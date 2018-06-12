@@ -23,8 +23,6 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn") {
 annoy_nn <- function(X, k = 10, n_trees = 50, search_k = 2 * k * n_trees,
                      include_self = TRUE,
                      verbose = getOption("verbose", TRUE)) {
-  check_pkg("RcppAnnoy")
-
   nr <- nrow(X)
   nc <- ncol(X)
   ann <- methods::new(RcppAnnoy::AnnoyEuclidean, nc)
@@ -59,8 +57,6 @@ annoy_nn <- function(X, k = 10, n_trees = 50, search_k = 2 * k * n_trees,
 }
 
 FNN_nn <- function(X, k = 10, include_self = TRUE) {
-  check_pkg("FNN")
-
   if (include_self) {
     k <- k - 1
   }

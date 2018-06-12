@@ -12,31 +12,21 @@
 # Eigenmaps anyway.
 #
 # As we only need to calculate the top ndim + 1 eigenvectors (i.e. normally 3)
-# it's incredibly wasteful to calculate all of them. Therefore, if the
-# RSpectra library is available, we use that instead, which allows for only the
-# top eigenvectors to be extracted. Otherwise, use the slower eigen routine.
+# it's incredibly wasteful to calculate all of them.
 # A must be symmetric and positive semi definite, but not necessarily
 # normalized in any specific way.
-laplacian_eigenmap <- function(A, ndim = 2, use_RSpectra = TRUE,
+laplacian_eigenmap <- function(A, ndim = 2,
                                verbose = getOption("verbose", TRUE)) {
   # Equivalent to: D <- diag(colSums(A)); M <- solve(D) %*% A
   # This effectively row-normalizes A: colSums is normally faster than rowSums
   # and because A is symmetric, they're equivalent
   M <- A / colSums(A)
-  if (use_RSpectra && requireNamespace("RSpectra", quietly = TRUE,
-                                       warn.conflicts = FALSE)) {
-    vtsmessage("Using RSpectra for eigenvectors", verbose = verbose)
-    Re(RSpectra::eigs(M, k = ndim + 1)$vectors[, 2:(ndim + 1)])
-  }
-  else {
-    vtsmessage("Using eigen for eigenvectors", verbose = verbose)
-    eigen(M, symmetric = FALSE)$vectors[, 2:(ndim + 1)]
-  }
+  Re(RSpectra::eigs(M, k = ndim + 1)$vectors[, 2:(ndim + 1)])
 }
 
 # Use a normalized Laplacian.
-normalized_laplacian_init <- function(A, ndim = 2, use_RSpectra = TRUE,
-                                     verbose = getOption("verbose", TRUE)) {
+normalized_laplacian_init <- function(A, ndim = 2,
+                                      verbose = getOption("verbose", TRUE)) {
   n <- nrow(A)
   # Normalized Laplacian: clear and close to UMAP code, but very slow in R
   # I <- diag(1, nrow = n, ncol = n)
@@ -48,42 +38,32 @@ normalized_laplacian_init <- function(A, ndim = 2, use_RSpectra = TRUE,
   L <- -Matrix::t(A / Dsq) / Dsq
   Matrix::diag(L) <- 1 + Matrix::diag(L)
 
-  if (use_RSpectra && requireNamespace("RSpectra", quietly = TRUE,
-                                       warn.conflicts = FALSE)) {
-    vtsmessage("Using RSpectra for eigenvectors", verbose = verbose)
-    k <- ndim + 1
-    ncv <- max(2 * k + 1, floor(sqrt(n)))
-    opt <- list(
-      ncv = ncv,
-      maxitr = 5 * n,
-      tol = 1e-4
-    )
-    res <- RSpectra::eigs(L, k = k, which = "SM", opt = opt)
-    vec_indices <- rev(order(res$values, decreasing = TRUE)[1:ndim])
-    res <- Re(res$vectors[, vec_indices])
-  }
-  else {
-    vtsmessage("Using eigen for eigenvectors", verbose = verbose)
-    res <- eigen(L, symmetric = FALSE)
-    vec_indices <- order(res$values, decreasing = FALSE)[2:(ndim + 1)]
-    res <- Re(res$vectors[, vec_indices])
-  }
-  res
+  k <- ndim + 1
+  ncv <- max(2 * k + 1, floor(sqrt(n)))
+  opt <- list(
+    ncv = ncv,
+    maxitr = 5 * n,
+    tol = 1e-4
+  )
+  res <- RSpectra::eigs(L, k = k, which = "SM", opt = opt)
+  vec_indices <- rev(order(res$values, decreasing = TRUE)[1:ndim])
+
+  Re(res$vectors[, vec_indices])
 }
 
 # Default UMAP initialization
 # spectral decomposition of the normalized Laplacian + some noise
-spectral_init <- function(A, ndim = 2, use_RSpectra = TRUE,
+spectral_init <- function(A, ndim = 2,
                           verbose = getOption("verbose", TRUE)) {
-  coords <- normalized_laplacian_init(A, ndim, use_RSpectra, verbose)
+  coords <- normalized_laplacian_init(A, ndim, verbose)
   expansion <- 10.0 / max(coords)
-  (coords * expansion) + matrix(rnorm(n = prod(dim(coords)), sd = 0.001),
+  (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.001),
                                 ncol = ndim)
 }
 
 # UMAP random initialization: uniform between +10 and -10 along each axis
 rand_init <- function(n, ndim) {
-  matrix(runif(n = n * ndim, min = -10, max = 10), ncol = ndim)
+  matrix(stats::runif(n = n * ndim, min = -10, max = 10), ncol = ndim)
 }
 
 scaled_pca <- function(X, ndim = 2, verbose = getOption("verbose", TRUE)) {

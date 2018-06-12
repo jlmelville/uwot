@@ -20,12 +20,3 @@ summarize <- function(X, msg = "") {
   tsmessage(msg, ": ", paste(names(summary_X), ":", summary_X, "|",
                              collapse = ""))
 }
-
-# stops if the package pkg isn't installed
-check_pkg <- function(pkg) {
-  calling_fn <- as.list(sys.call(-1))[[1]]
-  if (!requireNamespace(pkg, quietly = TRUE, warn.conflicts = FALSE)) {
-    stop(calling_fn, " function requires '", pkg ,"' package", call. = FALSE)
-  }
-}
-

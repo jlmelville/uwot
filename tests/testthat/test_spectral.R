@@ -16,11 +16,9 @@ test_that("normalized laplacian", {
         -0.2725, -0.01241, 0.1084, -0.106, -0.5723, 0.2024, -0.3082,
         0.1642, -5.549e-05, -0.04843, -0.1747, 0.1684, 0.6611)
 
-  res <- normalized_laplacian_init(x2d(iris[1:10, ]), use_RSpectra = TRUE)
+  res <- normalized_laplacian_init(x2d(iris[1:10, ]))
   expect_equal(abs(res), abs(expected_norm_lap), tolerance = 1e-2)
 
-  res <- normalized_laplacian_init(x2d(iris[1:10, ]), use_RSpectra = FALSE)
-  expect_equal(abs(res), abs(expected_norm_lap), tolerance = 1e-2)
 })
 
 test_that("laplacian eigenmap", {
@@ -30,10 +28,7 @@ test_that("laplacian eigenmap", {
         -0.4656, -0.1417, 0.4416, -0.3753, 0.4397)
 
   # Test with distance matrix (simple and symmetric)
-  res <- laplacian_eigenmap(x2d(iris[1:10, ]), use_RSpectra = TRUE)
-  expect_equal(abs(res), abs(expected_lap_eig), tolerance = 1e-4)
-
-  res <- laplacian_eigenmap(x2d(iris[1:10, ]), use_RSpectra = FALSE)
+  res <- laplacian_eigenmap(x2d(iris[1:10, ]))
   expect_equal(abs(res), abs(expected_lap_eig), tolerance = 1e-4)
 })
 

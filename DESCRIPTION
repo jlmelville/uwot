@@ -6,14 +6,15 @@ Description: The dimensionality reduction method UMAP
   (McInnes and Healy, 2018, <https://arxiv.org/abs/1802.03426>). It is similar 
   to, but faster than, the t-Distributed Stochastic Neighbor Embedding (t-SNE) 
   method.
-Depends: R (>= 3.5.0),
-  FNN,
-  RcppAnnoy,
-  RSpectra
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat
 RoxygenNote: 6.0.1
 LinkingTo: Rcpp, RcppArmadillo
-Imports: Rcpp
+Imports: Rcpp,
+    Matrix,
+    methods,
+    FNN,
+    RSpectra,
+    RcppAnnoy

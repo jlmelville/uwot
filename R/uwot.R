@@ -62,20 +62,17 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   }
   else {
     if (init == "spectral") {
-      embedding <- spectral_init(V, ndim = n_components, use_RSpectra = TRUE,
-                                 verbose = verbose)
+      embedding <- spectral_init(V, ndim = n_components, verbose = verbose)
     }
     else if (init == "random") {
       embedding <- rand_init(n_vertices, n_components)
     }
     else if (init == "normlaplacian") {
       embedding <- normalized_laplacian_init(V, ndim = n_components,
-                                             use_RSpectra = TRUE,
                                              verbose = verbose)
     }
     else if (init == "laplacian") {
-      embedding <- laplacian_eigenmap(V, ndim = n_components, use_RSpectra = TRUE,
-                                      verbose = verbose)
+      embedding <- laplacian_eigenmap(V, ndim = n_components, verbose = verbose)
     }
     else {
       embedding <- scaled_pca(X, ndim = n_components, verbose = verbose)
