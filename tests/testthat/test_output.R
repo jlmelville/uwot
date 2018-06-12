@@ -6,6 +6,8 @@ context("UMAP output")
 # These tests characterize the C++ output, which also matched a pure R
 # implementation.
 
+skip_if(Sys.info()[["machine"]] != "x86-64", "test works for 64-bit only")
+
 norm_vec_out <- c(
   1.38167422, -0.56341620, -0.52414563, -0.44066463, 0.35588609, 0.92339921,
   -0.10439442, 1.27274590, -0.29202394, -0.78932333, 0.50988506, -0.80345216,
