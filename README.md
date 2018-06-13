@@ -44,13 +44,23 @@ the Python code as closely as possible. It is my first time using Rcpp, so
 let's assume I did a horrible job.
 
 For the datasets I've tried it with, the results look at least
-reminiscent of those obtained using the Python reference implementation. On my
-Sandy Bridge-era Windows laptop I was able to embed the 70,000 MNIST digits in 
-just over 15 minutes, whereas both the 
-[largeVis](https://github.com/elbamos/largeVis) and 
-[Barnes-Hut t-SNE](https://cran.r-project.org/package=Rtsne) R packages take
-closer to 45 minutes. The Python UMAP implementation is still a lot faster, 
-though (less than three minutes).
+reminiscent of those obtained using the 
+[official Python implementation](https://github.com/lmcinnes/umap).
+Below are results for the 70,000 MNIST digits (downloaded using the
+[snedata](https://github.com/jlmelville/snedata) package). On the left
+is the result of using the official Python UMAP implementation 
+(via the [reticulate](https://cran.r-project.org/package=reticulate) package).
+The right hand image is the result of using `uwot`.
+
+|                                    |                                  |
+|------------------------------------|----------------------------------|
+| ![mnist-py.png](mnist-py.png)      | ![mnist-r.png](mnist-r.png)      |
+
+On my not-particularly beefy laptop `uwot` took around 12 minutes, while 
+the Python UMAP implementation took just under 11 minutes. For comparison, 
+the default settings of the R package for
+[Barnes-Hut t-SNE](https://cran.r-project.org/package=Rtsne) took 21 minutes, and the
+[largeVis](https://github.com/elbamos/largeVis) package took 56 minutes.
 
 ## Limitations
 
