@@ -1,5 +1,4 @@
-# The UMAP equivalent of perplexity calibration in x2aff. k is continuous rather
-# than integral and so is analogous to perplexity.
+# The UMAP equivalent of perplexity calibration.
 # Some differences:
 # 1. The target value is the log2 of k, not the Shannon entropy associated
 # with the desired perplexity.
@@ -17,6 +16,7 @@
 # This code has been converted from the original Python and may not be very
 # idiomatic (or vectorizable).
 # tol is SMOOTH_K_TOLERANCE in the Python code.
+#' @importFrom methods new
 smooth_knn_distances <-
   function(nn,
            n_iter = 64,
@@ -24,23 +24,23 @@ smooth_knn_distances <-
            bandwidth = 1.0,
            tol = 1e-5,
            min_k_dist_scale = 1e-3,
+           ret_extra = FALSE,
            verbose = FALSE) {
-
     nn_dist <- nn$dist
     nn_idx <- nn$idx
     k <- ncol(nn_dist)
-
-    if (verbose) {
-      tsmessage("Commencing smooth kNN distance calibration for k = ", formatC(k))
-    }
-
     n <- nrow(nn_dist)
     target <- log2(k) * bandwidth
-    rho <- rep(0, n)
-    sigma <- rep(0, n)
+
+    tsmessage("Commencing smooth kNN distance calibration for k = ", formatC(k))
+
+    if (ret_extra) {
+      rhos <- rep(0, n)
+      sigmas <- rep(0, n)
+    }
 
     mean_distances <- NULL
-
+    progress <- Progress$new(n, display = verbose)
     for (i in 1:n) {
       lo <- 0.0
       hi <- Inf
@@ -53,27 +53,27 @@ smooth_knn_distances <-
         interpolation <- local_connectivity - index
         if (index > 0) {
           if (interpolation <= tol) {
-            rho[i] <- non_zero_dists[index]
+            rho <- non_zero_dists[index]
           }
           else {
-            rho[i] <- non_zero_dists[index] + interpolation *
+            rho <- non_zero_dists[index] + interpolation *
               (non_zero_dists[index + 1] - non_zero_dists[index])
           }
         }
         else {
-          rho[i] <- interpolation * non_zero_dists[1]
+          rho <- interpolation * non_zero_dists[1]
         }
       } else if (length(non_zero_dists) > 0) {
-        rho[i] <- max(non_zero_dists)
+        rho <- max(non_zero_dists)
       }
       else {
-        rho[i] <- 0.0
+        rho <- 0.0
       }
 
       for (iter in 1:n_iter) {
         psum <- 0.0
         for (j in 2:ncol(nn_dist)) {
-          dist <- max(0, (nn_dist[i, j] - rho[i]))
+          dist <- max(0, (nn_dist[i, j] - rho))
           psum <- psum + exp(-(dist / mid))
         }
         val <- psum
@@ -96,30 +96,43 @@ smooth_knn_distances <-
           }
         }
       }
-      sigma[i] <- mid
+      sigma <- mid
 
-      if (rho[i] > 0.0) {
-        sigma[i] <- max(sigma[i], min_k_dist_scale * mean(ith_distances))
+      if (rho > 0.0) {
+        sigma <- max(sigma, min_k_dist_scale * mean(ith_distances))
       }
       else {
         if (is.null(mean_distances)) {
           mean_distances <- mean(nn_dist)
         }
-        sigma[i] <- max(sigma[i], min_k_dist_scale * mean_distances)
+        sigma <- max(sigma, min_k_dist_scale * mean_distances)
       }
 
-      prow <- exp(-(nn_dist[i, ] - rho[i]) / (sigma[i] * bandwidth))
-      prow[nn_dist[i, ] - rho[i] <= 0] <- 1
+      prow <- exp(-(nn_dist[i, ] - rho) / (sigma * bandwidth))
+      prow[nn_dist[i, ] - rho <= 0] <- 1
       nn_dist[i, ] <- prow
+
+      if (ret_extra) {
+        rhos[i] <- rho
+        sigmas[i] <- sigma
+      }
+
+      progress$increment()
     }
     P <- Matrix::sparseMatrix(i = rep(1:n, times = k), j = as.vector(nn_idx),
                               x = as.vector(nn_dist))
     Matrix::diag(P) <- 0
+    P <- Matrix::drop0(P)
 
-    if (verbose) {
-      summarize(sigma, "sigma summary")
+    if (ret_extra) {
+      if (verbose) {
+        summarize(sigmas, "sigma summary")
+      }
+      list(sigma = sigmas, rho = rhos, P = P)
     }
-    list(sigma = sigma, rho = rho, P = Matrix::drop0(P))
+    else {
+      P
+    }
   }
 
 # set_op_mix_ratio = between 0 and 1 mixes in fuzzy set intersection

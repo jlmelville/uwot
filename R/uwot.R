@@ -147,27 +147,24 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     n_vertices <- nrow(X)
   }
 
+  if (n_neighbors > n_vertices) {
+    stop("n_neighbors must be smaller than the dataset size")
+  }
+
   if (is.null(nn_method)) {
     if (n_vertices < 4096) {
-      if (verbose) {
-        tsmessage("Using FNN for neighbor search")
-      }
+      tsmessage("Using FNN for neighbor search")
       nn_method = "fnn"
     }
     else {
-      if (verbose) {
-        tsmessage("Using ANNOY for neighbor search")
-      }
+      tsmessage("Using ANNOY for neighbor search")
       nn_method = "annoy"
     }
   }
+  nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
 
-  V <- fuzzy_set_union(smooth_knn_distances(nn = find_nn(X, n_neighbors,
-                                                         method = nn_method),
-                                            local_connectivity = local_connectivity,
-                                            bandwidth = bandwidth,
-                                            verbose = verbose
-                                            )$P)
+  V <- fuzzy_simplicial_set(X, n_neighbors, set_op_mix_ratio, local_connectivity,
+                            bandwidth, nn_method, verbose)
 
   if (methods::is(init, "matrix")) {
     if (nrow(init) != n_vertices || ncol(init) != n_components) {
@@ -175,22 +172,17 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     }
   }
   else {
-    if (init == "spectral") {
-      embedding <- spectral_init(V, ndim = n_components, verbose = verbose)
-    }
-    else if (init == "random") {
-      embedding <- rand_init(n_vertices, n_components)
-    }
-    else if (init == "normlaplacian") {
-      embedding <- normalized_laplacian_init(V, ndim = n_components,
-                                             verbose = verbose)
-    }
-    else if (init == "laplacian") {
-      embedding <- laplacian_eigenmap(V, ndim = n_components, verbose = verbose)
-    }
-    else {
-      embedding <- scaled_pca(X, ndim = n_components, verbose = verbose)
-    }
+    init <- match.arg(tolower(init), c("spectral", "random", "normlaplacian",
+                                       "laplacian", "spca"))
+    embedding <- switch(init,
+      spectral = spectral_init(V, ndim = n_components, verbose = verbose),
+      random = rand_init(n_vertices, n_components),
+      normlaplacian = normalized_laplacian_init(V, ndim = n_components,
+                                                verbose = verbose),
+      laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
+      spca = scaled_pca(X, ndim = n_components, verbose = verbose),
+      stop("Unknown initialization method: '", init, "'")
+    )
   }
 
   if (is.null(n_epochs) || n_epochs <= 0) {
@@ -209,16 +201,42 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   positive_head <- V@i
   positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
 
-
+  tsmessage("Commencing optimization")
+  # NB: This is a C++ function which modifies embedding directly.
   optimize_layout_cpp(embedding, positive_head, positive_tail,
                   n_epochs, n_vertices,
                   epochs_per_sample, a, b, gamma,
                   initial_alpha = alpha, negative_sample_rate,
                   verbose = verbose)
+  tsmessage("Optimization finished")
   embedding
 }
 
 
+# Given a set of data X, a neighborhood size, and a measure of distance compute
+# the fuzzy simplicial set (here represented as a fuzzy graph in the form of a
+# sparse matrix) associated to the data. This is done by locally approximating
+# geodesic distance at each point, creating a fuzzy simplicial set for each such
+# point, and then combining all the local fuzzy simplicial sets into a global
+# one via a fuzzy union
+ fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio,
+                                  local_connectivity, bandwidth, nn_method,
+                                  verbose = FALSE) {
+  nn <- find_nn(X, n_neighbors, method = nn_method)
+  affinity_matrix <- smooth_knn_distances(nn = nn,
+                                          local_connectivity = local_connectivity,
+                                          bandwidth = bandwidth,
+                                          verbose = verbose,
+                                          ret_extra = FALSE)
+
+  fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio)
+}
+
+
+
+# Creates the number of epochs per sample for each weight weights are the
+# non-zero input affinities (1-simplex) n_epoch the total number of epochs There
+# is an inverse relationship between the weights and the return vector.
 make_epochs_per_sample <- function(weights, n_epochs) {
   result <- rep(-1, length(weights))
   n_samples = n_epochs * (weights / max(weights))
@@ -226,6 +244,7 @@ make_epochs_per_sample <- function(weights, n_epochs) {
   result
 }
 
+# Create the a/b parameters from spread and min_dist
 find_ab_params <- function(spread = 1, min_dist = 0.001) {
   xv <- seq(from = 0, to = spread * 3, length.out = 300)
   yv <- rep(0, length(xv))

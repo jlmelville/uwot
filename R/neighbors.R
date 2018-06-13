@@ -20,6 +20,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn") {
 # search_k - the number of nodes to search during the neighbor retrieval. The
 # larger k, the more accurate results, but the longer the search takes. Default
 # is k * n_trees.
+#' @importFrom methods new
 annoy_nn <- function(X, k = 10, n_trees = 50, search_k = 2 * k * n_trees,
                      include_self = TRUE,
                      verbose = getOption("verbose", TRUE)) {
@@ -28,8 +29,11 @@ annoy_nn <- function(X, k = 10, n_trees = 50, search_k = 2 * k * n_trees,
   ann <- methods::new(RcppAnnoy::AnnoyEuclidean, nc)
   ann$setVerbose(verbose)
 
+  progress <- Progress$new(max = 2 * nrow(X))
+
   for (i in 1:nrow(X)) {
     ann$addItem(i - 1, X[i, ])
+    progress$increment()
   }
 
   ann$build(n_trees)
@@ -45,6 +49,7 @@ annoy_nn <- function(X, k = 10, n_trees = 50, search_k = 2 * k * n_trees,
     res <- ann$getNNsByItemList(i - 1, k, search_k, TRUE)
     idx[i, ] <- res$item
     dist[i, ] <- res$distance
+    progress$increment()
   }
 
   if (!include_self) {
