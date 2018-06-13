@@ -4,15 +4,15 @@ An R implementation of the
 [Uniform Manifold Approximation and Projection (UMAP)](https://arxiv.org/abs/1802.03426) 
 method for dimensionality reduction (McInnes and Healy, 2018).
 
-Current status: probably working, but not as efficient as it could be. Also, no 
-documentation yet.
-
 ## Installing
 
 ```R
 install.packages("devtools")
 devtools::install_github("jlmelville/uwot")
 library(uwot)
+
+# See function man page for help
+?umap
 ```
 
 ## Example
