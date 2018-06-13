@@ -20,6 +20,8 @@
 #include <limits>
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::depends(RcppProgress)]]
+#include <progress.hpp>
 
 // Clip a numeric vector so that all values are within [-4, 4]
 Rcpp::NumericVector clip(const Rcpp::NumericVector& vec) {
@@ -51,6 +53,7 @@ void optimize_layout_cpp(Rcpp::NumericMatrix& embedding,
   Rcpp::NumericVector epoch_of_next_sample = Rcpp::clone(epochs_per_sample);
 
   const double dist_eps = std::numeric_limits<double>::epsilon();
+  Progress progress(n_epochs, verbose);
 
   for (int n = 0; n < n_epochs; n++) {
     for (int i = 0; i < epochs_per_sample.size(); i++) {
@@ -96,14 +99,16 @@ void optimize_layout_cpp(Rcpp::NumericMatrix& embedding,
         epoch_of_next_negative_sample[i] +=
           n_neg_samples * epochs_per_negative_sample[i];
       }
-      Rcpp::checkUserInterrupt();
     }
+    if (Progress::check_abort()) {
+      return;
+    }
+
     alpha = initial_alpha * (1.0 - (double(n) / double(n_epochs)));
 
-    if (verbose && n_epochs > 10 && n % int(n_epochs / 10) == 0) {
-      Rcpp::Rcout << "completed " << (n + 1) << " / " << n_epochs << " epochs"
-            << std::endl;
+    if (verbose) {
+      progress.increment();
     }
-  }
+  } // next epoch
 }
 
