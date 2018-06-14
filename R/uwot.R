@@ -219,15 +219,22 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 # geodesic distance at each point, creating a fuzzy simplicial set for each such
 # point, and then combining all the local fuzzy simplicial sets into a global
 # one via a fuzzy union
- fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio,
-                                  local_connectivity, bandwidth, nn_method,
+fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio = 1.0,
+                                  local_connectivity = 1.0, bandwidth = 1.0,
+                                  nn_method = "fnn",
                                   verbose = FALSE) {
   nn <- find_nn(X, n_neighbors, method = nn_method)
-  affinity_matrix <- smooth_knn_distances(nn = nn,
+  tsmessage("Commencing smooth kNN distance calibration for k = ",
+            formatC(n_neighbors))
+
+  affinity_matrix <- smooth_knn_distances_cpp(nn_dist = nn$dist,
+                                          nn_idx = nn$idx,
+                                          n_iter = 64,
                                           local_connectivity = local_connectivity,
                                           bandwidth = bandwidth,
-                                          verbose = verbose,
-                                          ret_extra = FALSE)
+                                          tol = 1e-5,
+                                          min_k_dist_scale = 1e-3,
+                                          verbose = verbose)
 
   fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio)
 }
