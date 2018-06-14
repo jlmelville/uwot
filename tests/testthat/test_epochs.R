@@ -1,7 +1,7 @@
 library(uwot)
 context("Epochs")
 
-V <- fuzzy_set_union(smooth_knn_distances(find_nn(iris10, k = 4)))
+V <- fuzzy_simplicial_set(iris10, n_neighbors = 4)
 
 n_epochs <- 500
 V@x[V@x < max(V@x) / n_epochs] <- 0
