@@ -11,9 +11,9 @@ Encoding: UTF-8
 LazyData: true
 Suggests: testthat
 RoxygenNote: 6.0.1
+Depends: Matrix
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress
 Imports: Rcpp,
-    Matrix,
     methods,
     FNN,
     RSpectra,

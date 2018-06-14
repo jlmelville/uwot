@@ -15,6 +15,7 @@
 # it's incredibly wasteful to calculate all of them.
 # A must be symmetric and positive semi definite, but not necessarily
 # normalized in any specific way.
+#' @import Matrix
 laplacian_eigenmap <- function(A, ndim = 2,
                                verbose = getOption("verbose", TRUE)) {
   # Equivalent to: D <- diag(colSums(A)); M <- solve(D) %*% A
