@@ -37,7 +37,8 @@ Coordinate initialization uses
 [RSpectra](https://cran.r-project.org/package=RSpectra) to do the
 eigendecomposition of the normalized Laplacian.
 
-The main optimization loop is written in C++ (using 
+The smooth k-nearest neighbor distance and stochastic gradient descent
+optimization routines are written in C++ (using
 [Rcpp](https://cran.r-project.org/package=Rcpp) and 
 [RcppArmadillo](https://cran.r-project.org/package=RcppArmadillo)), aping
 the Python code as closely as possible. It is my first time using Rcpp, so 
@@ -56,7 +57,7 @@ The right hand image is the result of using `uwot`.
 |------------------------------------|----------------------------------|
 | ![mnist-py.png](mnist-py.png)      | ![mnist-r.png](mnist-r.png)      |
 
-On my not-particularly beefy laptop `uwot` took around 12 minutes, while 
+On my not-particularly beefy laptop `uwot` took around 8 minutes, while 
 the Python UMAP implementation took just under 11 minutes. For comparison, 
 the default settings of the R package for
 [Barnes-Hut t-SNE](https://cran.r-project.org/package=Rtsne) took 21 minutes, and the
@@ -67,8 +68,6 @@ the default settings of the R package for
 * Only Euclidean distances are supported for finding nearest neighbors. You can
 pass in a `dist` object instead of a data frame. Sparse matrices are not yet 
 supported.
-* The smooth k-nearest-neighbor routine (this is separate from the nearest 
-neighbor search itself) is currently written in pure R, so is unnecessarily slow.
 
 ## License
 
