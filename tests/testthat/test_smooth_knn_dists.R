@@ -1,7 +1,8 @@
 library(uwot)
 context("Smooth kNN distances")
 
-res <- smooth_knn_distances(find_nn(iris10, k = 8), ret_extra = TRUE)
+nn_8 <- find_nn(iris10, k = 8)
+res <- smooth_knn_distances(nn_8$dist, nn_8$idx, ret_extra = TRUE)
 expect_equal(res$sigma, c(0.2567215,  0.22098923, 0.08285332, 0.09981823,
                           0.28608322, 0.17873764, 0.15968704, 0.17134094,
                           0.25434113, 0.19572449))
@@ -10,7 +11,8 @@ expect_equal(res$rho, c(0.14142136, 0.17320508, 0.24494897, 0.24494897,
                         0.3, 0.17320508))
 
 
-res <- smooth_knn_distances(FNN_nn(iris10, k = 4), ret_extra = TRUE)
+nn_4 <- find_nn(iris10, k = 4)
+res <- smooth_knn_distances(nn_4$dist, nn_4$idx, ret_extra = TRUE)
 expect_equal(res$sigma, c(0.17993927, 0.20488739, 0.0493803,  0.09060478,
                           0.24940491, 0.00390625, 0.15367126, 0.13551712,
                           0.24542618, 0.20633698))
@@ -19,7 +21,7 @@ expect_equal(res$rho, c(0.14142136, 0.17320508, 0.24494897, 0.24494897,
                         0.17320508))
 
 # distance matrix
-res <- smooth_knn_distances(find_nn(dist(iris10), k = 4), ret_extra = TRUE)
+res <- smooth_knn_distances(nn_4$dist, nn_4$idx, ret_extra = TRUE)
 expect_equal(res$sigma, c(0.17993927, 0.20488739, 0.0493803,  0.09060478,
                           0.24940491, 0.00390625, 0.15367126, 0.13551712,
                           0.24542618, 0.20633698))
@@ -218,7 +220,7 @@ expect_equal(fuzzy_set_union(res$P, set_op_mix_ratio = 0), Matrix::drop0(Psi))
 
 
 # local connectivity
-res <- smooth_knn_distances(find_nn(iris10, k = 4), local_connectivity = 1.5, ret_extra = TRUE)
+res <- smooth_knn_distances(nn_4$dist, nn_4$idx, local_connectivity = 1.5, ret_extra = TRUE)
 expect_equal(res$sigma, c(0.13976288, 0.11270523, 0.03319359, 0.05047989,
                           0.17582703, 0.00390625, 0.1002903, 0.09278679,
                           0.14465714, 0.10316849))
@@ -266,6 +268,13 @@ Pl[9, 4] <- 1.0
 Pl[10, 2] <- 1.0
 Pl[10, 3] <- 0.4999980790544043
 Pl[10, 4] <- 0.49999807905429533
-
 expect_equal(res$P, Matrix::drop0(Pl))
 
+### C++ tests
+res_cpp_conn1 <- smooth_knn_distances_cpp(nn_4$dist, nn_4$idx, n_iter = 64, local_connectivity = 1.0,
+                                    bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, verbose = FALSE)
+expect_equal(res_cpp_conn1, Matrix::drop0(P))
+
+res_cpp_conn1.5 <- smooth_knn_distances_cpp(nn_4$dist, nn_4$idx, n_iter = 64, local_connectivity = 1.5,
+                                    bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, verbose = FALSE)
+expect_equal(res_cpp_conn1.5, Matrix::drop0(Pl))

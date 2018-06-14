@@ -5,3 +5,7 @@ optimize_layout_cpp <- function(embedding, positive_head, positive_tail, n_epoch
     invisible(.Call('_uwot_optimize_layout_cpp', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, verbose))
 }
 
+smooth_knn_distances_cpp <- function(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose) {
+    .Call('_uwot_smooth_knn_distances_cpp', PACKAGE = 'uwot', nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose)
+}
+
