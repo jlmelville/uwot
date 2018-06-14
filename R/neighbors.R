@@ -29,7 +29,7 @@ annoy_nn <- function(X, k = 10, n_trees = 50, search_k = 2 * k * n_trees,
   ann <- methods::new(RcppAnnoy::AnnoyEuclidean, nc)
   ann$setVerbose(verbose)
 
-  progress <- Progress$new(max = 2 * nrow(X))
+  progress <- Progress$new(max = 2 * nrow(X), display = verbose)
 
   for (i in 1:nrow(X)) {
     ann$addItem(i - 1, X[i, ])
