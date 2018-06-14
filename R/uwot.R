@@ -130,6 +130,10 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     stop("set_op_mix_ratio must be between 0.0 and 1.0")
   }
 
+  if (local_connectivity < 1.0) {
+    stop("local_connectivity cannot be < 1.0");
+  }
+
   if (methods::is(X, "dist")) {
     n_vertices <- attr(X, "Size")
   }
