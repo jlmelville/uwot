@@ -85,6 +85,15 @@ NULL
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
+#' @param n_trees Number of trees to build when constructing the nearest
+#'   neighbor index. The more trees specified, the larger the index, but the
+#'   better the results. With \code{search_k}, determines the accuracy of the
+#'   ANNOY nearest neighbor search. Only used if the \code{nn_method} is
+#'   \code{"annoy"}. Sensible values are between \code{10} to \code{100}.
+#' @param search_k Number of nodes to search during the neighbor retrieval. The
+#'   larger k, the more the accurate results, but the longer the search takes.
+#'   With \code{n_trees}, determines the accuracy of the ANNOY nearest neighbor
+#'   search. Only used if the \code{nn_method} is \code{"annoy"}.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates.
 #' @examples
@@ -114,7 +123,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                  bandwidth = 1.0, gamma = 1.0,
                  negative_sample_rate = 5.0, a = NULL, b = NULL,
-                 nn_method = NULL,
+                 nn_method = NULL, n_trees = 50,
+                 search_k = 2 * n_neighbors * n_trees,
                  verbose = getOption("verbose", TRUE)) {
   if (is.null(a) || is.null(b)) {
     ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
@@ -168,7 +178,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
 
   V <- fuzzy_simplicial_set(X, n_neighbors, set_op_mix_ratio, local_connectivity,
-                            bandwidth, nn_method, verbose)
+                            bandwidth, nn_method, n_trees, search_k, verbose)
 
   if (methods::is(init, "matrix")) {
     if (nrow(init) != n_vertices || ncol(init) != n_components) {
@@ -224,10 +234,13 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 # point, and then combining all the local fuzzy simplicial sets into a global
 # one via a fuzzy union
 fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio = 1.0,
-                                  local_connectivity = 1.0, bandwidth = 1.0,
-                                  nn_method = "fnn",
-                                  verbose = FALSE) {
-  nn <- find_nn(X, n_neighbors, method = nn_method)
+                                 local_connectivity = 1.0, bandwidth = 1.0,
+                                 nn_method = "fnn",
+                                 n_trees = 50,
+                                 search_k = 2 * n_neighbors * n_trees,
+                                 verbose = FALSE) {
+  nn <- find_nn(X, n_neighbors, method = nn_method, n_trees = n_trees,
+                search_k = search_k)
   tsmessage("Commencing smooth kNN distance calibration for k = ",
             formatC(n_neighbors))
 

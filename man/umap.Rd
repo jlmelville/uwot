@@ -8,6 +8,7 @@ umap(X, n_neighbors = 15, n_components = 2, n_epochs = NULL, alpha = 1,
   init = "spectral", spread = 1, min_dist = 0.01, set_op_mix_ratio = 1,
   local_connectivity = 1, bandwidth = 1, gamma = 1,
   negative_sample_rate = 5, a = NULL, b = NULL, nn_method = NULL,
+  n_trees = 50, search_k = 2 * n_neighbors * n_trees,
   verbose = getOption("verbose", TRUE))
 }
 \arguments{
@@ -102,6 +103,17 @@ these values are set automatically as determined by \code{min_dist} and
  }
 By default, if \code{X} has less than 4,096 vertices, the exact nearest
 neighbors are found. Otherwise, approximate nearest neighbors are used.}
+
+\item{n_trees}{Number of trees to build when constructing the nearest
+neighbor index. The more trees specified, the larger the index, but the
+better the results. With \code{search_k}, determines the accuracy of the
+ANNOY nearest neighbor search. Only used if the \code{nn_method} is
+\code{"annoy"}. Sensible values are between \code{10} to \code{100}.}
+
+\item{search_k}{Number of nodes to search during the neighbor retrieval. The
+larger k, the more the accurate results, but the longer the search takes.
+With \code{n_trees}, determines the accuracy of the ANNOY nearest neighbor
+search. Only used if the \code{nn_method} is \code{"annoy"}.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }

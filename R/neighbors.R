@@ -1,4 +1,5 @@
-find_nn <- function(X, k, include_self = TRUE, method = "fnn") {
+find_nn <- function(X, k, include_self = TRUE, method = "fnn",
+                    n_trees = 50, search_k = 2 * k * n_trees) {
   if (methods::is(X, "dist")) {
     res <- dist_nn(X, k, include_self = include_self)
   }
@@ -7,7 +8,8 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn") {
       res <- FNN_nn(X, k = k, include_self = include_self)
     }
     else {
-      res <- annoy_nn(X, k = k, include_self = include_self)
+      res <- annoy_nn(X, k = k, include_self = include_self,
+                      n_trees = n_trees, search_k = search_k)
     }
   }
   res
@@ -21,8 +23,8 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn") {
 # larger k, the more accurate results, but the longer the search takes. Default
 # is k * n_trees.
 #' @importFrom methods new
-annoy_nn <- function(X, k = 10, n_trees = 50, search_k = 2 * k * n_trees,
-                     include_self = TRUE,
+annoy_nn <- function(X, k = 10, include_self = TRUE,
+                     n_trees = 50, search_k = 2 * k * n_trees,
                      verbose = getOption("verbose", TRUE)) {
   nr <- nrow(X)
   nc <- ncol(X)
