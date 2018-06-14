@@ -1,3 +1,24 @@
+# set_op_mix_ratio = between 0 and 1 mixes in fuzzy set intersection
+# set to 0 for intersection only
+fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
+  XX <- X * Matrix::t(X)
+  if (set_op_mix_ratio == 0) {
+    Matrix::drop0(XX)
+  }
+  else if (set_op_mix_ratio == 1) {
+    Matrix::drop0(X + Matrix::t(X) - XX)
+  }
+  else {
+    Matrix::drop0(set_op_mix_ratio * (X + Matrix::t(X) - XX) + (1 - set_op_mix_ratio) * XX)
+  }
+}
+
+
+# Obsolete pure R function ------------------------------------------------
+
+# The following function is now obsolete because a C++ function is available.
+# Remains for testing purposes.
+#
 # The UMAP equivalent of perplexity calibration.
 # Some differences:
 # 1. The target value is the log2 of k, not the Shannon entropy associated
@@ -18,7 +39,8 @@
 # tol is SMOOTH_K_TOLERANCE in the Python code.
 #' @importFrom methods new
 smooth_knn_distances <-
-  function(nn,
+  function(nn_dist,
+           nn_idx,
            n_iter = 64,
            local_connectivity = 1.0,
            bandwidth = 1.0,
@@ -26,20 +48,18 @@ smooth_knn_distances <-
            min_k_dist_scale = 1e-3,
            ret_extra = FALSE,
            verbose = FALSE) {
-    nn_dist <- nn$dist
-    nn_idx <- nn$idx
+
     k <- ncol(nn_dist)
     n <- nrow(nn_dist)
     target <- log2(k) * bandwidth
-
-    tsmessage("Commencing smooth kNN distance calibration for k = ", formatC(k))
 
     if (ret_extra) {
       rhos <- rep(0, n)
       sigmas <- rep(0, n)
     }
 
-    mean_distances <- NULL
+    mean_distances <- mean(nn_dist)
+
     progress <- Progress$new(n, display = verbose)
     for (i in 1:n) {
       lo <- 0.0
@@ -102,9 +122,6 @@ smooth_knn_distances <-
         sigma <- max(sigma, min_k_dist_scale * mean(ith_distances))
       }
       else {
-        if (is.null(mean_distances)) {
-          mean_distances <- mean(nn_dist)
-        }
         sigma <- max(sigma, min_k_dist_scale * mean_distances)
       }
 
@@ -134,18 +151,3 @@ smooth_knn_distances <-
       P
     }
   }
-
-# set_op_mix_ratio = between 0 and 1 mixes in fuzzy set intersection
-# set to 0 for intersection only
-fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
-  XX <- X * Matrix::t(X)
-  if (set_op_mix_ratio == 0) {
-    Matrix::drop0(XX)
-  }
-  else if (set_op_mix_ratio == 1) {
-    Matrix::drop0(X + Matrix::t(X) - XX)
-  }
-  else {
-    Matrix::drop0(set_op_mix_ratio * (X + Matrix::t(X) - XX) + (1 - set_op_mix_ratio) * XX)
-  }
-}
