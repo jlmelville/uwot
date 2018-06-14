@@ -136,19 +136,19 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 
   if (methods::is(X, "dist")) {
     n_vertices <- attr(X, "Size")
+    tsmessage("Read ", n_vertices, " rows")
   }
   else {
     if (methods::is(X, "data.frame")) {
       indexes <- which(vapply(X, is.numeric, logical(1)))
-      if (verbose) {
-        message("Found ", length(indexes), " numeric columns")
-      }
       if (length(indexes) == 0) {
         stop("No numeric columns found")
       }
       X <- as.matrix(X[, indexes])
     }
     n_vertices <- nrow(X)
+    tsmessage("Read ", n_vertices, " rows and found ", length(indexes),
+            " numeric columns")
   }
 
   if (n_neighbors > n_vertices) {
