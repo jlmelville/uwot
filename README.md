@@ -42,7 +42,8 @@ optimization routines are written in C++ (using
 [Rcpp](https://cran.r-project.org/package=Rcpp) and 
 [RcppArmadillo](https://cran.r-project.org/package=RcppArmadillo)), aping
 the Python code as closely as possible. It is my first time using Rcpp, so 
-let's assume I did a horrible job.
+let's assume I did a horrible job (as we shall see when we look at performance
+numbers versus Python).
 
 For the datasets I've tried it with, the results look at least
 reminiscent of those obtained using the 
@@ -57,11 +58,23 @@ The right hand image is the result of using `uwot`.
 |------------------------------------|----------------------------------|
 | ![mnist-py.png](mnist-py.png)      | ![mnist-r.png](mnist-r.png)      |
 
-On my not-particularly beefy laptop `uwot` took around 8 minutes, while 
-the Python UMAP implementation took just under 11 minutes. For comparison, 
-the default settings of the R package for
+## Performance
+
+On my not-particularly-beefy laptop `uwot` took around 4 minutes. 
+For comparison, the default settings of the R package for
 [Barnes-Hut t-SNE](https://cran.r-project.org/package=Rtsne) took 21 minutes, and the
 [largeVis](https://github.com/elbamos/largeVis) package took 56 minutes.
+
+The Python UMAP implementation (powered by the JIT-magic of [Numba](https://numba.pydata.org/)) 
+took just under 2 minutes (it takes 11 minutes to get through this via
+reticulate for reasons I haven't looked into). I've looked at some rough timings
+which show that both the nearest neighbor search (40 seconds in Python, 65
+seconds in R) and stage optimization (60 seconds in Python, 90 seconds in R)
+could do with some improvements. The experimental parallel support in Numba is on
+for the nearest neighbor search, but not for the optimization.
+
+I would welcome any suggestions on how to improve this. However, it's certainly
+fast enough for my needs.
 
 ## Limitations
 
