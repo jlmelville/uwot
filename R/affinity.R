@@ -82,7 +82,10 @@ smooth_knn_distances <-
 
     k <- ncol(nn_dist)
     n <- nrow(nn_dist)
-    target <- log2(k) * bandwidth
+
+    # In the python code the target is multiplied by the bandwidth, but fuzzy_simplicial_set
+    # doesn't pass the user-supplied version on purpose, so it's always 1
+    target <- log2(k)
 
     if (ret_extra) {
       rhos <- rep(0, n)

@@ -34,7 +34,8 @@ arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const 
   const unsigned int n_vertices = nn_dist.nrow();
   const unsigned int n_neighbors = nn_dist.ncol();
 
-  const double target = log2(n_neighbors) * bandwidth;
+  // bandwidth is not used here on purpose
+  const double target = log2(n_neighbors);
   const double double_max = std::numeric_limits<double>::max();
 
   double mean_distances = mean(nn_dist);
