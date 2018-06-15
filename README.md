@@ -26,6 +26,24 @@ iris_umap <- umap(iris, n_neighbors = 50, alpha = 0.5, init = "random")
 mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
 ```
 
+### t-UMAP
+
+If you choose the UMAP curve parameters to be `a = 1` and `b = 1`, you get
+back the Cauchy distribution used in 
+[t-Distributed Stochastic Neighbor Embedding](https://lvdmaaten.github.io/tsne/) 
+and [LargeVis](https://arxiv.org/abs/1602.00370). This also happens to
+significantly simplify the gradient leading to a noticeable speed-up (around
+50% for MNIST), at the cost of larger, more spread-out clusters than from
+the typical UMAP settings (they're still more compact than you see in t-SNE,
+however). To try t-UMAP, use the `tumap` function:
+
+```R
+mnist_tumap <- tumap(mnist, n_neighbors = 15, verbose = TRUE)
+```
+
+Note that using `umap(a = 1, b = 1)` doesn't use the simplified gradient, so
+you won't see any speed-up that way.
+
 ## Implementation Details
 
 For small (N < 4096), exact nearest neighbors are found using the 
@@ -65,13 +83,14 @@ For comparison, the default settings of the R package for
 [Barnes-Hut t-SNE](https://cran.r-project.org/package=Rtsne) took 21 minutes, and the
 [largeVis](https://github.com/elbamos/largeVis) package took 56 minutes.
 
-The Python UMAP implementation (powered by the JIT-magic of [Numba](https://numba.pydata.org/)) 
+The Python UMAP implementation (powered by the JIT-magic of 
+[Numba](https://numba.pydata.org/)) 
 took just under 2 minutes (it takes 11 minutes to get through this via
 reticulate for reasons I haven't looked into). I've looked at some rough timings
 which show that both the nearest neighbor search (40 seconds in Python, 65
 seconds in R) and stage optimization (60 seconds in Python, 90 seconds in R)
-could do with some improvements. The experimental parallel support in Numba is on
-for the nearest neighbor search, but not for the optimization.
+could do with some improvements. The experimental parallel support in Numba is
+on for the nearest neighbor search, but not for the optimization.
 
 I would welcome any suggestions on how to improve this. However, it's certainly
 fast enough for my needs.
