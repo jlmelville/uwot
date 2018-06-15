@@ -16,8 +16,8 @@
 # A must be symmetric and positive semi definite, but not necessarily
 # normalized in any specific way.
 #' @import Matrix
-laplacian_eigenmap <- function(A, ndim = 2,
-                               verbose = getOption("verbose", TRUE)) {
+laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
+  tsmessage("Initializing from Laplacian Eigenmap")
   # Equivalent to: D <- diag(colSums(A)); M <- solve(D) %*% A
   # This effectively row-normalizes A: colSums is normally faster than rowSums
   # and because A is symmetric, they're equivalent
@@ -26,8 +26,9 @@ laplacian_eigenmap <- function(A, ndim = 2,
 }
 
 # Use a normalized Laplacian.
-normalized_laplacian_init <- function(A, ndim = 2,
-                                      verbose = getOption("verbose", TRUE)) {
+normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
+  tsmessage("Initializing from normalized Laplacian")
+
   n <- nrow(A)
   # Normalized Laplacian: clear and close to UMAP code, but very slow in R
   # I <- diag(1, nrow = n, ncol = n)
@@ -54,8 +55,8 @@ normalized_laplacian_init <- function(A, ndim = 2,
 
 # Default UMAP initialization
 # spectral decomposition of the normalized Laplacian + some noise
-spectral_init <- function(A, ndim = 2,
-                          verbose = getOption("verbose", TRUE)) {
+spectral_init <- function(A, ndim = 2, verbose = FALSE) {
+  tsmessage("Initializing from normalized Laplacian + noise")
   coords <- normalized_laplacian_init(A, ndim, verbose)
   expansion <- 10.0 / max(coords)
   (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.001),
@@ -63,11 +64,13 @@ spectral_init <- function(A, ndim = 2,
 }
 
 # UMAP random initialization: uniform between +10 and -10 along each axis
-rand_init <- function(n, ndim) {
+rand_init <- function(n, ndim, verbose = FALSE) {
+  tsmessage("Initializing from random")
   matrix(stats::runif(n = n * ndim, min = -10, max = 10), ncol = ndim)
 }
 
-scaled_pca <- function(X, ndim = 2, verbose = getOption("verbose", TRUE)) {
+scaled_pca <- function(X, ndim = 2, verbose = FALSE) {
+  tsmessage("Initializing from scaled PCA")
   scores <- pca_scores(X, ncol = ndim, verbose = verbose)
   scale(scores, scale = apply(scores, 2, stats::sd) / 1e-4)
 }
@@ -76,19 +79,17 @@ scaled_pca <- function(X, ndim = 2, verbose = getOption("verbose", TRUE)) {
 # Calculates a matrix containing the first ncol columns of the PCA scores.
 # Returns the score matrix unless ret_extra is TRUE, in which case a list
 # is returned also containing the eigenvalues
-pca_scores <- function(X, ncol = min(dim(X)),
-                       verbose = getOption("verbose", TRUE),
-                       ret_extra = FALSE) {
+pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
+                       verbose = FALSE) {
   if (methods::is(X, "dist")) {
     res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ncol)
 
     if (ret_extra || verbose) {
       lambda <- res_mds$eig
       varex <- sum(lambda[1:ncol]) / sum(lambda)
-      if (verbose) {
-        message("PCA (using classical MDS): ", ncol, " components explained ",
+      tsmessage("PCA (using classical MDS): ", ncol, " components explained ",
                 formatC(varex * 100), "% variance")
-      }
+
     }
     scores <- res_mds$points
   }
@@ -101,10 +102,8 @@ pca_scores <- function(X, ncol = min(dim(X)),
       # calculate eigenvalues of covariance matrix from singular values
       lambda <- (s$d ^ 2) / (nrow(X) - 1)
       varex <- sum(lambda[1:ncol]) / sum(lambda)
-      if (verbose) {
-        message("PCA: ", ncol, " components explained ", formatC(varex * 100),
+      tsmessage("PCA: ", ncol, " components explained ", formatC(varex * 100),
                 "% variance")
-      }
     }
     scores <- s$u %*% D
   }
