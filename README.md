@@ -88,7 +88,7 @@ The Python UMAP implementation (powered by the JIT-magic of
 took just under 2 minutes (it takes 11 minutes to get through this via
 reticulate for reasons I haven't looked into). I've looked at some rough timings
 which show that both the nearest neighbor search (40 seconds in Python, 65
-seconds in R) and stage optimization (60 seconds in Python, 90 seconds in R)
+seconds in R) and optimization (60 seconds in Python, 90 seconds in R)
 could do with some improvements. The experimental parallel support in Numba is
 on for the nearest neighbor search, but not for the optimization.
 
@@ -100,6 +100,7 @@ fast enough for my needs.
 * Only Euclidean distances are supported for finding nearest neighbors. You can
 pass in a `dist` object instead of a data frame. Sparse matrices are not yet 
 supported.
+* I haven't tried this on anything larger than MNIST and Fashion MNIST.
 
 ## License
 
