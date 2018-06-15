@@ -4,6 +4,8 @@ An R implementation of the
 [Uniform Manifold Approximation and Projection (UMAP)](https://arxiv.org/abs/1802.03426) 
 method for dimensionality reduction (McInnes and Healy, 2018).
 
+Current status: a bit slower than the Python version, but seems to be working.
+
 ## Installing
 
 ```R
