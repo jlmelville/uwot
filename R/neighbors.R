@@ -1,5 +1,6 @@
 find_nn <- function(X, k, include_self = TRUE, method = "fnn",
-                    n_trees = 50, search_k = 2 * k * n_trees) {
+                    n_trees = 50, search_k = 2 * k * n_trees,
+                    verbose = getOption("verbose", TRUE)) {
   if (methods::is(X, "dist")) {
     res <- dist_nn(X, k, include_self = include_self)
   }
@@ -9,7 +10,8 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
     }
     else {
       res <- annoy_nn(X, k = k, include_self = include_self,
-                      n_trees = n_trees, search_k = search_k)
+                      n_trees = n_trees, search_k = search_k,
+                      verbose = verbose)
     }
   }
   res
@@ -29,7 +31,6 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
   nr <- nrow(X)
   nc <- ncol(X)
   ann <- methods::new(RcppAnnoy::AnnoyEuclidean, nc)
-  ann$setVerbose(verbose)
 
   progress <- Progress$new(max = 2 * nrow(X), display = verbose)
 

@@ -240,7 +240,7 @@ fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio = 1.0,
                                  search_k = 2 * n_neighbors * n_trees,
                                  verbose = FALSE) {
   nn <- find_nn(X, n_neighbors, method = nn_method, n_trees = n_trees,
-                search_k = search_k)
+                search_k = search_k, verbose = verbose)
   tsmessage("Commencing smooth kNN distance calibration for k = ",
             formatC(n_neighbors))
 
