@@ -41,15 +41,16 @@ double rdist(const arma::rowvec& a,
   return sum;
 }
 
-// [[Rcpp::export]]
-void optimize_layout_cpp(arma::mat& embedding,
-                         const arma::uvec& positive_head,
-                         const arma::uvec& positive_tail,
-                         int n_epochs, int n_vertices,
-                         const arma::vec& epochs_per_sample,
-                         double a, double b,
-                         double gamma, double initial_alpha,
-                         double negative_sample_rate, bool verbose) {
+
+template<typename T>
+void optimize_layout(const T& gradient,
+                     arma::mat& embedding,
+                     const arma::uvec& positive_head,
+                     const arma::uvec& positive_tail,
+                     int n_epochs, int n_vertices,
+                     const arma::vec& epochs_per_sample,
+                     double initial_alpha,
+                     double negative_sample_rate, bool verbose) {
   Progress progress(n_epochs, verbose);
 
   const arma::uword ndim = embedding.n_cols;
@@ -62,8 +63,6 @@ void optimize_layout_cpp(arma::mat& embedding,
   arma::vec epoch_of_next_negative_sample(epochs_per_negative_sample);
   arma::vec epoch_of_next_sample(epochs_per_sample);
 
-  const umap_gradient grad(a, b, gamma);
-
   for (int n = 0; n < n_epochs; n++) {
     for (arma::uword i = 0; i < n_epochs_per_sample; i++) {
       if (epoch_of_next_sample[i] <= n) {
@@ -74,7 +73,7 @@ void optimize_layout_cpp(arma::mat& embedding,
         arma::subview_row<double> other = embedding.row(k);
         const double dist_squared = std::max(rdist(current, other, ndim), dist_eps);
 
-        const double grad_coeff = grad.grad_attr(dist_squared);
+        const double grad_coeff = gradient.grad_attr(dist_squared);
 
         for (arma::uword d = 0; d < ndim; d++) {
           double grad_d = clip(grad_coeff * (current[d] - other[d])) * alpha;
@@ -98,7 +97,7 @@ void optimize_layout_cpp(arma::mat& embedding,
           arma::subview_row<double> other_neg = embedding.row(k);
 
           const double dist_squared = std::max(rdist(current, other_neg, ndim), dist_eps);
-          const double grad_coeff = grad.grad_rep(dist_squared);
+          const double grad_coeff = gradient.grad_rep(dist_squared);
 
           // This is in the original code, but I strongly suspect this can never happen
           // if (!arma::is_finite(grad_coeff)) {
@@ -125,3 +124,31 @@ void optimize_layout_cpp(arma::mat& embedding,
   } // next epoch
 }
 
+// [[Rcpp::export]]
+void optimize_layout_umap(arma::mat& embedding,
+                          const arma::uvec& positive_head,
+                          const arma::uvec& positive_tail,
+                          int n_epochs, int n_vertices,
+                          const arma::vec& epochs_per_sample,
+                          double a, double b,
+                          double gamma, double initial_alpha,
+                          double negative_sample_rate, bool verbose) {
+  const umap_gradient gradient(a, b, gamma);
+  optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
+                  n_vertices, epochs_per_sample, initial_alpha,
+                  negative_sample_rate, verbose);
+}
+
+// [[Rcpp::export]]
+void optimize_layout_tumap(arma::mat& embedding,
+                           const arma::uvec& positive_head,
+                           const arma::uvec& positive_tail,
+                           int n_epochs, int n_vertices,
+                           const arma::vec& epochs_per_sample,
+                           double initial_alpha,
+                           double negative_sample_rate, bool verbose) {
+  const tumap_gradient gradient;
+  optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
+                  n_vertices, epochs_per_sample, initial_alpha,
+                  negative_sample_rate, verbose);
+}

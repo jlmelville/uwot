@@ -18,6 +18,7 @@
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
 // The standard UMAP gradient
+
 class umap_gradient {
 public:
   umap_gradient(const double a, const double b, const double gamma);
