@@ -36,3 +36,11 @@ c2y <- function(...) {
 iris10 <- x2m(iris[1:10, ])
 iris10_Y <- pca_scores(iris10, ncol = 2)
 
+diris10 <- dist(iris10)
+
+# Sparse iris10 dist
+dmiris10 <- as.matrix(diris10)
+dmiris10z <- dmiris10
+dmiris10z[dmiris10z > 0.71] <- 0
+dmiris10z <- Matrix::drop0(dmiris10z)
+
