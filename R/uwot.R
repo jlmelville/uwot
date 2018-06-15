@@ -157,7 +157,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
       X <- as.matrix(X[, indexes])
     }
     n_vertices <- nrow(X)
-    tsmessage("Read ", n_vertices, " rows and found ", length(indexes),
+    tsmessage("Read ", n_vertices, " rows and found ", ncol(X),
             " numeric columns")
   }
 
