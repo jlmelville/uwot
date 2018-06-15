@@ -9,9 +9,13 @@ NULL
 #' the following help text is lifted verbatim from the Python reference
 #' implementation at \url{https://github.com/lmcinnes/umap}.
 #'
-#' @param X Input data. Can be a \code{data.frame}, \code{matrix} or \code{dist}
-#'   object. Matrix and data frames should contain one observation per row. Data
-#'   frames will have any non-numeric columns removed.
+#' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
+#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
+#'   A sparse matrix is interpreted as a distance matrix and both implicit and
+#'   explicit zero entries are ignored. Set zero distances you want to keep to
+#'   an arbitrarily small non-zero value (e.g. \code{1e-10}). Matrix and data
+#'   frames should contain one observation per row. Data frames will have any
+#'   non-numeric columns removed.
 #' @param n_neighbors The size of local neighborhood (in terms of number of
 #'   neighboring sample points) used for manifold approximation. Larger values
 #'   result in more global views of the manifold, while smaller values result in
@@ -143,9 +147,13 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #' results in a substantially simplified gradient expression. This can give
 #' a speed improvement of around 50\%.
 #'
-#' @param X Input data. Can be a \code{data.frame}, \code{matrix} or \code{dist}
-#'   object. Matrix and data frames should contain one observation per row. Data
-#'   frames will have any non-numeric columns removed.
+#' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
+#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
+#'   A sparse matrix is interpreted as a distance matrix and both implicit and
+#'   explicit zero entries are ignored. Set zero distances you want to keep to
+#'   an arbitrarily small non-zero value (e.g. \code{1e-10}). Matrix and data
+#'   frames should contain one observation per row. Data frames will have any
+#'   non-numeric columns removed.
 #' @param n_neighbors The size of local neighborhood (in terms of number of
 #'   neighboring sample points) used for manifold approximation. Larger values
 #'   result in more global views of the manifold, while smaller values result in
@@ -263,6 +271,13 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   if (methods::is(X, "dist")) {
     n_vertices <- attr(X, "Size")
     tsmessage("Read ", n_vertices, " rows")
+  }
+  else if (methods::is(X, "sparseMatrix")) {
+    n_vertices <- nrow(X)
+    if (ncol(X) != n_vertices) {
+      stop("Sparse matrices are only supported as distance matrices")
+    }
+    tsmessage("Read ", n_vertices, " rows of sparse distance matrix")
   }
   else {
     if (methods::is(X, "data.frame")) {

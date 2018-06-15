@@ -11,9 +11,13 @@ tumap(X, n_neighbors = 15, n_components = 2, n_epochs = NULL, alpha = 1,
   verbose = getOption("verbose", TRUE))
 }
 \arguments{
-\item{X}{Input data. Can be a \code{data.frame}, \code{matrix} or \code{dist}
-object. Matrix and data frames should contain one observation per row. Data
-frames will have any non-numeric columns removed.}
+\item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
+\code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
+A sparse matrix is interpreted as a distance matrix and both implicit and
+explicit zero entries are ignored. Set zero distances you want to keep to
+an arbitrarily small non-zero value (e.g. \code{1e-10}). Matrix and data
+frames should contain one observation per row. Data frames will have any
+non-numeric columns removed.}
 
 \item{n_neighbors}{The size of local neighborhood (in terms of number of
 neighboring sample points) used for manifold approximation. Larger values
