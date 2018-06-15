@@ -226,38 +226,6 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   embedding
 }
 
-
-# Given a set of data X, a neighborhood size, and a measure of distance compute
-# the fuzzy simplicial set (here represented as a fuzzy graph in the form of a
-# sparse matrix) associated to the data. This is done by locally approximating
-# geodesic distance at each point, creating a fuzzy simplicial set for each such
-# point, and then combining all the local fuzzy simplicial sets into a global
-# one via a fuzzy union
-fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio = 1.0,
-                                 local_connectivity = 1.0, bandwidth = 1.0,
-                                 nn_method = "fnn",
-                                 n_trees = 50,
-                                 search_k = 2 * n_neighbors * n_trees,
-                                 verbose = FALSE) {
-  nn <- find_nn(X, n_neighbors, method = nn_method, n_trees = n_trees,
-                search_k = search_k, verbose = verbose)
-  tsmessage("Commencing smooth kNN distance calibration for k = ",
-            formatC(n_neighbors))
-
-  affinity_matrix <- smooth_knn_distances_cpp(nn_dist = nn$dist,
-                                          nn_idx = nn$idx,
-                                          n_iter = 64,
-                                          local_connectivity = local_connectivity,
-                                          bandwidth = bandwidth,
-                                          tol = 1e-5,
-                                          min_k_dist_scale = 1e-3,
-                                          verbose = verbose)
-
-  fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio)
-}
-
-
-
 # Creates the number of epochs per sample for each weight weights are the
 # non-zero input affinities (1-simplex) n_epoch the total number of epochs There
 # is an inverse relationship between the weights and the return vector.
