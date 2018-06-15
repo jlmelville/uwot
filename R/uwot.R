@@ -215,7 +215,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   positive_head <- V@i
   positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
 
-  tsmessage("Commencing optimization")
+  tsmessage("Commencing optimization using ", n_epochs, " epochs")
   # NB: This is a C++ function which modifies embedding directly.
   optimize_layout_cpp(embedding, positive_head, positive_tail,
                   n_epochs, n_vertices,
