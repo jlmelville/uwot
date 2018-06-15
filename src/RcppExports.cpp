@@ -7,16 +7,16 @@
 using namespace Rcpp;
 
 // optimize_layout_cpp
-void optimize_layout_cpp(Rcpp::NumericMatrix& embedding, const Rcpp::IntegerVector& positive_head, const Rcpp::IntegerVector& positive_tail, int n_epochs, int n_vertices, const Rcpp::NumericVector& epochs_per_sample, double a, double b, double gamma, double initial_alpha, double negative_sample_rate, bool verbose);
+void optimize_layout_cpp(arma::mat& embedding, const arma::uvec& positive_head, const arma::uvec& positive_tail, int n_epochs, int n_vertices, const arma::vec& epochs_per_sample, double a, double b, double gamma, double initial_alpha, double negative_sample_rate, bool verbose);
 RcppExport SEXP _uwot_optimize_layout_cpp(SEXP embeddingSEXP, SEXP positive_headSEXP, SEXP positive_tailSEXP, SEXP n_epochsSEXP, SEXP n_verticesSEXP, SEXP epochs_per_sampleSEXP, SEXP aSEXP, SEXP bSEXP, SEXP gammaSEXP, SEXP initial_alphaSEXP, SEXP negative_sample_rateSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix& >::type embedding(embeddingSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type positive_head(positive_headSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type positive_tail(positive_tailSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type embedding(embeddingSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type positive_head(positive_headSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type positive_tail(positive_tailSEXP);
     Rcpp::traits::input_parameter< int >::type n_epochs(n_epochsSEXP);
     Rcpp::traits::input_parameter< int >::type n_vertices(n_verticesSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type epochs_per_sample(epochs_per_sampleSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type epochs_per_sample(epochs_per_sampleSEXP);
     Rcpp::traits::input_parameter< double >::type a(aSEXP);
     Rcpp::traits::input_parameter< double >::type b(bSEXP);
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);

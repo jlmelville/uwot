@@ -22,80 +22,94 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppProgress)]]
 #include <progress.hpp>
+#include "gradient.h"
 
-// Clip a numeric vector so that all values are within [-4, 4]
-Rcpp::NumericVector clip(const Rcpp::NumericVector& vec) {
-  return Rcpp::pmax(Rcpp::pmin(vec, 4.0), -4.0);
+// Clip a numeric value to within [-4, 4]
+double clip(double val) {
+  return std::max(std::min(val, 4.0), -4.0);
 }
 
 // The squared Euclidean distance between vectors a and b
-double rdist(const Rcpp::NumericVector& a, const Rcpp::NumericVector& b) {
-  return Rcpp::sum((a - b) * (a - b));
+double rdist(const arma::rowvec& a,
+             const arma::rowvec& b,
+             const arma::uword ndim) {
+  double sum = 0.0;
+  for (arma::uword i = 0; i < ndim; i++) {
+    sum += (a[i] - b[i]) * (a[i] - b[i]);
+  }
+
+  return sum;
 }
 
 // [[Rcpp::export]]
-void optimize_layout_cpp(Rcpp::NumericMatrix& embedding,
-                         const Rcpp::IntegerVector& positive_head,
-                         const Rcpp::IntegerVector& positive_tail,
+void optimize_layout_cpp(arma::mat& embedding,
+                         const arma::uvec& positive_head,
+                         const arma::uvec& positive_tail,
                          int n_epochs, int n_vertices,
-                         const Rcpp::NumericVector& epochs_per_sample,
-                         double a, double b, double gamma, double initial_alpha,
+                         const arma::vec& epochs_per_sample,
+                         double a, double b,
+                         double gamma, double initial_alpha,
                          double negative_sample_rate, bool verbose) {
-  double alpha = initial_alpha;
-
-  Rcpp::NumericVector epochs_per_negative_sample =
-    Rcpp::clone(epochs_per_sample);
-  epochs_per_negative_sample =
-    epochs_per_negative_sample / negative_sample_rate;
-
-  Rcpp::NumericVector epoch_of_next_negative_sample =
-    Rcpp::clone(epochs_per_negative_sample);
-  Rcpp::NumericVector epoch_of_next_sample = Rcpp::clone(epochs_per_sample);
-
-  const double dist_eps = std::numeric_limits<double>::epsilon();
   Progress progress(n_epochs, verbose);
 
+  const arma::uword ndim = embedding.n_cols;
+  const arma::uword n_epochs_per_sample = epochs_per_sample.size();
+
+  const double dist_eps = std::numeric_limits<double>::epsilon();
+  double alpha = initial_alpha;
+
+  arma::vec epochs_per_negative_sample(epochs_per_sample / negative_sample_rate);
+  arma::vec epoch_of_next_negative_sample(epochs_per_negative_sample);
+  arma::vec epoch_of_next_sample(epochs_per_sample);
+
+  const umap_gradient grad(a, b, gamma);
+
   for (int n = 0; n < n_epochs; n++) {
-    for (int i = 0; i < epochs_per_sample.size(); i++) {
+    for (arma::uword i = 0; i < n_epochs_per_sample; i++) {
       if (epoch_of_next_sample[i] <= n) {
+        arma::uword j = positive_head[i];
+        arma::uword k = positive_tail[i];
 
-        int j = positive_head[i];
-        int k = positive_tail[i];
-        Rcpp::NumericMatrix::Row current = embedding.row(j);
-        Rcpp::NumericMatrix::Row other = embedding.row(k);
+        arma::subview_row<double> current = embedding.row(j);
+        arma::subview_row<double> other = embedding.row(k);
+        const double dist_squared = std::max(rdist(current, other, ndim), dist_eps);
 
-        double dist_squared = std::max(rdist(current, other), dist_eps);
+        const double grad_coeff = grad.grad_attr(dist_squared);
 
-        double grad_coeff = -2.0 * a * b * pow(dist_squared, b - 1.0);
-        grad_coeff /= a * pow(dist_squared, b) + 1.0;
-
-        Rcpp::NumericVector grad_d = clip(grad_coeff * (current - other));
-        current = current + grad_d * alpha;
-        other = other - grad_d * alpha;
+        for (arma::uword d = 0; d < ndim; d++) {
+          double grad_d = clip(grad_coeff * (current[d] - other[d])) * alpha;
+          current[d] += grad_d;
+          other[d] -= grad_d;
+        }
 
         epoch_of_next_sample[i] += epochs_per_sample[i];
 
         int n_neg_samples = int((n - epoch_of_next_negative_sample[i]) /
-          epochs_per_negative_sample[i]);
+                                epochs_per_negative_sample[i]);
 
-        Rcpp::IntegerVector ks =
-          Rcpp::sample(n_vertices, n_neg_samples, true) - 1;
+        Rcpp::IntegerVector ks = Rcpp::sample(n_vertices, n_neg_samples, true) - 1;
         for (int p = 0; p < ks.size(); p++) {
-          int k = ks[p];
+          arma::uword k = ks[p];
 
-          Rcpp::NumericMatrix::Row other_neg = embedding.row(k);
-
-          dist_squared = std::max(rdist(current, other_neg), dist_eps);
-          double grad_coeff = (2.0 * gamma * b);
-          grad_coeff /= (0.001 + dist_squared) * (a * pow(dist_squared, b) + 1);
-
-          if (!arma::is_finite(grad_coeff)) {
-            grad_coeff = 4.0;
+          if (j == k) {
+            continue;
           }
 
-          grad_d = clip(grad_coeff * (current - other_neg));
-          current = current + grad_d * alpha;
+          arma::subview_row<double> other_neg = embedding.row(k);
+
+          const double dist_squared = std::max(rdist(current, other_neg, ndim), dist_eps);
+          const double grad_coeff = grad.grad_rep(dist_squared);
+
+          // This is in the original code, but I strongly suspect this can never happen
+          // if (!arma::is_finite(grad_coeff)) {
+          //   grad_coeff = 4.0;
+          // }
+
+          for (arma::uword d = 0; d < ndim; d++) {
+            current[d] += clip(grad_coeff * (current[d] - other_neg[d])) * alpha;
+          }
         }
+
         epoch_of_next_negative_sample[i] +=
           n_neg_samples * epochs_per_negative_sample[i];
       }
@@ -105,7 +119,6 @@ void optimize_layout_cpp(Rcpp::NumericMatrix& embedding,
     }
 
     alpha = initial_alpha * (1.0 - (double(n) / double(n_epochs)));
-
     if (verbose) {
       progress.increment();
     }
