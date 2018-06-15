@@ -4,7 +4,12 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
   if (methods::is(X, "dist")) {
     res <- dist_nn(X, k, include_self = include_self)
   }
+  else if (methods::is(X, "sparseMatrix")) {
+    # sparse distance matrix
+    res <- sparse_nn(X, k, include_self = include_self)
+  }
   else {
+    # normal matrix
     if (method == "fnn") {
       res <- FNN_nn(X, k = k, include_self = include_self)
     }
@@ -99,6 +104,41 @@ dist_nn <- function(X, k, include_self = TRUE) {
     nn_dist <- nn_dist[, 2:ncol(nn_dist)]
   }
 
+  attr(nn_idx, "dimnames") <- NULL
+  attr(nn_dist, "dimnames") <- NULL
+
   list(idx = nn_idx, dist = nn_dist)
 }
 
+sparse_nn <- function(X, k, include_self = TRUE) {
+  if (include_self) {
+    k <- k - 1
+  }
+
+  n <- nrow(X)
+  nn_idx <- matrix(0, nrow = n, ncol = k)
+  nn_dist <- matrix(0, nrow = n, ncol = k)
+
+  for (i in 1:n) {
+    dists <- X[, i]
+    is_nonzero <- dists != 0
+    dist_nonzero <- dists[is_nonzero]
+    if (length(dist_nonzero) < k) {
+      stop("Row ", i, " of distance matrix has only ", length(dist_nonzero), " defined distances")
+    }
+
+    k_order <- order(dist_nonzero)[1:k]
+
+    idx_nonzero <- which(is_nonzero, arr.ind = TRUE)
+
+    nn_idx[i, ] <- idx_nonzero[k_order]
+    nn_dist[i, ] <- dist_nonzero[k_order]
+  }
+
+  if (include_self) {
+    nn_idx <- cbind(1:n, nn_idx)
+    nn_dist <- cbind(rep(0, n), nn_dist)
+  }
+
+  list(idx = nn_idx, dist = nn_dist)
+}
