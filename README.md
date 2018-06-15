@@ -102,6 +102,9 @@ fast enough for my needs.
 * Only Euclidean distances are supported for finding nearest neighbors. You can
 pass in a `dist` object instead of a data frame. Sparse matrices are not yet 
 supported.
+* The C++ code is single-threaded. Multi-threading in the style of 
+[largeVis](https://github.com/elbamos/largeVis) is something I'd like to look
+into.
 * I haven't tried this on anything larger than MNIST and Fashion MNIST.
 
 ## License
