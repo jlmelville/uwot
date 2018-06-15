@@ -306,7 +306,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                                        "laplacian", "spca"))
     embedding <- switch(init,
                         spectral = spectral_init(V, ndim = n_components, verbose = verbose),
-                        random = rand_init(n_vertices, n_components),
+                        random = rand_init(n_vertices, n_components, verbose = verbose),
                         normlaplacian = normalized_laplacian_init(V, ndim = n_components,
                                                                   verbose = verbose),
                         laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
