@@ -43,6 +43,28 @@ fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio = 1.0,
   fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio)
 }
 
+symmetrize <- function(P) {
+  0.5 * (P + Matrix::t(P))
+}
+
+perplexity_similarities <- function(X, n_neighbors, perplexity,
+                                 nn_method = "fnn",
+                                 n_trees = 50,
+                                 search_k = 2 * n_neighbors * n_trees,
+                                 verbose = FALSE) {
+  nn <- find_nn(X, n_neighbors, method = nn_method, n_trees = n_trees,
+                search_k = search_k, verbose = verbose)
+  tsmessage("Commencing smooth kNN distance calibration for k = ",
+            formatC(n_neighbors))
+
+  affinity_matrix <- calc_row_probabilities(nn_dist = nn$dist,
+                                              nn_idx = nn$idx,
+                                              perplexity = perplexity,
+                                              verbose = verbose)
+
+  symmetrize(affinity_matrix) / sum(affinity_matrix)
+}
+
 
 # Obsolete pure R function ------------------------------------------------
 
@@ -186,10 +208,11 @@ smooth_knn_distances <-
     }
   }
 
+
 calc_row_probabilities <- function(nn_dist,
                                    nn_idx,
-                                   perplexity = 50,
-                                   n_iter = 64,
+                                   perplexity,
+                                   n_iter = 200,
                                    tol = 1e-5,
                                    ret_extra = FALSE,
                                    verbose = FALSE)
@@ -210,7 +233,7 @@ calc_row_probabilities <- function(nn_dist,
     hi <- Inf
     mid <- 1.0
 
-    Di <- nn_dist[i, -1]
+    Di <- nn_dist[i, -1] ^ 2
 
     for (iter in 1:n_iter) {
       sres <- shannon(Di, mid)
@@ -260,7 +283,6 @@ calc_row_probabilities <- function(nn_dist,
     P
   }
 }
-
 
 shannon <- function(D2, beta) {
   W <- exp(-D2 * beta)
