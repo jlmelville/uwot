@@ -185,3 +185,96 @@ smooth_knn_distances <-
       P
     }
   }
+
+calc_row_probabilities <- function(nn_dist,
+                                   nn_idx,
+                                   perplexity = 50,
+                                   n_iter = 64,
+                                   tol = 1e-5,
+                                   ret_extra = FALSE,
+                                   verbose = FALSE)
+{
+  k <- ncol(nn_dist)
+  n <- nrow(nn_dist)
+
+  target <- log(perplexity)
+
+  if (ret_extra) {
+    sigmas <- rep(0, n)
+  }
+
+  progress <- Progress$new(n, display = verbose)
+  for (i in 1:n) {
+
+    lo <- 0.0
+    hi <- Inf
+    mid <- 1.0
+
+    Di <- nn_dist[i, -1]
+
+    for (iter in 1:n_iter) {
+      sres <- shannon(Di, mid)
+      val <- sres$H
+
+      if (abs(val - target) < tol) {
+        break
+      }
+
+      if (val < target) {
+        hi <- mid
+        mid <- (lo + hi) / 2.0
+      }
+      else {
+        lo <- mid
+        if (is.infinite(hi)) {
+          mid <- mid * 2
+        }
+        else {
+          mid <- (lo + hi) / 2.0
+        }
+      }
+    }
+    beta <- mid
+    sres <- shannon(Di, beta)
+    prow <- sres$W / sres$Z
+    nn_dist[i, -1] <- prow
+
+    if (ret_extra) {
+      sigmas[i] <-  sqrt(1 / beta)
+    }
+
+    progress$increment()
+  }
+  P <- Matrix::sparseMatrix(i = rep(1:n, times = k), j = as.vector(nn_idx),
+                            x = as.vector(nn_dist))
+  Matrix::diag(P) <- 0
+  P <- Matrix::drop0(P)
+
+  if (ret_extra) {
+    if (verbose) {
+      summarize(sigmas, "sigma summary")
+    }
+    list(sigma = sigmas, P = P)
+  }
+  else {
+    P
+  }
+}
+
+
+shannon <- function(D2, beta) {
+  W <- exp(-D2 * beta)
+  Z <- sum(W)
+
+  if (Z == 0) {
+    H <- 0
+  }
+  else {
+    H <- log(Z) + beta * sum(D2 * W) / Z
+  }
+  list(
+    W = W,
+    Z = Z,
+    H = H
+  )
+}
