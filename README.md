@@ -99,13 +99,16 @@ fast enough for my needs.
 
 ## Limitations
 
-* Only Euclidean distances are supported for finding nearest neighbors. You can
-pass in a `dist` object instead of a data frame. Sparse matrices are not yet 
-supported.
+* Only Euclidean distances are supported for finding nearest neighbors from data frame
+and dense matrix input. But if you can calculate a distance matrix for your data, you
+can pass it in as `dist` object. For larger distance matrices, you can pass in a 
+`sparseMatrix` (from the [Matrix](https://cran.r-project.org/package=Matrix) package).
+Neither approach is supremely efficient at the moment.
 * The C++ code is single-threaded. Multi-threading in the style of 
 [largeVis](https://github.com/elbamos/largeVis) is something I'd like to look
 into.
-* I haven't tried this on anything larger than MNIST and Fashion MNIST.
+* I haven't tried this on anything much larger than MNIST and Fashion MNIST (so
+at least around 100,000 rows with 500-1,000 columns works fine).
 
 ## License
 
