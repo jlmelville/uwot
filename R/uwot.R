@@ -366,12 +366,13 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 
 
 
-# Creates the number of epochs per sample for each weight weights are the
-# non-zero input affinities (1-simplex) n_epoch the total number of epochs There
-# is an inverse relationship between the weights and the return vector.
+# Creates the number of epochs per sample for each weight
+# weights are the non-zero input affinities (1-simplex)
+# n_epoch the total number of epochs
+# There is an inverse relationship between the weights and the return vector.
 make_epochs_per_sample <- function(weights, n_epochs) {
   result <- rep(-1, length(weights))
-  n_samples = n_epochs * (weights / max(weights))
+  n_samples <- n_epochs * (weights / max(weights))
   result[n_samples > 0] <- n_epochs / n_samples[n_samples > 0]
   result
 }

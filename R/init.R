@@ -57,7 +57,7 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
 # spectral decomposition of the normalized Laplacian + some noise
 spectral_init <- function(A, ndim = 2, verbose = FALSE) {
   tsmessage("Initializing from normalized Laplacian + noise")
-  coords <- normalized_laplacian_init(A, ndim, verbose)
+  coords <- normalized_laplacian_init(A, ndim, verbose = FALSE)
   expansion <- 10.0 / max(coords)
   (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.001),
                                 ncol = ndim)
@@ -69,6 +69,7 @@ rand_init <- function(n, ndim, verbose = FALSE) {
   matrix(stats::runif(n = n * ndim, min = -10, max = 10), ncol = ndim)
 }
 
+# PCA but then scale the vectors to a t-SNE-like stdev of 1e-4
 scaled_pca <- function(X, ndim = 2, verbose = FALSE) {
   tsmessage("Initializing from scaled PCA")
   scores <- pca_scores(X, ncol = ndim, verbose = verbose)
