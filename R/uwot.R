@@ -1,7 +1,3 @@
-#' @useDynLib uwot
-#' @importFrom Rcpp sourceCpp
-NULL
-
 #' Dimensionality Reduction with UMAP
 #'
 #' Carry out dimensionality reduction of a dataset using the Uniform Manifold
@@ -391,5 +387,11 @@ find_ab_params <- function(spread = 1, min_dist = 0.001) {
     stop("Can't find a, b for provided spread/min_dist values")
   }
   result
+}
+
+#' @useDynLib uwot
+#' @importFrom Rcpp sourceCpp
+.onUnload <- function(libpath) {
+  library.dynam.unload("uwot", libpath)
 }
 
