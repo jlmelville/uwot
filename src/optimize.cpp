@@ -44,7 +44,7 @@ double rdist(const arma::mat& mat,
 }
 
 // Three-component combined Tausworthe "taus88" PRNG from L'Ecuyer 1996.
-unsigned int tau_rand_int(long long* state) {
+unsigned long tau_rand_int(long long* state) {
 
   state[0] = (((state[0] & 4294967294LL) << 12) & 0xffffffff) ^
     ((((state[0] << 13) & 0xffffffff) ^ state[0]) >> 19);
@@ -133,7 +133,6 @@ void optimize_layout(const T& gradient,
               clip(grad_coeff * (embedding.at(j, d) - embedding.at(k, d))) * alpha;
           }
         }
-
         epoch_of_next_negative_sample[i] += n_neg_samples * epochs_per_negative_sample[i];
       }
     }
