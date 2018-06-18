@@ -86,15 +86,22 @@ For comparison, the default settings of the R package for
 [Barnes-Hut t-SNE](https://cran.r-project.org/package=Rtsne) took 21 minutes, and the
 [largeVis](https://github.com/elbamos/largeVis) package took 56 minutes.
 
-The Python UMAP implementation (powered by the JIT-magic of 
-[Numba](https://numba.pydata.org/)) 
-took just under 2 minutes (it takes 11 minutes to get through this via
-reticulate for reasons I haven't looked into). I've looked at some rough timings
-which show that both the nearest neighbor search (40 seconds in Python, just
-over 2 minutes in `uwot`) and optimization (60 seconds in Python, about 66
-seconds in `uwot`) could do with some improvements. The experimental parallel
-support in Numba is on for the nearest neighbor search, but not for the
-optimization.
+The Python UMAP implementation (powered by the JIT-magic of
+[Numba](https://numba.pydata.org/)) took just under 2 minutes (it takes 11
+minutes to get through this via reticulate for reasons I haven't looked into).
+The difference in performance of the Python UMAP and `uwot` is due to:
+
+* nearest neighbor search: takes 40 seconds in Python which also has the
+experimental parallel support in Numba turned on, vs just over 2 minutes in
+`uwot`. The Python version of UMAP uses
+[kgraph](https://github.com/aaalgo/kgraph), rather than ANNOY, so that's an
+obvious change to make (or to fiddle with the ANNOY defaults). 
+* the optimization stage, which takes 60 seconds in Python (no parallel option
+here), versus about 66 seconds in `uwot`. I think the difference here is due to
+the `pow` operations in the gradient. Comparing with a modified version of the
+Python UMAP to use the t-UMAP gradient mentioned above, which doesn't use any
+`pow` operatons, `uwot` is now faster: Python t-UMAP optimization takes 32
+seconds, while `uwot` t-UMAP optimization only takes 18 seconds.
 
 I would welcome any suggestions on improvements (particularly speeding up the
 optimization loop). However, it's certainly fast enough for my needs.
