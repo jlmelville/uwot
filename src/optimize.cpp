@@ -18,6 +18,7 @@
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <limits>
+#include <random>
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppProgress)]]
@@ -29,18 +30,31 @@ double clip(double val) {
   return std::max(std::min(val, 4.0), -4.0);
 }
 
-// The squared Euclidean distance between vectors a and b
-double rdist(const arma::rowvec& a,
-             const arma::rowvec& b,
+// The squared Euclidean distance between rows at indexes a and b
+double rdist(const arma::mat& mat,
+             const arma::uword a,
+             const arma::uword b,
              const arma::uword ndim) {
   double sum = 0.0;
   for (arma::uword i = 0; i < ndim; i++) {
-    sum += (a[i] - b[i]) * (a[i] - b[i]);
+    sum += (mat.at(a, i) - mat.at(b, i)) * (mat.at(a, i) - mat.at(b, i));
   }
 
   return sum;
 }
 
+// Three-component combined Tausworthe "taus88" PRNG from L'Ecuyer 1996.
+unsigned int tau_rand_int(long long* state) {
+
+  state[0] = (((state[0] & 4294967294LL) << 12) & 0xffffffff) ^
+    ((((state[0] << 13) & 0xffffffff) ^ state[0]) >> 19);
+  state[1] = (((state[1] & 4294967288LL) << 4) & 0xffffffff) ^
+    ((((state[1] << 2) & 0xffffffff) ^ state[1]) >> 25);
+  state[2] = (((state[2] & 4294967280LL) << 17) & 0xffffffff) ^
+    ((((state[2] << 3) & 0xffffffff) ^ state[2]) >> 11);
+
+  return state[0] ^ state[1] ^ state[2];
+}
 
 template<typename T>
 void optimize_layout(const T& gradient,
@@ -50,11 +64,13 @@ void optimize_layout(const T& gradient,
                      int n_epochs, int n_vertices,
                      const arma::vec& epochs_per_sample,
                      double initial_alpha,
-                     double negative_sample_rate, bool verbose) {
+                     double negative_sample_rate,
+                     unsigned int seed,
+                     bool verbose) {
   Progress progress(n_epochs, verbose);
 
-  const arma::uword ndim = embedding.n_cols;
-  const arma::uword n_epochs_per_sample = epochs_per_sample.size();
+  const auto ndim = embedding.n_cols;
+  const auto n_epochs_per_sample = epochs_per_sample.size();
 
   const double dist_eps = std::numeric_limits<double>::epsilon();
   double alpha = initial_alpha;
@@ -63,40 +79,48 @@ void optimize_layout(const T& gradient,
   arma::vec epoch_of_next_negative_sample(epochs_per_negative_sample);
   arma::vec epoch_of_next_sample(epochs_per_sample);
 
-  for (int n = 0; n < n_epochs; n++) {
+  // Reproducibly initialize the state of the Tausworthe PRNG.
+  // seed is an unsigned integer sampled from R, and hence is reproducible.
+  // (It is dependent on, but NOT the same as, any value that might be passed
+  // to set.seed)
+  // Use that seed to initialize the standard library Mersenne Twister PRNG.
+  // Generate three random integers. Use those to initialize the Tausworthe
+  // PRNG.
+  std::mt19937 rng(seed);
+  std::uniform_int_distribution<long> gen(-2147483647, 2147483646);
+  long s1 = gen(rng);
+  long s2 = gen(rng);
+  long s3 = gen(rng);
+  long long state[3] = {s1, s2, s3};
+
+  for (auto n = 0; n < n_epochs; n++) {
     for (arma::uword i = 0; i < n_epochs_per_sample; i++) {
       if (epoch_of_next_sample[i] <= n) {
         arma::uword j = positive_head[i];
         arma::uword k = positive_tail[i];
 
-        arma::subview_row<double> current = embedding.row(j);
-        arma::subview_row<double> other = embedding.row(k);
-        const double dist_squared = std::max(rdist(current, other, ndim), dist_eps);
-
+        const double dist_squared = std::max(rdist(embedding, j, k, ndim), dist_eps);
         const double grad_coeff = gradient.grad_attr(dist_squared);
 
         for (arma::uword d = 0; d < ndim; d++) {
-          double grad_d = clip(grad_coeff * (current[d] - other[d])) * alpha;
-          current[d] += grad_d;
-          other[d] -= grad_d;
+          double grad_d = clip(grad_coeff * (embedding.at(j, d) - embedding.at(k, d))) * alpha;
+          embedding.at(j, d) += grad_d;
+          embedding.at(k, d) -= grad_d;
         }
 
         epoch_of_next_sample[i] += epochs_per_sample[i];
 
-        int n_neg_samples = int((n - epoch_of_next_negative_sample[i]) /
+        unsigned int n_neg_samples = static_cast<unsigned int>((n - epoch_of_next_negative_sample[i]) /
                                 epochs_per_negative_sample[i]);
 
-        Rcpp::IntegerVector ks = Rcpp::sample(n_vertices, n_neg_samples, true) - 1;
-        for (int p = 0; p < ks.size(); p++) {
-          arma::uword k = ks[p];
+        for (unsigned int p = 0; p < n_neg_samples; p++) {
+          arma::uword k = tau_rand_int(state) % n_vertices;
 
           if (j == k) {
             continue;
           }
 
-          arma::subview_row<double> other_neg = embedding.row(k);
-
-          const double dist_squared = std::max(rdist(current, other_neg, ndim), dist_eps);
+          const double dist_squared = std::max(rdist(embedding, j, k, ndim), dist_eps);
           const double grad_coeff = gradient.grad_rep(dist_squared);
 
           // This is in the original code, but I strongly suspect this can never happen
@@ -105,12 +129,12 @@ void optimize_layout(const T& gradient,
           // }
 
           for (arma::uword d = 0; d < ndim; d++) {
-            current[d] += clip(grad_coeff * (current[d] - other_neg[d])) * alpha;
+            embedding.at(j, d) +=
+              clip(grad_coeff * (embedding.at(j, d) - embedding.at(k, d))) * alpha;
           }
         }
 
-        epoch_of_next_negative_sample[i] +=
-          n_neg_samples * epochs_per_negative_sample[i];
+        epoch_of_next_negative_sample[i] += n_neg_samples * epochs_per_negative_sample[i];
       }
     }
     if (Progress::check_abort()) {
@@ -132,11 +156,13 @@ void optimize_layout_umap(arma::mat& embedding,
                           const arma::vec& epochs_per_sample,
                           double a, double b,
                           double gamma, double initial_alpha,
-                          double negative_sample_rate, bool verbose) {
+                          double negative_sample_rate,
+                          unsigned int seed,
+                          bool verbose) {
   const umap_gradient gradient(a, b, gamma);
   optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
                   n_vertices, epochs_per_sample, initial_alpha,
-                  negative_sample_rate, verbose);
+                  negative_sample_rate, seed, verbose);
 }
 
 // [[Rcpp::export]]
@@ -146,9 +172,11 @@ void optimize_layout_tumap(arma::mat& embedding,
                            int n_epochs, int n_vertices,
                            const arma::vec& epochs_per_sample,
                            double initial_alpha,
-                           double negative_sample_rate, bool verbose) {
+                           double negative_sample_rate,
+                           unsigned int seed,
+                           bool verbose) {
   const tumap_gradient gradient;
   optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
                   n_vertices, epochs_per_sample, initial_alpha,
-                  negative_sample_rate, verbose);
+                  negative_sample_rate, seed, verbose);
 }

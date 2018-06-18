@@ -21,3 +21,8 @@ summarize <- function(X, msg = "") {
                              collapse = ""),
             force = get0("verbose", envir = sys.parent()))
 }
+
+# http://rorynolan.rbind.io/2018/05/08/rcsetseed/
+get_seed <- function() {
+  sample.int(.Machine$integer.max, 1)
+}

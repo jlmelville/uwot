@@ -346,15 +346,27 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 
   # NB: optimize functions are C++ and modify embedding directly.
   if (tolower(method) == "umap") {
-    optimize_layout_umap(embedding, positive_head, positive_tail, n_epochs,
-                         n_vertices, epochs_per_sample, a, b, gamma,
+    optimize_layout_umap(embedding = embedding,
+                         positive_head = positive_head,
+                         positive_tail = positive_tail,
+                         n_epochs = n_epochs,
+                         n_vertices = n_vertices,
+                         epochs_per_sample = epochs_per_sample,
+                         a = a, b = b, gamma = gamma,
                          initial_alpha = alpha, negative_sample_rate,
+                         seed = get_seed(),
                          verbose = verbose)
   }
   else {
-    optimize_layout_tumap(embedding, positive_head, positive_tail, n_epochs,
-                         n_vertices, epochs_per_sample, initial_alpha = alpha,
-                         negative_sample_rate, verbose = verbose)
+    optimize_layout_tumap(embedding,
+                          positive_head = positive_head,
+                          positive_tail = positive_tail,
+                          n_epochs = n_epochs,
+                          n_vertices, epochs_per_sample,
+                          initial_alpha = alpha,
+                          negative_sample_rate = negative_sample_rate,
+                          seed = get_seed(),
+                          verbose = verbose)
   }
   tsmessage("Optimization finished")
   embedding
