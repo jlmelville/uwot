@@ -41,8 +41,11 @@ containing 10,000 vertices or less, and \code{200} otherwise.}
   of the fuzzy 1-skeleton, with Gaussian noise added.
   \item \code{"normlaplacian"}. Spectral embedding using the normalized
   Laplacian of the fuzzy 1-skeleton, without noise.
-  \item \code{random}. Coordinates assigned using a uniform random
+  \item \code{"random"}. Coordinates assigned using a uniform random
   distribution between -10 and 10.
+  \item \code{"lvrandom"}. Coordinates assigned using a Gaussian
+  distribution with standard deviation 1e-4, as in LargeVis
+  (Tang et al., 2016).
   \item \code{"laplacian"}. Spectral embedding using the Laplacian Eigenmap
   (Belkin and Niyogi, 2002).
   \item \code{"spca"}. The first two principal components from PCA of
