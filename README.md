@@ -84,7 +84,9 @@ The right hand image is the result of using `uwot`.
 On my not-particularly-beefy laptop `uwot` took around 3 and a half minutes. 
 For comparison, the default settings of the R package for
 [Barnes-Hut t-SNE](https://cran.r-project.org/package=Rtsne) took 21 minutes, and the
-[largeVis](https://github.com/elbamos/largeVis) package took 56 minutes.
+[largeVis](https://github.com/elbamos/largeVis) package took 56 minutes. The
+[official LargeVis implementation](https://github.com/lferry007/LargeVis) took
+10 minutes.
 
 The Python UMAP implementation (powered by the JIT-magic of
 [Numba](https://numba.pydata.org/)) took just under 2 minutes (it takes 11
