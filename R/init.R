@@ -65,8 +65,14 @@ spectral_init <- function(A, ndim = 2, verbose = FALSE) {
 
 # UMAP random initialization: uniform between +10 and -10 along each axis
 rand_init <- function(n, ndim, verbose = FALSE) {
-  tsmessage("Initializing from random")
+  tsmessage("Initializing from uniform random")
   matrix(stats::runif(n = n * ndim, min = -10, max = 10), ncol = ndim)
+}
+
+# LargeVis random initialization: Gaussian with sd 1e-4 (like t-SNE)
+rand_init_lv <- function(n, ndim, verbose = FALSE) {
+  tsmessage("Initializing from random Gaussian with sd = 1e-4")
+  matrix(stats::rnorm(ndim * n, sd = 1e-4), n)
 }
 
 # PCA but then scale the vectors to a t-SNE-like stdev of 1e-4
