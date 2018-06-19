@@ -179,3 +179,20 @@ void optimize_layout_tumap(arma::mat& embedding,
                   n_vertices, epochs_per_sample, initial_alpha,
                   negative_sample_rate, seed, verbose);
 }
+
+
+// [[Rcpp::export]]
+void optimize_layout_largevis(arma::mat& embedding,
+                          const arma::uvec& positive_head,
+                          const arma::uvec& positive_tail,
+                          int n_epochs, int n_vertices,
+                          const arma::vec& epochs_per_sample,
+                          double gamma, double initial_alpha,
+                          double negative_sample_rate,
+                          unsigned int seed,
+                          bool verbose) {
+  const largevis_gradient gradient(gamma);
+  optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
+                  n_vertices, epochs_per_sample, initial_alpha,
+                  negative_sample_rate, seed, verbose);
+}

@@ -235,6 +235,27 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
        verbose)
 }
 
+# Differs from official LargeVis implementation:
+# Single-threaded
+# n_trees is not data dependent
+# No neighbor-of-a-neighbor refinement
+# grad clip is 4, not 5
+# Number of samples is different
+largevis <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
+                     n_components = 2, n_epochs = NULL,
+                     alpha = 1, init = "lvrandom", gamma = 7,
+                     negative_sample_rate = 5.0,
+                     nn_method = NULL, n_trees = 50,
+                     search_k = 2 * n_neighbors * n_trees,
+                     verbose = getOption("verbose", TRUE)) {
+  uwot(X, n_neighbors = n_neighbors, n_components = n_components,
+       n_epochs = n_epochs, alpha = alpha, init = init, gamma = gamma,
+       negative_sample_rate = negative_sample_rate,
+       nn_method = nn_method, n_trees = n_trees, search_k = search_k,
+       method = "largevis", perplexity = perplexity,
+       verbose = verbose)
+}
+
 # Function that does all the real work
 uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  alpha = 1, init = "spectral", spread = 1, min_dist = 0.01,
@@ -243,7 +264,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  negative_sample_rate = 5.0, a = NULL, b = NULL,
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
-                 method = "umap",
+                 method = "umap", perplexity,
                  verbose = getOption("verbose", TRUE)) {
 
   if (method == "umap" && (is.null(a) || is.null(b))) {
@@ -289,23 +310,41 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   }
 
   if (n_neighbors > n_vertices) {
-    stop("n_neighbors must be smaller than the dataset size")
+    # for LargeVis, n_neighbors normally determined from perplexity
+    # not an error to be too large
+    if (method == "largevis") {
+      tsmessage("Setting n_neighbors to ", n_vertices)
+      n_neighbors <- n_vertices
+    }
+    else {
+      stop("n_neighbors must be smaller than the dataset size")
+    }
   }
 
   if (is.null(nn_method)) {
     if (n_vertices < 4096) {
-      tsmessage("Using FNN for neighbor search")
+      tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
       nn_method = "fnn"
     }
     else {
-      tsmessage("Using ANNOY for neighbor search")
+      tsmessage("Using ANNOY for neighbor search, n_neighbors = ", n_neighbors)
       nn_method = "annoy"
     }
   }
   nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
 
-  V <- fuzzy_simplicial_set(X, n_neighbors, set_op_mix_ratio, local_connectivity,
+  if (method == "largevis") {
+    if (perplexity >= n_vertices) {
+      stop("perplexity can be no larger than ", n_vertices - 1)
+    }
+
+    V <- perplexity_similarities(X, n_neighbors, perplexity,
+                                 nn_method, n_trees, search_k, verbose)
+  }
+  else {
+    V <- fuzzy_simplicial_set(X, n_neighbors, set_op_mix_ratio, local_connectivity,
                             bandwidth, nn_method, n_trees, search_k, verbose)
+  }
 
   if (methods::is(init, "matrix")) {
     if (nrow(init) != n_vertices || ncol(init) != n_components) {
@@ -313,11 +352,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     }
   }
   else {
-    init <- match.arg(tolower(init), c("spectral", "random", "normlaplacian",
+    init <- match.arg(tolower(init), c("spectral", "random", "lvrandom", "normlaplacian",
                                        "laplacian", "spca"))
     embedding <- switch(init,
                         spectral = spectral_init(V, ndim = n_components, verbose = verbose),
                         random = rand_init(n_vertices, n_components, verbose = verbose),
+                        lvrandom = rand_init_lv(n_vertices, n_components, verbose = verbose),
                         normlaplacian = normalized_laplacian_init(V, ndim = n_components,
                                                                   verbose = verbose),
                         laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
@@ -357,12 +397,24 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                          seed = get_seed(),
                          verbose = verbose)
   }
-  else {
+  else if (method == "tumap") {
     optimize_layout_tumap(embedding,
                           positive_head = positive_head,
                           positive_tail = positive_tail,
                           n_epochs = n_epochs,
                           n_vertices, epochs_per_sample,
+                          initial_alpha = alpha,
+                          negative_sample_rate = negative_sample_rate,
+                          seed = get_seed(),
+                          verbose = verbose)
+  }
+  else {
+    optimize_layout_largevis(embedding,
+                          positive_head = positive_head,
+                          positive_tail = positive_tail,
+                          n_epochs = n_epochs,
+                          n_vertices, epochs_per_sample,
+                          gamma = gamma,
                           initial_alpha = alpha,
                           negative_sample_rate = negative_sample_rate,
                           seed = get_seed(),
@@ -406,4 +458,3 @@ find_ab_params <- function(spread = 1, min_dist = 0.001) {
 .onUnload <- function(libpath) {
   library.dynam.unload("uwot", libpath)
 }
-

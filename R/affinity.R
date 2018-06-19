@@ -54,15 +54,14 @@ perplexity_similarities <- function(X, n_neighbors, perplexity,
                                  verbose = FALSE) {
   nn <- find_nn(X, n_neighbors, method = nn_method, n_trees = n_trees,
                 search_k = search_k, verbose = verbose)
-  tsmessage("Commencing smooth kNN distance calibration for k = ",
-            formatC(n_neighbors))
+  tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
+            " k = ", formatC(n_neighbors))
 
-  affinity_matrix <- calc_row_probabilities(nn_dist = nn$dist,
-                                              nn_idx = nn$idx,
-                                              perplexity = perplexity,
-                                              verbose = verbose)
-
-  symmetrize(affinity_matrix) / sum(affinity_matrix)
+  affinity_matrix <- calc_row_probabilities_cpp(nn_dist = nn$dist,
+                                            nn_idx = nn$idx,
+                                            perplexity = perplexity,
+                                            verbose = verbose)
+  symmetrize(affinity_matrix)
 }
 
 

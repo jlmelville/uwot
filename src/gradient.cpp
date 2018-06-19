@@ -54,5 +54,19 @@ const double tumap_gradient::grad_attr(const double dist_squared) const {
 }
 
 const double tumap_gradient::grad_rep(const double dist_squared) const {
-  return 2.0 / ((0.001 + dist_squared) * (dist_squared + 1));
+  return 2.0 / ((0.001 + dist_squared) * (dist_squared + 1.0));
 }
+
+
+// LargeVis
+
+largevis_gradient::largevis_gradient(const double gamma) : gamma_2(gamma * 2.0) {}
+
+const double largevis_gradient::grad_attr(const double dist_squared) const {
+  return -2.0 / (dist_squared + 1.0);
+}
+
+const double largevis_gradient::grad_rep(const double dist_squared) const {
+  return gamma_2 / ((0.1 + dist_squared) * (dist_squared + 1.0));
+}
+

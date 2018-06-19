@@ -9,6 +9,14 @@ optimize_layout_tumap <- function(embedding, positive_head, positive_tail, n_epo
     invisible(.Call('_uwot_optimize_layout_tumap', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, verbose))
 }
 
+optimize_layout_largevis <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, verbose) {
+    invisible(.Call('_uwot_optimize_layout_largevis', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, verbose))
+}
+
+calc_row_probabilities_cpp <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, verbose = FALSE) {
+    .Call('_uwot_calc_row_probabilities_cpp', PACKAGE = 'uwot', nn_dist, nn_idx, perplexity, n_iter, tol, verbose)
+}
+
 smooth_knn_distances_cpp <- function(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose) {
     .Call('_uwot_smooth_knn_distances_cpp', PACKAGE = 'uwot', nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose)
 }

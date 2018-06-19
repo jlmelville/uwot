@@ -43,3 +43,12 @@ public:
   const double grad_attr(const double dist_squared) const;
   const double grad_rep(const double dist_squared) const;
 };
+
+class largevis_gradient {
+public:
+  largevis_gradient(const double gamma);
+  const double grad_attr(const double dist_squared) const;
+  const double grad_rep(const double dist_squared) const;
+private:
+  const double gamma_2;
+};
