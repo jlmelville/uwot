@@ -31,6 +31,19 @@ private:
   const double gamma_b_2;
 };
 
+// apUMAP: UMAP with an approximate power calculation
+class apumap_gradient {
+public:
+  apumap_gradient(const double a, const double b, const double gamma);
+  const double grad_attr(const double dist_squared) const;
+  const double grad_rep(const double dist_squared) const;
+private:
+  const double a;
+  const double b;
+  const double a_b_m2;
+  const double gamma_b_2;
+};
+
 // t-UMAP: the UMAP function with a = 1, and b = 1, which results in the Cauchy
 // distribution as used in t-SNE. This massively simplifies the gradient,
 // removing the pow calls, resulting in a noticeable speed increase (50% with

@@ -157,11 +157,21 @@ void optimize_layout_umap(arma::mat& embedding,
                           double gamma, double initial_alpha,
                           double negative_sample_rate,
                           unsigned int seed,
+                          bool approx_pow,
                           bool verbose) {
-  const umap_gradient gradient(a, b, gamma);
-  optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
-                  n_vertices, epochs_per_sample, initial_alpha,
-                  negative_sample_rate, seed, verbose);
+  if (approx_pow) {
+    const apumap_gradient gradient(a, b, gamma);
+    optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
+                    n_vertices, epochs_per_sample, initial_alpha,
+                    negative_sample_rate, seed, verbose);
+  }
+  else {
+    const umap_gradient gradient(a, b, gamma);
+    optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
+                    n_vertices, epochs_per_sample, initial_alpha,
+                    negative_sample_rate, seed, verbose);
+  }
+
 }
 
 // [[Rcpp::export]]

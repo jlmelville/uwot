@@ -97,6 +97,9 @@
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the ANNOY nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
+#' @param approx_pow If \code{TRUE}, use an approximation to the power function
+#'   in the UMAP gradient, from
+#'   \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates.
 #' @examples
@@ -135,12 +138,16 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  negative_sample_rate = 5.0, a = NULL, b = NULL,
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
+                 approx_pow = FALSE,
                  verbose = getOption("verbose", TRUE)) {
-  uwot(X, n_neighbors, n_components, n_epochs, alpha, init, spread,
-       min_dist, set_op_mix_ratio, local_connectivity, bandwidth, gamma,
-       negative_sample_rate, a, b, nn_method, n_trees, search_k,
-       method = "umap",
-       verbose)
+  uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
+       n_epochs = n_epochs, alpha = alpha, init = init, spread = spread,
+       min_dist = min_dist, set_op_mix_ratio = set_op_mix_ratio,
+       local_connectivity = local_connectivity, bandwidth = bandwidth,
+       gamma = gamma, negative_sample_rate = negative_sample_rate,
+       a = a, b = b, nn_method = nn_method, n_trees = n_trees,
+       search_k = search_k, method = "umap", approx_pow = approx_pow,
+       verbose = verbose)
 }
 
 #' Dimensionality Reduction Using T-Distributed UMAP (t-UMAP)
@@ -241,11 +248,13 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
                   verbose = getOption("verbose", TRUE)) {
-  uwot(X, n_neighbors, n_components, n_epochs, alpha, init, spread = NULL,
-       min_dist = NULL, set_op_mix_ratio, local_connectivity, bandwidth, gamma,
-       negative_sample_rate, a = NULL, b = NULL, nn_method, n_trees, search_k,
-       method = "tumap",
-       verbose)
+  uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
+       n_epochs = n_epochs, alpha = alpha, init = init, spread = NULL,
+       min_dist = NULL, set_op_mix_ratio = set_op_mix_ratio,
+       local_connectivity = local_connectivity, bandwidth = bandwidth,
+       gamma = gamma, negative_sample_rate = negative_sample_rate,
+       a = NULL, b = NULL, nn_method = nn_method, n_trees = n_trees,
+       search_k = search_k, method = "tumap", verbose = verbose)
 }
 
 #' Dimensionality Reduction with a LargeVis-like method
@@ -369,7 +378,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  negative_sample_rate = 5.0, a = NULL, b = NULL,
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
-                 method = "umap", perplexity,
+                 method = "umap", perplexity = 50, approx_pow = FALSE,
                  verbose = getOption("verbose", TRUE)) {
 
   if (method == "umap" && (is.null(a) || is.null(b))) {
@@ -500,6 +509,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                          a = a, b = b, gamma = gamma,
                          initial_alpha = alpha, negative_sample_rate,
                          seed = get_seed(),
+                         approx_pow = approx_pow,
                          verbose = verbose)
   }
   else if (method == "tumap") {
@@ -553,7 +563,8 @@ find_ab_params <- function(spread = 1, min_dist = 0.001) {
                start = list(a = 1, b = 1))$m$getPars()
   }, silent = TRUE)
   if (class(result) == "try-error") {
-    stop("Can't find a, b for provided spread/min_dist values")
+    stop("Can't find a, b for provided spread = ", spread,
+         " min_dist = ", min_dist)
   }
   result
 }

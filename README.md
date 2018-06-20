@@ -76,9 +76,10 @@ The difference in performance of the Python UMAP and `uwot` is due to:
 
 * nearest neighbor search: takes 40 seconds in Python which also has the
 experimental parallel support in Numba turned on, vs just over 2 minutes in
-`uwot`. The Python version of UMAP uses
+`uwot`. This part is the performance bottleneck at the moment. The Python version of UMAP uses
 [kgraph](https://github.com/aaalgo/kgraph), rather than ANNOY, so that's an
-obvious change to make (or to fiddle with the ANNOY defaults). 
+obvious change to make, or to fiddle with the ANNOY defaults, or to try something
+like [HNSW](https://github.com/nmslib/hnsw). 
 * the optimization stage, which takes 60 seconds in Python (no parallel option
 here), versus about 66 seconds in `uwot`. I think the difference here is due to
 the `pow` operations in the gradient. Comparing with a modified version of the
@@ -87,8 +88,21 @@ which doesn't use any `pow` operations, `uwot` is now faster: Python t-UMAP
 optimization takes 32 seconds, while `uwot` t-UMAP optimization only takes 18
 seconds.
 
-I would welcome any suggestions on improvements (particularly speeding up the
-optimization loop). However, it's certainly fast enough for my needs.
+If you like living dangerously, you can try using the `fastPrecisePow` 
+approximation to the `pow` function suggested by 
+[Martin Ankerl](https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/):
+
+```R
+# Set approx_pow = TRUE to use the approximation
+mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, approx_pow = TRUE, verbose = TRUE)
+```
+
+For what I think seem like typical values of `b` (between `0.7` and `0.9`)
+and the squared distance (`0`-`1000`), I found the maximum relative error was 
+about `0.06`.
+
+I would welcome any further suggestions on improvements (particularly speeding
+up the optimization loop). However, it's certainly fast enough for my needs.
 
 ## Limitations
 

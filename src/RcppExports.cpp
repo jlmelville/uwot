@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // optimize_layout_umap
-void optimize_layout_umap(arma::mat& embedding, const arma::uvec& positive_head, const arma::uvec& positive_tail, int n_epochs, int n_vertices, const arma::vec& epochs_per_sample, double a, double b, double gamma, double initial_alpha, double negative_sample_rate, unsigned int seed, bool verbose);
-RcppExport SEXP _uwot_optimize_layout_umap(SEXP embeddingSEXP, SEXP positive_headSEXP, SEXP positive_tailSEXP, SEXP n_epochsSEXP, SEXP n_verticesSEXP, SEXP epochs_per_sampleSEXP, SEXP aSEXP, SEXP bSEXP, SEXP gammaSEXP, SEXP initial_alphaSEXP, SEXP negative_sample_rateSEXP, SEXP seedSEXP, SEXP verboseSEXP) {
+void optimize_layout_umap(arma::mat& embedding, const arma::uvec& positive_head, const arma::uvec& positive_tail, int n_epochs, int n_vertices, const arma::vec& epochs_per_sample, double a, double b, double gamma, double initial_alpha, double negative_sample_rate, unsigned int seed, bool approx_pow, bool verbose);
+RcppExport SEXP _uwot_optimize_layout_umap(SEXP embeddingSEXP, SEXP positive_headSEXP, SEXP positive_tailSEXP, SEXP n_epochsSEXP, SEXP n_verticesSEXP, SEXP epochs_per_sampleSEXP, SEXP aSEXP, SEXP bSEXP, SEXP gammaSEXP, SEXP initial_alphaSEXP, SEXP negative_sample_rateSEXP, SEXP seedSEXP, SEXP approx_powSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat& >::type embedding(embeddingSEXP);
@@ -23,8 +23,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type initial_alpha(initial_alphaSEXP);
     Rcpp::traits::input_parameter< double >::type negative_sample_rate(negative_sample_rateSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type seed(seedSEXP);
+    Rcpp::traits::input_parameter< bool >::type approx_pow(approx_powSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    optimize_layout_umap(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, verbose);
+    optimize_layout_umap(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, verbose);
     return R_NilValue;
 END_RCPP
 }
@@ -103,7 +104,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_uwot_optimize_layout_umap", (DL_FUNC) &_uwot_optimize_layout_umap, 13},
+    {"_uwot_optimize_layout_umap", (DL_FUNC) &_uwot_optimize_layout_umap, 14},
     {"_uwot_optimize_layout_tumap", (DL_FUNC) &_uwot_optimize_layout_tumap, 10},
     {"_uwot_optimize_layout_largevis", (DL_FUNC) &_uwot_optimize_layout_largevis, 11},
     {"_uwot_calc_row_probabilities_cpp", (DL_FUNC) &_uwot_calc_row_probabilities_cpp, 6},

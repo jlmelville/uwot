@@ -8,7 +8,7 @@ umap(X, n_neighbors = 15, n_components = 2, n_epochs = NULL, alpha = 1,
   init = "spectral", spread = 1, min_dist = 0.01, set_op_mix_ratio = 1,
   local_connectivity = 1, bandwidth = 1, gamma = 1,
   negative_sample_rate = 5, a = NULL, b = NULL, nn_method = NULL,
-  n_trees = 50, search_k = 2 * n_neighbors * n_trees,
+  n_trees = 50, search_k = 2 * n_neighbors * n_trees, approx_pow = FALSE,
   verbose = getOption("verbose", TRUE))
 }
 \arguments{
@@ -121,6 +121,10 @@ ANNOY nearest neighbor search. Only used if the \code{nn_method} is
 larger k, the more the accurate results, but the longer the search takes.
 With \code{n_trees}, determines the accuracy of the ANNOY nearest neighbor
 search. Only used if the \code{nn_method} is \code{"annoy"}.}
+
+\item{approx_pow}{If \code{TRUE}, use an approximation to the power function
+in the UMAP gradient, from
+\url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }

@@ -45,6 +45,46 @@ const double umap_gradient::grad_rep(const double dist_squared) const {
   return gamma_b_2 / ((0.001 + dist_squared) * (a * std::pow(dist_squared, b) + 1.0));
 }
 
+// https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
+// an approximation to pow
+double fastPrecisePow(double a, double b) {
+  // calculate approximation with fraction of the exponent
+  int e = (int) b;
+  union {
+    double d;
+    int x[2];
+  } u = { a };
+  u.x[1] = (int)((b - e) * (u.x[1] - 1072632447) + 1072632447);
+  u.x[0] = 0;
+
+  // exponentiation by squaring with the exponent's integer part
+  // double r = u.d makes everything much slower, not sure why
+  double r = 1.0;
+  while (e) {
+    if (e & 1) {
+      r *= a;
+    }
+    a *= a;
+    e >>= 1;
+  }
+
+  return r * u.d;
+}
+
+// Approximate-Power UMAP: UMAP with an approximation to the slow pow calculation
+apumap_gradient::apumap_gradient(const double a, const double b, const double gamma) :
+  a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b) {  }
+
+const double apumap_gradient::grad_attr(const double dist_squared) const {
+  const double pd2b = fastPrecisePow(dist_squared, b);
+  return (a_b_m2 * pd2b) / (dist_squared * (a * pd2b + 1.0));
+}
+
+const double apumap_gradient::grad_rep(const double dist_squared) const {
+  return gamma_b_2 /
+    ((0.001 + dist_squared) * (a * fastPrecisePow(dist_squared, b) + 1.0));
+}
+
 // t-UMAP
 
 tumap_gradient::tumap_gradient() {}
@@ -69,4 +109,5 @@ const double largevis_gradient::grad_attr(const double dist_squared) const {
 const double largevis_gradient::grad_rep(const double dist_squared) const {
   return gamma_2 / ((0.1 + dist_squared) * (dist_squared + 1.0));
 }
+
 
