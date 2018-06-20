@@ -83,7 +83,7 @@ obvious change to make (or to fiddle with the ANNOY defaults).
 here), versus about 66 seconds in `uwot`. I think the difference here is due to
 the `pow` operations in the gradient. Comparing with a modified version of the
 Python UMAP to use the t-UMAP gradient (see the "Other Methods" section below), 
-which doesn't use any `pow` operatons, `uwot` is now faster: Python t-UMAP
+which doesn't use any `pow` operations, `uwot` is now faster: Python t-UMAP
 optimization takes 32 seconds, while `uwot` t-UMAP optimization only takes 18
 seconds.
 
