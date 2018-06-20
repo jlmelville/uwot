@@ -99,7 +99,10 @@ mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, approx_pow = TRUE,
 
 For what I think seem like typical values of `b` (between `0.7` and `0.9`)
 and the squared distance (`0`-`1000`), I found the maximum relative error was 
-about `0.06`.
+about `0.06`. However, I haven't done much testing, beyond looking to see that
+the MNIST results are not obviously worsened. Optimization time was reduced to 
+24 seconds with this method, so it does show a worthwhile improvement if you
+are feeling brave.
 
 I would welcome any further suggestions on improvements (particularly speeding
 up the optimization loop). However, it's certainly fast enough for my needs.
