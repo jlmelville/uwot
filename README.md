@@ -149,7 +149,7 @@ yourself by doing:
 data <- scale(data, center = TRUE, scale = FALSE)
 data <- data / max(abs(data))
 ```
-* The `n_trees` parameter cannot be dynamically chosen based of data set size.
+* The `n_trees` parameter is not dynamically chosen based on data set size.
 * Nearest neighbor results are not refined via the neighbor-of-my-neighbor
 method. The `search_k` parameter is twice as large than ANNOY's default to
 compensate.
