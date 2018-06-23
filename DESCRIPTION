@@ -12,9 +12,10 @@ LazyData: true
 Suggests: testthat
 RoxygenNote: 6.0.1
 Depends: Matrix
-LinkingTo: Rcpp, RcppArmadillo, RcppProgress
+LinkingTo: Rcpp, RcppArmadillo, RcppProgress, RcppParallel, RcppAnnoy
 Imports: Rcpp,
     methods,
     FNN,
     RSpectra,
-    RcppAnnoy
+    RcppAnnoy,
+    RcppParallel
