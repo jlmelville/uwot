@@ -1,6 +1,8 @@
 find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                     n_trees = 50, search_k = 2 * k * n_trees,
-                    verbose = getOption("verbose", TRUE)) {
+                    n_threads = RcppParallel::defaultNumThreads() / 2,
+                    grain_size = 1000,
+                    verbose = FALSE) {
   if (methods::is(X, "dist")) {
     res <- dist_nn(X, k, include_self = include_self)
   }
@@ -16,6 +18,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
     else {
       res <- annoy_nn(X, k = k, include_self = include_self,
                       n_trees = n_trees, search_k = search_k,
+                      n_threads = n_threads,
                       verbose = verbose)
     }
   }
@@ -32,32 +35,53 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
 #' @importFrom methods new
 annoy_nn <- function(X, k = 10, include_self = TRUE,
                      n_trees = 50, search_k = 2 * k * n_trees,
-                     verbose = getOption("verbose", TRUE)) {
+                     n_threads = RcppParallel::defaultNumThreads() / 2,
+                     grain_size = 1000,
+                     verbose = FALSE) {
   nr <- nrow(X)
   nc <- ncol(X)
   ann <- methods::new(RcppAnnoy::AnnoyEuclidean, nc)
 
-  progress <- Progress$new(max = 2 * nrow(X), display = verbose)
+  tsmessage("Building index")
+  progress <- Progress$new(max = nr, display = verbose)
 
-  for (i in 1:nrow(X)) {
+  for (i in 1:nr) {
     ann$addItem(i - 1, X[i, ])
     progress$increment()
   }
 
   ann$build(n_trees)
+  index_file = tempfile()
+  ann$save(index_file)
 
   if (!include_self) {
     k <- k + 1
   }
 
-  idx <- matrix(nrow = nr, ncol = k)
-  dist <- matrix(nrow = nr, ncol = k)
+  RcppParallel::setThreadOptions(numThreads = n_threads)
+  if (n_threads > 1) {
+    tsmessage("Searching index with ", n_threads, " threads")
+    res <- annoy_euclidean_nns(index_file,
+                               X,
+                               k, search_k,
+                               grain_size = grain_size,
+                               verbose = verbose)
+    idx <- res$item
+    dist <- res$distance
 
-  for (i in 1:nrow(X)) {
-    res <- ann$getNNsByItemList(i - 1, k, search_k, TRUE)
-    idx[i, ] <- res$item
-    dist[i, ] <- res$distance
-    progress$increment()
+    unlink(index_file)
+  }
+  else {
+    tsmessage("Searching index")
+    search_progress <- Progress$new(max = nr, display = verbose)
+    idx <- matrix(nrow = nr, ncol = k)
+    dist <- matrix(nrow = nr, ncol = k)
+    for (i in 1:nr) {
+      res <- ann$getNNsByItemList(i - 1, k, search_k, TRUE)
+      idx[i, ] <- res$item
+      dist[i, ] <- res$distance
+      search_progress$increment()
+    }
   }
 
   if (!include_self) {
