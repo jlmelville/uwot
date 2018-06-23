@@ -23,8 +23,7 @@ carried out. Set `n_threads = 1` to use the previous non-threaded search.
 
 I can't tell you how many times I blew up my R Session while writing this. I
 think I've got it working now, but consider this highly experimental. The rest
-of `uwot` remains single-threaded. The timings mentioned in the "Performance"
-section are yet to be updated.
+of `uwot` remains single-threaded.
 
 ## Installing
 
@@ -95,12 +94,17 @@ minutes to get through this via reticulate for reasons I haven't looked into).
 The difference in performance of the Python UMAP and `uwot` is due to:
 
 * nearest neighbor search: takes 40 seconds in Python which also has the
-experimental parallel support in Numba turned on, vs just over 2 minutes in
-`uwot`. This part is the performance bottleneck at the moment. The Python
-version of UMAP uses [kgraph](https://github.com/aaalgo/kgraph), rather than
-Annoy, so that's an obvious change to make, or to fiddle with the Annoy
-defaults, or to try something like [HNSW](https://github.com/nmslib/hnsw).
-* the optimization stage, which takes 60 seconds in Python (no parallel option
+experimental parallel support in Numba turned on, versus just over 2 minutes in
+`uwot`. Using 4 threads for the index search part reduces this to 1 minute.
+This part is the performance bottleneck at the moment. The Python
+version of UMAP uses [pynndescent](https://github.com/lmcinnes/pynndescent),
+a nearest neighbor descent approach, rather than Annoy. Alternative nearest
+neighbors libraries e.g. [kgraph](https://github.com/aaalgo/kgraph) (which is
+based on the same paper as pynndescent), or 
+[HNSW](https://github.com/nmslib/hnsw) would be interesting to try, but all of
+the ones I've looked at either don't currently build on Windows or have
+non-portable compilation flags, so will require some fiddling with.
+* the optimization stage: takes 60 seconds in Python (no parallel option
 here), versus about 66 seconds in `uwot`. I think the difference here is due to
 the `pow` operations in the gradient. Comparing with a modified version of the
 Python UMAP to use the t-UMAP gradient (see the "Other Methods" section below), 
