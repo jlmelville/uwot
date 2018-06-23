@@ -100,6 +100,13 @@
 #' @param approx_pow If \code{TRUE}, use an approximation to the power function
 #'   in the UMAP gradient, from
 #'   \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.
+#' @param n_threads Number of threads to use during the nearest neighbor search.
+#'   Default is half of \code{\link[RcppParallel]{defaultNumThreads}}. Only
+#'   applies if \code{nn_method = "annoy"}.
+#' @param grain_size Minimum batch size for multithreading. If the number of
+#'   items to process in a thread falls below this number, then no threads will
+#'   be used. Used in conjunction with \code{n_threads}. Only applies during
+#'   the nearest neighbor search and if \code{nn_method = "annoy"}.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates.
 #' @examples
@@ -139,6 +146,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
                  approx_pow = FALSE,
+                 n_threads = RcppParallel::defaultNumThreads() / 2,
+                 grain_size = 1000,
                  verbose = getOption("verbose", TRUE)) {
   uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
        n_epochs = n_epochs, alpha = alpha, init = init, spread = spread,
@@ -147,7 +156,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
        gamma = gamma, negative_sample_rate = negative_sample_rate,
        a = a, b = b, nn_method = nn_method, n_trees = n_trees,
        search_k = search_k, method = "umap", approx_pow = approx_pow,
-       verbose = verbose)
+       n_threads = n_threads, grain_size = grain_size, verbose = verbose)
 }
 
 #' Dimensionality Reduction Using T-Distributed UMAP (t-UMAP)
@@ -237,6 +246,13 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the ANNOY nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
+#' @param n_threads Number of threads to use during the nearest neighbor search.
+#'   Default is half of \code{\link[RcppParallel]{defaultNumThreads}}. Only
+#'   applies if \code{nn_method = "annoy"}.
+#' @param grain_size Minimum batch size for multithreading. If the number of
+#'   items to process in a thread falls below this number, then no threads will
+#'   be used. Used in conjunction with \code{n_threads}. Only applies during
+#'   the nearest neighbor search and if \code{nn_method = "annoy"}.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates.
 #' @export
@@ -247,6 +263,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
+                  n_threads = RcppParallel::defaultNumThreads() / 2,
+                  grain_size = 1000,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
        n_epochs = n_epochs, alpha = alpha, init = init, spread = NULL,
@@ -254,7 +272,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
        local_connectivity = local_connectivity, bandwidth = bandwidth,
        gamma = gamma, negative_sample_rate = negative_sample_rate,
        a = NULL, b = NULL, nn_method = nn_method, n_trees = n_trees,
-       search_k = search_k, method = "tumap", verbose = verbose)
+       search_k = search_k, method = "tumap",
+       n_threads = n_threads, grain_size = grain_size,
+       verbose = verbose)
 }
 
 #' Dimensionality Reduction with a LargeVis-like method
@@ -266,7 +286,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #' following:
 #'
 #' \itemize{
-#'   \item It is single threaded.
+#'   \item Only the nearest-neighbor index search phase is multi-threaded.
 #'   \item Matrix input data is not normalized.
 #'   \item The \code{n_trees} parameter cannot be dynamically chosen based on
 #'   data set size.
@@ -344,6 +364,13 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the ANNOY nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
+#' @param n_threads Number of threads to use during the nearest neighbor search.
+#'   Default is half of \code{\link[RcppParallel]{defaultNumThreads}}. Only
+#'   applies if \code{nn_method = "annoy"}.
+#' @param grain_size Minimum batch size for multithreading. If the number of
+#'   items to process in a thread falls below this number, then no threads will
+#'   be used. Used in conjunction with \code{n_threads}. Only applies during
+#'   the nearest neighbor search and if \code{nn_method = "annoy"}.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates.
 #' @references
@@ -356,18 +383,20 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #'
 #' @export
 lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
-                     n_components = 2, n_epochs = 5000,
-                     alpha = 1, init = "lvrandom", gamma = 7,
-                     negative_sample_rate = 5.0,
-                     nn_method = NULL, n_trees = 50,
-                     search_k = 2 * n_neighbors * n_trees,
-                     verbose = getOption("verbose", TRUE)) {
+                  n_components = 2, n_epochs = 5000,
+                  alpha = 1, init = "lvrandom", gamma = 7,
+                  negative_sample_rate = 5.0,
+                  nn_method = NULL, n_trees = 50,
+                  search_k = 2 * n_neighbors * n_trees,
+                  n_threads = RcppParallel::defaultNumThreads() / 2,
+                  grain_size = 1000,
+                  verbose = getOption("verbose", TRUE)) {
   uwot(X, n_neighbors = n_neighbors, n_components = n_components,
        n_epochs = n_epochs, alpha = alpha, init = init, gamma = gamma,
        negative_sample_rate = negative_sample_rate,
        nn_method = nn_method, n_trees = n_trees, search_k = search_k,
-       method = "largevis", perplexity = perplexity,
-       verbose = verbose)
+       method = "largevis", perplexity = perplexity, n_threads = n_threads,
+       grain_size = grain_size, verbose = verbose)
 }
 
 # Function that does all the real work
@@ -379,6 +408,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
                  method = "umap", perplexity = 50, approx_pow = FALSE,
+                 n_threads = RcppParallel::defaultNumThreads() / 2,
+                 grain_size = 1000,
                  verbose = getOption("verbose", TRUE)) {
 
   if (method == "umap" && (is.null(a) || is.null(b))) {
@@ -452,12 +483,23 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
       stop("perplexity can be no larger than ", n_vertices - 1)
     }
 
-    V <- perplexity_similarities(X, n_neighbors, perplexity,
-                                 nn_method, n_trees, search_k, verbose)
+    V <- perplexity_similarities(X, n_neighbors,
+                                 perplexity = perplexity,
+                                 nn_method = nn_method,
+                                 n_trees = n_trees,
+                                 search_k  = search_k,
+                                 n_threads = n_threads,
+                                 grain_size = grain_size,
+                                 verbose = verbose)
   }
   else {
-    V <- fuzzy_simplicial_set(X, n_neighbors, set_op_mix_ratio, local_connectivity,
-                            bandwidth, nn_method, n_trees, search_k, verbose)
+    V <- fuzzy_simplicial_set(X, n_neighbors,
+                              set_op_mix_ratio = set_op_mix_ratio,
+                              local_connectivity = local_connectivity,
+                              bandwidth = bandwidth, nn_method = nn_method,
+                              n_trees = n_trees, search_k = search_k,
+                              n_threads = n_threads, grain_size = grain_size,
+                              verbose = verbose)
   }
 
   if (methods::is(init, "matrix")) {
