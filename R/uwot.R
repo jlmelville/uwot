@@ -91,11 +91,11 @@
 #' @param n_trees Number of trees to build when constructing the nearest
 #'   neighbor index. The more trees specified, the larger the index, but the
 #'   better the results. With \code{search_k}, determines the accuracy of the
-#'   ANNOY nearest neighbor search. Only used if the \code{nn_method} is
+#'   Annoy nearest neighbor search. Only used if the \code{nn_method} is
 #'   \code{"annoy"}. Sensible values are between \code{10} to \code{100}.
 #' @param search_k Number of nodes to search during the neighbor retrieval. The
 #'   larger k, the more the accurate results, but the longer the search takes.
-#'   With \code{n_trees}, determines the accuracy of the ANNOY nearest neighbor
+#'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
 #' @param approx_pow If \code{TRUE}, use an approximation to the power function
 #'   in the UMAP gradient, from
@@ -240,11 +240,11 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #' @param n_trees Number of trees to build when constructing the nearest
 #'   neighbor index. The more trees specified, the larger the index, but the
 #'   better the results. With \code{search_k}, determines the accuracy of the
-#'   ANNOY nearest neighbor search. Only used if the \code{nn_method} is
+#'   Annoy nearest neighbor search. Only used if the \code{nn_method} is
 #'   \code{"annoy"}. Sensible values are between \code{10} to \code{100}.
 #' @param search_k Number of nodes to search during the neighbor retrieval. The
 #'   larger k, the more the accurate results, but the longer the search takes.
-#'   With \code{n_trees}, determines the accuracy of the ANNOY nearest neighbor
+#'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
 #' @param n_threads Number of threads to use during the nearest neighbor search.
 #'   Default is half of \code{\link[RcppParallel]{defaultNumThreads}}. Only
@@ -358,11 +358,11 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #' @param n_trees Number of trees to build when constructing the nearest
 #'   neighbor index. The more trees specified, the larger the index, but the
 #'   better the results. With \code{search_k}, determines the accuracy of the
-#'   ANNOY nearest neighbor search. Only used if the \code{nn_method} is
+#'   Annoy nearest neighbor search. Only used if the \code{nn_method} is
 #'   \code{"annoy"}. Sensible values are between \code{10} to \code{100}.
 #' @param search_k Number of nodes to search during the neighbor retrieval. The
 #'   larger k, the more the accurate results, but the longer the search takes.
-#'   With \code{n_trees}, determines the accuracy of the ANNOY nearest neighbor
+#'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
 #' @param n_threads Number of threads to use during the nearest neighbor search.
 #'   Default is half of \code{\link[RcppParallel]{defaultNumThreads}}. Only
@@ -472,7 +472,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
       nn_method = "fnn"
     }
     else {
-      tsmessage("Using ANNOY for neighbor search, n_neighbors = ", n_neighbors)
+      tsmessage("Using Annoy for neighbor search, n_neighbors = ", n_neighbors)
       nn_method = "annoy"
     }
   }

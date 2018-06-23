@@ -115,12 +115,12 @@ neighbors are found. Otherwise, approximate nearest neighbors are used.}
 \item{n_trees}{Number of trees to build when constructing the nearest
 neighbor index. The more trees specified, the larger the index, but the
 better the results. With \code{search_k}, determines the accuracy of the
-ANNOY nearest neighbor search. Only used if the \code{nn_method} is
+Annoy nearest neighbor search. Only used if the \code{nn_method} is
 \code{"annoy"}. Sensible values are between \code{10} to \code{100}.}
 
 \item{search_k}{Number of nodes to search during the neighbor retrieval. The
 larger k, the more the accurate results, but the longer the search takes.
-With \code{n_trees}, determines the accuracy of the ANNOY nearest neighbor
+With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 search. Only used if the \code{nn_method} is \code{"annoy"}.}
 
 \item{approx_pow}{If \code{TRUE}, use an approximation to the power function
