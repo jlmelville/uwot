@@ -5,7 +5,7 @@
 \title{Dimensionality Reduction with a LargeVis-like method}
 \usage{
 lvish(X, perplexity = 50, n_neighbors = perplexity * 3, n_components = 2,
-  n_epochs = 5000, alpha = 1, init = "lvrandom", gamma = 7,
+  n_epochs = -1, alpha = 1, init = "lvrandom", gamma = 7,
   negative_sample_rate = 5, nn_method = NULL, n_trees = 50, search_k = 2
   * n_neighbors * n_trees, n_threads = RcppParallel::defaultNumThreads()/2,
   grain_size = 1000, verbose = getOption("verbose", TRUE))
@@ -32,7 +32,10 @@ to \code{2} to provide easy visualization, but can reasonably be set to any
 integer value in the range \code{2} to \code{100}.}
 
 \item{n_epochs}{Number of epochs to use during the optimization of the
-embedded coordinates.}
+embedded coordinates. The default is calculate the number of epochs
+dynamically based on dataset size, to give the same number of edge samples
+as the LargeVis defaults. This is usually substantially larger than the
+UMAP defaults.}
 
 \item{alpha}{Initial learning rate used in optimization of the coordinates.}
 
@@ -122,6 +125,17 @@ following:
   epochs, \code{n_epochs}, is set to \code{5000}, much larger than for
   \code{\link{umap}}, but may need to be increased further depending on your
   dataset. Using \code{init = "spectral"} can help.
+}
+}
+\examples{
+\dontrun{
+# Use perplexity rather than n_neighbors to control the size of the local
+neighborhood iris_lvish <- umap(iris, perplexity = 50, alpha = 0.5,
+                                init = "random")
+
+# Default number of epochs is much larger than for UMAP, assumes random
+initialization # If using a more global initialization, can use fewer epochs
+iris_lvish_short <- umap(iris, perpelxity = 50, n_epochs = 1000)
 }
 }
 \references{

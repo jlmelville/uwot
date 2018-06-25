@@ -113,6 +113,9 @@
 #' \dontrun{
 #' iris_umap <- umap(iris, n_neighbors = 50, alpha = 0.5, init = "random")
 #'
+#' # Faster approximation to the gradient
+#' iris_umap <- umap(iris, n_neighbors = 15, approx_pow = TRUE)
+#'
 #' # Load mnist from somewhere, e.g.
 #' # devtools::install_github("jlmelville/snedata")
 #' # mnist <- snedata::download_mnist()
@@ -319,7 +322,10 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #'   to \code{2} to provide easy visualization, but can reasonably be set to any
 #'   integer value in the range \code{2} to \code{100}.
 #' @param n_epochs Number of epochs to use during the optimization of the
-#'   embedded coordinates.
+#'   embedded coordinates. The default is calculate the number of epochs
+#'   dynamically based on dataset size, to give the same number of edge samples
+#'   as the LargeVis defaults. This is usually substantially larger than the
+#'   UMAP defaults.
 #' @param alpha Initial learning rate used in optimization of the coordinates.
 #' @param init Type of initialization for the coordinates. Options are:
 #'   \itemize{
@@ -380,10 +386,19 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #' (pp. 287-297).
 #' International World Wide Web Conferences Steering Committee.
 #' \url{https://arxiv.org/abs/1602.00370}
+#' @examples
+#' \dontrun{
+#' # Use perplexity rather than n_neighbors to control the size of the local
+#' neighborhood iris_lvish <- umap(iris, perplexity = 50, alpha = 0.5,
+#'                                 init = "random")
 #'
+#' # Default number of epochs is much larger than for UMAP, assumes random
+#' initialization # If using a more global initialization, can use fewer epochs
+#' iris_lvish_short <- umap(iris, perpelxity = 50, n_epochs = 1000)
+#' }
 #' @export
 lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
-                  n_components = 2, n_epochs = 5000,
+                  n_components = 2, n_epochs = -1,
                   alpha = 1, init = "lvrandom", gamma = 7,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
@@ -482,7 +497,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     if (perplexity >= n_vertices) {
       stop("perplexity can be no larger than ", n_vertices - 1)
     }
-
     V <- perplexity_similarities(X, n_neighbors,
                                  perplexity = perplexity,
                                  nn_method = nn_method,
@@ -522,12 +536,18 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     )
   }
 
+
   if (is.null(n_epochs) || n_epochs <= 0) {
-    if (n_vertices <= 10000) {
-      n_epochs <- 500
+    if (method == "largevis") {
+      n_epochs <- lvish_epochs(n_vertices, V)
     }
     else {
-      n_epochs <- 200
+      if (n_vertices <= 10000) {
+        n_epochs <- 500
+      }
+      else {
+        n_epochs <- 200
+      }
     }
   }
 
@@ -609,6 +629,30 @@ find_ab_params <- function(spread = 1, min_dist = 0.001) {
          " min_dist = ", min_dist)
   }
   result
+}
+
+# The default number of edge samples used by LargeVis
+lvish_samples <- function(n_vertices) {
+  n_samples <- 0
+
+  if (n_vertices < 10000) {
+    n_samples <- 1000
+  }
+  else if (n_vertices < 1000000) {
+    n_samples <- (n_vertices - 10000) * 9000 / (1000000 - 10000) + 1000
+  }
+  else {
+    n_samples <- n_vertices / 100
+  }
+
+  round(n_samples * 1000000)
+}
+
+# Returns the number of epochs required to generate the default number of edge samples
+# used in LargeVis
+lvish_epochs <- function(n_vertices, V) {
+  n_samples <- lvish_samples(n_vertices)
+  round(n_samples * max(V) / sum(V))
 }
 
 #' @useDynLib uwot
