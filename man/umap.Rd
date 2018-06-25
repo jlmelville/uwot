@@ -151,6 +151,9 @@ implementation at \url{https://github.com/lmcinnes/umap}.
 \dontrun{
 iris_umap <- umap(iris, n_neighbors = 50, alpha = 0.5, init = "random")
 
+# Faster approximation to the gradient
+iris_umap <- umap(iris, n_neighbors = 15, approx_pow = TRUE)
+
 # Load mnist from somewhere, e.g.
 # devtools::install_github("jlmelville/snedata")
 # mnist <- snedata::download_mnist()
