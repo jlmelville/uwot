@@ -133,11 +133,14 @@ up the optimization loop). However, it's certainly fast enough for my needs.
 
 ## Limitations
 
-* Only Euclidean distances are supported for finding nearest neighbors from data frame
-and dense matrix input. But if you can calculate a distance matrix for your data, you
-can pass it in as `dist` object. For larger distance matrices, you can pass in a 
-`sparseMatrix` (from the [Matrix](https://cran.r-project.org/package=Matrix) package).
-Neither approach is supremely efficient at the moment.
+* Only Euclidean distances are supported for finding nearest neighbors from data
+frame and dense matrix input. But if you can calculate a distance matrix for
+your data, you can pass it in as `dist` object. For larger distance matrices,
+you can pass in a `sparseMatrix` (from the
+[Matrix](https://cran.r-project.org/package=Matrix) package). Neither approach
+is supremely efficient at the moment. Proper sparse matrix support is limited
+by the nearest neighbor search routine: Annoy is intended for dense vectors.
+Adding a library for sparse nearest neighbor search would be a good extension. 
 * The code is mostly single-threaded, with the exception of the Annoy-based 
 nearest neighbor index search, which works similarly to LargeVis. 
 * I haven't tried this on anything much larger than MNIST and Fashion MNIST (so
