@@ -44,17 +44,26 @@ double rdist(const arma::mat& mat,
 }
 
 // Three-component combined Tausworthe "taus88" PRNG from L'Ecuyer 1996.
-unsigned long tau_rand_int(long long* state) {
+class tau_prng {
+  long long state0;
+  long long state1;
+  long long state2;
+public:
+  tau_prng(long long state0, long long state1, long long state2)
+  : state0(state0), state1(state1), state2(state2) {}
 
-  state[0] = (((state[0] & 4294967294LL) << 12) & 0xffffffff) ^
-    ((((state[0] << 13) & 0xffffffff) ^ state[0]) >> 19);
-  state[1] = (((state[1] & 4294967288LL) << 4) & 0xffffffff) ^
-    ((((state[1] << 2) & 0xffffffff) ^ state[1]) >> 25);
-  state[2] = (((state[2] & 4294967280LL) << 17) & 0xffffffff) ^
-    ((((state[2] << 3) & 0xffffffff) ^ state[2]) >> 11);
+  unsigned long operator()(int n) {
+    state0 = (((state0 & 4294967294LL) << 12) & 0xffffffff) ^
+      ((((state0 << 13) & 0xffffffff) ^ state0) >> 19);
+    state1 = (((state1 & 4294967288LL) << 4) & 0xffffffff) ^
+      ((((state1 << 2) & 0xffffffff) ^ state1) >> 25);
+    state2 = (((state2 & 4294967280LL) << 17) & 0xffffffff) ^
+      ((((state2 << 3) & 0xffffffff) ^ state2) >> 11);
 
-  return state[0] ^ state[1] ^ state[2];
-}
+    return (state0 ^ state1 ^ state2) % n;
+  }
+};
+
 
 template<typename T>
 void optimize_layout(const T& gradient,
@@ -91,7 +100,7 @@ void optimize_layout(const T& gradient,
   long s1 = gen(rng);
   long s2 = gen(rng);
   long s3 = gen(rng);
-  long long state[3] = {s1, s2, s3};
+  tau_prng prng(s1, s2, s3);
 
   for (auto n = 0; n < n_epochs; n++) {
     for (arma::uword i = 0; i < n_epochs_per_sample; i++) {
@@ -114,8 +123,7 @@ void optimize_layout(const T& gradient,
                                 epochs_per_negative_sample[i]);
 
         for (unsigned int p = 0; p < n_neg_samples; p++) {
-          arma::uword k = tau_rand_int(state) % n_vertices;
-
+          arma::uword k = prng(n_vertices);
           if (j == k) {
             continue;
           }
