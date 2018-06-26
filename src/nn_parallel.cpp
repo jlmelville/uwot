@@ -19,7 +19,7 @@ struct NNWorker : public RcppParallel::Worker {
   std::string index_name;
   RcppParallel::RMatrix<double> mat;
   RcppParallel::RMatrix<double> dists;
-  RcppParallel::RMatrix<double> idx;
+  RcppParallel::RMatrix<int> idx;
   size_t ncol;
   size_t n;
   size_t search_k;
@@ -28,9 +28,9 @@ struct NNWorker : public RcppParallel::Worker {
 
   NNWorker(
     const std::string& index_name,
-    const Rcpp::NumericMatrix mat,
+    const Rcpp::NumericMatrix& mat,
     Rcpp::NumericMatrix dists,
-    Rcpp::NumericMatrix idx,
+    Rcpp::IntegerMatrix idx,
     size_t ncol,
     size_t n,
     size_t search_k,
@@ -70,14 +70,14 @@ struct NNWorker : public RcppParallel::Worker {
 
 // [[Rcpp::export]]
 Rcpp::List annoy_euclidean_nns(const std::string& index_name,
-                          Rcpp::NumericMatrix mat,
+                          const Rcpp::NumericMatrix& mat,
                           size_t n, size_t search_k,
                           std::size_t grain_size = 1000,
                           bool verbose = false) {
   size_t nrow = mat.rows();
   size_t ncol = mat.cols();
   Rcpp::NumericMatrix dist(nrow, n);
-  Rcpp::NumericMatrix idx(nrow, n);
+  Rcpp::IntegerMatrix idx(nrow, n);
 
   Progress progress(nrow, verbose);
 

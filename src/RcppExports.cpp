@@ -7,13 +7,13 @@
 using namespace Rcpp;
 
 // annoy_euclidean_nns
-Rcpp::List annoy_euclidean_nns(const std::string& index_name, Rcpp::NumericMatrix mat, size_t n, size_t search_k, std::size_t grain_size, bool verbose);
+Rcpp::List annoy_euclidean_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, size_t n, size_t search_k, std::size_t grain_size, bool verbose);
 RcppExport SEXP _uwot_annoy_euclidean_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
     Rcpp::traits::input_parameter< size_t >::type n(nSEXP);
     Rcpp::traits::input_parameter< size_t >::type search_k(search_kSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
