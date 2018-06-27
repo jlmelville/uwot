@@ -52,7 +52,7 @@ public:
   tau_prng(long long state0, long long state1, long long state2)
   : state0(state0), state1(state1), state2(state2) {}
 
-  unsigned long operator()(int n) {
+  unsigned long operator()() {
     state0 = (((state0 & 4294967294LL) << 12) & 0xffffffff) ^
       ((((state0 << 13) & 0xffffffff) ^ state0) >> 19);
     state1 = (((state1 & 4294967288LL) << 4) & 0xffffffff) ^
@@ -60,7 +60,7 @@ public:
     state2 = (((state2 & 4294967280LL) << 17) & 0xffffffff) ^
       ((((state2 << 3) & 0xffffffff) ^ state2) >> 11);
 
-    return (state0 ^ state1 ^ state2) % n;
+    return state0 ^ state1 ^ state2;
   }
 };
 
@@ -123,7 +123,7 @@ void optimize_layout(const T& gradient,
                                 epochs_per_negative_sample[i]);
 
         for (unsigned int p = 0; p < n_neg_samples; p++) {
-          arma::uword k = prng(n_vertices);
+          arma::uword k = prng() % n_vertices;
           if (j == k) {
             continue;
           }
