@@ -6,24 +6,7 @@ method for dimensionality reduction (McInnes and Healy, 2018).
 
 ## Status
 
-`uwot` is now slightly multi-threaded. Thanks to 
-[RcppAnnoy](https://github.com/eddelbuettel/rcppannoy) and 
-[RcppParallel](https://github.com/RcppCore/RcppParallel), the slowest part of 
-the code, the [Annoy](https://github.com/spotify/annoy)-based
-nearest neighbor index search, follows the strategy of 
-[LargeVis](https://github.com/lferry007/LargeVis): after index building, the
-index is written to disk, each thread then creates its own index by reading
-that file and each chunk of data in the thread uses that index.
-
-You can (and should) adjust the number of threads via the `n_threads` parameter;
-for now, the default is half of whatever RcppParallel thinks should be the
-default. I have also exposed the `grain_size` parameter. If a thread would
-process less than `grain_size` number of items, then no multithreading is
-carried out. Set `n_threads = 1` to use the previous non-threaded search.
-
-I can't tell you how many times I blew up my R Session while writing this. I
-think I've got it working now, but consider this highly experimental. The rest
-of `uwot` remains single-threaded.
+Under development. Probably working, at least in non-threaded mode.
 
 ## Installing
 
@@ -47,6 +30,27 @@ iris_umap <- umap(iris, n_neighbors = 50, alpha = 0.5, init = "random")
 mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
 ```
 
+## What's New
+
+June 27: `uwot` is now slightly more multi-threaded: [RcppParallel](https://github.com/RcppCore/RcppParallel)
+is used for both the nearest neighbor search and the optimization stage,
+which represent the two biggest bottlenecks. That leaves the perplexity/smooth
+knn stage single-threaded, but it's not that slow compared to the other stages.
+
+You can (and should) adjust the number of threads via the `n_threads` parameter;
+for now, the default is half of whatever RcppParallel thinks should be the
+default. I have also exposed the `grain_size` parameter. If a thread would
+process less than `grain_size` number of items, then no multithreading is
+carried out. Set `n_threads = 0` to use the previous non-threaded search; 
+with `n_threads = 1`, you get the new multi-threaded code but with only one thread.
+
+I can't tell you how many times I blew up my R session while writing this. It's
+working for me at the moment, but there's no way there aren't problems waiting
+to be unleashed during an R garbage collection event or the like. Do not run the
+multi-threaded code without saving all your data first. The timing comparison
+below will be updated once I'm more convinced the multi-threading is being a
+good citizen.
+
 ## Implementation Details
 
 For small (N < 4096), exact nearest neighbors are found using the 
@@ -63,8 +67,7 @@ optimization routines are written in C++ (using
 [Rcpp](https://cran.r-project.org/package=Rcpp) and 
 [RcppArmadillo](https://cran.r-project.org/package=RcppArmadillo)), aping
 the Python code as closely as possible. It is my first time using Rcpp, so 
-let's assume I did a horrible job (as we shall see when we look at performance
-numbers versus Python).
+let's assume I did a horrible job.
 
 For the datasets I've tried it with, the results look at least
 reminiscent of those obtained using the 
@@ -81,7 +84,8 @@ The right hand image is the result of using `uwot`.
 
 ## Performance
 
-On my not-particularly-beefy laptop `uwot` took around 3 and a half minutes. 
+On my not-particularly-beefy laptop `uwot` took around 3 and a half minutes to process
+MNIST. 
 For comparison, the default settings of the R package for
 [Barnes-Hut t-SNE](https://cran.r-project.org/package=Rtsne) took 21 minutes, and the
 [largeVis](https://github.com/elbamos/largeVis) package took 56 minutes. The
@@ -141,8 +145,6 @@ you can pass in a `sparseMatrix` (from the
 is supremely efficient at the moment. Proper sparse matrix support is limited
 by the nearest neighbor search routine: Annoy is intended for dense vectors.
 Adding a library for sparse nearest neighbor search would be a good extension. 
-* The code is mostly single-threaded, with the exception of the Annoy-based 
-nearest neighbor index search, which works similarly to LargeVis. 
 * I haven't tried this on anything much larger than MNIST and Fashion MNIST (so
 at least around 100,000 rows with 500-1,000 columns works fine).
 
@@ -186,7 +188,8 @@ Although `lvish` is like the real LargeVis in terms of the input weights, output
 weight function and gradient, and so should give results that resemble the real
 thing, it differs in the following ways:
 
-* Only the nearest-neighor search is multi-threaded.
+* Although the nearest-neighor search and optimization routines are multi-threaded, 
+but the perplexity calculations are not (for now).
 * Matrix input data is not normalized. You can carry out the LargeVis normalization
 yourself by doing:
 ```R
@@ -212,8 +215,9 @@ default `perplexity = 50`, the nearest neighbor search needs to find 150 nearest
 neighbors per data point, an order of magnitude larger than the UMAP defaults.
 This leads to a less sparse input graph and hence more edges to sample. Combined
 with the increased number of epochs, expect `lvish` to be slower than `umap` 
-(with default settings, it took about 16 minutes to embed the MNIST data under
-the same circumstances as described in the "Performance" section).
+(with default single-threaded settings, it took about 16 minutes to embed the
+MNIST data under the same circumstances as described in the "Performance"
+section).
 
 ## License
 
