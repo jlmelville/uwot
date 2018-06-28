@@ -127,14 +127,14 @@ search. Only used if the \code{nn_method} is \code{"annoy"}.}
 in the UMAP gradient, from
 \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.}
 
-\item{n_threads}{Number of threads to use during the nearest neighbor search.
-Default is half of \code{\link[RcppParallel]{defaultNumThreads}}. Only
-applies if \code{nn_method = "annoy"}.}
+\item{n_threads}{Number of threads to use during nearest neighbor search and
+optimization. Default is half of
+\code{\link[RcppParallel]{defaultNumThreads}}. For nearest neighbor search,
+only applies if \code{nn_method = "annoy"}.}
 
 \item{grain_size}{Minimum batch size for multithreading. If the number of
 items to process in a thread falls below this number, then no threads will
-be used. Used in conjunction with \code{n_threads}. Only applies during
-the nearest neighbor search and if \code{nn_method = "annoy"}.}
+be used. Used in conjunction with \code{n_threads}.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }
