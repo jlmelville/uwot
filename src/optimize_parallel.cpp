@@ -157,6 +157,9 @@ struct SgdWorker : public RcppParallel::Worker {
 
 };
 
+// Method specific function have their data passed by copy, so should be ok
+// to use const reference for read-only data without using RcppParallel
+// wrappers even in threads?
 template<typename T>
 arma::mat optimize_layout_parallel(const T& gradient,
                               arma::mat& embedding,
@@ -200,12 +203,16 @@ arma::mat optimize_layout_parallel(const T& gradient,
   return embedding;
 }
 
+// Reasoning that may come back to haunt me:
+// positive_head, positive_tail and epochs_per_sample are read from multiple
+// threads: naively, I am hoping that passing by copy as arma vecs should
+// prevent R garbage collection from moving this data or causing other issues
 // [[Rcpp::export]]
 arma::mat optimize_layout_umap_parallel(arma::mat embedding,
-                          const arma::uvec& positive_head,
-                          const arma::uvec& positive_tail,
+                          const arma::uvec positive_head,
+                          const arma::uvec positive_tail,
                           unsigned int n_epochs, unsigned int n_vertices,
-                          const arma::vec& epochs_per_sample,
+                          const arma::vec epochs_per_sample,
                           double a, double b,
                           double gamma, double initial_alpha,
                           double negative_sample_rate,
@@ -229,10 +236,10 @@ arma::mat optimize_layout_umap_parallel(arma::mat embedding,
 
 // [[Rcpp::export]]
 arma::mat optimize_layout_tumap_parallel(arma::mat embedding,
-                           const arma::uvec& positive_head,
-                           const arma::uvec& positive_tail,
+                           const arma::uvec positive_head,
+                           const arma::uvec positive_tail,
                            unsigned int n_epochs, unsigned int n_vertices,
-                           const arma::vec& epochs_per_sample,
+                           const arma::vec epochs_per_sample,
                            double initial_alpha,
                            double negative_sample_rate,
                            unsigned int seed,
@@ -246,10 +253,10 @@ arma::mat optimize_layout_tumap_parallel(arma::mat embedding,
 
 // [[Rcpp::export]]
 arma::mat optimize_layout_largevis_parallel(arma::mat embedding,
-                              const arma::uvec& positive_head,
-                              const arma::uvec& positive_tail,
+                              const arma::uvec positive_head,
+                              const arma::uvec positive_tail,
                               unsigned int n_epochs, unsigned int n_vertices,
-                              const arma::vec& epochs_per_sample,
+                              const arma::vec epochs_per_sample,
                               double gamma, double initial_alpha,
                               double negative_sample_rate,
                               unsigned int seed,
