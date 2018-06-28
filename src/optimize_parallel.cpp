@@ -167,7 +167,8 @@ void optimize_layout_parallel(const T& gradient,
                               double initial_alpha,
                               double negative_sample_rate,
                               unsigned int seed,
-                              bool verbose) {
+                              std::size_t grain_size = 1000,
+                              bool verbose = false) {
   Progress progress(n_epochs, verbose);
 
   const auto n_epochs_per_sample = epochs_per_sample.size();
@@ -185,7 +186,7 @@ void optimize_layout_parallel(const T& gradient,
     worker.set_alpha(alpha);
     worker.set_n(n);
 
-    RcppParallel::parallelFor(0, n_epochs_per_sample, worker);
+    RcppParallel::parallelFor(0, n_epochs_per_sample, worker, grain_size);
 
     alpha = initial_alpha * (1.0 - (double(n) / double(n_epochs)));
 
@@ -209,18 +210,19 @@ void optimize_layout_umap_parallel(arma::mat& embedding,
                           double negative_sample_rate,
                           unsigned int seed,
                           bool approx_pow,
-                          bool verbose) {
+                          std::size_t grain_size = 1000,
+                          bool verbose = false) {
   if (approx_pow) {
     const apumap_gradient gradient(a, b, gamma);
     optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
                              n_vertices, epochs_per_sample, initial_alpha,
-                             negative_sample_rate, seed, verbose);
+                             negative_sample_rate, seed, grain_size, verbose);
   }
   else {
     const umap_gradient gradient(a, b, gamma);
     optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
                              n_vertices, epochs_per_sample, initial_alpha,
-                             negative_sample_rate, seed, verbose);
+                             negative_sample_rate, seed, grain_size, verbose);
   }
 }
 
@@ -233,11 +235,12 @@ void optimize_layout_tumap_parallel(arma::mat& embedding,
                            double initial_alpha,
                            double negative_sample_rate,
                            unsigned int seed,
-                           bool verbose) {
+                           std::size_t grain_size = 1000,
+                           bool verbose = false) {
   const tumap_gradient gradient;
   optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
                   n_vertices, epochs_per_sample, initial_alpha,
-                  negative_sample_rate, seed, verbose);
+                  negative_sample_rate, seed, grain_size, verbose);
 }
 
 // [[Rcpp::export]]
@@ -249,9 +252,10 @@ void optimize_layout_largevis_parallel(arma::mat& embedding,
                               double gamma, double initial_alpha,
                               double negative_sample_rate,
                               unsigned int seed,
-                              bool verbose) {
+                              std::size_t grain_size = 1000,
+                              bool verbose = false) {
   const largevis_gradient gradient(gamma);
   optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
                   n_vertices, epochs_per_sample, initial_alpha,
-                  negative_sample_rate, seed, verbose);
+                  negative_sample_rate, seed, grain_size, verbose);
 }

@@ -573,6 +573,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                          initial_alpha = alpha, negative_sample_rate,
                          seed = get_seed(),
                          approx_pow = approx_pow,
+                         grain_size = grain_size,
                          verbose = verbose)
     }
     else if (method == "tumap") {
@@ -584,6 +585,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                             initial_alpha = alpha,
                             negative_sample_rate = negative_sample_rate,
                             seed = get_seed(),
+                            grain_size = grain_size,
                             verbose = verbose)
     }
     else {
@@ -596,6 +598,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                                         initial_alpha = alpha,
                                         negative_sample_rate = negative_sample_rate,
                                         seed = get_seed(),
+                                        grain_size = grain_size,
                                         verbose = verbose)
     }
   }
