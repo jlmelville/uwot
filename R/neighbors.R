@@ -42,7 +42,7 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
   nc <- ncol(X)
   ann <- methods::new(RcppAnnoy::AnnoyEuclidean, nc)
 
-  tsmessage("Building index")
+  tsmessage("Building Annoy index")
   progress <- Progress$new(max = nr, display = verbose)
 
   for (i in 1:nr) {
@@ -58,9 +58,9 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
     k <- k + 1
   }
 
-  RcppParallel::setThreadOptions(numThreads = n_threads)
-  if (n_threads > 1) {
-    tsmessage("Searching index with ", n_threads, " threads")
+  if (n_threads > 0) {
+    RcppParallel::setThreadOptions(numThreads = n_threads)
+    tsmessage("Searching Annoy index with ", n_threads, " thread", ifelse(n_threads > 1, "s", ""))
     res <- annoy_euclidean_nns(index_file,
                                X,
                                k, search_k,
@@ -72,7 +72,7 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
     unlink(index_file)
   }
   else {
-    tsmessage("Searching index")
+    tsmessage("Searching Annoy index")
     search_progress <- Progress$new(max = nr, display = verbose)
     idx <- matrix(nrow = nr, ncol = k)
     dist <- matrix(nrow = nr, ncol = k)
