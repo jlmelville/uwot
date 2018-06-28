@@ -426,7 +426,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  n_threads = RcppParallel::defaultNumThreads() / 2,
                  grain_size = 1000,
                  verbose = getOption("verbose", TRUE)) {
-
   if (method == "umap" && (is.null(a) || is.null(b))) {
     ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
     a <- ab_res[1]
@@ -558,11 +557,13 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   positive_head <- V@i
   positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
 
-  tsmessage("Commencing optimization using ", n_epochs, " epochs")
-
   # NB: optimize functions are C++ and modify embedding directly.
-  if (tolower(method) == "umap") {
-    optimize_layout_umap(embedding = embedding,
+  if (n_threads >= 1) {
+    tsmessage("Commencing optimization for ", n_epochs, " epochs, using ", n_threads, " thread",
+              ifelse(n_threads > 1, "s", ""))
+    RcppParallel::setThreadOptions(numThreads = n_threads)
+    if (tolower(method) == "umap") {
+      optimize_layout_umap_parallel(embedding = embedding,
                          positive_head = positive_head,
                          positive_tail = positive_tail,
                          n_epochs = n_epochs,
@@ -573,30 +574,71 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                          seed = get_seed(),
                          approx_pow = approx_pow,
                          verbose = verbose)
-  }
-  else if (method == "tumap") {
-    optimize_layout_tumap(embedding,
-                          positive_head = positive_head,
-                          positive_tail = positive_tail,
-                          n_epochs = n_epochs,
-                          n_vertices, epochs_per_sample,
-                          initial_alpha = alpha,
-                          negative_sample_rate = negative_sample_rate,
-                          seed = get_seed(),
-                          verbose = verbose)
+    }
+    else if (method == "tumap") {
+      optimize_layout_tumap_parallel(embedding,
+                            positive_head = positive_head,
+                            positive_tail = positive_tail,
+                            n_epochs = n_epochs,
+                            n_vertices, epochs_per_sample,
+                            initial_alpha = alpha,
+                            negative_sample_rate = negative_sample_rate,
+                            seed = get_seed(),
+                            verbose = verbose)
+    }
+    else {
+      optimize_layout_largevis_parallel(embedding,
+                                        positive_head = positive_head,
+                                        positive_tail = positive_tail,
+                                        n_epochs = n_epochs,
+                                        n_vertices, epochs_per_sample,
+                                        gamma = gamma,
+                                        initial_alpha = alpha,
+                                        negative_sample_rate = negative_sample_rate,
+                                        seed = get_seed(),
+                                        verbose = verbose)
+    }
   }
   else {
-    optimize_layout_largevis(embedding,
-                          positive_head = positive_head,
-                          positive_tail = positive_tail,
-                          n_epochs = n_epochs,
-                          n_vertices, epochs_per_sample,
-                          gamma = gamma,
-                          initial_alpha = alpha,
-                          negative_sample_rate = negative_sample_rate,
-                          seed = get_seed(),
-                          verbose = verbose)
+    tsmessage("Commencing optimization for ", n_epochs, " epochs")
+    if (tolower(method) == "umap") {
+      optimize_layout_umap(embedding = embedding,
+                           positive_head = positive_head,
+                           positive_tail = positive_tail,
+                           n_epochs = n_epochs,
+                           n_vertices = n_vertices,
+                           epochs_per_sample = epochs_per_sample,
+                           a = a, b = b, gamma = gamma,
+                           initial_alpha = alpha, negative_sample_rate,
+                           seed = get_seed(),
+                           approx_pow = approx_pow,
+                           verbose = verbose)
+    }
+    else if (method == "tumap") {
+      optimize_layout_tumap(embedding,
+                            positive_head = positive_head,
+                            positive_tail = positive_tail,
+                            n_epochs = n_epochs,
+                            n_vertices, epochs_per_sample,
+                            initial_alpha = alpha,
+                            negative_sample_rate = negative_sample_rate,
+                            seed = get_seed(),
+                            verbose = verbose)
+    }
+    else {
+      optimize_layout_largevis(embedding,
+                               positive_head = positive_head,
+                               positive_tail = positive_tail,
+                               n_epochs = n_epochs,
+                               n_vertices, epochs_per_sample,
+                               gamma = gamma,
+                               initial_alpha = alpha,
+                               negative_sample_rate = negative_sample_rate,
+                               seed = get_seed(),
+                               verbose = verbose)
+    }
   }
+
   tsmessage("Optimization finished")
   embedding
 }

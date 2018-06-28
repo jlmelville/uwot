@@ -17,6 +17,18 @@ optimize_layout_largevis <- function(embedding, positive_head, positive_tail, n_
     invisible(.Call('_uwot_optimize_layout_largevis', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, verbose))
 }
 
+optimize_layout_umap_parallel <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, verbose) {
+    invisible(.Call('_uwot_optimize_layout_umap_parallel', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, verbose))
+}
+
+optimize_layout_tumap_parallel <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, verbose) {
+    invisible(.Call('_uwot_optimize_layout_tumap_parallel', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, verbose))
+}
+
+optimize_layout_largevis_parallel <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, verbose) {
+    invisible(.Call('_uwot_optimize_layout_largevis_parallel', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, verbose))
+}
+
 calc_row_probabilities_cpp <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, verbose = FALSE) {
     .Call('_uwot_calc_row_probabilities_cpp', PACKAGE = 'uwot', nn_dist, nn_idx, perplexity, n_iter, tol, verbose)
 }
