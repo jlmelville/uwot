@@ -158,7 +158,7 @@ struct SgdWorker : public RcppParallel::Worker {
 };
 
 template<typename T>
-void optimize_layout_parallel(const T& gradient,
+arma::mat optimize_layout_parallel(const T& gradient,
                               arma::mat& embedding,
                               const arma::uvec& positive_head,
                               const arma::uvec& positive_tail,
@@ -191,16 +191,17 @@ void optimize_layout_parallel(const T& gradient,
     alpha = initial_alpha * (1.0 - (double(n) / double(n_epochs)));
 
     if (Progress::check_abort()) {
-      return;
+      return embedding;
     }
     if (verbose) {
       progress.increment();
     }
   }
+  return embedding;
 }
 
 // [[Rcpp::export]]
-void optimize_layout_umap_parallel(arma::mat& embedding,
+arma::mat optimize_layout_umap_parallel(arma::mat embedding,
                           const arma::uvec& positive_head,
                           const arma::uvec& positive_tail,
                           int n_epochs, unsigned int n_vertices,
@@ -214,20 +215,20 @@ void optimize_layout_umap_parallel(arma::mat& embedding,
                           bool verbose = false) {
   if (approx_pow) {
     const apumap_gradient gradient(a, b, gamma);
-    optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
+    return optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
                              n_vertices, epochs_per_sample, initial_alpha,
                              negative_sample_rate, seed, grain_size, verbose);
   }
   else {
     const umap_gradient gradient(a, b, gamma);
-    optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
+    return optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
                              n_vertices, epochs_per_sample, initial_alpha,
                              negative_sample_rate, seed, grain_size, verbose);
   }
 }
 
 // [[Rcpp::export]]
-void optimize_layout_tumap_parallel(arma::mat& embedding,
+arma::mat optimize_layout_tumap_parallel(arma::mat embedding,
                            const arma::uvec& positive_head,
                            const arma::uvec& positive_tail,
                            int n_epochs, unsigned int n_vertices,
@@ -238,13 +239,13 @@ void optimize_layout_tumap_parallel(arma::mat& embedding,
                            std::size_t grain_size = 1000,
                            bool verbose = false) {
   const tumap_gradient gradient;
-  optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
+  return optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
                   n_vertices, epochs_per_sample, initial_alpha,
                   negative_sample_rate, seed, grain_size, verbose);
 }
 
 // [[Rcpp::export]]
-void optimize_layout_largevis_parallel(arma::mat& embedding,
+arma::mat optimize_layout_largevis_parallel(arma::mat embedding,
                               const arma::uvec& positive_head,
                               const arma::uvec& positive_tail,
                               int n_epochs, unsigned int n_vertices,
@@ -255,7 +256,7 @@ void optimize_layout_largevis_parallel(arma::mat& embedding,
                               std::size_t grain_size = 1000,
                               bool verbose = false) {
   const largevis_gradient gradient(gamma);
-  optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
+  return optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
                   n_vertices, epochs_per_sample, initial_alpha,
                   negative_sample_rate, seed, grain_size, verbose);
 }

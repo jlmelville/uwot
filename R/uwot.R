@@ -557,13 +557,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   positive_head <- V@i
   positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
 
-  # NB: optimize functions are C++ and modify embedding directly.
   if (n_threads >= 1) {
     tsmessage("Commencing optimization for ", n_epochs, " epochs, using ", n_threads, " thread",
               ifelse(n_threads > 1, "s", ""))
     RcppParallel::setThreadOptions(numThreads = n_threads)
     if (tolower(method) == "umap") {
-      optimize_layout_umap_parallel(embedding = embedding,
+      embedding <- optimize_layout_umap_parallel(embedding = embedding,
                          positive_head = positive_head,
                          positive_tail = positive_tail,
                          n_epochs = n_epochs,
@@ -577,7 +576,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                          verbose = verbose)
     }
     else if (method == "tumap") {
-      optimize_layout_tumap_parallel(embedding,
+      embedding <- optimize_layout_tumap_parallel(embedding,
                             positive_head = positive_head,
                             positive_tail = positive_tail,
                             n_epochs = n_epochs,
@@ -589,7 +588,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                             verbose = verbose)
     }
     else {
-      optimize_layout_largevis_parallel(embedding,
+      embedding <- optimize_layout_largevis_parallel(embedding,
                                         positive_head = positive_head,
                                         positive_tail = positive_tail,
                                         n_epochs = n_epochs,
@@ -605,7 +604,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   else {
     tsmessage("Commencing optimization for ", n_epochs, " epochs")
     if (tolower(method) == "umap") {
-      optimize_layout_umap(embedding = embedding,
+      embedding <- optimize_layout_umap(embedding = embedding,
                            positive_head = positive_head,
                            positive_tail = positive_tail,
                            n_epochs = n_epochs,
@@ -618,7 +617,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                            verbose = verbose)
     }
     else if (method == "tumap") {
-      optimize_layout_tumap(embedding,
+      embedding <- optimize_layout_tumap(embedding,
                             positive_head = positive_head,
                             positive_tail = positive_tail,
                             n_epochs = n_epochs,
@@ -629,7 +628,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                             verbose = verbose)
     }
     else {
-      optimize_layout_largevis(embedding,
+      embedding <- optimize_layout_largevis(embedding,
                                positive_head = positive_head,
                                positive_tail = positive_tail,
                                n_epochs = n_epochs,

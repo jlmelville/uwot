@@ -47,7 +47,7 @@ double rdist(const arma::mat& mat,
 
 
 template<typename T>
-void optimize_layout(const T& gradient,
+arma::mat optimize_layout(const T& gradient,
                      arma::mat& embedding,
                      const arma::uvec& positive_head,
                      const arma::uvec& positive_tail,
@@ -126,7 +126,7 @@ void optimize_layout(const T& gradient,
       }
     }
     if (Progress::check_abort()) {
-      return;
+      return embedding;
     }
 
     alpha = initial_alpha * (1.0 - (double(n) / double(n_epochs)));
@@ -134,10 +134,11 @@ void optimize_layout(const T& gradient,
       progress.increment();
     }
   } // next epoch
+  return embedding;
 }
 
 // [[Rcpp::export]]
-void optimize_layout_umap(arma::mat& embedding,
+arma::mat optimize_layout_umap(arma::mat embedding,
                           const arma::uvec& positive_head,
                           const arma::uvec& positive_tail,
                           int n_epochs, unsigned int n_vertices,
@@ -150,13 +151,13 @@ void optimize_layout_umap(arma::mat& embedding,
                           bool verbose) {
   if (approx_pow) {
     const apumap_gradient gradient(a, b, gamma);
-    optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
+    return optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
                     n_vertices, epochs_per_sample, initial_alpha,
                     negative_sample_rate, seed, verbose);
   }
   else {
     const umap_gradient gradient(a, b, gamma);
-    optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
+    return optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
                     n_vertices, epochs_per_sample, initial_alpha,
                     negative_sample_rate, seed, verbose);
   }
@@ -164,7 +165,7 @@ void optimize_layout_umap(arma::mat& embedding,
 }
 
 // [[Rcpp::export]]
-void optimize_layout_tumap(arma::mat& embedding,
+arma::mat optimize_layout_tumap(arma::mat embedding,
                            const arma::uvec& positive_head,
                            const arma::uvec& positive_tail,
                            int n_epochs, unsigned int n_vertices,
@@ -174,14 +175,14 @@ void optimize_layout_tumap(arma::mat& embedding,
                            unsigned int seed,
                            bool verbose) {
   const tumap_gradient gradient;
-  optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
+  return optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
                   n_vertices, epochs_per_sample, initial_alpha,
                   negative_sample_rate, seed, verbose);
 }
 
 
 // [[Rcpp::export]]
-void optimize_layout_largevis(arma::mat& embedding,
+arma::mat optimize_layout_largevis(arma::mat embedding,
                           const arma::uvec& positive_head,
                           const arma::uvec& positive_tail,
                           int n_epochs, unsigned int n_vertices,
@@ -191,7 +192,7 @@ void optimize_layout_largevis(arma::mat& embedding,
                           unsigned int seed,
                           bool verbose) {
   const largevis_gradient gradient(gamma);
-  optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
+  return optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
                   n_vertices, epochs_per_sample, initial_alpha,
                   negative_sample_rate, seed, verbose);
 }
