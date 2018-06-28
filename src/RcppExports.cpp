@@ -23,7 +23,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // optimize_layout_umap
-void optimize_layout_umap(arma::mat& embedding, const arma::uvec& positive_head, const arma::uvec& positive_tail, int n_epochs, int n_vertices, const arma::vec& epochs_per_sample, double a, double b, double gamma, double initial_alpha, double negative_sample_rate, unsigned int seed, bool approx_pow, bool verbose);
+void optimize_layout_umap(arma::mat& embedding, const arma::uvec& positive_head, const arma::uvec& positive_tail, int n_epochs, unsigned int n_vertices, const arma::vec& epochs_per_sample, double a, double b, double gamma, double initial_alpha, double negative_sample_rate, unsigned int seed, bool approx_pow, bool verbose);
 RcppExport SEXP _uwot_optimize_layout_umap(SEXP embeddingSEXP, SEXP positive_headSEXP, SEXP positive_tailSEXP, SEXP n_epochsSEXP, SEXP n_verticesSEXP, SEXP epochs_per_sampleSEXP, SEXP aSEXP, SEXP bSEXP, SEXP gammaSEXP, SEXP initial_alphaSEXP, SEXP negative_sample_rateSEXP, SEXP seedSEXP, SEXP approx_powSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -31,7 +31,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::uvec& >::type positive_head(positive_headSEXP);
     Rcpp::traits::input_parameter< const arma::uvec& >::type positive_tail(positive_tailSEXP);
     Rcpp::traits::input_parameter< int >::type n_epochs(n_epochsSEXP);
-    Rcpp::traits::input_parameter< int >::type n_vertices(n_verticesSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type n_vertices(n_verticesSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type epochs_per_sample(epochs_per_sampleSEXP);
     Rcpp::traits::input_parameter< double >::type a(aSEXP);
     Rcpp::traits::input_parameter< double >::type b(bSEXP);
@@ -46,7 +46,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // optimize_layout_tumap
-void optimize_layout_tumap(arma::mat& embedding, const arma::uvec& positive_head, const arma::uvec& positive_tail, int n_epochs, int n_vertices, const arma::vec& epochs_per_sample, double initial_alpha, double negative_sample_rate, unsigned int seed, bool verbose);
+void optimize_layout_tumap(arma::mat& embedding, const arma::uvec& positive_head, const arma::uvec& positive_tail, int n_epochs, unsigned int n_vertices, const arma::vec& epochs_per_sample, double initial_alpha, double negative_sample_rate, unsigned int seed, bool verbose);
 RcppExport SEXP _uwot_optimize_layout_tumap(SEXP embeddingSEXP, SEXP positive_headSEXP, SEXP positive_tailSEXP, SEXP n_epochsSEXP, SEXP n_verticesSEXP, SEXP epochs_per_sampleSEXP, SEXP initial_alphaSEXP, SEXP negative_sample_rateSEXP, SEXP seedSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -54,7 +54,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::uvec& >::type positive_head(positive_headSEXP);
     Rcpp::traits::input_parameter< const arma::uvec& >::type positive_tail(positive_tailSEXP);
     Rcpp::traits::input_parameter< int >::type n_epochs(n_epochsSEXP);
-    Rcpp::traits::input_parameter< int >::type n_vertices(n_verticesSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type n_vertices(n_verticesSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type epochs_per_sample(epochs_per_sampleSEXP);
     Rcpp::traits::input_parameter< double >::type initial_alpha(initial_alphaSEXP);
     Rcpp::traits::input_parameter< double >::type negative_sample_rate(negative_sample_rateSEXP);
@@ -65,7 +65,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // optimize_layout_largevis
-void optimize_layout_largevis(arma::mat& embedding, const arma::uvec& positive_head, const arma::uvec& positive_tail, int n_epochs, int n_vertices, const arma::vec& epochs_per_sample, double gamma, double initial_alpha, double negative_sample_rate, unsigned int seed, bool verbose);
+void optimize_layout_largevis(arma::mat& embedding, const arma::uvec& positive_head, const arma::uvec& positive_tail, int n_epochs, unsigned int n_vertices, const arma::vec& epochs_per_sample, double gamma, double initial_alpha, double negative_sample_rate, unsigned int seed, bool verbose);
 RcppExport SEXP _uwot_optimize_layout_largevis(SEXP embeddingSEXP, SEXP positive_headSEXP, SEXP positive_tailSEXP, SEXP n_epochsSEXP, SEXP n_verticesSEXP, SEXP epochs_per_sampleSEXP, SEXP gammaSEXP, SEXP initial_alphaSEXP, SEXP negative_sample_rateSEXP, SEXP seedSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -73,7 +73,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::uvec& >::type positive_head(positive_headSEXP);
     Rcpp::traits::input_parameter< const arma::uvec& >::type positive_tail(positive_tailSEXP);
     Rcpp::traits::input_parameter< int >::type n_epochs(n_epochsSEXP);
-    Rcpp::traits::input_parameter< int >::type n_vertices(n_verticesSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type n_vertices(n_verticesSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type epochs_per_sample(epochs_per_sampleSEXP);
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< double >::type initial_alpha(initial_alphaSEXP);
