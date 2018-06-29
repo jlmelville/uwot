@@ -84,22 +84,27 @@ The right hand image is the result of using `uwot`.
 
 ## Performance
 
-On my not-particularly-beefy laptop `uwot` took around 3 and a half minutes to process
-MNIST. 
-For comparison, the default settings of the R package for
-[Barnes-Hut t-SNE](https://cran.r-project.org/package=Rtsne) took 21 minutes, and the
-[largeVis](https://github.com/elbamos/largeVis) package took 56 minutes. The
-[official LargeVis implementation](https://github.com/lferry007/LargeVis) took
-10 minutes. 
+To get a feel for the performance of `uwot`, here are some timings for
+processing the MNIST dataset on my not-particularly-beefy laptop, compared with
+some other packages with their default settings:
 
-The Python UMAP implementation (powered by the JIT-magic of
-[Numba](https://numba.pydata.org/)) took just under 2 minutes (it takes 11
-minutes to get through this via reticulate for reasons I haven't looked into).
-The difference in performance of the Python UMAP and `uwot` is due to:
+| Method                                                                    |   Time       |
+|---------------------------------------------------------------------------|--------------|
+| `uwot(n_threads = 1)`                                                     | 3.5 minutes  |
+| [Barnes-Hut t-SNE](https://cran.r-project.org/package=Rtsne)              | 21 minutes   |
+| [largeVis](https://github.com/elbamos/largeVis)                           | 56 minutes   |
+| [official LargeVis implementation](https://github.com/lferry007/LargeVis) | 10 minutes   |
+| [UMAP (Python)](https://github.com/lmcinnes/umap)                         | 2 minutes    |
+| `uwot(n_threads = 4)`                                                     | 2 minutes    |
+| `uwot(n_threads = 1, approx_pow = TRUE)`                                  | 3 minutes    | 
+| `uwot(n_threads = 4, approx_pow = TRUE)`                                  | 1.5 minutes  | 
+
+The difference in performance between the Python UMAP (powered by the JIT-magic of
+[Numba](https://numba.pydata.org/)) and `uwot` with one thread is due to:
 
 * nearest neighbor search: takes 40 seconds in Python which also has the
 experimental parallel support in Numba turned on, versus just over 2 minutes in
-`uwot`. Using 4 threads for the index search part reduces this to 1 minute.
+single-threaded `uwot`. Using 4 threads for the index search part reduces this to 1 minute.
 This part is the performance bottleneck at the moment. The Python
 version of UMAP uses [pynndescent](https://github.com/lmcinnes/pynndescent),
 a nearest neighbor descent approach, rather than Annoy. Alternative nearest
@@ -109,15 +114,10 @@ based on the same paper as pynndescent), or
 the ones I've looked at either don't currently build on Windows or have
 non-portable compilation flags, so will require some fiddling with.
 * the optimization stage: takes 60 seconds in Python (no parallel option
-here), versus about 66 seconds in `uwot`. I think the difference here is due to
-the `pow` operations in the gradient. Comparing with a modified version of the
-Python UMAP to use the t-UMAP gradient (see the "Other Methods" section below), 
-which doesn't use any `pow` operations, `uwot` is now faster: Python t-UMAP
-optimization takes 32 seconds, while `uwot` t-UMAP optimization only takes 18
-seconds.
-
-If you like living dangerously, you can try using the `fastPrecisePow` 
-approximation to the `pow` function suggested by 
+here), versus about 66 seconds with `uwot` with one thread . I think the
+difference here is due to the `pow` operations in the gradient. If you like
+living dangerously, you can try using the `fastPrecisePow` approximation to the
+`pow` function suggested by
 [Martin Ankerl](https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/):
 
 ```R
@@ -128,12 +128,20 @@ mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, approx_pow = TRUE,
 For what I think seem like typical values of `b` (between `0.7` and `0.9`)
 and the squared distance (`0`-`1000`), I found the maximum relative error was 
 about `0.06`. However, I haven't done much testing, beyond looking to see that
-the MNIST results are not obviously worsened. Optimization time was reduced to 
-24 seconds with this method, so it does show a worthwhile improvement if you
-are feeling brave.
+the MNIST results are not obviously worsened. Results in the table above with
+`approx_pow = TRUE` do show a worthwhile improvement.
 
 I would welcome any further suggestions on improvements (particularly speeding
 up the optimization loop). However, it's certainly fast enough for my needs.
+
+## Memory Usage
+
+By the deeply unscientific method of me looking at how much memory the R session
+was taking up according to the Task Manager, processing MNIST with four threads
+saw the memory usage increase by nearly 1 GB at some points. There are some manual
+calls to `gc()` after some stages to avoid holding onto unused memory for longer
+than usual. The larger the value of `n_neighbors`, the more memory you can expect
+to take up (see, for example, the discussion of the `lvish` function below).
 
 ## Limitations
 
@@ -189,7 +197,7 @@ weight function and gradient, and so should give results that resemble the real
 thing, it differs in the following ways:
 
 * Although the nearest-neighor search and optimization routines are multi-threaded, 
-but the perplexity calculations are not (for now).
+the perplexity calculations are not (for now).
 * Matrix input data is not normalized. You can carry out the LargeVis normalization
 yourself by doing:
 ```R
@@ -214,10 +222,12 @@ Because the default number of neighbors is 3 times the `perplexity`, and the
 default `perplexity = 50`, the nearest neighbor search needs to find 150 nearest
 neighbors per data point, an order of magnitude larger than the UMAP defaults.
 This leads to a less sparse input graph and hence more edges to sample. Combined
-with the increased number of epochs, expect `lvish` to be slower than `umap` 
-(with default single-threaded settings, it took about 16 minutes to embed the
+with the increased number of epochs, expect `lvish` to be slower than `umap`:
+with default single-threaded settings, it took about 20 minutes to embed the
 MNIST data under the same circumstances as described in the "Performance"
-section).
+section. With `n_threads = 4`, it took 7 minutes. In addition, storing those
+extra edges requires a lot more memory than the `umap` defaults: my R session
+increased by around 3.2 GB, versus 1 GB for `umap`.
 
 ## License
 
