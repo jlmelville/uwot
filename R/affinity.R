@@ -68,7 +68,7 @@ perplexity_similarities <- function(X, n_neighbors, perplexity,
 
   if (n_threads > 0) {
     tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
-              " k = ", formatC(n_neighbors), " using ", pluralize("threads", n_threads))
+              " k = ", formatC(n_neighbors), " using ", pluralize("thread", n_threads))
     affinity_matrix <- calc_row_probabilities_parallel(nn_dist = nn$dist,
                                                   nn_idx = nn$idx,
                                                   perplexity = perplexity,
