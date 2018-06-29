@@ -3,6 +3,7 @@
 #include <RcppParallel.h>
 // [[Rcpp::depends(RcppProgress)]]
 #include <progress.hpp>
+#include "tthread/fast_mutex.h"
 
 #if defined(__MINGW32__)
 #undef Realloc
@@ -23,14 +24,15 @@ struct NNWorker : public RcppParallel::Worker {
   size_t ncol;
   size_t n;
   size_t search_k;
+
   Progress progress;
-  tthread::mutex mutex;
+  tthread::fast_mutex mutex;
 
   NNWorker(
     const std::string& index_name,
     const Rcpp::NumericMatrix& mat,
-    Rcpp::NumericMatrix dists,
-    Rcpp::IntegerMatrix idx,
+    Rcpp::NumericMatrix& dists,
+    Rcpp::IntegerMatrix& idx,
     size_t ncol,
     size_t n,
     size_t search_k,
@@ -58,7 +60,7 @@ struct NNWorker : public RcppParallel::Worker {
       }
 
       {
-        tthread::lock_guard<tthread::mutex> guard(mutex);
+        tthread::lock_guard<tthread::fast_mutex> guard(mutex);
         progress.increment();
         if (Progress::check_abort()) {
           return;
