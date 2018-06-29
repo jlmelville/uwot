@@ -74,7 +74,7 @@ struct NNWorker : public RcppParallel::Worker {
 Rcpp::List annoy_euclidean_nns(const std::string& index_name,
                           const Rcpp::NumericMatrix& mat,
                           size_t n, size_t search_k,
-                          std::size_t grain_size = 1000,
+                          std::size_t grain_size = 1,
                           bool verbose = false) {
   size_t nrow = mat.rows();
   size_t ncol = mat.cols();

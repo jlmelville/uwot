@@ -8,7 +8,7 @@ lvish(X, perplexity = 50, n_neighbors = perplexity * 3, n_components = 2,
   n_epochs = -1, alpha = 1, init = "lvrandom", gamma = 7,
   negative_sample_rate = 5, nn_method = NULL, n_trees = 50, search_k = 2
   * n_neighbors * n_trees, n_threads = RcppParallel::defaultNumThreads()/2,
-  grain_size = 1000, verbose = getOption("verbose", TRUE))
+  grain_size = 1, verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},

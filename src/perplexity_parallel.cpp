@@ -139,7 +139,7 @@ arma::sp_mat calc_row_probabilities_parallel(const Rcpp::NumericMatrix& nn_dist,
                                         const double perplexity,
                                         const unsigned int n_iter = 200,
                                         const double tol = 1e-5,
-                                        const std::size_t grain_size = 1000,
+                                        const std::size_t grain_size = 1,
                                         const bool verbose = false) {
   const unsigned int n_vertices = nn_dist.nrow();
   Progress progress(n_vertices, verbose);

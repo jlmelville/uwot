@@ -170,7 +170,7 @@ arma::mat optimize_layout_parallel(const T& gradient,
                               double initial_alpha,
                               double negative_sample_rate,
                               unsigned int seed,
-                              std::size_t grain_size = 1000,
+                              std::size_t grain_size = 1,
                               bool verbose = false) {
   Progress progress(n_epochs, verbose);
 
@@ -218,7 +218,7 @@ arma::mat optimize_layout_umap_parallel(arma::mat embedding,
                           double negative_sample_rate,
                           unsigned int seed,
                           bool approx_pow,
-                          std::size_t grain_size = 1000,
+                          std::size_t grain_size = 1,
                           bool verbose = false) {
   if (approx_pow) {
     const apumap_gradient gradient(a, b, gamma);
@@ -243,7 +243,7 @@ arma::mat optimize_layout_tumap_parallel(arma::mat embedding,
                            double initial_alpha,
                            double negative_sample_rate,
                            unsigned int seed,
-                           std::size_t grain_size = 1000,
+                           std::size_t grain_size = 1,
                            bool verbose = false) {
   const tumap_gradient gradient;
   return optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,
@@ -260,7 +260,7 @@ arma::mat optimize_layout_largevis_parallel(arma::mat embedding,
                               double gamma, double initial_alpha,
                               double negative_sample_rate,
                               unsigned int seed,
-                              std::size_t grain_size = 1000,
+                              std::size_t grain_size = 1,
                               bool verbose = false) {
   const largevis_gradient gradient(gamma);
   return optimize_layout_parallel(gradient, embedding, positive_head, positive_tail, n_epochs,

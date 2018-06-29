@@ -1,7 +1,7 @@
 find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                     n_trees = 50, search_k = 2 * k * n_trees,
                     n_threads = RcppParallel::defaultNumThreads() / 2,
-                    grain_size = 1000,
+                    grain_size = 1,
                     verbose = FALSE) {
   if (methods::is(X, "dist")) {
     res <- dist_nn(X, k, include_self = include_self)
@@ -36,7 +36,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
 annoy_nn <- function(X, k = 10, include_self = TRUE,
                      n_trees = 50, search_k = 2 * k * n_trees,
                      n_threads = RcppParallel::defaultNumThreads() / 2,
-                     grain_size = 1000,
+                     grain_size = 1,
                      verbose = FALSE) {
   nr <- nrow(X)
   nc <- ncol(X)

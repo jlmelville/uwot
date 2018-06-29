@@ -8,7 +8,7 @@ tumap(X, n_neighbors = 15, n_components = 2, n_epochs = NULL, alpha = 1,
   init = "spectral", set_op_mix_ratio = 1, local_connectivity = 1,
   bandwidth = 1, gamma = 1, negative_sample_rate = 5, nn_method = NULL,
   n_trees = 50, search_k = 2 * n_neighbors * n_trees,
-  n_threads = RcppParallel::defaultNumThreads()/2, grain_size = 1000,
+  n_threads = RcppParallel::defaultNumThreads()/2, grain_size = 1,
   verbose = getOption("verbose", TRUE))
 }
 \arguments{

@@ -179,7 +179,7 @@ arma::sp_mat smooth_knn_distances_parallel(const Rcpp::NumericMatrix& nn_dist, c
                                            const double bandwidth,
                                            const double tol,
                                            const double min_k_dist_scale,
-                                           const size_t grain_size = 1000,
+                                           const size_t grain_size = 1,
                                            const bool verbose = false) {
   const unsigned int n_vertices = nn_dist.nrow();
   Progress progress(n_vertices, verbose);
