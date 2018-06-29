@@ -56,3 +56,15 @@ res_cpp_conn1.5 <- smooth_knn_distances_cpp(nn_4$dist, nn_4$idx, n_iter = 64, lo
 expect_equal(res_cpp_conn1.5, V_asymm_local, tol = 1e-4)
 
 
+RcppParallel::setThreadOptions(numThreads = 1)
+res_cpp_conn1 <- smooth_knn_distances_parallel(nn_4$dist, nn_4$idx, n_iter = 64, local_connectivity = 1.0,
+                                          bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
+                                          grain_size = 1,
+                                          verbose = FALSE)
+expect_equal(res_cpp_conn1, V_asymm, tol = 1e-4)
+res_cpp_conn1.5 <- smooth_knn_distances_parallel(nn_4$dist, nn_4$idx, n_iter = 64, local_connectivity = 1.5,
+                                            bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, 
+                                            grain_size = 1,
+                                            verbose = FALSE)
+expect_equal(res_cpp_conn1.5, V_asymm_local, tol = 1e-4)
+

@@ -41,3 +41,7 @@ smooth_knn_distances_cpp <- function(nn_dist, nn_idx, n_iter = 64L, local_connec
     .Call('_uwot_smooth_knn_distances_cpp', PACKAGE = 'uwot', nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose)
 }
 
+smooth_knn_distances_parallel <- function(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size = 1000L, verbose = FALSE) {
+    .Call('_uwot_smooth_knn_distances_parallel', PACKAGE = 'uwot', nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size, verbose)
+}
+

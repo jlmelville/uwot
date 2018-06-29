@@ -31,19 +31,34 @@ fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio = 1.0,
   nn <- find_nn(X, n_neighbors, method = nn_method, n_trees = n_trees,
                 n_threads = n_threads, grain_size = grain_size,
                 search_k = search_k, verbose = verbose)
-
   gc()
 
-  tsmessage("Commencing smooth kNN distance calibration for k = ",
-            formatC(n_neighbors))
-  affinity_matrix <- smooth_knn_distances_cpp(nn_dist = nn$dist,
-                                              nn_idx = nn$idx,
-                                              n_iter = 64,
-                                              local_connectivity = local_connectivity,
-                                              bandwidth = bandwidth,
-                                              tol = 1e-5,
-                                              min_k_dist_scale = 1e-3,
-                                              verbose = verbose)
+  if (n_threads > 0) {
+    tsmessage("Commencing smooth kNN distance calibration for k = ",
+              formatC(n_neighbors), " with ", 
+              pluralize("thread", n_threads))
+    affinity_matrix <- smooth_knn_distances_parallel(nn_dist = nn$dist,
+                                                nn_idx = nn$idx,
+                                                n_iter = 64,
+                                                local_connectivity = local_connectivity,
+                                                bandwidth = bandwidth,
+                                                tol = 1e-5,
+                                                min_k_dist_scale = 1e-3,
+                                                grain_size = grain_size,
+                                                verbose = verbose)
+  }
+  else {
+    tsmessage("Commencing smooth kNN distance calibration for k = ",
+              formatC(n_neighbors))
+    affinity_matrix <- smooth_knn_distances_cpp(nn_dist = nn$dist,
+                                                nn_idx = nn$idx,
+                                                n_iter = 64,
+                                                local_connectivity = local_connectivity,
+                                                bandwidth = bandwidth,
+                                                tol = 1e-5,
+                                                min_k_dist_scale = 1e-3,
+                                                verbose = verbose)
+  }
 
   fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio)
 }
