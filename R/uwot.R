@@ -444,6 +444,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     stop("local_connectivity cannot be < 1.0");
   }
 
+  RcppParallel::setThreadOptions(numThreads = n_threads)
+
   if (methods::is(X, "dist")) {
     n_vertices <- attr(X, "Size")
     tsmessage("Read ", n_vertices, " rows")
@@ -561,7 +563,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 
   if (n_threads >= 1) {
     tsmessage("Commencing optimization for ", n_epochs, " epochs, using ", pluralize("thread", n_threads))
-    RcppParallel::setThreadOptions(numThreads = n_threads)
     if (tolower(method) == "umap") {
       embedding <- optimize_layout_umap_parallel(embedding = embedding,
                          positive_head = positive_head,

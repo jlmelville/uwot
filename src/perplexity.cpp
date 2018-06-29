@@ -38,7 +38,6 @@ arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, cons
 
   arma::umat locations(2, n_vertices * n_neighbors);
   arma::vec values(n_vertices * n_neighbors);
-  int nloc = 0;
 
   double d2[n_neighbors - 1];
 
@@ -95,18 +94,19 @@ arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, cons
       d2[k] = W;
     }
 
-    for (unsigned int k = 0; k < n_neighbors; k++) {
+    unsigned int iloc = i * n_neighbors;
+    // iloc is incremented in the loop
+    for (unsigned int k = 0; k < n_neighbors; k++, iloc++) {
       unsigned int j = nn_idx(i, k) - 1;
 
-      locations(0, nloc) = i;
-      locations(1, nloc) = j;
+      locations(0, iloc) = i;
+      locations(1, iloc) = j;
       if (i != j) {
-        values(nloc) = d2[k - 1] / Z;
+        values(iloc) = d2[k - 1] / Z;
       }
       else {
-        values(nloc) = 0.0;
+        values(iloc) = 0.0;
       }
-      nloc++;
     }
 
     if (progress.check_abort()) {

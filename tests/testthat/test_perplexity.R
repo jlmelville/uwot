@@ -62,6 +62,10 @@ expect_equal(as.matrix(res), P_symm_6nn, tol = 1e-5, check.attributes = FALSE)
 res <- calc_row_probabilities_cpp(iris10_nn10$dist, iris10_nn10$idx, perplexity = 4, verbose = FALSE)
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 
+RcppParallel::setThreadOptions(numThreads = 1)
+res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx, perplexity = 4, verbose = FALSE)
+expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
+
 # Taken from LargeVis C++ implementation
 Prow_niris_p150_k50_betas <-
   c(
@@ -109,5 +113,12 @@ Prow_iris_p150_k50_rowSums <- c(
   0.824926,  0.663579,  1.063836,  1.242015,  0.843297,  0.769286,  0.907494,  1.14366,  1.252945,  1.073047,
   1.022525,  0.951965,  0.977462,  0.941184,  1.050544,  1.128182,  1.230836,  0.925821,  1.158545
 )
-res <- perplexity_similarities(normiris, n_neighbors = 149, perplexity = 50, verbose = FALSE)
+
+RcppParallel::setThreadOptions(numThreads = 0)
+res <- perplexity_similarities(normiris, n_neighbors = 149, perplexity = 50, n_threads = 0, verbose = FALSE)
 expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tol = 1e-6)
+
+RcppParallel::setThreadOptions(numThreads = 1)
+res <- perplexity_similarities(normiris, n_neighbors = 149, perplexity = 50, n_threads = 1, verbose = FALSE)
+expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tol = 1e-6)
+

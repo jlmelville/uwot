@@ -66,12 +66,23 @@ perplexity_similarities <- function(X, n_neighbors, perplexity,
 
   gc()
 
-  tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
-            " k = ", formatC(n_neighbors))
-  affinity_matrix <- calc_row_probabilities_cpp(nn_dist = nn$dist,
-                                            nn_idx = nn$idx,
-                                            perplexity = perplexity,
-                                            verbose = verbose)
+  if (n_threads > 0) {
+    tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
+              " k = ", formatC(n_neighbors), " using ", pluralize("threads", n_threads))
+    affinity_matrix <- calc_row_probabilities_parallel(nn_dist = nn$dist,
+                                                  nn_idx = nn$idx,
+                                                  perplexity = perplexity,
+                                                  grain_size = grain_size,
+                                                  verbose = verbose)
+  }
+  else {
+    tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
+              " k = ", formatC(n_neighbors))
+    affinity_matrix <- calc_row_probabilities_cpp(nn_dist = nn$dist,
+                                              nn_idx = nn$idx,
+                                              perplexity = perplexity,
+                                              verbose = verbose)
+  }
   symmetrize(affinity_matrix)
 }
 

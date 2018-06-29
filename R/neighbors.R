@@ -59,7 +59,6 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
   }
 
   if (n_threads > 0) {
-    RcppParallel::setThreadOptions(numThreads = n_threads)
     tsmessage("Searching Annoy index using ", pluralize("thread", n_threads))
     res <- annoy_euclidean_nns(index_file,
                                X,

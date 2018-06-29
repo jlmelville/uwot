@@ -33,6 +33,10 @@ calc_row_probabilities_cpp <- function(nn_dist, nn_idx, perplexity, n_iter = 200
     .Call('_uwot_calc_row_probabilities_cpp', PACKAGE = 'uwot', nn_dist, nn_idx, perplexity, n_iter, tol, verbose)
 }
 
+calc_row_probabilities_parallel <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, grain_size = 1000L, verbose = FALSE) {
+    .Call('_uwot_calc_row_probabilities_parallel', PACKAGE = 'uwot', nn_dist, nn_idx, perplexity, n_iter, tol, grain_size, verbose)
+}
+
 smooth_knn_distances_cpp <- function(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose) {
     .Call('_uwot_smooth_knn_distances_cpp', PACKAGE = 'uwot', nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose)
 }
