@@ -196,16 +196,12 @@ mnist_lv <- lvish(mnist, perplexity = 50, init = "lvrand", n_epochs = 5000,
 
 Although `lvish` is like the real LargeVis in terms of the input weights, output
 weight function and gradient, and so should give results that resemble the real
-thing, it differs in the following ways:
+thing, note that:
 
-* Although the nearest-neighor search and optimization routines are multi-threaded, 
-the perplexity calculations are not (for now).
-* Matrix input data is not normalized. You can carry out the LargeVis normalization
-yourself by doing:
-```R
-data <- scale(data, center = TRUE, scale = FALSE)
-data <- data / max(abs(data))
-```
+* Like the real LargeVis, matrix input data is normalized by centering each column
+and then the entire matrix is scaled by dividing by the maximum absolute value.
+This differs from `umap`, where no scaling is carried out. Scaling can be controlled
+by the `scale` parameter.
 * The `n_trees` parameter is not dynamically chosen based on data set size.
 * Nearest neighbor results are not refined via the neighbor-of-my-neighbor
 method. The `search_k` parameter is twice as large than Annoy's default to
