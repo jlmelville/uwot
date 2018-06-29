@@ -35,7 +35,7 @@ fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio = 1.0,
 
   if (n_threads > 0) {
     tsmessage("Commencing smooth kNN distance calibration for k = ",
-              formatC(n_neighbors), " with ", 
+              formatC(n_neighbors), " using ", 
               pluralize("thread", n_threads))
     affinity_matrix <- smooth_knn_distances_parallel(nn_dist = nn$dist,
                                                 nn_idx = nn$idx,
