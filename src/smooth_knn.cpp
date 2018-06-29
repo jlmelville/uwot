@@ -25,12 +25,12 @@
 
 // [[Rcpp::export]]
 arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx,
-                                      const unsigned int n_iter,
-                                      const double local_connectivity,
-                                      const double bandwidth,
-                                      const double tol,
-                                      const double min_k_dist_scale,
-                                      const bool verbose) {
+                                      const unsigned int n_iter = 64,
+                                      const double local_connectivity = 1.0,
+                                      const double bandwidth = 1.0,
+                                      const double tol = 1e-5,
+                                      const double min_k_dist_scale = 1e-3,
+                                      const bool verbose = false) {
   const unsigned int n_vertices = nn_dist.nrow();
   const unsigned int n_neighbors = nn_dist.ncol();
 
