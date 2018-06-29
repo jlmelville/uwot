@@ -51,18 +51,11 @@ struct PerplexityWorker : public RcppParallel::Worker {
     locations(2, n_vertices * n_neighbors), values(n_vertices * n_neighbors),
     target(log(perplexity)), n_iter(n_iter), tol(tol),
     progress(progress)
-    {
-
-    }
+    {  }
 
   void operator()(std::size_t begin, std::size_t end) {
-
-    // arma::umat locations(2, n_vertices * n_neighbors);
-    // arma::vec values(n_vertices * n_neighbors);
-
     double d2[n_neighbors - 1];
 
-    // Progress progress(n_vertices, verbose);
     // first vertex: guess initial beta as 1.0
     // subsequent vertices, guess the last optimized beta
     double beta = 1.0;
