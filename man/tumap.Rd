@@ -5,11 +5,11 @@
 \title{Dimensionality Reduction Using T-Distributed UMAP (t-UMAP)}
 \usage{
 tumap(X, n_neighbors = 15, n_components = 2, n_epochs = NULL, alpha = 1,
-  init = "spectral", set_op_mix_ratio = 1, local_connectivity = 1,
-  bandwidth = 1, gamma = 1, negative_sample_rate = 5, nn_method = NULL,
-  n_trees = 50, search_k = 2 * n_neighbors * n_trees,
-  n_threads = RcppParallel::defaultNumThreads()/2, grain_size = 1,
-  verbose = getOption("verbose", TRUE))
+  scale = FALSE, init = "spectral", set_op_mix_ratio = 1,
+  local_connectivity = 1, bandwidth = 1, gamma = 1,
+  negative_sample_rate = 5, nn_method = NULL, n_trees = 50, search_k = 2
+  * n_neighbors * n_trees, n_threads = RcppParallel::defaultNumThreads()/2,
+  grain_size = 1, verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -35,6 +35,17 @@ embedded coordinates. By default, this value is set to \code{500} for datasets
 containing 10,000 vertices or less, and \code{200} otherwise.}
 
 \item{alpha}{Initial learning rate used in optimization of the coordinates.}
+
+\item{scale}{Scaling to apply to \code{X} if it is a data frame or matrix:
+\itemize{
+  \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
+  \item{\code{"scale"} or \code{TRUE}} Scale each column to zero mean and variance 1.
+  \item{\code{"maxabs"}} Center each column to mean 0, then divide each element by the
+  maximum absolute value over the entire matrix.
+  \item{\code{"range"}} Range scale the entire matrix, so the smallest element is 0 and
+  the largest is 1.
+}
+For t-UMAP, the default is \code{"none"}.}
 
 \item{init}{Type of initialization for the coordinates. Options are:
 \itemize{

@@ -5,10 +5,11 @@
 \title{Dimensionality Reduction with a LargeVis-like method}
 \usage{
 lvish(X, perplexity = 50, n_neighbors = perplexity * 3, n_components = 2,
-  n_epochs = -1, alpha = 1, init = "lvrandom", gamma = 7,
-  negative_sample_rate = 5, nn_method = NULL, n_trees = 50, search_k = 2
-  * n_neighbors * n_trees, n_threads = RcppParallel::defaultNumThreads()/2,
-  grain_size = 1, verbose = getOption("verbose", TRUE))
+  n_epochs = -1, alpha = 1, scale = "maxabs", init = "lvrandom",
+  gamma = 7, negative_sample_rate = 5, nn_method = NULL, n_trees = 50,
+  search_k = 2 * n_neighbors * n_trees,
+  n_threads = RcppParallel::defaultNumThreads()/2, grain_size = 1,
+  verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -38,6 +39,17 @@ as the LargeVis defaults. This is usually substantially larger than the
 UMAP defaults.}
 
 \item{alpha}{Initial learning rate used in optimization of the coordinates.}
+
+\item{scale}{Scaling to apply to \code{X} if it is a data frame or matrix:
+\itemize{
+  \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
+  \item{\code{"scale"} or \code{TRUE}} Scale each column to zero mean and variance 1.
+  \item{\code{"maxabs"}} Center each column to mean 0, then divide each element by the
+  maximum absolute value over the entire matrix.
+  \item{\code{"range"}} Range scale the entire matrix, so the smallest element is 0 and
+  the largest is 1.
+}
+For lvish, the default is \code{"maxabs"}, for consistency with LargeVis.}
 
 \item{init}{Type of initialization for the coordinates. Options are:
 \itemize{
@@ -133,7 +145,8 @@ neighborhood iris_lvish <- umap(iris, perplexity = 50, alpha = 0.5,
                                 init = "random")
 
 # Default number of epochs is much larger than for UMAP, assumes random
-initialization # If using a more global initialization, can use fewer epochs
+# initialization
+# If using a more global initialization, can use fewer epochs
 iris_lvish_short <- umap(iris, perpelxity = 50, n_epochs = 1000)
 }
 }

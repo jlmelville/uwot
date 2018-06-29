@@ -23,6 +23,16 @@
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. By default, this value is set to \code{500} for datasets
 #'   containing 10,000 vertices or less, and \code{200} otherwise.
+#' @param scale Scaling to apply to \code{X} if it is a data frame or matrix:
+#' \itemize{
+#'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
+#'   \item{\code{"scale"} or \code{TRUE}} Scale each column to zero mean and variance 1.
+#'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each element by the
+#'   maximum absolute value over the entire matrix.
+#'   \item{\code{"range"}} Range scale the entire matrix, so the smallest element is 0 and
+#'   the largest is 1.
+#' }
+#' For UMAP, the default is \code{"none"}.
 #' @param alpha Initial learning rate used in optimization of the coordinates.
 #' @param init Type of initialization for the coordinates. Options are:
 #'   \itemize{
@@ -141,7 +151,7 @@
 #'
 #' @export
 umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
-                 alpha = 1, init = "spectral", spread = 1, min_dist = 0.01,
+                 alpha = 1, scale = FALSE, init = "spectral", spread = 1, min_dist = 0.01,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                  bandwidth = 1.0, gamma = 1.0,
                  negative_sample_rate = 5.0, a = NULL, b = NULL,
@@ -152,7 +162,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  grain_size = 1,
                  verbose = getOption("verbose", TRUE)) {
   uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
-       n_epochs = n_epochs, alpha = alpha, init = init, spread = spread,
+       n_epochs = n_epochs, alpha = alpha, scale = scale, init = init, spread = spread,
        min_dist = min_dist, set_op_mix_ratio = set_op_mix_ratio,
        local_connectivity = local_connectivity, bandwidth = bandwidth,
        gamma = gamma, negative_sample_rate = negative_sample_rate,
@@ -190,6 +200,16 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #'   embedded coordinates. By default, this value is set to \code{500} for datasets
 #'   containing 10,000 vertices or less, and \code{200} otherwise.
 #' @param alpha Initial learning rate used in optimization of the coordinates.
+#' @param scale Scaling to apply to \code{X} if it is a data frame or matrix:
+#' \itemize{
+#'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
+#'   \item{\code{"scale"} or \code{TRUE}} Scale each column to zero mean and variance 1.
+#'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each element by the
+#'   maximum absolute value over the entire matrix.
+#'   \item{\code{"range"}} Range scale the entire matrix, so the smallest element is 0 and
+#'   the largest is 1.
+#' }
+#' For t-UMAP, the default is \code{"none"}.
 #' @param init Type of initialization for the coordinates. Options are:
 #'   \itemize{
 #'     \item \code{"spectral"} Spectral embedding using the normalized Laplacian
@@ -258,7 +278,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #' @return A matrix of optimized coordinates.
 #' @export
 tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
-                  alpha = 1, init = "spectral",
+                  alpha = 1, scale = FALSE, init = "spectral",
                   set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                   bandwidth = 1.0, gamma = 1.0,
                   negative_sample_rate = 5.0,
@@ -268,7 +288,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                   grain_size = 1,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
-       n_epochs = n_epochs, alpha = alpha, init = init, spread = NULL,
+       n_epochs = n_epochs, alpha = alpha, scale = scale, init = init, spread = NULL,
        min_dist = NULL, set_op_mix_ratio = set_op_mix_ratio,
        local_connectivity = local_connectivity, bandwidth = bandwidth,
        gamma = gamma, negative_sample_rate = negative_sample_rate,
@@ -325,6 +345,16 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #'   as the LargeVis defaults. This is usually substantially larger than the
 #'   UMAP defaults.
 #' @param alpha Initial learning rate used in optimization of the coordinates.
+#' @param scale Scaling to apply to \code{X} if it is a data frame or matrix:
+#' \itemize{
+#'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
+#'   \item{\code{"scale"} or \code{TRUE}} Scale each column to zero mean and variance 1.
+#'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each element by the
+#'   maximum absolute value over the entire matrix.
+#'   \item{\code{"range"}} Range scale the entire matrix, so the smallest element is 0 and
+#'   the largest is 1.
+#' }
+#' For lvish, the default is \code{"maxabs"}, for consistency with LargeVis.
 #' @param init Type of initialization for the coordinates. Options are:
 #'   \itemize{
 #'     \item \code{"spectral"} Spectral embedding using the normalized Laplacian
@@ -390,13 +420,14 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #'                                 init = "random")
 #'
 #' # Default number of epochs is much larger than for UMAP, assumes random
-#' initialization # If using a more global initialization, can use fewer epochs
+#' # initialization
+#' # If using a more global initialization, can use fewer epochs
 #' iris_lvish_short <- umap(iris, perpelxity = 50, n_epochs = 1000)
 #' }
 #' @export
 lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   n_components = 2, n_epochs = -1,
-                  alpha = 1, init = "lvrandom", gamma = 7,
+                  alpha = 1, scale = "maxabs", init = "lvrandom", gamma = 7,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
@@ -404,7 +435,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   grain_size = 1,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X, n_neighbors = n_neighbors, n_components = n_components,
-       n_epochs = n_epochs, alpha = alpha, init = init, gamma = gamma,
+       n_epochs = n_epochs, alpha = alpha, scale = scale, init = init, gamma = gamma,
        negative_sample_rate = negative_sample_rate,
        nn_method = nn_method, n_trees = n_trees, search_k = search_k,
        method = "largevis", perplexity = perplexity, n_threads = n_threads,
@@ -413,7 +444,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 
 # Function that does all the real work
 uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
-                 alpha = 1, init = "spectral", spread = 1, min_dist = 0.01,
+                 alpha = 1, scale = FALSE, init = "spectral", spread = 1, min_dist = 0.01,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                  bandwidth = 1.0, gamma = 1.0,
                  negative_sample_rate = 5.0, a = NULL, b = NULL,
@@ -467,6 +498,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     n_vertices <- nrow(X)
     tsmessage("Read ", n_vertices, " rows and found ", ncol(X),
               " numeric columns")
+    X <- scale_input(X, scale_type = scale, verbose = verbose)
   }
 
   if (n_neighbors > n_vertices) {
@@ -699,6 +731,43 @@ lvish_epochs <- function(n_vertices, V) {
   n_samples <- lvish_samples(n_vertices)
   round(n_samples * max(V) / sum(V))
 }
+
+# Scale X according to various strategies
+scale_input <- function(X, scale_type, verbose = FALSE) {
+  if (is.null(scale_type)) {
+    scale_type <- "none"
+  }
+  else if (is.logical(scale_type)) {
+    scale_type <- ifelse(scale_type, "scale", "none")
+  }
+  
+  scale_type <- match.arg(tolower(scale_type), c("none", "scale", "range", "maxabs"))
+  switch(scale_type,
+         range = {
+           tsmessage("Range scaling X")
+           X <- X - min(X)
+           X <- X / max(X)
+         },
+         maxabs = {
+           tsmessage("Normalizing by max-abs")
+           X <- base::scale(X, scale = FALSE)
+           X <- X / max(abs(X))
+         },
+         scale = {
+           tsmessage("Scaling to zero mean and unit variance")
+           non_zero_var_cols <- 
+             apply(X, 2, function(x) { sum((x - sum(x) / length(x)) ^ 2) }) >= .Machine$double.xmin
+           if (length(non_zero_var_cols) == 0) {
+             stop("Matrix has zero variance")
+           }
+           X <- X[, non_zero_var_cols]
+           tsmessage("Kept ", ncol(X), " non-zero-variance columns")
+           X <- base::scale(X, scale = TRUE)
+         }
+  )
+  X
+}
+
 
 #' @useDynLib uwot
 #' @importFrom Rcpp sourceCpp
