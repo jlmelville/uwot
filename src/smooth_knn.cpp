@@ -42,13 +42,16 @@ arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const 
 
   arma::umat locations(2, n_vertices * n_neighbors);
   arma::vec values(n_vertices * n_neighbors);
-  int nloc = 0;
+
 
   Progress progress(n_vertices, verbose);
-  for (unsigned int i = 0; i < n_vertices; i++) {
 
+  // Initial guess for i = 0
+  // On subsequent iterations we shall start from the previous optimized
+  // value: seems to save around 20% on total number of iterations
+  double sigma = 1.0;
+  for (unsigned int i = 0; i < n_vertices; i++) {
     double lo = 0.0;
-    double mid = 1.0;
     double hi = double_max;
 
     Rcpp::NumericVector ith_distances = nn_dist.row(i);
@@ -79,7 +82,7 @@ arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const 
       // Makes using Rcpp sugar sufficiently awkward so do the explicit loop
       for (unsigned int j = 1; j < n_neighbors; j++) {
         double dist = std::max(0.0, ith_distances[j] - rho);
-        val += exp(-dist / mid);
+        val += exp(-dist / sigma);
       }
 
       if (std::abs(val - target) < tol) {
@@ -87,21 +90,19 @@ arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const 
       }
 
       if (val > target) {
-        hi = mid;
-        mid = 0.5 * (lo + hi);
+        hi = sigma;
+        sigma = 0.5 * (lo + hi);
       }
       else {
-        lo = mid;
+        lo = sigma;
         if (hi == double_max) {
-          mid *= 2;
+          sigma *= 2;
         }
         else {
-          mid = 0.5 * (lo + hi);
+          sigma = 0.5 * (lo + hi);
         }
       }
     }
-
-    double sigma = mid;
 
     if (rho > 0.0) {
       sigma = std::max(min_k_dist_scale * mean(ith_distances), sigma);
@@ -113,18 +114,19 @@ arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const 
     Rcpp::NumericVector res = Rcpp::exp(-(ith_distances - rho) / (sigma * bandwidth));
     res[ith_distances - rho <= 0] = 1.0;
 
-    for (unsigned int k = 0; k < n_neighbors; k++) {
+    unsigned int loc = i * n_neighbors;
+    // loc is incremented in the loop
+    for (unsigned int k = 0; k < n_neighbors; k++, loc++) {
       unsigned int j = nn_idx(i, k) - 1;
 
-      locations(0, nloc) = i;
-      locations(1, nloc) = j;
+      locations(0, loc) = i;
+      locations(1, loc) = j;
       if (i != j) {
-        values(nloc) = res(k);
+        values(loc) = res(k);
       }
       else {
-        values(nloc) = 0.0;
+        values(loc) = 0.0;
       }
-      nloc++;
     }
 
     if (progress.check_abort()) {
