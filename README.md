@@ -28,14 +28,18 @@ iris_umap <- umap(iris, n_neighbors = 50, alpha = 0.5, init = "random")
 # devtools::install_github("jlmelville/snedata")
 # mnist <- snedata::download_mnist()
 mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
+
+# Use a specific number of threads
+mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8)
 ```
 
 ## What's New
 
-June 27: `uwot` is now slightly more multi-threaded: [RcppParallel](https://github.com/RcppCore/RcppParallel)
-is used for both the nearest neighbor search and the optimization stage,
-which represent the two biggest bottlenecks. That leaves the perplexity/smooth
-knn stage single-threaded, but it's not that slow compared to the other stages.
+June 29: `uwot` is now multi-threaded in all the obvious places.
+[RcppParallel](https://github.com/RcppCore/RcppParallel) is used for the nearest
+neighbor index search, the smooth knn/perplexity calibration, and the
+optimization, which is the same approach that
+[LargeVis](https://github.com/lferry007/LargeVis) takes.
 
 You can (and should) adjust the number of threads via the `n_threads` parameter;
 for now, the default is half of whatever RcppParallel thinks should be the
@@ -47,9 +51,7 @@ with `n_threads = 1`, you get the new multi-threaded code but with only one thre
 I can't tell you how many times I blew up my R session while writing this. It's
 working for me at the moment, but there's no way there aren't problems waiting
 to be unleashed during an R garbage collection event or the like. Do not run the
-multi-threaded code without saving all your data first. The timing comparison
-below will be updated once I'm more convinced the multi-threading is being a
-good citizen.
+multi-threaded code without saving all your data first.
 
 ## Implementation Details
 
