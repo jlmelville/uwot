@@ -560,8 +560,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
 
   if (n_threads >= 1) {
-    tsmessage("Commencing optimization for ", n_epochs, " epochs, using ", n_threads, " thread",
-              ifelse(n_threads > 1, "s", ""))
+    tsmessage("Commencing optimization for ", n_epochs, " epochs, using ", pluralize("thread", n_threads))
     RcppParallel::setThreadOptions(numThreads = n_threads)
     if (tolower(method) == "umap") {
       embedding <- optimize_layout_umap_parallel(embedding = embedding,

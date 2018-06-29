@@ -26,3 +26,13 @@ summarize <- function(X, msg = "") {
 get_seed <- function() {
   sample.int(.Machine$integer.max, 1)
 }
+
+# pluralize("thread", 1) => "1 thread"
+# pluralize("thread", 2) => "2 threads"
+pluralize <- function(str, n, inc_num = TRUE) {
+  ret <- paste0(str, ifelse(n != 1, "s", ""))
+  if (inc_num) {
+    ret <- paste0(n, " ", ret)
+  }
+  ret
+}
