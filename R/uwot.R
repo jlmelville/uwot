@@ -515,6 +515,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                               verbose = verbose)
   }
 
+  gc()
+
   if (methods::is(init, "matrix")) {
     if (nrow(init) != n_vertices || ncol(init) != n_components) {
       stop("init matrix does not match necessary configuration for X")
@@ -640,7 +642,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                                verbose = verbose)
     }
   }
-
+  gc()
   tsmessage("Optimization finished")
   embedding
 }

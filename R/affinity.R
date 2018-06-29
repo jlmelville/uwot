@@ -31,9 +31,11 @@ fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio = 1.0,
   nn <- find_nn(X, n_neighbors, method = nn_method, n_trees = n_trees,
                 n_threads = n_threads, grain_size = grain_size,
                 search_k = search_k, verbose = verbose)
+
+  gc()
+
   tsmessage("Commencing smooth kNN distance calibration for k = ",
             formatC(n_neighbors))
-
   affinity_matrix <- smooth_knn_distances_cpp(nn_dist = nn$dist,
                                               nn_idx = nn$idx,
                                               n_iter = 64,
@@ -61,9 +63,11 @@ perplexity_similarities <- function(X, n_neighbors, perplexity,
                 search_k = search_k, n_threads = n_threads,
                 grain_size = grain_size,
                 verbose = verbose)
+
+  gc()
+
   tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
             " k = ", formatC(n_neighbors))
-
   affinity_matrix <- calc_row_probabilities_cpp(nn_dist = nn$dist,
                                             nn_idx = nn$idx,
                                             perplexity = perplexity,
