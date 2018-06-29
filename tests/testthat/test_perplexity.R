@@ -114,7 +114,6 @@ Prow_iris_p150_k50_rowSums <- c(
   1.022525,  0.951965,  0.977462,  0.941184,  1.050544,  1.128182,  1.230836,  0.925821,  1.158545
 )
 
-RcppParallel::setThreadOptions(numThreads = 0)
 res <- perplexity_similarities(normiris, n_neighbors = 149, perplexity = 50, n_threads = 0, verbose = FALSE)
 expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tol = 1e-6)
 
