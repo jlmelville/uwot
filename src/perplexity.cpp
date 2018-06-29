@@ -43,10 +43,12 @@ arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, cons
   double d2[n_neighbors - 1];
 
   Progress progress(n_vertices, verbose);
+  // first vertex: guess initial beta as 1.0
+  // subsequent vertices, guess the last optimized beta
+  double beta = 1.0;
   for (unsigned int i = 0; i < n_vertices; i++) {
 
     double lo = 0.0;
-    double mid = 1.0;
     double hi = double_max;
 
     for (unsigned int k = 1; k < n_neighbors; k++) {
@@ -58,12 +60,12 @@ arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, cons
       double H = 0.0;
       double sum_D2_W = 0.0;
       for (unsigned int k = 0; k < n_neighbors - 1; k++) {
-        double W = exp(-d2[k] * mid);
+        double W = exp(-d2[k] * beta);
         Z += W;
         sum_D2_W += d2[k] * W;
       }
       if (Z > 0) {
-        H = log(Z) + mid * sum_D2_W / Z;
+        H = log(Z) + beta * sum_D2_W / Z;
       }
 
       if (std::abs(H - target) < tol) {
@@ -71,21 +73,20 @@ arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, cons
       }
 
       if (H < target) {
-        hi = mid;
-        mid = 0.5 * (lo + hi);
+        hi = beta;
+        beta = 0.5 * (lo + hi);
       }
       else {
-        lo = mid;
+        lo = beta;
         if (hi == double_max) {
-          mid *= 2.0;
+          beta *= 2.0;
         }
         else {
-          mid = 0.5 * (lo + hi);
+          beta = 0.5 * (lo + hi);
         }
       }
     }
 
-    double beta = mid;
     double Z = 0.0;
     for (unsigned int k = 0; k < n_neighbors - 1; k++) {
       double W = exp(-d2[k] * beta);
