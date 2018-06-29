@@ -444,7 +444,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     stop("local_connectivity cannot be < 1.0");
   }
 
-  RcppParallel::setThreadOptions(numThreads = n_threads)
+  if (n_threads > 0) {
+    RcppParallel::setThreadOptions(numThreads = n_threads)
+  }
 
   if (methods::is(X, "dist")) {
     n_vertices <- attr(X, "Size")
