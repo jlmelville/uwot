@@ -216,6 +216,16 @@ time than for `umap`. You may be able to get away with fewer epochs, and using
 the UMAP initialization of `init = "spectral"`, rather than the default Gaussian
 random initialization (`init = "lvrand"`) can help.
 
+The left-hand image below is the result of running the official LargeVis
+implementation on MNIST. The image on the right is that from running `lvish`
+with its default settings (apart from setting `n_threads = 8`). Given they were
+both initialized from different random configurations, there's no reason to
+believe they would be identical, but they look pretty similar:
+
+|                                           |                                     |
+|-------------------------------------------|-------------------------------------|
+| ![mnist-largevis.png](mnist-largevis.png) | ![mnist-lvish.png](mnist-lvish.png) |
+
 Because the default number of neighbors is 3 times the `perplexity`, and the
 default `perplexity = 50`, the nearest neighbor search needs to find 150 nearest
 neighbors per data point, an order of magnitude larger than the UMAP defaults.
