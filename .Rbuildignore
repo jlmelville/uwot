@@ -2,4 +2,5 @@
 ^\.Rproj\.user$
 ^README\.md$
 ^LICENSE$
-^.*\.png$
+^docs$
+^img$
