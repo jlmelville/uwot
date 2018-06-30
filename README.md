@@ -80,9 +80,9 @@ is the result of using the official Python UMAP implementation
 (via the [reticulate](https://cran.r-project.org/package=reticulate) package).
 The right hand image is the result of using `uwot`.
 
-|                                    |                                  |
-|------------------------------------|----------------------------------|
-| ![mnist-py.png](mnist-py.png)      | ![mnist-r.png](mnist-r.png)      |
+|                                   |                                 |
+|-----------------------------------|---------------------------------|
+| ![mnist-py.png](img/mnist-py.png) | ![mnist-r.png](img/mnist-r.png) |
 
 ## Performance
 
@@ -224,9 +224,9 @@ with its default settings (apart from setting `n_threads = 8`). Given they were
 both initialized from different random configurations, there's no reason to
 believe they would be identical, but they look pretty similar:
 
-|                                           |                                     |
-|-------------------------------------------|-------------------------------------|
-| ![mnist-largevis.png](mnist-largevis.png) | ![mnist-lvish.png](mnist-lvish.png) |
+|                                               |                                         |
+|-----------------------------------------------|-----------------------------------------|
+| ![mnist-largevis.png](img/mnist-largevis.png) | ![mnist-lvish.png](img/mnist-lvish.png) |
 
 Because the default number of neighbors is 3 times the `perplexity`, and the
 default `perplexity = 50`, the nearest neighbor search needs to find 150 nearest
