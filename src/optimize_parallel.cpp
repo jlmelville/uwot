@@ -101,7 +101,7 @@ struct SgdWorker : public RcppParallel::Worker {
         const double grad_coeff = gradient.grad_attr(dist_squared);
 
         for (arma::uword d = 0; d < ncol; d++) {
-          double grad_d = clip(grad_coeff * (embedding.at(j, d) - embedding.at(k, d))) * alpha;
+          double grad_d = clip(grad_coeff * (embedding.at(j, d) - embedding.at(k, d)), gradient.clip_max) * alpha;
           embedding.at(j, d) += grad_d;
           embedding.at(k, d) -= grad_d;
         }
@@ -123,7 +123,7 @@ struct SgdWorker : public RcppParallel::Worker {
 
           for (arma::uword d = 0; d < ncol; d++) {
             embedding.at(j, d) +=
-              clip(grad_coeff * (embedding.at(j, d) - embedding.at(k, d))) * alpha;
+              clip(grad_coeff * (embedding.at(j, d) - embedding.at(k, d)), gradient.clip_max) * alpha;
           }
         }
         epoch_of_next_negative_sample[i] += n_neg_samples * epochs_per_negative_sample[i];
@@ -139,8 +139,8 @@ struct SgdWorker : public RcppParallel::Worker {
     this->alpha = alpha;
   }
 
-  double clip(double val) {
-    return std::max(std::min(val, 4.0), -4.0);
+  double clip(double val, double clip_max) {
+    return std::max(std::min(val, clip_max), -clip_max);
   }
 
   double rdist(const arma::mat& mat,

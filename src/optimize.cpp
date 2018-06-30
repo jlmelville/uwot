@@ -26,9 +26,9 @@
 #include "gradient.h"
 #include "tauprng.h"
 
-// Clip a numeric value to within [-4, 4]
-double clip(double val) {
-  return std::max(std::min(val, 4.0), -4.0);
+// Clip a numeric value to within [-clip_max, clip_max]
+double clip(const double val, const double clip_max) {
+  return std::max(std::min(val, clip_max), -clip_max);
 }
 
 // The squared Euclidean distance between rows at indexes a and b
@@ -93,7 +93,7 @@ arma::mat optimize_layout(const T& gradient,
         const double grad_coeff = gradient.grad_attr(dist_squared);
 
         for (arma::uword d = 0; d < ndim; d++) {
-          double grad_d = clip(grad_coeff * (embedding.at(j, d) - embedding.at(k, d))) * alpha;
+          double grad_d = clip(grad_coeff * (embedding.at(j, d) - embedding.at(k, d)), gradient.clip_max) * alpha;
           embedding.at(j, d) += grad_d;
           embedding.at(k, d) -= grad_d;
         }
@@ -119,7 +119,7 @@ arma::mat optimize_layout(const T& gradient,
 
           for (arma::uword d = 0; d < ndim; d++) {
             embedding.at(j, d) +=
-              clip(grad_coeff * (embedding.at(j, d) - embedding.at(k, d))) * alpha;
+              clip(grad_coeff * (embedding.at(j, d) - embedding.at(k, d)), gradient.clip_max) * alpha;
           }
         }
         epoch_of_next_negative_sample[i] += n_neg_samples * epochs_per_negative_sample[i];
@@ -192,6 +192,7 @@ arma::mat optimize_layout_largevis(arma::mat embedding,
                           unsigned int seed,
                           bool verbose) {
   const largevis_gradient gradient(gamma);
+
   return optimize_layout(gradient, embedding, positive_head, positive_tail, n_epochs,
                   n_vertices, epochs_per_sample, initial_alpha,
                   negative_sample_rate, seed, verbose);
