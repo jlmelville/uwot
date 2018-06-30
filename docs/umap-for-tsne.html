@@ -370,13 +370,13 @@ w_{ij} = 1 / \left(1 + ad_{ij}^{2b}\right)
 <h2>Minor UMAP Variations</h2>
 <p>There are some extra parameters in UMAP that make some minor changes if mpdified from their default-values:</p>
 <ul>
-<li><p><code>local_connectivity</code> This affects <code>rho_{i}</code> by using the distance to the <code>local_connectivity</code>th non-zero near neighbor (or by interpolating between distances if <code>local_connectivity</code> is non-integral).</p></li>
-<li><p><code>bandwidth</code> <code>bandwidth</code> affects <span class="math inline">\(v_{j|i}\)</span> by multiplying the value of <code>\sigma_{i}</code>:</p></li>
+<li><p><code>local_connectivity</code> affects <span class="math inline">\(\rho_{i}\)</span> by using the distance to the <code>local_connectivity</code>th non-zero near neighbor (or by interpolating between distances if <code>local_connectivity</code> is non-integral).</p></li>
+<li><p><code>bandwidth</code> affects <span class="math inline">\(v_{j|i}\)</span> by multiplying the value of <span class="math inline">\(\sigma_{i}\)</span>:</p></li>
 </ul>
 <p><span class="math display">\[
 v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \beta \sigma_{i} \right]
 \]</span></p>
-<p>where <code>bandwidth</code> is represented as <span class="math inline">\(\beta\)</span>. The value of <span class="math inline">\(\sigma_{i}\)</span> is determined using calculations of <span class="math inline">\(v_{j|i}\)</span> without <span class="math inline">\(\beta\)</span>, before recalculating the <span class="math inline">\(\v_{j|i}\)</span> using <code>bandwidth</code>.</p>
+<p>where <code>bandwidth</code> is represented as <span class="math inline">\(\beta\)</span>. The value of <span class="math inline">\(\sigma_{i}\)</span> is determined using calculations of <span class="math inline">\(v_{j|i}\)</span> without <span class="math inline">\(\beta\)</span>, before recalculating the <span class="math inline">\(v_{j|i}\)</span> using <code>bandwidth</code>.</p>
 <ul>
 <li><p><code>set_op_mix_ratio</code> This changes the form of the symmetrization from fuzzy set union to fuzzy set intersection which is just <span class="math inline">\(v_{j|i}v_{i|j}\)</span>, and can also blend between the two.</p></li>
 <li><p><code>gamma</code> This works exactly like the value in LargeVis, up-weighting the repulsive contribution of the gradient.</p></li>

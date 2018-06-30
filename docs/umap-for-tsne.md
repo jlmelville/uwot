@@ -316,12 +316,12 @@ There are some extra parameters in UMAP that make some minor changes if mpdified
 from their default-values:
 
 * `local_connectivity`
-This affects `rho_{i}` by using the distance to the `local_connectivity`th
+affects $\rho_{i}$ by using the distance to the `local_connectivity`th
 non-zero near neighbor (or by interpolating between distances if
 `local_connectivity` is non-integral).
 
 * `bandwidth`
-`bandwidth` affects $v_{j|i}$ by multiplying the value of `\sigma_{i}`:
+affects $v_{j|i}$ by multiplying the value of $\sigma_{i}$:
 
 $$
 v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \beta \sigma_{i} \right]
@@ -329,7 +329,7 @@ $$
 
 where `bandwidth` is represented as $\beta$. The value of $\sigma_{i}$
 is determined using calculations of $v_{j|i}$ without $\beta$, before recalculating
-the $\v_{j|i}$ using `bandwidth`.
+the $v_{j|i}$ using `bandwidth`.
 
 * `set_op_mix_ratio`
 This changes the form of the symmetrization from fuzzy set union to fuzzy set
