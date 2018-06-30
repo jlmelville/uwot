@@ -33,6 +33,13 @@ mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
 mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8)
 ```
 
+## Documentation
+
+Apart from the man pages in R, there is a page 
+[describing UMAP](https://jlmelville.github.io/uwot/umap-for-tsne.html) using
+terminology similar to t-SNE, rather than the more topological approach of the
+UMAP publication.
+
 ## What's New
 
 June 29: `uwot` is now multi-threaded in all the obvious places.
