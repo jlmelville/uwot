@@ -9,7 +9,7 @@ lvish(X, perplexity = 50, n_neighbors = perplexity * 3, n_components = 2,
   gamma = 7, negative_sample_rate = 5, nn_method = NULL, n_trees = 50,
   search_k = 2 * n_neighbors * n_trees,
   n_threads = RcppParallel::defaultNumThreads()/2, grain_size = 1,
-  verbose = getOption("verbose", TRUE))
+  kernel = "gauss", verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -107,6 +107,13 @@ only applies if \code{nn_method = "annoy"}.}
 \item{grain_size}{Minimum batch size for multithreading. If the number of
 items to process in a thread falls below this number, then no threads will
 be used. Used in conjunction with \code{n_threads}.}
+
+\item{kernel}{Type of kernel function to create input probabilities. Can be
+one of \code{"gauss"} (the default) or \code{"knn"}. \code{"gauss"} uses
+the usual Gaussian weighted similarities. \code{"knn"} assigns equal
+probabilities to every edge in the nearest neighbor graph, and zero
+otherwise, using \code{perplexity} nearest neighbors. The \code{n_neighbors}
+parameter is ignored in this case.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }

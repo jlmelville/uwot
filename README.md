@@ -227,6 +227,25 @@ section. With `n_threads = 4`, it took 7 minutes. In addition, storing those
 extra edges requires a lot more memory than the `umap` defaults: my R session
 increased by around 3.2 GB, versus 1 GB for `umap`.
 
+As an alternative to the usual Gaussian input weight function, you can use the
+k-nearest neighbor graph itself, by setting `kernel = "knn"`. This will give
+each edge between neighbors a uniform weight equal to 1/`perplexity`, which
+leads to each row's probability distribution having the target `perplexity`.
+This matrix will then be symmetrized in the usual way. The advantage of this is
+that the number of neighbors is reduced to the same as the perplexity (indeed,
+the `n_neighbors` parameter is ignored with this setting), and leads to less
+memory usage and a faster runtime. You can also get away with setting the
+perplexity to a much lower value than usual with this kernel (e.g. `perplexity =
+15`) and get closer to UMAP's performance. If you use the default LargeVis
+random initialization, you will still need more epochs than UMAP, but you can
+still expect to see a big improvement. Something like the following works for
+MNIST:
+
+```R
+mnist_lv <- lvish(mnist, kernel = "knn", perplexity = 15, n_epochs = 1500,
+                  init = "lvrand", verbose = TRUE)
+```
+
 ## License
 
 [GPLv3 or later](https://www.gnu.org/licenses/gpl-3.0.txt).

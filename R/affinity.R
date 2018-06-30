@@ -73,6 +73,7 @@ perplexity_similarities <- function(X, n_neighbors, perplexity,
                                  search_k = 2 * n_neighbors * n_trees,
                                  n_threads = RcppParallel::defaultNumThreads() / 2,
                                  grain_size = 1,
+                                 kernel = "gauss",
                                  verbose = FALSE) {
   nn <- find_nn(X, n_neighbors, method = nn_method, n_trees = n_trees,
                 search_k = search_k, n_threads = n_threads,
@@ -81,24 +82,46 @@ perplexity_similarities <- function(X, n_neighbors, perplexity,
 
   gc()
 
-  if (n_threads > 0) {
-    tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
-              " k = ", formatC(n_neighbors), " using ", pluralize("thread", n_threads))
-    affinity_matrix <- calc_row_probabilities_parallel(nn_dist = nn$dist,
-                                                  nn_idx = nn$idx,
-                                                  perplexity = perplexity,
-                                                  grain_size = grain_size,
-                                                  verbose = verbose)
+  if (kernel == "gauss") {
+    if (n_threads > 0) {
+      tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
+                " k = ", formatC(n_neighbors), " using ", pluralize("thread", n_threads))
+      affinity_matrix <- calc_row_probabilities_parallel(nn_dist = nn$dist,
+                                                    nn_idx = nn$idx,
+                                                    perplexity = perplexity,
+                                                    grain_size = grain_size,
+                                                    verbose = verbose)
+    }
+    else {
+      tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
+                " k = ", formatC(n_neighbors))
+      affinity_matrix <- calc_row_probabilities_cpp(nn_dist = nn$dist,
+                                                nn_idx = nn$idx,
+                                                perplexity = perplexity,
+                                                verbose = verbose)
+    }
   }
-  else {
-    tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
-              " k = ", formatC(n_neighbors))
-    affinity_matrix <- calc_row_probabilities_cpp(nn_dist = nn$dist,
-                                              nn_idx = nn$idx,
-                                              perplexity = perplexity,
-                                              verbose = verbose)
+  else { # "knn"
+    tsmessage("Using knn graph for input weights with k = ", n_neighbors)
+    # Make each row sum to 1, ignoring the self-index, i.e. diagonal will be zero
+    affinity_matrix <- nn_to_sparse(nn$idx, val = 1 / (n_neighbors - 1))
+    Matrix::diag(affinity_matrix) <- 0
+    affinity_matrix <- Matrix::drop0(affinity_matrix)
   }
   symmetrize(affinity_matrix)
+}
+
+# Convert the matrix of NN indices to a sparse asymetric matrix where each
+# edge has a weight of val
+nn_to_sparse <- function(nn_idx, val = 1) {
+  nd <- nrow(nn_idx)
+  k <- ncol(nn_idx)
+
+  xs <- rep(val, nd * k)
+  is <- rep(1:nd, times = k)
+  js <- as.vector(nn_idx)
+  
+  sparseMatrix(i = is, j = js, x = xs)
 }
 
 

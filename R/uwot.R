@@ -404,6 +404,12 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads}.
+#' @param kernel Type of kernel function to create input probabilities. Can be
+#'   one of \code{"gauss"} (the default) or \code{"knn"}. \code{"gauss"} uses
+#'   the usual Gaussian weighted similarities. \code{"knn"} assigns equal
+#'   probabilities to every edge in the nearest neighbor graph, and zero
+#'   otherwise, using \code{perplexity} nearest neighbors. The \code{n_neighbors}
+#'   parameter is ignored in this case.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates.
 #' @references
@@ -433,13 +439,14 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   search_k = 2 * n_neighbors * n_trees,
                   n_threads = RcppParallel::defaultNumThreads() / 2,
                   grain_size = 1,
+                  kernel = "gauss",
                   verbose = getOption("verbose", TRUE)) {
   uwot(X, n_neighbors = n_neighbors, n_components = n_components,
        n_epochs = n_epochs, alpha = alpha, scale = scale, init = init, gamma = gamma,
        negative_sample_rate = negative_sample_rate,
        nn_method = nn_method, n_trees = n_trees, search_k = search_k,
        method = "largevis", perplexity = perplexity, n_threads = n_threads,
-       grain_size = grain_size, verbose = verbose)
+       grain_size = grain_size, kernel = kernel, verbose = verbose)
 }
 
 # Function that does all the real work
@@ -452,6 +459,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  search_k = 2 * n_neighbors * n_trees,
                  method = "umap", perplexity = 50, approx_pow = FALSE,
                  n_threads = RcppParallel::defaultNumThreads() / 2,
+                 kernel = "gauss",
                  grain_size = 1,
                  verbose = getOption("verbose", TRUE)) {
   if (method == "umap" && (is.null(a) || is.null(b))) {
@@ -501,6 +509,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     X <- scale_input(X, scale_type = scale, verbose = verbose)
   }
 
+  if (method == "largevis" && kernel == "knn") {
+    n_neighbors <- perplexity
+  }
+  
   if (n_neighbors > n_vertices) {
     # for LargeVis, n_neighbors normally determined from perplexity
     # not an error to be too large
@@ -536,6 +548,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                                  search_k  = search_k,
                                  n_threads = n_threads,
                                  grain_size = grain_size,
+                                 kernel = kernel,
                                  verbose = verbose)
   }
   else {
