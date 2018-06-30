@@ -6,7 +6,7 @@ method for dimensionality reduction (McInnes and Healy, 2018).
 
 ## Status
 
-Under development. Probably working, at least in non-threaded mode.
+Under development, but it seems to be working.
 
 ## Installing
 
