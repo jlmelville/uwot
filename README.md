@@ -52,8 +52,8 @@ You can (and should) adjust the number of threads via the `n_threads` parameter;
 for now, the default is half of whatever RcppParallel thinks should be the
 default. I have also exposed the `grain_size` parameter. If a thread would
 process less than `grain_size` number of items, then no multithreading is
-carried out. Set `n_threads = 0` to use the previous non-threaded search; 
-with `n_threads = 1`, you get the new multi-threaded code but with only one thread.
+carried out. Set `n_threads = 0` to use the previous non-threaded search; with
+`n_threads = 1`, you get the new multi-threaded code but with only one thread.
 
 I can't tell you how many times I blew up my R session while writing this. It's
 working for me at the moment, but there's no way there aren't problems waiting
@@ -113,8 +113,8 @@ The difference in performance between the Python UMAP (powered by the JIT-magic 
 
 * nearest neighbor search: takes 40 seconds in Python which also has the
 experimental parallel support in Numba turned on, versus just over 2 minutes in
-single-threaded `uwot`. Using 4 threads for the index search part reduces this to 1 minute.
-This part is the performance bottleneck at the moment. The Python
+single-threaded `uwot`. Using 4 threads for the index search part reduces this
+to 1 minute. This part is the performance bottleneck at the moment. The Python
 version of UMAP uses [pynndescent](https://github.com/lmcinnes/pynndescent),
 a nearest neighbor descent approach, rather than Annoy. Alternative nearest
 neighbors libraries e.g. [kgraph](https://github.com/aaalgo/kgraph) (which is
@@ -163,7 +163,9 @@ is supremely efficient at the moment. Proper sparse matrix support is limited
 by the nearest neighbor search routine: Annoy is intended for dense vectors.
 Adding a library for sparse nearest neighbor search would be a good extension. 
 * I haven't tried this on anything much larger than MNIST and Fashion MNIST (so
-at least around 100,000 rows with 500-1,000 columns works fine).
+at least around 100,000 rows with 500-1,000 columns works fine). Bear in mind
+that Annoy itself says it works best with dimensions < 100, but still works
+"surprisingly well" up to 1000.
 
 ## Other Methods
 
