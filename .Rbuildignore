@@ -5,3 +5,4 @@
 ^docs$
 ^img$
 ^\.travis\.yml$
+^appveyor\.yml$
