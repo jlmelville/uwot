@@ -25,7 +25,7 @@ fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio = 1.0,
                                  nn_method = "fnn",
                                  n_trees = 50,
                                  search_k = 2 * n_neighbors * n_trees,
-                                 n_threads = RcppParallel::defaultNumThreads() / 2,
+                                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                                  grain_size = 1,
                                  verbose = FALSE) {
   nn <- find_nn(X, n_neighbors, method = nn_method, n_trees = n_trees,
@@ -35,7 +35,7 @@ fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio = 1.0,
 
   if (n_threads > 0) {
     tsmessage("Commencing smooth kNN distance calibration for k = ",
-              formatC(n_neighbors), " using ", 
+              formatC(n_neighbors), " using ",
               pluralize("thread", n_threads))
     affinity_matrix <- smooth_knn_distances_parallel(nn_dist = nn$dist,
                                                 nn_idx = nn$idx,
@@ -71,7 +71,7 @@ perplexity_similarities <- function(X, n_neighbors, perplexity,
                                  nn_method = "fnn",
                                  n_trees = 50,
                                  search_k = 2 * n_neighbors * n_trees,
-                                 n_threads = RcppParallel::defaultNumThreads() / 2,
+                                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                                  grain_size = 1,
                                  kernel = "gauss",
                                  verbose = FALSE) {
@@ -120,7 +120,7 @@ nn_to_sparse <- function(nn_idx, val = 1) {
   xs <- rep(val, nd * k)
   is <- rep(1:nd, times = k)
   js <- as.vector(nn_idx)
-  
+
   sparseMatrix(i = is, j = js, x = xs)
 }
 

@@ -158,7 +158,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
                  approx_pow = FALSE,
-                 n_threads = RcppParallel::defaultNumThreads() / 2,
+                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  grain_size = 1,
                  verbose = getOption("verbose", TRUE)) {
   uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
@@ -284,7 +284,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
-                  n_threads = RcppParallel::defaultNumThreads() / 2,
+                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                   grain_size = 1,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
@@ -437,7 +437,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
-                  n_threads = RcppParallel::defaultNumThreads() / 2,
+                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                   grain_size = 1,
                   kernel = "gauss",
                   verbose = getOption("verbose", TRUE)) {
@@ -458,7 +458,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
                  method = "umap", perplexity = 50, approx_pow = FALSE,
-                 n_threads = RcppParallel::defaultNumThreads() / 2,
+                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  kernel = "gauss",
                  grain_size = 1,
                  verbose = getOption("verbose", TRUE)) {
@@ -512,7 +512,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   if (method == "largevis" && kernel == "knn") {
     n_neighbors <- perplexity
   }
-  
+
   if (n_neighbors > n_vertices) {
     # for LargeVis, n_neighbors normally determined from perplexity
     # not an error to be too large
@@ -753,7 +753,7 @@ scale_input <- function(X, scale_type, verbose = FALSE) {
   else if (is.logical(scale_type)) {
     scale_type <- ifelse(scale_type, "scale", "none")
   }
-  
+
   scale_type <- match.arg(tolower(scale_type), c("none", "scale", "range", "maxabs"))
   switch(scale_type,
          range = {
@@ -768,7 +768,7 @@ scale_input <- function(X, scale_type, verbose = FALSE) {
          },
          scale = {
            tsmessage("Scaling to zero mean and unit variance")
-           non_zero_var_cols <- 
+           non_zero_var_cols <-
              apply(X, 2, function(x) { sum((x - sum(x) / length(x)) ^ 2) }) >= .Machine$double.xmin
            if (length(non_zero_var_cols) == 0) {
              stop("Matrix has zero variance")
