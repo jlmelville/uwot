@@ -100,9 +100,9 @@ larger k, the more the accurate results, but the longer the search takes.
 With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 search. Only used if the \code{nn_method} is \code{"annoy"}.}
 
-\item{n_threads}{Number of threads to use. Default is half of
-\code{\link[RcppParallel]{defaultNumThreads}}. For nearest neighbor search,
-only applies if \code{nn_method = "annoy"}.}
+\item{n_threads}{Number of threads to use. Default is half that recommended
+by RcppParallel. For nearest neighbor search, only applies if
+\code{nn_method = "annoy"}.}
 
 \item{grain_size}{Minimum batch size for multithreading. If the number of
 items to process in a thread falls below this number, then no threads will

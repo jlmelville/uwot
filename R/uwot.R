@@ -110,9 +110,9 @@
 #' @param approx_pow If \code{TRUE}, use an approximation to the power function
 #'   in the UMAP gradient, from
 #'   \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.
-#' @param n_threads Number of threads to use. Default is half of
-#'   \code{\link[RcppParallel]{defaultNumThreads}}. For nearest neighbor search,
-#'   only applies if \code{nn_method = "annoy"}.
+#' @param n_threads Number of threads to use. Default is half that recommended
+#'   by RcppParallel. For nearest neighbor search, only applies if
+#'   \code{nn_method = "annoy"}.
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads}.
@@ -268,9 +268,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
-#' @param n_threads Number of threads to use. Default is half of
-#'   \code{\link[RcppParallel]{defaultNumThreads}}. For nearest neighbor search,
-#'   only applies if \code{nn_method = "annoy"}.
+#' @param n_threads Number of threads to use. Default is half that recommended
+#'   by RcppParallel. For nearest neighbor search, only applies if
+#'   \code{nn_method = "annoy"}.
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads}.
@@ -398,9 +398,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
-#' @param n_threads Number of threads to use. Default is half of
-#'   \code{\link[RcppParallel]{defaultNumThreads}}. For nearest neighbor search,
-#'   only applies if \code{nn_method = "annoy"}.
+#' @param n_threads Number of threads to use. Default is half that recommended
+#'   by RcppParallel. For nearest neighbor search, only applies if
+#'   \code{nn_method = "annoy"}.
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads}.
