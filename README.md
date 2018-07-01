@@ -1,5 +1,7 @@
 # UWOT
 
+[![Travis-CI Build Status](https://travis-ci.org/jlmelville/uwot.svg?branch=master)](https://travis-ci.org/jlmelville/uwot)
+
 An R implementation of the 
 [Uniform Manifold Approximation and Projection (UMAP)](https://arxiv.org/abs/1802.03426) 
 method for dimensionality reduction (McInnes and Healy, 2018).
