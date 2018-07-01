@@ -24,8 +24,6 @@
 #include <RcppParallel.h>
 // [[Rcpp::depends(RcppProgress)]]
 #include <progress.hpp>
-#include "tthread/fast_mutex.h"
-
 
 struct PerplexityWorker : public RcppParallel::Worker {
   const RcppParallel::RMatrix<double> nn_dist;
@@ -42,7 +40,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
   const double double_max = std::numeric_limits<double>::max();
 
   Progress progress;
-  tthread::fast_mutex mutex;
+  tthread::mutex mutex;
 
   PerplexityWorker(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix&  nn_idx,
                    const double perplexity, const unsigned int n_iter, const double tol,
@@ -124,7 +122,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
       }
 
       {
-        tthread::lock_guard<tthread::fast_mutex> guard(mutex);
+        tthread::lock_guard<tthread::mutex> guard(mutex);
         progress.increment();
         if (Progress::check_abort()) {
           return;

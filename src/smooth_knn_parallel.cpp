@@ -26,7 +26,6 @@
 #include <RcppParallel.h>
 // [[Rcpp::depends(RcppProgress)]]
 #include <progress.hpp>
-#include "tthread/fast_mutex.h"
 
 struct SmoothKnnWorker : public RcppParallel::Worker {
   const RcppParallel::RMatrix<double> nn_dist;
@@ -47,10 +46,10 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
   const double double_max = std::numeric_limits<double>::max();
 
   Progress progress;
-  tthread::fast_mutex mutex;
+  tthread::mutex mutex;
 
   SmoothKnnWorker(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix&  nn_idx,
-                  const unsigned int n_iter, const double local_connectivity, 
+                  const unsigned int n_iter, const double local_connectivity,
                   const double bandwidth, const double tol, const double min_k_dist_scale,
                   Progress& progress) :
     nn_dist(nn_dist), nn_idx(nn_idx), n_vertices(nn_dist.nrow()), n_neighbors(nn_dist.ncol()),
@@ -62,23 +61,23 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
     progress(progress)
   {  }
 
-  
+
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<double> non_zero_distances(n_neighbors);
-    
+
     double sigma = 1.0;
     for (std::size_t i = begin; i < end; i++) {
       non_zero_distances.clear();
       double lo = 0.0;
       double hi = double_max;
-      
+
       auto ith_distances = nn_dist.row(i);
       for (size_t k = 0; k < ith_distances.size(); k++) {
         if (ith_distances[k] > 0.0) {
           non_zero_distances.push_back(ith_distances[k]);
         }
       }
-      
+
       // Find rho, the distance to the nearest neighbor (excluding zero distance neighbors)
       double rho = 0.0;
       if (non_zero_distances.size() >= local_connectivity) {
@@ -97,7 +96,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
       else if (non_zero_distances.size() > 0) {
         rho = *std::max_element(non_zero_distances.begin(), non_zero_distances.end());
       }
-      
+
       for (unsigned int iter = 0; iter < n_iter; iter++) {
         double val = 0.0;
         // NB we iterate from 1, not 0: don't use the self-distance.
@@ -106,11 +105,11 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
           double dist = std::max(0.0, ith_distances[k] - rho);
           val += exp(-dist / sigma);
         }
-        
+
         if (std::abs(val - target) < tol) {
           break;
         }
-        
+
         if (val > target) {
           hi = sigma;
           sigma = 0.5 * (lo + hi);
@@ -125,7 +124,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
           }
         }
       }
-      
+
       if (rho > 0.0) {
         double mean = std::accumulate(ith_distances.begin(), ith_distances.end(), 0.0) / ith_distances.size();
         sigma = std::max(min_k_dist_scale * mean, sigma);
@@ -133,7 +132,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
       else {
         sigma = std::max(min_k_dist_scale * mean_distances, sigma);
       }
-      
+
       double res[n_neighbors];
       for (size_t k = 0; k < n_neighbors; k++) {
         double rk = ith_distances[k] - rho;
@@ -149,7 +148,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
       // loc is incremented in the loop
       for (unsigned int k = 0; k < n_neighbors; k++, loc++) {
         unsigned int j = nn_idx(i, k) - 1;
-        
+
         locations(0, loc) = i;
         locations(1, loc) = j;
         if (i != j) {
@@ -161,7 +160,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
       }
 
       {
-        tthread::lock_guard<tthread::fast_mutex> guard(mutex);
+        tthread::lock_guard<tthread::mutex> guard(mutex);
         progress.increment();
         if (Progress::check_abort()) {
           return;

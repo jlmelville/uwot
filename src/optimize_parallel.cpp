@@ -27,7 +27,6 @@
 #include <progress.hpp>
 #include "gradient.h"
 #include "tauprng.h"
-#include "tthread/fast_mutex.h"
 
 template <typename T>
 struct SgdWorker : public RcppParallel::Worker {
@@ -46,7 +45,7 @@ struct SgdWorker : public RcppParallel::Worker {
   unsigned int n_vertices;
   const arma::uword nrow;
   const arma::uword ncol;
-  tthread::fast_mutex mutex;
+  tthread::mutex mutex;
   std::mt19937 rng;
   std::uniform_int_distribution<long> gen;
   const double dist_eps;
@@ -85,7 +84,7 @@ struct SgdWorker : public RcppParallel::Worker {
     // Doesn't waste much time, though.
     long s1, s2, s3;
     {
-      tthread::lock_guard<tthread::fast_mutex> guard(mutex);
+      tthread::lock_guard<tthread::mutex> guard(mutex);
       s1 = gen(rng);
       s2 = gen(rng); // technically this needs to always be > 7
       s3 = gen(rng); // should be > 15
