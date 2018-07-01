@@ -784,6 +784,7 @@ scale_input <- function(X, scale_type, verbose = FALSE) {
 
 #' @useDynLib uwot
 #' @importFrom Rcpp sourceCpp
+#' @importFrom RcppParallel RcppParallelLibs
 .onUnload <- function(libpath) {
   library.dynam.unload("uwot", libpath)
 }

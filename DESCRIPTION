@@ -19,3 +19,4 @@ Imports: Rcpp,
     RSpectra,
     RcppAnnoy,
     RcppParallel
+SystemRequirements: GNU make
