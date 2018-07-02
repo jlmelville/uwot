@@ -782,7 +782,7 @@ scale_input <- function(X, scale_type, verbose = FALSE) {
 }
 
 
-#' @useDynLib uwot
+#' @useDynLib uwot, .registration=TRUE
 #' @importFrom Rcpp sourceCpp
 #' @importFrom RcppParallel RcppParallelLibs
 .onUnload <- function(libpath) {

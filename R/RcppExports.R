@@ -2,46 +2,46 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 annoy_euclidean_nns <- function(index_name, mat, n, search_k, grain_size = 1L, verbose = FALSE) {
-    .Call('_uwot_annoy_euclidean_nns', PACKAGE = 'uwot', index_name, mat, n, search_k, grain_size, verbose)
+    .Call(`_uwot_annoy_euclidean_nns`, index_name, mat, n, search_k, grain_size, verbose)
 }
 
 optimize_layout_umap <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, verbose) {
-    .Call('_uwot_optimize_layout_umap', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, verbose)
+    .Call(`_uwot_optimize_layout_umap`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, verbose)
 }
 
 optimize_layout_tumap <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, verbose) {
-    .Call('_uwot_optimize_layout_tumap', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, verbose)
+    .Call(`_uwot_optimize_layout_tumap`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, verbose)
 }
 
 optimize_layout_largevis <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, verbose) {
-    .Call('_uwot_optimize_layout_largevis', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, verbose)
+    .Call(`_uwot_optimize_layout_largevis`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, verbose)
 }
 
 optimize_layout_umap_parallel <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, grain_size = 1L, verbose = FALSE) {
-    .Call('_uwot_optimize_layout_umap_parallel', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, grain_size, verbose)
+    .Call(`_uwot_optimize_layout_umap_parallel`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, grain_size, verbose)
 }
 
 optimize_layout_tumap_parallel <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, grain_size = 1L, verbose = FALSE) {
-    .Call('_uwot_optimize_layout_tumap_parallel', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, grain_size, verbose)
+    .Call(`_uwot_optimize_layout_tumap_parallel`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, grain_size, verbose)
 }
 
 optimize_layout_largevis_parallel <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, grain_size = 1L, verbose = FALSE) {
-    .Call('_uwot_optimize_layout_largevis_parallel', PACKAGE = 'uwot', embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, grain_size, verbose)
+    .Call(`_uwot_optimize_layout_largevis_parallel`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, grain_size, verbose)
 }
 
 calc_row_probabilities_cpp <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, verbose = FALSE) {
-    .Call('_uwot_calc_row_probabilities_cpp', PACKAGE = 'uwot', nn_dist, nn_idx, perplexity, n_iter, tol, verbose)
+    .Call(`_uwot_calc_row_probabilities_cpp`, nn_dist, nn_idx, perplexity, n_iter, tol, verbose)
 }
 
 calc_row_probabilities_parallel <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, grain_size = 1L, verbose = FALSE) {
-    .Call('_uwot_calc_row_probabilities_parallel', PACKAGE = 'uwot', nn_dist, nn_idx, perplexity, n_iter, tol, grain_size, verbose)
+    .Call(`_uwot_calc_row_probabilities_parallel`, nn_dist, nn_idx, perplexity, n_iter, tol, grain_size, verbose)
 }
 
 smooth_knn_distances_cpp <- function(nn_dist, nn_idx, n_iter = 64L, local_connectivity = 1.0, bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, verbose = FALSE) {
-    .Call('_uwot_smooth_knn_distances_cpp', PACKAGE = 'uwot', nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose)
+    .Call(`_uwot_smooth_knn_distances_cpp`, nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose)
 }
 
 smooth_knn_distances_parallel <- function(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size = 1L, verbose = FALSE) {
-    .Call('_uwot_smooth_knn_distances_parallel', PACKAGE = 'uwot', nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size, verbose)
+    .Call(`_uwot_smooth_knn_distances_parallel`, nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size, verbose)
 }
 
