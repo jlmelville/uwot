@@ -24,8 +24,8 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppParallel)]]
 #include <RcppParallel.h>
-// [[Rcpp::depends(RcppProgress)]]
-#include <progress.hpp>
+// // [[Rcpp::depends(RcppProgress)]]
+// #include <progress.hpp>
 
 struct SmoothKnnWorker : public RcppParallel::Worker {
   const RcppParallel::RMatrix<double> nn_dist;
@@ -45,20 +45,21 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
   const double mean_distances;
   const double double_max = std::numeric_limits<double>::max();
 
-  Progress progress;
-  tthread::mutex mutex;
+  // Progress progress;
+  // tthread::mutex mutex;
 
   SmoothKnnWorker(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix&  nn_idx,
                   const unsigned int n_iter, const double local_connectivity,
-                  const double bandwidth, const double tol, const double min_k_dist_scale,
-                  Progress& progress) :
+                  const double bandwidth, const double tol, const double min_k_dist_scale
+                    // , Progress& progress
+                    ) :
     nn_dist(nn_dist), nn_idx(nn_idx), n_vertices(nn_dist.nrow()), n_neighbors(nn_dist.ncol()),
     locations(2, n_vertices * n_neighbors), values(n_vertices * n_neighbors),
     target(std::log2(n_neighbors)),
     n_iter(n_iter), local_connectivity(local_connectivity), bandwidth(bandwidth),
     tol(tol), min_k_dist_scale(min_k_dist_scale),
-    mean_distances(mean(nn_dist)),
-    progress(progress)
+    mean_distances(mean(nn_dist))
+    // , progress(progress)
   {  }
 
 
@@ -159,13 +160,13 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
         }
       }
 
-      {
-        tthread::lock_guard<tthread::mutex> guard(mutex);
-        progress.increment();
-        if (Progress::check_abort()) {
-          return;
-        }
-      }
+      // {
+      //   tthread::lock_guard<tthread::mutex> guard(mutex);
+      //   progress.increment();
+      //   if (Progress::check_abort()) {
+      //     return;
+      //   }
+      // }
     }
   }
 };
@@ -181,8 +182,11 @@ arma::sp_mat smooth_knn_distances_parallel(const Rcpp::NumericMatrix& nn_dist, c
                                            const size_t grain_size = 1,
                                            const bool verbose = false) {
   const unsigned int n_vertices = nn_dist.nrow();
-  Progress progress(n_vertices, verbose);
-  SmoothKnnWorker worker(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, progress);
+  // Progress progress(n_vertices, verbose);
+  SmoothKnnWorker worker(nn_dist, nn_idx, n_iter, local_connectivity,
+                         bandwidth, tol, min_k_dist_scale
+                           // , progress
+                           );
 
   RcppParallel::parallelFor(0, n_vertices, worker, grain_size);
 

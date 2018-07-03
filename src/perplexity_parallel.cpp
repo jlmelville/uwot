@@ -22,8 +22,8 @@
 // [[Rcpp::depends(RcppArmadillo)]
 // [[Rcpp::depends(RcppParallel)]]
 #include <RcppParallel.h>
-// [[Rcpp::depends(RcppProgress)]]
-#include <progress.hpp>
+// // [[Rcpp::depends(RcppProgress)]]
+// #include <progress.hpp>
 
 struct PerplexityWorker : public RcppParallel::Worker {
   const RcppParallel::RMatrix<double> nn_dist;
@@ -39,16 +39,19 @@ struct PerplexityWorker : public RcppParallel::Worker {
   const double tol;
   const double double_max = std::numeric_limits<double>::max();
 
-  Progress progress;
-  tthread::mutex mutex;
+  // Progress progress;
+  // tthread::mutex mutex;
 
-  PerplexityWorker(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix&  nn_idx,
-                   const double perplexity, const unsigned int n_iter, const double tol,
-                   Progress& progress) :
+  PerplexityWorker(const Rcpp::NumericMatrix& nn_dist,
+                   const Rcpp::IntegerMatrix&  nn_idx,
+                   const double perplexity, const unsigned int n_iter,
+                   const double tol
+                     // , Progress& progress
+                     ) :
     nn_dist(nn_dist), nn_idx(nn_idx), n_vertices(nn_dist.nrow()), n_neighbors(nn_dist.ncol()),
     locations(2, n_vertices * n_neighbors), values(n_vertices * n_neighbors),
-    target(std::log(perplexity)), n_iter(n_iter), tol(tol),
-    progress(progress)
+    target(std::log(perplexity)), n_iter(n_iter), tol(tol)
+    // , progress(progress)
     {  }
 
   void operator()(std::size_t begin, std::size_t end) {
@@ -121,13 +124,13 @@ struct PerplexityWorker : public RcppParallel::Worker {
         }
       }
 
-      {
-        tthread::lock_guard<tthread::mutex> guard(mutex);
-        progress.increment();
-        if (Progress::check_abort()) {
-          return;
-        }
-      }
+      // {
+      //   tthread::lock_guard<tthread::mutex> guard(mutex);
+      //   progress.increment();
+      //   if (Progress::check_abort()) {
+      //     return;
+      //   }
+      // }
     }
   }
 };
@@ -140,8 +143,10 @@ arma::sp_mat calc_row_probabilities_parallel(const Rcpp::NumericMatrix& nn_dist,
                                         const std::size_t grain_size = 1,
                                         const bool verbose = false) {
   const unsigned int n_vertices = nn_dist.nrow();
-  Progress progress(n_vertices, verbose);
-  PerplexityWorker worker(nn_dist, nn_idx, perplexity, n_iter, tol, progress);
+  // Progress progress(n_vertices, verbose);
+  PerplexityWorker worker(nn_dist, nn_idx, perplexity, n_iter, tol
+                            // , progress
+                            );
 
   RcppParallel::parallelFor(0, n_vertices, worker, grain_size);
 

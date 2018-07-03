@@ -1,8 +1,8 @@
 #include <Rcpp.h>
 // [[Rcpp::depends(RcppParallel)]]
 #include <RcppParallel.h>
-// [[Rcpp::depends(RcppProgress)]]
-#include <progress.hpp>
+// // [[Rcpp::depends(RcppProgress)]]
+// #include <progress.hpp>
 
 #if defined(__MINGW32__)
 #undef Realloc
@@ -24,8 +24,8 @@ struct NNWorker : public RcppParallel::Worker {
   size_t n;
   size_t search_k;
 
-  Progress progress;
-  tthread::mutex mutex;
+  // Progress progress;
+  // tthread::mutex mutex;
 
   NNWorker(
     const std::string& index_name,
@@ -34,10 +34,13 @@ struct NNWorker : public RcppParallel::Worker {
     Rcpp::IntegerMatrix& idx,
     size_t ncol,
     size_t n,
-    size_t search_k,
-    Progress& progress) :
+    size_t search_k
+    // , Progress& progress
+    ) :
     index_name(index_name), mat(mat), dists(dists), idx(idx), ncol(ncol), n(n),
-    search_k(search_k), progress(progress) {}
+    search_k(search_k)
+    // , progress(progress)
+    {}
 
   void operator()(std::size_t begin, std::size_t end) {
     AnnoyIndex<S, T, Distance, Random> index(ncol);
@@ -58,13 +61,13 @@ struct NNWorker : public RcppParallel::Worker {
         idx(i, j) = result[j];
       }
 
-      {
-        tthread::lock_guard<tthread::mutex> guard(mutex);
-        progress.increment();
-        if (Progress::check_abort()) {
-          return;
-        }
-      }
+      // {
+      //   tthread::lock_guard<tthread::mutex> guard(mutex);
+      //   progress.increment();
+      //   if (Progress::check_abort()) {
+      //     return;
+      //   }
+      // }
     }
   }
 };
@@ -80,10 +83,12 @@ Rcpp::List annoy_euclidean_nns(const std::string& index_name,
   Rcpp::NumericMatrix dist(nrow, n);
   Rcpp::IntegerMatrix idx(nrow, n);
 
-  Progress progress(nrow, verbose);
+  // Progress progress(nrow, verbose);
 
   NNWorker<int32_t, float, Euclidean, Kiss64Random>
-    worker(index_name, mat, dist, idx, ncol, n, search_k, progress);
+    worker(index_name, mat, dist, idx, ncol, n, search_k
+             // , progress
+             );
   RcppParallel::parallelFor(0, nrow, worker, grain_size);
 
   return Rcpp::List::create(Rcpp::Named("item") = idx,
