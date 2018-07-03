@@ -8,6 +8,8 @@ output:
       collapsed: false
 ---
 
+This is part of the documentation for [UWOT](https://github.com/jlmelville/uwot).
+
 The [UMAP paper](https://arxiv.org/abs/1802.03426) does not go into much 
 implementation detail. If you are coming to UMAP from t-SNE and don't know
 much about topology or fuzzy set (and I certainly don't), you may find yourself
