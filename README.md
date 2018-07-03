@@ -8,9 +8,11 @@ method for dimensionality reduction (McInnes and Healy, 2018).
 
 ## Status
 
-1st July: I had really messed up the Linux install due to failing to heed 
-simple written instructions from the RcppParallel project. Should be fixed now,
-please retry installing if it broke for you over the last few days.
+3rd July: the `C stack usage [big number] is too close to the limit` error that
+occurs under Linux seems to be due to using RcppProgress within a RcppParallel
+worker, so progress bars for the neighbor search and smooth knn
+distance/perplexity phase have been disabled if using `n_threads` greater than
+0.
 
 Current issues:
 
@@ -19,10 +21,6 @@ which is expected and due to using RcppParallel. On Linux, I also see a note
 about the `libs` directory being 5 MB, probably due to code bloat from my
 undisciplined and profligate stick-it-all-in-the-header C++ coding style, but
 might be fixable if it's not due to templates.
-
-* Also on Linux I get warnings about 
-`C stack usage [big number] is too close to the limit` during the smooth knn
-distances and perplexity calibration if using multiple threads.
 
 ## Installing
 
