@@ -47,7 +47,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
                    Progress& progress) :
     nn_dist(nn_dist), nn_idx(nn_idx), n_vertices(nn_dist.nrow()), n_neighbors(nn_dist.ncol()),
     locations(2, n_vertices * n_neighbors), values(n_vertices * n_neighbors),
-    target(log(perplexity)), n_iter(n_iter), tol(tol),
+    target(std::log(perplexity)), n_iter(n_iter), tol(tol),
     progress(progress)
     {  }
 
@@ -71,12 +71,12 @@ struct PerplexityWorker : public RcppParallel::Worker {
         double H = 0.0;
         double sum_D2_W = 0.0;
         for (unsigned int k = 0; k < n_neighbors - 1; k++) {
-          double W = exp(-d2[k] * beta);
+          double W = std::exp(-d2[k] * beta);
           Z += W;
           sum_D2_W += d2[k] * W;
         }
         if (Z > 0) {
-          H = log(Z) + beta * sum_D2_W / Z;
+          H = std::log(Z) + beta * sum_D2_W / Z;
         }
 
         if (std::abs(H - target) < tol) {
@@ -100,7 +100,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
 
       double Z = 0.0;
       for (unsigned int k = 0; k < n_neighbors - 1; k++) {
-        double W = exp(-d2[k] * beta);
+        double W = std::exp(-d2[k] * beta);
         Z += W;
         // no longer need d2 at this point, store final W there
         d2[k] = W;

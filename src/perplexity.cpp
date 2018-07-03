@@ -33,7 +33,7 @@ arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, cons
   const unsigned int n_vertices = nn_dist.nrow();
   const unsigned int n_neighbors = nn_dist.ncol();
 
-  const double target = log(perplexity);
+  const double target = std::log(perplexity);
   const double double_max = std::numeric_limits<double>::max();
 
   arma::umat locations(2, n_vertices * n_neighbors);
@@ -59,12 +59,12 @@ arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, cons
       double H = 0.0;
       double sum_D2_W = 0.0;
       for (unsigned int k = 0; k < n_neighbors - 1; k++) {
-        double W = exp(-d2[k] * beta);
+        double W = std::exp(-d2[k] * beta);
         Z += W;
         sum_D2_W += d2[k] * W;
       }
       if (Z > 0) {
-        H = log(Z) + beta * sum_D2_W / Z;
+        H = std::log(Z) + beta * sum_D2_W / Z;
       }
 
       if (std::abs(H - target) < tol) {
@@ -88,7 +88,7 @@ arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, cons
 
     double Z = 0.0;
     for (unsigned int k = 0; k < n_neighbors - 1; k++) {
-      double W = exp(-d2[k] * beta);
+      double W = std::exp(-d2[k] * beta);
       Z += W;
       // no longer need d2 at this point, store final W there
       d2[k] = W;

@@ -54,7 +54,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
                   Progress& progress) :
     nn_dist(nn_dist), nn_idx(nn_idx), n_vertices(nn_dist.nrow()), n_neighbors(nn_dist.ncol()),
     locations(2, n_vertices * n_neighbors), values(n_vertices * n_neighbors),
-    target(log2(n_neighbors)),
+    target(std::log2(n_neighbors)),
     n_iter(n_iter), local_connectivity(local_connectivity), bandwidth(bandwidth),
     tol(tol), min_k_dist_scale(min_k_dist_scale),
     mean_distances(mean(nn_dist)),
@@ -81,7 +81,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
       // Find rho, the distance to the nearest neighbor (excluding zero distance neighbors)
       double rho = 0.0;
       if (non_zero_distances.size() >= local_connectivity) {
-        int index = int(floor(local_connectivity));
+        int index = static_cast<int>(std::floor(local_connectivity));
         double interpolation = local_connectivity - index;
         if (index > 0) {
           rho = non_zero_distances[index - 1];
@@ -103,7 +103,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
         // Makes using Rcpp sugar sufficiently awkward so do the explicit loop
         for (unsigned int k = 1; k < n_neighbors; k++) {
           double dist = std::max(0.0, ith_distances[k] - rho);
-          val += exp(-dist / sigma);
+          val += std::exp(-dist / sigma);
         }
 
         if (std::abs(val - target) < tol) {
@@ -140,7 +140,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
           res[k] = 1.0;
         }
         else {
-          res[k] = exp(-rk / (sigma * bandwidth));
+          res[k] = std::exp(-rk / (sigma * bandwidth));
         }
       }
 

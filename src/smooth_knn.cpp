@@ -60,7 +60,7 @@ arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const 
     // Find rho, the distance to the nearest neighbor (excluding zero distance neighbors)
     double rho = 0.0;
     if (non_zero_distances.size() >= local_connectivity) {
-      int index = int(floor(local_connectivity));
+      int index = static_cast<int>(std::floor(local_connectivity));
       double interpolation = local_connectivity - index;
       if (index > 0) {
         rho = non_zero_distances[index - 1];
@@ -82,7 +82,7 @@ arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const 
       // Makes using Rcpp sugar sufficiently awkward so do the explicit loop
       for (unsigned int j = 1; j < n_neighbors; j++) {
         double dist = std::max(0.0, ith_distances[j] - rho);
-        val += exp(-dist / sigma);
+        val += std::exp(-dist / sigma);
       }
 
       if (std::abs(val - target) < tol) {
