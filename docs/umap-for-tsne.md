@@ -74,15 +74,16 @@ $$
 
 where $d_{ij}$ is the Euclidean distance between $\mathbf{y_i}$ and
 $\mathbf{y_j}$. There is no $\beta$ in this weight definition so these weights 
-are symmetric. The output probabilities, $q_{ij}$ are calculated from $w_{ij}$
+are symmetric. The output probabilities, $q_{j|i}$ are calculated from $w_{ij}$
 in the same way that we go from $v_{j|i}$ to $p_{j|i}$, again creating $N$
-probability distributions. 
+probability distributions. Due to normalizing by rows, the $q_{j|i}$ are 
+asymmetric despite the symmetric weights they are generated from.
 
 The SNE cost function is the sum of the Kullback-Leibler divergences of the $N$
 distributions:
 
 $$
-C_{SNE} = \sum_{i}^{N} \sum_{j}^{N} p_{j|i} \log \frac{p_{j|i}}{q_{ij}} 
+C_{SNE} = \sum_{i}^{N} \sum_{j}^{N} p_{j|i} \log \frac{p_{j|i}}{q_{j|i}} 
 $$
 In all of the above (and in what follows), weights and probabilities when $i =
 j$ are not defined. I don't want to clutter the notation further, so assume they
@@ -166,25 +167,16 @@ Also, rather than talk about probabilities, LargeVis uses the language of graph
 theory. Each observation in our dataset is now considered to be a vertex or node
 and the similarity between them is the weight of the edge between the two
 vertices. Conceptually we're still talking about elements in a matrix, but I
-will start slipping into the language of "edges" and "nodes".
+will start slipping into the language of "edges" and "vertices".
 
 The key change is the cost function, which is now a maximum likelihood function:
 
 $$
-L_{LV} = \sum_{ \left(i, j\right) \in E} v_{ij} \log w_{ij} 
+L_{LV} = \sum_{ \left(i, j\right) \in E} p_{ij} \log w_{ij} 
 +\gamma \sum_{\left(i, j\right) \in \bar{E}} \log \left(1 - w_{ij} \right)
 $$
-$w_{ij}$ is the same as in t-SNE (the authors try some alternative $w_{ij}$
-functions, but they aren't as effective) and $v_{ij}$ are the symmetrized, but
-not matrix-normalized, versions of the input weights:
-
-$$
-v_{ij} = \frac{v_{j|i} + v_{i|j}}{2}
-$$
-
-The version of the cost function in the LargeVis paper uses what we would write
-as $p_{ij}$ instead of $v_{ij}$, but the source code doesn't divide by $N$ and
-due to how LargeVis samples, it makes no difference.
+$p_{ij}$ and $w_{ij}$ is the same as in t-SNE (the authors try some alternative
+$w_{ij}$ definitions, but they aren't as effective).
 
 The new concepts here are $\gamma$ and $E$. $\gamma$ is a user-defined positive
 scalar to weight repulsive versus attractive forces. It's default in the 
@@ -202,10 +194,10 @@ neighbors in the input space contribute to the attractive part of the cost
 function (the first part). Everything else contributes to the second, repulsive 
 part.
 
-The key advantage of this cost function of the KL divergence is that it doesn't
-contain $q_{ij}$. With no normalization, we don't need to calculate all the
-output pairwise distances. So this cost function is amenable to stochastic 
-gradient descent techniques.
+The key advantage of this cost function over the KL divergence is that it
+doesn't contain $q_{ij}$. With no output normalization, we don't need to
+calculate all the output pairwise distances. So this cost function is amenable
+to stochastic gradient descent techniques.
 
 ## The LargeVis sampling strategy
 
@@ -225,30 +217,42 @@ is to sample 5 negatives for each positive edge.
 The coordinates of $i$, $j$ and the various $k$ are then updated according to
 the gradients. This concludes one iteration of the SGD.
 
-Sampling of edges and vertices is not uniform. Positive edges are sampled
-proportionally to $v_{ij}$. Vertices are sampled according to their degree ^
-0.75, where the degree of the vertex is the sum of the weights of the edges
-incident to them. There doesn't seem to be a theoretical reason to use the
-degree ^ 0.75, this is based on results from the field of word embeddings: the
-LargeVis authors reference a 
-[skip-gram](http://papers.nips.cc/paper/5021-distributed-representations-of-words-andphrases)
-paper, but the same power also shows up in 
-[GloVE](https://nlp.stanford.edu/projects/glove/). In both cases it is justified
-purely empirically.
-
-The attractive and repulsive gradients for LargeVis are. respectively:
+The attractive and repulsive gradients for LargeVis are respectively:
 
 $$
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^+ =
-\frac{-2}{1 + d_{ij}^2}v_{ij} \left(\mathbf{y_i - y_j}\right) \\
+\frac{-2}{1 + d_{ij}^2}p_{ij} \left(\mathbf{y_i - y_j}\right) \\
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^- =
 \frac{2\gamma}{\left(0.1 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)} \left(\mathbf{y_i - y_j}\right)
 $$
+The value of 0.1 that appears in the repulsive gradient is there to prevent
+division by zero.
 
-However, the factor of $v_{ij}$ in the attractive gradient isn't present
-in the SGD formulation, because it's already accounted for by making the 
-sampling of positive edges proportional to $v_{ij}$. The value of 0.1 that
-appears in the repulsive gradient is there to prevent division by zero.
+Sampling of edges and vertices is not uniform. For the attractive gradient, the
+authors note that the factor of $p_{ij}$ that appears means that the magnitude
+of the gradient can differ hugely between samples to the extent that choosing an
+appropriate learning rate can be difficult. Instead they sample the edges
+proportionally to $p_{ij}$ and then for the gradient calculation, treat each
+edge as if the weights were all equal. The attractive gradient used as part of
+LargeVis SGD is therefore:
+
+$$
+\frac{\partial L_{LV}}{\partial \mathbf{y_i}}^+ =
+\frac{-2}{1 + d_{ij}^2} \left(\mathbf{y_i - y_j}\right)
+$$
+
+As $p_{ij}$ doesn't appear in the repulsive part of the gradient, so it would
+seem that uniform sampling would work for the negative sampling. However,
+vertices are sampled using a "noisy" distribution proportional to their degree ^
+0.75, where the degree of the vertex is the sum of the weights of the edges
+incident to them. There doesn't seem to be a theoretical reason to use the
+degree ^ 0.75, this is based on results from the field of word embeddings: the
+LargeVis authors reference a
+[skip-gram](http://papers.nips.cc/paper/5021-distributed-representations-of-words-andphrases)
+paper, but the same power also shows up in 
+[GloVE](https://nlp.stanford.edu/projects/glove/). In both cases it is justified
+purely empirically. The `uwot` version of LargeVis (`lvish`) samples the 
+negative edges uniformly, and it doesn't seem to cause any problems.
 
 ## UMAP (at last)
 
@@ -260,7 +264,10 @@ C_{UMAP} =
 \sum_{ij} \left[ v_{ij} \log \left( \frac{v_{ij}}{w_{ij}} \right) + 
 (1 - v_{ij}) \log \left( \frac{1 - v_{ij}}{1 - w_{ij}} \right) \right]
 $$
-The UMAP input weights are given by:
+$v_{ij}$ are symmetrized input affinities, and are not probabilities. The graph
+interpretation of them as weights of edges in a graph still applies, though. 
+These are arrived at differently to t-SNE and LargeVis. The unsymmetrized UMAP 
+input weights are given by:
 
 $$
 v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \sigma_{i} \right]
@@ -304,17 +311,43 @@ $$
 \frac{b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
 $$
 While more complex-looking than the LargeVis gradient, there are obvious
-similiarities. The 0.001 term in the denominator of the repulsive gradient plays
+similarities. The 0.001 term in the denominator of the repulsive gradient plays
 the same role as the 0.1 in the LargeVis gradient.
 
-UMAP uses the same sampling strategy as LargeVis, except with the negative 
-sampling strategy of vertices, which uses uniform sampling. The $v_{ij}$ terms
-do not appear in either the attractive or repulsive gradient terms used by the
-UMAP SGD.
+UMAP uses the same sampling strategy as LargeVis, where sampling of positive
+edges is proportional to the weight of the edge (in this case $v_{ij}$), and
+then the value of the gradient is calculated by assuming that $v_{ij} = 1$
+for all edges. So for SGD purposes, the attractive gradient for UMAP is:
+
+$$
+\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
+\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + d_{ij}^2}\left(\mathbf{y_i - y_j}\right)
+$$
+
+The repulsive part of the gradient contains a $1 - v_{ij}$ term, but because
+$v_{ij} = 0$ for most pairs of edges, that term effectively disappears, leaving:
+
+$$
+\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
+\frac{b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}
+  \left(\mathbf{y_i - y_j}\right)
+$$
+
+Unlike LargeVis, negative sampling in UMAP uses a uniform distribution.
+
+It's worth considering that, although LargeVis uses $p_{ij}$ and UMAP uses
+$v_{ij}$ in their cost functions, the difference isn't that important, because
+sampling proportionally to $p_{ij}$ is exactly the same as sampling
+proportionally to $v_{ij}$. In fact, if you look at the LargeVis reference
+implementation (or `lvish` in `uwot`), the input affinities are symmetrized, but
+not divided by $N$. Nonetheless, because the affinities are only used to
+construct the sampling probabilities, the presence of the $\gamma$ parameter in
+the repulsive part of the gradient means that you are effectively using
+$p_{ij}$ in the LargeVis cost function that is being optimized, not $v_{ij}$.
 
 ## Minor UMAP Variations
 
-There are some extra parameters in UMAP that make some minor changes if mpdified
+There are some extra parameters in UMAP that make some minor changes if modified
 from their default-values:
 
 * `local_connectivity`
@@ -342,3 +375,6 @@ This works exactly like the value in LargeVis, up-weighting the repulsive
 contribution of the gradient.
 
 I'm not sure how useful any of these are when changed from the defaults.
+
+My thanks to [Dmitry Kobak](https://github.com/dkobak) for some very helpful 
+discussions and typo-spotting.
