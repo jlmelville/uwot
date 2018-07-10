@@ -82,6 +82,12 @@ scaled_pca <- function(X, ndim = 2, verbose = FALSE) {
   scale(scores, scale = apply(scores, 2, stats::sd) / 1e-4)
 }
 
+# PCA
+pca_init <- function(X, ndim = 2, verbose = FALSE) {
+  tsmessage("Initializing from PCA")
+  pca_scores(X, ncol = ndim, verbose = verbose)
+}
+
 
 # Calculates a matrix containing the first ncol columns of the PCA scores.
 # Returns the score matrix unless ret_extra is TRUE, in which case a list

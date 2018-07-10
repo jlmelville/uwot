@@ -58,14 +58,16 @@ For UMAP, the default is \code{"none"}.}
   \item \code{"random"}. Coordinates assigned using a uniform random
   distribution between -10 and 10.
   \item \code{"lvrandom"}. Coordinates assigned using a Gaussian
-  distribution with standard deviation 1e-4, as in LargeVis
-  (Tang et al., 2016).
+  distribution with standard deviation 1e-4, as used in LargeVis
+  (Tang et al., 2016) and t-SNE.
   \item \code{"laplacian"}. Spectral embedding using the Laplacian Eigenmap
   (Belkin and Niyogi, 2002).
-  \item \code{"spca"}. The first two principal components from PCA of
+  \item \code{"pca"}. The first two principal components from PCA of
   \code{X} if \code{X} is a data frame, and from a 2-dimensional classical
-  MDS if \code{X} is of class \code{"dist"}. These vectors are then scaled
-  so their standard deviation is 0.0001.
+  MDS if \code{X} is of class \code{"dist"}.
+  \item \code{"spca"}. Like \code{"pca"}, but each dimension is then scaled
+  so the standard deviation is 1e-4, to give a distribution similar to
+  that used in t-SNE.
   \item A matrix of initial coordinates.
 }}
 
@@ -189,4 +191,9 @@ In \emph{Proceedings of the 25th International Conference on World Wide Web}
 (pp. 287-297).
 International World Wide Web Conferences Steering Committee.
 \url{https://arxiv.org/abs/1602.00370}
+
+Van der Maaten, L., & Hinton, G. (2008).
+Visualizing data using t-SNE.
+\emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
+\url{http://www.jmlr.org/papers/v9/vandermaaten08a.html}
 }

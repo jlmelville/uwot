@@ -43,14 +43,16 @@
 #'     \item \code{"random"}. Coordinates assigned using a uniform random
 #'     distribution between -10 and 10.
 #'     \item \code{"lvrandom"}. Coordinates assigned using a Gaussian
-#'     distribution with standard deviation 1e-4, as in LargeVis
-#'     (Tang et al., 2016).
+#'     distribution with standard deviation 1e-4, as used in LargeVis
+#'     (Tang et al., 2016) and t-SNE.
 #'     \item \code{"laplacian"}. Spectral embedding using the Laplacian Eigenmap
 #'     (Belkin and Niyogi, 2002).
-#'     \item \code{"spca"}. The first two principal components from PCA of
+#'     \item \code{"pca"}. The first two principal components from PCA of
 #'     \code{X} if \code{X} is a data frame, and from a 2-dimensional classical
-#'     MDS if \code{X} is of class \code{"dist"}. These vectors are then scaled
-#'     so their standard deviation is 0.0001.
+#'     MDS if \code{X} is of class \code{"dist"}.
+#'     \item \code{"spca"}. Like \code{"pca"}, but each dimension is then scaled
+#'     so the standard deviation is 1e-4, to give a distribution similar to
+#'     that used in t-SNE.
 #'     \item A matrix of initial coordinates.
 #'   }
 #' @param spread The effective scale of embedded points. In combination with
@@ -149,6 +151,10 @@
 #' International World Wide Web Conferences Steering Committee.
 #' \url{https://arxiv.org/abs/1602.00370}
 #'
+#' Van der Maaten, L., & Hinton, G. (2008).
+#' Visualizing data using t-SNE.
+#' \emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
+#' \url{http://www.jmlr.org/papers/v9/vandermaaten08a.html}
 #' @export
 umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  alpha = 1, scale = FALSE, init = "spectral", spread = 1, min_dist = 0.01,
@@ -219,14 +225,16 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #'     \item \code{"random"}. Coordinates assigned using a uniform random
 #'     distribution between -10 and 10.
 #'     \item \code{"lvrandom"}. Coordinates assigned using a Gaussian
-#'     distribution with standard deviation 1e-4, as in LargeVis
-#'     (Tang et al., 2016).
+#'     distribution with standard deviation 1e-4, as used in LargeVis
+#'     (Tang et al., 2016) and t-SNE.
 #'     \item \code{"laplacian"}. Spectral embedding using the Laplacian Eigenmap
 #'     (Belkin and Niyogi, 2002).
-#'     \item \code{"spca"}. The first two principal components from PCA of
+#'     \item \code{"pca"}. The first two principal components from PCA of
 #'     \code{X} if \code{X} is a data frame, and from a 2-dimensional classical
-#'     MDS if \code{X} is of class \code{"dist"}. These vectors are then scaled
-#'     so their standard deviation is 0.0001.
+#'     MDS if \code{X} is of class \code{"dist"}.
+#'     \item \code{"spca"}. Like \code{"pca"}, but each dimension is then scaled
+#'     so the standard deviation is 1e-4, to give a distribution similar to
+#'     that used in t-SNE.
 #'     \item A matrix of initial coordinates.
 #'   }
 #' @param set_op_mix_ratio Interpolate between (fuzzy) union and intersection as
@@ -364,14 +372,16 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #'     \item \code{"random"}. Coordinates assigned using a uniform random
 #'     distribution between -10 and 10.
 #'     \item \code{"lvrandom"}. Coordinates assigned using a Gaussian
-#'     distribution with standard deviation 1e-4, as in LargeVis
-#'     (Tang et al., 2016).
+#'     distribution with standard deviation 1e-4, as used in LargeVis
+#'     (Tang et al., 2016) and t-SNE.
 #'     \item \code{"laplacian"}. Spectral embedding using the Laplacian Eigenmap
 #'     (Belkin and Niyogi, 2002).
-#'     \item \code{"spca"}. The first two principal components from PCA of
+#'     \item \code{"pca"}. The first two principal components from PCA of
 #'     \code{X} if \code{X} is a data frame, and from a 2-dimensional classical
-#'     MDS if \code{X} is of class \code{"dist"}. These vectors are then scaled
-#'     so their standard deviation is 0.0001.
+#'     MDS if \code{X} is of class \code{"dist"}.
+#'     \item \code{"spca"}. Like \code{"pca"}, but each dimension is then scaled
+#'     so the standard deviation is 1e-4, to give a distribution similar to
+#'     that used in t-SNE and LargeVis.
 #'     \item A matrix of initial coordinates.
 #'   }
 #' @param gamma Weighting applied to negative samples in low dimensional embedding
@@ -570,7 +580,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
   }
   else {
     init <- match.arg(tolower(init), c("spectral", "random", "lvrandom", "normlaplacian",
-                                       "laplacian", "spca"))
+                                       "laplacian", "spca", "pca"))
     embedding <- switch(init,
                         spectral = spectral_init(V, ndim = n_components, verbose = verbose),
                         random = rand_init(n_vertices, n_components, verbose = verbose),
@@ -579,6 +589,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                                                                   verbose = verbose),
                         laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
                         spca = scaled_pca(X, ndim = n_components, verbose = verbose),
+                        pca = pca_init(X, ndim = n_components, verbose = verbose),
                         stop("Unknown initialization method: '", init, "'")
     )
   }
