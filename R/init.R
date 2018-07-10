@@ -88,6 +88,12 @@ scaled_pca <- function(X, ndim = 2, verbose = FALSE) {
 # is returned also containing the eigenvalues
 pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
                        verbose = FALSE) {
+  # irlba warns about using too large a percentage of total singular value
+  # so don't use if dataset is small compared to ncol
+  if (ncol < 0.5 * min(dim(X))) {
+    return(irlba_scores(X, ncol = ncol))
+  }
+
   if (methods::is(X, "dist")) {
     res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ncol)
 
@@ -124,4 +130,9 @@ pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
   else {
     scores
   }
+}
+
+# Get PCA scores via irlba
+irlba_scores <- function(X, ncol) {
+  irlba::prcomp_irlba(X, n = ncol, retx = TRUE, center = TRUE, scale = FALSE)$x
 }
