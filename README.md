@@ -180,6 +180,12 @@ Adding a library for sparse nearest neighbor search would be a good extension.
 at least around 100,000 rows with 500-1,000 columns works fine). Bear in mind
 that Annoy itself says it works best with dimensions < 100, but still works
 "surprisingly well" up to 1000.
+* The spectral initialization default for `umap` (and the Laplacian eigenmap
+initialization, `init = "laplacian"`) can sometimes run into problems. If it
+fails to converge it will fall back to random initialization, but on occasion
+I've seen it take an extremely long time (a couple of hours) to converge. If
+initialization is taking more than a few minutes, I suggest stopping the 
+calculation and using the scaled PCA (`init = "spca"`) instead.
 
 ## Other Methods
 
