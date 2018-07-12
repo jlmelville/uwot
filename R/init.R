@@ -47,7 +47,7 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     maxitr = 5 * n,
     tol = 1e-4
   )
-  res <- RSpectra::eigs(L, k = k, which = "SM", opt = opt)
+  res <- RSpectra::eigs_sym(L, k = k, which = "SM", opt = opt)
   vec_indices <- rev(order(res$values, decreasing = TRUE)[1:ndim])
 
   Re(res$vectors[, vec_indices])
