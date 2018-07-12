@@ -22,7 +22,13 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   # This effectively row-normalizes A: colSums is normally faster than rowSums
   # and because A is symmetric, they're equivalent
   M <- A / colSums(A)
-  Re(RSpectra::eigs(M, k = ndim + 1)$vectors[, 2:(ndim + 1)])
+  eig_res <- RSpectra::eigs(M, k = ndim + 1)
+  if (ncol(eig_res$vectors) < ndim + 1) {
+    message("Laplacian Eigenmap failed to converge, using random initialization instead")
+    return(rand_init(nrow(A), ndim))
+  }
+  vecs <- eig_res$vectors[, 2:(ndim + 1)]
+  Re(vecs)
 }
 
 # Use a normalized Laplacian.
@@ -47,9 +53,13 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     maxitr = 5 * n,
     tol = 1e-4
   )
+  
   res <- RSpectra::eigs_sym(L, k = k, which = "SM", opt = opt)
+  if (ncol(res$vectors) < ndim) {
+    message("Spectral initialization failed to converge, using random initialization instead")
+    return(rand_init(n, ndim))
+  }
   vec_indices <- rev(order(res$values, decreasing = TRUE)[1:ndim])
-
   Re(res$vectors[, vec_indices])
 }
 
