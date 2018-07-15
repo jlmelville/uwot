@@ -295,8 +295,9 @@ mnist_lv <- lvish(mnist, kernel = "knn", perplexity = 15, n_epochs = 1500,
 
 * The [UMAP](https://github.com/lmcinnes/umap) reference implementation and
 [publication](https://arxiv.org/abs/1802.03426).
-* Other R packages for UMAP: https://github.com/ropenscilabs/umapr and 
-https://github.com/tkonopka/umap
+* There is now a [UMAP package on CRAN](https://cran.r-project.org/package=umap)
+(see also its [github repo](https://github.com/tkonopka/umap)). Another R
+package is https://github.com/ropenscilabs/umapr.
 * `uwot` uses the [RcppProgress](https://cran.r-project.org/package=RcppProgress)
 package to show a text-based progress bar when `verbose = TRUE`.
 * My somewhat convoluted method to ensure the C++ random numbers are repeatable
