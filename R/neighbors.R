@@ -1,4 +1,5 @@
 find_nn <- function(X, k, include_self = TRUE, method = "fnn",
+                    metric = "euclidean",
                     n_trees = 50, search_k = 2 * k * n_trees,
                     n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                     grain_size = 1,
@@ -17,6 +18,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
     }
     else {
       res <- annoy_nn(X, k = k, include_self = include_self,
+                      metric = metric,
                       n_trees = n_trees, search_k = search_k,
                       n_threads = n_threads,
                       verbose = verbose)
@@ -34,15 +36,28 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
 # is k * n_trees.
 #' @importFrom methods new
 annoy_nn <- function(X, k = 10, include_self = TRUE,
+                     metric = "euclidean",
                      n_trees = 50, search_k = 2 * k * n_trees,
                      n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                      grain_size = 1,
                      verbose = FALSE) {
   nr <- nrow(X)
   nc <- ncol(X)
-  ann <- methods::new(RcppAnnoy::AnnoyEuclidean, nc)
 
-  tsmessage("Building Annoy index")
+  if (metric == "cosine") {
+    ann <- methods::new(RcppAnnoy::AnnoyAngular, nc)
+    search_nn_func <- annoy_cosine_nns
+  }
+  else if (metric == "manhattan") {
+    ann <- methods::new(RcppAnnoy::AnnoyManhattan, nc)
+    search_nn_func <- annoy_manhattan_nns
+  }
+  else {
+    ann <- methods::new(RcppAnnoy::AnnoyEuclidean, nc)
+    search_nn_func <- annoy_euclidean_nns
+  }
+
+  tsmessage("Building Annoy index with metric = ", metric)
   progress <- Progress$new(max = nr, display = verbose)
 
   for (i in 1:nr) {
@@ -60,7 +75,7 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
 
   if (n_threads > 0) {
     tsmessage("Searching Annoy index using ", pluralize("thread", n_threads))
-    res <- annoy_euclidean_nns(index_file,
+    res <- search_nn_func(index_file,
                                X,
                                k, search_k,
                                grain_size = grain_size,

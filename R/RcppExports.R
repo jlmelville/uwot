@@ -5,6 +5,14 @@ annoy_euclidean_nns <- function(index_name, mat, n, search_k, grain_size = 1L, v
     .Call(`_uwot_annoy_euclidean_nns`, index_name, mat, n, search_k, grain_size, verbose)
 }
 
+annoy_cosine_nns <- function(index_name, mat, n, search_k, grain_size = 1L, verbose = FALSE) {
+    .Call(`_uwot_annoy_cosine_nns`, index_name, mat, n, search_k, grain_size, verbose)
+}
+
+annoy_manhattan_nns <- function(index_name, mat, n, search_k, grain_size = 1L, verbose = FALSE) {
+    .Call(`_uwot_annoy_manhattan_nns`, index_name, mat, n, search_k, grain_size, verbose)
+}
+
 optimize_layout_umap <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, verbose) {
     .Call(`_uwot_optimize_layout_umap`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, verbose)
 }

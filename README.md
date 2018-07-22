@@ -8,19 +8,10 @@ method for dimensionality reduction (McInnes and Healy, 2018).
 
 ## Status
 
-3rd July: the `C stack usage [big number] is too close to the limit` error that
-occurs under Linux seems to be due to using RcppProgress within a RcppParallel
-worker, so progress bars for the neighbor search and smooth knn
-distance/perplexity phase have been disabled if using `n_threads` greater than
-0.
-
-Current issues:
-
-* `R CMD check` currently reports two notes: `GNU make is a SystemRequirements.`,
-which is expected and due to using RcppParallel. On Linux, I also see a note
-about the `libs` directory being 5 MB, probably due to code bloat from my
-undisciplined and profligate stick-it-all-in-the-header C++ coding style, but
-might be fixable if it's not due to templates.
+You can now use the cosine and Manhattan distances with the Annoy nearest
+neighbor search, via `metric = "cosine"` and `metric = "manhattan"`,
+respectively. Hamming distance is not supported because RcppAnnoy doesn't yet
+support it.
 
 ## Installing
 
@@ -45,6 +36,9 @@ mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
 
 # Use a specific number of threads
 mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8)
+
+# Use a different metric
+mnist_umap_cosine <- umap(n_neighbors = 15, metric = "cosine", min_dist = 0.001, verbose = TRUE, n_threads = 8)
 ```
 
 ## Documentation
@@ -53,26 +47,6 @@ Apart from the man pages in R, there is a page
 [describing UMAP](https://jlmelville.github.io/uwot/umap-for-tsne.html) using
 terminology similar to t-SNE, rather than the more topological approach of the
 UMAP publication.
-
-## What's New
-
-June 29: `uwot` is now multi-threaded in all the obvious places.
-[RcppParallel](https://github.com/RcppCore/RcppParallel) is used for the nearest
-neighbor index search, the smooth knn/perplexity calibration, and the
-optimization, which is the same approach that
-[LargeVis](https://github.com/lferry007/LargeVis) takes.
-
-You can (and should) adjust the number of threads via the `n_threads` parameter;
-for now, the default is half of whatever RcppParallel thinks should be the
-default. I have also exposed the `grain_size` parameter. If a thread would
-process less than `grain_size` number of items, then no multithreading is
-carried out. Set `n_threads = 0` to use the previous non-threaded search; with
-`n_threads = 1`, you get the new multi-threaded code but with only one thread.
-
-I can't tell you how many times I blew up my R session while writing this. It's
-working for me at the moment, but there's no way there aren't problems waiting
-to be unleashed during an R garbage collection event or the like. Do not run the
-multi-threaded code without saving all your data first.
 
 ## Implementation Details
 
@@ -166,16 +140,34 @@ calls to `gc()` after some stages to avoid holding onto unused memory for longer
 than usual. The larger the value of `n_neighbors`, the more memory you can expect
 to take up (see, for example, the discussion of the `lvish` function below).
 
-## Limitations
+## Multi-threading support
 
-* Only Euclidean distances are supported for finding nearest neighbors from data
-frame and dense matrix input. But if you can calculate a distance matrix for
-your data, you can pass it in as `dist` object. For larger distance matrices,
-you can pass in a `sparseMatrix` (from the
+[RcppParallel](https://github.com/RcppCore/RcppParallel) is used for the nearest
+neighbor index search, the smooth knn/perplexity calibration, and the
+optimization, which is the same approach that
+[LargeVis](https://github.com/lferry007/LargeVis) takes.
+
+You can (and should) adjust the number of threads via the `n_threads` parameter;
+for now, the default is half of whatever RcppParallel thinks should be the
+default. I have also exposed the `grain_size` parameter. If a thread would
+process less than `grain_size` number of items, then no multithreading is
+carried out. Set `n_threads = 0` to use the previous non-threaded search; with
+`n_threads = 1`, you get the new multi-threaded code but with only one thread.
+
+I've not experienced any problems with using multiple threads for a little
+while, but if you have any problems with crashing sessions, please file an 
+issue.
+
+## Limitations and Other Issues
+
+* Only Euclidean, cosine, and Manhattan distances are supported for finding
+nearest neighbors from data frame and dense matrix input. But if you can
+calculate a distance matrix for your data, you can pass it in as `dist` object.
+For larger distance matrices, you can pass in a `sparseMatrix` (from the
 [Matrix](https://cran.r-project.org/package=Matrix) package). Neither approach
 is supremely efficient at the moment. Proper sparse matrix support is limited
 by the nearest neighbor search routine: Annoy is intended for dense vectors.
-Adding a library for sparse nearest neighbor search would be a good extension. 
+Adding a library for sparse nearest neighbor search would be a good extension.
 * I haven't tried this on anything much larger than MNIST and Fashion MNIST (so
 at least around 100,000 rows with 500-1,000 columns works fine). Bear in mind
 that Annoy itself says it works best with dimensions < 100, but still works
@@ -186,6 +178,8 @@ fails to converge it will fall back to random initialization, but on occasion
 I've seen it take an extremely long time (a couple of hours) to converge. If
 initialization is taking more than a few minutes, I suggest stopping the 
 calculation and using the scaled PCA (`init = "spca"`) instead.
+* `R CMD check` currently reports two notes: `GNU make is a SystemRequirements.`,
+which is expected and due to using RcppParallel.
 
 ## Other Methods
 

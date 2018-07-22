@@ -20,6 +20,15 @@
 #' @param n_components The dimension of the space to embed into. This defaults
 #'   to \code{2} to provide easy visualization, but can reasonably be set to any
 #'   integer value in the range \code{2} to \code{100}.
+#' @param metric Type of distance metric to use to find nearest neighbors. One
+#'   of:
+#' \itemize{
+#'   \item \code{"euclidean"} (the default)
+#'   \item \code{"cosine"}
+#'   \item \code{"manhattan"}
+#' }
+#' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
+#' distance metric is always "euclidean").
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. By default, this value is set to \code{500} for datasets
 #'   containing 10,000 vertices or less, and \code{200} otherwise.
@@ -156,8 +165,9 @@
 #' \emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
 #' \url{http://www.jmlr.org/papers/v9/vandermaaten08a.html}
 #' @export
-umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
-                 alpha = 1, scale = FALSE, init = "spectral", spread = 1, min_dist = 0.01,
+umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
+                 n_epochs = NULL, alpha = 1, scale = FALSE, init = "spectral",
+                 spread = 1, min_dist = 0.01,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                  bandwidth = 1.0, gamma = 1.0,
                  negative_sample_rate = 5.0, a = NULL, b = NULL,
@@ -168,8 +178,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                  grain_size = 1,
                  verbose = getOption("verbose", TRUE)) {
   uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
-       n_epochs = n_epochs, alpha = alpha, scale = scale, init = init, spread = spread,
-       min_dist = min_dist, set_op_mix_ratio = set_op_mix_ratio,
+       metric = metric, n_epochs = n_epochs, alpha = alpha, scale = scale,
+       init = init, spread = spread, min_dist = min_dist,
+       set_op_mix_ratio = set_op_mix_ratio,
        local_connectivity = local_connectivity, bandwidth = bandwidth,
        gamma = gamma, negative_sample_rate = negative_sample_rate,
        a = a, b = b, nn_method = nn_method, n_trees = n_trees,
@@ -202,6 +213,15 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #' @param n_components The dimension of the space to embed into. This defaults
 #'   to \code{2} to provide easy visualization, but can reasonably be set to any
 #'   integer value in the range \code{2} to \code{100}.
+#' @param metric Type of distance metric to use to find nearest neighbors. One
+#'   of:
+#' \itemize{
+#'   \item \code{"euclidean"} (the default)
+#'   \item \code{"cosine"}
+#'   \item \code{"manhattan"}
+#' }
+#' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
+#' distance metric is always "euclidean").
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. By default, this value is set to \code{500} for datasets
 #'   containing 10,000 vertices or less, and \code{200} otherwise.
@@ -285,7 +305,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates.
 #' @export
-tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
+tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
+                  n_epochs = NULL,
                   alpha = 1, scale = FALSE, init = "spectral",
                   set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                   bandwidth = 1.0, gamma = 1.0,
@@ -296,6 +317,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                   grain_size = 1,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
+       metric = metric,
        n_epochs = n_epochs, alpha = alpha, scale = scale, init = init, spread = NULL,
        min_dist = NULL, set_op_mix_ratio = set_op_mix_ratio,
        local_connectivity = local_connectivity, bandwidth = bandwidth,
@@ -347,6 +369,15 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #' @param n_components The dimension of the space to embed into. This defaults
 #'   to \code{2} to provide easy visualization, but can reasonably be set to any
 #'   integer value in the range \code{2} to \code{100}.
+#' @param metric Type of distance metric to use to find nearest neighbors. One
+#'   of:
+#' \itemize{
+#'   \item \code{"euclidean"} (the default)
+#'   \item \code{"cosine"}
+#'   \item \code{"manhattan"}
+#' }
+#' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
+#' distance metric is always "euclidean").
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. The default is calculate the number of epochs
 #'   dynamically based on dataset size, to give the same number of edge samples
@@ -442,7 +473,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
 #' }
 #' @export
 lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
-                  n_components = 2, n_epochs = -1,
+                  n_components = 2, metric = "euclidean", n_epochs = -1,
                   alpha = 1, scale = "maxabs", init = "lvrandom", gamma = 7,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
@@ -452,6 +483,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   kernel = "gauss",
                   verbose = getOption("verbose", TRUE)) {
   uwot(X, n_neighbors = n_neighbors, n_components = n_components,
+       metric = metric,
        n_epochs = n_epochs, alpha = alpha, scale = scale, init = init, gamma = gamma,
        negative_sample_rate = negative_sample_rate,
        nn_method = nn_method, n_trees = n_trees, search_k = search_k,
@@ -460,7 +492,8 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 }
 
 # Function that does all the real work
-uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
+uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
+                 n_epochs = NULL,
                  alpha = 1, scale = FALSE, init = "spectral", spread = 1, min_dist = 0.01,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                  bandwidth = 1.0, gamma = 1.0,
@@ -535,8 +568,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     }
   }
 
+  metric <- match.arg(tolower(metric), c("euclidean", "cosine", "manhattan"))
+
   if (is.null(nn_method)) {
-    if (n_vertices < 4096) {
+    if (n_vertices < 4096 && metric == "euclidean") {
       tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
       nn_method = "fnn"
     }
@@ -546,6 +581,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     }
   }
   nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
+  if (nn_method == "fnn" && metric != "euclidean") {
+    stop("nn_method = 'FNN' is only compatible with distance metric 'euclidean'")
+  }
 
   if (method == "largevis") {
     if (perplexity >= n_vertices) {
@@ -554,6 +592,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     V <- perplexity_similarities(X, n_neighbors,
                                  perplexity = perplexity,
                                  nn_method = nn_method,
+                                 metric = metric,
                                  n_trees = n_trees,
                                  search_k  = search_k,
                                  n_threads = n_threads,
@@ -566,6 +605,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
                               set_op_mix_ratio = set_op_mix_ratio,
                               local_connectivity = local_connectivity,
                               bandwidth = bandwidth, nn_method = nn_method,
+                              metric = metric,
                               n_trees = n_trees, search_k = search_k,
                               n_threads = n_threads, grain_size = grain_size,
                               verbose = verbose)
@@ -698,6 +738,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, n_epochs = NULL,
     }
   }
   gc()
+  # Center the points before returning
+  embedding <- scale(embedding, center = TRUE, scale = FALSE)
   tsmessage("Optimization finished")
   embedding
 }

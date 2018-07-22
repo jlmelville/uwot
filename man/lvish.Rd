@@ -5,11 +5,11 @@
 \title{Dimensionality Reduction with a LargeVis-like method}
 \usage{
 lvish(X, perplexity = 50, n_neighbors = perplexity * 3, n_components = 2,
-  n_epochs = -1, alpha = 1, scale = "maxabs", init = "lvrandom",
-  gamma = 7, negative_sample_rate = 5, nn_method = NULL, n_trees = 50,
-  search_k = 2 * n_neighbors * n_trees, n_threads = max(1,
-  RcppParallel::defaultNumThreads()/2), grain_size = 1, kernel = "gauss",
-  verbose = getOption("verbose", TRUE))
+  metric = "euclidean", n_epochs = -1, alpha = 1, scale = "maxabs",
+  init = "lvrandom", gamma = 7, negative_sample_rate = 5,
+  nn_method = NULL, n_trees = 50, search_k = 2 * n_neighbors * n_trees,
+  n_threads = max(1, RcppParallel::defaultNumThreads()/2), grain_size = 1,
+  kernel = "gauss", verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -31,6 +31,16 @@ manifold approximation. This is the analogous to \code{n_neighbors} in
 \item{n_components}{The dimension of the space to embed into. This defaults
 to \code{2} to provide easy visualization, but can reasonably be set to any
 integer value in the range \code{2} to \code{100}.}
+
+\item{metric}{Type of distance metric to use to find nearest neighbors. One
+  of:
+\itemize{
+  \item \code{"euclidean"} (the default)
+  \item \code{"cosine"}
+  \item \code{"manhattan"}
+}
+Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
+distance metric is always "euclidean").}
 
 \item{n_epochs}{Number of epochs to use during the optimization of the
 embedded coordinates. The default is calculate the number of epochs

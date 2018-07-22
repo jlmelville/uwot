@@ -22,6 +22,38 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// annoy_cosine_nns
+Rcpp::List annoy_cosine_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, size_t n, size_t search_k, std::size_t grain_size, bool verbose);
+RcppExport SEXP _uwot_annoy_cosine_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< size_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< size_t >::type search_k(search_kSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(annoy_cosine_nns(index_name, mat, n, search_k, grain_size, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// annoy_manhattan_nns
+Rcpp::List annoy_manhattan_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, size_t n, size_t search_k, std::size_t grain_size, bool verbose);
+RcppExport SEXP _uwot_annoy_manhattan_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< size_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< size_t >::type search_k(search_kSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(annoy_manhattan_nns(index_name, mat, n, search_k, grain_size, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // optimize_layout_umap
 arma::mat optimize_layout_umap(arma::mat embedding, const arma::uvec& positive_head, const arma::uvec& positive_tail, unsigned int n_epochs, unsigned int n_vertices, const arma::vec& epochs_per_sample, double a, double b, double gamma, double initial_alpha, double negative_sample_rate, unsigned int seed, bool approx_pow, bool verbose);
 RcppExport SEXP _uwot_optimize_layout_umap(SEXP embeddingSEXP, SEXP positive_headSEXP, SEXP positive_tailSEXP, SEXP n_epochsSEXP, SEXP n_verticesSEXP, SEXP epochs_per_sampleSEXP, SEXP aSEXP, SEXP bSEXP, SEXP gammaSEXP, SEXP initial_alphaSEXP, SEXP negative_sample_rateSEXP, SEXP seedSEXP, SEXP approx_powSEXP, SEXP verboseSEXP) {
@@ -228,6 +260,8 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_uwot_annoy_euclidean_nns", (DL_FUNC) &_uwot_annoy_euclidean_nns, 6},
+    {"_uwot_annoy_cosine_nns", (DL_FUNC) &_uwot_annoy_cosine_nns, 6},
+    {"_uwot_annoy_manhattan_nns", (DL_FUNC) &_uwot_annoy_manhattan_nns, 6},
     {"_uwot_optimize_layout_umap", (DL_FUNC) &_uwot_optimize_layout_umap, 14},
     {"_uwot_optimize_layout_tumap", (DL_FUNC) &_uwot_optimize_layout_tumap, 10},
     {"_uwot_optimize_layout_largevis", (DL_FUNC) &_uwot_optimize_layout_largevis, 11},

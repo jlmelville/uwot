@@ -4,13 +4,13 @@
 \alias{umap}
 \title{Dimensionality Reduction with UMAP}
 \usage{
-umap(X, n_neighbors = 15, n_components = 2, n_epochs = NULL, alpha = 1,
-  scale = FALSE, init = "spectral", spread = 1, min_dist = 0.01,
-  set_op_mix_ratio = 1, local_connectivity = 1, bandwidth = 1,
-  gamma = 1, negative_sample_rate = 5, a = NULL, b = NULL,
-  nn_method = NULL, n_trees = 50, search_k = 2 * n_neighbors * n_trees,
-  approx_pow = FALSE, n_threads = max(1,
-  RcppParallel::defaultNumThreads()/2), grain_size = 1,
+umap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
+  n_epochs = NULL, alpha = 1, scale = FALSE, init = "spectral",
+  spread = 1, min_dist = 0.01, set_op_mix_ratio = 1,
+  local_connectivity = 1, bandwidth = 1, gamma = 1,
+  negative_sample_rate = 5, a = NULL, b = NULL, nn_method = NULL,
+  n_trees = 50, search_k = 2 * n_neighbors * n_trees, approx_pow = FALSE,
+  n_threads = max(1, RcppParallel::defaultNumThreads()/2), grain_size = 1,
   verbose = getOption("verbose", TRUE))
 }
 \arguments{
@@ -31,6 +31,16 @@ more local data being preserved. In general values should be in the range
 \item{n_components}{The dimension of the space to embed into. This defaults
 to \code{2} to provide easy visualization, but can reasonably be set to any
 integer value in the range \code{2} to \code{100}.}
+
+\item{metric}{Type of distance metric to use to find nearest neighbors. One
+  of:
+\itemize{
+  \item \code{"euclidean"} (the default)
+  \item \code{"cosine"}
+  \item \code{"manhattan"}
+}
+Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
+distance metric is always "euclidean").}
 
 \item{n_epochs}{Number of epochs to use during the optimization of the
 embedded coordinates. By default, this value is set to \code{500} for datasets

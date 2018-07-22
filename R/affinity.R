@@ -20,15 +20,17 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
 # geodesic distance at each point, creating a fuzzy simplicial set for each such
 # point, and then combining all the local fuzzy simplicial sets into a global
 # one via a fuzzy union
-fuzzy_simplicial_set <- function(X, n_neighbors, set_op_mix_ratio = 1.0,
+fuzzy_simplicial_set <- function(X, n_neighbors,
+                                 set_op_mix_ratio = 1.0,
                                  local_connectivity = 1.0, bandwidth = 1.0,
-                                 nn_method = "fnn",
+                                 nn_method = "fnn", metric = "euclidean",
                                  n_trees = 50,
                                  search_k = 2 * n_neighbors * n_trees,
                                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                                  grain_size = 1,
                                  verbose = FALSE) {
-  nn <- find_nn(X, n_neighbors, method = nn_method, n_trees = n_trees,
+  nn <- find_nn(X, n_neighbors, method = nn_method, metric = metric,
+                n_trees = n_trees,
                 n_threads = n_threads, grain_size = grain_size,
                 search_k = search_k, verbose = verbose)
   gc()
@@ -68,14 +70,15 @@ symmetrize <- function(P) {
 }
 
 perplexity_similarities <- function(X, n_neighbors, perplexity,
-                                 nn_method = "fnn",
+                                 nn_method = "fnn", metric = "euclidean",
                                  n_trees = 50,
                                  search_k = 2 * n_neighbors * n_trees,
                                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                                  grain_size = 1,
                                  kernel = "gauss",
                                  verbose = FALSE) {
-  nn <- find_nn(X, n_neighbors, method = nn_method, n_trees = n_trees,
+  nn <- find_nn(X, n_neighbors, method = nn_method, metric = metric,
+                n_trees = n_trees,
                 search_k = search_k, n_threads = n_threads,
                 grain_size = grain_size,
                 verbose = verbose)
