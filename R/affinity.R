@@ -34,6 +34,9 @@ fuzzy_simplicial_set <- function(X, n_neighbors,
                 n_threads = n_threads, grain_size = grain_size,
                 search_k = search_k, verbose = verbose)
   gc()
+  if (any(is.infinite(nn$dist))) {
+    stop("Infinite distances found in nearest neighbors")
+  }
 
   if (n_threads > 0) {
     tsmessage("Commencing smooth kNN distance calibration for k = ",

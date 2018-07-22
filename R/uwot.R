@@ -610,7 +610,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                               n_threads = n_threads, grain_size = grain_size,
                               verbose = verbose)
   }
-
+  if (any(is.na(V))) {
+    stop("Non-finite entries in the input matrix")
+  }
   gc()
 
   if (methods::is(init, "matrix")) {
