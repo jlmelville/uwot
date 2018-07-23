@@ -659,7 +659,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
 
   if (n_threads >= 1) {
-    tsmessage("Commencing optimization for ", n_epochs, " epochs, using ", pluralize("thread", n_threads))
+    tsmessage("Commencing optimization for ", n_epochs, " epochs, with ",
+              length(positive_head), " positive edges using ",
+              pluralize("thread", n_threads))
     if (tolower(method) == "umap") {
       embedding <- optimize_layout_umap_parallel(embedding = embedding,
                          positive_head = positive_head,
