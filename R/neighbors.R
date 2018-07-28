@@ -66,14 +66,15 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
   }
 
   ann$build(n_trees)
-  index_file = tempfile()
-  ann$save(index_file)
 
   if (!include_self) {
     k <- k + 1
   }
 
   if (n_threads > 0) {
+    index_file = tempfile()
+    ann$save(index_file)
+
     tsmessage("Searching Annoy index using ", pluralize("thread", n_threads))
     res <- search_nn_func(index_file,
                                X,
