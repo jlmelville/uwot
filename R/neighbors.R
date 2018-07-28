@@ -93,6 +93,10 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
     dist <- matrix(nrow = nr, ncol = k)
     for (i in 1:nr) {
       res <- ann$getNNsByItemList(i - 1, k, search_k, TRUE)
+      if (length(res$item) != k) {
+        stop("search_k/n_trees settings were unable to find ", k,
+             " neighbors for item ", i)
+      }
       idx[i, ] <- res$item
       dist[i, ] <- res$distance
       search_progress$increment()
