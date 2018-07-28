@@ -619,6 +619,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (nrow(init) != n_vertices || ncol(init) != n_components) {
       stop("init matrix does not match necessary configuration for X")
     }
+    embedding <- init
   }
   else {
     init <- match.arg(tolower(init), c("spectral", "random", "lvrandom", "normlaplacian",
