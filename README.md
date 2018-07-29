@@ -79,6 +79,8 @@ The right hand image is the result of using `uwot`.
 |-----------------------------------|---------------------------------|
 | ![mnist-py.png](img/mnist-py.png) | ![mnist-r.png](img/mnist-r.png) |
 
+The project documentation contains some more [examples](https://jlmelville.github.io/uwot/umap-examples.html).
+
 ## Performance
 
 To get a feel for the performance of `uwot`, here are some timings for
