@@ -39,7 +39,11 @@ P_symm <- matrix(c(
   4.134502e-03, 0.0506769759, 0.0136734904, 0.0143633019, 2.356628e-03, 1.168212e-03, 0.002656313, 0.0122124758, 4.150755e-03, 0.000000000
 ) * 10, nrow = 10, byrow = TRUE)
 
-res <- perplexity_similarities(iris10, n_neighbors = 10, perplexity = 4, verbose = FALSE)
+
+res <- perplexity_similarities(perplexity = 4, verbose = FALSE,
+                               nn = find_nn(iris10, k = 10 , method = "fnn",
+                                            metric = "euclidean", n_threads = 0,
+                                            verbose = FALSE))
 expect_true(Matrix::isSymmetric(res))
 expect_equal(as.matrix(res), P_symm, tol = 1e-5, check.attributes = FALSE)
 
@@ -55,7 +59,10 @@ P_symm_6nn <- matrix(c(
    0,           0.008608916, 0.010952319, 0.03281124, 0,           0,           0.004717900, 0,           0,           0.004370167,
    0.007253571, 0.043891243, 0.015666352, 0.01564463, 0.003730662, 0.002562369, 0.003609179, 0.015406444, 0.004370167, 0
 ) * 10, nrow = 10, byrow = TRUE)
-res <- perplexity_similarities(iris10, n_neighbors = 6, perplexity = 4, verbose = FALSE)
+res <- perplexity_similarities(perplexity = 4, verbose = FALSE,
+                               nn = find_nn(iris10, k = 6, method = "fnn",
+                                            metric = "euclidean", n_threads = 0,
+                                            verbose = FALSE))
 expect_true(Matrix::isSymmetric(res))
 expect_equal(as.matrix(res), P_symm_6nn, tol = 1e-5, check.attributes = FALSE)
 
@@ -114,10 +121,16 @@ Prow_iris_p150_k50_rowSums <- c(
   1.022525,  0.951965,  0.977462,  0.941184,  1.050544,  1.128182,  1.230836,  0.925821,  1.158545
 )
 
-res <- perplexity_similarities(normiris, n_neighbors = 149, perplexity = 50, n_threads = 0, verbose = FALSE)
+res <- perplexity_similarities(perplexity = 50, n_threads = 0, verbose = FALSE,
+                               nn = find_nn(normiris, k = 149 , method = "fnn",
+                                            metric = "euclidean", n_threads = 0,
+                                            verbose = FALSE))
 expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tol = 1e-6)
 
 RcppParallel::setThreadOptions(numThreads = 1)
-res <- perplexity_similarities(normiris, n_neighbors = 149, perplexity = 50, n_threads = 1, verbose = FALSE)
+res <- perplexity_similarities(perplexity = 50, n_threads = 1, verbose = FALSE,
+                               nn = find_nn(normiris, k = 149 , method = "fnn",
+                                            metric = "euclidean", n_threads = 0,
+                                            verbose = FALSE))
 expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tol = 1e-6)
 

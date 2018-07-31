@@ -14,33 +14,20 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
   }
 }
 
-# Given a set of data X, a neighborhood size, and a measure of distance compute
+# Given nearest neighbor data and a measure of distance compute
 # the fuzzy simplicial set (here represented as a fuzzy graph in the form of a
 # sparse matrix) associated to the data. This is done by locally approximating
 # geodesic distance at each point, creating a fuzzy simplicial set for each such
 # point, and then combining all the local fuzzy simplicial sets into a global
 # one via a fuzzy union
-fuzzy_simplicial_set <- function(X, n_neighbors,
+fuzzy_simplicial_set <- function(nn,
                                  set_op_mix_ratio = 1.0,
                                  local_connectivity = 1.0, bandwidth = 1.0,
-                                 nn_method = "fnn", metric = "euclidean",
-                                 n_trees = 50,
-                                 search_k = 2 * n_neighbors * n_trees,
                                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                                  grain_size = 1,
                                  verbose = FALSE) {
-  nn <- find_nn(X, n_neighbors, method = nn_method, metric = metric,
-                n_trees = n_trees,
-                n_threads = n_threads, grain_size = grain_size,
-                search_k = search_k, verbose = verbose)
-  gc()
-  if (any(is.infinite(nn$dist))) {
-    stop("Infinite distances found in nearest neighbors")
-  }
-
   if (n_threads > 0) {
-    tsmessage("Commencing smooth kNN distance calibration for k = ",
-              formatC(n_neighbors), " using ",
+    tsmessage("Commencing smooth kNN distance calibration using ",
               pluralize("thread", n_threads))
     affinity_matrix <- smooth_knn_distances_parallel(nn_dist = nn$dist,
                                                 nn_idx = nn$idx,
@@ -53,8 +40,7 @@ fuzzy_simplicial_set <- function(X, n_neighbors,
                                                 verbose = verbose)
   }
   else {
-    tsmessage("Commencing smooth kNN distance calibration for k = ",
-              formatC(n_neighbors))
+    tsmessage("Commencing smooth kNN distance calibration")
     affinity_matrix <- smooth_knn_distances_cpp(nn_dist = nn$dist,
                                                 nn_idx = nn$idx,
                                                 n_iter = 64,
@@ -72,26 +58,20 @@ symmetrize <- function(P) {
   0.5 * (P + Matrix::t(P))
 }
 
-perplexity_similarities <- function(X, n_neighbors, perplexity,
-                                 nn_method = "fnn", metric = "euclidean",
-                                 n_trees = 50,
-                                 search_k = 2 * n_neighbors * n_trees,
+perplexity_similarities <- function(nn, perplexity = NULL,
                                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                                  grain_size = 1,
                                  kernel = "gauss",
                                  verbose = FALSE) {
-  nn <- find_nn(X, n_neighbors, method = nn_method, metric = metric,
-                n_trees = n_trees,
-                search_k = search_k, n_threads = n_threads,
-                grain_size = grain_size,
-                verbose = verbose)
 
-  gc()
+  if (is.null(perplexity) && kernel != "knn") {
+    stop("Must provide perplexity")
+  }
 
   if (kernel == "gauss") {
     if (n_threads > 0) {
-      tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
-                " k = ", formatC(n_neighbors), " using ", pluralize("thread", n_threads))
+      tsmessage("Commencing calibration for perplexity = ", formatC(perplexity),
+                " using ", pluralize("thread", n_threads))
       affinity_matrix <- calc_row_probabilities_parallel(nn_dist = nn$dist,
                                                     nn_idx = nn$idx,
                                                     perplexity = perplexity,
@@ -99,18 +79,18 @@ perplexity_similarities <- function(X, n_neighbors, perplexity,
                                                     verbose = verbose)
     }
     else {
-      tsmessage("Commencing perplexity calibration for perplexity = ", formatC(perplexity),
-                " k = ", formatC(n_neighbors))
+      tsmessage("Commencing calibration for perplexity = ", formatC(perplexity))
       affinity_matrix <- calc_row_probabilities_cpp(nn_dist = nn$dist,
                                                 nn_idx = nn$idx,
                                                 perplexity = perplexity,
                                                 verbose = verbose)
     }
   }
-  else { # "knn"
-    tsmessage("Using knn graph for input weights with k = ", n_neighbors)
+  else {
+    # knn kernel
+    tsmessage("Using knn graph for input weights with k = ", ncol(nn$idx))
     # Make each row sum to 1, ignoring the self-index, i.e. diagonal will be zero
-    affinity_matrix <- nn_to_sparse(nn$idx, val = 1 / (n_neighbors - 1))
+    affinity_matrix <- nn_to_sparse(nn$idx, val = 1 / (ncol(nn$idx) - 1))
     Matrix::diag(affinity_matrix) <- 0
     affinity_matrix <- Matrix::drop0(affinity_matrix)
   }

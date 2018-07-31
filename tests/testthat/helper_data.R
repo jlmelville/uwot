@@ -44,3 +44,6 @@ dmiris10z <- dmiris10
 dmiris10z[dmiris10z > 0.71] <- 0
 dmiris10z <- Matrix::drop0(dmiris10z)
 
+nn <- find_nn(iris10, k = 4 , method = "fnn", metric = "euclidean",
+              n_threads = 0, verbose = FALSE)
+

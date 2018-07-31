@@ -1,20 +1,18 @@
 library(uwot)
 context("knn affinity")
 
-nn_4 <- find_nn(iris10, k = 4)
-
 expected_sparse <- matrix(0, nrow = 10, ncol = 10)
-for (i in 1:nrow(nn_4$idx)) {
-  for (j in 1:ncol(nn_4$idx)) {
-    expected_sparse[i, nn_4$idx[i, j]] <- 2
+for (i in 1:nrow(nn$idx)) {
+  for (j in 1:ncol(nn$idx)) {
+    expected_sparse[i, nn$idx[i, j]] <- 2
   }
 }
 expected_sparse <- Matrix::drop0(expected_sparse)
 
-res <- nn_to_sparse(nn_4$idx, val = 2)
+res <- nn_to_sparse(nn$idx, val = 2)
 expect_equal(res, expected_sparse)
 
-res <- perplexity_similarities(iris10, 4, kernel = "knn")
+res <- perplexity_similarities(iris10, 4, kernel = "knn", nn = nn)
 expected_sym_nn_graph <- matrix(0, nrow = 10, ncol = 10)
 o3 <- 1 / 3
 o6 <- 1 / 6

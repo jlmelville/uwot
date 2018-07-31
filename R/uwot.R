@@ -584,30 +584,31 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (nn_method == "fnn" && metric != "euclidean") {
     stop("nn_method = 'FNN' is only compatible with distance metric 'euclidean'")
   }
+  nn <- find_nn(X, n_neighbors, method = nn_method, metric = metric,
+                n_trees = n_trees,
+                n_threads = n_threads, grain_size = grain_size,
+                search_k = search_k, verbose = verbose)
+  gc()
+  if (any(is.infinite(nn$dist))) {
+    stop("Infinite distances found in nearest neighbors")
+  }
+
 
   if (method == "largevis") {
     if (perplexity >= n_vertices) {
       stop("perplexity can be no larger than ", n_vertices - 1)
     }
-    V <- perplexity_similarities(X, n_neighbors,
-                                 perplexity = perplexity,
-                                 nn_method = nn_method,
-                                 metric = metric,
-                                 n_trees = n_trees,
-                                 search_k  = search_k,
+    V <- perplexity_similarities(nn = nn, perplexity = perplexity,
                                  n_threads = n_threads,
                                  grain_size = grain_size,
                                  kernel = kernel,
                                  verbose = verbose)
   }
   else {
-    V <- fuzzy_simplicial_set(X, n_neighbors,
+    V <- fuzzy_simplicial_set(nn = nn,
                               set_op_mix_ratio = set_op_mix_ratio,
                               local_connectivity = local_connectivity,
-                              bandwidth = bandwidth, nn_method = nn_method,
-                              metric = metric,
-                              n_trees = n_trees, search_k = search_k,
-                              n_threads = n_threads, grain_size = grain_size,
+                              bandwidth = bandwidth,
                               verbose = verbose)
   }
   if (any(is.na(V))) {
