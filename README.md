@@ -6,12 +6,31 @@ An R implementation of the
 [Uniform Manifold Approximation and Projection (UMAP)](https://arxiv.org/abs/1802.03426) 
 method for dimensionality reduction (McInnes and Healy, 2018).
 
-## Status
+## News
 
-You can now use the cosine and Manhattan distances with the Annoy nearest
-neighbor search, via `metric = "cosine"` and `metric = "manhattan"`,
-respectively. Hamming distance is not supported because RcppAnnoy doesn't yet
-support it.
+*July 31 2018*. (Very) initial support for supervised dimension reduction:
+categorical data only at the moment. Pass in a factor vector (use `NA` for
+unknown labels) as the `y` parameter and edges with bad (or unknown) labels are
+down-weighted, hopefully leading to better separation of classes. This works
+remarkably well for the Fashion MNIST dataset. An easy way to try this:
+
+```R
+devtools::install_github("jlmelville/snedata")
+devtools::install_github("jlmelville/vizier")
+
+fashion <- snedata::download_fashion_mnist(verbose = TRUE)
+
+fashion_umap <- umap(fashion)
+fashion_sumap <- umap(fashion, y = fashion$Label)
+
+vizier::embed_plot(fashion_umap, fashion, title = "UMAP")
+vizier::embed_plot(fashion_sumap, fashion, title = "Supervised UMAP")
+```
+
+*July 22 2018*. You can now use the cosine and Manhattan distances with the
+Annoy nearest neighbor search, via `metric = "cosine"` and `metric =
+"manhattan"`, respectively. Hamming distance is not supported because RcppAnnoy
+doesn't yet support it.
 
 ## Installing
 
@@ -39,6 +58,10 @@ mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_
 
 # Use a different metric
 mnist_umap_cosine <- umap(n_neighbors = 15, metric = "cosine", min_dist = 0.001, verbose = TRUE, n_threads = 8)
+
+# Supervised dimension reduction
+mnist_umap_s <- umap(n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8, 
+                     y = mnist$Label, target_weight = 0.5)
 ```
 
 ## Documentation

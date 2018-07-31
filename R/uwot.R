@@ -121,6 +121,12 @@
 #' @param approx_pow If \code{TRUE}, use an approximation to the power function
 #'   in the UMAP gradient, from
 #'   \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.
+#' @param y Optional target array for supervised dimension reduction. Must be a
+#' vector of factors of the same length as \code{X}.
+#' @param target_weight Weighting factor between data topology and target
+#'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
+#'   entirely on target. The default of 0.5 balances the weighting equally
+#'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param n_threads Number of threads to use. Default is half that recommended
 #'   by RcppParallel. For nearest neighbor search, only applies if
 #'   \code{nn_method = "annoy"}.
@@ -140,6 +146,10 @@
 #' # devtools::install_github("jlmelville/snedata")
 #' # mnist <- snedata::download_mnist()
 #' mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
+#'
+#' # Supervised dimension reduction
+#' mnist_sumap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE,
+#'                     y = mnist$Label, target_weight = 0.5)
 #' }
 #' @references
 #' Belkin, M., & Niyogi, P. (2002).
@@ -174,6 +184,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
                  approx_pow = FALSE,
+                 y = NULL, target_weight = 0.5,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  grain_size = 1,
                  verbose = getOption("verbose", TRUE)) {
@@ -185,7 +196,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
        gamma = gamma, negative_sample_rate = negative_sample_rate,
        a = a, b = b, nn_method = nn_method, n_trees = n_trees,
        search_k = search_k, method = "umap", approx_pow = approx_pow,
-       n_threads = n_threads, grain_size = grain_size, verbose = verbose)
+       n_threads = n_threads, grain_size = grain_size,
+       y = y, target_weight = target_weight,
+       verbose = verbose)
 }
 
 #' Dimensionality Reduction Using T-Distributed UMAP (t-UMAP)
@@ -299,6 +312,12 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param n_threads Number of threads to use. Default is half that recommended
 #'   by RcppParallel. For nearest neighbor search, only applies if
 #'   \code{nn_method = "annoy"}.
+#' @param y Optional target array for supervised dimension reduction. Must be a
+#' vector of factors of the same length as \code{X}.
+#' @param target_weight Weighting factor between data topology and target
+#'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
+#'   entirely on target. The default of 0.5 balances the weighting equally
+#'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads}.
@@ -315,6 +334,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   search_k = 2 * n_neighbors * n_trees,
                   n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                   grain_size = 1,
+                  y = NULL, target_weight = 0.5,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
        metric = metric,
@@ -325,6 +345,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
        a = NULL, b = NULL, nn_method = nn_method, n_trees = n_trees,
        search_k = search_k, method = "tumap",
        n_threads = n_threads, grain_size = grain_size,
+       y = y, target_weight = target_weight,
        verbose = verbose)
 }
 
@@ -439,6 +460,12 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
+#' @param y Optional target array for supervised dimension reduction. Must be a
+#' vector of factors of the same length as \code{X}.
+#' @param target_weight Weighting factor between data topology and target
+#'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
+#'   entirely on target. The default of 0.5 balances the weighting equally
+#'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param n_threads Number of threads to use. Default is half that recommended
 #'   by RcppParallel. For nearest neighbor search, only applies if
 #'   \code{nn_method = "annoy"}.
@@ -480,6 +507,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   search_k = 2 * n_neighbors * n_trees,
                   n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                   grain_size = 1,
+                  y = NULL, target_weight = 0.5,
                   kernel = "gauss",
                   verbose = getOption("verbose", TRUE)) {
   uwot(X, n_neighbors = n_neighbors, n_components = n_components,
@@ -487,7 +515,9 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
        n_epochs = n_epochs, alpha = alpha, scale = scale, init = init, gamma = gamma,
        negative_sample_rate = negative_sample_rate,
        nn_method = nn_method, n_trees = n_trees, search_k = search_k,
-       method = "largevis", perplexity = perplexity, n_threads = n_threads,
+       method = "largevis", perplexity = perplexity,
+       y = y, target_weight = target_weight,
+       n_threads = n_threads,
        grain_size = grain_size, kernel = kernel, verbose = verbose)
 }
 
@@ -501,6 +531,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
                  method = "umap", perplexity = 50, approx_pow = FALSE,
+                 y = NULL, target_weight = 0.5,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  kernel = "gauss",
                  grain_size = 1,
@@ -593,7 +624,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     stop("Infinite distances found in nearest neighbors")
   }
 
-
   if (method == "largevis") {
     if (perplexity >= n_vertices) {
       stop("perplexity can be no larger than ", n_vertices - 1)
@@ -615,6 +645,21 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     stop("Non-finite entries in the input matrix")
   }
   gc()
+
+  if (!is.null(y)) {
+    if (target_weight < 1.0) {
+      far_dist <- 2.5 * (1.0 / (1.0 - target_weight))
+    }
+    else {
+      far_dist <- 1.0e12
+    }
+    tsmessage("Apply categorical set intersection, target weight = ",
+              formatC(target_weight), " far distance = ", formatC(far_dist))
+
+    V <- categorical_simplicial_set_intersection(V, y, far_dist = far_dist,
+                                                 verbose = verbose)
+  }
+
 
   if (methods::is(init, "matrix")) {
     if (nrow(init) != n_vertices || ncol(init) != n_components) {
