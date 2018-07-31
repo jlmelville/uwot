@@ -1,7 +1,9 @@
 Package: uwot
 Title: The Uniform Manifold Approximation and Projection (UMAP) Method for Dimensionality Reduction
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R: person("James", "Melville", email = "james.melville@gmail.com", role = c("aut", "cre"))
+Author: James Melville <james.melville@gmail.com>
+Maintainer: James Melville <james.melville@gmail.com>
 Description: The dimensionality reduction method UMAP 
   (McInnes and Healy, 2018, <arxiv:1802.03426>). It is similar 
   to, but faster than, the t-Distributed Stochastic Neighbor Embedding (t-SNE) 
