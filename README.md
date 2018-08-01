@@ -205,6 +205,8 @@ fails to converge it will fall back to random initialization, but on occasion
 I've seen it take an extremely long time (a couple of hours) to converge. If
 initialization is taking more than a few minutes, I suggest stopping the 
 calculation and using the scaled PCA (`init = "spca"`) instead.
+* For supervised dimensionality reduction using a numeric vector, only the
+Euclidean distance is supported for building the target graph.
 * `R CMD check` currently reports two notes: `GNU make is a SystemRequirements.`,
 which is expected and due to using RcppParallel.
 
