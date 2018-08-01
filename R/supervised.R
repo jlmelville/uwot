@@ -56,6 +56,20 @@ fast_intersection <- function(rows, cols, values, target, unknown_dist = 1.0,
   values
 }
 
+# Sparse Matrix functions -------------------------------------------------
+
+# normalize each column of a dgCMatrix by its maximum
+# https://stackoverflow.com/questions/39284774/column-rescaling-for-a-very-large-sparse-matrix-in-r
+col_max_normalize <- function(X) {
+  X@x <- X@x / rep.int(colMaxs(X), diff(X@p))
+  X
+}
+
+# normalize each row of a dgCMatrix by its maximum
+row_max_normalize <- function(X) {
+  Matrix::t(col_max_normalize(Matrix::t(X)))
+}
+
 # column maximums of a dgCMatrix
 colMaxs <- function(X) {
   nr <- nrow(X)
