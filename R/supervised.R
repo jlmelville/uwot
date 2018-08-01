@@ -56,6 +56,69 @@ fast_intersection <- function(rows, cols, values, target, unknown_dist = 1.0,
   values
 }
 
+general_simplicial_set_intersection <- function(left, right, weight) {
+  result <- methods::as(left + right, "dgTMatrix")
+
+  result@x <- general_sset_intersection(
+    left@p,
+    left@i,
+    left@x,
+    right@p,
+    right@i,
+    right@x,
+    result@i,
+    result@j,
+    result@x,
+    weight
+   )
+
+  result
+}
+
+general_sset_intersection <- function(indptr1,
+                                          indices1,
+                                          data1,
+                                          indptr2,
+                                          indices2,
+                                          data2,
+                                          result_row,
+                                          result_col,
+                                          result_val,
+                                          mix_weight=0.5) {
+  left_min <- max(min(data1) / 2.0, 1.0e-8)
+  right_min <- max(min(data2) / 2.0, 1.0e-8)
+
+  for (idx in 1:length(result_row)) {
+    i <- result_col[idx] + 1
+    j <- result_row[idx]
+
+    left_val <- left_min
+    for (k in (indptr1[i]):(indptr1[i + 1] - 1)) {
+      if (indices1[k + 1] == j) {
+        left_val <- data1[k + 1]
+      }
+    }
+
+    right_val <- right_min
+    for (k in (indptr2[i]):(indptr2[i + 1] - 1)) {
+      if (indices2[k + 1] == j) {
+        right_val <- data2[k + 1]
+      }
+    }
+
+    if (left_val > left_min || right_val > right_min) {
+      if (mix_weight < 0.5) {
+        result_val[idx] <- left_val * right_val ^ (mix_weight / (1.0 - mix_weight))
+      }
+      else {
+        result_val[idx] <- right_val * left_val ^ (((1.0 - mix_weight) / mix_weight))
+      }
+    }
+  }
+  result_val
+}
+
+
 # Sparse Matrix functions -------------------------------------------------
 
 # normalize each column of a dgCMatrix by its maximum

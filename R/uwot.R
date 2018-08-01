@@ -122,7 +122,10 @@
 #'   in the UMAP gradient, from
 #'   \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.
 #' @param y Optional target array for supervised dimension reduction. Must be a
-#' vector of factors of the same length as \code{X}.
+#'   factor or numeric vector with the same length as \code{X}.
+#' @param target_n_neighbors Number of nearest neighbors to use to construct the
+#'   target simplcial set. Default value is \code{n_neighbors}. Applies only if
+#'   \code{y} is non-\code{NULL} and \code{numeric}.
 #' @param target_weight Weighting factor between data topology and target
 #'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
 #'   entirely on target. The default of 0.5 balances the weighting equally
@@ -184,7 +187,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
                  approx_pow = FALSE,
-                 y = NULL, target_weight = 0.5,
+                 y = NULL, target_n_neighbors = n_neighbors,
+                 target_weight = 0.5,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  grain_size = 1,
                  verbose = getOption("verbose", TRUE)) {
@@ -197,7 +201,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
        a = a, b = b, nn_method = nn_method, n_trees = n_trees,
        search_k = search_k, method = "umap", approx_pow = approx_pow,
        n_threads = n_threads, grain_size = grain_size,
-       y = y, target_weight = target_weight,
+       y = y, target_n_neighbors = target_n_neighbors,
+       target_weight = target_weight,
        verbose = verbose)
 }
 
@@ -313,7 +318,10 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   by RcppParallel. For nearest neighbor search, only applies if
 #'   \code{nn_method = "annoy"}.
 #' @param y Optional target array for supervised dimension reduction. Must be a
-#' vector of factors of the same length as \code{X}.
+#'   factor or numeric vector with the same length as \code{X}.
+#' @param target_n_neighbors Number of nearest neighbors to use to construct the
+#'   target simplcial set. Default value is \code{n_neighbors}. Applies only if
+#'   \code{y} is non-\code{NULL} and \code{numeric}.
 #' @param target_weight Weighting factor between data topology and target
 #'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
 #'   entirely on target. The default of 0.5 balances the weighting equally
@@ -334,7 +342,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   search_k = 2 * n_neighbors * n_trees,
                   n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                   grain_size = 1,
-                  y = NULL, target_weight = 0.5,
+                  y = NULL, target_n_neighbors = n_neighbors,
+                  target_weight = 0.5,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
        metric = metric,
@@ -345,7 +354,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
        a = NULL, b = NULL, nn_method = nn_method, n_trees = n_trees,
        search_k = search_k, method = "tumap",
        n_threads = n_threads, grain_size = grain_size,
-       y = y, target_weight = target_weight,
+       y = y, target_n_neighbors = target_n_neighbors,
+       target_weight = target_weight,
        verbose = verbose)
 }
 
@@ -523,7 +533,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
                  method = "umap", perplexity = 50, approx_pow = FALSE,
-                 y = NULL, target_weight = 0.5,
+                 y = NULL, target_n_neighbors = n_neighbors, target_weight = 0.5,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  kernel = "gauss",
                  grain_size = 1,
@@ -639,17 +649,40 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   gc()
 
   if (!is.null(y)) {
-    if (target_weight < 1.0) {
-      far_dist <- 2.5 * (1.0 / (1.0 - target_weight))
+    if (is.factor(y)) {
+      if (target_weight < 1.0) {
+        far_dist <- 2.5 * (1.0 / (1.0 - target_weight))
+      }
+      else {
+        far_dist <- 1.0e12
+      }
+      tsmessage("Apply categorical set intersection, target weight = ",
+                formatC(target_weight), " far distance = ", formatC(far_dist))
+
+      V <- categorical_simplicial_set_intersection(V, y, far_dist = far_dist,
+                                                   verbose = verbose)
+    }
+    else if (is.numeric(y)) {
+      target_nn <- find_nn(as.matrix(y), target_n_neighbors, method = "annoy",
+                           metric = "euclidean",
+                           n_trees = n_trees,
+                           n_threads = n_threads, grain_size = grain_size,
+                           search_k = search_k, verbose = FALSE)
+
+      target_graph <- fuzzy_simplicial_set(nn = target_nn,
+                                set_op_mix_ratio = 1.0,
+                                local_connectivity = 1.0,
+                                bandwidth = 1.0,
+                                verbose = FALSE)
+
+      V <- general_simplicial_set_intersection(
+        V, target_graph, target_weight
+      )
+      V <- reset_local_connectivity(V)
     }
     else {
-      far_dist <- 1.0e12
+      stop("y must be factors or numeric")
     }
-    tsmessage("Apply categorical set intersection, target weight = ",
-              formatC(target_weight), " far distance = ", formatC(far_dist))
-
-    V <- categorical_simplicial_set_intersection(V, y, far_dist = far_dist,
-                                                 verbose = verbose)
   }
 
 

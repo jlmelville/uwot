@@ -10,8 +10,8 @@ umap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   local_connectivity = 1, bandwidth = 1, gamma = 1,
   negative_sample_rate = 5, a = NULL, b = NULL, nn_method = NULL,
   n_trees = 50, search_k = 2 * n_neighbors * n_trees, approx_pow = FALSE,
-  y = NULL, target_weight = 0.5, n_threads = max(1,
-  RcppParallel::defaultNumThreads()/2), grain_size = 1,
+  y = NULL, target_n_neighbors = n_neighbors, target_weight = 0.5,
+  n_threads = max(1, RcppParallel::defaultNumThreads()/2), grain_size = 1,
   verbose = getOption("verbose", TRUE))
 }
 \arguments{
@@ -153,7 +153,11 @@ in the UMAP gradient, from
 \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.}
 
 \item{y}{Optional target array for supervised dimension reduction. Must be a
-vector of factors of the same length as \code{X}.}
+factor or numeric vector with the same length as \code{X}.}
+
+\item{target_n_neighbors}{Number of nearest neighbors to use to construct the
+target simplcial set. Default value is \code{n_neighbors}. Applies only if
+\code{y} is non-\code{NULL} and \code{numeric}.}
 
 \item{target_weight}{Weighting factor between data topology and target
 topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
