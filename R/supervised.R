@@ -14,8 +14,8 @@ categorical_simplicial_set_intersection <- function(
   # Convert to dgTMatrix to get to the j indices
   simplicial_set <- methods::as(simplicial_set, "dgTMatrix")
   simplicial_set@x <- fast_intersection_cpp(
-    simplicial_set@j,
     simplicial_set@i,
+    simplicial_set@j,
     simplicial_set@x,
     target,
     unknown_dist,
@@ -24,18 +24,6 @@ categorical_simplicial_set_intersection <- function(
 
   # drop0 converts back to dgCMatrix
   reset_local_connectivity(Matrix::drop0(simplicial_set))
-}
-
-# normalize each column of a dgCMatrix by its maximum
-# https://stackoverflow.com/questions/39284774/column-rescaling-for-a-very-large-sparse-matrix-in-r
-col_max_normalize <- function(X) {
-  X@x <- X@x / rep.int(colMaxs(X), diff(X@p))
-  X
-}
-
-# normalize each row of a dgCMatrix by its maximum
-row_max_normalize <- function(X) {
-  Matrix::t(col_max_normalize(Matrix::t(X)))
 }
 
 # Reset the local connectivity requirement -- each data sample should
