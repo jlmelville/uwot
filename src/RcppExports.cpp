@@ -6,42 +6,6 @@
 
 using namespace Rcpp;
 
-// fast_intersection_cpp
-NumericVector fast_intersection_cpp(const IntegerVector rows, const IntegerVector cols, NumericVector values, const IntegerVector target, double unknown_dist, double far_dist);
-RcppExport SEXP _uwot_fast_intersection_cpp(SEXP rowsSEXP, SEXP colsSEXP, SEXP valuesSEXP, SEXP targetSEXP, SEXP unknown_distSEXP, SEXP far_distSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const IntegerVector >::type rows(rowsSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type cols(colsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type values(valuesSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type target(targetSEXP);
-    Rcpp::traits::input_parameter< double >::type unknown_dist(unknown_distSEXP);
-    Rcpp::traits::input_parameter< double >::type far_dist(far_distSEXP);
-    rcpp_result_gen = Rcpp::wrap(fast_intersection_cpp(rows, cols, values, target, unknown_dist, far_dist));
-    return rcpp_result_gen;
-END_RCPP
-}
-// general_sset_intersection_cpp
-NumericVector general_sset_intersection_cpp(const IntegerVector indptr1, const IntegerVector indices1, NumericVector data1, const IntegerVector indptr2, const IntegerVector indices2, NumericVector data2, const IntegerVector result_row, const IntegerVector result_col, NumericVector result_val, double mix_weight);
-RcppExport SEXP _uwot_general_sset_intersection_cpp(SEXP indptr1SEXP, SEXP indices1SEXP, SEXP data1SEXP, SEXP indptr2SEXP, SEXP indices2SEXP, SEXP data2SEXP, SEXP result_rowSEXP, SEXP result_colSEXP, SEXP result_valSEXP, SEXP mix_weightSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const IntegerVector >::type indptr1(indptr1SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type indices1(indices1SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type data1(data1SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type indptr2(indptr2SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type indices2(indices2SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type data2(data2SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type result_row(result_rowSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type result_col(result_colSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type result_val(result_valSEXP);
-    Rcpp::traits::input_parameter< double >::type mix_weight(mix_weightSEXP);
-    rcpp_result_gen = Rcpp::wrap(general_sset_intersection_cpp(indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val, mix_weight));
-    return rcpp_result_gen;
-END_RCPP
-}
 // annoy_euclidean_nns
 Rcpp::List annoy_euclidean_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, size_t n, size_t search_k, std::size_t grain_size, bool verbose);
 RcppExport SEXP _uwot_annoy_euclidean_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
@@ -293,10 +257,44 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// fast_intersection_cpp
+NumericVector fast_intersection_cpp(const IntegerVector rows, const IntegerVector cols, NumericVector values, const IntegerVector target, double unknown_dist, double far_dist);
+RcppExport SEXP _uwot_fast_intersection_cpp(SEXP rowsSEXP, SEXP colsSEXP, SEXP valuesSEXP, SEXP targetSEXP, SEXP unknown_distSEXP, SEXP far_distSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector >::type rows(rowsSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type cols(colsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type values(valuesSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< double >::type unknown_dist(unknown_distSEXP);
+    Rcpp::traits::input_parameter< double >::type far_dist(far_distSEXP);
+    rcpp_result_gen = Rcpp::wrap(fast_intersection_cpp(rows, cols, values, target, unknown_dist, far_dist));
+    return rcpp_result_gen;
+END_RCPP
+}
+// general_sset_intersection_cpp
+NumericVector general_sset_intersection_cpp(const IntegerVector indptr1, const IntegerVector indices1, NumericVector data1, const IntegerVector indptr2, const IntegerVector indices2, NumericVector data2, const IntegerVector result_row, const IntegerVector result_col, NumericVector result_val, double mix_weight);
+RcppExport SEXP _uwot_general_sset_intersection_cpp(SEXP indptr1SEXP, SEXP indices1SEXP, SEXP data1SEXP, SEXP indptr2SEXP, SEXP indices2SEXP, SEXP data2SEXP, SEXP result_rowSEXP, SEXP result_colSEXP, SEXP result_valSEXP, SEXP mix_weightSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector >::type indptr1(indptr1SEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type indices1(indices1SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type data1(data1SEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type indptr2(indptr2SEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type indices2(indices2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type data2(data2SEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type result_row(result_rowSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type result_col(result_colSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type result_val(result_valSEXP);
+    Rcpp::traits::input_parameter< double >::type mix_weight(mix_weightSEXP);
+    rcpp_result_gen = Rcpp::wrap(general_sset_intersection_cpp(indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val, mix_weight));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_uwot_fast_intersection_cpp", (DL_FUNC) &_uwot_fast_intersection_cpp, 6},
-    {"_uwot_general_sset_intersection_cpp", (DL_FUNC) &_uwot_general_sset_intersection_cpp, 10},
     {"_uwot_annoy_euclidean_nns", (DL_FUNC) &_uwot_annoy_euclidean_nns, 6},
     {"_uwot_annoy_cosine_nns", (DL_FUNC) &_uwot_annoy_cosine_nns, 6},
     {"_uwot_annoy_manhattan_nns", (DL_FUNC) &_uwot_annoy_manhattan_nns, 6},
@@ -310,6 +308,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_uwot_calc_row_probabilities_parallel", (DL_FUNC) &_uwot_calc_row_probabilities_parallel, 7},
     {"_uwot_smooth_knn_distances_cpp", (DL_FUNC) &_uwot_smooth_knn_distances_cpp, 8},
     {"_uwot_smooth_knn_distances_parallel", (DL_FUNC) &_uwot_smooth_knn_distances_parallel, 9},
+    {"_uwot_fast_intersection_cpp", (DL_FUNC) &_uwot_fast_intersection_cpp, 6},
+    {"_uwot_general_sset_intersection_cpp", (DL_FUNC) &_uwot_general_sset_intersection_cpp, 10},
     {NULL, NULL, 0}
 };
 
