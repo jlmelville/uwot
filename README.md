@@ -8,6 +8,8 @@ method for dimensionality reduction (McInnes and Healy, 2018).
 
 ## News
 
+*August 1 2018*. Numerical vectors are now supported for supervised dimension reduction.
+
 *July 31 2018*. (Very) initial support for supervised dimension reduction:
 categorical data only at the moment. Pass in a factor vector (use `NA` for
 unknown labels) as the `y` parameter and edges with bad (or unknown) labels are
