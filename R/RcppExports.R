@@ -5,6 +5,10 @@ fast_intersection_cpp <- function(rows, cols, values, target, unknown_dist = 1.0
     .Call(`_uwot_fast_intersection_cpp`, rows, cols, values, target, unknown_dist, far_dist)
 }
 
+general_sset_intersection_cpp <- function(indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val, mix_weight = 0.5) {
+    .Call(`_uwot_general_sset_intersection_cpp`, indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val, mix_weight)
+}
+
 annoy_euclidean_nns <- function(index_name, mat, n, search_k, grain_size = 1L, verbose = FALSE) {
     .Call(`_uwot_annoy_euclidean_nns`, index_name, mat, n, search_k, grain_size, verbose)
 }

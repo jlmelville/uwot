@@ -656,13 +656,15 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       else {
         far_dist <- 1.0e12
       }
-      tsmessage("Apply categorical set intersection, target weight = ",
+      tsmessage("Applying categorical set intersection, target weight = ",
                 formatC(target_weight), " far distance = ", formatC(far_dist))
-
+      
       V <- categorical_simplicial_set_intersection(V, y, far_dist = far_dist,
                                                    verbose = verbose)
     }
     else if (is.numeric(y)) {
+      tsmessage("Applying numeric set intersection, target weight = ",
+                formatC(target_weight), " target neighbors = ", target_n_neighbors)
       target_nn <- find_nn(as.matrix(y), target_n_neighbors, method = "annoy",
                            metric = "euclidean",
                            n_trees = n_trees,
@@ -678,7 +680,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       V <- general_simplicial_set_intersection(
         V, target_graph, target_weight
       )
-      V <- reset_local_connectivity(V)
+      
+      V <- reset_local_connectivity(Matrix::drop0(V))
     }
     else {
       stop("y must be factors or numeric")

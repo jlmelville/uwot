@@ -59,7 +59,7 @@ fast_intersection <- function(rows, cols, values, target, unknown_dist = 1.0,
 general_simplicial_set_intersection <- function(left, right, weight) {
   result <- methods::as(left + right, "dgTMatrix")
 
-  result@x <- general_sset_intersection(
+  result@x <- general_sset_intersection_cpp(
     left@p,
     left@i,
     left@x,
@@ -75,6 +75,8 @@ general_simplicial_set_intersection <- function(left, right, weight) {
   result
 }
 
+# An R translation of the Python function. Not very fast,
+# so use the C++ version instead
 general_sset_intersection <- function(indptr1,
                                           indices1,
                                           data1,
