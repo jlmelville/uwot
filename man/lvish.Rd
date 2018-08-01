@@ -4,11 +4,12 @@
 \alias{lvish}
 \title{Dimensionality Reduction with a LargeVis-like method}
 \usage{
-lvish(X, perplexity = 50, n_neighbors = perplexity * 3, n_components = 2,
-  metric = "euclidean", n_epochs = -1, alpha = 1, scale = "maxabs",
-  init = "lvrandom", gamma = 7, negative_sample_rate = 5,
-  nn_method = NULL, n_trees = 50, search_k = 2 * n_neighbors * n_trees,
-  n_threads = max(1, RcppParallel::defaultNumThreads()/2), grain_size = 1,
+lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
+  n_components = 2, metric = "euclidean", n_epochs = -1, alpha = 1,
+  scale = "maxabs", init = "lvrandom", gamma = 7,
+  negative_sample_rate = 5, nn_method = NULL, n_trees = 50,
+  search_k = 2 * n_neighbors * n_trees, n_threads = max(1,
+  RcppParallel::defaultNumThreads()/2), grain_size = 1,
   kernel = "gauss", verbose = getOption("verbose", TRUE))
 }
 \arguments{

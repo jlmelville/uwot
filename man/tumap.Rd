@@ -7,11 +7,11 @@
 tumap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   n_epochs = NULL, alpha = 1, scale = FALSE, init = "spectral",
   set_op_mix_ratio = 1, local_connectivity = 1, bandwidth = 1,
-  gamma = 1, negative_sample_rate = 5, nn_method = NULL, n_trees = 50,
-  search_k = 2 * n_neighbors * n_trees, n_threads = max(1,
-  RcppParallel::defaultNumThreads()/2), grain_size = 1, y = NULL,
-  target_n_neighbors = n_neighbors, target_weight = 0.5,
-  verbose = getOption("verbose", TRUE))
+  gamma = 1, negative_sample_rate = 5, nn_method = NULL,
+  n_trees = 50, search_k = 2 * n_neighbors * n_trees,
+  n_threads = max(1, RcppParallel::defaultNumThreads()/2),
+  grain_size = 1, y = NULL, target_n_neighbors = n_neighbors,
+  target_weight = 0.5, verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},

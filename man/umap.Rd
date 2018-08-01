@@ -9,9 +9,10 @@ umap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   spread = 1, min_dist = 0.01, set_op_mix_ratio = 1,
   local_connectivity = 1, bandwidth = 1, gamma = 1,
   negative_sample_rate = 5, a = NULL, b = NULL, nn_method = NULL,
-  n_trees = 50, search_k = 2 * n_neighbors * n_trees, approx_pow = FALSE,
-  y = NULL, target_n_neighbors = n_neighbors, target_weight = 0.5,
-  n_threads = max(1, RcppParallel::defaultNumThreads()/2), grain_size = 1,
+  n_trees = 50, search_k = 2 * n_neighbors * n_trees,
+  approx_pow = FALSE, y = NULL, target_n_neighbors = n_neighbors,
+  target_weight = 0.5, n_threads = max(1,
+  RcppParallel::defaultNumThreads()/2), grain_size = 1,
   verbose = getOption("verbose", TRUE))
 }
 \arguments{
