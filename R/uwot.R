@@ -460,12 +460,6 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
-#' @param y Optional target array for supervised dimension reduction. Must be a
-#' vector of factors of the same length as \code{X}.
-#' @param target_weight Weighting factor between data topology and target
-#'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
-#'   entirely on target. The default of 0.5 balances the weighting equally
-#'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param n_threads Number of threads to use. Default is half that recommended
 #'   by RcppParallel. For nearest neighbor search, only applies if
 #'   \code{nn_method = "annoy"}.
@@ -507,7 +501,6 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   search_k = 2 * n_neighbors * n_trees,
                   n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                   grain_size = 1,
-                  y = NULL, target_weight = 0.5,
                   kernel = "gauss",
                   verbose = getOption("verbose", TRUE)) {
   uwot(X, n_neighbors = n_neighbors, n_components = n_components,
@@ -516,7 +509,6 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
        negative_sample_rate = negative_sample_rate,
        nn_method = nn_method, n_trees = n_trees, search_k = search_k,
        method = "largevis", perplexity = perplexity,
-       y = y, target_weight = target_weight,
        n_threads = n_threads,
        grain_size = grain_size, kernel = kernel, verbose = verbose)
 }
