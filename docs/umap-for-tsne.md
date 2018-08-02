@@ -12,7 +12,7 @@ This is part of the documentation for [UWOT](https://github.com/jlmelville/uwot)
 
 The [UMAP paper](https://arxiv.org/abs/1802.03426) does not go into much 
 implementation detail. If you are coming to UMAP from t-SNE and don't know
-much about topology or fuzzy set (and I certainly don't), you may find yourself
+much about topology or fuzzy sets (and I certainly don't), you may find yourself
 hankering for some insight into how UMAP achieves its results and what
 connection there is with t-SNE and related methods.
 
@@ -21,7 +21,7 @@ from scouring the [Python source code](https://github.com/lmcinnes/umap) and
 from asking UMAP creator [Leland McInnes](https://github.com/lmcinnes). In what 
 follows, I assume that you are already familiar with how t-SNE works.
 
-Broadly, the UMAP implementation use a similar approach to
+Broadly, the UMAP implementation uses a similar approach to
 [LargeVis](https://arxiv.org/abs/1602.00370). LargeVis in turn uses
 concepts from [t-SNE](https://lvdmaaten.github.io/tsne/). t-SNE itself is a
 modification of the original 
@@ -147,8 +147,8 @@ taking advantage of the t-SNE gradient:
 only large for neighbors that are close in the input space. Therefore it's only
 necessary to calculate the attractive gradient for nearest neighbors of 
 $\mathbf{x_i}$. In Barnes-Hut t-SNE, the number of nearest neighbors used is
-three times whatever the perplexity is, so usually, you are looking for the
-150-nearest neighbors of each point.
+three times whatever the perplexity is. For larger datasets, a perplexity of
+50 is common, so usually you are looking for the 150-nearest neighbors of each point.
 * The repulsive part of the gradient is dependent on $q_{ij}$ which changes
 with each iteration, so the improvements here focus on grouping together points
 which are distant in the output space and treating them as a single point for
@@ -179,15 +179,16 @@ $p_{ij}$ and $w_{ij}$ is the same as in t-SNE (the authors try some alternative
 $w_{ij}$ definitions, but they aren't as effective).
 
 The new concepts here are $\gamma$ and $E$. $\gamma$ is a user-defined positive
-scalar to weight repulsive versus attractive forces. It's default in the 
+scalar to weight repulsive versus attractive forces. Its default in the 
 [reference implementation](https://github.com/lferry007/LargeVis) is 7.
 
 $E$ is the set of edges with a non-zero weight. This is the graph theory way to
 talk about nearest neighbors in the input space. Just as with Barnes-Hut t-SNE,
 we find a set of nearest neighbors for each point $\mathbf{x_i}$ and only 
 define input weights and probabilities for pairs of points which are nearest
-neighbors. LargeVis also uses a default perplexity of 50, and the number of 
-nearest neighbors is set to 3 times the perplexity.
+neighbors. As with the official Barnes-Hut t-SNE implementation, the LargeVis 
+reference implementation uses a default perplexity of 50, and the default number of 
+nearest neighbors is 3 times the perplexity.
 
 This cost function therefore consists of two disjoint contributions: nearest
 neighbors in the input space contribute to the attractive part of the cost
@@ -246,7 +247,7 @@ seem that uniform sampling would work for the negative sampling. However,
 vertices are sampled using a "noisy" distribution proportional to their degree ^
 0.75, where the degree of the vertex is the sum of the weights of the edges
 incident to them. There doesn't seem to be a theoretical reason to use the
-degree ^ 0.75, this is based on results from the field of word embeddings: the
+degree ^ 0.75. It's based on results from the field of word embeddings: the
 LargeVis authors reference a
 [skip-gram](http://papers.nips.cc/paper/5021-distributed-representations-of-words-andphrases)
 paper, but the same power also shows up in 
@@ -301,8 +302,10 @@ $$
 
 where $a$ and $b$ are determined by a non-linear least squares fit based on the
 `min_dist` and `spread` parameters that control the tightness of the squashing
-function. By setting $a = 1$ and $b = 1$ you get the t-SNE style weighting back.
+function. By setting $a = 1$ and $b = 1$ you get t-SNE weighting back.
 The current UMAP defaults result in $a = 1.929$ and $b = 0.7915$.
+
+The attractive and repulsive UMAP gradient expressions are, respectively:
 
 $$
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
@@ -312,7 +315,7 @@ $$
 $$
 While more complex-looking than the LargeVis gradient, there are obvious
 similarities. The 0.001 term in the denominator of the repulsive gradient plays
-the same role as the 0.1 in the LargeVis gradient.
+the same role as the 0.1 in the LargeVis gradient (preventing division by zero).
 
 UMAP uses the same sampling strategy as LargeVis, where sampling of positive
 edges is proportional to the weight of the edge (in this case $v_{ij}$), and
@@ -355,8 +358,17 @@ affects $\rho_{i}$ by using the distance to the `local_connectivity`th
 non-zero near neighbor (or by interpolating between distances if
 `local_connectivity` is non-integral).
 
-* `bandwidth`
-affects $v_{j|i}$ by multiplying the value of $\sigma_{i}$:
+* `set_op_mix_ratio`
+This changes the form of the symmetrization from fuzzy set union to fuzzy set
+intersection which is just $v_{j|i}v_{i|j}$, and can also blend between the two.
+
+* `gamma`
+This works exactly like the value in LargeVis, up-weighting the repulsive 
+contribution of the gradient.
+
+*2 August 2018*: The follow parameter no longer appears in the reference UMAP implementation:
+
+* `bandwidth` affects $v_{j|i}$ by multiplying the value of $\sigma_{i}$:
 
 $$
 v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \beta \sigma_{i} \right]
@@ -365,14 +377,6 @@ $$
 where `bandwidth` is represented as $\beta$. The value of $\sigma_{i}$
 is determined using calculations of $v_{j|i}$ without $\beta$, before recalculating
 the $v_{j|i}$ using `bandwidth`.
-
-* `set_op_mix_ratio`
-This changes the form of the symmetrization from fuzzy set union to fuzzy set
-intersection which is just $v_{j|i}v_{i|j}$, and can also blend between the two.
-
-* `gamma`
-This works exactly like the value in LargeVis, up-weighting the repulsive 
-contribution of the gradient.
 
 I'm not sure how useful any of these are when changed from the defaults.
 
