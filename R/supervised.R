@@ -135,6 +135,15 @@ row_max_normalize <- function(X) {
   Matrix::t(col_max_normalize(Matrix::t(X)))
 }
 
+col_sum_normalize <- function(X) {
+  X@x <- X@x / rep.int(Matrix::colSums(X), diff(X@p))
+  X
+}
+
+row_sum_normalize <- function(X) {
+  Matrix::t(col_sum_normalize(Matrix::t(X)))
+}
+
 # column maximums of a dgCMatrix
 colMaxs <- function(X) {
   nr <- nrow(X)
