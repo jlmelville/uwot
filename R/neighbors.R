@@ -93,7 +93,7 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
 
 # Search a pre-built Annoy index for neighbors of X
 annoy_search <- function(X, k = 10, ann,
-                         search_k = NULL,
+                         search_k = 100 * k,
                          n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                          grain_size = 1,
                          verbose = FALSE) {
