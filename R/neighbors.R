@@ -46,44 +46,75 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
 
   if (metric == "cosine") {
     ann <- methods::new(RcppAnnoy::AnnoyAngular, nc)
-    search_nn_func <- annoy_cosine_nns
   }
   else if (metric == "manhattan") {
     ann <- methods::new(RcppAnnoy::AnnoyManhattan, nc)
-    search_nn_func <- annoy_manhattan_nns
   }
   else {
     ann <- methods::new(RcppAnnoy::AnnoyEuclidean, nc)
-    search_nn_func <- annoy_euclidean_nns
   }
 
   tsmessage("Building Annoy index with metric = ", metric)
   progress <- Progress$new(max = nr, display = verbose)
 
+  # Add items
   for (i in 1:nr) {
     ann$addItem(i - 1, X[i, ])
     progress$increment()
   }
 
+  # Build index
   ann$build(n_trees)
 
+  # Search index
   if (!include_self) {
     k <- k + 1
   }
+  res <- annoy_search(X, k = k, ann = ann, search_k = search_k, n_thread = n_threads,
+                      grain_size = grain_size, verbose = verbose)
+  idx <- res$idx
+  dist <- res$dist
+  if (!include_self) {
+    idx <- idx[, -1]
+    dist <- dist[, -1]
+    k <- k - 1
+  }
 
+  list(idx = idx, dist = dist)
+}
+
+# Search a pre-built Annoy index for neighbors of X
+annoy_search <- function(X, k = 10, ann,
+                         search_k = 2 * k * n_trees,
+                         n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                         grain_size = 1,
+                         verbose = FALSE) {
+  ann_class <- class(ann)
+  if (endsWith(ann_class, "Cosine")) {
+    search_nn_func <- annoy_cosine_nns
+  }
+  else if (endsWith(ann_class, "Manhattan")) {
+    search_nn_func <- annoy_manhattan_nns
+  }
+  else {
+    search_nn_func <- annoy_euclidean_nns
+  }
+  
+  nr <- nrow(X)
+  
   if (n_threads > 0) {
     index_file = tempfile()
     ann$save(index_file)
-
+    
     tsmessage("Searching Annoy index using ", pluralize("thread", n_threads))
     res <- search_nn_func(index_file,
-                               X,
-                               k, search_k,
-                               grain_size = grain_size,
-                               verbose = verbose)
+                          X,
+                          k, search_k,
+                          grain_size = grain_size,
+                          verbose = verbose)
     idx <- res$item
     dist <- res$distance
-
+    
     unlink(index_file)
   }
   else {
@@ -92,7 +123,7 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
     idx <- matrix(nrow = nr, ncol = k)
     dist <- matrix(nrow = nr, ncol = k)
     for (i in 1:nr) {
-      res <- ann$getNNsByItemList(i - 1, k, search_k, TRUE)
+      res <- ann$getNNsByVectorList(X[i, ], k, search_k, TRUE)
       if (length(res$item) != k) {
         stop("search_k/n_trees settings were unable to find ", k,
              " neighbors for item ", i)
@@ -102,15 +133,10 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
       search_progress$increment()
     }
   }
-
-  if (!include_self) {
-    idx <- idx[, -1]
-    dist <- dist[, -1]
-    k <- k - 1
-  }
-
+  
   list(idx = idx + 1, dist = dist)
 }
+
 
 FNN_nn <- function(X, k = 10, include_self = TRUE) {
   if (include_self) {
