@@ -70,7 +70,8 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
   if (!include_self) {
     k <- k + 1
   }
-  res <- annoy_search(X, k = k, ann = ann, search_k = search_k, n_thread = n_threads,
+  res <- annoy_search(X, k = k, ann = ann, search_k = search_k,
+                      n_threads = n_threads,
                       grain_size = grain_size, verbose = verbose)
   idx <- res$idx
   dist <- res$dist
