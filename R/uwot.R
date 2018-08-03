@@ -537,6 +537,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  kernel = "gauss",
                  grain_size = 1,
+                 ret_model = FALSE,
                  verbose = getOption("verbose", TRUE)) {
   if (method == "umap" && (is.null(a) || is.null(b))) {
     ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
@@ -604,7 +605,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   metric <- match.arg(tolower(metric), c("euclidean", "cosine", "manhattan"))
 
   if (is.null(nn_method)) {
-    if (n_vertices < 4096 && metric == "euclidean") {
+    if (n_vertices < 4096 && metric == "euclidean" && !ret_model) {
       tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
       nn_method <- "fnn"
     }
@@ -617,10 +618,13 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (nn_method == "fnn" && metric != "euclidean") {
     stop("nn_method = 'FNN' is only compatible with distance metric 'euclidean'")
   }
+  if (nn_method == "fnn" && ret_model) {
+    stop("nn_method = 'FNN' is incompatible with ret_model = TRUE")
+  }
   nn <- find_nn(X, n_neighbors, method = nn_method, metric = metric,
                 n_trees = n_trees,
                 n_threads = n_threads, grain_size = grain_size,
-                search_k = search_k, verbose = verbose)
+                search_k = search_k, ret_index = ret_model, verbose = verbose)
   gc()
   if (any(is.infinite(nn$dist))) {
     stop("Infinite distances found in nearest neighbors")
@@ -658,7 +662,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       }
       tsmessage("Applying categorical set intersection, target weight = ",
                 formatC(target_weight), " far distance = ", formatC(far_dist))
-      
+
       V <- categorical_simplicial_set_intersection(V, y, far_dist = far_dist,
                                                    verbose = verbose)
     }
@@ -680,7 +684,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       V <- general_simplicial_set_intersection(
         V, target_graph, target_weight
       )
-      
+
       V <- reset_local_connectivity(Matrix::drop0(V))
     }
     else {
@@ -820,7 +824,18 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   # Center the points before returning
   embedding <- scale(embedding, center = TRUE, scale = FALSE)
   tsmessage("Optimization finished")
-  embedding
+
+  if (ret_model) {
+    list(
+      nn_index = nn$index,
+      n_neighbors = n_neighbors,
+      search_k = search_k,
+      embedding = embedding
+    )
+  }
+  else {
+    embedding
+  }
 }
 
 
