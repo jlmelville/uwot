@@ -85,7 +85,7 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
 
 # Search a pre-built Annoy index for neighbors of X
 annoy_search <- function(X, k = 10, ann,
-                         search_k = 2 * k * n_trees,
+                         search_k = NULL,
                          n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                          grain_size = 1,
                          verbose = FALSE) {
@@ -99,13 +99,13 @@ annoy_search <- function(X, k = 10, ann,
   else {
     search_nn_func <- annoy_euclidean_nns
   }
-  
+
   nr <- nrow(X)
-  
+
   if (n_threads > 0) {
     index_file = tempfile()
     ann$save(index_file)
-    
+
     tsmessage("Searching Annoy index using ", pluralize("thread", n_threads))
     res <- search_nn_func(index_file,
                           X,
@@ -114,7 +114,7 @@ annoy_search <- function(X, k = 10, ann,
                           verbose = verbose)
     idx <- res$item
     dist <- res$distance
-    
+
     unlink(index_file)
   }
   else {
@@ -133,7 +133,7 @@ annoy_search <- function(X, k = 10, ann,
       search_progress$increment()
     }
   }
-  
+
   list(idx = idx + 1, dist = dist)
 }
 

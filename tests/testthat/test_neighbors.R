@@ -118,3 +118,11 @@ expect_equal(res$dist, self_nn_dist4, check.attributes = FALSE, tol = 1e-6)
 res <- annoy_nn(ui10, k = 4, include_self = FALSE, n_threads = 0)
 expect_equal(res$idx, nn_index4, check.attributes = FALSE)
 expect_equal(res$dist, nn_dist4, check.attributes = FALSE, tol = 1e-6)
+
+res <- annoy_nn(ui10, k = 4, include_self = TRUE, n_threads = 1)
+expect_equal(res$idx, self_nn_index4, check.attributes = FALSE)
+expect_equal(res$dist, self_nn_dist4, check.attributes = FALSE, tol = 1e-6)
+
+res <- annoy_nn(ui10, k = 4, include_self = FALSE, n_threads = 1)
+expect_equal(res$idx, nn_index4, check.attributes = FALSE)
+expect_equal(res$dist, nn_dist4, check.attributes = FALSE, tol = 1e-6)
