@@ -606,11 +606,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (is.null(nn_method)) {
     if (n_vertices < 4096 && metric == "euclidean") {
       tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
-      nn_method = "fnn"
+      nn_method <- "fnn"
     }
     else {
       tsmessage("Using Annoy for neighbor search, n_neighbors = ", n_neighbors)
-      nn_method = "annoy"
+      nn_method <- "annoy"
     }
   }
   nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
