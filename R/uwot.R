@@ -830,6 +830,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       nn_index = nn$index,
       n_neighbors = n_neighbors,
       search_k = search_k,
+      local_connectivity = local_connectivity,
       embedding = embedding
     )
   }
