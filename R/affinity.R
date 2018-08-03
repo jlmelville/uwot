@@ -14,30 +14,23 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
   }
 }
 
-# Given nearest neighbor data and a measure of distance compute
-# the fuzzy simplicial set (here represented as a fuzzy graph in the form of a
-# sparse matrix) associated to the data. This is done by locally approximating
-# geodesic distance at each point, creating a fuzzy simplicial set for each such
-# point, and then combining all the local fuzzy simplicial sets into a global
-# one via a fuzzy union
-fuzzy_simplicial_set <- function(nn,
-                                 set_op_mix_ratio = 1.0,
-                                 local_connectivity = 1.0, bandwidth = 1.0,
-                                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
-                                 grain_size = 1,
-                                 verbose = FALSE) {
+smooth_knn <- function(nn,
+                       local_connectivity = 1.0, bandwidth = 1.0,
+                       n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                       grain_size = 1,
+                       verbose = FALSE) {
   if (n_threads > 0) {
     tsmessage("Commencing smooth kNN distance calibration using ",
               pluralize("thread", n_threads))
     affinity_matrix <- smooth_knn_distances_parallel(nn_dist = nn$dist,
-                                                nn_idx = nn$idx,
-                                                n_iter = 64,
-                                                local_connectivity = local_connectivity,
-                                                bandwidth = bandwidth,
-                                                tol = 1e-5,
-                                                min_k_dist_scale = 1e-3,
-                                                grain_size = grain_size,
-                                                verbose = verbose)
+                                                     nn_idx = nn$idx,
+                                                     n_iter = 64,
+                                                     local_connectivity = local_connectivity,
+                                                     bandwidth = bandwidth,
+                                                     tol = 1e-5,
+                                                     min_k_dist_scale = 1e-3,
+                                                     grain_size = grain_size,
+                                                     verbose = verbose)
   }
   else {
     tsmessage("Commencing smooth kNN distance calibration")
@@ -50,6 +43,26 @@ fuzzy_simplicial_set <- function(nn,
                                                 min_k_dist_scale = 1e-3,
                                                 verbose = verbose)
   }
+}
+
+# Given nearest neighbor data and a measure of distance compute
+# the fuzzy simplicial set (here represented as a fuzzy graph in the form of a
+# sparse matrix) associated to the data. This is done by locally approximating
+# geodesic distance at each point, creating a fuzzy simplicial set for each such
+# point, and then combining all the local fuzzy simplicial sets into a global
+# one via a fuzzy union
+fuzzy_simplicial_set <- function(nn,
+                                 set_op_mix_ratio = 1.0,
+                                 local_connectivity = 1.0, bandwidth = 1.0,
+                                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                                 grain_size = 1,
+                                 verbose = FALSE) {
+  affinity_matrix <- smooth_knn(nn,
+                                local_connectivity = local_connectivity,
+                                bandwidth = bandwidth,
+                                n_threads = n_threads,
+                                grain_size = grain_size,
+                                verbose = verbose)
 
   fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio)
 }
