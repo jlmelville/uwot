@@ -297,6 +297,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// init_transform_cpp
+Rcpp::NumericMatrix init_transform_cpp(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index, arma::sp_mat weights);
+RcppExport SEXP _uwot_init_transform_cpp(SEXP train_embeddingSEXP, SEXP nn_indexSEXP, SEXP weightsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type train_embedding(train_embeddingSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type nn_index(nn_indexSEXP);
+    Rcpp::traits::input_parameter< arma::sp_mat >::type weights(weightsSEXP);
+    rcpp_result_gen = Rcpp::wrap(init_transform_cpp(train_embedding, nn_index, weights));
+    return rcpp_result_gen;
+END_RCPP
+}
+// init_transform_av_cpp
+Rcpp::NumericMatrix init_transform_av_cpp(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index);
+RcppExport SEXP _uwot_init_transform_av_cpp(SEXP train_embeddingSEXP, SEXP nn_indexSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type train_embedding(train_embeddingSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type nn_index(nn_indexSEXP);
+    rcpp_result_gen = Rcpp::wrap(init_transform_av_cpp(train_embedding, nn_index));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_uwot_annoy_euclidean_nns", (DL_FUNC) &_uwot_annoy_euclidean_nns, 6},

@@ -61,4 +61,11 @@ general_sset_intersection_cpp <- function(indptr1, indices1, data1, indptr2, ind
     .Call(`_uwot_general_sset_intersection_cpp`, indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val, mix_weight)
 }
 
+init_transform_cpp <- function(train_embedding, nn_index, weights) {
+    .Call(`_uwot_init_transform_cpp`, train_embedding, nn_index, weights)
 }
+
+init_transform_av_cpp <- function(train_embedding, nn_index) {
+    .Call(`_uwot_init_transform_av_cpp`, train_embedding, nn_index)
+}
+
