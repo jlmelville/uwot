@@ -3,6 +3,7 @@
 export(lvish)
 export(tumap)
 export(umap)
+export(umap_transform)
 import(Matrix)
 importFrom(Rcpp,sourceCpp)
 importFrom(RcppParallel,RcppParallelLibs)
