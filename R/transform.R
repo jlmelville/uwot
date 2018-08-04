@@ -54,15 +54,30 @@ umap_transform <- function(X, model,
                         n_reference_vertices = nrow(train_embedding),
                         verbose = verbose)
   }
-  if (weighted) {
-    tsmessage("Initializing by weighted average of neighbor coordinates")
-    embedding <- init_transform_cpp(train_embedding, nn$idx, graph)
-    # embedding <- init_transform(train_embedding, nn$idx, graph)
+  
+  if (n_threads > 0) {
+    if (weighted) {
+      tsmessage("Initializing by weighted average of neighbor coordinates using ", 
+                pluralize("thread", n_threads))
+      embedding <- init_transform_parallel(train_embedding, nn$idx, graph, grain_size = grain_size)
+    }
+    else {
+      tsmessage("Initializing by average of neighbor coordinates using ", 
+                pluralize("thread", n_threads))
+      embedding <- init_transform_av_parallel(train_embedding, nn$idx, grain_size = grain_size)
+    }
   }
   else {
-    tsmessage("Initializing by average of neighbor coordinates")
-    embedding <- init_transform_av_cpp(train_embedding, nn$idx)
-    # embedding <- init_transform(train_embedding, nn$idx)
+    if (weighted) {
+      tsmessage("Initializing by weighted average of neighbor coordinates")
+      embedding <- init_transform_cpp(train_embedding, nn$idx, graph)
+      # embedding <- init_transform(train_embedding, nn$idx, graph)
+    }
+    else {
+      tsmessage("Initializing by average of neighbor coordinates")
+      embedding <- init_transform_av_cpp(train_embedding, nn$idx)
+      # embedding <- init_transform(train_embedding, nn$idx)
+    }
   }
   
   tsmessage("Finished")

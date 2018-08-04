@@ -69,3 +69,11 @@ init_transform_av_cpp <- function(train_embedding, nn_index) {
     .Call(`_uwot_init_transform_av_cpp`, train_embedding, nn_index)
 }
 
+init_transform_parallel <- function(train_embedding, nn_index, weights, grain_size = 1L) {
+    .Call(`_uwot_init_transform_parallel`, train_embedding, nn_index, weights, grain_size)
+}
+
+init_transform_av_parallel <- function(train_embedding, nn_index, grain_size = 1L) {
+    .Call(`_uwot_init_transform_av_parallel`, train_embedding, nn_index, grain_size)
+}
+
