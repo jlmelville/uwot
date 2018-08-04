@@ -146,17 +146,17 @@ row_sum_normalize <- function(X) {
 
 # column maximums of a dgCMatrix
 colMaxs <- function(X) {
-  nr <- nrow(X)
-  result <- rep(0, nr)
-
+  nc <- ncol(X)
+  result <- rep(0, nc)
+  
   dX <- diff(X@p)
-
-  for (i in 1:nr) {
+  
+  for (i in 1:nc) {
     if (dX[i] > 0) {
       result[i] <- max(X@x[(X@p[i] + 1):X@p[i + 1]])
     }
   }
-
+  
   result
 }
 

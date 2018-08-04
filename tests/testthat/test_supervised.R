@@ -47,3 +47,10 @@ res01 <- matrix(c(0.97318335824, 1.12392924757, 0.734457833761,
                 nrow = 3, byrow = TRUE)
 expect_equal(as.matrix(int01), res01, check.attributes = FALSE, tol = 1e-6)
 
+sp34 <- Matrix::drop0(matrix(nrow = 3, byrow = TRUE, c(
+ 0, 0.7403984, 0,         0.6574427,
+ 0, 0,         0.9472488, 0,
+ 0, 0.3039677, 0.2868714, 0
+)))
+
+expect_equal(colMaxs(sp34), c(0, 0.7403984, 0.9472488, 0.6574427))
