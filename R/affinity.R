@@ -16,6 +16,8 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
 
 smooth_knn <- function(nn,
                        local_connectivity = 1.0, bandwidth = 1.0,
+                       self_nbr = TRUE,
+                       n_reference_vertices = 0,
                        n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                        grain_size = 1,
                        verbose = FALSE) {
@@ -30,6 +32,8 @@ smooth_knn <- function(nn,
                                                      tol = 1e-5,
                                                      min_k_dist_scale = 1e-3,
                                                      grain_size = grain_size,
+                                                     self_nbr = self_nbr,
+                                                     n_reference_vertices = n_reference_vertices,
                                                      verbose = verbose)
   }
   else {
@@ -41,6 +45,8 @@ smooth_knn <- function(nn,
                                                 bandwidth = bandwidth,
                                                 tol = 1e-5,
                                                 min_k_dist_scale = 1e-3,
+                                                self_nbr = self_nbr,
+                                                n_reference_vertices = n_reference_vertices,
                                                 verbose = verbose)
   }
 }
@@ -63,7 +69,7 @@ fuzzy_simplicial_set <- function(nn,
                                 n_threads = n_threads,
                                 grain_size = grain_size,
                                 verbose = verbose)
-
+  
   fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio)
 }
 
@@ -72,31 +78,31 @@ symmetrize <- function(P) {
 }
 
 perplexity_similarities <- function(nn, perplexity = NULL,
-                                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
-                                 grain_size = 1,
-                                 kernel = "gauss",
-                                 verbose = FALSE) {
-
+                                    n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                                    grain_size = 1,
+                                    kernel = "gauss",
+                                    verbose = FALSE) {
+  
   if (is.null(perplexity) && kernel != "knn") {
     stop("Must provide perplexity")
   }
-
+  
   if (kernel == "gauss") {
     if (n_threads > 0) {
       tsmessage("Commencing calibration for perplexity = ", formatC(perplexity),
                 " using ", pluralize("thread", n_threads))
       affinity_matrix <- calc_row_probabilities_parallel(nn_dist = nn$dist,
-                                                    nn_idx = nn$idx,
-                                                    perplexity = perplexity,
-                                                    grain_size = grain_size,
-                                                    verbose = verbose)
+                                                         nn_idx = nn$idx,
+                                                         perplexity = perplexity,
+                                                         grain_size = grain_size,
+                                                         verbose = verbose)
     }
     else {
       tsmessage("Commencing calibration for perplexity = ", formatC(perplexity))
       affinity_matrix <- calc_row_probabilities_cpp(nn_dist = nn$dist,
-                                                nn_idx = nn$idx,
-                                                perplexity = perplexity,
-                                                verbose = verbose)
+                                                    nn_idx = nn$idx,
+                                                    perplexity = perplexity,
+                                                    verbose = verbose)
     }
   }
   else {
@@ -115,11 +121,11 @@ perplexity_similarities <- function(nn, perplexity = NULL,
 nn_to_sparse <- function(nn_idx, val = 1) {
   nd <- nrow(nn_idx)
   k <- ncol(nn_idx)
-
+  
   xs <- rep(val, nd * k)
   is <- rep(1:nd, times = k)
   js <- as.vector(nn_idx)
-
+  
   sparseMatrix(i = is, j = js, x = xs)
 }
 
@@ -157,29 +163,30 @@ smooth_knn_distances <-
            bandwidth = 1.0,
            tol = 1e-5,
            min_k_dist_scale = 1e-3,
+           self_nbr = TRUE,
            ret_extra = FALSE,
            verbose = FALSE) {
-
+    
     k <- ncol(nn_dist)
     n <- nrow(nn_dist)
-
+    
     # In the python code the target is multiplied by the bandwidth, but fuzzy_simplicial_set
     # doesn't pass the user-supplied version on purpose, so it's always 1
     target <- log2(k)
-
+    
     if (ret_extra) {
       rhos <- rep(0, n)
       sigmas <- rep(0, n)
     }
-
+    
     mean_distances <- mean(nn_dist)
-
+    
     progress <- Progress$new(n, display = verbose)
     for (i in 1:n) {
       lo <- 0.0
       hi <- Inf
       mid <- 1.0
-
+      
       ith_distances <- nn_dist[i, ]
       non_zero_dists <- ith_distances[ith_distances > 0.0]
       if (length(non_zero_dists) >= local_connectivity) {
@@ -203,7 +210,7 @@ smooth_knn_distances <-
       else {
         rho <- 0.0
       }
-
+      
       for (iter in 1:n_iter) {
         psum <- 0.0
         for (j in 2:ncol(nn_dist)) {
@@ -211,11 +218,11 @@ smooth_knn_distances <-
           psum <- psum + exp(-(dist / mid))
         }
         val <- psum
-
+        
         if (abs(val - target) < tol) {
           break
         }
-
+        
         if (val > target) {
           hi <- mid
           mid <- (lo + hi) / 2.0
@@ -231,30 +238,32 @@ smooth_knn_distances <-
         }
       }
       sigma <- mid
-
+      
       if (rho > 0.0) {
         sigma <- max(sigma, min_k_dist_scale * mean(ith_distances))
       }
       else {
         sigma <- max(sigma, min_k_dist_scale * mean_distances)
       }
-
+      
       prow <- exp(-(nn_dist[i, ] - rho) / (sigma * bandwidth))
       prow[nn_dist[i, ] - rho <= 0] <- 1
       nn_dist[i, ] <- prow
-
+      
       if (ret_extra) {
         rhos[i] <- rho
         sigmas[i] <- sigma
       }
-
+      
       progress$increment()
     }
     P <- Matrix::sparseMatrix(i = rep(1:n, times = k), j = as.vector(nn_idx),
                               x = as.vector(nn_dist))
-    Matrix::diag(P) <- 0
+    if (self_nbr) {
+      Matrix::diag(P) <- 0
+    }
     P <- Matrix::drop0(P)
-
+    
     if (ret_extra) {
       if (verbose) {
         summarize(sigmas, "sigma summary")
@@ -277,30 +286,30 @@ calc_row_probabilities <- function(nn_dist,
 {
   k <- ncol(nn_dist)
   n <- nrow(nn_dist)
-
+  
   target <- log(perplexity)
-
+  
   if (ret_extra) {
     sigmas <- rep(0, n)
   }
-
+  
   progress <- Progress$new(n, display = verbose)
   for (i in 1:n) {
-
+    
     lo <- 0.0
     hi <- Inf
     mid <- 1.0
-
+    
     Di <- nn_dist[i, -1] ^ 2
-
+    
     for (iter in 1:n_iter) {
       sres <- shannon(Di, mid)
       val <- sres$H
-
+      
       if (abs(val - target) < tol) {
         break
       }
-
+      
       if (val < target) {
         hi <- mid
         mid <- (lo + hi) / 2.0
@@ -319,18 +328,18 @@ calc_row_probabilities <- function(nn_dist,
     sres <- shannon(Di, beta)
     prow <- sres$W / sres$Z
     nn_dist[i, -1] <- prow
-
+    
     if (ret_extra) {
       sigmas[i] <-  sqrt(1 / beta)
     }
-
+    
     progress$increment()
   }
   P <- Matrix::sparseMatrix(i = rep(1:n, times = k), j = as.vector(nn_idx),
                             x = as.vector(nn_dist))
   Matrix::diag(P) <- 0
   P <- Matrix::drop0(P)
-
+  
   if (ret_extra) {
     if (verbose) {
       summarize(sigmas, "sigma summary")
@@ -345,7 +354,7 @@ calc_row_probabilities <- function(nn_dist,
 shannon <- function(D2, beta) {
   W <- exp(-D2 * beta)
   Z <- sum(W)
-
+  
   if (Z == 0) {
     H <- 0
   }

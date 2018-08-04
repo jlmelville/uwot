@@ -45,12 +45,12 @@ calc_row_probabilities_parallel <- function(nn_dist, nn_idx, perplexity, n_iter 
     .Call(`_uwot_calc_row_probabilities_parallel`, nn_dist, nn_idx, perplexity, n_iter, tol, grain_size, verbose)
 }
 
-smooth_knn_distances_cpp <- function(nn_dist, nn_idx, n_iter = 64L, local_connectivity = 1.0, bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, verbose = FALSE) {
-    .Call(`_uwot_smooth_knn_distances_cpp`, nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose)
+smooth_knn_distances_cpp <- function(nn_dist, nn_idx, n_iter = 64L, local_connectivity = 1.0, bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, self_nbr = TRUE, n_reference_vertices = 0L, verbose = FALSE) {
+    .Call(`_uwot_smooth_knn_distances_cpp`, nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, self_nbr, n_reference_vertices, verbose)
 }
 
-smooth_knn_distances_parallel <- function(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size = 1L, verbose = FALSE) {
-    .Call(`_uwot_smooth_knn_distances_parallel`, nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size, verbose)
+smooth_knn_distances_parallel <- function(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size = 1L, self_nbr = TRUE, n_reference_vertices = 0L, verbose = FALSE) {
+    .Call(`_uwot_smooth_knn_distances_parallel`, nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size, self_nbr, n_reference_vertices, verbose)
 }
 
 fast_intersection_cpp <- function(rows, cols, values, target, unknown_dist = 1.0, far_dist = 5.0) {
@@ -61,3 +61,4 @@ general_sset_intersection_cpp <- function(indptr1, indices1, data1, indptr2, ind
     .Call(`_uwot_general_sset_intersection_cpp`, indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val, mix_weight)
 }
 
+}

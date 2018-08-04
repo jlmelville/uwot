@@ -24,28 +24,31 @@
 #include <progress.hpp>
 
 // [[Rcpp::export]]
-arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx,
+arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist,
+                                      const Rcpp::IntegerMatrix& nn_idx,
                                       const unsigned int n_iter = 64,
                                       const double local_connectivity = 1.0,
                                       const double bandwidth = 1.0,
                                       const double tol = 1e-5,
                                       const double min_k_dist_scale = 1e-3,
+                                      const bool self_nbr = true,
+                                      const unsigned int n_reference_vertices = 0,
                                       const bool verbose = false) {
   const unsigned int n_vertices = nn_dist.nrow();
+  const unsigned int n_ref_vertices = n_reference_vertices > 0 ? n_reference_vertices : n_vertices;
   const unsigned int n_neighbors = nn_dist.ncol();
-
+  
   // bandwidth is not used here on purpose
   const double target = log2(n_neighbors);
   const double double_max = std::numeric_limits<double>::max();
-
+  
   double mean_distances = mean(nn_dist);
-
+  
   arma::umat locations(2, n_vertices * n_neighbors);
   arma::vec values(n_vertices * n_neighbors);
-
-
+  
   Progress progress(n_vertices, verbose);
-
+  
   // Initial guess for i = 0
   // On subsequent iterations we shall start from the previous optimized
   // value: seems to save around 20% on total number of iterations
@@ -53,10 +56,10 @@ arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const 
   for (unsigned int i = 0; i < n_vertices; i++) {
     double lo = 0.0;
     double hi = double_max;
-
+    
     Rcpp::NumericVector ith_distances = nn_dist.row(i);
     Rcpp::NumericVector non_zero_distances = ith_distances[ith_distances > 0.0];
-
+    
     // Find rho, the distance to the nearest neighbor (excluding zero distance neighbors)
     double rho = 0.0;
     if (non_zero_distances.size() >= local_connectivity) {
@@ -75,7 +78,7 @@ arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const 
     else if (non_zero_distances.size() > 0) {
       rho = Rcpp::max(non_zero_distances);
     }
-
+    
     for (unsigned int iter = 0; iter < n_iter; iter++) {
       double val = 0.0;
       // NB we iterate from 1, not 0: don't use the self-distance.
@@ -84,11 +87,11 @@ arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const 
         double dist = std::max(0.0, ith_distances[j] - rho);
         val += std::exp(-dist / sigma);
       }
-
+      
       if (std::abs(val - target) < tol) {
         break;
       }
-
+      
       if (val > target) {
         hi = sigma;
         sigma = 0.5 * (lo + hi);
@@ -103,43 +106,42 @@ arma::sp_mat smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const 
         }
       }
     }
-
+    
     if (rho > 0.0) {
       sigma = std::max(min_k_dist_scale * mean(ith_distances), sigma);
     }
     else {
       sigma = std::max(min_k_dist_scale * mean_distances, sigma);
     }
-
+    
     Rcpp::NumericVector res = Rcpp::exp(-(ith_distances - rho) / (sigma * bandwidth));
     res[ith_distances - rho <= 0] = 1.0;
-
+    
     unsigned int loc = i * n_neighbors;
     // loc is incremented in the loop
     for (unsigned int k = 0; k < n_neighbors; k++, loc++) {
       unsigned int j = nn_idx(i, k) - 1;
-
-      locations(0, loc) = i;
-      locations(1, loc) = j;
-      if (i != j) {
+      
+      locations(0, loc) = j;
+      locations(1, loc) = i;
+      if (i != j || !self_nbr) {
         values(loc) = res(k);
       }
       else {
         values(loc) = 0.0;
       }
     }
-
+    
     if (progress.check_abort()) {
       Rcpp::stop("Progress aborted by user");
     }
     progress.increment();
   }
-
+  
   return arma::sp_mat(
     false, // add_values
     locations,
     values,
-    n_vertices, n_vertices
+    n_ref_vertices, n_vertices
   );
 }
-

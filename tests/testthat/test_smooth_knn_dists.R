@@ -47,13 +47,15 @@ res <- smooth_knn_distances(nn_4$dist, nn_4$idx, local_connectivity = 1.5, ret_e
 expect_equal(res$P, V_asymm_local, tol = 1e-4)
 
 ### C++ tests
+# NB the asymmetric smooth knn matrix is now column-oriented for the convenience of the transform
+# routine, so compare the transpose to the "real" result
 res_cpp_conn1 <- smooth_knn_distances_cpp(nn_4$dist, nn_4$idx, n_iter = 64, local_connectivity = 1.0,
                                     bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, verbose = FALSE)
-expect_equal(res_cpp_conn1, V_asymm, tol = 1e-4)
+expect_equal(Matrix::t(res_cpp_conn1), V_asymm, tol = 1e-4)
 
 res_cpp_conn1.5 <- smooth_knn_distances_cpp(nn_4$dist, nn_4$idx, n_iter = 64, local_connectivity = 1.5,
                                     bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, verbose = FALSE)
-expect_equal(res_cpp_conn1.5, V_asymm_local, tol = 1e-4)
+expect_equal(Matrix::t(res_cpp_conn1.5), V_asymm_local, tol = 1e-4)
 
 
 RcppParallel::setThreadOptions(numThreads = 1)
@@ -61,10 +63,25 @@ res_cpp_conn1 <- smooth_knn_distances_parallel(nn_4$dist, nn_4$idx, n_iter = 64,
                                           bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
                                           grain_size = 1,
                                           verbose = FALSE)
-expect_equal(res_cpp_conn1, V_asymm, tol = 1e-4)
+expect_equal(Matrix::t(res_cpp_conn1), V_asymm, tol = 1e-4)
 res_cpp_conn1.5 <- smooth_knn_distances_parallel(nn_4$dist, nn_4$idx, n_iter = 64, local_connectivity = 1.5,
                                             bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, 
                                             grain_size = 1,
                                             verbose = FALSE)
-expect_equal(res_cpp_conn1.5, V_asymm_local, tol = 1e-4)
+expect_equal(Matrix::t(res_cpp_conn1.5), V_asymm_local, tol = 1e-4)
 
+# Test cross-distances
+V_asymm_local_cross <- Matrix::t(V_asymm_local)
+diag(V_asymm_local_cross) <- 1
+V_asymm_local_cross <- rbind(V_asymm_local_cross, matrix(0, nrow = 2, ncol = 10))
+
+res_cpp_conn1.5_cross <- smooth_knn_distances_cpp(nn_4$dist, nn_4$idx, n_iter = 64, local_connectivity = 1.5,
+                                            bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, verbose = FALSE,
+                                            self_nbr = FALSE, n_reference_vertices = 12)
+expect_equal(res_cpp_conn1.5_cross, V_asymm_local_cross, tol = 1e-4)
+
+
+res_cpp_conn1.5_cross <- smooth_knn_distances_parallel(nn_4$dist, nn_4$idx, n_iter = 64, local_connectivity = 1.5,
+                                                  bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, verbose = FALSE,
+                                                  self_nbr = FALSE, n_reference_vertices = 12)
+expect_equal(res_cpp_conn1.5_cross, V_asymm_local_cross, tol = 1e-4)
