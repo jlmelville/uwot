@@ -13,16 +13,16 @@ annoy_manhattan_nns <- function(index_name, mat, n, search_k, grain_size = 1L, v
     .Call(`_uwot_annoy_manhattan_nns`, index_name, mat, n, search_k, grain_size, verbose)
 }
 
-optimize_layout_umap <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, verbose) {
-    .Call(`_uwot_optimize_layout_umap`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, verbose)
+optimize_layout_umap <- function(head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, move_other, verbose) {
+    .Call(`_uwot_optimize_layout_umap`, head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, move_other, verbose)
 }
 
-optimize_layout_tumap <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, verbose) {
-    .Call(`_uwot_optimize_layout_tumap`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, verbose)
+optimize_layout_tumap <- function(head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, move_other, verbose) {
+    .Call(`_uwot_optimize_layout_tumap`, head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, move_other, verbose)
 }
 
-optimize_layout_largevis <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, verbose) {
-    .Call(`_uwot_optimize_layout_largevis`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, verbose)
+optimize_layout_largevis <- function(head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, move_other, verbose) {
+    .Call(`_uwot_optimize_layout_largevis`, head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, move_other, verbose)
 }
 
 optimize_layout_umap_parallel <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, grain_size = 1L, verbose = FALSE) {

@@ -784,7 +784,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   else {
     tsmessage("Commencing optimization for ", n_epochs, " epochs")
     if (tolower(method) == "umap") {
-      embedding <- optimize_layout_umap(embedding = embedding,
+      embedding <- optimize_layout_umap(embedding,
+                                        embedding,
                            positive_head = positive_head,
                            positive_tail = positive_tail,
                            n_epochs = n_epochs,
@@ -794,10 +795,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                            initial_alpha = alpha, negative_sample_rate,
                            seed = get_seed(),
                            approx_pow = approx_pow,
+                           move_other = TRUE,
                            verbose = verbose)
     }
     else if (method == "tumap") {
       embedding <- optimize_layout_tumap(embedding,
+                                         embedding,
                             positive_head = positive_head,
                             positive_tail = positive_tail,
                             n_epochs = n_epochs,
@@ -805,10 +808,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                             initial_alpha = alpha,
                             negative_sample_rate = negative_sample_rate,
                             seed = get_seed(),
+                            move_other = TRUE,
                             verbose = verbose)
     }
     else {
       embedding <- optimize_layout_largevis(embedding,
+                                            embedding,
                                positive_head = positive_head,
                                positive_tail = positive_tail,
                                n_epochs = n_epochs,
@@ -817,6 +822,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                                initial_alpha = alpha,
                                negative_sample_rate = negative_sample_rate,
                                seed = get_seed(),
+                               move_other = TRUE,
                                verbose = verbose)
     }
   }
