@@ -2,7 +2,7 @@
 % Please edit documentation in R/uwot.R
 \name{tumap}
 \alias{tumap}
-\title{Dimensionality Reduction Using T-Distributed UMAP (t-UMAP)}
+\title{Dimensionality Reduction Using t-Distributed UMAP (t-UMAP)}
 \usage{
 tumap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   n_epochs = NULL, alpha = 1, scale = FALSE, init = "spectral",
@@ -11,7 +11,8 @@ tumap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   n_trees = 50, search_k = 2 * n_neighbors * n_trees,
   n_threads = max(1, RcppParallel::defaultNumThreads()/2),
   grain_size = 1, y = NULL, target_n_neighbors = n_neighbors,
-  target_weight = 0.5, verbose = getOption("verbose", TRUE))
+  target_weight = 0.5, ret_model = FALSE,
+  verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -148,10 +149,17 @@ topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
 entirely on target. The default of 0.5 balances the weighting equally
 between data and target. Only applies if \code{y} is non-\code{NULL}.}
 
+\item{ret_model}{If \code{TRUE}, then return extra data that can be used to
+add new data to an existing embedding via \code{\link{umap_transform}}.
+Otherwise, just return the coordinates.}
+
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }
 \value{
-A matrix of optimized coordinates.
+A matrix of optimized coordinates, or if \code{ret_model = TRUE}, a
+  list containing extra information that can be used to add new data to an
+  existing embedding via \code{\link{umap_transform}}. In this case, the
+  coordinates are available in the list item \code{embedding}.
 }
 \description{
 A faster (but less flexible) version of the UMAP gradient. FOr more detail on

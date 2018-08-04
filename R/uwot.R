@@ -130,6 +130,9 @@
 #'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
 #'   entirely on target. The default of 0.5 balances the weighting equally
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
+#' @param ret_model If \code{TRUE}, then return extra data that can be used to
+#'   add new data to an existing embedding via \code{\link{umap_transform}}.
+#'   Otherwise, just return the coordinates.
 #' @param n_threads Number of threads to use. Default is half that recommended
 #'   by RcppParallel. For nearest neighbor search, only applies if
 #'   \code{nn_method = "annoy"}.
@@ -137,7 +140,10 @@
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads}.
 #' @param verbose If \code{TRUE}, log details to the console.
-#' @return A matrix of optimized coordinates.
+#' @return A matrix of optimized coordinates, or if \code{ret_model = TRUE}, a
+#'   list containing extra information that can be used to add new data to an
+#'   existing embedding via \code{\link{umap_transform}}. In this case, the
+#'   coordinates are available in the list item \code{embedding}.
 #' @examples
 #' \dontrun{
 #' iris_umap <- umap(iris, n_neighbors = 50, alpha = 0.5, init = "random")
@@ -189,6 +195,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  approx_pow = FALSE,
                  y = NULL, target_n_neighbors = n_neighbors,
                  target_weight = 0.5,
+                 ret_model = FALSE,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  grain_size = 1,
                  verbose = getOption("verbose", TRUE)) {
@@ -203,10 +210,11 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
        n_threads = n_threads, grain_size = grain_size,
        y = y, target_n_neighbors = target_n_neighbors,
        target_weight = target_weight,
+       ret_model = ret_model,
        verbose = verbose)
 }
 
-#' Dimensionality Reduction Using T-Distributed UMAP (t-UMAP)
+#' Dimensionality Reduction Using t-Distributed UMAP (t-UMAP)
 #'
 #' A faster (but less flexible) version of the UMAP gradient. FOr more detail on
 #' UMAP, see the  \code{\link{umap}} function.
@@ -314,9 +322,6 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
-#' @param n_threads Number of threads to use. Default is half that recommended
-#'   by RcppParallel. For nearest neighbor search, only applies if
-#'   \code{nn_method = "annoy"}.
 #' @param y Optional target array for supervised dimension reduction. Must be a
 #'   factor or numeric vector with the same length as \code{X}.
 #' @param target_n_neighbors Number of nearest neighbors to use to construct the
@@ -326,11 +331,20 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
 #'   entirely on target. The default of 0.5 balances the weighting equally
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
+#' @param ret_model If \code{TRUE}, then return extra data that can be used to
+#'   add new data to an existing embedding via \code{\link{umap_transform}}.
+#'   Otherwise, just return the coordinates.
+#' @param n_threads Number of threads to use. Default is half that recommended
+#'   by RcppParallel. For nearest neighbor search, only applies if
+#'   \code{nn_method = "annoy"}.
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads}.
 #' @param verbose If \code{TRUE}, log details to the console.
-#' @return A matrix of optimized coordinates.
+#' @return A matrix of optimized coordinates, or if \code{ret_model = TRUE}, a
+#'   list containing extra information that can be used to add new data to an
+#'   existing embedding via \code{\link{umap_transform}}. In this case, the
+#'   coordinates are available in the list item \code{embedding}.
 #' @export
 tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   n_epochs = NULL,
@@ -344,6 +358,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   grain_size = 1,
                   y = NULL, target_n_neighbors = n_neighbors,
                   target_weight = 0.5,
+                  ret_model = FALSE,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X = X, n_neighbors = n_neighbors, n_components = n_components,
        metric = metric,
@@ -356,6 +371,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
        n_threads = n_threads, grain_size = grain_size,
        y = y, target_n_neighbors = target_n_neighbors,
        target_weight = target_weight,
+       ret_model = ret_model,
        verbose = verbose)
 }
 
@@ -837,7 +853,15 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       n_neighbors = n_neighbors,
       search_k = search_k,
       local_connectivity = local_connectivity,
-      embedding = embedding
+      embedding = embedding,
+      n_epochs = n_epochs,
+      alpha = alpha,
+      negative_sample_rate = negative_sample_rate,
+      method = method,
+      a = a,
+      b = b,
+      gamma = gamma,
+      approx_pow = approx_pow
     )
   }
   else {
