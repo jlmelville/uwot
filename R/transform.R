@@ -28,6 +28,15 @@
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of coordinates for \code{X} transformed into the space
 #'   of the \code{model}.
+#' @examples
+#' \dontrun{
+#' iris_train <- iris[1:100, ]
+#' iris_test <- iris[101:150, ]
+#'
+#' # You must set ret_model = TRUE to return extra data needed
+#' iris_train_umap <- umap(iris_train, verbose = TRUE, ret_model = TRUE)
+#' iris_test_umap <- umap_transform(iris_test, iris_train_umap, verbose = TRUE)
+#' }
 #' @export
 umap_transform <- function(X, model,
                            init_weighted = TRUE,

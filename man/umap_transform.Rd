@@ -49,3 +49,13 @@ Carry out an embedding of new data using an existing embedding. Requires
 using the result of calling \code{\link{umap}} or \code{\link{tumap}} with
 \code{ret_model = TRUE}.
 }
+\examples{
+\dontrun{
+iris_train <- iris[1:100, ]
+iris_test <- iris[101:150, ]
+
+# You must set ret_model = TRUE to return extra data needed
+iris_train_umap <- umap(iris_train, verbose = TRUE, ret_model = TRUE)
+iris_test_umap <- umap_transform(iris_test, iris_train_umap, verbose = TRUE)
+}
+}
