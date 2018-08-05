@@ -758,7 +758,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
               length(positive_head), " positive edges using ",
               pluralize("thread", n_threads))
     if (tolower(method) == "umap") {
-      embedding <- optimize_layout_umap_parallel(embedding = embedding,
+      embedding <- optimize_layout_umap_parallel(
+                         head_embedding = embedding,
+                         tail_embedding = embedding,
                          positive_head = positive_head,
                          positive_tail = positive_tail,
                          n_epochs = n_epochs,
@@ -769,10 +771,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                          seed = get_seed(),
                          approx_pow = approx_pow,
                          grain_size = grain_size,
+                         move_other = TRUE,
                          verbose = verbose)
     }
     else if (method == "tumap") {
       embedding <- optimize_layout_tumap_parallel(embedding,
+                            tail_embedding = embedding,
                             positive_head = positive_head,
                             positive_tail = positive_tail,
                             n_epochs = n_epochs,
@@ -781,10 +785,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                             negative_sample_rate = negative_sample_rate,
                             seed = get_seed(),
                             grain_size = grain_size,
+                            move_other = TRUE,
                             verbose = verbose)
     }
     else {
       embedding <- optimize_layout_largevis_parallel(embedding,
+                                        tail_embedding = embedding,
                                         positive_head = positive_head,
                                         positive_tail = positive_tail,
                                         n_epochs = n_epochs,
@@ -794,6 +800,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                                         negative_sample_rate = negative_sample_rate,
                                         seed = get_seed(),
                                         grain_size = grain_size,
+                                        move_other = TRUE,
                                         verbose = verbose)
     }
   }

@@ -25,16 +25,16 @@ optimize_layout_largevis <- function(head_embedding, tail_embedding, positive_he
     .Call(`_uwot_optimize_layout_largevis`, head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, move_other, verbose)
 }
 
-optimize_layout_umap_parallel <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, grain_size = 1L, verbose = FALSE) {
-    .Call(`_uwot_optimize_layout_umap_parallel`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, grain_size, verbose)
+optimize_layout_umap_parallel <- function(head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, grain_size = 1L, move_other = TRUE, verbose = FALSE) {
+    .Call(`_uwot_optimize_layout_umap_parallel`, head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, seed, approx_pow, grain_size, move_other, verbose)
 }
 
-optimize_layout_tumap_parallel <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, grain_size = 1L, verbose = FALSE) {
-    .Call(`_uwot_optimize_layout_tumap_parallel`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, grain_size, verbose)
+optimize_layout_tumap_parallel <- function(head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, grain_size = 1L, move_other = TRUE, verbose = FALSE) {
+    .Call(`_uwot_optimize_layout_tumap_parallel`, head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, grain_size, move_other, verbose)
 }
 
-optimize_layout_largevis_parallel <- function(embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, grain_size = 1L, verbose = FALSE) {
-    .Call(`_uwot_optimize_layout_largevis_parallel`, embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, grain_size, verbose)
+optimize_layout_largevis_parallel <- function(head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, grain_size = 1L, move_other = TRUE, verbose = FALSE) {
+    .Call(`_uwot_optimize_layout_largevis_parallel`, head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, grain_size, move_other, verbose)
 }
 
 calc_row_probabilities_cpp <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, verbose = FALSE) {
