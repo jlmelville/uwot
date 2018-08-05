@@ -64,7 +64,25 @@ embedding <- init_new_embedding(train_embedding, nn, graph = dgraph,
 expect_equal(embedding, wav, check.attributes = FALSE, tol = 1e-5)
 
 
-# av <- matrix(nrow = nrow(train_embedding), ncol = ncol(train_embedding))
-# for (i in 1:nrow(train_embedding)) {
-#   av[i, ] <- apply(train_embedding[nn$idx[i, ], ], 2, function(x) { weighted.mean(x, w = graph[nn$idx[i, ], i]) } )
-# }
+iris10_range <- scale_input(iris10, scale_type = "range", ret_model = TRUE)
+iris10_rtrans <- apply_scaling(iris10, attr_to_scale_info(iris10_range))
+expect_equal(iris10_range, iris10_rtrans, check.attributes = FALSE)
+
+iris10_maxabs <- scale_input(iris10, scale_type = "maxabs", ret_model = TRUE)
+iris10_matrans <- apply_scaling(iris10, attr_to_scale_info(iris10_maxabs))
+expect_equal(iris10_maxabs, iris10_matrans, check.attributes = FALSE)
+
+iris10_scale <- scale_input(iris10, scale_type = "scale", ret_model = TRUE)
+iris10_strans <- apply_scaling(iris10, attr_to_scale_info(iris10_scale))
+expect_equal(iris10_scale, iris10_strans, check.attributes = FALSE)
+
+iris10_zv_col <- iris10
+iris10_zv_col[, 3] <- 10
+iris10zvc_scale <- scale_input(iris10_zv_col, scale_type = "scale", ret_model = TRUE)
+# scale the original iris10 here on purpose to check that full-variance column
+# is correctly removed
+iris10_zvstrans <- apply_scaling(iris10, attr_to_scale_info(iris10zvc_scale))
+expect_equal(iris10zvc_scale, iris10_zvstrans, check.attributes = FALSE)
+
+iris10_none <- scale_input(iris10, scale_type = FALSE, ret_model = TRUE)
+expect_null(attr_to_scale_info(iris10_none))

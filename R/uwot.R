@@ -578,10 +578,16 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
 
   if (methods::is(X, "dist")) {
+    if (ret_model) {
+      stop("Can only create models with dense matrix or data frame input" )
+    }
     n_vertices <- attr(X, "Size")
     tsmessage("Read ", n_vertices, " rows")
   }
   else if (methods::is(X, "sparseMatrix")) {
+    if (ret_model) {
+      stop("Can only create models with dense matrix or data frame input" )
+    }
     n_vertices <- nrow(X)
     if (ncol(X) != n_vertices) {
       stop("Sparse matrices are only supported as distance matrices")
@@ -599,7 +605,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_vertices <- nrow(X)
     tsmessage("Read ", n_vertices, " rows and found ", ncol(X),
               " numeric columns")
-    X <- scale_input(X, scale_type = scale, verbose = verbose)
+    X <- scale_input(X, scale_type = scale, ret_model = ret_model,
+                     verbose = verbose)
   }
 
   if (method == "largevis" && kernel == "knn") {
@@ -856,6 +863,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
   if (ret_model) {
     list(
+      scale_info = attr_to_scale_info(X),
       nn_index = nn$index,
       n_neighbors = n_neighbors,
       search_k = search_k,
@@ -931,7 +939,7 @@ lvish_epochs <- function(n_vertices, V) {
 }
 
 # Scale X according to various strategies
-scale_input <- function(X, scale_type, verbose = FALSE) {
+scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
   if (is.null(scale_type)) {
     scale_type <- "none"
   }
@@ -943,29 +951,56 @@ scale_input <- function(X, scale_type, verbose = FALSE) {
   switch(scale_type,
          range = {
            tsmessage("Range scaling X")
-           X <- X - min(X)
-           X <- X / max(X)
+           min_X <- min(X)
+           X <- X - min_X
+
+           max_X <- max(X)
+           X <- X / max_X
+
+           if (ret_model) {
+            attr(X, "scaled:range:min") <- min_X
+            attr(X, "scaled:range:max") <- max_X
+           }
          },
          maxabs = {
            tsmessage("Normalizing by max-abs")
            X <- base::scale(X, scale = FALSE)
-           X <- X / max(abs(X))
+           max_abs <- max(abs(X))
+           X <- X / max_abs
+
+           if (ret_model) {
+            attr(X, "scaled:maxabs") <- max_abs
+           }
          },
          scale = {
            tsmessage("Scaling to zero mean and unit variance")
-           non_zero_var_cols <-
-             apply(X, 2, function(x) { sum((x - sum(x) / length(x)) ^ 2) }) >= .Machine$double.xmin
+
+           varf <- function(x) { sum((x - sum(x) / length(x)) ^ 2) }
+           non_zero_var_cols <- apply(X, 2, varf) >= .Machine$double.xmin
+
            if (length(non_zero_var_cols) == 0) {
              stop("Matrix has zero variance")
            }
            X <- X[, non_zero_var_cols]
            tsmessage("Kept ", ncol(X), " non-zero-variance columns")
            X <- base::scale(X, scale = TRUE)
+
+           if (ret_model) {
+            attr(X, "scaled:nzvcols") <- which(non_zero_var_cols)
+           }
          }
   )
   X
 }
 
+attr_to_scale_info <- function(X) {
+  Xattr <- attributes(X)
+  Xattr <- Xattr[startsWith(names(Xattr), "scaled:")]
+  if (length(Xattr) == 0) {
+    Xattr <- NULL
+  }
+  Xattr
+}
 
 #' @useDynLib uwot, .registration=TRUE
 #' @importFrom Rcpp sourceCpp

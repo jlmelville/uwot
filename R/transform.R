@@ -48,6 +48,7 @@ umap_transform <- function(X, model,
   local_connectivity <- model$local_connectivity
   train_embedding <- model$embedding
   method <- model$method
+  scale_info <- model$scale_info
 
   a <- model$a
   b <- model$b
@@ -55,9 +56,6 @@ umap_transform <- function(X, model,
   alpha <- model$alpha
   negative_sample_rate <- model$negative_sample_rate
   approx_pow <- model$approx_pow
-
-  # TODO return scaling info from uwot and apply it
-  scale <- FALSE
 
   if (methods::is(X, "data.frame")) {
     indexes <- which(vapply(X, is.numeric, logical(1)))
@@ -69,7 +67,10 @@ umap_transform <- function(X, model,
   n_vertices <- nrow(X)
   tsmessage("Read ", n_vertices, " rows and found ", ncol(X),
             " numeric columns")
-  X <- scale_input(X, scale_type = scale, verbose = verbose)
+
+  if (!is.null(scale_info)) {
+    X <- apply_scaling(X, scale_info = scale_info, verbose = verbose)
+  }
 
   if (n_threads > 0) {
     RcppParallel::setThreadOptions(numThreads = n_threads)
@@ -239,4 +240,25 @@ init_transform <- function(train_embedding, nn_index, weights = NULL) {
   }
 
   embedding
+}
+
+apply_scaling <- function(X, scale_info, verbose = FALSE) {
+  if (!is.null(scale_info[["scaled:range:min"]])) {
+    tsmessage("Applying training data range scaling")
+    X <- X - scale_info[["scaled:range:min"]]
+    X <- X / scale_info[["scaled:range:max"]]
+  }
+  else if (!is.null(scale_info[["scaled:maxabs"]])) {
+    tsmessage("Applying training data max-abs scaling")
+    X <- scale(X, center = scale_info[["scaled:center"]], scale = FALSE)
+    X <- X / scale_info[["scaled:maxabs"]]
+  }
+  else {
+    tsmessage("Applying training data column filtering/scaling")
+    X <- X[, scale_info[["scaled:nzvcols"]]]
+    X <- scale(X, center = scale_info[["scaled:center"]],
+               scale = scale_info[["scaled:scale"]])
+  }
+
+  X
 }
