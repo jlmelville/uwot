@@ -8,26 +8,16 @@ method for dimensionality reduction (McInnes and Healy, 2018).
 
 ## News
 
+*August 5 2018*. You can now use an existing embedding to add new points via 
+`umap_transform`. See the example section below.
+
 *August 1 2018*. Numerical vectors are now supported for supervised dimension reduction.
 
 *July 31 2018*. (Very) initial support for supervised dimension reduction:
 categorical data only at the moment. Pass in a factor vector (use `NA` for
 unknown labels) as the `y` parameter and edges with bad (or unknown) labels are
 down-weighted, hopefully leading to better separation of classes. This works
-remarkably well for the Fashion MNIST dataset. An easy way to try this:
-
-```R
-devtools::install_github("jlmelville/snedata")
-devtools::install_github("jlmelville/vizier")
-
-fashion <- snedata::download_fashion_mnist(verbose = TRUE)
-
-fashion_umap <- umap(fashion)
-fashion_sumap <- umap(fashion, y = fashion$Label)
-
-vizier::embed_plot(fashion_umap, fashion, title = "UMAP")
-vizier::embed_plot(fashion_sumap, fashion, title = "Supervised UMAP")
-```
+remarkably well for the Fashion MNIST dataset.
 
 *July 22 2018*. You can now use the cosine and Manhattan distances with the
 Annoy nearest neighbor search, via `metric = "cosine"` and `metric =
@@ -64,6 +54,14 @@ mnist_umap_cosine <- umap(n_neighbors = 15, metric = "cosine", min_dist = 0.001,
 # Supervised dimension reduction
 mnist_umap_s <- umap(n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8, 
                      y = mnist$Label, target_weight = 0.5)
+                    
+# Add new points to an existing embedding
+mnist_train <- mnist[1:60000, ]
+mnist_test <- mnist[60001:70000, ]
+
+# You must set ret_model = TRUE to return extra data we need
+mnist_train_umap <- umap(mnist_train, verbose = TRUE, ret_model = TRUE)
+mnist_test_umap <- umap_transform(mnist_test, mnist_train_umap, verbose = TRUE)
 ```
 
 ## Documentation
