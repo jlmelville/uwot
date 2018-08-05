@@ -83,14 +83,15 @@ umap_transform <- function(X, model,
                       local_connectivity = adjusted_local_connectivity,
                       n_threads = n_threads,
                       grain_size = grain_size,
-                      self_nbr = FALSE,
-                      n_reference_vertices = nrow(train_embedding),
                       verbose = verbose)
 
   embedding <- init_new_embedding(train_embedding, nn, graph,
                                   weighted = init_weighted,
                                   n_threads = n_threads,
                                   grain_size = grain_size, verbose = verbose)
+
+  graph <- nn_to_sparse(nn$idx, as.vector(graph), self_nbr = FALSE,
+                        max_nbr_id = nrow(train_embedding))
 
   if (is.null(n_epochs)) {
     if (ncol(graph) <= 10000) {
@@ -105,15 +106,12 @@ umap_transform <- function(X, model,
   }
 
   if (n_epochs > 0) {
-    # TODO: change graph storage so that training data is on the columns
-    graph <- Matrix::t(graph)
     graph@x[graph@x < max(graph@x) / n_epochs] <- 0
     graph <- Matrix::drop0(graph)
     epochs_per_sample <- make_epochs_per_sample(graph@x, n_epochs)
 
     positive_head <- graph@i
     positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
-
 
     if (n_threads > 0) {
       tsmessage("Commencing optimization for ", n_epochs, " epochs, with ",
