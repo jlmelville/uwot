@@ -12,6 +12,19 @@ expected_sparse <- Matrix::drop0(expected_sparse)
 res <- nn_to_sparse(nn$idx, val = 2)
 expect_equal(res, expected_sparse)
 
+v <- 1
+expected_sparse_mv <- matrix(0, nrow = 10, ncol = 10)
+for (i in 1:nrow(nn$idx)) {
+  nnr <- sort(nn$idx[i, ])
+  for (j in 1:ncol(nn$idx)) {
+    expected_sparse_mv[i, nnr[j]] <- v
+    v <- v + 1
+  }
+}
+expect_equal(nn_to_sparse(nn$idx, matrix(1:40, nrow = 10, byrow = TRUE)),
+             Matrix::drop0(expected_sparse_mv),
+             check.attributes = FALSE)
+
 res <- perplexity_similarities(iris10, 4, kernel = "knn", nn = nn)
 expected_sym_nn_graph <- matrix(0, nrow = 10, ncol = 10)
 o3 <- 1 / 3
