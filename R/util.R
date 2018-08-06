@@ -29,10 +29,16 @@ get_seed <- function() {
 
 # pluralize("thread", 1) => "1 thread"
 # pluralize("thread", 2) => "2 threads"
-pluralize <- function(str, n, inc_num = TRUE) {
+pluralize <- function(str, n, prefix = NULL, inc_num = TRUE) {
+  if (n == 0) {
+    return("")
+  }
   ret <- paste0(str, ifelse(n != 1, "s", ""))
   if (inc_num) {
     ret <- paste0(n, " ", ret)
+  }
+  if (!is.null(prefix)) {
+    ret <- paste0(prefix, " ", ret)
   }
   ret
 }
