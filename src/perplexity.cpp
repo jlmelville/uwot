@@ -19,107 +19,162 @@
 
 #include <limits>
 #include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::depends(RcppProgress)]]
-#include <progress.hpp>
+// [[Rcpp::depends(RcppArmadillo)]
+// [[Rcpp::depends(RcppParallel)]]
+#include <RcppParallel.h>
+// // [[Rcpp::depends(RcppProgress)]]
+// #include <progress.hpp>
 
-// [[Rcpp::export]]
-arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx,
-                                    const double perplexity,
-                                    const unsigned int n_iter = 200,
-                                    const double tol = 1e-5,
-                                    const bool verbose = false) {
+struct PerplexityWorker : public RcppParallel::Worker {
+  const RcppParallel::RMatrix<double> nn_dist;
+  const RcppParallel::RMatrix<int> nn_idx;
+  const unsigned int n_vertices;
+  const unsigned int n_neighbors;
 
-  const unsigned int n_vertices = nn_dist.nrow();
-  const unsigned int n_neighbors = nn_dist.ncol();
+  arma::umat locations;
+  arma::vec values;
 
-  const double target = std::log(perplexity);
+  const double target;
+  const unsigned int n_iter;
+  const double tol;
   const double double_max = std::numeric_limits<double>::max();
 
-  arma::umat locations(2, n_vertices * n_neighbors);
-  arma::vec values(n_vertices * n_neighbors);
+  // Progress progress;
+  // tthread::mutex mutex;
 
-  double d2[n_neighbors - 1];
+  PerplexityWorker(const Rcpp::NumericMatrix& nn_dist,
+                   const Rcpp::IntegerMatrix&  nn_idx,
+                   const double perplexity, const unsigned int n_iter,
+                   const double tol
+                     // , Progress& progress
+  ) :
+    nn_dist(nn_dist), nn_idx(nn_idx), n_vertices(nn_dist.nrow()), n_neighbors(nn_dist.ncol()),
+    locations(2, n_vertices * n_neighbors), values(n_vertices * n_neighbors),
+    target(std::log(perplexity)), n_iter(n_iter), tol(tol)
+    // , progress(progress)
+  {  }
 
-  Progress progress(n_vertices, verbose);
-  // first vertex: guess initial beta as 1.0
-  // subsequent vertices, guess the last optimized beta
-  double beta = 1.0;
-  for (unsigned int i = 0; i < n_vertices; i++) {
+  void operator()(std::size_t begin, std::size_t end) {
+    double d2[n_neighbors - 1];
 
-    double lo = 0.0;
-    double hi = double_max;
+    // first vertex: guess initial beta as 1.0
+    // subsequent vertices, guess the last optimized beta
+    double beta = 1.0;
 
-    for (unsigned int k = 1; k < n_neighbors; k++) {
-      d2[k - 1] = nn_dist(i, k) * nn_dist(i, k);
-    }
+    for (std::size_t i = begin; i < end; i++) {
+      double lo = 0.0;
+      double hi = double_max;
 
-    for (unsigned int iter = 0; iter < n_iter; iter++) {
+      for (unsigned int k = 1; k < n_neighbors; k++) {
+        d2[k - 1] = nn_dist(i, k) * nn_dist(i, k);
+      }
+
+      for (unsigned int iter = 0; iter < n_iter; iter++) {
+        double Z = 0.0;
+        double H = 0.0;
+        double sum_D2_W = 0.0;
+        for (unsigned int k = 0; k < n_neighbors - 1; k++) {
+          double W = std::exp(-d2[k] * beta);
+          Z += W;
+          sum_D2_W += d2[k] * W;
+        }
+        if (Z > 0) {
+          H = std::log(Z) + beta * sum_D2_W / Z;
+        }
+
+        if (std::abs(H - target) < tol) {
+          break;
+        }
+
+        if (H < target) {
+          hi = beta;
+          beta = 0.5 * (lo + hi);
+        }
+        else {
+          lo = beta;
+          if (hi == double_max) {
+            beta *= 2.0;
+          }
+          else {
+            beta = 0.5 * (lo + hi);
+          }
+        }
+      }
+
       double Z = 0.0;
-      double H = 0.0;
-      double sum_D2_W = 0.0;
       for (unsigned int k = 0; k < n_neighbors - 1; k++) {
         double W = std::exp(-d2[k] * beta);
         Z += W;
-        sum_D2_W += d2[k] * W;
-      }
-      if (Z > 0) {
-        H = std::log(Z) + beta * sum_D2_W / Z;
+        // no longer need d2 at this point, store final W there
+        d2[k] = W;
       }
 
-      if (std::abs(H - target) < tol) {
-        break;
-      }
+      unsigned int loc = i * n_neighbors;
+      // loc is incremented in the loop
+      for (unsigned int k = 0; k < n_neighbors; k++, loc++) {
+        unsigned int j = nn_idx(i, k) - 1;
 
-      if (H < target) {
-        hi = beta;
-        beta = 0.5 * (lo + hi);
-      }
-      else {
-        lo = beta;
-        if (hi == double_max) {
-          beta *= 2.0;
+        locations(0, loc) = i;
+        locations(1, loc) = j;
+        if (i != j) {
+          values(loc) = d2[k - 1] / Z;
         }
         else {
-          beta = 0.5 * (lo + hi);
+          values(loc) = 0.0;
         }
       }
-    }
 
-    double Z = 0.0;
-    for (unsigned int k = 0; k < n_neighbors - 1; k++) {
-      double W = std::exp(-d2[k] * beta);
-      Z += W;
-      // no longer need d2 at this point, store final W there
-      d2[k] = W;
+      // {
+      //   tthread::lock_guard<tthread::mutex> guard(mutex);
+      //   progress.increment();
+      //   if (Progress::check_abort()) {
+      //     return;
+      //   }
+      // }
     }
-
-    unsigned int iloc = i * n_neighbors;
-    // iloc is incremented in the loop
-    for (unsigned int k = 0; k < n_neighbors; k++, iloc++) {
-      unsigned int j = nn_idx(i, k) - 1;
-
-      locations(0, iloc) = i;
-      locations(1, iloc) = j;
-      if (i != j) {
-        values(iloc) = d2[k - 1] / Z;
-      }
-      else {
-        values(iloc) = 0.0;
-      }
-    }
-
-    if (progress.check_abort()) {
-      Rcpp::stop("Progress aborted by user");
-    }
-    progress.increment();
   }
+};
+
+// [[Rcpp::export]]
+arma::sp_mat calc_row_probabilities_parallel(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx,
+                                             const double perplexity,
+                                             const unsigned int n_iter = 200,
+                                             const double tol = 1e-5,
+                                             const std::size_t grain_size = 1,
+                                             const bool verbose = false) {
+  const unsigned int n_vertices = nn_dist.nrow();
+  // Progress progress(n_vertices, verbose);
+  PerplexityWorker worker(nn_dist, nn_idx, perplexity, n_iter, tol
+                            // , progress
+  );
+
+  RcppParallel::parallelFor(0, n_vertices, worker, grain_size);
 
   return arma::sp_mat(
     false, // add_values
-    locations,
-    values,
+    worker.locations,
+    worker.values,
     n_vertices, n_vertices
   );
 }
 
+
+// [[Rcpp::export]]
+arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx,
+                                        const double perplexity,
+                                        const unsigned int n_iter = 200,
+                                        const double tol = 1e-5,
+                                        const bool verbose = false) {
+
+  const unsigned int n_vertices = nn_dist.nrow();
+  PerplexityWorker worker(nn_dist, nn_idx, perplexity, n_iter, tol);
+
+  worker(0, n_vertices);
+
+  return arma::sp_mat(
+    false, // add_values
+    worker.locations,
+    worker.values,
+    n_vertices, n_vertices
+  );
+}

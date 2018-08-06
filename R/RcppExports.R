@@ -37,12 +37,12 @@ optimize_layout_largevis_parallel <- function(head_embedding, tail_embedding, po
     .Call(`_uwot_optimize_layout_largevis_parallel`, head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, grain_size, move_other, verbose)
 }
 
-calc_row_probabilities_cpp <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, verbose = FALSE) {
-    .Call(`_uwot_calc_row_probabilities_cpp`, nn_dist, nn_idx, perplexity, n_iter, tol, verbose)
-}
-
 calc_row_probabilities_parallel <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, grain_size = 1L, verbose = FALSE) {
     .Call(`_uwot_calc_row_probabilities_parallel`, nn_dist, nn_idx, perplexity, n_iter, tol, grain_size, verbose)
+}
+
+calc_row_probabilities_cpp <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, verbose = FALSE) {
+    .Call(`_uwot_calc_row_probabilities_cpp`, nn_dist, nn_idx, perplexity, n_iter, tol, verbose)
 }
 
 smooth_knn_distances_cpp <- function(nn_dist, nn_idx, n_iter = 64L, local_connectivity = 1.0, bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, verbose = FALSE) {
