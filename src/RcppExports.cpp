@@ -238,33 +238,22 @@ BEGIN_RCPP
 END_RCPP
 }
 // init_transform_av_parallel
-Rcpp::NumericMatrix init_transform_av_parallel(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index, const size_t grain_size);
-RcppExport SEXP _uwot_init_transform_av_parallel(SEXP train_embeddingSEXP, SEXP nn_indexSEXP, SEXP grain_sizeSEXP) {
+Rcpp::NumericMatrix init_transform_av_parallel(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index, bool parallelize, const size_t grain_size);
+RcppExport SEXP _uwot_init_transform_av_parallel(SEXP train_embeddingSEXP, SEXP nn_indexSEXP, SEXP parallelizeSEXP, SEXP grain_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type train_embedding(train_embeddingSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type nn_index(nn_indexSEXP);
+    Rcpp::traits::input_parameter< bool >::type parallelize(parallelizeSEXP);
     Rcpp::traits::input_parameter< const size_t >::type grain_size(grain_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(init_transform_av_parallel(train_embedding, nn_index, grain_size));
-    return rcpp_result_gen;
-END_RCPP
-}
-// init_transform_av_cpp
-Rcpp::NumericMatrix init_transform_av_cpp(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index);
-RcppExport SEXP _uwot_init_transform_av_cpp(SEXP train_embeddingSEXP, SEXP nn_indexSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type train_embedding(train_embeddingSEXP);
-    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type nn_index(nn_indexSEXP);
-    rcpp_result_gen = Rcpp::wrap(init_transform_av_cpp(train_embedding, nn_index));
+    rcpp_result_gen = Rcpp::wrap(init_transform_av_parallel(train_embedding, nn_index, parallelize, grain_size));
     return rcpp_result_gen;
 END_RCPP
 }
 // init_transform_parallel
-Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index, Rcpp::NumericMatrix nn_weights, const size_t grain_size);
-RcppExport SEXP _uwot_init_transform_parallel(SEXP train_embeddingSEXP, SEXP nn_indexSEXP, SEXP nn_weightsSEXP, SEXP grain_sizeSEXP) {
+Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index, Rcpp::NumericMatrix nn_weights, const size_t grain_size, bool parallelize);
+RcppExport SEXP _uwot_init_transform_parallel(SEXP train_embeddingSEXP, SEXP nn_indexSEXP, SEXP nn_weightsSEXP, SEXP grain_sizeSEXP, SEXP parallelizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -272,20 +261,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type nn_index(nn_indexSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type nn_weights(nn_weightsSEXP);
     Rcpp::traits::input_parameter< const size_t >::type grain_size(grain_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(init_transform_parallel(train_embedding, nn_index, nn_weights, grain_size));
-    return rcpp_result_gen;
-END_RCPP
-}
-// init_transform_cpp
-Rcpp::NumericMatrix init_transform_cpp(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index, Rcpp::NumericMatrix nn_weights);
-RcppExport SEXP _uwot_init_transform_cpp(SEXP train_embeddingSEXP, SEXP nn_indexSEXP, SEXP nn_weightsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type train_embedding(train_embeddingSEXP);
-    Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type nn_index(nn_indexSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type nn_weights(nn_weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(init_transform_cpp(train_embedding, nn_index, nn_weights));
+    Rcpp::traits::input_parameter< bool >::type parallelize(parallelizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(init_transform_parallel(train_embedding, nn_index, nn_weights, grain_size, parallelize));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -303,10 +280,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_uwot_smooth_knn_distances_cpp", (DL_FUNC) &_uwot_smooth_knn_distances_cpp, 8},
     {"_uwot_fast_intersection_cpp", (DL_FUNC) &_uwot_fast_intersection_cpp, 6},
     {"_uwot_general_sset_intersection_cpp", (DL_FUNC) &_uwot_general_sset_intersection_cpp, 10},
-    {"_uwot_init_transform_av_parallel", (DL_FUNC) &_uwot_init_transform_av_parallel, 3},
-    {"_uwot_init_transform_av_cpp", (DL_FUNC) &_uwot_init_transform_av_cpp, 2},
-    {"_uwot_init_transform_parallel", (DL_FUNC) &_uwot_init_transform_parallel, 4},
-    {"_uwot_init_transform_cpp", (DL_FUNC) &_uwot_init_transform_cpp, 3},
+    {"_uwot_init_transform_av_parallel", (DL_FUNC) &_uwot_init_transform_av_parallel, 4},
+    {"_uwot_init_transform_parallel", (DL_FUNC) &_uwot_init_transform_parallel, 5},
     {NULL, NULL, 0}
 };
 

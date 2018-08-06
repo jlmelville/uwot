@@ -170,27 +170,20 @@ umap_transform <- function(X, model,
 init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
                                n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                                grain_size = 1, verbose = FALSE) {
-  if (n_threads > 0) {
-    if (weighted) {
-      tsmessage("Initializing by weighted average of neighbor coordinates using ",
-                pluralize("thread", n_threads))
-      embedding <- init_transform_parallel(train_embedding, nn$idx, graph, grain_size = grain_size)
-    }
-    else {
-      tsmessage("Initializing by average of neighbor coordinates using ",
-                pluralize("thread", n_threads))
-      embedding <- init_transform_av_parallel(train_embedding, nn$idx, grain_size = grain_size)
-    }
+  parallelize <- n_threads > 0
+  if (weighted) {
+    tsmessage("Initializing by weighted average of neighbor coordinates using ",
+              pluralize("thread", n_threads, " using"))
+    embedding <- init_transform_parallel(train_embedding, nn$idx, graph,
+                                         parallelize = parallelize,
+                                         grain_size = grain_size)
   }
   else {
-    if (weighted) {
-      tsmessage("Initializing by weighted average of neighbor coordinates")
-      embedding <- init_transform_cpp(train_embedding, nn$idx, graph)
-    }
-    else {
-      tsmessage("Initializing by average of neighbor coordinates")
-      embedding <- init_transform_av_cpp(train_embedding, nn$idx)
-    }
+    tsmessage("Initializing by average of neighbor coordinates using ",
+              pluralize("thread", n_threads, " using"))
+    embedding <- init_transform_av_parallel(train_embedding, nn$idx,
+                                            parallelize = parallelize,
+                                            grain_size = grain_size)
   }
 
   embedding

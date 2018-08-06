@@ -67,23 +67,18 @@ struct AverageWorker : public RcppParallel::Worker {
 // [[Rcpp::export]]
 Rcpp::NumericMatrix init_transform_av_parallel(Rcpp::NumericMatrix train_embedding,
                                                Rcpp::IntegerMatrix nn_index,
+                                               bool parallelize = true,
                                                const size_t grain_size = 1) {
   Rcpp::NumericMatrix embedding(nn_index.nrow(), train_embedding.ncol());
 
   AverageWorker worker(train_embedding, nn_index, embedding);
 
-  RcppParallel::parallelFor(0, nn_index.nrow(), worker, grain_size);
-
-  return embedding;
-}
-
-// [[Rcpp::export]]
-Rcpp::NumericMatrix init_transform_av_cpp(Rcpp::NumericMatrix train_embedding,
-                                          Rcpp::IntegerMatrix nn_index) {
-  Rcpp::NumericMatrix embedding(nn_index.nrow(), train_embedding.ncol());
-
-  AverageWorker worker(train_embedding, nn_index, embedding);
-  worker(0, nn_index.nrow());
+  if (parallelize) {
+    RcppParallel::parallelFor(0, nn_index.nrow(), worker, grain_size);
+  }
+  else {
+    worker(0, nn_index.nrow());
+  }
 
   return embedding;
 }
@@ -129,20 +124,6 @@ struct WeightedAverageWorker : public RcppParallel::Worker {
   }
 };
 
-// [[Rcpp::export]]
-Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding,
-                                            Rcpp::IntegerMatrix nn_index,
-                                            Rcpp::NumericMatrix nn_weights,
-                                            const size_t grain_size = 1) {
-  Rcpp::NumericMatrix embedding(nn_index.nrow(), train_embedding.ncol());
-
-  WeightedAverageWorker worker(train_embedding, nn_index, nn_weights, embedding);
-
-  RcppParallel::parallelFor(0, nn_index.nrow(), worker, grain_size);
-
-  return embedding;
-}
-
 // Initialize embedding as a weighted average of nearest neighbors of each point
 // train_embedding: n_train x dim matrix of final embedding coordinates
 // nn_index: n_test x n_nbrs matrix of indexes of neighbors in X_train that are
@@ -150,13 +131,21 @@ Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding,
 // weights: n_test x n_nbrs weight matrix
 // Returns the n_test x dim matrix of initialized coordinates.
 // [[Rcpp::export]]
-Rcpp::NumericMatrix init_transform_cpp(Rcpp::NumericMatrix train_embedding,
-                                       Rcpp::IntegerMatrix nn_index,
-                                       Rcpp::NumericMatrix nn_weights) {
+Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding,
+                                            Rcpp::IntegerMatrix nn_index,
+                                            Rcpp::NumericMatrix nn_weights,
+                                            const size_t grain_size = 1,
+                                            bool parallelize = true) {
   Rcpp::NumericMatrix embedding(nn_index.nrow(), train_embedding.ncol());
 
   WeightedAverageWorker worker(train_embedding, nn_index, nn_weights, embedding);
-  worker(0, nn_index.nrow());
+
+  if (parallelize) {
+    RcppParallel::parallelFor(0, nn_index.nrow(), worker, grain_size);
+  }
+  else {
+    worker(0, nn_index.nrow());
+  }
 
   return embedding;
 }
