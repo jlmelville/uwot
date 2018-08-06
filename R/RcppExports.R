@@ -33,12 +33,8 @@ calc_row_probabilities_cpp <- function(nn_dist, nn_idx, perplexity, n_iter = 200
     .Call(`_uwot_calc_row_probabilities_cpp`, nn_dist, nn_idx, perplexity, n_iter, tol, verbose)
 }
 
-smooth_knn_distances_parallel <- function(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size = 1L, verbose = FALSE) {
-    .Call(`_uwot_smooth_knn_distances_parallel`, nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size, verbose)
-}
-
-smooth_knn_distances_cpp <- function(nn_dist, nn_idx, n_iter = 64L, local_connectivity = 1.0, bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, verbose = FALSE) {
-    .Call(`_uwot_smooth_knn_distances_cpp`, nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose)
+smooth_knn_distances_parallel <- function(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, parallelize = TRUE, grain_size = 1L, verbose = FALSE) {
+    .Call(`_uwot_smooth_knn_distances_parallel`, nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, parallelize, grain_size, verbose)
 }
 
 fast_intersection_cpp <- function(rows, cols, values, target, unknown_dist = 1.0, far_dist = 5.0) {

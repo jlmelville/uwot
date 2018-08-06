@@ -21,30 +21,19 @@ smooth_knn <- function(nn,
                        n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                        grain_size = 1,
                        verbose = FALSE) {
-  if (n_threads > 0) {
-    tsmessage("Commencing smooth kNN distance calibration using ",
-              pluralize("thread", n_threads))
-    affinity_matrix <- smooth_knn_distances_parallel(nn_dist = nn$dist,
+  tsmessage("Commencing smooth kNN distance calibration using ",
+            pluralize("thread", n_threads, " using"))
+  parallelize <- n_threads > 0
+  affinity_matrix <- smooth_knn_distances_parallel(nn_dist = nn$dist,
                                                      nn_idx = nn$idx,
                                                      n_iter = 64,
                                                      local_connectivity = local_connectivity,
                                                      bandwidth = bandwidth,
                                                      tol = 1e-5,
                                                      min_k_dist_scale = 1e-3,
+                                                     parallelize = parallelize,
                                                      grain_size = grain_size,
                                                      verbose = verbose)
-  }
-  else {
-    tsmessage("Commencing smooth kNN distance calibration")
-    affinity_matrix <- smooth_knn_distances_cpp(nn_dist = nn$dist,
-                                                nn_idx = nn$idx,
-                                                n_iter = 64,
-                                                local_connectivity = local_connectivity,
-                                                bandwidth = bandwidth,
-                                                tol = 1e-5,
-                                                min_k_dist_scale = 1e-3,
-                                                verbose = verbose)
-  }
   affinity_matrix
 }
 

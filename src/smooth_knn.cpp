@@ -170,6 +170,7 @@ Rcpp::NumericMatrix smooth_knn_distances_parallel(
     const double bandwidth,
     const double tol,
     const double min_k_dist_scale,
+    const bool parallelize = true,
     const size_t grain_size = 1,
     const bool verbose = false) {
   const unsigned int n_vertices = nn_dist.nrow();
@@ -182,27 +183,12 @@ Rcpp::NumericMatrix smooth_knn_distances_parallel(
                            // , progress
   );
 
-  RcppParallel::parallelFor(0, n_vertices, worker, grain_size);
-
-  return nn_weights;
-}
-
-// [[Rcpp::export]]
-Rcpp::NumericMatrix smooth_knn_distances_cpp(
-    const Rcpp::NumericMatrix& nn_dist,
-    const Rcpp::IntegerMatrix& nn_idx,
-    const unsigned int n_iter = 64,
-    const double local_connectivity = 1.0,
-    const double bandwidth = 1.0,
-    const double tol = 1e-5,
-    const double min_k_dist_scale = 1e-3,
-    const bool verbose = false) {
-
-  const unsigned int n_vertices = nn_dist.nrow();
-  Rcpp::NumericMatrix nn_weights(n_vertices, nn_idx.ncol());
-  SmoothKnnWorker worker(nn_dist, nn_idx, nn_weights, n_iter, local_connectivity,
-                         bandwidth, tol, min_k_dist_scale);
-  worker(0, n_vertices);
+  if (parallelize) {
+    RcppParallel::parallelFor(0, n_vertices, worker, grain_size);
+  }
+  else {
+    worker(0, n_vertices);
+  }
 
   return nn_weights;
 }
