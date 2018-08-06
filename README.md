@@ -213,7 +213,9 @@ calculation and using the scaled PCA (`init = "spca"`) instead.
 * For supervised dimensionality reduction using a numeric vector, only the
 Euclidean distance is supported for building the target graph.
 * `R CMD check` currently reports two notes: `GNU make is a SystemRequirements.`,
-which is expected and due to using RcppParallel.
+which is expected and due to using RcppParallel. On Linux only, it also notes
+that the `libs` sub-directory is over 1 MB (in fact, it's currently closer to 
+6MB). I am unsure if this is anything to worry about.
 
 ## Other Methods
 
