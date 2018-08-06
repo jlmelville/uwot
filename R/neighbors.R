@@ -44,6 +44,36 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
                      grain_size = 1,
                      ret_index = FALSE,
                      verbose = FALSE) {
+
+  ann <- annoy_build(X, metric = metric, n_trees = n_trees,
+                     n_threads = n_threads, grain_size = grain_size,
+                     verbose = verbose)
+
+  # Search index
+  if (!include_self) {
+    k <- k + 1
+  }
+  res <- annoy_search(X, k = k, ann = ann, search_k = search_k,
+                      n_threads = n_threads,
+                      grain_size = grain_size, verbose = verbose)
+  idx <- res$idx
+  dist <- res$dist
+  if (!include_self) {
+    idx <- idx[, -1]
+    dist <- dist[, -1]
+    k <- k - 1
+  }
+
+  res <- list(idx = idx, dist = dist)
+  if (ret_index) {
+    res$index <- ann
+  }
+  res
+}
+
+annoy_build <- function(X, metric = "euclidean", n_trees = 50,
+                        n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                        grain_size = 1, verbose = FALSE) {
   nr <- nrow(X)
   nc <- ncol(X)
 
@@ -69,26 +99,7 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
   # Build index
   ann$build(n_trees)
 
-  # Search index
-  if (!include_self) {
-    k <- k + 1
-  }
-  res <- annoy_search(X, k = k, ann = ann, search_k = search_k,
-                      n_threads = n_threads,
-                      grain_size = grain_size, verbose = verbose)
-  idx <- res$idx
-  dist <- res$dist
-  if (!include_self) {
-    idx <- idx[, -1]
-    dist <- dist[, -1]
-    k <- k - 1
-  }
-
-  res <- list(idx = idx, dist = dist)
-  if (ret_index) {
-    res$index <- ann
-  }
-  res
+  ann
 }
 
 # Search a pre-built Annoy index for neighbors of X
