@@ -232,24 +232,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// smooth_knn_distances_cpp
-Rcpp::NumericMatrix smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx, const unsigned int n_iter, const double local_connectivity, const double bandwidth, const double tol, const double min_k_dist_scale, const bool verbose);
-RcppExport SEXP _uwot_smooth_knn_distances_cpp(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP n_iterSEXP, SEXP local_connectivitySEXP, SEXP bandwidthSEXP, SEXP tolSEXP, SEXP min_k_dist_scaleSEXP, SEXP verboseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type nn_dist(nn_distSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix& >::type nn_idx(nn_idxSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type n_iter(n_iterSEXP);
-    Rcpp::traits::input_parameter< const double >::type local_connectivity(local_connectivitySEXP);
-    Rcpp::traits::input_parameter< const double >::type bandwidth(bandwidthSEXP);
-    Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
-    Rcpp::traits::input_parameter< const double >::type min_k_dist_scale(min_k_dist_scaleSEXP);
-    Rcpp::traits::input_parameter< const bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(smooth_knn_distances_cpp(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose));
-    return rcpp_result_gen;
-END_RCPP
-}
 // smooth_knn_distances_parallel
 Rcpp::NumericMatrix smooth_knn_distances_parallel(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx, const unsigned int n_iter, const double local_connectivity, const double bandwidth, const double tol, const double min_k_dist_scale, const size_t grain_size, const bool verbose);
 RcppExport SEXP _uwot_smooth_knn_distances_parallel(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP n_iterSEXP, SEXP local_connectivitySEXP, SEXP bandwidthSEXP, SEXP tolSEXP, SEXP min_k_dist_scaleSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
@@ -266,6 +248,24 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< const bool >::type verbose(verboseSEXP);
     rcpp_result_gen = Rcpp::wrap(smooth_knn_distances_parallel(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, grain_size, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// smooth_knn_distances_cpp
+Rcpp::NumericMatrix smooth_knn_distances_cpp(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx, const unsigned int n_iter, const double local_connectivity, const double bandwidth, const double tol, const double min_k_dist_scale, const bool verbose);
+RcppExport SEXP _uwot_smooth_knn_distances_cpp(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP n_iterSEXP, SEXP local_connectivitySEXP, SEXP bandwidthSEXP, SEXP tolSEXP, SEXP min_k_dist_scaleSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type nn_dist(nn_distSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix& >::type nn_idx(nn_idxSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< const double >::type local_connectivity(local_connectivitySEXP);
+    Rcpp::traits::input_parameter< const double >::type bandwidth(bandwidthSEXP);
+    Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< const double >::type min_k_dist_scale(min_k_dist_scaleSEXP);
+    Rcpp::traits::input_parameter< const bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(smooth_knn_distances_cpp(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -370,8 +370,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_uwot_optimize_layout_largevis_parallel", (DL_FUNC) &_uwot_optimize_layout_largevis_parallel, 14},
     {"_uwot_calc_row_probabilities_parallel", (DL_FUNC) &_uwot_calc_row_probabilities_parallel, 7},
     {"_uwot_calc_row_probabilities_cpp", (DL_FUNC) &_uwot_calc_row_probabilities_cpp, 6},
-    {"_uwot_smooth_knn_distances_cpp", (DL_FUNC) &_uwot_smooth_knn_distances_cpp, 8},
     {"_uwot_smooth_knn_distances_parallel", (DL_FUNC) &_uwot_smooth_knn_distances_parallel, 9},
+    {"_uwot_smooth_knn_distances_cpp", (DL_FUNC) &_uwot_smooth_knn_distances_cpp, 8},
     {"_uwot_fast_intersection_cpp", (DL_FUNC) &_uwot_fast_intersection_cpp, 6},
     {"_uwot_general_sset_intersection_cpp", (DL_FUNC) &_uwot_general_sset_intersection_cpp, 10},
     {"_uwot_init_transform_av_parallel", (DL_FUNC) &_uwot_init_transform_av_parallel, 3},
