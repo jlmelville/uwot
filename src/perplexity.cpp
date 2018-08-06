@@ -140,6 +140,7 @@ arma::sp_mat calc_row_probabilities_parallel(const Rcpp::NumericMatrix& nn_dist,
                                              const double perplexity,
                                              const unsigned int n_iter = 200,
                                              const double tol = 1e-5,
+                                             const bool parallelize = true,
                                              const std::size_t grain_size = 1,
                                              const bool verbose = false) {
   const unsigned int n_vertices = nn_dist.nrow();
@@ -148,28 +149,12 @@ arma::sp_mat calc_row_probabilities_parallel(const Rcpp::NumericMatrix& nn_dist,
                             // , progress
   );
 
-  RcppParallel::parallelFor(0, n_vertices, worker, grain_size);
-
-  return arma::sp_mat(
-    false, // add_values
-    worker.locations,
-    worker.values,
-    n_vertices, n_vertices
-  );
-}
-
-
-// [[Rcpp::export]]
-arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx,
-                                        const double perplexity,
-                                        const unsigned int n_iter = 200,
-                                        const double tol = 1e-5,
-                                        const bool verbose = false) {
-
-  const unsigned int n_vertices = nn_dist.nrow();
-  PerplexityWorker worker(nn_dist, nn_idx, perplexity, n_iter, tol);
-
-  worker(0, n_vertices);
+  if (parallelize) {
+    RcppParallel::parallelFor(0, n_vertices, worker, grain_size);
+  }
+  else {
+    worker(0, n_vertices);
+  }
 
   return arma::sp_mat(
     false, // add_values

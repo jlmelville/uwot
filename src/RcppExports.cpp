@@ -132,8 +132,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_row_probabilities_parallel
-arma::sp_mat calc_row_probabilities_parallel(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx, const double perplexity, const unsigned int n_iter, const double tol, const std::size_t grain_size, const bool verbose);
-RcppExport SEXP _uwot_calc_row_probabilities_parallel(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP perplexitySEXP, SEXP n_iterSEXP, SEXP tolSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+arma::sp_mat calc_row_probabilities_parallel(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx, const double perplexity, const unsigned int n_iter, const double tol, const bool parallelize, const std::size_t grain_size, const bool verbose);
+RcppExport SEXP _uwot_calc_row_probabilities_parallel(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP perplexitySEXP, SEXP n_iterSEXP, SEXP tolSEXP, SEXP parallelizeSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -142,25 +142,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type perplexity(perplexitySEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type n_iter(n_iterSEXP);
     Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< const bool >::type parallelize(parallelizeSEXP);
     Rcpp::traits::input_parameter< const std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< const bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_row_probabilities_parallel(nn_dist, nn_idx, perplexity, n_iter, tol, grain_size, verbose));
-    return rcpp_result_gen;
-END_RCPP
-}
-// calc_row_probabilities_cpp
-arma::sp_mat calc_row_probabilities_cpp(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx, const double perplexity, const unsigned int n_iter, const double tol, const bool verbose);
-RcppExport SEXP _uwot_calc_row_probabilities_cpp(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP perplexitySEXP, SEXP n_iterSEXP, SEXP tolSEXP, SEXP verboseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type nn_dist(nn_distSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix& >::type nn_idx(nn_idxSEXP);
-    Rcpp::traits::input_parameter< const double >::type perplexity(perplexitySEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type n_iter(n_iterSEXP);
-    Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
-    Rcpp::traits::input_parameter< const bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_row_probabilities_cpp(nn_dist, nn_idx, perplexity, n_iter, tol, verbose));
+    rcpp_result_gen = Rcpp::wrap(calc_row_probabilities_parallel(nn_dist, nn_idx, perplexity, n_iter, tol, parallelize, grain_size, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -257,8 +242,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_uwot_optimize_layout_umap", (DL_FUNC) &_uwot_optimize_layout_umap, 18},
     {"_uwot_optimize_layout_tumap", (DL_FUNC) &_uwot_optimize_layout_tumap, 14},
     {"_uwot_optimize_layout_largevis", (DL_FUNC) &_uwot_optimize_layout_largevis, 15},
-    {"_uwot_calc_row_probabilities_parallel", (DL_FUNC) &_uwot_calc_row_probabilities_parallel, 7},
-    {"_uwot_calc_row_probabilities_cpp", (DL_FUNC) &_uwot_calc_row_probabilities_cpp, 6},
+    {"_uwot_calc_row_probabilities_parallel", (DL_FUNC) &_uwot_calc_row_probabilities_parallel, 8},
     {"_uwot_smooth_knn_distances_parallel", (DL_FUNC) &_uwot_smooth_knn_distances_parallel, 10},
     {"_uwot_fast_intersection_cpp", (DL_FUNC) &_uwot_fast_intersection_cpp, 6},
     {"_uwot_general_sset_intersection_cpp", (DL_FUNC) &_uwot_general_sset_intersection_cpp, 10},

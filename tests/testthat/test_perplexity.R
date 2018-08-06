@@ -66,7 +66,8 @@ res <- perplexity_similarities(perplexity = 4, verbose = FALSE,
 expect_true(Matrix::isSymmetric(res))
 expect_equal(as.matrix(res), P_symm_6nn, tol = 1e-5, check.attributes = FALSE)
 
-res <- calc_row_probabilities_cpp(iris10_nn10$dist, iris10_nn10$idx, perplexity = 4, verbose = FALSE)
+res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx, perplexity = 4,
+                                       parallelize = FALSE, verbose = FALSE)
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 
 RcppParallel::setThreadOptions(numThreads = 1)

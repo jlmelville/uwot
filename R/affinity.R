@@ -77,22 +77,15 @@ perplexity_similarities <- function(nn, perplexity = NULL,
   }
 
   if (kernel == "gauss") {
-    if (n_threads > 0) {
-      tsmessage("Commencing calibration for perplexity = ", formatC(perplexity),
-                " using ", pluralize("thread", n_threads))
-      affinity_matrix <- calc_row_probabilities_parallel(nn_dist = nn$dist,
+    tsmessage("Commencing calibration for perplexity = ", formatC(perplexity),
+              " using ", pluralize("thread", n_threads, " using"))
+    parallelize <- n_threads > 0
+    affinity_matrix <- calc_row_probabilities_parallel(nn_dist = nn$dist,
                                                          nn_idx = nn$idx,
                                                          perplexity = perplexity,
+                                                         parallelize = parallelize,
                                                          grain_size = grain_size,
                                                          verbose = verbose)
-    }
-    else {
-      tsmessage("Commencing calibration for perplexity = ", formatC(perplexity))
-      affinity_matrix <- calc_row_probabilities_cpp(nn_dist = nn$dist,
-                                                    nn_idx = nn$idx,
-                                                    perplexity = perplexity,
-                                                    verbose = verbose)
-    }
   }
   else {
     # knn kernel
