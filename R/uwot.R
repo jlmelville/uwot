@@ -668,6 +668,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                               set_op_mix_ratio = set_op_mix_ratio,
                               local_connectivity = local_connectivity,
                               bandwidth = bandwidth,
+                              n_threads = n_threads,
+                              grain_size = grain_size,
                               verbose = verbose)
   }
   if (any(is.na(V))) {
