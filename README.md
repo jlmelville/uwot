@@ -4,7 +4,9 @@
 
 An R implementation of the 
 [Uniform Manifold Approximation and Projection (UMAP)](https://arxiv.org/abs/1802.03426) 
-method for dimensionality reduction (McInnes and Healy, 2018).
+method for dimensionality reduction (McInnes and Healy, 2018), that also 
+implements the supervised and metric (out-of-sample) learning extensions to
+the basic method.
 
 ## News
 
@@ -56,8 +58,8 @@ mnist_umap_s <- umap(n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threa
                      y = mnist$Label, target_weight = 0.5)
                     
 # Add new points to an existing embedding
-mnist_train <- mnist[1:60000, ]
-mnist_test <- mnist[60001:70000, ]
+mnist_train <- head(mnist, 60000)
+mnist_test <- tail(mnist, 70000)
 
 # You must set ret_model = TRUE to return extra data we need
 mnist_train_umap <- umap(mnist_train, verbose = TRUE, ret_model = TRUE)
@@ -66,10 +68,15 @@ mnist_test_umap <- umap_transform(mnist_test, mnist_train_umap, verbose = TRUE)
 
 ## Documentation
 
-Apart from the man pages in R, there is a page 
-[describing UMAP](https://jlmelville.github.io/uwot/umap-for-tsne.html) using
-terminology similar to t-SNE, rather than the more topological approach of the
-UMAP publication.
+Apart from the man pages in R: you may be interested in:
+
+* A [description of UMAP](https://jlmelville.github.io/uwot/umap-for-tsne.html)
+using algorithmic terminology similar to t-SNE, rather than the more topological
+approach of the UMAP publication.
+* [Examples](https://jlmelville.github.io/uwot/umap-examples.html) of the 
+output of UMAP on some datasets, compared to t-SNE.
+* How to use UMAP for 
+[Supervised and Metric Learning](https://jlmelville.github.io/uwot/metric-learning.html)
 
 ## Implementation Details
 
