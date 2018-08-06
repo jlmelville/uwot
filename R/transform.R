@@ -123,74 +123,44 @@ umap_transform <- function(X, model,
     positive_head <- graph@i
     positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
 
-    if (n_threads > 0) {
-      tsmessage("Commencing optimization for ", n_epochs, " epochs, with ",
-                length(positive_head), " positive edges using ",
-                pluralize("thread", n_threads))
-      if (tolower(method) == "umap") {
-        embedding <- optimize_layout_umap_parallel(
-          head_embedding = embedding,
-          tail_embedding = train_embedding,
-          positive_head = positive_head,
-          positive_tail = positive_tail,
-          n_epochs = n_epochs,
-          n_vertices = n_vertices,
-          epochs_per_sample = epochs_per_sample,
-          a = a, b = b, gamma = gamma,
-          initial_alpha = alpha, negative_sample_rate,
-          seed = get_seed(),
-          approx_pow = approx_pow,
-          grain_size = grain_size,
-          move_other = FALSE,
-          verbose = verbose)
-      }
-      else {
-        embedding <- optimize_layout_tumap_parallel(
-          head_embedding = embedding,
-          tail_embedding = train_embedding,
-          positive_head = positive_head,
-          positive_tail = positive_tail,
-          n_epochs = n_epochs,
-          n_vertices, epochs_per_sample,
-          initial_alpha = alpha,
-          negative_sample_rate = negative_sample_rate,
-          seed = get_seed(),
-          grain_size = grain_size,
-          move_other = FALSE,
-          verbose = verbose)
-      }
+    tsmessage("Commencing optimization for ", n_epochs, " epochs, with ",
+              length(positive_head), " positive edges",
+              pluralize("thread", n_threads, " using"))
+
+    parallelize <- n_threads > 0
+    if (tolower(method) == "umap") {
+      embedding <- optimize_layout_umap(
+        head_embedding = embedding,
+        tail_embedding = train_embedding,
+        positive_head = positive_head,
+        positive_tail = positive_tail,
+        n_epochs = n_epochs,
+        n_vertices = n_vertices,
+        epochs_per_sample = epochs_per_sample,
+        a = a, b = b, gamma = gamma,
+        initial_alpha = alpha, negative_sample_rate,
+        seed = get_seed(),
+        approx_pow = approx_pow,
+        parallelize = parallelize,
+        grain_size = grain_size,
+        move_other = FALSE,
+        verbose = verbose)
     }
     else {
-      tsmessage("Commencing optimization for ", n_epochs, " epochs, with ",
-                length(positive_head), " positive edges")
-      if (method == "umap") {
-        embedding <- optimize_layout_umap(embedding,
-                                          train_embedding,
-                                          positive_head = positive_head,
-                                          positive_tail = positive_tail,
-                                          n_epochs = n_epochs,
-                                          n_vertices = n_vertices,
-                                          epochs_per_sample = epochs_per_sample,
-                                          a = a, b = b, gamma = gamma,
-                                          initial_alpha = alpha, negative_sample_rate,
-                                          seed = get_seed(),
-                                          approx_pow = approx_pow,
-                                          move_other = FALSE,
-                                          verbose = verbose)
-      }
-      else {
-        embedding <- optimize_layout_tumap(embedding,
-                                          train_embedding,
-                                          positive_head = positive_head,
-                                          positive_tail = positive_tail,
-                                          n_epochs = n_epochs,
-                                          n_vertices = n_vertices,
-                                          epochs_per_sample = epochs_per_sample,
-                                          initial_alpha = alpha, negative_sample_rate,
-                                          seed = get_seed(),
-                                          move_other = FALSE,
-                                          verbose = verbose)
-      }
+      embedding <- optimize_layout_tumap(
+        head_embedding = embedding,
+        tail_embedding = train_embedding,
+        positive_head = positive_head,
+        positive_tail = positive_tail,
+        n_epochs = n_epochs,
+        n_vertices, epochs_per_sample,
+        initial_alpha = alpha,
+        negative_sample_rate = negative_sample_rate,
+        seed = get_seed(),
+        parallelize = parallelize,
+        grain_size = grain_size,
+        move_other = FALSE,
+        verbose = verbose)
     }
   }
   tsmessage("Finished")
