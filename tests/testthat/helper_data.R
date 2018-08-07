@@ -47,3 +47,8 @@ dmiris10z <- Matrix::drop0(dmiris10z)
 nn <- find_nn(iris10, k = 4 , method = "fnn", metric = "euclidean",
               n_threads = 0, verbose = FALSE)
 
+# Just test that res is a matrix with valid numbers
+expect_ok_matrix <- function(res) {
+  expect_is(res, "matrix")
+  expect_false(any(is.infinite(res)))
+}

@@ -1,5 +1,11 @@
 context("Supervised")
 
+y <- as.factor(c(levels(iris$Species)[c(rep(1, 3), rep(2, 3), rep(3, 3))], NA))
+res <- umap(iris10, n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            init = "rand", verbose = FALSE, n_threads = 1, y = y)
+expect_ok_matrix(res)
+
+
 sm <- Matrix::drop0(matrix(c(
   -0.9183907, -1.4071020,  0.70400164,
    0.4990913, -0.1631884, -0.03232201,
@@ -12,8 +18,6 @@ expected <- matrix(c(
 
 expect_equal(as.matrix(reset_local_connectivity(sm)), expected, tol = 1e-7,
              check.attributes = FALSE)
-
-
 
 sparr <- new("dgCMatrix",
              i = c(0L, 2L, 0L, 1L, 2L, 0L, 1L),
@@ -54,3 +58,4 @@ sp34 <- Matrix::drop0(matrix(nrow = 3, byrow = TRUE, c(
 )))
 
 expect_equal(colMaxs(sp34), c(0, 0.7403984, 0.9472488, 0.6574427))
+
