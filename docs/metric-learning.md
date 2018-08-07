@@ -135,4 +135,41 @@ training data. Of particular interest are the test results with the supervised
 model, where the clusters stay well separated compared to the unsupervised 
 results, although there are some misclassifications of shirts, t-shirts, coats
 and pullover classes (the green, blue and red clusters on the right of the
-supervised UMAP plot).
+supervised UMAP plot). 
+
+### Accuracy Results
+
+To quantify this improvement, we can look at accuracy in predicting the 
+test set labels by using the embedded coordinates as a k-nearest neighbor 
+classifier. There are a variety of ways I can imagine using the information
+in the model, but two obvious ones are to use the label of the nearest neighbor,
+(`1NN`) or take a vote using the `n_neighbors` (in this case, 15) nearest 
+neighbors (`15NN`).
+
+For standard UMAP, the `1NN` accuracy is 70.9%, and the `15NN` accuracy is 
+77.1%. Using supervised UMAP, these accuracies improve to 82.7% and 83.8%,
+respectively. So quantitatively, the supervised UMAP is a big help in correctly
+classifying the test data. 
+
+To put these numbers in perspective, we can carry out similar calculations using
+the input data directly. Here, the `1NN` accuracy is 84.7% and the `15NN` 
+accuracy is 84.2%. Possibly, the lack of improvement on going from 1 to 15 
+neighbors indicates that a different value of the `n_neighbors` parameter could
+improve the embedding, but I haven't pursued that. I also looked at weighting 
+the contributions of the 15 nearest neighbors by the edge weights used in
+the UMAP embedding, but the accuracy remains virtually unchanged at 84.3%.
+At any rate, it's clear that the Fashion MNIST images do not embed well in 
+two dimensions, although supervised UMAP gets impressively close to matching
+the high dimensional results. Maybe supervised UMAP can do even better by
+a suitable choice of `target_weight` and `n_components` on top of fiddling 
+with `n_neighbors`.
+
+The Fashion MNIST website contains a page that shows the accuracy using
+129 
+[scikit-learn methods](http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/),
+and the `15NN` supervised UMAP accuracy puts us in the top 60, which isn't bad,
+considering the only hyperparameter search I did was to look at `1NN` and
+`15NN`. However, although the highest accuracy reported on that page is 89.7%,
+the 
+[deep learning results](https://github.com/zalandoresearch/fashion-mnist#benchmark) achieve
+90-97%.
