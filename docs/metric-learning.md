@@ -36,6 +36,18 @@ equivalent, factor column, `Description` provides a short text string to
 describe the classes, e.g. the `Description` `"Coat"` and the `Label` `4` are
 equivalent.
 
+### Visualization
+
+To produce the plots below, I used my 
+[vizier package](https://github.com/jlmelville/vizier), which can be installed
+using:
+
+```R
+devtools::install_github("jlmelville/vizier")
+```
+
+I'll show the commands to produce the plots before they are displayed.
+
 ## Supervised Learning
 
 We'll compare the supervised result with a standard run of UMAP:
@@ -55,6 +67,11 @@ fashion_sumap <- umap(fashion, y = fashion$Description)
 
 Let's take a look at the results, the unsupervised embedding on the left, and
 the supervised version on the right:
+
+```R
+vizier::embed_plot(fashion_umap, fashion, cex = 0.5, title = "Fashion UMAP")
+vizier::embed_plot(fashion_sumap, fashion, cex = 0.5, title = "Fashion Supervised UMAP")
+```
 
 |                             |                           |
 :----------------------------:|:--------------------------:
@@ -94,11 +111,16 @@ and supervised UMAP:
 
 ```R
 set.seed(1337)
-fashion_sumap_train <- umap(fashion_train, y = fashion_train$Description, ret_model = TRUE)
+fashion_sumap_train <- umap(fashion_train, ret_model = TRUE, y = fashion_train$Description)
 ```
 
 These results shouldn't be that different from the full-dataset embeddings, but
 let's take a look anyway:
+
+```R
+vizier::embed_plot(fashion_umap_train$embedding, fashion_train, cex = 0.5, title = "Fashion Train UMAP")
+vizier::embed_plot(fashion_sumap_train$embedding, fashion_train, cex = 0.5, title = "Fashion Train Supervised UMAP")
+```
 
 |                             |                           |
 :----------------------------:|:--------------------------:
@@ -125,6 +147,11 @@ fashion_sumap_test <- umap_transform(fashion_test, fashion_sumap_train)
 ```
 
 Here are the results:
+
+```R
+vizier::embed_plot(fashion_umap_test, fashion_test, cex = 0.5, title = "Fashion Test UMAP")
+vizier::embed_plot(fashion_sumap_test, fashion_test, cex = 0.5, title = "Fashion Test Supervised UMAP")
+```
 
 |                             |                           |
 :----------------------------:|:--------------------------:

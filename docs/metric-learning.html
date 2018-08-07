@@ -236,6 +236,12 @@ div.tocify {
 <pre class="r"><code>devtools::install_github(&quot;jlmelville/snedata&quot;)
 fashion &lt;- snedata::download_fashion_mnist()</code></pre>
 <p>The Fashion MNIST dataset contains 70,000 images of fashion items, in one of ten classes. A factor column, <code>Label</code> contains the id of each item (from <code>0</code> to <code>9</code>) for backwards compatibility with the MNIST dataset, which Fashion MNIST is designed to be a drop-in replacement for. A more descriptive, but entirely equivalent, factor column, <code>Description</code> provides a short text string to describe the classes, e.g. the <code>Description</code> <code>&quot;Coat&quot;</code> and the <code>Label</code> <code>4</code> are equivalent.</p>
+<div id="visualization" class="section level3">
+<h3>Visualization</h3>
+<p>To produce the plots below, I used my <a href="https://github.com/jlmelville/vizier">vizier package</a>, which can be installed using:</p>
+<pre class="r"><code>devtools::install_github(&quot;jlmelville/vizier&quot;)</code></pre>
+<p>I’ll show the commands to produce the plots before they are displayed.</p>
+</div>
 <div id="supervised-learning" class="section level2">
 <h2>Supervised Learning</h2>
 <p>We’ll compare the supervised result with a standard run of UMAP:</p>
@@ -245,6 +251,8 @@ fashion_umap &lt;- umap(fashion)</code></pre>
 <pre class="r"><code>set.seed(1337)
 fashion_sumap &lt;- umap(fashion, y = fashion$Description)</code></pre>
 <p>Let’s take a look at the results, the unsupervised embedding on the left, and the supervised version on the right:</p>
+<pre class="r"><code>vizier::embed_plot(fashion_umap, fashion, cex = 0.5, title = &quot;Fashion UMAP&quot;)
+vizier::embed_plot(fashion_sumap, fashion, cex = 0.5, title = &quot;Fashion Supervised UMAP&quot;)</code></pre>
 <table>
 <tbody>
 <tr class="odd">
@@ -268,8 +276,10 @@ fashion_test &lt;- tail(fashion, 10000)</code></pre>
 fashion_umap_train &lt;- umap(fashion_train, ret_model = TRUE)</code></pre>
 <p>and supervised UMAP:</p>
 <pre class="r"><code>set.seed(1337)
-fashion_sumap_train &lt;- umap(fashion_train, y = fashion_train$Description, ret_model = TRUE)</code></pre>
+fashion_sumap_train &lt;- umap(fashion_train, ret_model = TRUE, y = fashion_train$Description)</code></pre>
 <p>These results shouldn’t be that different from the full-dataset embeddings, but let’s take a look anyway:</p>
+<pre class="r"><code>vizier::embed_plot(fashion_umap_train$embedding, fashion_train, cex = 0.5, title = &quot;Fashion Train UMAP&quot;)
+vizier::embed_plot(fashion_sumap_train$embedding, fashion_train, cex = 0.5, title = &quot;Fashion Train Supervised UMAP&quot;)</code></pre>
 <table>
 <tbody>
 <tr class="odd">
@@ -289,6 +299,8 @@ fashion_umap_test &lt;- umap_transform(fashion_test, fashion_umap_train)</code><
 <pre class="r"><code>set.seed(1337)
 fashion_sumap_test &lt;- umap_transform(fashion_test, fashion_sumap_train)</code></pre>
 <p>Here are the results:</p>
+<pre class="r"><code>vizier::embed_plot(fashion_umap_test, fashion_test, cex = 0.5, title = &quot;Fashion Test UMAP&quot;)
+vizier::embed_plot(fashion_sumap_test, fashion_test, cex = 0.5, title = &quot;Fashion Test Supervised UMAP&quot;)</code></pre>
 <table>
 <tbody>
 <tr class="odd">
