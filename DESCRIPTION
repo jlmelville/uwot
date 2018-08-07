@@ -11,7 +11,8 @@ Description: The dimensionality reduction method UMAP
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Suggests: testthat
+Suggests: testthat,
+    covr
 RoxygenNote: 6.1.0
 Depends: Matrix
 LinkingTo: Rcpp, RcppArmadillo, RcppProgress, RcppParallel, RcppAnnoy

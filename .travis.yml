@@ -7,3 +7,5 @@ os:
 - linux
 - osx
 disable_homebrew: true
+after_success:
+  - Rscript -e 'covr::codecov()'
