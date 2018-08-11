@@ -9,6 +9,8 @@ Description: The dimensionality reduction method UMAP
   to, but faster than, the t-Distributed Stochastic Neighbor Embedding (t-SNE) 
   method.
 License: GPL-3
+URL: https://github.com/jlmelville/uwot
+BugReports: https://github.com/jlmelville/uwot/issues
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat,
