@@ -42,7 +42,7 @@ fast_intersection <- function(rows, cols, values, target, unknown_dist = 1.0,
   ex_unknown <- exp(-unknown_dist)
   ex_far <- exp(-far_dist)
 
-  for (nz in 1:length(values)) {
+  for (nz in seq_len(length(values))) {
     i <- rows[nz]
     j <- cols[nz]
     if (is.na(target[i]) || is.na(target[j])) {
@@ -90,7 +90,7 @@ general_sset_intersection <- function(indptr1,
   left_min <- max(min(data1) / 2.0, 1.0e-8)
   right_min <- max(min(data2) / 2.0, 1.0e-8)
 
-  for (idx in 1:length(result_row)) {
+  for (idx in seq_len(length(result_row))) {
     i <- result_col[idx] + 1
     j <- result_row[idx]
 

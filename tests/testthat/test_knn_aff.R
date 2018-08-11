@@ -2,8 +2,8 @@ library(uwot)
 context("knn affinity")
 
 expected_sparse <- matrix(0, nrow = 10, ncol = 10)
-for (i in 1:nrow(nn$idx)) {
-  for (j in 1:ncol(nn$idx)) {
+for (i in seq_len(nrow(nn$idx))) {
+  for (j in seq_len(ncol(nn$idx))) {
     expected_sparse[i, nn$idx[i, j]] <- 2
   }
 }
@@ -14,9 +14,9 @@ expect_equal(res, expected_sparse)
 
 v <- 1
 expected_sparse_mv <- matrix(0, nrow = 10, ncol = 10)
-for (i in 1:nrow(nn$idx)) {
+for (i in seq_len(nrow(nn$idx))) {
   nnr <- sort(nn$idx[i, ])
-  for (j in 1:ncol(nn$idx)) {
+  for (j in seq_len(ncol(nn$idx))) {
     expected_sparse_mv[i, nnr[j]] <- v
     v <- v + 1
   }

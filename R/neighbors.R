@@ -175,7 +175,7 @@ FNN_nn <- function(X, k = 10, include_self = TRUE) {
   dist <- fnn$nn.dist
 
   if (include_self) {
-    idx <- cbind(1:nrow(X), idx)
+    idx <- cbind(seq_len(nrow(X)), idx)
     dist <- cbind(rep(0, nrow(X)), dist)
   }
 
@@ -191,7 +191,7 @@ dist_nn <- function(X, k, include_self = TRUE) {
 
   nn_idx <- t(apply(X, 2, order))[, 1:k]
   nn_dist <- matrix(0, nrow = nrow(X), ncol = k)
-  for (i in 1:nrow(nn_idx)) {
+  for (i in seq_len(nrow(nn_idx))) {
     nn_dist[i, ] <- X[i, nn_idx[i, ]]
   }
 
