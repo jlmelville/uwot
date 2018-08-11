@@ -18,12 +18,14 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
       res <- FNN_nn(X, k = k, include_self = include_self)
     }
     else {
-      res <- annoy_nn(X, k = k, include_self = include_self,
-                      metric = metric,
-                      n_trees = n_trees, search_k = search_k,
-                      n_threads = n_threads,
-                      ret_index = ret_index,
-                      verbose = verbose)
+      res <- annoy_nn(X,
+        k = k, include_self = include_self,
+        metric = metric,
+        n_trees = n_trees, search_k = search_k,
+        n_threads = n_threads,
+        ret_index = ret_index,
+        verbose = verbose
+      )
     }
   }
   res
@@ -44,18 +46,21 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
                      grain_size = 1,
                      ret_index = FALSE,
                      verbose = FALSE) {
-
-  ann <- annoy_build(X, metric = metric, n_trees = n_trees,
-                     n_threads = n_threads, grain_size = grain_size,
-                     verbose = verbose)
+  ann <- annoy_build(X,
+    metric = metric, n_trees = n_trees,
+    n_threads = n_threads, grain_size = grain_size,
+    verbose = verbose
+  )
 
   # Search index
   if (!include_self) {
     k <- k + 1
   }
-  res <- annoy_search(X, k = k, ann = ann, search_k = search_k,
-                      n_threads = n_threads,
-                      grain_size = grain_size, verbose = verbose)
+  res <- annoy_search(X,
+    k = k, ann = ann, search_k = search_k,
+    n_threads = n_threads,
+    grain_size = grain_size, verbose = verbose
+  )
   idx <- res$idx
   dist <- res$dist
   if (!include_self) {
@@ -122,15 +127,16 @@ annoy_search <- function(X, k = 10, ann,
   nr <- nrow(X)
 
   if (n_threads > 0) {
-    index_file = tempfile()
+    index_file <- tempfile()
     ann$save(index_file)
 
     tsmessage("Searching Annoy index using ", pluralize("thread", n_threads))
     res <- search_nn_func(index_file,
-                          X,
-                          k, search_k,
-                          grain_size = grain_size,
-                          verbose = verbose)
+      X,
+      k, search_k,
+      grain_size = grain_size,
+      verbose = verbose
+    )
     idx <- res$item
     dist <- res$distance
 
@@ -144,8 +150,10 @@ annoy_search <- function(X, k = 10, ann,
     for (i in 1:nr) {
       res <- ann$getNNsByVectorList(X[i, ], k, search_k, TRUE)
       if (length(res$item) != k) {
-        stop("search_k/n_trees settings were unable to find ", k,
-             " neighbors for item ", i)
+        stop(
+          "search_k/n_trees settings were unable to find ", k,
+          " neighbors for item ", i
+        )
       }
       idx[i, ] <- res$item
       dist[i, ] <- res$distance

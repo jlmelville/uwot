@@ -21,19 +21,23 @@ smooth_knn <- function(nn,
                        n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                        grain_size = 1,
                        verbose = FALSE) {
-  tsmessage("Commencing smooth kNN distance calibration using ",
-            pluralize("thread", n_threads, " using"))
+  tsmessage(
+    "Commencing smooth kNN distance calibration using ",
+    pluralize("thread", n_threads, " using")
+  )
   parallelize <- n_threads > 0
-  affinity_matrix <- smooth_knn_distances_parallel(nn_dist = nn$dist,
-                                                     nn_idx = nn$idx,
-                                                     n_iter = 64,
-                                                     local_connectivity = local_connectivity,
-                                                     bandwidth = bandwidth,
-                                                     tol = 1e-5,
-                                                     min_k_dist_scale = 1e-3,
-                                                     parallelize = parallelize,
-                                                     grain_size = grain_size,
-                                                     verbose = verbose)
+  affinity_matrix <- smooth_knn_distances_parallel(
+    nn_dist = nn$dist,
+    nn_idx = nn$idx,
+    n_iter = 64,
+    local_connectivity = local_connectivity,
+    bandwidth = bandwidth,
+    tol = 1e-5,
+    min_k_dist_scale = 1e-3,
+    parallelize = parallelize,
+    grain_size = grain_size,
+    verbose = verbose
+  )
   affinity_matrix
 }
 
@@ -50,14 +54,16 @@ fuzzy_simplicial_set <- function(nn,
                                  grain_size = 1,
                                  verbose = FALSE) {
   affinity_matrix <- smooth_knn(nn,
-                                local_connectivity = local_connectivity,
-                                bandwidth = bandwidth,
-                                n_threads = n_threads,
-                                grain_size = grain_size,
-                                verbose = verbose)
+    local_connectivity = local_connectivity,
+    bandwidth = bandwidth,
+    n_threads = n_threads,
+    grain_size = grain_size,
+    verbose = verbose
+  )
 
   affinity_matrix <- nn_to_sparse(nn$idx, as.vector(affinity_matrix),
-                                  self_nbr = TRUE, max_nbr_id = nrow(nn$idx))
+    self_nbr = TRUE, max_nbr_id = nrow(nn$idx)
+  )
 
   fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio)
 }
@@ -71,21 +77,24 @@ perplexity_similarities <- function(nn, perplexity = NULL,
                                     grain_size = 1,
                                     kernel = "gauss",
                                     verbose = FALSE) {
-
   if (is.null(perplexity) && kernel != "knn") {
     stop("Must provide perplexity")
   }
 
   if (kernel == "gauss") {
-    tsmessage("Commencing calibration for perplexity = ", formatC(perplexity),
-              " using ", pluralize("thread", n_threads, " using"))
+    tsmessage(
+      "Commencing calibration for perplexity = ", formatC(perplexity),
+      " using ", pluralize("thread", n_threads, " using")
+    )
     parallelize <- n_threads > 0
-    affinity_matrix <- calc_row_probabilities_parallel(nn_dist = nn$dist,
-                                                         nn_idx = nn$idx,
-                                                         perplexity = perplexity,
-                                                         parallelize = parallelize,
-                                                         grain_size = grain_size,
-                                                         verbose = verbose)
+    affinity_matrix <- calc_row_probabilities_parallel(
+      nn_dist = nn$dist,
+      nn_idx = nn$idx,
+      perplexity = perplexity,
+      parallelize = parallelize,
+      grain_size = grain_size,
+      verbose = verbose
+    )
   }
   else {
     # knn kernel
@@ -158,16 +167,15 @@ nn_to_sparse <- function(nn_idx, val = 1, byrow = FALSE, self_nbr = FALSE,
 #' @import Matrix
 smooth_knn_distances <-
   function(nn_dist,
-           nn_idx,
-           n_iter = 64,
-           local_connectivity = 1.0,
-           bandwidth = 1.0,
-           tol = 1e-5,
-           min_k_dist_scale = 1e-3,
-           self_nbr = TRUE,
-           ret_extra = FALSE,
-           verbose = FALSE) {
-
+             nn_idx,
+             n_iter = 64,
+             local_connectivity = 1.0,
+             bandwidth = 1.0,
+             tol = 1e-5,
+             min_k_dist_scale = 1e-3,
+             self_nbr = TRUE,
+             ret_extra = FALSE,
+             verbose = FALSE) {
     k <- ncol(nn_dist)
     n <- nrow(nn_dist)
 
@@ -277,8 +285,7 @@ calc_row_probabilities <- function(nn_dist,
                                    n_iter = 200,
                                    tol = 1e-5,
                                    ret_extra = FALSE,
-                                   verbose = FALSE)
-{
+                                   verbose = FALSE) {
   k <- ncol(nn_dist)
   n <- nrow(nn_dist)
 
@@ -290,12 +297,11 @@ calc_row_probabilities <- function(nn_dist,
 
   progress <- Progress$new(n, display = verbose)
   for (i in 1:n) {
-
     lo <- 0.0
     hi <- Inf
     mid <- 1.0
 
-    Di <- nn_dist[i, -1] ^ 2
+    Di <- nn_dist[i, -1]^2
 
     for (iter in 1:n_iter) {
       sres <- shannon(Di, mid)
@@ -325,13 +331,15 @@ calc_row_probabilities <- function(nn_dist,
     nn_dist[i, -1] <- prow
 
     if (ret_extra) {
-      sigmas[i] <-  sqrt(1 / beta)
+      sigmas[i] <- sqrt(1 / beta)
     }
 
     progress$increment()
   }
-  P <- Matrix::sparseMatrix(i = rep(1:n, times = k), j = as.vector(nn_idx),
-                            x = as.vector(nn_dist))
+  P <- Matrix::sparseMatrix(
+    i = rep(1:n, times = k), j = as.vector(nn_idx),
+    x = as.vector(nn_dist)
+  )
   Matrix::diag(P) <- 0
   P <- Matrix::drop0(P)
 

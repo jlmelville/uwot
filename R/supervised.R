@@ -9,7 +9,7 @@
 # far_dist The distance between unmatched labels.
 # Return The resulting intersected fuzzy simplicial set.
 categorical_simplicial_set_intersection <- function(
-  simplicial_set, target, unknown_dist = 1.0, far_dist = 5.0, verbose = FALSE) {
+                                                    simplicial_set, target, unknown_dist = 1.0, far_dist = 5.0, verbose = FALSE) {
 
   # Convert to dgTMatrix to get to the j indices
   simplicial_set <- methods::as(simplicial_set, "dgTMatrix")
@@ -70,7 +70,7 @@ general_simplicial_set_intersection <- function(left, right, weight) {
     result@j,
     result@x,
     weight
-   )
+  )
 
   result
 }
@@ -78,15 +78,15 @@ general_simplicial_set_intersection <- function(left, right, weight) {
 # An R translation of the Python function. Not very fast,
 # so use the C++ version instead
 general_sset_intersection <- function(indptr1,
-                                          indices1,
-                                          data1,
-                                          indptr2,
-                                          indices2,
-                                          data2,
-                                          result_row,
-                                          result_col,
-                                          result_val,
-                                          mix_weight=0.5) {
+                                      indices1,
+                                      data1,
+                                      indptr2,
+                                      indices2,
+                                      data2,
+                                      result_row,
+                                      result_col,
+                                      result_val,
+                                      mix_weight = 0.5) {
   left_min <- max(min(data1) / 2.0, 1.0e-8)
   right_min <- max(min(data2) / 2.0, 1.0e-8)
 
@@ -110,10 +110,10 @@ general_sset_intersection <- function(indptr1,
 
     if (left_val > left_min || right_val > right_min) {
       if (mix_weight < 0.5) {
-        result_val[idx] <- left_val * right_val ^ (mix_weight / (1.0 - mix_weight))
+        result_val[idx] <- left_val * right_val^(mix_weight / (1.0 - mix_weight))
       }
       else {
-        result_val[idx] <- right_val * left_val ^ (((1.0 - mix_weight) / mix_weight))
+        result_val[idx] <- right_val * left_val^(((1.0 - mix_weight) / mix_weight))
       }
     }
   }
@@ -148,15 +148,15 @@ row_sum_normalize <- function(X) {
 colMaxs <- function(X) {
   nc <- ncol(X)
   result <- rep(0, nc)
-  
+
   dX <- diff(X@p)
-  
+
   for (i in 1:nc) {
     if (dX[i] > 0) {
       result[i] <- max(X@x[(X@p[i] + 1):X@p[i + 1]])
     }
   }
-  
+
   result
 }
 

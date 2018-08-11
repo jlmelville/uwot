@@ -24,9 +24,9 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   M <- A / colSums(A)
 
   eig_res <- tryCatch(RSpectra::eigs(M, k = ndim + 1),
-           error = function(c) {
-              NULL
-            }
+    error = function(c) {
+      NULL
+    }
   )
 
   if (is.null(eig_res) || ncol(eig_res$vectors) < ndim + 1) {
@@ -60,9 +60,9 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     tol = 1e-4
   )
   res <- tryCatch(RSpectra::eigs_sym(L, k = k, which = "SM", opt = opt),
-           error = function(c) {
-             NULL
-           }
+    error = function(c) {
+      NULL
+    }
   )
   if (is.null(res) || ncol(res$vectors) < ndim) {
     message("Spectral initialization failed to converge, using random initialization instead")
@@ -79,7 +79,8 @@ spectral_init <- function(A, ndim = 2, verbose = FALSE) {
   coords <- normalized_laplacian_init(A, ndim, verbose = FALSE)
   expansion <- 10.0 / max(coords)
   (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.001),
-                                ncol = ndim)
+    ncol = ndim
+  )
 }
 
 # UMAP random initialization: uniform between +10 and -10 along each axis
@@ -125,9 +126,10 @@ pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
     if (ret_extra || verbose) {
       lambda <- res_mds$eig
       varex <- sum(lambda[1:ncol]) / sum(lambda)
-      tsmessage("PCA (using classical MDS): ", ncol, " components explained ",
-                formatC(varex * 100), "% variance")
-
+      tsmessage(
+        "PCA (using classical MDS): ", ncol, " components explained ",
+        formatC(varex * 100), "% variance"
+      )
     }
     scores <- res_mds$points
   }
@@ -138,10 +140,12 @@ pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
     D <- diag(c(s$d[1:ncol]))
     if (verbose || ret_extra) {
       # calculate eigenvalues of covariance matrix from singular values
-      lambda <- (s$d ^ 2) / (nrow(X) - 1)
+      lambda <- (s$d^2) / (nrow(X) - 1)
       varex <- sum(lambda[1:ncol]) / sum(lambda)
-      tsmessage("PCA: ", ncol, " components explained ", formatC(varex * 100),
-                "% variance")
+      tsmessage(
+        "PCA: ", ncol, " components explained ", formatC(varex * 100),
+        "% variance"
+      )
     }
     scores <- s$u %*% D
   }

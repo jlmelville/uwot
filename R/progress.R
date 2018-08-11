@@ -18,14 +18,15 @@
 # }
 #
 Progress <- setRefClass("Progress",
-  fields = list(value = "numeric",
-                max = "numeric",
-                curr_stars = "numeric",
-                max_stars = "numeric",
-                display = "logical"),
+  fields = list(
+    value = "numeric",
+    max = "numeric",
+    curr_stars = "numeric",
+    max_stars = "numeric",
+    display = "logical"
+  ),
   methods = list(
     initialize = function(max, display = TRUE) {
-
       max_stars <<- 51 # length of the progress bar
       value <<- 0
       curr_stars <<- 0

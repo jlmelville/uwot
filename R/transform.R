@@ -74,8 +74,10 @@ umap_transform <- function(X, model,
     X <- as.matrix(X[, indexes])
   }
   n_vertices <- nrow(X)
-  tsmessage("Read ", n_vertices, " rows and found ", ncol(X),
-            " numeric columns")
+  tsmessage(
+    "Read ", n_vertices, " rows and found ", ncol(X),
+    " numeric columns"
+  )
 
   if (!is.null(scale_info)) {
     X <- apply_scaling(X, scale_info = scale_info, verbose = verbose)
@@ -85,23 +87,29 @@ umap_transform <- function(X, model,
     RcppParallel::setThreadOptions(numThreads = n_threads)
   }
 
-  nn <- annoy_search(X, k = n_neighbors, nn_index, search_k = search_k,
-                     n_threads = n_threads, grain_size = grain_size,
-                     verbose = verbose)
+  nn <- annoy_search(X,
+    k = n_neighbors, nn_index, search_k = search_k,
+    n_threads = n_threads, grain_size = grain_size,
+    verbose = verbose
+  )
   adjusted_local_connectivity <- max(0, local_connectivity - 1.0)
   graph <- smooth_knn(nn,
-                      local_connectivity = adjusted_local_connectivity,
-                      n_threads = n_threads,
-                      grain_size = grain_size,
-                      verbose = verbose)
+    local_connectivity = adjusted_local_connectivity,
+    n_threads = n_threads,
+    grain_size = grain_size,
+    verbose = verbose
+  )
 
   embedding <- init_new_embedding(train_embedding, nn, graph,
-                                  weighted = init_weighted,
-                                  n_threads = n_threads,
-                                  grain_size = grain_size, verbose = verbose)
+    weighted = init_weighted,
+    n_threads = n_threads,
+    grain_size = grain_size, verbose = verbose
+  )
 
-  graph <- nn_to_sparse(nn$idx, as.vector(graph), self_nbr = FALSE,
-                        max_nbr_id = nrow(train_embedding))
+  graph <- nn_to_sparse(nn$idx, as.vector(graph),
+    self_nbr = FALSE,
+    max_nbr_id = nrow(train_embedding)
+  )
 
   if (is.null(n_epochs)) {
     if (ncol(graph) <= 10000) {
@@ -123,9 +131,11 @@ umap_transform <- function(X, model,
     positive_head <- graph@i
     positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
 
-    tsmessage("Commencing optimization for ", n_epochs, " epochs, with ",
-              length(positive_head), " positive edges",
-              pluralize("thread", n_threads, " using"))
+    tsmessage(
+      "Commencing optimization for ", n_epochs, " epochs, with ",
+      length(positive_head), " positive edges",
+      pluralize("thread", n_threads, " using")
+    )
 
     parallelize <- n_threads > 0
     if (tolower(method) == "umap") {
@@ -144,7 +154,8 @@ umap_transform <- function(X, model,
         parallelize = parallelize,
         grain_size = grain_size,
         move_other = FALSE,
-        verbose = verbose)
+        verbose = verbose
+      )
     }
     else {
       embedding <- optimize_layout_tumap(
@@ -160,7 +171,8 @@ umap_transform <- function(X, model,
         parallelize = parallelize,
         grain_size = grain_size,
         move_other = FALSE,
-        verbose = verbose)
+        verbose = verbose
+      )
     }
   }
   tsmessage("Finished")
@@ -172,18 +184,24 @@ init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
                                grain_size = 1, verbose = FALSE) {
   parallelize <- n_threads > 0
   if (weighted) {
-    tsmessage("Initializing by weighted average of neighbor coordinates using ",
-              pluralize("thread", n_threads, " using"))
+    tsmessage(
+      "Initializing by weighted average of neighbor coordinates using ",
+      pluralize("thread", n_threads, " using")
+    )
     embedding <- init_transform_parallel(train_embedding, nn$idx, graph,
-                                         parallelize = parallelize,
-                                         grain_size = grain_size)
+      parallelize = parallelize,
+      grain_size = grain_size
+    )
   }
   else {
-    tsmessage("Initializing by average of neighbor coordinates using ",
-              pluralize("thread", n_threads, " using"))
+    tsmessage(
+      "Initializing by average of neighbor coordinates using ",
+      pluralize("thread", n_threads, " using")
+    )
     embedding <- init_transform_av_parallel(train_embedding, nn$idx,
-                                            parallelize = parallelize,
-                                            grain_size = grain_size)
+      parallelize = parallelize,
+      grain_size = grain_size
+    )
   }
 
   embedding
@@ -206,8 +224,12 @@ init_transform <- function(train_embedding, nn_index, weights = NULL) {
     for (i in 1:nr) {
       nbr_embedding <- train_embedding[nn_index[i, ], ]
       nbr_weights <- weights[nn_index[i, ], i]
-      embedding[i, ] <- apply(nbr_embedding, 2,
-                              function(x) { stats::weighted.mean(x, nbr_weights) })
+      embedding[i, ] <- apply(
+        nbr_embedding, 2,
+        function(x) {
+          stats::weighted.mean(x, nbr_weights)
+        }
+      )
     }
   }
 
@@ -228,8 +250,10 @@ apply_scaling <- function(X, scale_info, verbose = FALSE) {
   else {
     tsmessage("Applying training data column filtering/scaling")
     X <- X[, scale_info[["scaled:nzvcols"]]]
-    X <- scale(X, center = scale_info[["scaled:center"]],
-               scale = scale_info[["scaled:scale"]])
+    X <- scale(X,
+      center = scale_info[["scaled:center"]],
+      scale = scale_info[["scaled:scale"]]
+    )
   }
 
   X

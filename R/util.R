@@ -18,8 +18,10 @@ tsmessage <- function(..., domain = NULL, appendLF = TRUE, force = FALSE) {
 summarize <- function(X, msg = "") {
   summary_X <- summary(X, digits = max(3, getOption("digits") - 3))
   tsmessage(msg, ": ", paste(names(summary_X), ":", summary_X, "|",
-                             collapse = ""),
-            force = get0("verbose", envir = sys.parent()))
+    collapse = ""
+  ),
+  force = get0("verbose", envir = sys.parent())
+  )
 }
 
 # http://rorynolan.rbind.io/2018/05/08/rcsetseed/

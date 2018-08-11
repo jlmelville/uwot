@@ -5,7 +5,9 @@ graph <- V_asymm + diag(1, nrow(V_asymm), ncol(V_asymm))
 dV <- as.matrix(graph)
 vdV <- as.vector(t(dV))
 dgraph <- matrix(vdV[vdV > 0], byrow = TRUE, nrow = 10)
-dgraph <- t(apply(dgraph, 1, function(x) { sort(x, decreasing = TRUE)}))
+dgraph <- t(apply(dgraph, 1, function(x) {
+  sort(x, decreasing = TRUE)
+}))
 
 graph <- Matrix::t(graph)
 
@@ -24,10 +26,12 @@ av <- matrix(c(
   4.50, 14.50,
   4.75, 14.75
 ), nrow = 10, byrow = TRUE)
-embedding <- init_new_embedding(train_embedding, nn, graph = NULL,
-                                weighted = FALSE,
-                                n_threads = 0,
-                                verbose = FALSE)
+embedding <- init_new_embedding(train_embedding, nn,
+  graph = NULL,
+  weighted = FALSE,
+  n_threads = 0,
+  verbose = FALSE
+)
 expect_equal(embedding, av, check.attributes = FALSE)
 
 wav <- matrix(c(
@@ -42,25 +46,31 @@ wav <- matrix(c(
   5.191600, 15.19160,
   5.166667, 15.16667
 ), nrow = 10, byrow = TRUE)
-embedding <- init_new_embedding(train_embedding, nn, graph = dgraph,
-                                weighted = TRUE,
-                                n_threads = 0,
-                                verbose = FALSE)
+embedding <- init_new_embedding(train_embedding, nn,
+  graph = dgraph,
+  weighted = TRUE,
+  n_threads = 0,
+  verbose = FALSE
+)
 expect_equal(embedding, wav, check.attributes = FALSE, tol = 1e-5)
 
 
 # Check threaded code
 RcppParallel::setThreadOptions(numThreads = 1)
-embedding <- init_new_embedding(train_embedding, nn, graph = NULL,
-                                weighted = FALSE,
-                                n_threads = 1,
-                                verbose = FALSE)
+embedding <- init_new_embedding(train_embedding, nn,
+  graph = NULL,
+  weighted = FALSE,
+  n_threads = 1,
+  verbose = FALSE
+)
 expect_equal(embedding, av, check.attributes = FALSE)
 
-embedding <- init_new_embedding(train_embedding, nn, graph = dgraph,
-                                weighted = TRUE,
-                                n_threads = 1,
-                                verbose = FALSE)
+embedding <- init_new_embedding(train_embedding, nn,
+  graph = dgraph,
+  weighted = TRUE,
+  n_threads = 1,
+  verbose = FALSE
+)
 expect_equal(embedding, wav, check.attributes = FALSE, tol = 1e-5)
 
 
