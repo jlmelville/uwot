@@ -88,7 +88,8 @@ expect_equal(iris10_scale, iris10_strans, check.attributes = FALSE)
 
 iris10_zv_col <- iris10
 iris10_zv_col[, 3] <- 10
-iris10zvc_scale <- scale_input(iris10_zv_col, scale_type = "scale", ret_model = TRUE)
+iris10zvc_scale <- scale_input(iris10_zv_col, scale_type = "scale", 
+                               ret_model = TRUE)
 # scale the original iris10 here on purpose to check that full-variance column
 # is correctly removed
 iris10_zvstrans <- apply_scaling(iris10, attr_to_scale_info(iris10zvc_scale))

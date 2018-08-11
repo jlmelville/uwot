@@ -45,7 +45,8 @@ Progress <- setRefClass("Progress",
           # Number of new stars to print
           num_new_stars <- num_stars - curr_stars
 
-          # If we are going to reach the end of the progress bar, save space for the terminal "|"
+          # If we are going to reach the end of the progress bar
+          # save space for the terminal "|"
           if (curr_stars + num_new_stars >= max_stars) {
             num_new_stars <- num_new_stars - 1
           }

@@ -77,7 +77,8 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
 }
 
 annoy_build <- function(X, metric = "euclidean", n_trees = 50,
-                        n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                        n_threads = 
+                          max(1, RcppParallel::defaultNumThreads() / 2),
                         grain_size = 1, verbose = FALSE) {
   nr <- nrow(X)
   nc <- ncol(X)
@@ -110,7 +111,8 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
 # Search a pre-built Annoy index for neighbors of X
 annoy_search <- function(X, k = 10, ann,
                          search_k = 100 * k,
-                         n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                         n_threads = 
+                           max(1, RcppParallel::defaultNumThreads() / 2),
                          grain_size = 1,
                          verbose = FALSE) {
   ann_class <- class(ann)
@@ -220,7 +222,8 @@ sparse_nn <- function(X, k, include_self = TRUE) {
     is_nonzero <- dists != 0
     dist_nonzero <- dists[is_nonzero]
     if (length(dist_nonzero) < k) {
-      stop("Row ", i, " of distance matrix has only ", length(dist_nonzero), " defined distances")
+      stop("Row ", i, " of distance matrix has only ", length(dist_nonzero), 
+           " defined distances")
     }
 
     k_order <- order(dist_nonzero)[1:k]

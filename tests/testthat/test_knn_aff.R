@@ -43,4 +43,5 @@ expected_sym_nn_graph[10, c(1, 2, 3, 4, 8)] <- c(o6, o3, o6, o3, o6)
 
 expect_equal(sum(res), 10)
 expect_true(Matrix::isSymmetric(res))
-expect_equal(as.matrix(res), expected_sym_nn_graph, check.attributes = FALSE, tol = 1e-7)
+expect_equal(as.matrix(res), expected_sym_nn_graph, check.attributes = FALSE, 
+             tol = 1e-7)

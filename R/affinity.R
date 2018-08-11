@@ -10,7 +10,8 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
     Matrix::drop0(X + Matrix::t(X) - XX)
   }
   else {
-    Matrix::drop0(set_op_mix_ratio * (X + Matrix::t(X) - XX) + (1 - set_op_mix_ratio) * XX)
+    Matrix::drop0(
+      set_op_mix_ratio * (X + Matrix::t(X) - XX) + (1 - set_op_mix_ratio) * XX)
   }
 }
 
@@ -18,7 +19,8 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
 # or not
 smooth_knn <- function(nn,
                        local_connectivity = 1.0, bandwidth = 1.0,
-                       n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                       n_threads = max(1, 
+                                       RcppParallel::defaultNumThreads() / 2),
                        grain_size = 1,
                        verbose = FALSE) {
   tsmessage(
@@ -50,7 +52,9 @@ smooth_knn <- function(nn,
 fuzzy_simplicial_set <- function(nn,
                                  set_op_mix_ratio = 1.0,
                                  local_connectivity = 1.0, bandwidth = 1.0,
-                                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                                 n_threads = 
+                                   max(1, 
+                                       RcppParallel::defaultNumThreads() / 2),
                                  grain_size = 1,
                                  verbose = FALSE) {
   affinity_matrix <- smooth_knn(nn,
@@ -73,7 +77,9 @@ symmetrize <- function(P) {
 }
 
 perplexity_similarities <- function(nn, perplexity = NULL,
-                                    n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                                    n_threads = 
+                                      max(1, 
+                                          RcppParallel::defaultNumThreads() / 2),
                                     grain_size = 1,
                                     kernel = "gauss",
                                     verbose = FALSE) {
@@ -99,7 +105,8 @@ perplexity_similarities <- function(nn, perplexity = NULL,
   else {
     # knn kernel
     tsmessage("Using knn graph for input weights with k = ", ncol(nn$idx))
-    # Make each row sum to 1, ignoring the self-index, i.e. diagonal will be zero
+    # Make each row sum to 1, ignoring the self-index
+    # i.e. diagonal will be zero
     affinity_matrix <- nn_to_sparse(nn$idx, val = 1 / (ncol(nn$idx) - 1))
     Matrix::diag(affinity_matrix) <- 0
     affinity_matrix <- Matrix::drop0(affinity_matrix)
@@ -111,7 +118,8 @@ perplexity_similarities <- function(nn, perplexity = NULL,
 # edge has a weight of val (scalar or vector)
 # return a sparse matrix with dimensions of nrow(nn_idx) x max_nbr_id
 nn_to_sparse <- function(nn_idx, val = 1, byrow = FALSE, self_nbr = FALSE,
-                         max_nbr_id = ifelse(self_nbr, nrow(nn_idx), max(nn_idx))) {
+                         max_nbr_id = ifelse(self_nbr, 
+                                             nrow(nn_idx), max(nn_idx))) {
   nd <- nrow(nn_idx)
   k <- ncol(nn_idx)
 
@@ -179,8 +187,9 @@ smooth_knn_distances <-
     k <- ncol(nn_dist)
     n <- nrow(nn_dist)
 
-    # In the python code the target is multiplied by the bandwidth, but fuzzy_simplicial_set
-    # doesn't pass the user-supplied version on purpose, so it's always 1
+    # In the python code the target is multiplied by the bandwidth
+    # fuzzy_simplicial_set doesn't pass the user-supplied version on purpose
+    # so it's always 1
     target <- log2(k)
 
     if (ret_extra) {

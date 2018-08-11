@@ -30,7 +30,8 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   )
 
   if (is.null(eig_res) || ncol(eig_res$vectors) < ndim + 1) {
-    message("Laplacian Eigenmap failed to converge, using random initialization instead")
+    message("Laplacian Eigenmap failed to converge, ", 
+            "using random initialization instead")
     return(rand_init(nrow(A), ndim))
   }
   vecs <- eig_res$vectors[, 2:(ndim + 1)]
@@ -65,7 +66,8 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     }
   )
   if (is.null(res) || ncol(res$vectors) < ndim) {
-    message("Spectral initialization failed to converge, using random initialization instead")
+    message("Spectral initialization failed to converge, ",
+            "using random initialization instead")
     return(rand_init(n, ndim))
   }
   vec_indices <- rev(order(res$values, decreasing = TRUE)[1:ndim])
