@@ -77,7 +77,7 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
 }
 
 annoy_build <- function(X, metric = "euclidean", n_trees = 50,
-                        n_threads = 
+                        n_threads =
                           max(1, RcppParallel::defaultNumThreads() / 2),
                         grain_size = 1, verbose = FALSE) {
   nr <- nrow(X)
@@ -111,28 +111,30 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
 # Search a pre-built Annoy index for neighbors of X
 annoy_search <- function(X, k = 10, ann,
                          search_k = 100 * k,
-                         n_threads = 
+                         n_threads =
                            max(1, RcppParallel::defaultNumThreads() / 2),
                          grain_size = 1,
                          verbose = FALSE) {
-  ann_class <- class(ann)
-  if (endsWith(ann_class, "Cosine")) {
-    search_nn_func <- annoy_cosine_nns
-  }
-  else if (endsWith(ann_class, "Manhattan")) {
-    search_nn_func <- annoy_manhattan_nns
-  }
-  else {
-    search_nn_func <- annoy_euclidean_nns
-  }
-
-  nr <- nrow(X)
-
   if (n_threads > 0) {
     index_file <- tempfile()
     ann$save(index_file)
 
     tsmessage("Searching Annoy index using ", pluralize("thread", n_threads))
+
+    ann_class <- class(ann)
+    if (endsWith(ann_class, "Angular")) {
+      search_nn_func <- annoy_cosine_nns
+    }
+    else if (endsWith(ann_class, "Manhattan")) {
+      search_nn_func <- annoy_manhattan_nns
+    }
+    else if (endsWith(ann_class, "Euclidean")) {
+      search_nn_func <- annoy_euclidean_nns
+    }
+    else {
+      stop("BUG: Unknown ANN class '", ann_class, "'")
+    }
+
     res <- search_nn_func(index_file,
       X,
       k, search_k,
@@ -146,6 +148,7 @@ annoy_search <- function(X, k = 10, ann,
   }
   else {
     tsmessage("Searching Annoy index")
+    nr <- nrow(X)
     search_progress <- Progress$new(max = nr, display = verbose)
     idx <- matrix(nrow = nr, ncol = k)
     dist <- matrix(nrow = nr, ncol = k)
@@ -222,7 +225,7 @@ sparse_nn <- function(X, k, include_self = TRUE) {
     is_nonzero <- dists != 0
     dist_nonzero <- dists[is_nonzero]
     if (length(dist_nonzero) < k) {
-      stop("Row ", i, " of distance matrix has only ", length(dist_nonzero), 
+      stop("Row ", i, " of distance matrix has only ", length(dist_nonzero),
            " defined distances")
     }
 
