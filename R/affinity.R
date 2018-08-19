@@ -11,7 +11,8 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
   }
   else {
     Matrix::drop0(
-      set_op_mix_ratio * (X + Matrix::t(X) - XX) + (1 - set_op_mix_ratio) * XX)
+      set_op_mix_ratio * (X + Matrix::t(X) - XX) + (1 - set_op_mix_ratio) * XX
+    )
   }
 }
 
@@ -19,8 +20,10 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
 # or not
 smooth_knn <- function(nn,
                        local_connectivity = 1.0, bandwidth = 1.0,
-                       n_threads = max(1, 
-                                       RcppParallel::defaultNumThreads() / 2),
+                       n_threads = max(
+                         1,
+                         RcppParallel::defaultNumThreads() / 2
+                       ),
                        grain_size = 1,
                        verbose = FALSE) {
   tsmessage(
@@ -52,9 +55,11 @@ smooth_knn <- function(nn,
 fuzzy_simplicial_set <- function(nn,
                                  set_op_mix_ratio = 1.0,
                                  local_connectivity = 1.0, bandwidth = 1.0,
-                                 n_threads = 
-                                   max(1, 
-                                       RcppParallel::defaultNumThreads() / 2),
+                                 n_threads =
+                                   max(
+                                     1,
+                                     RcppParallel::defaultNumThreads() / 2
+                                   ),
                                  grain_size = 1,
                                  verbose = FALSE) {
   affinity_matrix <- smooth_knn(nn,
@@ -77,9 +82,11 @@ symmetrize <- function(P) {
 }
 
 perplexity_similarities <- function(nn, perplexity = NULL,
-                                    n_threads = 
-                                      max(1, 
-                                          RcppParallel::defaultNumThreads() / 2),
+                                    n_threads =
+                                      max(
+                                        1,
+                                        RcppParallel::defaultNumThreads() / 2
+                                      ),
                                     grain_size = 1,
                                     kernel = "gauss",
                                     verbose = FALSE) {
@@ -118,8 +125,9 @@ perplexity_similarities <- function(nn, perplexity = NULL,
 # edge has a weight of val (scalar or vector)
 # return a sparse matrix with dimensions of nrow(nn_idx) x max_nbr_id
 nn_to_sparse <- function(nn_idx, val = 1, byrow = FALSE, self_nbr = FALSE,
-                         max_nbr_id = ifelse(self_nbr, 
-                                             nrow(nn_idx), max(nn_idx))) {
+                         max_nbr_id = ifelse(self_nbr,
+                           nrow(nn_idx), max(nn_idx)
+                         )) {
   nd <- nrow(nn_idx)
   k <- ncol(nn_idx)
 

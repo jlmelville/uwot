@@ -42,7 +42,7 @@ umap_transform <- function(X, model,
                            init_weighted = TRUE,
                            search_k = NULL,
                            n_epochs = NULL,
-                           n_threads = 
+                           n_threads =
                              max(1, RcppParallel::defaultNumThreads() / 2),
                            grain_size = 1,
                            verbose = FALSE) {
@@ -181,7 +181,7 @@ umap_transform <- function(X, model,
 }
 
 init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
-                               n_threads = 
+                               n_threads =
                                  max(1, RcppParallel::defaultNumThreads() / 2),
                                grain_size = 1, verbose = FALSE) {
   parallelize <- n_threads > 0

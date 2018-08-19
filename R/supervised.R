@@ -10,8 +10,8 @@
 # Return The resulting intersected fuzzy simplicial set.
 categorical_simplicial_set_intersection <- function(
                                                     simplicial_set, target,
-                                                    unknown_dist = 1.0, 
-                                                    far_dist = 5.0, 
+                                                    unknown_dist = 1.0,
+                                                    far_dist = 5.0,
                                                     verbose = FALSE) {
 
   # Convert to dgTMatrix to get to the j indices
@@ -113,11 +113,11 @@ general_sset_intersection <- function(indptr1,
 
     if (left_val > left_min || right_val > right_min) {
       if (mix_weight < 0.5) {
-        result_val[idx] <- left_val * 
+        result_val[idx] <- left_val *
           right_val^(mix_weight / (1.0 - mix_weight))
       }
       else {
-        result_val[idx] <- right_val * 
+        result_val[idx] <- right_val *
           left_val^(((1.0 - mix_weight) / mix_weight))
       }
     }

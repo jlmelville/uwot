@@ -50,16 +50,20 @@ expect_equal(res$P, V_asymm, tol = 1e-4)
 expect_equal(fuzzy_set_union(res$P), V_union, tol = 1e-4)
 
 # mix intersection with union
-expect_equal(fuzzy_set_union(res$P, set_op_mix_ratio = 0.5), V_mix, 
-             tol = 1e-4)
+expect_equal(fuzzy_set_union(res$P, set_op_mix_ratio = 0.5), V_mix,
+  tol = 1e-4
+)
 
 # intersection
-expect_equal(fuzzy_set_union(res$P, set_op_mix_ratio = 0), V_intersect, 
-             tol = 1e-4)
+expect_equal(fuzzy_set_union(res$P, set_op_mix_ratio = 0), V_intersect,
+  tol = 1e-4
+)
 
 # local connectivity
-res <- smooth_knn_distances(nn_4$dist, nn_4$idx, local_connectivity = 1.5, 
-                            ret_extra = TRUE)
+res <- smooth_knn_distances(nn_4$dist, nn_4$idx,
+  local_connectivity = 1.5,
+  ret_extra = TRUE
+)
 res$P <- nn_to_sparse(nn_4$idx, as.vector(res$P), self_nbr = TRUE)
 expect_equal(res$P, V_asymm_local, tol = 1e-4)
 
@@ -69,16 +73,18 @@ res_cpp_conn1 <- smooth_knn_distances_parallel(nn_4$dist, nn_4$idx,
   bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
   parallelize = FALSE, verbose = FALSE
 )
-expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1), 
-                          self_nbr = TRUE), V_asymm, tol = 1e-4)
+expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1),
+  self_nbr = TRUE
+), V_asymm, tol = 1e-4)
 
 res_cpp_conn1.5 <- smooth_knn_distances_parallel(nn_4$dist, nn_4$idx,
   n_iter = 64, local_connectivity = 1.5,
   bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
   parallelize = FALSE, verbose = FALSE
 )
-expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1.5), 
-                          self_nbr = TRUE), V_asymm_local, tol = 1e-4)
+expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1.5),
+  self_nbr = TRUE
+), V_asymm_local, tol = 1e-4)
 
 
 RcppParallel::setThreadOptions(numThreads = 1)
@@ -87,23 +93,27 @@ res_cpp_conn1 <- smooth_knn_distances_parallel(nn_4$dist, nn_4$idx,
   bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
   grain_size = 1, verbose = FALSE
 )
-expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1), 
-                          self_nbr = TRUE), V_asymm, tol = 1e-4)
+expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1),
+  self_nbr = TRUE
+), V_asymm, tol = 1e-4)
 
 res_cpp_conn1.5 <- smooth_knn_distances_parallel(nn_4$dist, nn_4$idx,
   n_iter = 64, local_connectivity = 1.5,
   bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
   grain_size = 1, verbose = FALSE
 )
-expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1.5), 
-                          self_nbr = TRUE), V_asymm_local, tol = 1e-4)
+expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1.5),
+  self_nbr = TRUE
+), V_asymm_local, tol = 1e-4)
 
 
 # Test cross-distances
 V_asymm_local_cross <- V_asymm_local
 diag(V_asymm_local_cross) <- 1
-V_asymm_local_cross <- cbind(V_asymm_local_cross, 
-                             matrix(0, nrow = 10, ncol = 2))
+V_asymm_local_cross <- cbind(
+  V_asymm_local_cross,
+  matrix(0, nrow = 10, ncol = 2)
+)
 
 res_cpp_conn1.5_cross <- smooth_knn_distances_parallel(nn_4$dist, nn_4$idx,
   n_iter = 64, local_connectivity = 1.5,

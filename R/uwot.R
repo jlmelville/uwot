@@ -365,7 +365,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
-    n_epochs = n_epochs, alpha = alpha, scale = scale, init = init, 
+    n_epochs = n_epochs, alpha = alpha, scale = scale, init = init,
     spread = NULL, min_dist = NULL, set_op_mix_ratio = set_op_mix_ratio,
     local_connectivity = local_connectivity, bandwidth = bandwidth,
     gamma = gamma, negative_sample_rate = negative_sample_rate,
@@ -536,7 +536,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
   uwot(X,
     n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
-    n_epochs = n_epochs, alpha = alpha, scale = scale, init = init, 
+    n_epochs = n_epochs, alpha = alpha, scale = scale, init = init,
     gamma = gamma, negative_sample_rate = negative_sample_rate,
     nn_method = nn_method, n_trees = n_trees, search_k = search_k,
     method = "largevis", perplexity = perplexity,
@@ -548,7 +548,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 # Function that does all the real work
 uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_epochs = NULL,
-                 alpha = 1, scale = FALSE, init = "spectral", 
+                 alpha = 1, scale = FALSE, init = "spectral",
                  spread = 1, min_dist = 0.01,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                  bandwidth = 1.0, gamma = 1.0,
@@ -556,7 +556,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
                  method = "umap", perplexity = 50, approx_pow = FALSE,
-                 y = NULL, target_n_neighbors = n_neighbors, 
+                 y = NULL, target_n_neighbors = n_neighbors,
                  target_weight = 0.5,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  kernel = "gauss",
@@ -651,8 +651,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
   nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
   if (nn_method == "fnn" && metric != "euclidean") {
-    stop("nn_method = 'FNN' is only compatible with distance metric ",
-         "'euclidean'")
+    stop(
+      "nn_method = 'FNN' is only compatible with distance metric ",
+      "'euclidean'"
+    )
   }
   if (nn_method == "fnn" && ret_model) {
     stop("nn_method = 'FNN' is incompatible with ret_model = TRUE")
@@ -949,8 +951,10 @@ scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
     scale_type <- ifelse(scale_type, "scale", "none")
   }
 
-  scale_type <- match.arg(tolower(scale_type), 
-                          c("none", "scale", "range", "maxabs"))
+  scale_type <- match.arg(
+    tolower(scale_type),
+    c("none", "scale", "range", "maxabs")
+  )
   switch(scale_type,
     range = {
       tsmessage("Range scaling X")

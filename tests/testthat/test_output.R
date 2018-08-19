@@ -29,20 +29,20 @@ expect_ok_matrix(res)
 
 # UMAP and cosine metric n_threads = 1 issue #5
 res <- umap(iris10,
-             n_neighbors = 4, n_epochs = 2, alpha = 0.5, metric = "cosine",
-             init = "spectral", verbose = FALSE, n_threads = 1
+  n_neighbors = 4, n_epochs = 2, alpha = 0.5, metric = "cosine",
+  init = "spectral", verbose = FALSE, n_threads = 1
 )
 expect_ok_matrix(res)
 
 # metric = Manhattan
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, metric = "manhattan",
-            init = "rand", verbose = FALSE, n_threads = 0
+  n_neighbors = 4, n_epochs = 2, alpha = 0.5, metric = "manhattan",
+  init = "rand", verbose = FALSE, n_threads = 0
 )
 expect_ok_matrix(res)
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, metric = "manhattan",
-            init = "spca", verbose = FALSE, n_threads = 1
+  n_neighbors = 4, n_epochs = 2, alpha = 0.5, metric = "manhattan",
+  init = "spca", verbose = FALSE, n_threads = 1
 )
 expect_ok_matrix(res)
 

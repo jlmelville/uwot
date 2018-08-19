@@ -225,8 +225,10 @@ sparse_nn <- function(X, k, include_self = TRUE) {
     is_nonzero <- dists != 0
     dist_nonzero <- dists[is_nonzero]
     if (length(dist_nonzero) < k) {
-      stop("Row ", i, " of distance matrix has only ", length(dist_nonzero),
-           " defined distances")
+      stop(
+        "Row ", i, " of distance matrix has only ", length(dist_nonzero),
+        " defined distances"
+      )
     }
 
     k_order <- order(dist_nonzero)[1:k]
