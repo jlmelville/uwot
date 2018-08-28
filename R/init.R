@@ -36,7 +36,7 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
     )
     return(rand_init(nrow(A), ndim))
   }
-  vecs <- eig_res$vectors[, 2:(ndim + 1)]
+  vecs <- as.matrix(eig_res$vectors[, 2:(ndim + 1)])
   Re(vecs)
 }
 
@@ -75,7 +75,7 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     return(rand_init(n, ndim))
   }
   vec_indices <- rev(order(res$values, decreasing = TRUE)[1:ndim])
-  Re(res$vectors[, vec_indices])
+  as.matrix(Re(res$vectors[, vec_indices]))
 }
 
 # Default UMAP initialization
