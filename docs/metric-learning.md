@@ -69,8 +69,8 @@ Let's take a look at the results, the unsupervised embedding on the left, and
 the supervised version on the right:
 
 ```R
-vizier::embed_plot(fashion_umap, fashion, cex = 0.5, title = "Fashion UMAP")
-vizier::embed_plot(fashion_sumap, fashion, cex = 0.5, title = "Fashion Supervised UMAP")
+vizier::embed_plot(fashion_umap, fashion, cex = 0.5, title = "Fashion UMAP", alpha_scale = 0.075)
+vizier::embed_plot(fashion_sumap, fashion, cex = 0.5, title = "Fashion Supervised UMAP", alpha_scale = 0.075)
 ```
 
 |                             |                           |
@@ -118,8 +118,8 @@ These results shouldn't be that different from the full-dataset embeddings, but
 let's take a look anyway:
 
 ```R
-vizier::embed_plot(fashion_umap_train$embedding, fashion_train, cex = 0.5, title = "Fashion Train UMAP")
-vizier::embed_plot(fashion_sumap_train$embedding, fashion_train, cex = 0.5, title = "Fashion Train Supervised UMAP")
+vizier::embed_plot(fashion_umap_train$embedding, fashion_train, cex = 0.5, title = "Fashion Train UMAP", alpha_scale = 0.075)
+vizier::embed_plot(fashion_sumap_train$embedding, fashion_train, cex = 0.5, title = "Fashion Train Supervised UMAP", alpha_scale = 0.075)
 ```
 
 |                             |                           |
@@ -149,8 +149,8 @@ fashion_sumap_test <- umap_transform(fashion_test, fashion_sumap_train)
 Here are the results:
 
 ```R
-vizier::embed_plot(fashion_umap_test, fashion_test, cex = 0.5, title = "Fashion Test UMAP")
-vizier::embed_plot(fashion_sumap_test, fashion_test, cex = 0.5, title = "Fashion Test Supervised UMAP")
+vizier::embed_plot(fashion_umap_test, fashion_test, cex = 0.5, title = "Fashion Test UMAP", alpha_scale = 0.075)
+vizier::embed_plot(fashion_sumap_test, fashion_test, cex = 0.5, title = "Fashion Test Supervised UMAP", alpha_scale = 0.075)
 ```
 
 |                             |                           |
