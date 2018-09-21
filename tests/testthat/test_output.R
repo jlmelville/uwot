@@ -48,14 +48,16 @@ expect_ok_matrix(res)
 
 
 # init with matrix
-y_init <- matrix(seq.int(20), ncol = 2)
+iris10_pca <- prcomp(iris10, rank. = 2, retx = TRUE, center = TRUE,
+                     scale. = FALSE)$x
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
-            init = y_init, verbose = FALSE, n_threads = 0
+            init = iris10_pca, verbose = FALSE, n_threads = 0
 )
 expect_ok_matrix(res)
 # Ensure that internal C++ code doesn't modify user-supplied initialization
-expect_equal(y_init, matrix(seq.int(20), ncol = 2))
+expect_equal(iris10_pca, prcomp(iris10, rank. = 2, retx = TRUE, center = TRUE,
+                            scale. = FALSE)$x)
 
 # lvish and force use of annoy
 res <- lvish(iris10,
