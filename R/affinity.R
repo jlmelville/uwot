@@ -27,7 +27,7 @@ smooth_knn <- function(nn,
                        grain_size = 1,
                        verbose = FALSE) {
   tsmessage(
-    "Commencing smooth kNN distance calibration using ",
+    "Commencing smooth kNN distance calibration",
     pluralize("thread", n_threads, " using")
   )
   parallelize <- n_threads > 0
@@ -97,7 +97,7 @@ perplexity_similarities <- function(nn, perplexity = NULL,
   if (kernel == "gauss") {
     tsmessage(
       "Commencing calibration for perplexity = ", formatC(perplexity),
-      " using ", pluralize("thread", n_threads, " using")
+      pluralize("thread", n_threads, " using")
     )
     parallelize <- n_threads > 0
     affinity_matrix <- calc_row_probabilities_parallel(

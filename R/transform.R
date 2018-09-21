@@ -187,7 +187,7 @@ init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
   parallelize <- n_threads > 0
   if (weighted) {
     tsmessage(
-      "Initializing by weighted average of neighbor coordinates using ",
+      "Initializing by weighted average of neighbor coordinates",
       pluralize("thread", n_threads, " using")
     )
     embedding <- init_transform_parallel(train_embedding, nn$idx, graph,
@@ -197,7 +197,7 @@ init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
   }
   else {
     tsmessage(
-      "Initializing by average of neighbor coordinates using ",
+      "Initializing by average of neighbor coordinates",
       pluralize("thread", n_threads, " using")
     )
     embedding <- init_transform_av_parallel(train_embedding, nn$idx,
