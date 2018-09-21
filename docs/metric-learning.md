@@ -200,3 +200,112 @@ considering the only hyperparameter search I did was to look at `1NN` and
 the 
 [deep learning results](https://github.com/zalandoresearch/fashion-mnist#benchmark) achieve
 90-97%.
+
+## Supervised UMAP: Numerical Y
+
+Here's an example of using supervised UMAP with a numerical target vector. We
+shall use the `diamonds` dataset that comes with the 
+[ggplot2](https://cran.r-project.org/package=ggplot2) package, as it is of
+a similar size to MNIST.
+
+```R
+library(ggplot2)
+?diamonds
+```
+
+There are 10 variables associated with each diamond: five numeric values
+related to the geometry of the diamonds (`table`, `x`, `y`, `z` and `depth`),
+three factors that measure the quality of the diamond (`cut`, `color` and 
+`clarity`), and the `price` in dollars. The `price` seems like a perfect 
+candidate for the sort of thing we'd want as the target vector, leaving the 
+other nine variables to be used for the dimensionality reduction.
+
+`uwot`'s implementation of UMAP uses all numeric columns in can find in its
+calculations, so to avoid including the `price` in the non-supervised part of
+UMAP, let's create a new data frame, initially with the geometric data:
+
+```R
+dia <- diamonds[, c("carat", "x", "y", "z", "table")]
+```
+
+The `depth` column is related to `x`, `y` and `z` (albeit non-linearly) so I'm
+not going to include it.
+
+Additionally, the factors `cut`, `color` and `clarity` are all ordinal variables,
+i.e. their categories can be ordered, so we can convert these to a numeric
+scale and include them as well:
+
+```R
+dia$cut <- as.numeric(diamonds$cut)
+dia$color <- as.numeric(diamonds$color)
+dia$clarity <- as.numeric(diamonds$clarity)
+```
+
+We now have a dataset with 53,940 rows and 8 columns. There are 360 duplicates,
+but it doesn't seem to affect the results particularly.
+
+Now, I'm not saying that this is the trickiest dataset to extract any meaning
+from. First, let's look at some standard unsupervised results. For starters,
+here's a plot of the first two principal components, using the
+[irlba](https://cran.r-project.org/package=irlba) package:
+
+```R
+dia_pca <- irlba::prcomp_irlba(dia, n = 2, scale. = TRUE)
+vizier::embed_plot(dia_pca$x, diamonds$price, title = "Diamonds PCA", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
+```
+![Diamonds PCA](../img/dia_pca.png)
+
+Because the different columns have different units and meaning, I set `scale. =
+TRUE` to equalize their variances. The color scheme is "Spectral" palette from
+ColorBrewer: red indicates a low price and blue a high price. Despite the
+majority of the dataset being clumped together in the plot due to some outliers
+you can't really see, the progression of prices from low to high is already
+pretty well captured with two components.
+
+Anyway, let's see what UMAP does with it. Like with PCA, the columns are all
+scaled to have equal variance (`scale = TRUE`):
+
+```R
+dia_umap <- umap(dia, scale = TRUE, verbose = TRUE)
+vizier::embed_plot(dia_umap, diamonds$price, title = "Diamonds UMAP", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
+```
+
+![Diamonds UMAP](../img/dia_umap.png)
+
+Not bad. The high price diamonds are clumped together in their own little 
+clusters in the middle of the plot. On this occasion, I prefer the layout that's
+initialized from the PCA results, though:
+
+```R
+dia_umap_from_pca <- umap(dia, scale = TRUE, verbose = TRUE, init = dia_pca$x)
+vizier::embed_plot(dia_umap_from_pca, diamonds$price, title = "Diamonds UMAP (PCA init)", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
+```
+
+![Diamonds UMAP from PCA](../img/dia_umap_from_pca.png)
+
+This maintains the global structure of the PCA result. Rather than have to
+separately create the PCA, you can also use `init = "pca"` and get the same
+results (`uwot` uses `irlba` internally for this, so there's no loss of speed).
+
+Onto the supervised result. Results are not particularly affected by the choice
+of initialization, so for simplicity we'll just use the standard spectral 
+initialization:
+
+```R
+dia_sumap <- umap(dia, scale = TRUE, verbose = TRUE, y = diamonds$price)
+vizier::embed_plot(dia_sumap, diamonds$price, title = "Diamonds Supervised UMAP", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
+```
+
+![Diamonds Supervised UMAP](../img/dia_sumap.png)
+
+As expected, the embedding is now even more well-organized along the price of 
+the diamonds.
+
+There is a visible gap between the lowest price diamonds (on the right) and the
+rest of the embedding. If you increase the `n_epochs` parameter and allow the
+optimization to proceed, this gap increases substantially, making the plot
+harder to read. Adjusting the `n_epochs` parameter, along with the
+`target_n_neighbors` and `target_weight` parameters may be required to strike
+the right balance. At the time of writing, I'm not aware of many examples of
+supervised UMAP with a numeric vector (in fact none except this thing I just
+wrote) so I cannot provide a lot of sage wisdom on this matter.
