@@ -7,5 +7,5 @@ res_rand <- rand_init(n_vertices, ndim = 2, verbose = FALSE)
 expect_ok_matrix(rand_init(n_vertices, ndim = 2, verbose = FALSE))
 expect_ok_matrix(rand_init_lv(n_vertices, ndim = 2, verbose = FALSE))
 
-expect_ok_matrix(rand_init(n_vertices, ndim = 1, verbose = FALSE))
-expect_ok_matrix(rand_init_lv(n_vertices, ndim = 1, verbose = FALSE))
+expect_ok_matrix(rand_init(n_vertices, ndim = 1, verbose = FALSE), nc = 1)
+expect_ok_matrix(rand_init_lv(n_vertices, ndim = 1, verbose = FALSE), nc = 1)

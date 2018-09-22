@@ -37,9 +37,10 @@ test_that("laplacian eigenmap", {
 
 
 test_that("1 dimensional output gives a matrix", {
-  expect_ok_matrix(spectral_init(V_union, ndim = 1, verbose = FALSE))
+  expect_ok_matrix(spectral_init(V_union, ndim = 1, verbose = FALSE), nc = 1)
   expect_ok_matrix(normalized_laplacian_init(V_union,
                                              ndim = 1,
-                                             verbose = FALSE))
-  expect_ok_matrix(laplacian_eigenmap(V_union, ndim = 1, verbose = FALSE))
+                                             verbose = FALSE), nc = 1)
+  expect_ok_matrix(laplacian_eigenmap(V_union, ndim = 1, verbose = FALSE),
+                   nc = 1)
 })

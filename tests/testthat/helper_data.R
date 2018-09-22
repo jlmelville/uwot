@@ -50,7 +50,9 @@ nn <- find_nn(iris10,
 )
 
 # Just test that res is a matrix with valid numbers
-expect_ok_matrix <- function(res) {
+expect_ok_matrix <- function(res, nr = nrow(iris10), nc = 2) {
   expect_is(res, "matrix")
+  expect_equal(nrow(res), nr)
+  expect_equal(ncol(res), nc)
   expect_false(any(is.infinite(res)))
 }

@@ -85,7 +85,7 @@ expect_ok_matrix(res$embedding)
 res_test <- umap_transform(iris10, res, n_threads = 1, verbose = FALSE)
 expect_ok_matrix(res_test)
 
-
+# https://github.com/jlmelville/uwot/issues/6
 res <- umap(iris10, n_components = 1, n_neighbors = 4, n_epochs = 2,
             n_threads = 1, verbose = FALSE)
-expect_ok_matrix(res)
+expect_ok_matrix(res, nc = 1)
