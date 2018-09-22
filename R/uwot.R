@@ -754,7 +754,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       stop("init matrix does not match necessary configuration for X")
     }
     # Clone matrix to avoid C++ code modifying the input data
-    embedding <- matrix(init)
+    embedding <- matrix(init, nrow = n_vertices, ncol = n_components)
   }
   else {
     init <- match.arg(tolower(init), c(
