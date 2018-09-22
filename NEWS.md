@@ -1,8 +1,25 @@
+# uwot 0.0.0.9003 (September 22 2018)
+
+## New features
+
+* New parameter `ret_nn`: when `TRUE` returns nearest neighbor matrices
+as a `nn` list: indices in item `idx` and distances in item `dist`. Embedded
+coordinates are in `embedding`. Both `ret_nn` and `ret_model` can be `TRUE`,
+and should not cause any compatibility issues with supervised embeddings.
+* `nn_method` can now take precomputed nearest neighbor data. Must be a list of
+two matrices: `idx`, containing integer indexes, and `dist` containing 
+distances. By no coincidence, this is the format return by `ret_nn`.
+
+## Bug fixes and minor improvements
+
+* Embedding to `n_components = 1` was broken (https://github.com/jlmelville/uwot/issues/6)
+* User-supplied matrices to `init` parameter were being modified, in defiance of basic R pass-by-copy semantics.
+
 # uwot 0.0.0.9002 (August 14 2018)
 
 ## Bug fixes and minor improvements
 
-* `metric = "cosine"` is working again for `n_threads` greater than `0`. 
+* `metric = "cosine"` is working again for `n_threads` greater than `0` (https://github.com/jlmelville/uwot/issues/5)
 
 # uwot 0.0.0.9001
 

@@ -10,9 +10,13 @@ the basic method.
 
 ## News
 
-*August 14 2018*. I had broken `metric = cosine` for all cases except when
-specifying `n_threads = 0`. Thanks to [ONeillMB1](https://github.com/ONeillMB1) 
-for reporting this.
+*September 2018*. You can now return the nearest neighbor data via 
+`umap_result <- umap(..., ret_nn = TRUE)`, and it
+can be re-used by setting 
+`umap_newresult <- umap(..., nn_method = umap_result$nn)`. As the nearest
+neighbor calculations is likely to be the bottleneck with default settings, this
+can save a lot of time if you are fiddling with epochs, initialization, output
+distance functions and so on. It also works with `lvish`.
 
 ## Installing
 
@@ -50,8 +54,18 @@ mnist_train <- head(mnist, 60000)
 mnist_test <- tail(mnist, 70000)
 
 # You must set ret_model = TRUE to return extra data we need
+# coordinates are in mnist_train_umap$embedding
 mnist_train_umap <- umap(mnist_train, verbose = TRUE, ret_model = TRUE)
 mnist_test_umap <- umap_transform(mnist_test, mnist_train_umap, verbose = TRUE)
+
+# Save the nearest neighbor data
+mnist_nn <- umap(mnist, ret_nn = TRUE)
+# coordinates are now in mnist_nn$embedding
+
+# Re-use the nearest neighor data and save a lot of time
+mnist_nn_spca <- umap(mnist, nn_method = mnist_nn$nn, init = spca)
+
+# No problem to have ret_nn = TRUE and ret_model = TRUE at the same time
 ```
 
 ## Documentation
