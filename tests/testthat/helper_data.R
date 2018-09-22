@@ -1,15 +1,3 @@
-# convert data frame to matrix using numeric columns
-x2m <- function(X) {
-  if (!methods::is(X, "matrix")) {
-    m <- as.matrix(X[, which(vapply(X, is.numeric, logical(1)))])
-    attr(m, "dimnames") <- NULL
-  }
-  else {
-    m <- X
-  }
-  m
-}
-
 # Small -ve distances are possible
 dist2 <- function(X) {
   D2 <- rowSums(X * X)

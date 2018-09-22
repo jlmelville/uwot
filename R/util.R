@@ -44,3 +44,15 @@ pluralize <- function(str, n, prefix = NULL, inc_num = TRUE) {
   }
   ret
 }
+
+# convert data frame to matrix using numeric columns
+x2m <- function(X) {
+  if (!methods::is(X, "matrix")) {
+    m <- as.matrix(X[, which(vapply(X, is.numeric, logical(1)))])
+    attr(m, "dimnames") <- NULL
+  }
+  else {
+    m <- X
+  }
+  m
+}
