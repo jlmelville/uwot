@@ -10,7 +10,8 @@ lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
   negative_sample_rate = 5, nn_method = NULL, n_trees = 50,
   search_k = 2 * n_neighbors * n_trees, n_threads = max(1,
   RcppParallel::defaultNumThreads()/2), grain_size = 1,
-  kernel = "gauss", verbose = getOption("verbose", TRUE))
+  kernel = "gauss", ret_nn = FALSE, verbose = getOption("verbose",
+  TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -140,10 +141,23 @@ probabilities to every edge in the nearest neighbor graph, and zero
 otherwise, using \code{perplexity} nearest neighbors. The \code{n_neighbors}
 parameter is ignored in this case.}
 
+\item{ret_nn}{If \code{TRUE}, then in addition to the embedding, also return
+nearest neighbor data that can be used as input to \code{nn_method} to
+avoid the overhead of repeatedly calculating the nearest neighbors when
+manipulating unrelated parameters (e.g. \code{min_dist}, \code{n_epochs},
+\code{init}). See the "Value" section for the names of the list items. If
+\code{FALSE}, just return the coordinates. Note that the nearest neighbors
+could be sensitive to data scaling, so be wary of reusing nearest neighbor
+data if modifying the \code{scale} parameter.}
+
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }
 \value{
-A matrix of optimized coordinates.
+A matrix of optimized coordinates, or if \code{ret_nn = TRUE},
+  returns the nearest neigbor data as a list containing a matrix \code{idx}
+  with the integer ids of the neighbors; and a matrix \code{dist} with the
+  distances. This list can be used as input to the \code{nn_method}
+  parameter.
 }
 \description{
 Carry out dimensionality reduction of a dataset using a method similar to

@@ -143,8 +143,19 @@
 #'   entirely on target. The default of 0.5 balances the weighting equally
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param ret_model If \code{TRUE}, then return extra data that can be used to
-#'   add new data to an existing embedding via \code{\link{umap_transform}}.
-#'   Otherwise, just return the coordinates.
+#'   add new data to an existing embedding via \code{\link{umap_transform}}. The
+#'   embedded coordinates are returned as the list item \code{embedding}. If
+#'   \code{FALSE}, just return the coordinates. This parameter can be used in
+#'   conjunction with \code{ret_nn}.
+#' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
+#'   nearest neighbor data that can be used as input to \code{nn_method} to
+#'   avoid the overhead of repeatedly calculating the nearest neighbors when
+#'   manipulating unrelated parameters (e.g. \code{min_dist}, \code{n_epochs},
+#'   \code{init}). See the "Value" section for the names of the list items. If
+#'   \code{FALSE}, just return the coordinates. Note that the nearest neighbors
+#'   could be sensitive to data scaling, so be wary of reusing nearest neighbor
+#'   data if modifying the \code{scale} parameter. This parameter can be used in
+#'   conjunction with \code{ret_model}.
 #' @param n_threads Number of threads to use. Default is half that recommended
 #'   by RcppParallel. For nearest neighbor search, only applies if
 #'   \code{nn_method = "annoy"}.
@@ -152,10 +163,19 @@
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads}.
 #' @param verbose If \code{TRUE}, log details to the console.
-#' @return A matrix of optimized coordinates, or if \code{ret_model = TRUE}, a
-#'   list containing extra information that can be used to add new data to an
-#'   existing embedding via \code{\link{umap_transform}}. In this case, the
-#'   coordinates are available in the list item \code{embedding}.
+#' @return A matrix of optimized coordinates, or:
+#'   \itemize{
+#'     \item if \code{ret_model = TRUE}, returns a
+#'     list containing extra information that can be used to add new data to an
+#'     existing embedding via \code{\link{umap_transform}}. In this case, the
+#'     coordinates are available in the list item \code{embedding}.
+#'     \item if \code{ret_nn = TRUE}, returns the nearest neigbor data as a
+#'     list containing a matrix \code{idx} with the integer ids of the
+#'     neighbors; and a matrix \code{dist} with the distances. This list can be
+#'     used as input to the \code{nn_method} parameter.
+#'   }
+#'   Both \code{ret_model} and \code{ret_nn} can be \code{TRUE}, in which case
+#'   the returned list contains the combined data.
 #' @examples
 #' \dontrun{
 #' iris_umap <- umap(iris, n_neighbors = 50, alpha = 0.5, init = "random")
@@ -171,6 +191,12 @@
 #' # Supervised dimension reduction
 #' mnist_sumap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE,
 #'                     y = mnist$Label, target_weight = 0.5)
+#'
+#' # Return NN info
+#' mnist_umap <- umap(mnist, verbose = TRUE, ret_nn = TRUE)
+#'
+#' # Re-use NN info for greater efficiency
+#' mnist_umap_spca <- umap(mnist, verbose = TRUE, init = "spca", nn_method = mnist_umap$nn)
 #' }
 #' @references
 #' Belkin, M., & Niyogi, P. (2002).
@@ -207,7 +233,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  approx_pow = FALSE,
                  y = NULL, target_n_neighbors = n_neighbors,
                  target_weight = 0.5,
-                 ret_model = FALSE,
+                 ret_model = FALSE, ret_nn = FALSE,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  grain_size = 1,
                  verbose = getOption("verbose", TRUE)) {
@@ -223,7 +249,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_threads = n_threads, grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight,
-    ret_model = ret_model,
+    ret_model = ret_model, ret_nn = ret_nn,
     verbose = verbose
   )
 }
@@ -358,8 +384,19 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   entirely on target. The default of 0.5 balances the weighting equally
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param ret_model If \code{TRUE}, then return extra data that can be used to
-#'   add new data to an existing embedding via \code{\link{umap_transform}}.
-#'   Otherwise, just return the coordinates.
+#'   add new data to an existing embedding via \code{\link{umap_transform}}. The
+#'   embedded coordinates are returned as the list item \code{embedding}. If
+#'   \code{FALSE}, just return the coordinates. This parameter can be used in
+#'   conjunction with \code{ret_nn}.
+#' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
+#'   nearest neighbor data that can be used as input to \code{nn_method} to
+#'   avoid the overhead of repeatedly calculating the nearest neighbors when
+#'   manipulating unrelated parameters (e.g. \code{min_dist}, \code{n_epochs},
+#'   \code{init}). See the "Value" section for the names of the list items. If
+#'   \code{FALSE}, just return the coordinates. Note that the nearest neighbors
+#'   could be sensitive to data scaling, so be wary of reusing nearest neighbor
+#'   data if modifying the \code{scale} parameter. This parameter can be used in
+#'   conjunction with \code{ret_model}.
 #' @param n_threads Number of threads to use. Default is half that recommended
 #'   by RcppParallel. For nearest neighbor search, only applies if
 #'   \code{nn_method = "annoy"}.
@@ -367,10 +404,19 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads}.
 #' @param verbose If \code{TRUE}, log details to the console.
-#' @return A matrix of optimized coordinates, or if \code{ret_model = TRUE}, a
-#'   list containing extra information that can be used to add new data to an
-#'   existing embedding via \code{\link{umap_transform}}. In this case, the
-#'   coordinates are available in the list item \code{embedding}.
+#' @return A matrix of optimized coordinates, or:
+#'   \itemize{
+#'     \item if \code{ret_model = TRUE}, returns a
+#'     list containing extra information that can be used to add new data to an
+#'     existing embedding via \code{\link{umap_transform}}. In this case, the
+#'     coordinates are available in the list item \code{embedding}.
+#'     \item if \code{ret_nn = TRUE}, returns the nearest neigbor data as a
+#'     list containing a matrix \code{idx} with the integer ids of the
+#'     neighbors; and a matrix \code{dist} with the distances. This list can be
+#'     used as input to the \code{nn_method} parameter.
+#'   }
+#'   Both \code{ret_model} and \code{ret_nn} can be \code{TRUE}, in which case
+#'   the returned list contains the combined data.
 #' @export
 tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   n_epochs = NULL,
@@ -384,7 +430,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   grain_size = 1,
                   y = NULL, target_n_neighbors = n_neighbors,
                   target_weight = 0.5,
-                  ret_model = FALSE,
+                  ret_model = FALSE, ret_nn = FALSE,
                   verbose = getOption("verbose", TRUE)) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
@@ -398,7 +444,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_threads = n_threads, grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight,
-    ret_model = ret_model,
+    ret_model = ret_model, ret_nn = ret_nn,
     verbose = verbose
   )
 }
@@ -538,8 +584,20 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   probabilities to every edge in the nearest neighbor graph, and zero
 #'   otherwise, using \code{perplexity} nearest neighbors. The \code{n_neighbors}
 #'   parameter is ignored in this case.
+#' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
+#'   nearest neighbor data that can be used as input to \code{nn_method} to
+#'   avoid the overhead of repeatedly calculating the nearest neighbors when
+#'   manipulating unrelated parameters (e.g. \code{min_dist}, \code{n_epochs},
+#'   \code{init}). See the "Value" section for the names of the list items. If
+#'   \code{FALSE}, just return the coordinates. Note that the nearest neighbors
+#'   could be sensitive to data scaling, so be wary of reusing nearest neighbor
+#'   data if modifying the \code{scale} parameter.
 #' @param verbose If \code{TRUE}, log details to the console.
-#' @return A matrix of optimized coordinates.
+#' @return A matrix of optimized coordinates, or if \code{ret_nn = TRUE},
+#'   returns the nearest neigbor data as a list containing a matrix \code{idx}
+#'   with the integer ids of the neighbors; and a matrix \code{dist} with the
+#'   distances. This list can be used as input to the \code{nn_method}
+#'   parameter.
 #' @references
 #' Tang, J., Liu, J., Zhang, M., & Mei, Q. (2016, April).
 #' Visualizing large-scale and high-dimensional data.
@@ -568,6 +626,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                   grain_size = 1,
                   kernel = "gauss",
+                  ret_nn = FALSE,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X,
     n_neighbors = n_neighbors, n_components = n_components,
@@ -577,7 +636,9 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     nn_method = nn_method, n_trees = n_trees, search_k = search_k,
     method = "largevis", perplexity = perplexity,
     n_threads = n_threads,
-    grain_size = grain_size, kernel = kernel, verbose = verbose
+    grain_size = grain_size, kernel = kernel,
+    ret_nn = ret_nn,
+    verbose = verbose
   )
 }
 
@@ -597,7 +658,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  kernel = "gauss",
                  grain_size = 1,
-                 ret_model = FALSE,
+                 ret_model = FALSE, ret_nn = FALSE,
                  verbose = getOption("verbose", TRUE)) {
   if (method == "umap" && (is.null(a) || is.null(b))) {
     ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
@@ -816,6 +877,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
 
+  if (!(ret_model || ret_nn)) {
+    nn <- NULL
+    gc()
+  }
 
   if (methods::is(init, "matrix")) {
     if (nrow(init) != n_vertices || ncol(init) != n_components) {
@@ -931,27 +996,34 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   embedding <- scale(embedding, center = TRUE, scale = FALSE)
   tsmessage("Optimization finished")
 
-  if (ret_model) {
-    list(
-      scale_info = attr_to_scale_info(X),
-      nn_index = nn$index,
-      n_neighbors = n_neighbors,
-      search_k = search_k,
-      local_connectivity = local_connectivity,
-      embedding = embedding,
-      n_epochs = n_epochs,
-      alpha = alpha,
-      negative_sample_rate = negative_sample_rate,
-      method = method,
-      a = a,
-      b = b,
-      gamma = gamma,
-      approx_pow = approx_pow
-    )
+  if (ret_model || ret_nn) {
+    res <- list(embedding = embedding)
+    if (ret_model) {
+      res <- append(res, list(
+        scale_info = attr_to_scale_info(X),
+        nn_index = nn$index,
+        n_neighbors = n_neighbors,
+        search_k = search_k,
+        local_connectivity = local_connectivity,
+        n_epochs = n_epochs,
+        alpha = alpha,
+        negative_sample_rate = negative_sample_rate,
+        method = method,
+        a = a,
+        b = b,
+        gamma = gamma,
+        approx_pow = approx_pow
+      ))
+    }
+    if (ret_nn) {
+      res$nn <- list(idx = nn$idx, dist = nn$dist)
+    }
   }
   else {
-    embedding
+    res <- embedding
   }
+
+  res
 }
 
 
