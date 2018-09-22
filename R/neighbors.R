@@ -19,7 +19,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
     }
     else {
       res <- annoy_nn(X,
-        k = k, include_self = include_self,
+        k = k,
         metric = metric,
         n_trees = n_trees, search_k = search_k,
         n_threads = n_threads,
@@ -39,7 +39,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
 # larger k, the more accurate results, but the longer the search takes. Default
 # is k * n_trees.
 #' @importFrom methods new
-annoy_nn <- function(X, k = 10, include_self = TRUE,
+annoy_nn <- function(X, k = 10,
                      metric = "euclidean",
                      n_trees = 50, search_k = 2 * k * n_trees,
                      n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
@@ -52,24 +52,13 @@ annoy_nn <- function(X, k = 10, include_self = TRUE,
     verbose = verbose
   )
 
-  # Search index
-  if (!include_self) {
-    k <- k + 1
-  }
   res <- annoy_search(X,
     k = k, ann = ann, search_k = search_k,
     n_threads = n_threads,
     grain_size = grain_size, verbose = verbose
   )
-  idx <- res$idx
-  dist <- res$dist
-  if (!include_self) {
-    idx <- idx[, -1]
-    dist <- dist[, -1]
-    k <- k - 1
-  }
 
-  res <- list(idx = idx, dist = dist)
+  res <- list(idx = res$idx, dist = res$dist)
   if (ret_index) {
     res$index <- ann
   }
