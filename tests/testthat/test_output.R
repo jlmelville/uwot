@@ -46,10 +46,11 @@ res <- umap(iris10,
 )
 expect_ok_matrix(res)
 
-
 # init with matrix
 iris10_pca <- prcomp(iris10, rank. = 2, retx = TRUE, center = TRUE,
                      scale. = FALSE)$x
+# reset seed here so we can compare output with next test result
+set.seed(1337)
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
             init = iris10_pca, verbose = FALSE, n_threads = 0
@@ -58,6 +59,14 @@ expect_ok_matrix(res)
 # Ensure that internal C++ code doesn't modify user-supplied initialization
 expect_equal(iris10_pca, prcomp(iris10, rank. = 2, retx = TRUE, center = TRUE,
                             scale. = FALSE)$x)
+
+# Use pre-calculated nn: should be the same as previous result
+set.seed(1337)
+res_nn <- umap(iris10,
+            nn_method = nn, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            init = iris10_pca, verbose = FALSE, n_threads = 0)
+expect_ok_matrix(res_nn)
+expect_equal(res_nn, res)
 
 # lvish and force use of annoy
 res <- lvish(iris10,

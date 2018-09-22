@@ -109,6 +109,18 @@
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
+#'   You may also pass precalculated nearest neighbor data to this argument. It
+#'   must be a list consisting of two elements:
+#'   \itemize{
+#'     \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
+#'     containing the integer indexes of the nearest neighbors in \code{X}. Each
+#'     vertex is considered to be its own nearest neighbor, i.e.
+#'     \code{idx[, 1] == 1:n_vertices}.
+#'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
+#'     containing the distances of the nearest neighbors.
+#'   }
+#'   The \code{n_neighbors} parameter is ignored when using precalculated
+#'   nearest neighbor data.
 #' @param n_trees Number of trees to build when constructing the nearest
 #'   neighbor index. The more trees specified, the larger the index, but the
 #'   better the results. With \code{search_k}, determines the accuracy of the
@@ -315,6 +327,18 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
+#'   You may also pass precalculated nearest neighbor data to this argument. It
+#'   must be a list consisting of two elements:
+#'   \itemize{
+#'     \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
+#'     containing the integer indexes of the nearest neighbors in \code{X}. Each
+#'     vertex is considered to be its own nearest neighbor, i.e.
+#'     \code{idx[, 1] == 1:n_vertices}.
+#'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
+#'     containing the distances of the nearest neighbors.
+#'   }
+#'   The \code{n_neighbors} parameter is ignored when using precalculated
+#'   nearest neighbor data.
 #' @param n_trees Number of trees to build when constructing the nearest
 #'   neighbor index. The more trees specified, the larger the index, but the
 #'   better the results. With \code{search_k}, determines the accuracy of the
@@ -481,6 +505,18 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
+#'   You may also pass precalculated nearest neighbor data to this argument. It
+#'   must be a list consisting of two elements:
+#'   \itemize{
+#'     \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
+#'     containing the integer indexes of the nearest neighbors in \code{X}. Each
+#'     vertex is considered to be its own nearest neighbor, i.e.
+#'     \code{idx[, 1] == 1:n_vertices}.
+#'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
+#'     containing the distances of the nearest neighbors.
+#'   }
+#'   The \code{n_neighbors} parameter is ignored when using precalculated
+#'   nearest neighbor data.
 #' @param n_trees Number of trees to build when constructing the nearest
 #'   neighbor index. The more trees specified, the larger the index, but the
 #'   better the results. With \code{search_k}, determines the accuracy of the
@@ -626,14 +662,17 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
 
   if (n_neighbors > n_vertices) {
-    # for LargeVis, n_neighbors normally determined from perplexity
-    # not an error to be too large
-    if (method == "largevis") {
-      tsmessage("Setting n_neighbors to ", n_vertices)
-      n_neighbors <- n_vertices
-    }
-    else {
-      stop("n_neighbors must be smaller than the dataset size")
+    # If nn_method is a list, we will determine n_neighbors later
+    if (!is.list(nn_method)) {
+      # Otherwise,for LargeVis, n_neighbors normally determined from perplexity
+      # not an error to be too large
+      if (method == "largevis") {
+        tsmessage("Setting n_neighbors to ", n_vertices)
+        n_neighbors <- n_vertices
+      }
+      else {
+        stop("n_neighbors must be smaller than the dataset size")
+      }
     }
   }
 
@@ -649,23 +688,52 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       nn_method <- "annoy"
     }
   }
-  nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
-  if (nn_method == "fnn" && metric != "euclidean") {
-    stop(
-      "nn_method = 'FNN' is only compatible with distance metric ",
-      "'euclidean'"
+
+  if (is.list(nn_method)) {
+    if (is.null(nn_method$idx)) {
+      stop("Couldn't find precalculated 'idx' matrix")
+    }
+    if (nrow(nn_method$idx) != n_vertices) {
+      stop("Precalculated 'idx' matrix must have ", n_vertices, " rows, but
+           found ", nrow(nn_method$idx))
+    }
+    n_neighbors <- ncol(nn_method$idx)
+
+    if (is.null(nn_method$dist)) {
+      stop("Couldn't find precalculated 'dist' matrix")
+    }
+    if (nrow(nn_method$idx) != n_vertices) {
+      stop("Precalculated 'dist' matrix must have ", n_vertices, " rows, but
+           found ", nrow(nn_method$dist))
+    }
+    if (ncol(nn_method$dist) != n_neighbors) {
+      stop("Precalculated 'dist' matrix must have ", n_neighbors, " cols, but
+           found ", ncol(nn_method$dist))
+    }
+
+    tsmessage("Using precalculated nearest neighbor data, n_neighbors = ",
+              n_neighbors)
+    nn <- nn_method
+  }
+  else {
+    nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
+    if (nn_method == "fnn" && metric != "euclidean") {
+      stop(
+        "nn_method = 'FNN' is only compatible with distance metric ",
+        "'euclidean'"
+      )
+    }
+    if (nn_method == "fnn" && ret_model) {
+      stop("nn_method = 'FNN' is incompatible with ret_model = TRUE")
+    }
+    nn <- find_nn(X, n_neighbors,
+      method = nn_method, metric = metric,
+      n_trees = n_trees,
+      n_threads = n_threads, grain_size = grain_size,
+      search_k = search_k, ret_index = ret_model, verbose = verbose
     )
+    gc()
   }
-  if (nn_method == "fnn" && ret_model) {
-    stop("nn_method = 'FNN' is incompatible with ret_model = TRUE")
-  }
-  nn <- find_nn(X, n_neighbors,
-    method = nn_method, metric = metric,
-    n_trees = n_trees,
-    n_threads = n_threads, grain_size = grain_size,
-    search_k = search_k, ret_index = ret_model, verbose = verbose
-  )
-  gc()
   if (any(is.infinite(nn$dist))) {
     stop("Infinite distances found in nearest neighbors")
   }

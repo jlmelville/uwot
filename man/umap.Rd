@@ -136,7 +136,19 @@ these values are set automatically as determined by \code{min_dist} and
     \href{https://cran.r-project.org/package=RcppAnnoy}{RcppAnnoy} package.
  }
 By default, if \code{X} has less than 4,096 vertices, the exact nearest
-neighbors are found. Otherwise, approximate nearest neighbors are used.}
+neighbors are found. Otherwise, approximate nearest neighbors are used.
+You may also pass precalculated nearest neighbor data to this argument. It
+must be a list consisting of two elements:
+\itemize{
+  \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
+  containing the integer indexes of the nearest neighbors in \code{X}. Each
+  vertex is considered to be its own nearest neighbor, i.e.
+  \code{idx[, 1] == 1:n_vertices}.
+  \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
+  containing the distances of the nearest neighbors.
+}
+The \code{n_neighbors} parameter is ignored when using precalculated
+nearest neighbor data.}
 
 \item{n_trees}{Number of trees to build when constructing the nearest
 neighbor index. The more trees specified, the larger the index, but the
