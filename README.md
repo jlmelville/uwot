@@ -20,6 +20,8 @@ distance functions and so on. It also works with `lvish`.
 
 ## Installing
 
+`uwot` makes use of C++ code which must be compiled. Windows users, first install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) and ensure `C:\Rtools\bin` is on your path.
+
 ```R
 install.packages("devtools")
 devtools::install_github("jlmelville/uwot")
