@@ -7,15 +7,15 @@
 using namespace Rcpp;
 
 // annoy_euclidean_nns
-Rcpp::List annoy_euclidean_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, size_t n, size_t search_k, std::size_t grain_size, bool verbose);
+Rcpp::List annoy_euclidean_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
 RcppExport SEXP _uwot_annoy_euclidean_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< size_t >::type n(nSEXP);
-    Rcpp::traits::input_parameter< size_t >::type search_k(search_kSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type search_k(search_kSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     rcpp_result_gen = Rcpp::wrap(annoy_euclidean_nns(index_name, mat, n, search_k, grain_size, verbose));
@@ -23,15 +23,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // annoy_cosine_nns
-Rcpp::List annoy_cosine_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, size_t n, size_t search_k, std::size_t grain_size, bool verbose);
+Rcpp::List annoy_cosine_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
 RcppExport SEXP _uwot_annoy_cosine_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< size_t >::type n(nSEXP);
-    Rcpp::traits::input_parameter< size_t >::type search_k(search_kSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type search_k(search_kSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     rcpp_result_gen = Rcpp::wrap(annoy_cosine_nns(index_name, mat, n, search_k, grain_size, verbose));
@@ -39,15 +39,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // annoy_manhattan_nns
-Rcpp::List annoy_manhattan_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, size_t n, size_t search_k, std::size_t grain_size, bool verbose);
+Rcpp::List annoy_manhattan_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
 RcppExport SEXP _uwot_annoy_manhattan_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< size_t >::type n(nSEXP);
-    Rcpp::traits::input_parameter< size_t >::type search_k(search_kSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type search_k(search_kSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     rcpp_result_gen = Rcpp::wrap(annoy_manhattan_nns(index_name, mat, n, search_k, grain_size, verbose));
@@ -150,7 +150,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // smooth_knn_distances_parallel
-Rcpp::NumericMatrix smooth_knn_distances_parallel(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx, const unsigned int n_iter, const double local_connectivity, const double bandwidth, const double tol, const double min_k_dist_scale, const bool parallelize, const size_t grain_size, const bool verbose);
+Rcpp::NumericMatrix smooth_knn_distances_parallel(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx, const unsigned int n_iter, const double local_connectivity, const double bandwidth, const double tol, const double min_k_dist_scale, const bool parallelize, const std::size_t grain_size, const bool verbose);
 RcppExport SEXP _uwot_smooth_knn_distances_parallel(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP n_iterSEXP, SEXP local_connectivitySEXP, SEXP bandwidthSEXP, SEXP tolSEXP, SEXP min_k_dist_scaleSEXP, SEXP parallelizeSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -163,7 +163,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< const double >::type min_k_dist_scale(min_k_dist_scaleSEXP);
     Rcpp::traits::input_parameter< const bool >::type parallelize(parallelizeSEXP);
-    Rcpp::traits::input_parameter< const size_t >::type grain_size(grain_sizeSEXP);
+    Rcpp::traits::input_parameter< const std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< const bool >::type verbose(verboseSEXP);
     rcpp_result_gen = Rcpp::wrap(smooth_knn_distances_parallel(nn_dist, nn_idx, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, parallelize, grain_size, verbose));
     return rcpp_result_gen;
@@ -206,7 +206,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // init_transform_av_parallel
-Rcpp::NumericMatrix init_transform_av_parallel(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index, bool parallelize, const size_t grain_size);
+Rcpp::NumericMatrix init_transform_av_parallel(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index, bool parallelize, const std::size_t grain_size);
 RcppExport SEXP _uwot_init_transform_av_parallel(SEXP train_embeddingSEXP, SEXP nn_indexSEXP, SEXP parallelizeSEXP, SEXP grain_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -214,13 +214,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type train_embedding(train_embeddingSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type nn_index(nn_indexSEXP);
     Rcpp::traits::input_parameter< bool >::type parallelize(parallelizeSEXP);
-    Rcpp::traits::input_parameter< const size_t >::type grain_size(grain_sizeSEXP);
+    Rcpp::traits::input_parameter< const std::size_t >::type grain_size(grain_sizeSEXP);
     rcpp_result_gen = Rcpp::wrap(init_transform_av_parallel(train_embedding, nn_index, parallelize, grain_size));
     return rcpp_result_gen;
 END_RCPP
 }
 // init_transform_parallel
-Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index, Rcpp::NumericMatrix nn_weights, const size_t grain_size, bool parallelize);
+Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index, Rcpp::NumericMatrix nn_weights, const std::size_t grain_size, bool parallelize);
 RcppExport SEXP _uwot_init_transform_parallel(SEXP train_embeddingSEXP, SEXP nn_indexSEXP, SEXP nn_weightsSEXP, SEXP grain_sizeSEXP, SEXP parallelizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -228,7 +228,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type train_embedding(train_embeddingSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerMatrix >::type nn_index(nn_indexSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type nn_weights(nn_weightsSEXP);
-    Rcpp::traits::input_parameter< const size_t >::type grain_size(grain_sizeSEXP);
+    Rcpp::traits::input_parameter< const std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< bool >::type parallelize(parallelizeSEXP);
     rcpp_result_gen = Rcpp::wrap(init_transform_parallel(train_embedding, nn_index, nn_weights, grain_size, parallelize));
     return rcpp_result_gen;

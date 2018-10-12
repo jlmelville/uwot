@@ -20,9 +20,9 @@ struct NNWorker : public RcppParallel::Worker {
   RcppParallel::RMatrix<double> mat;
   RcppParallel::RMatrix<double> dists;
   RcppParallel::RMatrix<int> idx;
-  size_t ncol;
-  size_t n;
-  size_t search_k;
+  std::size_t ncol;
+  std::size_t n;
+  std::size_t search_k;
 
   // Progress progress;
   // tthread::mutex mutex;
@@ -32,9 +32,9 @@ struct NNWorker : public RcppParallel::Worker {
     const Rcpp::NumericMatrix& mat,
     Rcpp::NumericMatrix& dists,
     Rcpp::IntegerMatrix& idx,
-    size_t ncol,
-    size_t n,
-    size_t search_k
+    std::size_t ncol,
+    std::size_t n,
+    std::size_t search_k
     // , Progress& progress
     ) :
     index_name(index_name), mat(mat), dists(dists), idx(idx), ncol(ncol), n(n),
@@ -75,11 +75,11 @@ struct NNWorker : public RcppParallel::Worker {
 // [[Rcpp::export]]
 Rcpp::List annoy_euclidean_nns(const std::string& index_name,
                           const Rcpp::NumericMatrix& mat,
-                          size_t n, size_t search_k,
+                          std::size_t n, std::size_t search_k,
                           std::size_t grain_size = 1,
                           bool verbose = false) {
-  size_t nrow = mat.rows();
-  size_t ncol = mat.cols();
+  std::size_t nrow = mat.rows();
+  std::size_t ncol = mat.cols();
   Rcpp::NumericMatrix dist(nrow, n);
   Rcpp::IntegerMatrix idx(nrow, n);
 
@@ -98,11 +98,11 @@ Rcpp::List annoy_euclidean_nns(const std::string& index_name,
 // [[Rcpp::export]]
 Rcpp::List annoy_cosine_nns(const std::string& index_name,
                                const Rcpp::NumericMatrix& mat,
-                               size_t n, size_t search_k,
+                               std::size_t n, std::size_t search_k,
                                std::size_t grain_size = 1,
                                bool verbose = false) {
-  size_t nrow = mat.rows();
-  size_t ncol = mat.cols();
+  std::size_t nrow = mat.rows();
+  std::size_t ncol = mat.cols();
   Rcpp::NumericMatrix dist(nrow, n);
   Rcpp::IntegerMatrix idx(nrow, n);
 
@@ -117,11 +117,11 @@ Rcpp::List annoy_cosine_nns(const std::string& index_name,
 // [[Rcpp::export]]
 Rcpp::List annoy_manhattan_nns(const std::string& index_name,
                              const Rcpp::NumericMatrix& mat,
-                             size_t n, size_t search_k,
+                             std::size_t n, std::size_t search_k,
                              std::size_t grain_size = 1,
                              bool verbose = false) {
-  size_t nrow = mat.rows();
-  size_t ncol = mat.cols();
+  std::size_t nrow = mat.rows();
+  std::size_t ncol = mat.cols();
   Rcpp::NumericMatrix dist(nrow, n);
   Rcpp::IntegerMatrix idx(nrow, n);
 

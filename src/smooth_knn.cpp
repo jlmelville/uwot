@@ -73,7 +73,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
       double hi = double_max;
 
       auto ith_distances = nn_dist.row(i);
-      for (size_t k = 0; k < ith_distances.size(); k++) {
+      for (std::size_t k = 0; k < ith_distances.size(); k++) {
         if (ith_distances[k] > 0.0) {
           non_zero_distances.push_back(ith_distances[k]);
         }
@@ -135,7 +135,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
       }
 
       double res[n_neighbors];
-      for (size_t k = 0; k < n_neighbors; k++) {
+      for (std::size_t k = 0; k < n_neighbors; k++) {
         double rk = ith_distances[k] - rho;
         if (rk <= 0) {
           res[k] = 1.0;
@@ -171,7 +171,7 @@ Rcpp::NumericMatrix smooth_knn_distances_parallel(
     const double tol,
     const double min_k_dist_scale,
     const bool parallelize = true,
-    const size_t grain_size = 1,
+    const std::size_t grain_size = 1,
     const bool verbose = false) {
   const unsigned int n_vertices = nn_dist.nrow();
 
