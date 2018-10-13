@@ -20,7 +20,20 @@ distance functions and so on. It also works with `lvish`.
 
 ## Installing
 
-`uwot` makes use of C++ code which must be compiled. Windows users, first install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) and ensure `C:\Rtools\bin` is on your path.
+`uwot` makes use of C++ code which must be compiled. You may have to carry out
+a few extra steps before being able to build this package:
+
+**Windows**: install 
+[Rtools](https://cran.r-project.org/bin/windows/Rtools/) and ensure 
+`C:\Rtools\bin` is on your path.
+
+**Mac OS X**: using a custom `~/.R/Makevars` 
+[may cause linking errors](https://github.com/jlmelville/uwot/issues/1).
+This sort of thing is a potential problem on all platforms but seems to bite
+Mac owners more.
+[The R for Mac OS X FAQ](https://cran.r-project.org/bin/macosx/RMacOSX-FAQ.html#Installation-of-source-packages)
+may be helpful here to work out what you can get away with. To be on the safe
+side, I would advise building `uwot` without a custom `Makevars`.
 
 ```R
 install.packages("devtools")
