@@ -18,6 +18,10 @@
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
 // Three-component combined Tausworthe "taus88" PRNG from L'Ecuyer 1996.
+
+#ifndef UWOT_TAUPRNG_H
+#define UWOT_TAUPRNG_H
+
 class tau_prng {
   long long state0;
   long long state1;
@@ -37,3 +41,5 @@ public:
     return state0 ^ state1 ^ state2;
   }
 };
+
+#endif // UWOT_TAUPRNG_H
