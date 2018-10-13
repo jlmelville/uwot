@@ -6,6 +6,8 @@ cache: packages
 os:
 - linux
 - osx
-disable_homebrew: true
+disable_homebrew:
+- true
+- false
 after_success:
   - Rscript -e 'covr::codecov()'
