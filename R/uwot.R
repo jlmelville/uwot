@@ -134,7 +134,8 @@
 #'   in the UMAP gradient, from
 #'   \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.
 #' @param y Optional target array for supervised dimension reduction. Must be a
-#'   factor or numeric vector with the same length as \code{X}.
+#'   factor or numeric vector with the same length as \code{X}. \code{NA} is
+#'   allowed for factors, but not for numeric \code{y}.
 #' @param target_n_neighbors Number of nearest neighbors to use to construct the
 #'   target simplcial set. Default value is \code{n_neighbors}. Applies only if
 #'   \code{y} is non-\code{NULL} and \code{numeric}.
@@ -375,7 +376,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
 #' @param y Optional target array for supervised dimension reduction. Must be a
-#'   factor or numeric vector with the same length as \code{X}.
+#'   factor or numeric vector with the same length as \code{X}. \code{NA} is
+#'   allowed for factors, but not for numeric \code{y}.
 #' @param target_n_neighbors Number of nearest neighbors to use to construct the
 #'   target simplcial set. Default value is \code{n_neighbors}. Applies only if
 #'   \code{y} is non-\code{NULL} and \code{numeric}.
@@ -676,6 +678,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
   if (local_connectivity < 1.0) {
     stop("local_connectivity cannot be < 1.0")
+  }
+
+  if (!is.null(y) && is.numeric(y) && any(is.na(y))) {
+    stop("numeric y cannot contain NA")
   }
 
   if (n_threads > 0) {

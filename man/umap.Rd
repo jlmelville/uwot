@@ -166,7 +166,8 @@ in the UMAP gradient, from
 \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.}
 
 \item{y}{Optional target array for supervised dimension reduction. Must be a
-factor or numeric vector with the same length as \code{X}.}
+factor or numeric vector with the same length as \code{X}. \code{NA} is
+allowed for factors, but not for numeric \code{y}.}
 
 \item{target_n_neighbors}{Number of nearest neighbors to use to construct the
 target simplcial set. Default value is \code{n_neighbors}. Applies only if
