@@ -133,11 +133,29 @@
 #' @param approx_pow If \code{TRUE}, use an approximation to the power function
 #'   in the UMAP gradient, from
 #'   \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.
-#' @param y Optional target array for supervised dimension reduction. Must be a
-#'   factor or numeric vector with the same length as \code{X}. \code{NA} is
-#'   allowed for factors, but not for numeric \code{y}.
+#' @param y Optional target array for supervised dimension reduction. The
+#'   following types are allowed:
+#'   \itemize{
+#'     \item A factor vector with the same length as \code{X}. \code{NA} is
+#'     allowed for any observation with an unknown level, in which case
+#'     UMAP operates as a form of semi-supervised learning.
+#'     \item A numeric vector with the same length as \code{X}. \code{NA} is
+#'     \emph{not} allowed in this case. Use the parameter
+#'     \code{target_n_neighbors} to set the number of neighbors used with
+#'     \code{y}. If unset, \code{n_neighbors} is used.
+#'     \item A list of two matrices, \code{idx} and \code{dist}, representing
+#'     precalculated nearest neighbor indices and distances, respectively. This
+#'     is the same format as that expected for precalculated data in
+#'     \code{nn_method}. This format assumes that the underlying data was a
+#'     numeric vector. Any user-supplied value of the \code{target_n_neighbors}
+#'     parameter is ignored in this case, because the the number of columns in
+#'     the matrices is used for the value. Using precalculated nearest neighbor
+#'     data for \code{y} may be useful if the Euclidean distances metric isn't
+#'     appropriate, or you have unlabelled data that can be accounted for in
+#'     some other way via nearest neighbors.
+#'   }
 #' @param target_n_neighbors Number of nearest neighbors to use to construct the
-#'   target simplcial set. Default value is \code{n_neighbors}. Applies only if
+#'   target simplicial set. Default value is \code{n_neighbors}. Applies only if
 #'   \code{y} is non-\code{NULL} and \code{numeric}.
 #' @param target_weight Weighting factor between data topology and target
 #'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
@@ -375,11 +393,29 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
-#' @param y Optional target array for supervised dimension reduction. Must be a
-#'   factor or numeric vector with the same length as \code{X}. \code{NA} is
-#'   allowed for factors, but not for numeric \code{y}.
+#' @param y Optional target array for supervised dimension reduction. The
+#'   following types are allowed:
+#'   \itemize{
+#'     \item A factor vector with the same length as \code{X}. \code{NA} is
+#'     allowed for any observation with an unknown level, in which case
+#'     UMAP operates as a form of semi-supervised learning.
+#'     \item A numeric vector with the same length as \code{X}. \code{NA} is
+#'     \emph{not} allowed in this case. Use the parameter
+#'     \code{target_n_neighbors} to set the number of neighbors used with
+#'     \code{y}. If unset, \code{n_neighbors} is used.
+#'     \item A list of two matrices, \code{idx} and \code{dist}, representing
+#'     precalculated nearest neighbor indices and distances, respectively. This
+#'     is the same format as that expected for precalculated data in
+#'     \code{nn_method}. This format assumes that the underlying data was a
+#'     numeric vector. Any user-supplied value of the \code{target_n_neighbors}
+#'     parameter is ignored in this case, because the the number of columns in
+#'     the matrices is used for the value. Using precalculated nearest neighbor
+#'     data for \code{y} may be useful if the Euclidean distances metric isn't
+#'     appropriate, or you have unlabelled data that can be accounted for in
+#'     some other way via nearest neighbors.
+#'   }
 #' @param target_n_neighbors Number of nearest neighbors to use to construct the
-#'   target simplcial set. Default value is \code{n_neighbors}. Applies only if
+#'   target simplicial set. Default value is \code{n_neighbors}. Applies only if
 #'   \code{y} is non-\code{NULL} and \code{numeric}.
 #' @param target_weight Weighting factor between data topology and target
 #'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
@@ -757,29 +793,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
 
   if (is.list(nn_method)) {
-    if (is.null(nn_method$idx)) {
-      stop("Couldn't find precalculated 'idx' matrix")
-    }
-    if (nrow(nn_method$idx) != n_vertices) {
-      stop("Precalculated 'idx' matrix must have ", n_vertices, " rows, but
-           found ", nrow(nn_method$idx))
-    }
+    validate_nn(nn_method, n_vertices)
     n_neighbors <- ncol(nn_method$idx)
-
-    if (is.null(nn_method$dist)) {
-      stop("Couldn't find precalculated 'dist' matrix")
-    }
-    if (nrow(nn_method$idx) != n_vertices) {
-      stop("Precalculated 'dist' matrix must have ", n_vertices, " rows, but
-           found ", nrow(nn_method$dist))
-    }
-    if (ncol(nn_method$dist) != n_neighbors) {
-      stop("Precalculated 'dist' matrix must have ", n_neighbors, " cols, but
-           found ", ncol(nn_method$dist))
-    }
-
-    tsmessage("Using precalculated nearest neighbor data, n_neighbors = ",
-              n_neighbors)
     nn <- nn_method
   }
   else {
@@ -851,18 +866,32 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         verbose = verbose
       )
     }
-    else if (is.numeric(y)) {
-      tsmessage(
-        "Applying numeric set intersection, target weight = ",
-        formatC(target_weight), " target neighbors = ", target_n_neighbors
-      )
-      target_nn <- find_nn(as.matrix(y), target_n_neighbors,
-        method = "annoy",
-        metric = "euclidean",
-        n_trees = n_trees,
-        n_threads = n_threads, grain_size = grain_size,
-        search_k = search_k, verbose = FALSE
-      )
+    else if (is.numeric(y) || is.list(y)) {
+
+      if (is.numeric(y)) {
+        tsmessage(
+          "Applying numeric set intersection, target weight = ",
+          formatC(target_weight), " target neighbors = ", target_n_neighbors
+        )
+        target_nn <- find_nn(as.matrix(y), target_n_neighbors,
+          method = "annoy",
+          metric = "euclidean",
+          n_trees = n_trees,
+          n_threads = n_threads, grain_size = grain_size,
+          search_k = search_k, verbose = FALSE
+        )
+      }
+      else {
+        # Must be a list
+        target_nn <- y
+        validate_nn(target_nn, n_vertices)
+        target_n_neighbors <- ncol(target_nn$idx)
+
+        tsmessage(
+          "Applying numeric set intersection, target weight = ",
+          formatC(target_weight), " target neighbors = ", target_n_neighbors
+        )
+      }
 
       target_graph <- fuzzy_simplicial_set(
         nn = target_nn,
@@ -1032,7 +1061,28 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   res
 }
 
+validate_nn <- function(nn_method, n_vertices) {
+  if (is.null(nn_method$idx)) {
+    stop("Couldn't find precalculated 'idx' matrix")
+  }
+  if (nrow(nn_method$idx) != n_vertices) {
+    stop("Precalculated 'idx' matrix must have ", n_vertices, " rows, but
+           found ", nrow(nn_method$idx))
+  }
+  n_neighbors <- ncol(nn_method$idx)
 
+  if (is.null(nn_method$dist)) {
+    stop("Couldn't find precalculated 'dist' matrix")
+  }
+  if (nrow(nn_method$idx) != n_vertices) {
+    stop("Precalculated 'dist' matrix must have ", n_vertices, " rows, but
+           found ", nrow(nn_method$dist))
+  }
+  if (ncol(nn_method$dist) != n_neighbors) {
+    stop("Precalculated 'dist' matrix must have ", n_neighbors, " cols, but
+           found ", ncol(nn_method$dist))
+  }
+}
 
 # Creates the number of epochs per sample for each weight
 # weights are the non-zero input affinities (1-simplex)

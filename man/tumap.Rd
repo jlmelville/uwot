@@ -149,12 +149,30 @@ by RcppParallel. For nearest neighbor search, only applies if
 items to process in a thread falls below this number, then no threads will
 be used. Used in conjunction with \code{n_threads}.}
 
-\item{y}{Optional target array for supervised dimension reduction. Must be a
-factor or numeric vector with the same length as \code{X}. \code{NA} is
-allowed for factors, but not for numeric \code{y}.}
+\item{y}{Optional target array for supervised dimension reduction. The
+following types are allowed:
+\itemize{
+  \item A factor vector with the same length as \code{X}. \code{NA} is
+  allowed for any observation with an unknown level, in which case
+  UMAP operates as a form of semi-supervised learning.
+  \item A numeric vector with the same length as \code{X}. \code{NA} is
+  \emph{not} allowed in this case. Use the parameter
+  \code{target_n_neighbors} to set the number of neighbors used with
+  \code{y}. If unset, \code{n_neighbors} is used.
+  \item A list of two matrices, \code{idx} and \code{dist}, representing
+  precalculated nearest neighbor indices and distances, respectively. This
+  is the same format as that expected for precalculated data in
+  \code{nn_method}. This format assumes that the underlying data was a
+  numeric vector. Any user-supplied value of the \code{target_n_neighbors}
+  parameter is ignored in this case, because the the number of columns in
+  the matrices is used for the value. Using precalculated nearest neighbor
+  data for \code{y} may be useful if the Euclidean distances metric isn't
+  appropriate, or you have unlabelled data that can be accounted for in
+  some other way via nearest neighbors.
+}}
 
 \item{target_n_neighbors}{Number of nearest neighbors to use to construct the
-target simplcial set. Default value is \code{n_neighbors}. Applies only if
+target simplicial set. Default value is \code{n_neighbors}. Applies only if
 \code{y} is non-\code{NULL} and \code{numeric}.}
 
 \item{target_weight}{Weighting factor between data topology and target

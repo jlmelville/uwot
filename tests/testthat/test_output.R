@@ -124,3 +124,47 @@ expect_ok_matrix(res_test)
 res <- umap(iris10, n_components = 1, n_neighbors = 4, n_epochs = 2,
             n_threads = 1, verbose = FALSE)
 expect_ok_matrix(res, nc = 1)
+
+
+# Supervised
+set.seed(1337)
+res_y <- umap(iris10, n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+               min_dist = 0.001, init = "spca", verbose = FALSE, n_threads = 0,
+               y = 1 / (1:10) ^ 2, target_n_neighbors = 2)
+expect_ok_matrix(res_y)
+
+# Repeat using equivalent NN info for y
+y_nn <- list(
+  idx = matrix(c(
+    1,    2,
+    2,    3,
+    3,    4,
+    4,    5,
+    5,    6,
+    6,    7,
+    7,    8,
+    8,    9,
+    9,   10,
+    10,    9
+  ), ncol = 2, byrow = TRUE),
+  dist = matrix(c(
+    0, 0.750000000,
+    0, 0.138888896,
+    0, 0.048611112,
+    0, 0.022500001,
+    0, 0.012222221,
+    0, 0.007369615,
+    0, 0.004783163,
+    0, 0.003279321,
+    0, 0.002345679,
+    0, 0.002345679
+  ), ncol = 2, byrow = TRUE)
+)
+
+set.seed(1337)
+res_ynn <- umap(iris10, n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+               min_dist = 0.001, init = "spca", verbose = FALSE, n_threads = 0,
+               y = y_nn)
+expect_ok_matrix(res_ynn)
+# Should be the same result
+expect_equal(res_ynn, res_y)
