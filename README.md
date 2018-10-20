@@ -356,7 +356,7 @@ should expect bad results.
 * `dist`: a matrix of dimension `n_vertices x n_neighbors`, where each row
 contains the distances of the nearest neighbors of each item (vertex) in the
 dataset, in Each item is always the nearest neighbor of itself, so the first
-element in row `i` should always be `0.0
+element in row `i` should always be `0.0`.
 
 If you set `ret_nn = TRUE`, the return value of `umap` will be a list, and the
 `nn` item contains the nearest neighbor data in a format that can be used
