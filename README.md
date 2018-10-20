@@ -6,7 +6,8 @@ An R implementation of the
 [Uniform Manifold Approximation and Projection (UMAP)](https://arxiv.org/abs/1802.03426) 
 method for dimensionality reduction (McInnes and Healy, 2018), that also 
 implements the supervised and metric (out-of-sample) learning extensions to
-the basic method.
+the basic method. Translated from the 
+[Python implementation](https://github.com/lmcinnes/umap).
 
 ## News
 
@@ -340,11 +341,11 @@ mnist_lv <- lvish(mnist, kernel = "knn", perplexity = 15, n_epochs = 1500,
 
 ## See Also
 
-* The [UMAP](https://github.com/lmcinnes/umap) reference implementation and
+* The [UMAP reference implementation](https://github.com/lmcinnes/umap) and
 [publication](https://arxiv.org/abs/1802.03426).
 * There is now a [UMAP package on CRAN](https://cran.r-project.org/package=umap)
 (see also its [github repo](https://github.com/tkonopka/umap)). Another R
-package is https://github.com/ropenscilabs/umapr.
+package is [umapr](https://github.com/ropenscilabs/umapr).
 * `uwot` uses the [RcppProgress](https://cran.r-project.org/package=RcppProgress)
 package to show a text-based progress bar when `verbose = TRUE`.
 * My somewhat convoluted method to ensure the C++ random numbers are repeatable
