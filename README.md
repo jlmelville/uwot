@@ -11,13 +11,12 @@ the basic method. Translated from the
 
 ## News
 
-*September 2018*. You can now return the nearest neighbor data via 
-`umap_result <- umap(..., ret_nn = TRUE)`, and it
-can be re-used by setting 
-`umap_newresult <- umap(..., nn_method = umap_result$nn)`. As the nearest
-neighbor calculations is likely to be the bottleneck with default settings, this
-can save a lot of time if you are fiddling with epochs, initialization, output
-distance functions and so on. It also works with `lvish`.
+*October 20 2018*. Supervised UMAP with numeric `y` now supports passing nearest
+neighbor data directly. This might be useful if you don't want to use Euclidean
+distances with `y` or if you have missing data, but you do have a way of 
+assigning neighbors to these points. See the 
+[Nearest Neighbor Data Format section](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
+for more details.
 
 ## Installing
 
@@ -334,6 +333,86 @@ MNIST:
 mnist_lv <- lvish(mnist, kernel = "knn", perplexity = 15, n_epochs = 1500,
                   init = "lvrand", verbose = TRUE)
 ```
+
+## Nearest Neighbor Data Format
+
+The Python implementation of UMAP supports lots of distance metrics; `uwot` does
+not, because it depends on the distance metrics supported by `RcppAnnoy`, which
+in turn depends on those supported by `Annoy`. For more flexibility, at the
+cost of convenience, you can generate nearest neighbor data for `X` by some
+other means and pass that to `umap` (or `tumap` or `lvish`) directly via the
+`nn_method` parameter.
+
+The format expected by `nn_method` is a `list` containing the following two
+entries:
+
+* `idx`: a matrix of dimension `n_vertices x n_neighbors`, where each row
+contains the indexes (starting at `1`) of the nearest neighbors of each item
+(vertex) in the dataset. Each item is always the nearest neighbor of itself, so
+the first element in row `i` should always be `i`. If it isn't then either you
+are using a really weird non-metric distance or your approximate nearest
+neighbor method is returning way too approximate results. In either case, you
+should expect bad results. 
+* `dist`: a matrix of dimension `n_vertices x n_neighbors`, where each row
+contains the distances of the nearest neighbors of each item (vertex) in the
+dataset, in Each item is always the nearest neighbor of itself, so the first
+element in row `i` should always be `0.0
+
+If you set `ret_nn = TRUE`, the return value of `umap` will be a list, and the
+`nn` item contains the nearest neighbor data in a format that can be used
+with `nn_method`. This is handy if you are going to be running UMAP multiple
+times with the same data and `n_neighbors` and `scale` settings, because the
+nearest neighbor calculation can be the most time-consuming part of the
+calculation.
+
+As an example, here's what the first few items of the `iris` 5-NN data should
+look like:
+
+```R
+lapply(umap(iris, ret_nn = TRUE, n_neighbors = 5), head)
+
+$`idx`
+     [,1] [,2] [,3] [,4] [,5]
+[1,]    1   18    5   40   29
+[2,]    2   35   46   13   10
+[3,]    3   48    4    7   13
+[4,]    4   48   30   31    3
+[5,]    5   38    1   18   41
+[6,]    6   19   11   49   45
+
+$dist
+     [,1]      [,2]      [,3]      [,4]      [,5]
+[1,]    0 0.1000000 0.1414214 0.1414214 0.1414214
+[2,]    0 0.1414214 0.1414214 0.1414214 0.1732051
+[3,]    0 0.1414214 0.2449490 0.2645751 0.2645751
+[4,]    0 0.1414214 0.1732051 0.2236068 0.2449490
+[5,]    0 0.1414214 0.1414214 0.1732051 0.1732051
+[6,]    0 0.3316625 0.3464102 0.3605551 0.3741657
+```
+
+### Numeric `y`
+
+If you are using supervised UMAP with a numeric `y`, then you can also pass
+nearest neighbor data to `y`, using the same format as above. In this case the
+nearest neighbors should be with respect to the data in `y`, not in `X`. There
+are a few reasons to do this:
+
+* If you pass a `y` numeric vector, it will always use the Euclidean distance
+between values. You may want to use a different distance.
+* Currently, only a single vector can be passed directly to `y`. This is one
+way to use a matrix-valued `y`.
+* Numeric `y` vectors do not support missing values. Obviously, using nearest
+neighbor data instead will only be useful if you have a way to assign
+neighbors to missing data. But if you do, then this is currently the only way to
+use numeric `y` in a semi-supervized mode.
+
+Note that you *cannot* pass categorical `y` as nearest neighbor data. This is
+because the processing of the data goes through a different code path that
+doesn't directly calculate nearest neighbors: if `y` is a factor, when there
+are only a small number of levels, the number of neighbors of an item can be
+vastly larger than `n_neighbors`.
+
+Nearest neighbor data for `y` is not returned from `umap` for re-use.
 
 ## License
 

@@ -1,3 +1,15 @@
+# uwot 0.0.0.9004 (October 20 2018)
+
+## New features
+
+* For supervised UMAP with numeric `y`, you may pass nearest neighbor data
+directly, in the same format as that supported by `X`-related nearest neighbor
+data. This may be useful if you don't want to use Euclidean distances for
+the `y` data, or if you have missing data (and have a way to assign nearest neighbors
+for those cases, obviously). See the 
+[Nearest Neighbor Data Format](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
+section for details.
+
 # uwot 0.0.0.9003 (September 22 2018)
 
 ## New features
