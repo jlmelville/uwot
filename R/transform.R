@@ -121,7 +121,7 @@ umap_transform <- function(X, model,
     }
   }
   else {
-    n_epochs <- max(1, round(n_epochs / 3))
+    n_epochs <- max(2, round(n_epochs / 3))
   }
 
   if (n_epochs > 0) {
