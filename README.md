@@ -18,6 +18,12 @@ assigning neighbors to these points. See the
 [Nearest Neighbor Data Format section](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
 for more details.
 
+Note: I recently upgraded to
+[devtools](https://cran.r-project.org/package=devtools) 2.0.0, and noticed that
+in building the project via `devtools::load_all(".")` now compiles the C++ in
+debug mode (with `-g -O0`). This results in a noticeable slow down. It shouldn't
+affect anyone installing the package via `devtools::install_github` though.
+
 ## Installing
 
 `uwot` makes use of C++ code which must be compiled. You may have to carry out
