@@ -28,12 +28,12 @@
 #include "gradient.h"
 #include "tauprng.h"
 
-template <typename T>
+template <typename Gradient>
 struct SgdWorker : public RcppParallel::Worker {
 
   int n; // epoch counter
   double alpha;
-  const T gradient;
+  const Gradient gradient;
   const arma::uvec positive_head;
   const arma::uvec positive_tail;
   const arma::vec epochs_per_sample;
@@ -53,7 +53,7 @@ struct SgdWorker : public RcppParallel::Worker {
   bool move_other;
 
   SgdWorker(
-    const T& gradient,
+    const Gradient& gradient,
     const arma::uvec& positive_head,
     const arma::uvec& positive_tail,
     const arma::vec& epochs_per_sample,
