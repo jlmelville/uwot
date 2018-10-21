@@ -1,4 +1,4 @@
-# uwot 0.0.0.9004 (October 20 2018)
+# uwot 0.0.0.9004 (October 21 2018)
 
 ## New features
 
