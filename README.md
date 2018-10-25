@@ -20,7 +20,7 @@ for more details.
 
 Note: I recently upgraded to
 [devtools](https://cran.r-project.org/package=devtools) 2.0.0, and noticed that
-in building the project via `devtools::load_all(".")` now compiles the C++ in
+building the project via `devtools::load_all(".")` now compiles the C++ in
 debug mode (with `-g -O0`). This results in a noticeable slow down. It shouldn't
 affect anyone installing the package via `devtools::install_github` though.
 
@@ -375,7 +375,7 @@ As an example, here's what the first few items of the `iris` 5-NN data should
 look like:
 
 ```R
-lapply(umap(iris, ret_nn = TRUE, n_neighbors = 5), head)
+lapply(umap(iris, ret_nn = TRUE, n_neighbors = 5)$nn, head)
 
 $`idx`
      [,1] [,2] [,3] [,4] [,5]
