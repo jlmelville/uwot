@@ -410,7 +410,7 @@ way to use a matrix-valued `y`.
 * Numeric `y` vectors do not support missing values. Obviously, using nearest
 neighbor data instead will only be useful if you have a way to assign
 neighbors to missing data. But if you do, then this is currently the only way to
-use numeric `y` in a semi-supervized mode.
+use numeric `y` in a semi-supervised mode.
 
 Note that you *cannot* pass categorical `y` as nearest neighbor data. This is
 because the processing of the data goes through a different code path that
