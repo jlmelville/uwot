@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <numeric>
 #include <limits>
+#include <vector>
 #include <Rcpp.h>
 // [[Rcpp::depends(RcppParallel)]]
 #include <RcppParallel.h>
@@ -134,7 +135,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
         sigma = std::max(min_k_dist_scale * mean_distances, sigma);
       }
 
-      double res[n_neighbors];
+      std::vector<double> res(n_neighbors, 0.0);
       for (std::size_t k = 0; k < n_neighbors; k++) {
         double rk = ith_distances[k] - rho;
         if (rk <= 0) {

@@ -17,12 +17,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <vector>
 #include <Rcpp.h>
 #include <RcppParallel.h>
 // [[Rcpp::depends(RcppParallel)]]
-
-
-
 
 struct AverageWorker : public RcppParallel::Worker {
 
@@ -43,7 +41,7 @@ struct AverageWorker : public RcppParallel::Worker {
   {  }
 
   void operator()(std::size_t begin, std::size_t end) {
-    double sumc[nc];
+    std::vector<double> sumc(nc, 0.0);
     for (std::size_t i = begin; i < end; i++) {
       for (std::size_t k = 0; k < nc; k++) {
         sumc[k] = 0.0;
@@ -101,7 +99,7 @@ struct WeightedAverageWorker : public RcppParallel::Worker {
   {  }
 
   void operator()(std::size_t begin, std::size_t end) {
-    double sumc[nc];
+    std::vector<double> sumc(nc, 0.0);
     for (std::size_t i = begin; i < end; i++) {
       for (std::size_t k = 0; k < nc; k++) {
         sumc[k] = 0.0;

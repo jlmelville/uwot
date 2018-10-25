@@ -18,6 +18,7 @@
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <limits>
+#include <vector>
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]
 // [[Rcpp::depends(RcppParallel)]]
@@ -55,7 +56,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
   {  }
 
   void operator()(std::size_t begin, std::size_t end) {
-    double d2[n_neighbors - 1];
+    std::vector<double> d2(n_neighbors - 1, 0.0);
 
     // first vertex: guess initial beta as 1.0
     // subsequent vertices, guess the last optimized beta
