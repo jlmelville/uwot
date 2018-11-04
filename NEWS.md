@@ -1,3 +1,9 @@
+# uwot 0.0.0.9005 (November 4 2018)
+
+## New features
+
+* Hamming distance is now supported, due to upgrade to RcppAnnoy 0.0.11.
+
 # uwot 0.0.0.9004 (October 21 2018)
 
 ## New features

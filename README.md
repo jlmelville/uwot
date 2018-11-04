@@ -11,12 +11,8 @@ the basic method. Translated from the
 
 ## News
 
-*October 20 2018*. Supervised UMAP with numeric `y` now supports passing nearest
-neighbor data directly. This might be useful if you don't want to use Euclidean
-distances with `y` or if you have missing data, but you do have a way of 
-assigning neighbors to these points. See the 
-[Nearest Neighbor Data Format section](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
-for more details.
+*November 4 2018*. Thanks to RcppAnnoy 0.0.11, Hamming distance is now supported
+(`metric = "hamming"`).
 
 Note: I recently upgraded to
 [devtools](https://cran.r-project.org/package=devtools) 2.0.0, and noticed that
@@ -103,10 +99,22 @@ output of UMAP on some datasets, compared to t-SNE.
 
 ## Implementation Details
 
-For small (N < 4096), exact nearest neighbors are found using the 
-[FNN](https://cran.r-project.org/package=FNN) package. Otherwise, approximate
-nearest neighbors are found using 
-[RcppAnnoy](https://cran.r-project.org/package=RcppAnnoy).
+For small (N < 4096) and Euclidean distance, exact nearest neighbors are found
+using the [FNN](https://cran.r-project.org/package=FNN) package. Otherwise,
+approximate nearest neighbors are found using
+[RcppAnnoy](https://cran.r-project.org/package=RcppAnnoy). The supported
+distance metrics (set by the `metric` parameter) are:
+
+* Euclidean
+* Cosine
+* Manhattan
+* Hamming
+
+If you need other metrics, and can generate the nearest neighbor info 
+externally, you can pass the data directly to `uwot` via the `nn_method` 
+parameter. See the 
+[Nearest Neighbor Data Format section](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
+for more details.
 
 Coordinate initialization uses
 [RSpectra](https://cran.r-project.org/package=RSpectra) to do the
@@ -215,16 +223,25 @@ issue.
 
 ## Limitations and Other Issues
 
-* Only Euclidean, cosine, and Manhattan distances are supported for finding
-nearest neighbors from data frame and dense matrix input. But if you can
-calculate a distance matrix for your data, you can pass it in as `dist` object.
-For larger distance matrices, you can pass in a `sparseMatrix` (from the
-[Matrix](https://cran.r-project.org/package=Matrix) package). Neither approach
-is supremely efficient at the moment. Proper sparse matrix support is limited
-by the nearest neighbor search routine: Annoy is intended for dense vectors.
-Adding a library for sparse nearest neighbor search would be a good extension.
-* I haven't tried this on anything much larger than MNIST and Fashion MNIST (so
-at least around 100,000 rows with 500-1,000 columns works fine). Bear in mind
+* As noted in the 
+[Implementation Details](https://github.com/jlmelville/uwot#implementation-details),
+only Euclidean, Cosine, Hamming, and Manhattan distances are supported for finding
+nearest neighbors from data frame and dense matrix input. For other metrics,
+you can pass nearest neighbor data directly: see the 
+[Nearest Neighbor Data Format](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
+section. Or if you can calculate a distance matrix for your data, you can pass
+it in as `dist` object. For larger distance matrices, you can pass in a
+`sparseMatrix` (from the [Matrix](https://cran.r-project.org/package=Matrix)
+package). Neither approach is supremely efficient at the moment. Proper sparse
+matrix support is limited by the nearest neighbor search routine: Annoy is
+intended for dense vectors. Adding a library for sparse nearest neighbor search
+would be a good extension.
+* For supervised dimensionality reduction using a numeric vector, only the
+Euclidean distance is supported for building the target graph. Again, see the 
+[Nearest Neighbor Data Format](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
+for a possible alternative.
+* I haven't applied `uwot` on anything much larger than MNIST and Fashion MNIST 
+(so at least around 100,000 rows with 500-1,000 columns works fine). Bear in mind
 that Annoy itself says it works best with dimensions < 100, but still works
 "surprisingly well" up to 1000.
 * The spectral initialization default for `umap` (and the Laplacian eigenmap
@@ -233,8 +250,6 @@ fails to converge it will fall back to random initialization, but on occasion
 I've seen it take an extremely long time (a couple of hours) to converge. If
 initialization is taking more than a few minutes, I suggest stopping the 
 calculation and using the scaled PCA (`init = "spca"`) instead.
-* For supervised dimensionality reduction using a numeric vector, only the
-Euclidean distance is supported for building the target graph.
 * `R CMD check` currently reports the following note: 
 `GNU make is a SystemRequirements.`, which is expected and due to using 
 RcppParallel. On Linux, it sometimes notes that the `libs` sub-directory is over

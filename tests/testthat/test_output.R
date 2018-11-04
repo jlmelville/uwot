@@ -168,3 +168,11 @@ res_ynn <- umap(iris10, n_neighbors = 4, n_epochs = 2, alpha = 0.5,
 expect_ok_matrix(res_ynn)
 # Should be the same result
 expect_equal(res_ynn, res_y)
+
+hamm <- structure(c(0L, 0L, 1L, 0L, 1L, 1L, 1L, 0L, 0L, 0L, 0L, 0L, 0L,
+                    0L, 1L, 1L, 1L, 1L, 0L, 1L, 0L, 1L, 0L, 0L, 0L, 0L, 0L, 1L, 1L,
+                    0L, 1L, 0L, 0L, 1L, 1L, 0L, 0L, 1L, 1L, 0L), .Dim = c(10L, 4L
+                    ))
+res <- umap(hamm, n_neighbors = 4, metric = "hamming", verbose = FALSE,
+            n_threads = 1)
+expect_ok_matrix(res)

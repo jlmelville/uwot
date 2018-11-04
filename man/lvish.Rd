@@ -40,6 +40,7 @@ integer value in the range \code{2} to \code{100}.}
   \item \code{"euclidean"} (the default)
   \item \code{"cosine"}
   \item \code{"manhattan"}
+  \item \code{"hamming"}
 }
 Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
 distance metric is always "euclidean").}

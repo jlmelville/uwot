@@ -26,6 +26,7 @@
 #'   \item \code{"euclidean"} (the default)
 #'   \item \code{"cosine"}
 #'   \item \code{"manhattan"}
+#'   \item \code{"hamming"}
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
 #' distance metric is always "euclidean").
@@ -304,6 +305,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"euclidean"} (the default)
 #'   \item \code{"cosine"}
 #'   \item \code{"manhattan"}
+#'   \item \code{"hamming"}
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
 #' distance metric is always "euclidean").
@@ -534,6 +536,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"euclidean"} (the default)
 #'   \item \code{"cosine"}
 #'   \item \code{"manhattan"}
+#'   \item \code{"hamming"}
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
 #' distance metric is always "euclidean").
@@ -779,7 +782,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
 
-  metric <- match.arg(tolower(metric), c("euclidean", "cosine", "manhattan"))
+  metric <- match.arg(tolower(metric), c("euclidean", "cosine", "manhattan",
+                                         "hamming"))
 
   if (is.null(nn_method)) {
     if (n_vertices < 4096 && metric == "euclidean" && !ret_model) {
