@@ -240,6 +240,12 @@ would be a good extension.
 Euclidean distance is supported for building the target graph. Again, see the 
 [Nearest Neighbor Data Format](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
 for a possible alternative.
+* Even if you use `set.seed`, results of the embeddings are not repeatable,
+unless you only use one thread (i.e. use the argument `n_threads = 1`). This is
+because there is no locking carried out on the underlying coordinate matrix, and
+work is partitioned by edge not vertex and a given vertex may be processed by
+different threads. The order in which reads and writes occur is of course at the
+whim of the thread scheduler.
 * I haven't applied `uwot` on anything much larger than MNIST and Fashion MNIST 
 (so at least around 100,000 rows with 500-1,000 columns works fine). Bear in mind
 that Annoy itself says it works best with dimensions < 100, but still works
