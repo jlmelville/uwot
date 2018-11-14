@@ -151,7 +151,7 @@ some other packages with their default settings:
 | Method                                                                    |   Time       |
 |---------------------------------------------------------------------------|--------------|
 | `uwot(n_threads = 1)`                                                     | 3.5 minutes  |
-| [Barnes-Hut t-SNE](https://cran.r-project.org/package=Rtsne)              | 21 minutes   |
+| [Barnes-Hut t-SNE (Rtsne 0.15)](https://cran.r-project.org/package=Rtsne) | 14 minutes   |
 | [largeVis](https://github.com/elbamos/largeVis)                           | 56 minutes   |
 | [official LargeVis implementation](https://github.com/lferry007/LargeVis) | 10 minutes   |
 | [UMAP (Python)](https://github.com/lmcinnes/umap)                         | 2 minutes    |
