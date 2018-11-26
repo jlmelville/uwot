@@ -2,6 +2,8 @@
 
 ## New features
 
+* Compatibility with older versions of RcppParallel (contributed by 
+[sirusb](https://github.com/sirusb)).
 * `scale = "Z"` To Z-scale each column of input (synonym for `scale = TRUE` 
 or `scale = "scale"`).
 
