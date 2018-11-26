@@ -802,33 +802,19 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
 
-  if (is.list(nn_method)) {
-    validate_nn(nn_method, n_vertices)
-    n_neighbors <- ncol(nn_method$idx)
-    nn <- nn_method
-  }
-  else {
-    nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
-    if (nn_method == "fnn" && metric != "euclidean") {
-      stop(
-        "nn_method = 'FNN' is only compatible with distance metric ",
-        "'euclidean'"
-      )
-    }
-    if (nn_method == "fnn" && ret_model) {
-      stop("nn_method = 'FNN' is incompatible with ret_model = TRUE")
-    }
-    nn <- find_nn(X, n_neighbors,
-      method = nn_method, metric = metric,
-      n_trees = n_trees,
-      n_threads = n_threads, grain_size = grain_size,
-      search_k = search_k, ret_index = ret_model, verbose = verbose
-    )
-    gc()
-  }
+  nn <- x2nn(X, n_neighbors, metric, nn_method,
+             n_trees, search_k,
+             n_threads, grain_size,
+             ret_model,
+             verbose)
+
   if (any(is.infinite(nn$dist))) {
     stop("Infinite distances found in nearest neighbors")
   }
+  gc()
+  # n_neighbors may have been updated
+  n_neighbors <- ncol(nn$idx)
+
 
   if (method == "largevis") {
     if (perplexity >= n_vertices) {
@@ -1012,6 +998,53 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
 
   res
+}
+
+# Get the number of vertices in X
+x2nv <- function(X) {
+  if (methods::is(X, "dist")) {
+    n_vertices <- attr(X, "Size")
+  }
+  else if (methods::is(X, "sparseMatrix")) {
+    n_vertices <- nrow(X)
+  }
+  else if (methods::is(X, "data.frame") || methods::is(X, "matrix")) {
+    n_vertices <- nrow(X)
+  }
+  else {
+    stop("Can't find number of vertices for X of type '", class(X)[1], "'")
+  }
+  n_vertices
+}
+
+x2nn <- function(X, n_neighbors, metric, nn_method,
+                 n_trees, search_k,
+                 n_threads, grain_size,
+                 ret_model,
+                 verbose = FALSE) {
+  if (is.list(nn_method)) {
+    validate_nn(nn_method, x2nv(X))
+    nn <- nn_method
+  }
+  else {
+    nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
+    if (nn_method == "fnn" && metric != "euclidean") {
+      stop(
+        "nn_method = 'FNN' is only compatible with distance metric ",
+        "'euclidean'"
+      )
+    }
+    if (nn_method == "fnn" && ret_model) {
+      stop("nn_method = 'FNN' is incompatible with ret_model = TRUE")
+    }
+    nn <- find_nn(X, n_neighbors,
+                  method = nn_method, metric = metric,
+                  n_trees = n_trees,
+                  n_threads = n_threads, grain_size = grain_size,
+                  search_k = search_k, ret_index = ret_model, verbose = verbose
+    )
+  }
+  nn
 }
 
 validate_nn <- function(nn_method, n_vertices) {
