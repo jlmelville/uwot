@@ -815,11 +815,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   # n_neighbors may have been updated
   n_neighbors <- ncol(nn$idx)
 
-  V <- nn2m(method, nn,
-            set_op_mix_ratio, local_connectivity, bandwidth,
-            perplexity, kernel,
-            n_threads, grain_size,
-            verbose = verbose)
+  V <- nn2set(method, nn,
+              set_op_mix_ratio, local_connectivity, bandwidth,
+              perplexity, kernel,
+              n_threads, grain_size,
+              verbose = verbose)
   if (any(is.na(V))) {
     stop("Non-finite entries in the input matrix")
   }
@@ -1051,7 +1051,7 @@ validate_nn <- function(nn_method, n_vertices) {
   }
 }
 
-nn2m <- function(method, nn,
+nn2set <- function(method, nn,
                  set_op_mix_ratio, local_connectivity, bandwidth,
                  perplexity, kernel,
                  n_threads, grain_size,
