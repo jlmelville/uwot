@@ -249,6 +249,11 @@ apply_scaling <- function(X, scale_info, verbose = FALSE) {
     X <- scale(X, center = scale_info[["scaled:center"]], scale = FALSE)
     X <- X / scale_info[["scaled:maxabs"]]
   }
+  else if (!is.null(scale_info[["scaled:colrange:min"]])) {
+    tsmessage("Applying training data column range scaling")
+    X <- sweep(X, 2, scale_info[["scaled:colrange:min"]])
+    X <- sweep(X, 2, scale_info[["scaled:colrange:max"]], `/`)
+  }
   else {
     tsmessage("Applying training data column filtering/scaling")
     X <- X[, scale_info[["scaled:nzvcols"]]]

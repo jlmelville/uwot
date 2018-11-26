@@ -100,6 +100,9 @@ expect_equal(iris10zvc_scale, iris10_zvstrans, check.attributes = FALSE)
 iris10_none <- scale_input(iris10, scale_type = FALSE, ret_model = TRUE)
 expect_null(attr_to_scale_info(iris10_none))
 
-# Z scaling is a synonym for scale
-expect_equal(scale_input(iris10, scale_type = "Z"),
-             iris10_scale, check.attributes = FALSE)
+
+iris10_colrange <- scale_input(iris10, scale_type = "colrange", ret_model = TRUE)
+iris10_crtrans <- apply_scaling(iris10, attr_to_scale_info(iris10_colrange))
+expect_equal(iris10_colrange, iris10_crtrans, check.attributes = FALSE)
+
+

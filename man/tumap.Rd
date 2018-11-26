@@ -59,6 +59,7 @@ containing 10,000 vertices or less, and \code{200} otherwise.}
   element by the maximum absolute value over the entire matrix.
   \item{\code{"range"}} Range scale the entire matrix, so the smallest
   element is 0 and the largest is 1.
+  \item{\code{"colrange"}} Scale each column in the range (0,1).
 }
 For t-UMAP, the default is \code{"none"}.}
 

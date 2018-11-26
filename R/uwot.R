@@ -42,6 +42,7 @@
 #'   element by the maximum absolute value over the entire matrix.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
 #'   element is 0 and the largest is 1.
+#'   \item{\code{"colrange"}} Scale each column in the range (0,1).
 #' }
 #' For UMAP, the default is \code{"none"}.
 #' @param alpha Initial learning rate used in optimization of the coordinates.
@@ -323,6 +324,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   element by the maximum absolute value over the entire matrix.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
 #'   element is 0 and the largest is 1.
+#'   \item{\code{"colrange"}} Scale each column in the range (0,1).
 #' }
 #' For t-UMAP, the default is \code{"none"}.
 #' @param init Type of initialization for the coordinates. Options are:
@@ -557,6 +559,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   element by the maximum absolute value over the entire matrix.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
 #'   element is 0 and the largest is 1.
+#'   \item{\code{"colrange"}} Scale each column in the range (0,1).
 #' }
 #' For lvish, the default is \code{"maxabs"}, for consistency with LargeVis.
 #' @param init Type of initialization for the coordinates. Options are:
@@ -1160,7 +1163,7 @@ scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
 
   scale_type <- match.arg(
     tolower(scale_type),
-    c("none", "scale","range", "maxabs")
+    c("none", "scale", "range", "colrange", "maxabs")
   )
   switch(scale_type,
     range = {
@@ -1174,6 +1177,19 @@ scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
       if (ret_model) {
         attr(X, "scaled:range:min") <- min_X
         attr(X, "scaled:range:max") <- max_X
+      }
+    },
+    colrange = {
+      tsmessage("Column range scaling X")
+      min_X <- apply(X, 2, min)
+      X <- sweep(X, 2, min_X)
+
+      max_X <- apply(X, 2, max)
+      X <- sweep(X, 2, max_X, `/`)
+
+      if (ret_model) {
+        attr(X, "scaled:colrange:min") <- min_X
+        attr(X, "scaled:colrange:max") <- max_X
       }
     },
     maxabs = {

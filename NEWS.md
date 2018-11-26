@@ -6,6 +6,7 @@
 [sirusb](https://github.com/sirusb)).
 * `scale = "Z"` To Z-scale each column of input (synonym for `scale = TRUE` 
 or `scale = "scale"`).
+* New scaling option, `scale = "colrange"` to scale columns in the range (0, 1).
 
 # uwot 0.0.0.9005 (November 4 2018)
 
