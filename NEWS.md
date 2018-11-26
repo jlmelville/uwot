@@ -1,3 +1,10 @@
+# uwot 0.0.0.9006
+
+## New features
+
+* `scale = "Z"` To Z-scale each column of input (synonym for `scale = TRUE` 
+or `scale = "scale"`).
+
 # uwot 0.0.0.9005 (November 4 2018)
 
 ## New features

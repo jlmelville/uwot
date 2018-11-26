@@ -54,11 +54,12 @@ containing 10,000 vertices or less, and \code{200} otherwise.}
 \item{scale}{Scaling to apply to \code{X} if it is a data frame or matrix:
 \itemize{
   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
-  \item{\code{"scale"} or \code{TRUE}} Scale each column to zero mean and variance 1.
-  \item{\code{"maxabs"}} Center each column to mean 0, then divide each element by the
-  maximum absolute value over the entire matrix.
-  \item{\code{"range"}} Range scale the entire matrix, so the smallest element is 0 and
-  the largest is 1.
+  \item{\code{"Z"} or \code{"scale"} or \code{TRUE}} Scale each column to
+  zero mean and variance 1.
+  \item{\code{"maxabs"}} Center each column to mean 0, then divide each
+  element by the maximum absolute value over the entire matrix.
+  \item{\code{"range"}} Range scale the entire matrix, so the smallest
+  element is 0 and the largest is 1.
 }
 For UMAP, the default is \code{"none"}.}
 

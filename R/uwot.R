@@ -36,11 +36,12 @@
 #' @param scale Scaling to apply to \code{X} if it is a data frame or matrix:
 #' \itemize{
 #'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
-#'   \item{\code{"scale"} or \code{TRUE}} Scale each column to zero mean and variance 1.
-#'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each element by the
-#'   maximum absolute value over the entire matrix.
-#'   \item{\code{"range"}} Range scale the entire matrix, so the smallest element is 0 and
-#'   the largest is 1.
+#'   \item{\code{"Z"} or \code{"scale"} or \code{TRUE}} Scale each column to
+#'   zero mean and variance 1.
+#'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
+#'   element by the maximum absolute value over the entire matrix.
+#'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
+#'   element is 0 and the largest is 1.
 #' }
 #' For UMAP, the default is \code{"none"}.
 #' @param alpha Initial learning rate used in optimization of the coordinates.
@@ -316,11 +317,12 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param scale Scaling to apply to \code{X} if it is a data frame or matrix:
 #' \itemize{
 #'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
-#'   \item{\code{"scale"} or \code{TRUE}} Scale each column to zero mean and variance 1.
-#'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each element by the
-#'   maximum absolute value over the entire matrix.
-#'   \item{\code{"range"}} Range scale the entire matrix, so the smallest element is 0 and
-#'   the largest is 1.
+#'   \item{\code{"Z"} or \code{"scale"} or \code{TRUE}} Scale each column to
+#'   zero mean and variance 1.
+#'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
+#'   element by the maximum absolute value over the entire matrix.
+#'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
+#'   element is 0 and the largest is 1.
 #' }
 #' For t-UMAP, the default is \code{"none"}.
 #' @param init Type of initialization for the coordinates. Options are:
@@ -549,11 +551,12 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param scale Scaling to apply to \code{X} if it is a data frame or matrix:
 #' \itemize{
 #'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
-#'   \item{\code{"scale"} or \code{TRUE}} Scale each column to zero mean and variance 1.
-#'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each element by the
-#'   maximum absolute value over the entire matrix.
-#'   \item{\code{"range"}} Range scale the entire matrix, so the smallest element is 0 and
-#'   the largest is 1.
+#'   \item{\code{"Z"} or \code{"scale"} or \code{TRUE}} Scale each column to
+#'   zero mean and variance 1.
+#'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
+#'   element by the maximum absolute value over the entire matrix.
+#'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
+#'   element is 0 and the largest is 1.
 #' }
 #' For lvish, the default is \code{"maxabs"}, for consistency with LargeVis.
 #' @param init Type of initialization for the coordinates. Options are:
@@ -1151,10 +1154,13 @@ scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
   else if (is.logical(scale_type)) {
     scale_type <- ifelse(scale_type, "scale", "none")
   }
+  else if (tolower(scale_type) == "z") {
+    scale_type <- "scale"
+  }
 
   scale_type <- match.arg(
     tolower(scale_type),
-    c("none", "scale", "range", "maxabs")
+    c("none", "scale","range", "maxabs")
   )
   switch(scale_type,
     range = {
