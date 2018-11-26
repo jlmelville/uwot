@@ -859,67 +859,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   gc()
 
   if (!is.null(y)) {
-    if (is.factor(y)) {
-      if (target_weight < 1.0) {
-        far_dist <- 2.5 * (1.0 / (1.0 - target_weight))
-      }
-      else {
-        far_dist <- 1.0e12
-      }
-      tsmessage(
-        "Applying categorical set intersection, target weight = ",
-        formatC(target_weight), " far distance = ", formatC(far_dist)
-      )
-
-      V <- categorical_simplicial_set_intersection(V, y,
-        far_dist = far_dist,
-        verbose = verbose
-      )
-    }
-    else if (is.numeric(y) || is.list(y)) {
-
-      if (is.numeric(y)) {
-        tsmessage(
-          "Applying numeric set intersection, target weight = ",
-          formatC(target_weight), " target neighbors = ", target_n_neighbors
-        )
-        target_nn <- find_nn(as.matrix(y), target_n_neighbors,
-          method = "annoy",
-          metric = "euclidean",
-          n_trees = n_trees,
-          n_threads = n_threads, grain_size = grain_size,
-          search_k = search_k, verbose = FALSE
-        )
-      }
-      else {
-        # Must be a list
-        target_nn <- y
-        validate_nn(target_nn, n_vertices)
-        target_n_neighbors <- ncol(target_nn$idx)
-
-        tsmessage(
-          "Applying numeric set intersection, target weight = ",
-          formatC(target_weight), " target neighbors = ", target_n_neighbors
-        )
-      }
-
-      target_graph <- fuzzy_simplicial_set(
-        nn = target_nn,
-        set_op_mix_ratio = 1.0,
-        local_connectivity = 1.0,
-        bandwidth = 1.0,
-        verbose = FALSE
-      )
-
-      V <- general_simplicial_set_intersection(
-        V, target_graph, target_weight
-      )
-
-      V <- reset_local_connectivity(Matrix::drop0(V))
-    }
-    else {
-      stop("y must be factors or numeric")
-    }
+    V <- intersect_y(y, V, n_vertices,
+                     target_n_neighbors, target_weight,
+                     method, metric, n_trees, search_k,
+                     n_threads, grain_size, verbose)
   }
 
   if (!(ret_model || ret_nn)) {
@@ -1093,6 +1036,76 @@ validate_nn <- function(nn_method, n_vertices) {
            found ", ncol(nn_method$dist))
   }
 }
+
+# Create a fuzzy set using Y data and intersect it with V
+intersect_y <- function(y, V, n_vertices,
+                        target_n_neighbors, target_weight,
+                        method, metric, n_trees, search_k,
+                        n_threads, grain_size, verbose = FALSE) {
+  if (is.factor(y)) {
+    if (target_weight < 1.0) {
+      far_dist <- 2.5 * (1.0 / (1.0 - target_weight))
+    }
+    else {
+      far_dist <- 1.0e12
+    }
+    tsmessage(
+      "Applying categorical set intersection, target weight = ",
+      formatC(target_weight), " far distance = ", formatC(far_dist)
+    )
+
+    V <- categorical_simplicial_set_intersection(V, y,
+                                                 far_dist = far_dist,
+                                                 verbose = verbose
+    )
+    V
+  }
+  else if (is.numeric(y) || is.list(y)) {
+    if (is.numeric(y)) {
+      tsmessage(
+        "Applying numeric set intersection, target weight = ",
+        formatC(target_weight), " target neighbors = ", target_n_neighbors
+      )
+      target_nn <- find_nn(as.matrix(y), target_n_neighbors,
+                           method = "annoy",
+                           metric = "euclidean",
+                           n_trees = n_trees,
+                           n_threads = n_threads, grain_size = grain_size,
+                           search_k = search_k, verbose = FALSE
+      )
+    }
+    else {
+      # Must be a list
+      target_nn <- y
+      validate_nn(target_nn, n_vertices)
+      target_n_neighbors <- ncol(target_nn$idx)
+
+      tsmessage(
+        "Applying numeric set intersection, target weight = ",
+        formatC(target_weight), " target neighbors = ", target_n_neighbors
+      )
+    }
+
+    target_graph <- fuzzy_simplicial_set(
+      nn = target_nn,
+      set_op_mix_ratio = 1.0,
+      local_connectivity = 1.0,
+      bandwidth = 1.0,
+      verbose = FALSE
+    )
+
+    V <- general_simplicial_set_intersection(
+      V, target_graph, target_weight
+    )
+
+    V <- reset_local_connectivity(Matrix::drop0(V))
+    V
+  }
+  else {
+    stop("y must be factors or numeric")
+  }
+}
+
 
 # Creates the number of epochs per sample for each weight
 # weights are the non-zero input affinities (1-simplex)
