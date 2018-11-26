@@ -89,7 +89,7 @@ umap_transform <- function(X, model,
   }
 
   nn <- annoy_search(X,
-    k = n_neighbors, nn_index, search_k = search_k,
+    k = n_neighbors, ann = nn_index, search_k = search_k,
     n_threads = n_threads, grain_size = grain_size,
     verbose = verbose
   )

@@ -98,7 +98,7 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
 }
 
 # Search a pre-built Annoy index for neighbors of X
-annoy_search <- function(X, k = 10, ann,
+annoy_search <- function(X, k, ann,
                          search_k = 100 * k,
                          n_threads =
                            max(1, RcppParallel::defaultNumThreads() / 2),
