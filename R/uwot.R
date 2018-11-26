@@ -815,30 +815,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   # n_neighbors may have been updated
   n_neighbors <- ncol(nn$idx)
 
-
-  if (method == "largevis") {
-    if (perplexity >= n_vertices) {
-      stop("perplexity can be no larger than ", n_vertices - 1)
-    }
-    V <- perplexity_similarities(
-      nn = nn, perplexity = perplexity,
-      n_threads = n_threads,
-      grain_size = grain_size,
-      kernel = kernel,
-      verbose = verbose
-    )
-  }
-  else {
-    V <- fuzzy_simplicial_set(
-      nn = nn,
-      set_op_mix_ratio = set_op_mix_ratio,
-      local_connectivity = local_connectivity,
-      bandwidth = bandwidth,
-      n_threads = n_threads,
-      grain_size = grain_size,
-      verbose = verbose
-    )
-  }
+  V <- nn2m(method, nn,
+            set_op_mix_ratio, local_connectivity, bandwidth,
+            perplexity, kernel,
+            n_threads, grain_size,
+            verbose = verbose)
   if (any(is.na(V))) {
     stop("Non-finite entries in the input matrix")
   }
@@ -1067,6 +1048,37 @@ validate_nn <- function(nn_method, n_vertices) {
   if (ncol(nn_method$dist) != n_neighbors) {
     stop("Precalculated 'dist' matrix must have ", n_neighbors, " cols, but
            found ", ncol(nn_method$dist))
+  }
+}
+
+nn2m <- function(method, nn,
+                 set_op_mix_ratio, local_connectivity, bandwidth,
+                 perplexity, kernel,
+                 n_threads, grain_size,
+                 verbose = FALSE) {
+  if (method == "largevis") {
+    n_vertices <- nrow(nn$dist)
+    if (perplexity >= n_vertices) {
+      stop("perplexity can be no larger than ", n_vertices - 1)
+    }
+    V <- perplexity_similarities(
+      nn = nn, perplexity = perplexity,
+      n_threads = n_threads,
+      grain_size = grain_size,
+      kernel = kernel,
+      verbose = verbose
+    )
+  }
+  else {
+    V <- fuzzy_simplicial_set(
+      nn = nn,
+      set_op_mix_ratio = set_op_mix_ratio,
+      local_connectivity = local_connectivity,
+      bandwidth = bandwidth,
+      n_threads = n_threads,
+      grain_size = grain_size,
+      verbose = verbose
+    )
   }
 }
 
