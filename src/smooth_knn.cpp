@@ -74,7 +74,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
       double hi = double_max;
 
       auto ith_distances = nn_dist.row(i);
-      for (std::size_t k = 0; k < ith_distances.size(); k++) {
+      for (std::size_t k = 0; k < ith_distances.length(); k++) {
         if (ith_distances[k] > 0.0) {
           non_zero_distances.push_back(ith_distances[k]);
         }
@@ -128,7 +128,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
       }
 
       if (rho > 0.0) {
-        double mean = std::accumulate(ith_distances.begin(), ith_distances.end(), 0.0) / ith_distances.size();
+        double mean = std::accumulate(ith_distances.begin(), ith_distances.end(), 0.0) / ith_distances.length();
         sigma = std::max(min_k_dist_scale * mean, sigma);
       }
       else {

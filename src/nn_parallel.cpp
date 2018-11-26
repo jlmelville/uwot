@@ -49,7 +49,7 @@ struct NNWorker : public RcppParallel::Worker {
     for (std::size_t i = begin; i < end; i++) {
 
       RcppParallel::RMatrix<double>::Row row = mat.row(i);
-      std::vector<T> fv(row.size());
+      std::vector<T> fv(row.length());
       std::copy(row.begin(), row.end(), fv.begin());
       std::vector<S> result;
       std::vector<T> distances;
