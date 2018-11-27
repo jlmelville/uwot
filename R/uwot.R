@@ -802,28 +802,19 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
 
-  nn <- x2nn(X, n_neighbors, metric, nn_method,
-             n_trees, search_k,
-             n_threads, grain_size,
-             ret_model,
-             verbose)
+  x2set_res <- x2set(X, n_neighbors, metric, nn_method,
+                    n_trees, search_k,
+                    method,
+                    set_op_mix_ratio, local_connectivity, bandwidth,
+                    perplexity, kernel,
+                    n_threads, grain_size,
+                    ret_model,
+                    verbose)
 
-  if (any(is.infinite(nn$dist))) {
-    stop("Infinite distances found in nearest neighbors")
-  }
-  gc()
+  nn <- x2set_res$nn
+  V <- x2set_res$V
   # n_neighbors may have been updated
   n_neighbors <- ncol(nn$idx)
-
-  V <- nn2set(method, nn,
-              set_op_mix_ratio, local_connectivity, bandwidth,
-              perplexity, kernel,
-              n_threads, grain_size,
-              verbose = verbose)
-  if (any(is.na(V))) {
-    stop("Non-finite entries in the input matrix")
-  }
-  gc()
 
   if (!is.null(y)) {
     V <- intersect_y(y, V, n_vertices,
@@ -1052,10 +1043,10 @@ validate_nn <- function(nn_method, n_vertices) {
 }
 
 nn2set <- function(method, nn,
-                 set_op_mix_ratio, local_connectivity, bandwidth,
-                 perplexity, kernel,
-                 n_threads, grain_size,
-                 verbose = FALSE) {
+                   set_op_mix_ratio, local_connectivity, bandwidth,
+                   perplexity, kernel,
+                   n_threads, grain_size,
+                   verbose = FALSE) {
   if (method == "largevis") {
     n_vertices <- nrow(nn$dist)
     if (perplexity >= n_vertices) {
@@ -1080,6 +1071,43 @@ nn2set <- function(method, nn,
       verbose = verbose
     )
   }
+}
+
+
+x2set <- function(X, n_neighbors, metric, nn_method,
+                  n_trees, search_k,
+                  method,
+                  set_op_mix_ratio, local_connectivity, bandwidth,
+                  perplexity, kernel,
+                  n_threads, grain_size,
+                  ret_model,
+                  verbose = FALSE) {
+  nn <- x2nn(X, n_neighbors, metric, nn_method,
+             n_trees, search_k,
+             n_threads, grain_size,
+             ret_model,
+             verbose)
+
+  if (any(is.infinite(nn$dist))) {
+    stop("Infinite distances found in nearest neighbors")
+  }
+  gc()
+
+
+  V <- nn2set(method, nn,
+              set_op_mix_ratio, local_connectivity, bandwidth,
+              perplexity, kernel,
+              n_threads, grain_size,
+              verbose = verbose)
+  if (any(is.na(V))) {
+    stop("Non-finite entries in the input matrix")
+  }
+  gc()
+
+  list(
+    nn = nn,
+    V = V
+  )
 }
 
 # Create a fuzzy set using Y data and intersect it with V
