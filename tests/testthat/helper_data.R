@@ -44,3 +44,15 @@ expect_ok_matrix <- function(res, nr = nrow(iris10), nc = 2) {
   expect_equal(ncol(res), nc)
   expect_false(any(is.infinite(res)))
 }
+
+expect_is_nn <- function(res, nr = 10, k = 4) {
+  expect_is(res, "list")
+  expect_is_nn_matrix(res$dist, nr, k)
+  expect_is_nn_matrix(res$idx, nr, k)
+}
+
+expect_is_nn_matrix <- function(res, nr = 10, k = 4) {
+  expect_is(res, "matrix")
+  expect_equal(nrow(res), nr)
+  expect_equal(ncol(res), k)
+}

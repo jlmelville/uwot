@@ -788,33 +788,67 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
 
-  metric <- match.arg(tolower(metric), c("euclidean", "cosine", "manhattan",
-                                         "hamming"))
-
-  if (is.null(nn_method)) {
-    if (n_vertices < 4096 && metric == "euclidean" && !ret_model) {
-      tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
-      nn_method <- "fnn"
-    }
-    else {
-      tsmessage("Using Annoy for neighbor search, n_neighbors = ", n_neighbors)
-      nn_method <- "annoy"
-    }
+  if (!is.list(metric)) {
+    metrics <- list(c())
+    names(metrics) <- metric
+  }
+  else {
+    metrics <- metric
   }
 
-  x2set_res <- x2set(X, n_neighbors, metric, nn_method,
-                    n_trees, search_k,
-                    method,
-                    set_op_mix_ratio, local_connectivity, bandwidth,
-                    perplexity, kernel,
-                    n_threads, grain_size,
-                    ret_model,
-                    verbose)
+  V <- NULL
+  nns <- list()
+  nblocks <- length(metrics)
+  if (nblocks > 1) {
+    tsmessage("Found ", nblocks, " blocks of data")
+  }
+  for (i in 1:nblocks) {
+    metric <- names(metrics)[[i]]
+    metric <- match.arg(tolower(metric), c("euclidean", "cosine", "manhattan",
+                                           "hamming"))
+    if (nblocks > 1) {
+      tsmessage("Processing block ", i, " of ", nblocks,
+                " with metric '", metric, "'")
+    }
+    if (is.null(nn_method)) {
+      if (n_vertices < 4096 && metric == "euclidean" && !ret_model) {
+        tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
+        nn_method <- "fnn"
+      }
+      else {
+        tsmessage("Using Annoy for neighbor search, n_neighbors = ", n_neighbors)
+        nn_method <- "annoy"
+      }
+    }
 
-  nn <- x2set_res$nn
-  V <- x2set_res$V
-  # n_neighbors may have been updated
-  n_neighbors <- ncol(nn$idx)
+    subset <- metrics[[i]]
+    if (is.null(subset)) {
+      Xsub <- X
+    }
+    else {
+      Xsub <- X[, subset]
+    }
+    x2set_res <- x2set(Xsub, n_neighbors, metric, nn_method,
+                      n_trees, search_k,
+                      method,
+                      set_op_mix_ratio, local_connectivity, bandwidth,
+                      perplexity, kernel,
+                      n_threads, grain_size,
+                      ret_model,
+                      verbose)
+    Vblock <- x2set_res$V
+    nn <- x2set_res$nn
+
+    nns[[i]] <- nn
+    names(nns)[[i]] <- metric
+    n_neighbors <- ncol(nn$idx)
+    if (is.null(V)) {
+      V <- Vblock
+    }
+    else {
+      V <- set_intersect(V, Vblock, weight = 0.5, reset = TRUE)
+    }
+  }
 
   if (!is.null(y)) {
     V <- intersect_y(y, V, n_vertices,
@@ -947,7 +981,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (ret_model) {
       res <- append(res, list(
         scale_info = attr_to_scale_info(X),
-        nn_index = nn$index,
         n_neighbors = n_neighbors,
         search_k = search_k,
         local_connectivity = local_connectivity,
@@ -958,11 +991,30 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         a = a,
         b = b,
         gamma = gamma,
-        approx_pow = approx_pow
+        approx_pow = approx_pow,
+        metric = metrics
       ))
+      if (nblocks > 1) {
+        res$nn_index <- list()
+        for (i in 1:nblocks) {
+          res$nn_index[[i]] <- nns[i]$index
+        }
+      }
+      else {
+        res$nn_index <- nns[[1]]$index
+      }
     }
     if (ret_nn) {
-      res$nn <- list(idx = nn$idx, dist = nn$dist)
+      if (nblocks > 1) {
+        res$nn <- list()
+        for (i in 1:nblocks) {
+          res$nn[[i]] <- list(idx = nns[[i]]$idx, dist = nns[[i]]$dist)
+        }
+        names(res$nn) <- names(metrics)
+      }
+      else {
+        res$nn <- list(idx = nns[[1]]$idx, dist = nns[[1]]$dist)
+      }
     }
   }
   else {
