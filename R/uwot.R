@@ -1110,6 +1110,19 @@ x2set <- function(X, n_neighbors, metric, nn_method,
   )
 }
 
+set_intersect <- function(A, B, weight, reset = TRUE) {
+  A <- general_simplicial_set_intersection(
+    A, B, weight
+  )
+
+  # https://github.com/lmcinnes/umap/issues/58#issuecomment-437633658
+  # For now always reset
+  if (reset) {
+    A <- reset_local_connectivity(Matrix::drop0(A))
+  }
+  A
+}
+
 # Create a fuzzy set using Y data and intersect it with V
 intersect_y <- function(y, V, n_vertices,
                         target_n_neighbors, target_weight,
@@ -1167,11 +1180,7 @@ intersect_y <- function(y, V, n_vertices,
       verbose = FALSE
     )
 
-    V <- general_simplicial_set_intersection(
-      V, target_graph, target_weight
-    )
-
-    V <- reset_local_connectivity(Matrix::drop0(V))
+    V <- set_intersect(V, target_graph, target_weight, reset = TRUE)
     V
   }
   else {
