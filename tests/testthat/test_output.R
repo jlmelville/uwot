@@ -184,3 +184,15 @@ hamm <- structure(c(0L, 0L, 1L, 0L, 1L, 1L, 1L, 0L, 0L, 0L, 0L, 0L, 0L,
 res <- umap(hamm, n_neighbors = 4, metric = "hamming", verbose = FALSE,
             n_threads = 1)
 expect_ok_matrix(res)
+
+# Multiple metrics
+set.seed(1337)
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+            init = "spca", verbose = FALSE, n_threads = 0,
+            metric = list(euclidean = c(1, 2), euclidean = c(3, 4)),
+            ret_model = TRUE)
+res_trans <- umap_transform(iris10, model = res, verbose = FALSE, n_threads = 0,
+                            n_epochs = 2)
+expect_ok_matrix(res_trans)
+

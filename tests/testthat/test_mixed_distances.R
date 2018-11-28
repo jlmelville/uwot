@@ -33,3 +33,5 @@ expect_is(reseuc2$nn, "list")
 expect_equal(names(reseuc2$nn), c("euclidean", "euclidean"))
 expect_is_nn(reseuc2$nn[[1]], 10, 4)
 expect_is_nn(reseuc2$nn[[2]], 10, 4)
+expect_ok_matrix(umap_transform(jiris10, reseuc2))
+

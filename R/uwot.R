@@ -997,7 +997,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       if (nblocks > 1) {
         res$nn_index <- list()
         for (i in 1:nblocks) {
-          res$nn_index[[i]] <- nns[i]$index
+          res$nn_index[[i]] <- nns[[i]]$index
         }
       }
       else {

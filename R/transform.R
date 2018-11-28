@@ -59,6 +59,7 @@ umap_transform <- function(X, model,
   train_embedding <- model$embedding
   method <- model$method
   scale_info <- model$scale_info
+  metric <- model$metric
 
   a <- model$a
   b <- model$b
@@ -88,29 +89,62 @@ umap_transform <- function(X, model,
     RcppParallel::setThreadOptions(numThreads = n_threads)
   }
 
-  nn <- annoy_search(X,
-    k = n_neighbors, ann = nn_index, search_k = search_k,
-    n_threads = n_threads, grain_size = grain_size,
-    verbose = verbose
-  )
   adjusted_local_connectivity <- max(0, local_connectivity - 1.0)
-  graph <- smooth_knn(nn,
-    local_connectivity = adjusted_local_connectivity,
-    n_threads = n_threads,
-    grain_size = grain_size,
-    verbose = verbose
-  )
 
-  embedding <- init_new_embedding(train_embedding, nn, graph,
-    weighted = init_weighted,
-    n_threads = n_threads,
-    grain_size = grain_size, verbose = verbose
-  )
+  nblocks <- length(metric)
+  graph <- NULL
+  embedding <- NULL
+  for (i in 1:nblocks) {
+    if (nblocks == 1) {
+      ann <- nn_index
+      Xsub <- X
+    }
+    else {
+      ann <- nn_index[[i]]
+      subset <- metric[[i]]
+      Xsub <- X[, subset]
+    }
 
-  graph <- nn_to_sparse(nn$idx, as.vector(graph),
-    self_nbr = FALSE,
-    max_nbr_id = nrow(train_embedding)
-  )
+    nn <- annoy_search(Xsub,
+      k = n_neighbors, ann = ann, search_k = search_k,
+      n_threads = n_threads, grain_size = grain_size,
+      verbose = verbose
+    )
+    graph_block <- smooth_knn(nn,
+      local_connectivity = adjusted_local_connectivity,
+      n_threads = n_threads,
+      grain_size = grain_size,
+      verbose = verbose
+    )
+
+    embedding_block <- init_new_embedding(train_embedding, nn, graph_block,
+                                    weighted = init_weighted,
+                                    n_threads = n_threads,
+                                    grain_size = grain_size, verbose = verbose
+    )
+    if (is.null(embedding)) {
+      embedding <- embedding_block
+    }
+    else {
+      embedding <- embedding + embedding_block
+    }
+
+    graph_block <- nn_to_sparse(nn$idx, as.vector(graph_block),
+                                self_nbr = FALSE,
+                                max_nbr_id = nrow(train_embedding)
+    )
+    if (is.null(graph)) {
+      graph <- graph_block
+    }
+    else {
+      graph <- set_intersect(graph, graph_block, weight = 0.5, reset = TRUE)
+    }
+  }
+
+  if (nblocks > 1) {
+    embedding <- embedding / nblocks
+  }
+
 
   if (is.null(n_epochs)) {
     if (ncol(graph) <= 10000) {
