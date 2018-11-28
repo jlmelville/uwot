@@ -160,6 +160,8 @@
 #' @param target_n_neighbors Number of nearest neighbors to use to construct the
 #'   target simplicial set. Default value is \code{n_neighbors}. Applies only if
 #'   \code{y} is non-\code{NULL} and \code{numeric}.
+#' @param target_metric The metric used to measure distance for \code{y} if
+#'   using supervised dimension reduction. Used only if \code{y} is numeric.
 #' @param target_weight Weighting factor between data topology and target
 #'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
 #'   entirely on target. The default of 0.5 balances the weighting equally
@@ -254,6 +256,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  search_k = 2 * n_neighbors * n_trees,
                  approx_pow = FALSE,
                  y = NULL, target_n_neighbors = n_neighbors,
+                 target_metric = "euclidean",
                  target_weight = 0.5,
                  ret_model = FALSE, ret_nn = FALSE,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
@@ -270,7 +273,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     search_k = search_k, method = "umap", approx_pow = approx_pow,
     n_threads = n_threads, grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
-    target_weight = target_weight,
+    target_weight = target_weight, target_metric = target_metric,
     ret_model = ret_model, ret_nn = ret_nn,
     verbose = verbose
   )
@@ -423,6 +426,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param target_n_neighbors Number of nearest neighbors to use to construct the
 #'   target simplicial set. Default value is \code{n_neighbors}. Applies only if
 #'   \code{y} is non-\code{NULL} and \code{numeric}.
+#' @param target_metric The metric used to measure distance for \code{y} if
+#'   using supervised dimension reduction. Used only if \code{y} is numeric.
 #' @param target_weight Weighting factor between data topology and target
 #'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
 #'   entirely on target. The default of 0.5 balances the weighting equally
@@ -473,6 +478,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                   grain_size = 1,
                   y = NULL, target_n_neighbors = n_neighbors,
+                  target_metric = "euclidean",
                   target_weight = 0.5,
                   ret_model = FALSE, ret_nn = FALSE,
                   verbose = getOption("verbose", TRUE)) {
@@ -487,7 +493,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     search_k = search_k, method = "tumap",
     n_threads = n_threads, grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
-    target_weight = target_weight,
+    target_weight = target_weight, target_metric = target_metric,
     ret_model = ret_model, ret_nn = ret_nn,
     verbose = verbose
   )
@@ -701,6 +707,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  search_k = 2 * n_neighbors * n_trees,
                  method = "umap", perplexity = 50, approx_pow = FALSE,
                  y = NULL, target_n_neighbors = n_neighbors,
+                 target_metric = "euclidean",
                  target_weight = 0.5,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  kernel = "gauss",
@@ -853,7 +860,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (!is.null(y)) {
     V <- intersect_y(y, V, n_vertices,
                      target_n_neighbors, target_weight,
-                     method, metric, n_trees, search_k,
+                     method, target_metric, n_trees, search_k,
                      n_threads, grain_size, verbose)
   }
 
@@ -1178,21 +1185,21 @@ set_intersect <- function(A, B, weight, reset = TRUE) {
 # Create a fuzzy set using Y data and intersect it with V
 intersect_y <- function(y, V, n_vertices,
                         target_n_neighbors, target_weight,
-                        method, metric, n_trees, search_k,
+                        method, target_metric, n_trees, search_k,
                         n_threads, grain_size, verbose = FALSE) {
   if (is.data.frame(y)) {
     col_weight <- target_weight / ncol(y)
     for (i in 1:ncol(y)) {
       V <- intersect_y_col(y[, i], V, n_vertices,
                        target_n_neighbors, target_weight = col_weight,
-                       method, metric, n_trees, search_k,
+                       method, target_metric, n_trees, search_k,
                        n_threads, grain_size, verbose)
     }
   }
   else {
     V <- intersect_y_col(y, V, n_vertices,
                      target_n_neighbors, target_weight,
-                     method, metric, n_trees, search_k,
+                     method, target_metric, n_trees, search_k,
                      n_threads, grain_size, verbose)
   }
   V
@@ -1200,7 +1207,7 @@ intersect_y <- function(y, V, n_vertices,
 
 intersect_y_col <- function(y, V, n_vertices,
                         target_n_neighbors, target_weight,
-                        method, metric, n_trees, search_k,
+                        method, target_metric, n_trees, search_k,
                         n_threads, grain_size, verbose = FALSE) {
   if (is.factor(y)) {
     if (target_weight < 1.0) {
@@ -1228,7 +1235,7 @@ intersect_y_col <- function(y, V, n_vertices,
       )
       target_nn <- find_nn(as.matrix(y), target_n_neighbors,
                            method = "annoy",
-                           metric = "euclidean",
+                           metric = target_metric,
                            n_trees = n_trees,
                            n_threads = n_threads, grain_size = grain_size,
                            search_k = search_k, verbose = FALSE
