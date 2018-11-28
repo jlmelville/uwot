@@ -1180,6 +1180,28 @@ intersect_y <- function(y, V, n_vertices,
                         target_n_neighbors, target_weight,
                         method, metric, n_trees, search_k,
                         n_threads, grain_size, verbose = FALSE) {
+  if (is.data.frame(y)) {
+    col_weight <- target_weight / ncol(y)
+    for (i in 1:ncol(y)) {
+      V <- intersect_y_col(y[, i], V, n_vertices,
+                       target_n_neighbors, target_weight = col_weight,
+                       method, metric, n_trees, search_k,
+                       n_threads, grain_size, verbose)
+    }
+  }
+  else {
+    V <- intersect_y_col(y, V, n_vertices,
+                     target_n_neighbors, target_weight,
+                     method, metric, n_trees, search_k,
+                     n_threads, grain_size, verbose)
+  }
+  V
+}
+
+intersect_y_col <- function(y, V, n_vertices,
+                        target_n_neighbors, target_weight,
+                        method, metric, n_trees, search_k,
+                        n_threads, grain_size, verbose = FALSE) {
   if (is.factor(y)) {
     if (target_weight < 1.0) {
       far_dist <- 2.5 * (1.0 / (1.0 - target_weight))

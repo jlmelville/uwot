@@ -35,3 +35,9 @@ expect_is_nn(reseuc2$nn[[1]], 10, 4)
 expect_is_nn(reseuc2$nn[[2]], 10, 4)
 expect_ok_matrix(umap_transform(jiris10, reseuc2))
 
+i10factor <- factor(c(rep("foo", 3), rep("bar", 3), rep("baz", 4)))
+
+res_y2 <- umap(iris10[, -1], y = cbind(i10factor, iris$Sepal.Length[1:10]),
+               n_neighbors = 4, n_epochs = 2, init = "spca",
+               verbose = FALSE, n_threads = 0)
+expect_ok_matrix(res_y2)
