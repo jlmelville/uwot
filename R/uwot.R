@@ -803,59 +803,17 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     metrics <- metric
   }
 
-  V <- NULL
-  nns <- list()
-  nblocks <- length(metrics)
-  if (nblocks > 1) {
-    tsmessage("Found ", nblocks, " blocks of data")
-  }
-  for (i in 1:nblocks) {
-    metric <- names(metrics)[[i]]
-    metric <- match.arg(tolower(metric), c("euclidean", "cosine", "manhattan",
-                                           "hamming"))
-    if (nblocks > 1) {
-      tsmessage("Processing block ", i, " of ", nblocks,
-                " with metric '", metric, "'")
-    }
-    if (is.null(nn_method)) {
-      if (n_vertices < 4096 && metric == "euclidean" && !ret_model) {
-        tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
-        nn_method <- "fnn"
-      }
-      else {
-        tsmessage("Using Annoy for neighbor search, n_neighbors = ", n_neighbors)
-        nn_method <- "annoy"
-      }
-    }
-
-    subset <- metrics[[i]]
-    if (is.null(subset)) {
-      Xsub <- X
-    }
-    else {
-      Xsub <- X[, subset]
-    }
-    x2set_res <- x2set(Xsub, n_neighbors, metric, nn_method,
-                      n_trees, search_k,
-                      method,
-                      set_op_mix_ratio, local_connectivity, bandwidth,
-                      perplexity, kernel,
-                      n_threads, grain_size,
-                      ret_model,
-                      verbose)
-    Vblock <- x2set_res$V
-    nn <- x2set_res$nn
-
-    nns[[i]] <- nn
-    names(nns)[[i]] <- metric
-    n_neighbors <- ncol(nn$idx)
-    if (is.null(V)) {
-      V <- Vblock
-    }
-    else {
-      V <- set_intersect(V, Vblock, weight = 0.5, reset = TRUE)
-    }
-  }
+  d2sr <- data2set(X, n_neighbors, metrics, nn_method,
+                n_trees, search_k,
+                method,
+                set_op_mix_ratio, local_connectivity, bandwidth,
+                perplexity, kernel,
+                n_threads, grain_size,
+                ret_model,
+                verbose)
+  
+  V <- d2sr$V
+  nns <- d2sr$nns
 
   if (!is.null(y)) {
     V <- intersect_y(y, V, n_vertices,
@@ -865,7 +823,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
 
   if (!(ret_model || ret_nn)) {
-    nn <- NULL
+    nns <- NULL
     gc()
   }
 
@@ -984,6 +942,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   tsmessage("Optimization finished")
 
   if (ret_model || ret_nn) {
+    nblocks <- length(nns)
     res <- list(embedding = embedding)
     if (ret_model) {
       res <- append(res, list(
@@ -1046,6 +1005,71 @@ x2nv <- function(X) {
     stop("Can't find number of vertices for X of type '", class(X)[1], "'")
   }
   n_vertices
+}
+
+data2set <- function(X, n_neighbors, metrics, nn_method,
+                   n_trees, search_k,
+                   method,
+                   set_op_mix_ratio, local_connectivity, bandwidth,
+                   perplexity, kernel,
+                   n_threads, grain_size,
+                   ret_model,
+                   verbose = FALSE) {
+  n_vertices <- x2nv(X)
+  V <- NULL
+  nns <- list()
+  nblocks <- length(metrics)
+  if (nblocks > 1) {
+    tsmessage("Found ", nblocks, " blocks of data")
+  }
+  for (i in 1:nblocks) {
+    metric <- names(metrics)[[i]]
+    metric <- match.arg(tolower(metric), c("euclidean", "cosine", "manhattan",
+                                           "hamming"))
+    if (nblocks > 1) {
+      tsmessage("Processing block ", i, " of ", nblocks,
+                " with metric '", metric, "'")
+    }
+    if (is.null(nn_method)) {
+      if (n_vertices < 4096 && metric == "euclidean" && !ret_model) {
+        tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
+        nn_method <- "fnn"
+      }
+      else {
+        tsmessage("Using Annoy for neighbor search, n_neighbors = ", n_neighbors)
+        nn_method <- "annoy"
+      }
+    }
+    
+    subset <- metrics[[i]]
+    if (is.null(subset)) {
+      Xsub <- X
+    }
+    else {
+      Xsub <- X[, subset]
+    }
+    x2set_res <- x2set(Xsub, n_neighbors, metric, nn_method,
+                       n_trees, search_k,
+                       method,
+                       set_op_mix_ratio, local_connectivity, bandwidth,
+                       perplexity, kernel,
+                       n_threads, grain_size,
+                       ret_model,
+                       verbose)
+    Vblock <- x2set_res$V
+    nn <- x2set_res$nn
+    
+    nns[[i]] <- nn
+    names(nns)[[i]] <- metric
+    n_neighbors <- ncol(nn$idx)
+    if (is.null(V)) {
+      V <- Vblock
+    }
+    else {
+      V <- set_intersect(V, Vblock, weight = 1 / nblocks, reset = TRUE)
+    }
+  }
+  list(V = V, nns = nns)
 }
 
 x2nn <- function(X, n_neighbors, metric, nn_method,
