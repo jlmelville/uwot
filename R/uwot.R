@@ -1234,22 +1234,8 @@ intersect_y_col <- function(y, V, n_vertices,
                         method, target_metric, n_trees, search_k,
                         n_threads, grain_size, verbose = FALSE) {
   if (is.factor(y)) {
-    if (target_weight < 1.0) {
-      far_dist <- 2.5 * (1.0 / (1.0 - target_weight))
-    }
-    else {
-      far_dist <- 1.0e12
-    }
-    tsmessage(
-      "Applying categorical set intersection, target weight = ",
-      formatC(target_weight), " far distance = ", formatC(far_dist)
-    )
-
-    V <- categorical_simplicial_set_intersection(V, y,
-                                                 far_dist = far_dist,
-                                                 verbose = verbose
-    )
-    V
+    V <- categorical_intersection(y, V, weight = target_weight, 
+                                  verbose = verbose)
   }
   else if (is.numeric(y) || is.list(y)) {
     if (is.numeric(y)) {
@@ -1291,6 +1277,29 @@ intersect_y_col <- function(y, V, n_vertices,
   else {
     stop("y must be factors or numeric")
   }
+}
+
+
+categorical_intersection <- function(x, V, weight, verbose = FALSE) {
+  if (is.null(V)) {
+    stop("V cannot be null for categorical intersection")
+  }
+  if (weight < 1.0) {
+    far_dist <- 2.5 * (1.0 / (1.0 - weight))
+  }
+  else {
+    far_dist <- 1.0e12
+  }
+  tsmessage(
+    "Applying categorical set intersection, weight = ", formatC(weight), 
+    " far distance = ", formatC(far_dist)
+  )
+  
+  V <- categorical_simplicial_set_intersection(V, x,
+                                               far_dist = far_dist,
+                                               verbose = verbose
+  )
+  V
 }
 
 
