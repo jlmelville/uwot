@@ -77,16 +77,37 @@ res <- umap(iris10,
 expect_is(res, "list")
 expect_ok_matrix(res$embedding)
 expect_is(res$nn, "list")
-expect_ok_matrix(res$nn$idx, nc = 4)
-expect_ok_matrix(res$nn$dist, nc = 4)
+expect_is(res$nn$euclidean, "list")
+expect_ok_matrix(res$nn$euclidean$idx, nc = 4)
+expect_ok_matrix(res$nn$euclidean$dist, nc = 4)
 
 # Use pre-calculated nn: should be the same as previous result
 set.seed(1337)
 res_nn <- umap(iris10,
-            nn_method = res$nn, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            nn_method = res$nn[[1]], n_epochs = 2, alpha = 0.5, min_dist = 0.001,
             init = "spca", verbose = FALSE, n_threads = 0)
 expect_ok_matrix(res_nn)
 expect_equal(res_nn, res$embedding)
+
+# Passing nn list directly is also ok
+set.seed(1337)
+res_nnl <- umap(iris10,
+               nn_method = res$nn, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+               init = "spca", verbose = FALSE, n_threads = 0,
+               ret_nn = TRUE)
+expect_ok_matrix(res_nnl$embedding)
+expect_equal(res_nnl$embedding, res$embedding)
+expect_equal(res_nnl$nn[[1]], res$nn[[1]])
+expect_equal(names(res_nnl$nn), "precomputed")
+
+# Use multiple nn data
+res_nn2 <- umap(iris10,
+               nn_method = list(nn, nn), n_epochs = 2, alpha = 0.5, 
+               min_dist = 0.001,
+               init = "spca", verbose = FALSE, n_threads = 0, ret_nn = TRUE)
+expect_ok_matrix(res_nn2$embedding)
+expect_equal(names(res_nn2$nn), c("precomputed", "precomputed"))
+
 
 # lvish and force use of annoy
 res <- lvish(iris10,
@@ -121,9 +142,10 @@ res <- umap(iris10,
             ret_model = TRUE, ret_nn = TRUE)
 expect_is(res, "list")
 expect_ok_matrix(res$embedding)
+
 expect_is(res$nn, "list")
-expect_ok_matrix(res$nn$idx, nc = 4)
-expect_ok_matrix(res$nn$dist, nc = 4)
+expect_is_nn(res$nn[[1]], k = 4)
+expect_equal(names(res$nn), "euclidean")
 res_test <- umap_transform(iris10, res, n_threads = 0, verbose = FALSE)
 expect_ok_matrix(res_test)
 

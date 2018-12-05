@@ -1051,16 +1051,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       }
     }
     if (ret_nn) {
-      if (nblocks > 1) {
-        res$nn <- list()
-        for (i in 1:nblocks) {
-          res$nn[[i]] <- list(idx = nns[[i]]$idx, dist = nns[[i]]$dist)
-        }
-        names(res$nn) <- names(metrics)
+      res$nn <- list()
+      for (i in 1:nblocks) {
+        res$nn[[i]] <- list(idx = nns[[i]]$idx, dist = nns[[i]]$dist)
       }
-      else {
-        res$nn <- list(idx = nns[[1]]$idx, dist = nns[[1]]$dist)
-      }
+      names(res$nn) <- names(nns)
     }
   }
   else {
@@ -1102,6 +1097,25 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
   V <- NULL
   nns <- list()
   nblocks <- length(metrics)
+  
+  # Check for precalculated NN data in nn_method
+  if (is.list(nn_method)) {
+    if (is.null(nn_method$idx)) {
+      nblocks <- length(nn_method)
+      if (nblocks == 0) {
+        stop("Incorrect format for precalculated neighbor data")
+      }
+    }
+    else {
+      nblocks <- 1
+      # wrap nn data in a list so data is always a list of lists
+      nn_method <- list(nn_method)
+    }
+    metrics <- replicate(nblocks, NULL, simplify = FALSE)
+    names(metrics) <- rep("precomputed", nblocks)
+  }
+
+  
   if (nblocks > 1) {
     tsmessage("Found ", nblocks, " blocks of data")
   }
@@ -1120,7 +1134,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
   for (i in 1:nblocks) {
     metric <- mnames[[i]]
     metric <- match.arg(metric, c("euclidean", "cosine", "manhattan", 
-                                  "hamming"))
+                                  "hamming", "precomputed"))
     if (nblocks > 1) {
       tsmessage("Processing block ", i, " of ", nblocks,
                 " with metric '", metric, "'")
@@ -1133,7 +1147,14 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     else {
       Xsub <- X[, subset, drop = FALSE]
     }
-    x2set_res <- x2set(Xsub, n_neighbors, metric, nn_method,
+    
+    nn_sub <- nn_method
+    # Extract this block of nn data from list of lists
+    if (metric == "precomputed") {
+      nn_sub <- nn_method[[i]]
+    }
+    
+    x2set_res <- x2set(Xsub, n_neighbors, metric, nn_method = nn_sub,
                        n_trees, search_k,
                        method,
                        set_op_mix_ratio, local_connectivity, bandwidth,
@@ -1144,7 +1165,6 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
                        verbose = verbose)
     Vblock <- x2set_res$V
     nn <- x2set_res$nn
-    
     nns[[i]] <- nn
     names(nns)[[i]] <- metric
     n_neighbors <- ncol(nn$idx)
@@ -1159,6 +1179,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
   if (!is.null(Xcat)) {
     V <- categorical_intersection_df(Xcat, V, weight = 0.5, verbose = verbose)
   }
+  
   list(V = V, nns = nns)
 }
 
@@ -1173,6 +1194,7 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
     nn <- nn_method
   }
   else {
+    
     nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
     if (nn_method == "fnn" && metric != "euclidean") {
       stop(

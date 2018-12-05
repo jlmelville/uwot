@@ -67,7 +67,8 @@ resmixed <- umap(irismixed,
                  init = "rand", verbose = FALSE, n_threads = 1, 
                  metric = list("euclidean" = 1:4, "euclidean" = 5, "cosine" = 6,
                                "categorical" = c("ycat", "ycat2")),
-                 ret_model = TRUE
+                 ret_model = TRUE, ret_nn = TRUE
 )
 expect_ok_matrix(resmixed$embedding)
 expect_ok_matrix(umap_transform(irismixed, resmixed, n_threads = 1))
+expect_equal(names(resmixed$nn), c("euclidean", "euclidean", "cosine"))
