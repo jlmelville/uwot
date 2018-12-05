@@ -1239,7 +1239,7 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
 }
 
 validate_nn <- function(nn_method, n_vertices) {
-  if (is.null(nn_method$idx)) {
+  if (!is.matrix(nn_method$idx)) {
     stop("Couldn't find precalculated 'idx' matrix")
   }
   if (nrow(nn_method$idx) != n_vertices) {
@@ -1248,7 +1248,7 @@ validate_nn <- function(nn_method, n_vertices) {
   }
   n_neighbors <- ncol(nn_method$idx)
 
-  if (is.null(nn_method$dist)) {
+  if (!is.matrix(nn_method$dist)) {
     stop("Couldn't find precalculated 'dist' matrix")
   }
   if (nrow(nn_method$idx) != n_vertices) {
