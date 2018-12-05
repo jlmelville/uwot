@@ -102,7 +102,7 @@ umap_transform <- function(X, model,
     else {
       ann <- nn_index[[i]]
       subset <- metric[[i]]
-      Xsub <- X[, subset]
+      Xsub <- X[, subset, drop = FALSE]
     }
 
     nn <- annoy_search(Xsub,
