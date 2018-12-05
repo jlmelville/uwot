@@ -7,6 +7,13 @@ res <- umap(iris10,
 )
 expect_ok_matrix(res)
 
+ynum <- (1:10) / 10
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            init = "rand", verbose = FALSE, n_threads = 1, y = ynum
+)
+expect_ok_matrix(res)
+
 
 sm <- Matrix::drop0(matrix(c(
   -0.9183907, -1.4071020, 0.70400164,
