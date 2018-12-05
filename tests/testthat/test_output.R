@@ -89,16 +89,22 @@ res_nn <- umap(iris10,
 expect_ok_matrix(res_nn)
 expect_equal(res_nn, res$embedding)
 
+# X = NULL is ok if passing nn data and rand init
+set.seed(1337)
+res_nnxn <- umap(X = NULL,
+               nn_method = nn, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+               init = "rand", verbose = FALSE, n_threads = 0)
+
 # Passing nn list directly is also ok
 set.seed(1337)
 res_nnl <- umap(iris10,
                nn_method = res$nn, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
-               init = "spca", verbose = FALSE, n_threads = 0,
+               init = "rand", verbose = FALSE, n_threads = 0,
                ret_nn = TRUE)
 expect_ok_matrix(res_nnl$embedding)
-expect_equal(res_nnl$embedding, res$embedding)
 expect_equal(res_nnl$nn[[1]], res$nn[[1]])
 expect_equal(names(res_nnl$nn), "precomputed")
+expect_equal(res_nnxn, res_nnl$embedding)
 
 # Use multiple nn data
 res_nn2 <- umap(iris10,

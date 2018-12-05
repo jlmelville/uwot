@@ -742,7 +742,16 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
   # Store categorical columns to be used to generate the graph
   Xcat <- NULL
-  if (methods::is(X, "dist")) {
+  if (is.null(X)) {
+    if (!is.list(nn_method)) {
+      stop("If X is NULL, must provide NN data in nn_method")
+    }
+    if (is.character(init) && tolower(init) %in% c("spca", "pca")) {
+      stop("init = 'pca' and 'spca' can't be used with X = NULL")
+    }
+    n_vertices <- x2nv(nn_method)
+  }
+  else if (methods::is(X, "dist")) {
     if (ret_model) {
       stop("Can only create models with dense matrix or data frame input")
     }
@@ -824,6 +833,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                 perplexity, kernel,
                 n_threads, grain_size,
                 ret_model,
+                n_vertices = n_vertices,
                 verbose = verbose)
   
   V <- d2sr$V
@@ -1067,7 +1077,20 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
 # Get the number of vertices in X
 x2nv <- function(X) {
-  if (methods::is(X, "dist")) {
+  if (is.list(X)) {
+    if (!is.null(X$idx)) {
+      n_vertices <- x2nv(X$idx)
+    }
+    else {
+      if (length(X) > 0) {
+        n_vertices <- x2nv(X[[1]])
+      }
+      else {
+        stop("Can't find n_vertices for list X")
+      }
+    }
+  }
+  else if (methods::is(X, "dist")) {
     n_vertices <- attr(X, "Size")
   }
   else if (methods::is(X, "sparseMatrix")) {
