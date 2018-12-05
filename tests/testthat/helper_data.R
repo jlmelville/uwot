@@ -32,6 +32,13 @@ dmiris10z <- dmiris10
 dmiris10z[dmiris10z > 0.71] <- 0
 dmiris10z <- Matrix::drop0(dmiris10z)
 
+# some Y data
+ycat <- as.factor(c(levels(iris$Species)[rep(1:3, each = 3)], NA))
+ycat2 <- as.factor(c(NA, levels(iris$Species)[rep(1:3, times = 3)]))
+ynum <- (1:10) / 10
+ynum2 <- seq(from = 10, to = -10, length.out = 10) / 100
+
+
 nn <- find_nn(iris10,
   k = 4, method = "fnn", metric = "euclidean",
   n_threads = 0, verbose = FALSE

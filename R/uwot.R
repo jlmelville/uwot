@@ -824,16 +824,82 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                 perplexity, kernel,
                 n_threads, grain_size,
                 ret_model,
-                verbose)
+                verbose = verbose)
   
   V <- d2sr$V
   nns <- d2sr$nns
 
   if (!is.null(y)) {
-    V <- intersect_y(y, V, n_vertices,
-                     target_n_neighbors, target_weight,
-                     method, target_metric, n_trees, search_k,
-                     n_threads, grain_size, verbose)
+    tsmessage("Processing y data")
+    
+    if (!is.list(target_metric)) {
+      target_metrics <- list(c())
+      names(target_metrics) <- target_metric
+    }
+    else {
+      target_metrics <- target_metric
+    }
+    
+    ycat <- NULL
+    ycat_ids <- NULL
+    if (methods::is(y, "data.frame")) {
+      ycat_res <- find_categoricals(target_metric)
+      target_metric <- ycat_res$metrics
+      ycat_ids <- ycat_res$categoricals
+      if (!is.null(ycat_ids)) {
+        ycat <- y[, ycat_ids, drop = FALSE]
+      }
+      else {
+        ycindexes <- which(vapply(y, is.factor, logical(1)))
+        if (length(ycindexes) > 0) {
+          ycat <- (y[, ycindexes, drop = FALSE])
+        }
+      }
+      
+      yindexes <- which(vapply(y, is.numeric, logical(1)))
+
+      if (length(yindexes) > 0) {
+        y <- as.matrix(y[, yindexes])
+      }
+      else {
+        y <- NULL
+      }
+    }
+    else if (is.list(y)) {
+      nn_method <- y
+    }
+    else if (is.numeric(y)) {
+      y <- as.matrix(y)
+    }
+    else if (is.factor(y)) {
+      ycat <- data.frame(y)
+      y <- NULL
+    }
+    
+
+    if (!is.null(y)) {
+      yd2sr <- data2set(y, ycat, target_n_neighbors, target_metrics, nn_method,
+                       n_trees, search_k,
+                       method,
+                       set_op_mix_ratio = 1.0,
+                       local_connectivity = 1.0,
+                       bandwidth = 1.0,
+                       perplexity = perplexity, kernel = kernel,
+                       n_threads = n_threads, grain_size = grain_size,
+                       ret_model = FALSE,
+                       n_vertices = n_vertices,
+                       verbose = verbose)
+      
+      tsmessage("Intersecting X and Y sets with target weight = ", 
+                formatC(target_weight))
+      V <- set_intersect(V, yd2sr$V, target_weight, reset = TRUE)
+      yd2sr$V <- NULL
+      yd2sr$nns <- NULL
+    }
+    else if (!is.null(ycat)) {
+      V <- categorical_intersection_df(ycat, V, weight = target_weight, 
+                                       verbose = verbose)
+    }
   }
 
   if (!(ret_model || ret_nn)) {
@@ -1015,6 +1081,9 @@ x2nv <- function(X) {
   else if (methods::is(X, "data.frame") || methods::is(X, "matrix")) {
     n_vertices <- nrow(X)
   }
+  else if (is.numeric(X)) {
+    n_vertices <- length(X)
+  }
   else {
     stop("Can't find number of vertices for X of type '", class(X)[1], "'")
   }
@@ -1028,31 +1097,33 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
                    perplexity, kernel,
                    n_threads, grain_size,
                    ret_model,
+                   n_vertices = x2nv(X),
                    verbose = FALSE) {
-  n_vertices <- x2nv(X)
   V <- NULL
   nns <- list()
   nblocks <- length(metrics)
   if (nblocks > 1) {
     tsmessage("Found ", nblocks, " blocks of data")
   }
+  mnames <- tolower(names(metrics))
+  if (is.null(nn_method)) {
+    if (n_vertices < 4096 && !ret_model && all(mnames == "euclidean")) {
+      tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
+      nn_method <- "fnn"
+    }
+    else {
+      tsmessage("Using Annoy for neighbor search, n_neighbors = ", n_neighbors)
+      nn_method <- "annoy"
+    }
+  }
+  
   for (i in 1:nblocks) {
-    metric <- names(metrics)[[i]]
-    metric <- match.arg(tolower(metric), c("euclidean", "cosine", "manhattan",
-                                           "hamming"))
+    metric <- mnames[[i]]
+    metric <- match.arg(metric, c("euclidean", "cosine", "manhattan", 
+                                  "hamming"))
     if (nblocks > 1) {
       tsmessage("Processing block ", i, " of ", nblocks,
                 " with metric '", metric, "'")
-    }
-    if (is.null(nn_method)) {
-      if (n_vertices < 4096 && metric == "euclidean" && !ret_model) {
-        tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
-        nn_method <- "fnn"
-      }
-      else {
-        tsmessage("Using Annoy for neighbor search, n_neighbors = ", n_neighbors)
-        nn_method <- "annoy"
-      }
     }
     
     subset <- metrics[[i]]
@@ -1060,7 +1131,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       Xsub <- X
     }
     else {
-      Xsub <- X[, subset]
+      Xsub <- X[, subset, drop = FALSE]
     }
     x2set_res <- x2set(Xsub, n_neighbors, metric, nn_method,
                        n_trees, search_k,
@@ -1069,7 +1140,8 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
                        perplexity, kernel,
                        n_threads, grain_size,
                        ret_model,
-                       verbose)
+                       n_vertices = n_vertices,
+                       verbose = verbose)
     Vblock <- x2set_res$V
     nn <- x2set_res$nn
     
@@ -1094,9 +1166,10 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
                  n_trees, search_k,
                  n_threads, grain_size,
                  ret_model,
+                 n_vertices = x2nv(X),
                  verbose = FALSE) {
   if (is.list(nn_method)) {
-    validate_nn(nn_method, x2nv(X))
+    validate_nn(nn_method, n_vertices)
     nn <- nn_method
   }
   else {
@@ -1182,12 +1255,14 @@ x2set <- function(X, n_neighbors, metric, nn_method,
                   perplexity, kernel,
                   n_threads, grain_size,
                   ret_model,
+                  n_vertices = x2nv(X),
                   verbose = FALSE) {
   nn <- x2nn(X, n_neighbors, metric, nn_method,
              n_trees, search_k,
              n_threads, grain_size,
              ret_model,
-             verbose)
+             n_vertices = n_vertices,
+             verbose = verbose)
 
   if (any(is.infinite(nn$dist))) {
     stop("Infinite distances found in nearest neighbors")
@@ -1222,79 +1297,6 @@ set_intersect <- function(A, B, weight, reset = TRUE) {
     A <- reset_local_connectivity(Matrix::drop0(A))
   }
   A
-}
-
-# Create a fuzzy set using Y data and intersect it with V
-intersect_y <- function(y, V, n_vertices,
-                        target_n_neighbors, target_weight,
-                        method, target_metric, n_trees, search_k,
-                        n_threads, grain_size, verbose = FALSE) {
-  if (is.data.frame(y)) {
-    col_weight <- target_weight / ncol(y)
-    for (i in 1:ncol(y)) {
-      V <- intersect_y_col(y[, i], V, n_vertices,
-                       target_n_neighbors, target_weight = col_weight,
-                       method, target_metric, n_trees, search_k,
-                       n_threads, grain_size, verbose)
-    }
-  }
-  else {
-    V <- intersect_y_col(y, V, n_vertices,
-                     target_n_neighbors, target_weight,
-                     method, target_metric, n_trees, search_k,
-                     n_threads, grain_size, verbose)
-  }
-  V
-}
-
-intersect_y_col <- function(y, V, n_vertices,
-                        target_n_neighbors, target_weight,
-                        method, target_metric, n_trees, search_k,
-                        n_threads, grain_size, verbose = FALSE) {
-  if (is.factor(y)) {
-    V <- categorical_intersection(y, V, weight = target_weight, 
-                                  verbose = verbose)
-  }
-  else if (is.numeric(y) || is.list(y)) {
-    if (is.numeric(y)) {
-      tsmessage(
-        "Applying numeric set intersection, target weight = ",
-        formatC(target_weight), " target neighbors = ", target_n_neighbors
-      )
-      target_nn <- find_nn(as.matrix(y), target_n_neighbors,
-                           method = "annoy",
-                           metric = target_metric,
-                           n_trees = n_trees,
-                           n_threads = n_threads, grain_size = grain_size,
-                           search_k = search_k, verbose = FALSE
-      )
-    }
-    else {
-      # Must be a list
-      target_nn <- y
-      validate_nn(target_nn, n_vertices)
-      target_n_neighbors <- ncol(target_nn$idx)
-
-      tsmessage(
-        "Applying numeric set intersection, target weight = ",
-        formatC(target_weight), " target neighbors = ", target_n_neighbors
-      )
-    }
-
-    target_graph <- fuzzy_simplicial_set(
-      nn = target_nn,
-      set_op_mix_ratio = 1.0,
-      local_connectivity = 1.0,
-      bandwidth = 1.0,
-      verbose = FALSE
-    )
-
-    V <- set_intersect(V, target_graph, target_weight, reset = TRUE)
-    V
-  }
-  else {
-    stop("y must be factors or numeric")
-  }
 }
 
 categorical_intersection_df <- function(X, V, weight = 0.5, verbose = FALSE) {
