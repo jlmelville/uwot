@@ -41,3 +41,12 @@ res_y2 <- umap(iris10[, -1], y = cbind(i10factor, iris$Sepal.Length[1:10]),
                n_neighbors = 4, n_epochs = 2, init = "spca",
                verbose = FALSE, n_threads = 0)
 expect_ok_matrix(res_y2)
+
+nafactor <- as.factor(c(levels(iris$Species)[
+  c(rep(1, 3), rep(2, 3), rep(3, 3))], NA))
+iris10c <- cbind(data.frame(iris10), nafactor)
+rescat <- umap(iris10c, 
+               metric = list("euclidean" = 1:4, "categorical" = "nafactor"),
+               n_neighbors = 4, n_epochs = 2, init = "spca", verbose = FALSE, 
+               n_threads = 0)
+expect_ok_matrix(rescat)

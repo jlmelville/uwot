@@ -5,11 +5,16 @@ stime <- function() {
 # message with a time stamp
 # appears only if called from an environment where a logical verbose = TRUE
 # OR force = TRUE
-tsmessage <- function(..., domain = NULL, appendLF = TRUE, force = FALSE) {
+tsmessage <- function(..., domain = NULL, appendLF = TRUE, force = FALSE,
+                      time_stamp = TRUE) {
   verbose <- get0("verbose", envir = sys.parent())
 
   if (force || (!is.null(verbose) && verbose)) {
-    message(stime(), " ", ..., domain = domain, appendLF = appendLF)
+    msg <- ""
+    if (time_stamp) {
+      msg <- paste0(stime(), " ")
+    }
+    message(msg, ..., domain = domain, appendLF = appendLF)
     utils::flush.console()
   }
 }
@@ -54,4 +59,25 @@ x2m <- function(X) {
     m <- X
   }
   m
+}
+
+# given a metric argument, returns a list containing:
+# metrics - the input list with any members called "categorical" removed
+# categoricals - a vector of the categorical ids
+find_categoricals <- function(metrics) {
+  res <- list(
+    metrics = metrics
+  )
+  if (is.list(metrics)) {
+    cat_pos <- grep("categorical", names(metrics))
+    if (length(cat_pos) > 0) {
+      cat_ids <- unlist(metrics[cat_pos])
+      names(cat_ids) <- NULL
+      res <- list(
+        metrics = metrics[-cat_pos],
+        categoricals = cat_ids
+      )
+    }
+  }
+  res
 }

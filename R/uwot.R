@@ -740,6 +740,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     RcppParallel::setThreadOptions(numThreads = n_threads)
   }
 
+  # Store categorical columns to be used to generate the graph
+  Xcat <- NULL
   if (methods::is(X, "dist")) {
     if (ret_model) {
       stop("Can only create models with dense matrix or data frame input")
@@ -758,7 +760,15 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     tsmessage("Read ", n_vertices, " rows of sparse distance matrix")
   }
   else {
+    cat_ids <- NULL
     if (methods::is(X, "data.frame")) {
+
+      cat_res <- find_categoricals(metric)
+      metric <- cat_res$metrics
+      cat_ids <- cat_res$categoricals
+      if (!is.null(cat_ids)) {
+        Xcat <- X[, cat_ids, drop = FALSE]
+      }
       indexes <- which(vapply(X, is.numeric, logical(1)))
       if (length(indexes) == 0) {
         stop("No numeric columns found")
@@ -768,8 +778,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_vertices <- nrow(X)
     tsmessage(
       "Read ", n_vertices, " rows and found ", ncol(X),
-      " numeric columns"
+      " numeric columns", appendLF = is.null(cat_ids)
     )
+    if (length(cat_ids) > 0) {
+      tsmessage(" and ", pluralize("categorical column", length(cat_ids)),  
+                time_stamp = FALSE)
+    }
     X <- scale_input(X,
       scale_type = scale, ret_model = ret_model,
       verbose = verbose
@@ -803,7 +817,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     metrics <- metric
   }
 
-  d2sr <- data2set(X, n_neighbors, metrics, nn_method,
+  d2sr <- data2set(X, Xcat, n_neighbors, metrics, nn_method,
                 n_trees, search_k,
                 method,
                 set_op_mix_ratio, local_connectivity, bandwidth,
@@ -1007,7 +1021,7 @@ x2nv <- function(X) {
   n_vertices
 }
 
-data2set <- function(X, n_neighbors, metrics, nn_method,
+data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
                    n_trees, search_k,
                    method,
                    set_op_mix_ratio, local_connectivity, bandwidth,
@@ -1066,7 +1080,16 @@ data2set <- function(X, n_neighbors, metrics, nn_method,
       V <- Vblock
     }
     else {
-      V <- set_intersect(V, Vblock, weight = 1 / nblocks, reset = TRUE)
+      V <- set_intersect(V, Vblock, weight = 0.5, reset = TRUE)
+    }
+  }
+  
+  if (!is.null(Xcat)) {
+    tsmessage("Carrying out categorical intersection for ", 
+              pluralize("column", ncol(Xcat)))
+    for (i in 1:ncol(Xcat)) {
+      V <- categorical_intersection(Xcat[, i], V, weight = 0.5,
+                                    verbose = (verbose && i == 1))
     }
   }
   list(V = V, nns = nns)
