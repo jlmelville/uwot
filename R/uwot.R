@@ -1085,12 +1085,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
   }
   
   if (!is.null(Xcat)) {
-    tsmessage("Carrying out categorical intersection for ", 
-              pluralize("column", ncol(Xcat)))
-    for (i in 1:ncol(Xcat)) {
-      V <- categorical_intersection(Xcat[, i], V, weight = 0.5,
-                                    verbose = (verbose && i == 1))
-    }
+    V <- categorical_intersection_df(Xcat, V, weight = 0.5, verbose = verbose)
   }
   list(V = V, nns = nns)
 }
@@ -1302,6 +1297,15 @@ intersect_y_col <- function(y, V, n_vertices,
   }
 }
 
+categorical_intersection_df <- function(X, V, weight = 0.5, verbose = FALSE) {
+  tsmessage("Carrying out categorical intersection for ", 
+            pluralize("column", ncol(X)))
+  for (i in 1:ncol(X)) {
+    V <- categorical_intersection(X[, i], V, weight = weight,
+                                  verbose = (verbose && i == 1))
+  }
+  V
+}
 
 categorical_intersection <- function(x, V, weight, verbose = FALSE) {
   if (is.null(V)) {
