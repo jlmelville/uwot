@@ -11,14 +11,12 @@ the basic method. Translated from the
 
 ## News
 
-*November 4 2018*. Thanks to RcppAnnoy 0.0.11, Hamming distance is now supported
-(`metric = "hamming"`).
-
-Note: I recently upgraded to
-[devtools](https://cran.r-project.org/package=devtools) 2.0.0, and noticed that
-building the project via `devtools::load_all(".")` now compiles the C++ in
-debug mode (with `-g -O0`). This results in a noticeable slow down. It shouldn't
-affect anyone installing the package via `devtools::install_github` though.
+*December 5 2018*. Some deeply experimental mixed data type features are now
+available: you can now mix different metrics (e.g. euclidean for some
+columns and cosine for others). The type of data that can be used with `y`
+in supervised UMAP has also been expanded. See 
+[Mixed Data Types](https://github.com/jlmelville/uwot#mixed-data-types)
+for more details.
 
 ## Installing
 
@@ -83,6 +81,14 @@ mnist_nn <- umap(mnist, ret_nn = TRUE)
 mnist_nn_spca <- umap(mnist, nn_method = mnist_nn$nn, init = spca)
 
 # No problem to have ret_nn = TRUE and ret_model = TRUE at the same time
+
+# Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
+iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),
+                                      "euclidean" = c("Petal.Length", "Petal.Width")))
+# Can also use individual factor columns
+iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),
+                                      "euclidean" = c("Petal.Length", "Petal.Width"),
+                                      "categorical" = "Species"))
 ```
 
 ## Documentation
@@ -361,6 +367,131 @@ mnist_lv <- lvish(mnist, kernel = "knn", perplexity = 15, n_epochs = 1500,
                   init = "lvrand", verbose = TRUE)
 ```
 
+## Mixed Data Types
+
+The default approach of UMAP is that all your data is numeric and will be 
+treated as one block using the Euclidean distance metric. To use a different
+metric, set the `metric` parameter, e.g. `metric = "cosine"`.
+
+Treating the data as one block may not always be appropriate. `uwot` now 
+supports a highly experimental approach to mixed data types. It is not based on
+any deep understanding of topology and sets, so consider it subject
+to change, breakage or completely disappearing.
+
+To use different metrics for different parts of a data frame, pass a list to 
+the `metric` parameter. The name of each item is the metric to use and the
+value is a vector containing the names of the columns (or their integer id, but
+I strongly recommend names) to apply that metric to, e.g.:
+
+```R
+metric = list("euclidean" = c("A1", "A2"), "cosine" = c("B1", "B2", "B3"))
+```
+
+this will treat columns `A1` and `A2` as one block of data, and generate 
+neighbor data using the Euclidean distance, while a different set of neighbors
+will be generated with columns `B1`, `B2` and `B3`, using the cosine distance.
+This will create two different simplicial sets. The final set used for 
+optimization is the intersection of these two sets. This is exactly the same
+process that is used when carrying out supervised UMAP (except the contribution
+is always equal between the two sets and can't be controlled by the user).
+
+You can repeat the same metric multiple times. For example, to treat the
+petal and sepal data separately in the `iris` dataset, but to use Euclidean
+distances for both, use:
+
+```R
+metric = list("euclidean" = c("Petal.Width", "Petal.Length"), 
+              "euclidean" = c("Sepal.Width", "Sepal.Length"))
+```
+
+### Indexing
+
+As the `iris` example shows, using column names can be very verbose. Integer
+indexing is supported, so the equivalent of the above using integer indexing
+into the columns of `iris` is:
+
+```R
+metric = list("euclidean" = 3:4, "euclidean" = 1:2)
+```
+
+but internally, `uwot` strips out the non-numeric columns from the data, and if
+you use Z-scaling (i.e. specify `scale = "Z"`), zero variance columns will also
+be removed. This is very likely to change the index of the columns. If you
+really want to use numeric column indexes, I strongly advise not using the
+`scale` argument and re-arranging your data frame if necessary so that all 
+non-numeric columns come after the numeric columns.
+
+### Categorical columns
+
+Supervized UMAP allows for a factor column to be used. You may now also specify
+factor columns in the `X` data. Use the special `metric` name `"categorical"`.
+For example, to use the `Species` factor in standard UMAP for `iris` along
+with the usual four numeric columns, use:
+
+```R
+metric = list("euclidean" = 1:4, "categorical" = "Species")
+```
+
+Factor columns are treated differently from numeric columns:
+
+* They are always treated separately, one column at a time. If you have two 
+factor columns, `cat1`, and `cat2`, and you would like them included in UMAP,
+you should write:
+
+```R
+metric = list("categorical" = "cat1", "categorical" = "cat2", ...)
+```
+
+As a convenience, you can also write:
+
+```R
+metric = list("categorical" = c("cat1", "cat2"), ...)
+```
+
+but that doesn't combine `cat1` and `cat2` into one block, just saves some
+typing.
+
+* Because of the way categorical data is intersected into a simplicial set, you 
+cannot have an X `metric` that specifies only `categorical` entries. You
+*must* specify at least one of the standard Annoy metrics for numeric data.
+For `iris`, the following is an error:
+
+```R
+# wrong and bad
+metric = list("categorical" = "Species")
+```
+
+Specifying some numeric columns is required:
+
+```R
+# OK
+metric = list("categorical" = "Species", "euclidean" = 1:4)
+```
+
+* Factor columns not explicitly included in the `metric` are still removed as
+usual.
+* Categorical data does not appear in the model returned when `ret_model = TRUE`
+and so does not affect the project of data used in `umap_transform`. You can
+still use the UMAP model to project new data, but factor columns in the new
+data are ignored (effectively working like supervized UMAP).
+
+### `y` data
+
+The handling of `y` data has been extended to allow for data frames, and
+`target_metric` works like `metric`: multiple numeric blocks with different 
+metrics can be specified, and categorical data can be specified with 
+`categorical`. However, unlike `X`, the default behavior for `y` is to include
+all factor columns. Any numeric data found will be treated as one block, so if
+you have multiple numeric columns that you want treated separately, you should 
+specify each column separately:
+
+```R
+target_metric = list("euclidean" = 1, "euclidean" = 2, ...)
+```
+
+I suspect that the vast majority of `y` data is one column, so the default
+behavior will be fine most of the time.
+
 ## Nearest Neighbor Data Format
 
 The Python implementation of UMAP supports lots of distance metrics; `uwot` does
@@ -385,6 +516,16 @@ contains the distances of the nearest neighbors of each item (vertex) in the
 dataset, in Each item is always the nearest neighbor of itself, so the first
 element in row `i` should always be `0.0`.
 
+If you use pre-computed nearest neighbor data, be aware that:
+
+* You can't use pre-computed nearest neighbor data and also use `metric`.
+* You can explicitly set `X` to NULL, as long as you don't try and use an
+initialization method that makes use of `X` (`init = "pca"` or `init = "spca"`).
+* Setting `ret_model = TRUE` does not produce a valid model. `umap_transform`
+will not work with this setting.
+
+### Exporting nearest neighbor data from `uwot`
+
 If you set `ret_nn = TRUE`, the return value of `umap` will be a list, and the
 `nn` item contains the nearest neighbor data in a format that can be used
 with `nn_method`. This is handy if you are going to be running UMAP multiple
@@ -392,11 +533,13 @@ times with the same data and `n_neighbors` and `scale` settings, because the
 nearest neighbor calculation can be the most time-consuming part of the
 calculation.
 
+Normally the contents of `nn` is itself a list, the value of which is the
+nearest neighbor data. The name is the type of metric that generated the data.
 As an example, here's what the first few items of the `iris` 5-NN data should
 look like:
 
 ```R
-lapply(umap(iris, ret_nn = TRUE, n_neighbors = 5)$nn, head)
+lapply(umap(iris, ret_nn = TRUE, n_neighbors = 5)$nn$euclidean, head)
 
 $`idx`
      [,1] [,2] [,3] [,4] [,5]
@@ -417,21 +560,47 @@ $dist
 [6,]    0 0.3316625 0.3464102 0.3605551 0.3741657
 ```
 
+If for some reason you specify `ret_nn` while supplying precomputed nearest
+neighbor data to `nn_method`, the returned data should be identical to what
+you passed in, and the list item names will be `precomputed`.
+
+### Multiple neighbor data
+
+As discussed under the 
+[Mixed Data Types](https://github.com/jlmelville/uwot#mixed-data-types) section,
+you can apply multiple distance metrics to different parts of matrix or 
+data frame input data. if you do this, then `ret_nn` will return all the 
+neighbor data. The list under `nn` will now contain as many items as metrics, 
+in the order they were specified. For instance, if the `metric` argument is:
+
+```R
+metric = list("euclidean" = c("Petal.Width", "Petal.Length"), 
+              "cosine" = c("Sepal.Width", "Sepal.Length"))
+```
+
+The `nn` list will contain two list entries. The first will be called
+`euclidean` and the second `cosine`.
+
+If you have access to multiple distance metrics, you may also provide multiple
+precomputed neighbor data to `nn_method` in the same format: a list of lists,
+where each sublist has the same format as described above (i.e. the two
+matrices, `idx` and `dist`). The names of the list items are ignored, so you
+don't need to set them. Roughly, do something like this:
+
+```R
+nn_metric1 <- list(idx = matrix(...), dist = matrix(...))
+nn_metric2 <- list(idx = matrix(...), dist = matrix(...))
+umap_res <- umap(nn_method = list(nn_metric1, nn_metric2), ...)
+```
+
+The different neighbor data must all have the same number of neighbors, i.e.
+the number of columns in all the matrices must be the same.
+
 ### Numeric `y`
 
 If you are using supervised UMAP with a numeric `y`, then you can also pass
 nearest neighbor data to `y`, using the same format as above. In this case the
-nearest neighbors should be with respect to the data in `y`, not in `X`. There
-are a few reasons to do this:
-
-* If you pass a `y` numeric vector, it will always use the Euclidean distance
-between values. You may want to use a different distance.
-* Currently, only a single vector can be passed directly to `y`. This is one
-way to use a matrix-valued `y`.
-* Numeric `y` vectors do not support missing values. Obviously, using nearest
-neighbor data instead will only be useful if you have a way to assign
-neighbors to missing data. But if you do, then this is currently the only way to
-use numeric `y` in a semi-supervised mode.
+nearest neighbors should be with respect to the data in `y`.
 
 Note that you *cannot* pass categorical `y` as nearest neighbor data. This is
 because the processing of the data goes through a different code path that
