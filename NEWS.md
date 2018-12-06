@@ -1,3 +1,5 @@
+# uwot 0.0.0.9007
+
 # uwot 0.0.0.9006 (December 5 2018)
 
 ## New features
