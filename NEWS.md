@@ -1,9 +1,25 @@
-# uwot 0.0.0.9006
+# uwot 0.0.0.9006 (December 5 2018)
 
 ## New features
 
+* Highly experimental mixed data type support for `metric`: instead of
+specifying a single metric name (e.g. `metric = "euclidean"`), you can pass a
+list, where the name of each item is the metric to use and the value is a vector
+of the names of the columns to use with that metric, e.g. 
+`metric = list("euclidean" = c("A1", "A2"), "cosine" = c("B1", "B2", "B3"))` 
+treats columns `A1` and `A2` as one block, using the Euclidean distance to find
+nearest neighbors, whereas `B1`, `B2` and `B3` are treated as a second block,
+using the cosine distance.
+* Factor columns can also be used in the metric, using the metric name 
+`categorical`. 
+* `y` may now be a data frame or matrix if multiple target data is available. 
 * New parameter `target_metric`, to specify the distance metric to use with 
-numerical `y`.
+numerical `y`. This has the same capabilities as `metric`.
+* Multiple external nearest neighbor data sources are now supported. Instead of
+passing a list of two matrices, pass a list of lists, one for each external
+metric.
+* More details on mixed data types can be found at 
+https://github.com/jlmelville/uwot#mixed-data-types.
 * Compatibility with older versions of RcppParallel (contributed by 
 [sirusb](https://github.com/sirusb)).
 * `scale = "Z"` To Z-scale each column of input (synonym for `scale = TRUE` 
