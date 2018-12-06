@@ -1191,6 +1191,12 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     # Extract this block of nn data from list of lists
     if (metric == "precomputed") {
       nn_sub <- nn_method[[i]]
+      if (i == 1) {
+        n_neighbors <- NULL
+      }
+      else {
+        n_neighbors <- ncol(nn_method[[1]]$idx)
+      }
     }
     
     x2set_res <- x2set(Xsub, n_neighbors, metric, nn_method = nn_sub,
@@ -1229,7 +1235,9 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
                  n_vertices = x2nv(X),
                  verbose = FALSE) {
   if (is.list(nn_method)) {
-    validate_nn(nn_method, n_vertices)
+    # on first iteration n_neighbors is NULL
+    # on subsequent iterations ensure n_neighbors is consistent for all data
+    validate_nn(nn_method, n_vertices, n_neighbors = n_neighbors)
     nn <- nn_method
   }
   else {
@@ -1254,16 +1262,19 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
   nn
 }
 
-validate_nn <- function(nn_method, n_vertices) {
+validate_nn <- function(nn_method, n_vertices, n_neighbors = NULL) {
   if (!is.matrix(nn_method$idx)) {
     stop("Couldn't find precalculated 'idx' matrix")
   }
   if (nrow(nn_method$idx) != n_vertices) {
-    stop("Precalculated 'idx' matrix must have ", n_vertices, " rows, but
-           found ", nrow(nn_method$idx))
+    stop("Precalculated 'idx' matrix must have ", n_vertices, 
+         " rows, but found ", nrow(nn_method$idx))
   }
-  n_neighbors <- ncol(nn_method$idx)
-
+  
+  # set n_neighbors from these matrices if it hasn't been already set
+  if (is.null(n_neighbors)) {
+    n_neighbors <- ncol(nn_method$idx)
+  }
   if (!is.matrix(nn_method$dist)) {
     stop("Couldn't find precalculated 'dist' matrix")
   }

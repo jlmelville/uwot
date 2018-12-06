@@ -24,3 +24,8 @@ expect_error(lvish(iris10, n_threads = 0, perplexity = 50), "perplexity")
 expect_error(umap(iris10, n_threads = 0, n_neighbors = 4, y = c(1:9, NA)), "numeric y")
 expect_error(umap(X = NULL, n_threads = 0, n_neighbors = 4, nn_method = nn, 
                   init = "spca"), "spca")
+# add an extra column to nn
+nn5 <- nn
+nn5$idx <- cbind(nn5$idx, rep(100, nrow(nn5$idx)))
+nn5$dist <- cbind(nn5$dist, rep(100.0, nrow(nn5$dist)))
+expect_error(umap(X = NULL, n_threads = 0,  nn_method = list(nn, nn5)), "Precalculated")
