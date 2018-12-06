@@ -1158,10 +1158,6 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     metric <- mnames[[i]]
     metric <- match.arg(metric, c("euclidean", "cosine", "manhattan", 
                                   "hamming", "precomputed"))
-    if (nblocks > 1) {
-      tsmessage("Processing block ", i, " of ", nblocks,
-                " with metric '", metric, "'")
-    }
     
     subset <- metrics[[i]]
     if (is.null(subset)) {
@@ -1170,6 +1166,26 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     else {
       Xsub <- X[, subset, drop = FALSE]
     }
+    
+    if (!is.null(X) && is.matrix(X)) {
+      block_size <- ncol(Xsub)
+      if (block_size == 0) {
+        stop("Block ", i, " has zero size")
+      }
+      if (nblocks > 1) {
+        tsmessage("Processing block ", i, " of ", nblocks,
+                  " with size ", block_size,
+                  " using metric '", metric, "'")
+      }
+    }
+    else {
+      # X is NULL or dist or something like that
+      if (nblocks > 1) {
+        tsmessage("Processing block ", i, " of ", nblocks,
+                  " using metric '", metric, "'")
+      }
+    }
+    
     
     nn_sub <- nn_method
     # Extract this block of nn data from list of lists
