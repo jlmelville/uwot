@@ -3,7 +3,14 @@
 #' Carry out an embedding of new data using an existing embedding. Requires
 #' using the result of calling \code{\link{umap}} or \code{\link{tumap}} with
 #' \code{ret_model = TRUE}.
-#'
+#' 
+#' Note that some settings are incompatible with the production of a UMAP model
+#' via \code{\link{umap}}: external neighbor data (passed via a list to the
+#' argument of the \code{nn_method} parameter), and factor columns that were
+#' included in the UMAP calculation via the \code{metric} parameter. In the 
+#' latter case, the model produced is based only on the numeric data. 
+#' A transformation is possible, but factor columns in the new data are ignored.
+#' 
 #' @param X The new data to be transformed, either a matrix of data frame. Must
 #'   have the same columns in the same order as the input data used to generate
 #'   the \code{model}.

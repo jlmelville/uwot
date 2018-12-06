@@ -15,12 +15,15 @@ lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
-\code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
-A sparse matrix is interpreted as a distance matrix and both implicit and
+\code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
+sparse matrix is interpreted as a distance matrix and both implicit and
 explicit zero entries are ignored. Set zero distances you want to keep to
 an arbitrarily small non-zero value (e.g. \code{1e-10}). Matrix and data
 frames should contain one observation per row. Data frames will have any
-non-numeric columns removed.}
+non-numeric columns removed, although factor columns will be used if
+explicitly included via \code{metric} (see the help for \code{metric} for
+details). Can be \code{NULL} if precomputed nearest neighbor data is passed
+to \code{nn_method}, and \code{init} is not \code{"spca"} or \code{"pca"}.}
 
 \item{perplexity}{Controls the size of the local neighborhood used for
 manifold approximation. This is the analogous to \code{n_neighbors} in
@@ -41,9 +44,21 @@ integer value in the range \code{2} to \code{100}.}
   \item \code{"cosine"}
   \item \code{"manhattan"}
   \item \code{"hamming"}
+  \item \code{"categorical"} (see below)
 }
 Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-distance metric is always "euclidean").}
+distance metric is always "euclidean"). If \code{X} is a data frame or matrix, 
+then multiple metrics can be specified, by passing a list to this argument,
+where the name of each item in the list is one of the metric names above. 
+The value of each list item should be a vector giving the names or integer 
+ids of the columns to be included in a calculation. Each metric calculation
+results in a separate fuzzy simplicial set, which are intersected together
+to produce the final set. Metric names can be repeated. Because non-numeric
+columns are removed from the data frame, it is safer to use column names than
+integer ids. Factor columns can also be used by specifying the metric name
+\code{"categorical"}. Factor columns are treated different from numeric 
+columns and although multiple factor columns can be specified in
+a vector, each factor column specified is processed individually.}
 
 \item{n_epochs}{Number of epochs to use during the optimization of the
 embedded coordinates. The default is calculate the number of epochs
@@ -115,6 +130,9 @@ must be a list consisting of two elements:
   \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
   containing the distances of the nearest neighbors.
 }
+Multiple nearest neighbor data (e.g. from two different precalulated 
+metrics) can be passed by passing a list containing the nearest neighbor
+data lists as items. 
 The \code{n_neighbors} parameter is ignored when using precalculated
 nearest neighbor data.}
 

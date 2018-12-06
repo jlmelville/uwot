@@ -6,12 +6,15 @@
 #' implementation at \url{https://github.com/lmcinnes/umap}.
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
-#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
-#'   A sparse matrix is interpreted as a distance matrix and both implicit and
+#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
+#'   sparse matrix is interpreted as a distance matrix and both implicit and
 #'   explicit zero entries are ignored. Set zero distances you want to keep to
 #'   an arbitrarily small non-zero value (e.g. \code{1e-10}). Matrix and data
 #'   frames should contain one observation per row. Data frames will have any
-#'   non-numeric columns removed.
+#'   non-numeric columns removed, although factor columns will be used if
+#'   explicitly included via \code{metric} (see the help for \code{metric} for
+#'   details). Can be \code{NULL} if precomputed nearest neighbor data is passed
+#'   to \code{nn_method}, and \code{init} is not \code{"spca"} or \code{"pca"}.
 #' @param n_neighbors The size of local neighborhood (in terms of number of
 #'   neighboring sample points) used for manifold approximation. Larger values
 #'   result in more global views of the manifold, while smaller values result in
@@ -27,9 +30,21 @@
 #'   \item \code{"cosine"}
 #'   \item \code{"manhattan"}
 #'   \item \code{"hamming"}
+#'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean").
+#' distance metric is always "euclidean"). If \code{X} is a data frame or matrix, 
+#' then multiple metrics can be specified, by passing a list to this argument,
+#' where the name of each item in the list is one of the metric names above. 
+#' The value of each list item should be a vector giving the names or integer 
+#' ids of the columns to be included in a calculation. Each metric calculation
+#' results in a separate fuzzy simplicial set, which are intersected together
+#' to produce the final set. Metric names can be repeated. Because non-numeric
+#' columns are removed from the data frame, it is safer to use column names than
+#' integer ids. Factor columns can also be used by specifying the metric name
+#' \code{"categorical"}. Factor columns are treated different from numeric 
+#' columns and although multiple factor columns can be specified in
+#' a vector, each factor column specified is processed individually.
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. By default, this value is set to \code{500} for datasets
 #'   containing 10,000 vertices or less, and \code{200} otherwise.
@@ -122,6 +137,9 @@
 #'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
 #'     containing the distances of the nearest neighbors.
 #'   }
+#'   Multiple nearest neighbor data (e.g. from two different precalulated 
+#'   metrics) can be passed by passing a list containing the nearest neighbor
+#'   data lists as items. 
 #'   The \code{n_neighbors} parameter is ignored when using precalculated
 #'   nearest neighbor data.
 #' @param n_trees Number of trees to build when constructing the nearest
@@ -136,27 +154,36 @@
 #' @param approx_pow If \code{TRUE}, use an approximation to the power function
 #'   in the UMAP gradient, from
 #'   \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.
-#' @param y Optional target array for supervised dimension reduction. The
-#'   following types are allowed:
+#' @param y Optional target data for supervised dimension reduction. Can be a
+#' vector, matrix or data frame. Use the \code{target_metric} parameter to 
+#' specify the metrics to use, using the same syntax as \code{metric}. Usually
+#' either a single numeric or factor column is used, but more complex formats
+#' are possible. The following types are allowed:
 #'   \itemize{
-#'     \item A factor vector with the same length as \code{X}. \code{NA} is
+#'     \item Factor columns with the same length as \code{X}. \code{NA} is
 #'     allowed for any observation with an unknown level, in which case
-#'     UMAP operates as a form of semi-supervised learning.
-#'     \item A numeric vector with the same length as \code{X}. \code{NA} is
-#'     \emph{not} allowed in this case. Use the parameter
-#'     \code{target_n_neighbors} to set the number of neighbors used with
-#'     \code{y}. If unset, \code{n_neighbors} is used.
-#'     \item A list of two matrices, \code{idx} and \code{dist}, representing
-#'     precalculated nearest neighbor indices and distances, respectively. This
+#'     UMAP operates as a form of semi-supervised learning. Each column is 
+#'     treated separately.
+#'     \item Numeric data. \code{NA} is \emph{not} allowed in this case. Use the
+#'     parameter \code{target_n_neighbors} to set the number of neighbors used
+#'     with \code{y}. If unset, \code{n_neighbors} is used. Unlike factors,
+#'     numeric columns are grouped into one block unless \code{target_metric}
+#'     specifies otherwise. For example, if you wish columns \code{a} and 
+#'     \code{b} to be treated separately, specify 
+#'     \code{target_metric = list(euclidean = "a", euclidean = "b")}. Otherwise,
+#'     the data will be effectively treated as a matrix with two columns. 
+#'     \item Nearest neighbor data, consisting of a list of two matrices, 
+#'     \code{idx} and \code{dist}. These represent the precalculated nearest 
+#'     neighbor indices and distances, respectively. This
 #'     is the same format as that expected for precalculated data in
 #'     \code{nn_method}. This format assumes that the underlying data was a
 #'     numeric vector. Any user-supplied value of the \code{target_n_neighbors}
 #'     parameter is ignored in this case, because the the number of columns in
-#'     the matrices is used for the value. Using precalculated nearest neighbor
-#'     data for \code{y} may be useful if the Euclidean distances metric isn't
-#'     appropriate, or you have unlabelled data that can be accounted for in
-#'     some other way via nearest neighbors.
+#'     the matrices is used for the value. Multiple nearest neighbor data using
+#'     different metrics can be supplied by passing a list of these lists.
 #'   }
+#' Unlike \code{X}, all factor columns included in \code{y} are automatically
+#' used.
 #' @param target_n_neighbors Number of nearest neighbors to use to construct the
 #'   target simplicial set. Default value is \code{n_neighbors}. Applies only if
 #'   \code{y} is non-\code{NULL} and \code{numeric}.
@@ -170,7 +197,12 @@
 #'   add new data to an existing embedding via \code{\link{umap_transform}}. The
 #'   embedded coordinates are returned as the list item \code{embedding}. If
 #'   \code{FALSE}, just return the coordinates. This parameter can be used in
-#'   conjunction with \code{ret_nn}.
+#'   conjunction with \code{ret_nn}. Note that some settings are incompatible 
+#'   with the production of a UMAP model: external neighbor data (passed via a
+#'   list to \code{nn_method}), and factor columns that were included 
+#'   via the \code{metric} parameter. In the latter case, the model produced is 
+#'   based only on the numeric data. A transformation using new data is 
+#'   possible, but the factor columns in the new data are ignored.
 #' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
 #'   nearest neighbor data that can be used as input to \code{nn_method} to
 #'   avoid the overhead of repeatedly calculating the nearest neighbors when
@@ -194,9 +226,11 @@
 #'     existing embedding via \code{\link{umap_transform}}. In this case, the
 #'     coordinates are available in the list item \code{embedding}.
 #'     \item if \code{ret_nn = TRUE}, returns the nearest neigbor data as a
-#'     list containing a matrix \code{idx} with the integer ids of the
-#'     neighbors; and a matrix \code{dist} with the distances. This list can be
-#'     used as input to the \code{nn_method} parameter.
+#'     list called \code{nn}. This contains one list for each \code{metric}
+#'     calculated, itself containing a matrix \code{idx} with the integer ids of 
+#'     the neighbors; and a matrix \code{dist} with the distances. The \code{nn} 
+#'     list (or a sub-list) can be used as input to the \code{nn_method} 
+#'     parameter.
 #'   }
 #'   Both \code{ret_model} and \code{ret_nn} can be \code{TRUE}, in which case
 #'   the returned list contains the combined data.
@@ -221,6 +255,16 @@
 #'
 #' # Re-use NN info for greater efficiency
 #' mnist_umap_spca <- umap(mnist, verbose = TRUE, init = "spca", nn_method = mnist_umap$nn)
+#' 
+#' # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
+#' iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),
+#'                                       "euclidean" = c("Petal.Length", "Petal.Width")))
+#'                                       
+#' # Can also use individual factor columns
+#' iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),
+#'                                       "euclidean" = c("Petal.Length", "Petal.Width"),
+#'                                       "categorical" = "Species"))
+#'  
 #' }
 #' @references
 #' Belkin, M., & Niyogi, P. (2002).
@@ -290,12 +334,15 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' a speed improvement of around 50\%.
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
-#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
-#'   A sparse matrix is interpreted as a distance matrix and both implicit and
+#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
+#'   sparse matrix is interpreted as a distance matrix and both implicit and
 #'   explicit zero entries are ignored. Set zero distances you want to keep to
 #'   an arbitrarily small non-zero value (e.g. \code{1e-10}). Matrix and data
 #'   frames should contain one observation per row. Data frames will have any
-#'   non-numeric columns removed.
+#'   non-numeric columns removed, although factor columns will be used if
+#'   explicitly included via \code{metric} (see the help for \code{metric} for
+#'   details). Can be \code{NULL} if precomputed nearest neighbor data is passed
+#'   to \code{nn_method}, and \code{init} is not \code{"spca"} or \code{"pca"}.
 #' @param n_neighbors The size of local neighborhood (in terms of number of
 #'   neighboring sample points) used for manifold approximation. Larger values
 #'   result in more global views of the manifold, while smaller values result in
@@ -311,9 +358,21 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"cosine"}
 #'   \item \code{"manhattan"}
 #'   \item \code{"hamming"}
+#'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean").
+#' distance metric is always "euclidean"). If \code{X} is a data frame or matrix, 
+#' then multiple metrics can be specified, by passing a list to this argument,
+#' where the name of each item in the list is one of the metric names above. 
+#' The value of each list item should be a vector giving the names or integer 
+#' ids of the columns to be included in a calculation. Each metric calculation
+#' results in a separate fuzzy simplicial set, which are intersected together
+#' to produce the final set. Metric names can be repeated. Because non-numeric
+#' columns are removed from the data frame, it is safer to use column names than
+#' integer ids. Factor columns can also be used by specifying the metric name
+#' \code{"categorical"}. Factor columns are treated different from numeric 
+#' columns and although multiple factor columns can be specified in
+#' a vector, each factor column specified is processed individually.
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. By default, this value is set to \code{500} for datasets
 #'   containing 10,000 vertices or less, and \code{200} otherwise.
@@ -391,6 +450,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
 #'     containing the distances of the nearest neighbors.
 #'   }
+#'   Multiple nearest neighbor data (e.g. from two different precalulated 
+#'   metrics) can be passed by passing a list containing the nearest neighbor
+#'   data lists as items. 
 #'   The \code{n_neighbors} parameter is ignored when using precalculated
 #'   nearest neighbor data.
 #' @param n_trees Number of trees to build when constructing the nearest
@@ -402,27 +464,36 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
-#' @param y Optional target array for supervised dimension reduction. The
-#'   following types are allowed:
+#' @param y Optional target data for supervised dimension reduction. Can be a
+#' vector, matrix or data frame. Use the \code{target_metric} parameter to 
+#' specify the metrics to use, using the same syntax as \code{metric}. Usually
+#' either a single numeric or factor column is used, but more complex formats
+#' are possible. The following types are allowed:
 #'   \itemize{
-#'     \item A factor vector with the same length as \code{X}. \code{NA} is
+#'     \item Factor columns with the same length as \code{X}. \code{NA} is
 #'     allowed for any observation with an unknown level, in which case
-#'     UMAP operates as a form of semi-supervised learning.
-#'     \item A numeric vector with the same length as \code{X}. \code{NA} is
-#'     \emph{not} allowed in this case. Use the parameter
-#'     \code{target_n_neighbors} to set the number of neighbors used with
-#'     \code{y}. If unset, \code{n_neighbors} is used.
-#'     \item A list of two matrices, \code{idx} and \code{dist}, representing
-#'     precalculated nearest neighbor indices and distances, respectively. This
+#'     UMAP operates as a form of semi-supervised learning. Each column is 
+#'     treated separately.
+#'     \item Numeric data. \code{NA} is \emph{not} allowed in this case. Use the
+#'     parameter \code{target_n_neighbors} to set the number of neighbors used
+#'     with \code{y}. If unset, \code{n_neighbors} is used. Unlike factors,
+#'     numeric columns are grouped into one block unless \code{target_metric}
+#'     specifies otherwise. For example, if you wish columns \code{a} and 
+#'     \code{b} to be treated separately, specify 
+#'     \code{target_metric = list(euclidean = "a", euclidean = "b")}. Otherwise,
+#'     the data will be effectively treated as a matrix with two columns. 
+#'     \item Nearest neighbor data, consisting of a list of two matrices, 
+#'     \code{idx} and \code{dist}. These represent the precalculated nearest 
+#'     neighbor indices and distances, respectively. This
 #'     is the same format as that expected for precalculated data in
 #'     \code{nn_method}. This format assumes that the underlying data was a
 #'     numeric vector. Any user-supplied value of the \code{target_n_neighbors}
 #'     parameter is ignored in this case, because the the number of columns in
-#'     the matrices is used for the value. Using precalculated nearest neighbor
-#'     data for \code{y} may be useful if the Euclidean distances metric isn't
-#'     appropriate, or you have unlabelled data that can be accounted for in
-#'     some other way via nearest neighbors.
+#'     the matrices is used for the value. Multiple nearest neighbor data using
+#'     different metrics can be supplied by passing a list of these lists.
 #'   }
+#' Unlike \code{X}, all factor columns included in \code{y} are automatically
+#' used.
 #' @param target_n_neighbors Number of nearest neighbors to use to construct the
 #'   target simplicial set. Default value is \code{n_neighbors}. Applies only if
 #'   \code{y} is non-\code{NULL} and \code{numeric}.
@@ -436,7 +507,12 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   add new data to an existing embedding via \code{\link{umap_transform}}. The
 #'   embedded coordinates are returned as the list item \code{embedding}. If
 #'   \code{FALSE}, just return the coordinates. This parameter can be used in
-#'   conjunction with \code{ret_nn}.
+#'   conjunction with \code{ret_nn}. Note that some settings are incompatible 
+#'   with the production of a UMAP model: external neighbor data (passed via a
+#'   list to \code{nn_method}), and factor columns that were included 
+#'   via the \code{metric} parameter. In the latter case, the model produced is 
+#'   based only on the numeric data. A transformation using new data is 
+#'   possible, but the factor columns in the new data are ignored.
 #' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
 #'   nearest neighbor data that can be used as input to \code{nn_method} to
 #'   avoid the overhead of repeatedly calculating the nearest neighbors when
@@ -460,9 +536,11 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     existing embedding via \code{\link{umap_transform}}. In this case, the
 #'     coordinates are available in the list item \code{embedding}.
 #'     \item if \code{ret_nn = TRUE}, returns the nearest neigbor data as a
-#'     list containing a matrix \code{idx} with the integer ids of the
-#'     neighbors; and a matrix \code{dist} with the distances. This list can be
-#'     used as input to the \code{nn_method} parameter.
+#'     list called \code{nn}. This contains one list for each \code{metric}
+#'     calculated, itself containing a matrix \code{idx} with the integer ids of 
+#'     the neighbors; and a matrix \code{dist} with the distances. The \code{nn} 
+#'     list (or a sub-list) can be used as input to the \code{nn_method} 
+#'     parameter.
 #'   }
 #'   Both \code{ret_model} and \code{ret_nn} can be \code{TRUE}, in which case
 #'   the returned list contains the combined data.
@@ -525,12 +603,15 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' }
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
-#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
-#'   A sparse matrix is interpreted as a distance matrix and both implicit and
+#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
+#'   sparse matrix is interpreted as a distance matrix and both implicit and
 #'   explicit zero entries are ignored. Set zero distances you want to keep to
 #'   an arbitrarily small non-zero value (e.g. \code{1e-10}). Matrix and data
 #'   frames should contain one observation per row. Data frames will have any
-#'   non-numeric columns removed.
+#'   non-numeric columns removed, although factor columns will be used if
+#'   explicitly included via \code{metric} (see the help for \code{metric} for
+#'   details). Can be \code{NULL} if precomputed nearest neighbor data is passed
+#'   to \code{nn_method}, and \code{init} is not \code{"spca"} or \code{"pca"}.
 #' @param perplexity Controls the size of the local neighborhood used for
 #'   manifold approximation. This is the analogous to \code{n_neighbors} in
 #'   \code{\link{umap}}. Change this, rather than \code{n_neighbors}.
@@ -547,9 +628,21 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"cosine"}
 #'   \item \code{"manhattan"}
 #'   \item \code{"hamming"}
+#'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean").
+#' distance metric is always "euclidean"). If \code{X} is a data frame or matrix, 
+#' then multiple metrics can be specified, by passing a list to this argument,
+#' where the name of each item in the list is one of the metric names above. 
+#' The value of each list item should be a vector giving the names or integer 
+#' ids of the columns to be included in a calculation. Each metric calculation
+#' results in a separate fuzzy simplicial set, which are intersected together
+#' to produce the final set. Metric names can be repeated. Because non-numeric
+#' columns are removed from the data frame, it is safer to use column names than
+#' integer ids. Factor columns can also be used by specifying the metric name
+#' \code{"categorical"}. Factor columns are treated different from numeric 
+#' columns and although multiple factor columns can be specified in
+#' a vector, each factor column specified is processed individually.
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. The default is calculate the number of epochs
 #'   dynamically based on dataset size, to give the same number of edge samples
@@ -614,6 +707,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
 #'     containing the distances of the nearest neighbors.
 #'   }
+#'   Multiple nearest neighbor data (e.g. from two different precalulated 
+#'   metrics) can be passed by passing a list containing the nearest neighbor
+#'   data lists as items. 
 #'   The \code{n_neighbors} parameter is ignored when using precalculated
 #'   nearest neighbor data.
 #' @param n_trees Number of trees to build when constructing the nearest
