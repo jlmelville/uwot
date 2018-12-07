@@ -1,5 +1,13 @@
 # uwot 0.0.0.9007
 
+## New features
+
+* New parameter `pca`: set this to a positive integer to reduce matrix of
+data frames to that number of columns using PCA. Only works if 
+`metric = "euclidean"`. If you have > 100 columns, this can substantially 
+improve the speed of the nearest neighbor search. t-SNE implementations often
+set this value to 50.
+
 # uwot 0.0.0.9006 (December 5 2018)
 
 ## New features

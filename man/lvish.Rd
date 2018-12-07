@@ -10,8 +10,8 @@ lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
   negative_sample_rate = 5, nn_method = NULL, n_trees = 50,
   search_k = 2 * n_neighbors * n_trees, n_threads = max(1,
   RcppParallel::defaultNumThreads()/2), grain_size = 1,
-  kernel = "gauss", ret_nn = FALSE, verbose = getOption("verbose",
-  TRUE))
+  kernel = "gauss", pca = NULL, ret_nn = FALSE,
+  verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -161,6 +161,17 @@ the usual Gaussian weighted similarities. \code{"knn"} assigns equal
 probabilities to every edge in the nearest neighbor graph, and zero
 otherwise, using \code{perplexity} nearest neighbors. The \code{n_neighbors}
 parameter is ignored in this case.}
+
+\item{pca}{If set to a positive integer value, reduce data to this number of
+columns using PCA. Only applied if the distance \code{metric} is
+\code{"euclidean"}, and the dimensions of the data is larger than the
+number specified (i.e. number of rows and columns must be larger than the
+value of this parameter). If you have > 100 columns in a data frame or
+matrix, reducing the number of columns in this way may substantially
+increase the performance of the nearest neighbor search at the cost of a
+potential decrease in accuracy. In many t-SNE applications, a value of 50
+is recommended, although there's no guarantee that this is appropriate for
+all settings.}
 
 \item{ret_nn}{If \code{TRUE}, then in addition to the embedding, also return
 nearest neighbor data that can be used as input to \code{nn_method} to

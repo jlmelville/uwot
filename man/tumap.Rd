@@ -11,7 +11,7 @@ tumap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   n_trees = 50, search_k = 2 * n_neighbors * n_trees,
   n_threads = max(1, RcppParallel::defaultNumThreads()/2),
   grain_size = 1, y = NULL, target_n_neighbors = n_neighbors,
-  target_metric = "euclidean", target_weight = 0.5,
+  target_metric = "euclidean", target_weight = 0.5, pca = NULL,
   ret_model = FALSE, ret_nn = FALSE, verbose = getOption("verbose",
   TRUE))
 }
@@ -213,6 +213,17 @@ using supervised dimension reduction. Used only if \code{y} is numeric.}
 topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
 entirely on target. The default of 0.5 balances the weighting equally
 between data and target. Only applies if \code{y} is non-\code{NULL}.}
+
+\item{pca}{If set to a positive integer value, reduce data to this number of
+columns using PCA. Only applied if the distance \code{metric} is
+\code{"euclidean"}, and the dimensions of the data is larger than the
+number specified (i.e. number of rows and columns must be larger than the
+value of this parameter). If you have > 100 columns in a data frame or
+matrix, reducing the number of columns in this way may substantially
+increase the performance of the nearest neighbor search at the cost of a
+potential decrease in accuracy. In many t-SNE applications, a value of 50
+is recommended, although there's no guarantee that this is appropriate for
+all settings.}
 
 \item{ret_model}{If \code{TRUE}, then return extra data that can be used to
 add new data to an existing embedding via \code{\link{umap_transform}}. The

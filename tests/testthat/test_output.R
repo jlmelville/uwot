@@ -224,3 +224,14 @@ res_trans <- umap_transform(iris10, model = res, verbose = FALSE, n_threads = 0,
                             n_epochs = 2)
 expect_ok_matrix(res_trans)
 
+# PCA dimensionality reduction
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+            init = "spca", verbose = FALSE, n_threads = 0, pca = 2)
+expect_ok_matrix(res)
+
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+            metric = list("euclidean" = 1:2, "euclidean" = 3:4),
+            init = "spca", verbose = FALSE, n_threads = 0, pca = 1)
+expect_ok_matrix(res)

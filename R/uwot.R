@@ -193,6 +193,16 @@
 #'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
 #'   entirely on target. The default of 0.5 balances the weighting equally
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
+#' @param pca If set to a positive integer value, reduce data to this number of
+#'   columns using PCA. Only applied if the distance \code{metric} is
+#'   \code{"euclidean"}, and the dimensions of the data is larger than the
+#'   number specified (i.e. number of rows and columns must be larger than the
+#'   value of this parameter). If you have > 100 columns in a data frame or
+#'   matrix, reducing the number of columns in this way may substantially
+#'   increase the performance of the nearest neighbor search at the cost of a
+#'   potential decrease in accuracy. In many t-SNE applications, a value of 50
+#'   is recommended, although there's no guarantee that this is appropriate for
+#'   all settings.
 #' @param ret_model If \code{TRUE}, then return extra data that can be used to
 #'   add new data to an existing embedding via \code{\link{umap_transform}}. The
 #'   embedded coordinates are returned as the list item \code{embedding}. If
@@ -302,6 +312,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  y = NULL, target_n_neighbors = n_neighbors,
                  target_metric = "euclidean",
                  target_weight = 0.5,
+                 pca = NULL,
                  ret_model = FALSE, ret_nn = FALSE,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  grain_size = 1,
@@ -318,6 +329,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_threads = n_threads, grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight, target_metric = target_metric,
+    pca = pca,
     ret_model = ret_model, ret_nn = ret_nn,
     verbose = verbose
   )
@@ -503,6 +515,16 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   topology. A value of 0.0 weights entirely on data, a value of 1.0 weights
 #'   entirely on target. The default of 0.5 balances the weighting equally
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
+#' @param pca If set to a positive integer value, reduce data to this number of
+#'   columns using PCA. Only applied if the distance \code{metric} is
+#'   \code{"euclidean"}, and the dimensions of the data is larger than the
+#'   number specified (i.e. number of rows and columns must be larger than the
+#'   value of this parameter). If you have > 100 columns in a data frame or
+#'   matrix, reducing the number of columns in this way may substantially
+#'   increase the performance of the nearest neighbor search at the cost of a
+#'   potential decrease in accuracy. In many t-SNE applications, a value of 50
+#'   is recommended, although there's no guarantee that this is appropriate for
+#'   all settings.
 #' @param ret_model If \code{TRUE}, then return extra data that can be used to
 #'   add new data to an existing embedding via \code{\link{umap_transform}}. The
 #'   embedded coordinates are returned as the list item \code{embedding}. If
@@ -558,6 +580,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   y = NULL, target_n_neighbors = n_neighbors,
                   target_metric = "euclidean",
                   target_weight = 0.5,
+                  pca = NULL,
                   ret_model = FALSE, ret_nn = FALSE,
                   verbose = getOption("verbose", TRUE)) {
   uwot(
@@ -572,6 +595,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_threads = n_threads, grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight, target_metric = target_metric,
+    pca = pca,
     ret_model = ret_model, ret_nn = ret_nn,
     verbose = verbose
   )
@@ -733,6 +757,16 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   probabilities to every edge in the nearest neighbor graph, and zero
 #'   otherwise, using \code{perplexity} nearest neighbors. The \code{n_neighbors}
 #'   parameter is ignored in this case.
+#' @param pca If set to a positive integer value, reduce data to this number of
+#'   columns using PCA. Only applied if the distance \code{metric} is
+#'   \code{"euclidean"}, and the dimensions of the data is larger than the
+#'   number specified (i.e. number of rows and columns must be larger than the
+#'   value of this parameter). If you have > 100 columns in a data frame or
+#'   matrix, reducing the number of columns in this way may substantially
+#'   increase the performance of the nearest neighbor search at the cost of a
+#'   potential decrease in accuracy. In many t-SNE applications, a value of 50
+#'   is recommended, although there's no guarantee that this is appropriate for
+#'   all settings.
 #' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
 #'   nearest neighbor data that can be used as input to \code{nn_method} to
 #'   avoid the overhead of repeatedly calculating the nearest neighbors when
@@ -775,6 +809,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                   grain_size = 1,
                   kernel = "gauss",
+                  pca = NULL,
                   ret_nn = FALSE,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X,
@@ -784,6 +819,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     gamma = gamma, negative_sample_rate = negative_sample_rate,
     nn_method = nn_method, n_trees = n_trees, search_k = search_k,
     method = "largevis", perplexity = perplexity,
+    pca = pca,
     n_threads = n_threads,
     grain_size = grain_size, kernel = kernel,
     ret_nn = ret_nn,
@@ -809,6 +845,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  kernel = "gauss",
                  grain_size = 1,
                  ret_model = FALSE, ret_nn = FALSE,
+                 pca = NULL,
                  verbose = getOption("verbose", TRUE)) {
   if (method == "umap" && (is.null(a) || is.null(b))) {
     ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
@@ -832,6 +869,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     stop("numeric y cannot contain NA")
   }
 
+  if (!is.null(pca)) {
+    if (!is.numeric(pca) || pca < 1) {
+      stop("'pca' must be a positive integer")
+    }
+  }
+  
   if (n_threads > 0) {
     RcppParallel::setThreadOptions(numThreads = n_threads)
   }
@@ -921,6 +964,16 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   else {
     metrics <- metric
   }
+  
+  # For typical case of numeric matrix X and metric = "euclidean", save
+  # PCA results here in case initialization uses PCA too
+  pca_shortcut <- FALSE
+  if (!is.null(pca) && length(metric) == 1 && metric == "euclidean" &&
+      is.matrix(X) && ncol(X) > pca) {
+    tsmessage("Reducing X column dimension to ", pca, " via PCA")
+    X <- pca_scores(X, ncol = pca)
+    pca_shortcut <- TRUE
+  }
 
   d2sr <- data2set(X, Xcat, n_neighbors, metrics, nn_method,
                 n_trees, search_k,
@@ -929,6 +982,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                 perplexity, kernel,
                 n_threads, grain_size,
                 ret_model,
+                pca = pca,
                 n_vertices = n_vertices,
                 verbose = verbose)
   
@@ -993,6 +1047,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                        perplexity = perplexity, kernel = kernel,
                        n_threads = n_threads, grain_size = grain_size,
                        ret_model = FALSE,
+                       pca = pca,
                        n_vertices = n_vertices,
                        verbose = verbose)
       
@@ -1025,19 +1080,33 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       "spectral", "random", "lvrandom", "normlaplacian",
       "laplacian", "spca", "pca"
     ))
-    embedding <- switch(init,
-      spectral = spectral_init(V, ndim = n_components, verbose = verbose),
-      random = rand_init(n_vertices, n_components, verbose = verbose),
-      lvrandom = rand_init_lv(n_vertices, n_components, verbose = verbose),
-      normlaplacian = normalized_laplacian_init(V,
-        ndim = n_components,
-        verbose = verbose
-      ),
-      laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
-      spca = scaled_pca(X, ndim = n_components, verbose = verbose),
-      pca = pca_init(X, ndim = n_components, verbose = verbose),
-      stop("Unknown initialization method: '", init, "'")
-    )
+    
+    # Don't repeat PCA initialization if we've already done it once
+    if (pca_shortcut && init %in% c("spca", "pca") && pca >= n_components) {
+      embedding <- X[, 1:n_components]
+      if (init == "spca") {
+        tsmessage("Initializing from scaled PCA")
+        embedding <- scale(embedding, scale = apply(embedding, 2, stats::sd) / 1e-4)
+      }
+      else {
+        tsmessage("Initializing from PCA")
+      }
+    }
+    else {
+      embedding <- switch(init,
+        spectral = spectral_init(V, ndim = n_components, verbose = verbose),
+        random = rand_init(n_vertices, n_components, verbose = verbose),
+        lvrandom = rand_init_lv(n_vertices, n_components, verbose = verbose),
+        normlaplacian = normalized_laplacian_init(V,
+          ndim = n_components,
+          verbose = verbose
+        ),
+        laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
+        spca = scaled_pca(X, ndim = n_components, verbose = verbose),
+        pca = pca_init(X, ndim = n_components, verbose = verbose),
+        stop("Unknown initialization method: '", init, "'")
+      )
+    }
   }
 
 
@@ -1212,6 +1281,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
                    n_threads, grain_size,
                    ret_model,
                    n_vertices = x2nv(X),
+                   pca = NULL,
                    verbose = FALSE) {
   V <- NULL
   nns <- list()
@@ -1282,6 +1352,11 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       }
     }
     
+    if (!is.null(pca) && is.matrix(X) && metric == "euclidean" && 
+        ncol(X) > pca && nrow(X) > pca) {
+      tsmessage("Reducing column dimension to ", pca, " via PCA")
+      Xsub <- pca_scores(Xsub, pca)
+    }
     
     nn_sub <- nn_method
     # Extract this block of nn data from list of lists
@@ -1454,7 +1529,7 @@ x2set <- function(X, n_neighbors, metric, nn_method,
   )
 }
 
-set_intersect <- function(A, B, weight, reset = TRUE) {
+set_intersect <- function(A, B, weight = 0.5, reset = TRUE) {
   A <- general_simplicial_set_intersection(
     A, B, weight
   )
