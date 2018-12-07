@@ -143,7 +143,7 @@ pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
     X <- scale(X, center = TRUE, scale = FALSE)
     # do SVD on X directly rather than forming covariance matrix
     s <- svd(X, nu = ncol, nv = 0)
-    D <- diag(c(s$d[1:ncol]))
+    D <- diag(c(s$d[1:ncol]), ncol, ncol)
     if (verbose || ret_extra) {
       # calculate eigenvalues of covariance matrix from singular values
       lambda <- (s$d^2) / (nrow(X) - 1)
