@@ -33,18 +33,18 @@
 // some of the vertices should be held fixed
 template <bool DoMoveVertex = false>
 void move_other_vertex(arma::mat& embedding,
-                const double& grad_d,
-                const arma::uword& k,
-                const arma::uword& d) {
+                       const double& grad_d,
+                       const arma::uword& k,
+                       const arma::uword& d) {
 }
 
 // Specialization to move the vertex: used in umap when both
 // vertices in an edge should be moved
 template <>
 void move_other_vertex<true>(arma::mat& embedding,
-                      const double& grad_d,
-                      const arma::uword& k,
-                      const arma::uword& d) {
+                             const double& grad_d,
+                             const arma::uword& k,
+                             const arma::uword& d) {
   embedding.at(k, d) -= grad_d;
 }
 
@@ -130,15 +130,18 @@ struct SgdWorker : public RcppParallel::Worker {
         const double grad_coeff = gradient.grad_attr(dist_squared);
 
         for (arma::uword d = 0; d < ncol; d++) {
-          double grad_d = clip(grad_coeff * (head_embedding.at(j, d) - tail_embedding.at(k, d)), gradient.clip_max) * alpha;
+          double grad_d = alpha * clip(grad_coeff * 
+            (head_embedding.at(j, d) - tail_embedding.at(k, d)), 
+            gradient.clip_max);
           head_embedding.at(j, d) += grad_d;
           move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, k, d);
         }
 
         epoch_of_next_sample[i] += epochs_per_sample[i];
 
-        unsigned int n_neg_samples = static_cast<unsigned int>((n - epoch_of_next_negative_sample[i]) /
-                                                               epochs_per_negative_sample[i]);
+        unsigned int n_neg_samples = static_cast<unsigned int>(
+          (n - epoch_of_next_negative_sample[i]) / 
+            epochs_per_negative_sample[i]);
 
         for (unsigned int p = 0; p < n_neg_samples; p++) {
           arma::uword k = prng() % n_vertices;
@@ -152,11 +155,13 @@ struct SgdWorker : public RcppParallel::Worker {
           const double grad_coeff = gradient.grad_rep(dist_squared);
 
           for (arma::uword d = 0; d < ncol; d++) {
-            head_embedding.at(j, d) +=
-              clip(grad_coeff * (head_embedding.at(j, d) - tail_embedding.at(k, d)), gradient.clip_max) * alpha;
+            head_embedding.at(j, d) += alpha * clip(grad_coeff * 
+              (head_embedding.at(j, d) - tail_embedding.at(k, d)), 
+              gradient.clip_max);
           }
         }
-        epoch_of_next_negative_sample[i] += n_neg_samples * epochs_per_negative_sample[i];
+        epoch_of_next_negative_sample[i] += 
+          n_neg_samples * epochs_per_negative_sample[i];
       }
     }
   }
@@ -188,24 +193,22 @@ struct SgdWorker : public RcppParallel::Worker {
 
 };
 
-// Method specific function have their data passed by copy, so should be ok
-// to use const reference for read-only data without using RcppParallel
-// wrappers even in threads?
+
 template<typename T, bool DoMove = true>
 arma::mat optimize_layout(const T& gradient,
-                                   arma::mat& head_embedding,
-                                   arma::mat& tail_embedding,
-                                   const arma::uvec& positive_head,
-                                   const arma::uvec& positive_tail,
-                                   unsigned int n_epochs, unsigned int n_vertices,
-                                   const arma::vec& epochs_per_sample,
-                                   double initial_alpha,
-                                   double negative_sample_rate,
-                                   unsigned int seed,
-                                   bool parallelize = true,
-                                   std::size_t grain_size = 1,
-                                   bool verbose = false) {
-  Progress progress(n_epochs, verbose);
+                          arma::mat& head_embedding,
+                          arma::mat& tail_embedding,
+                          const arma::uvec& positive_head,
+                          const arma::uvec& positive_tail,
+                          unsigned int n_epochs, unsigned int n_vertices,
+                          const arma::vec& epochs_per_sample,
+                          double initial_alpha,
+                          double negative_sample_rate,
+                          unsigned int seed,
+                          bool parallelize = true,
+                          std::size_t grain_size = 1,
+                          bool verbose = false) {
+Progress progress(n_epochs, verbose);
 
   const auto n_epochs_per_sample = epochs_per_sample.size();
   double alpha = initial_alpha;
@@ -214,12 +217,13 @@ arma::mat optimize_layout(const T& gradient,
   arma::vec epoch_of_next_negative_sample(epochs_per_negative_sample);
   arma::vec epoch_of_next_sample(epochs_per_sample);
 
-  SgdWorker<T, DoMove> worker(gradient, positive_head, positive_tail, epochs_per_sample,
-                                  epoch_of_next_sample, epochs_per_negative_sample,
-                                  epoch_of_next_negative_sample,
-                                  head_embedding, tail_embedding,
-                                  n_vertices, head_embedding.n_rows, head_embedding.n_cols,
-                                  seed);
+  SgdWorker<T, DoMove> worker(gradient, positive_head, positive_tail, 
+                              epochs_per_sample, epoch_of_next_sample, 
+                              epochs_per_negative_sample, 
+                              epoch_of_next_negative_sample,
+                              head_embedding, tail_embedding, n_vertices, 
+                              head_embedding.n_rows, head_embedding.n_cols,
+                              seed);
 
   for (auto n = 0U; n < n_epochs; n++) {
     worker.set_alpha(alpha);
@@ -248,115 +252,125 @@ arma::mat optimize_layout(const T& gradient,
 // threads: naively, I am hoping that passing by copy as arma vecs should
 // prevent R garbage collection from moving this data or causing other issues
 // [[Rcpp::export]]
-arma::mat optimize_layout_umap(arma::mat& head_embedding,
-                                        arma::mat& tail_embedding,
-                                        const arma::uvec positive_head,
-                                        const arma::uvec positive_tail,
-                                        unsigned int n_epochs, unsigned int n_vertices,
-                                        const arma::vec epochs_per_sample,
-                                        double a, double b,
-                                        double gamma, double initial_alpha,
-                                        double negative_sample_rate,
-                                        unsigned int seed,
-                                        bool approx_pow,
-                                        bool parallelize = true,
-                                        std::size_t grain_size = 1,
-                                        bool move_other = true,
-                                        bool verbose = false) {
+arma::mat optimize_layout_umap(arma::mat head_embedding,
+                               Rcpp::Nullable<Rcpp::NumericMatrix> tail_embedding,
+                               const arma::uvec positive_head,
+                               const arma::uvec positive_tail,
+                               unsigned int n_epochs, unsigned int n_vertices,
+                               const arma::vec epochs_per_sample,
+                               double a, double b,
+                               double gamma, double initial_alpha,
+                               double negative_sample_rate,
+                               unsigned int seed,
+                               bool approx_pow,
+                               bool parallelize = true,
+                               std::size_t grain_size = 1,
+                               bool move_other = true,
+                               bool verbose = false) {
+  
+  // For normal UMAP, tail_embedding is NULL and we want to pass 
+  // a shallow copy of head_embedding as tail_embedding.
+  // When updating new values, tail_embedding is the new coordinate to optimize
+  // and gets passed as normal.
+  arma::mat tail = tail_embedding.isNull() ? 
+  arma::mat(head_embedding.memptr(), head_embedding.n_rows, 
+            head_embedding.n_cols, false) :
+  Rcpp::as<arma::mat>(tail_embedding);  
+
   if (approx_pow) {
     const apumap_gradient gradient(a, b, gamma);
     if (move_other) {
-      return optimize_layout<apumap_gradient, true>(gradient, head_embedding, tail_embedding,
-                                      positive_head, positive_tail, n_epochs,
-                                      n_vertices, epochs_per_sample, initial_alpha,
-                                      negative_sample_rate, seed, parallelize,
-                                      grain_size, verbose);
+      return optimize_layout<apumap_gradient, true>(
+          gradient, head_embedding, tail, positive_head, positive_tail, 
+          n_epochs, n_vertices, epochs_per_sample, initial_alpha, 
+          negative_sample_rate, seed, parallelize, grain_size, verbose);
     }
     else {
-      return optimize_layout<apumap_gradient, false>(gradient, head_embedding, tail_embedding,
-                                                    positive_head, positive_tail, n_epochs,
-                                                    n_vertices, epochs_per_sample, initial_alpha,
-                                                    negative_sample_rate, seed, parallelize,
-                                                    grain_size, verbose);
+      return optimize_layout<apumap_gradient, false>(
+          gradient, head_embedding, tail, positive_head, positive_tail, 
+          n_epochs, n_vertices, epochs_per_sample, initial_alpha, 
+          negative_sample_rate, seed, parallelize, grain_size, verbose);
     }
   }
   else {
     const umap_gradient gradient(a, b, gamma);
     if (move_other) {
-      return optimize_layout<umap_gradient, true>(gradient, head_embedding, tail_embedding,
-                                    positive_head, positive_tail, n_epochs,
-                                    n_vertices, epochs_per_sample, initial_alpha,
-                                    negative_sample_rate, seed, parallelize,
-                                    grain_size, verbose);
+      return optimize_layout<umap_gradient, true>(
+          gradient, head_embedding, tail, positive_head, positive_tail, 
+          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
+          negative_sample_rate, seed, parallelize, grain_size, verbose);
     }
     else {
-      return optimize_layout<umap_gradient, false>(gradient, head_embedding, tail_embedding,
-                                                  positive_head, positive_tail, n_epochs,
-                                                  n_vertices, epochs_per_sample, initial_alpha,
-                                                  negative_sample_rate, seed, parallelize,
-                                                  grain_size, verbose);
+      return optimize_layout<umap_gradient, false>(
+          gradient, head_embedding, tail, positive_head, positive_tail, 
+          n_epochs,n_vertices, epochs_per_sample, initial_alpha,
+          negative_sample_rate, seed, parallelize, grain_size, verbose);
     }
   }
 }
 
 // [[Rcpp::export]]
 arma::mat optimize_layout_tumap(arma::mat& head_embedding,
-                                         arma::mat& tail_embedding,
-                                         const arma::uvec positive_head,
-                                         const arma::uvec positive_tail,
-                                         unsigned int n_epochs, unsigned int n_vertices,
-                                         const arma::vec epochs_per_sample,
-                                         double initial_alpha,
-                                         double negative_sample_rate,
-                                         unsigned int seed,
-                                         bool parallelize = true,
-                                         std::size_t grain_size = 1,
-                                         bool move_other = true,
-                                         bool verbose = false) {
+                                Rcpp::Nullable<Rcpp::NumericMatrix> tail_embedding,
+                                const arma::uvec positive_head,
+                                const arma::uvec positive_tail,
+                                unsigned int n_epochs, unsigned int n_vertices,
+                                const arma::vec epochs_per_sample,
+                                double initial_alpha,
+                                double negative_sample_rate,
+                                unsigned int seed,
+                                bool parallelize = true,
+                                std::size_t grain_size = 1,
+                                bool move_other = true,
+                                bool verbose = false) {
   const tumap_gradient gradient;
+  arma::mat tail = tail_embedding.isNull() ? 
+  arma::mat(head_embedding.memptr(), head_embedding.n_rows, 
+            head_embedding.n_cols, false) :
+    Rcpp::as<arma::mat>(tail_embedding);
   if (move_other) {
-    return optimize_layout<tumap_gradient, true>(gradient, head_embedding, tail_embedding,
-                                  positive_head, positive_tail, n_epochs,
-                                  n_vertices, epochs_per_sample, initial_alpha,
-                                  negative_sample_rate, seed, parallelize,
-                                  grain_size, verbose);
+    return optimize_layout<tumap_gradient, true>(
+        gradient, head_embedding, tail, positive_head, positive_tail, n_epochs,
+        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, 
+        seed, parallelize, grain_size, verbose);
   }
   else {
-    return optimize_layout<tumap_gradient, false>(gradient, head_embedding, tail_embedding,
-                                                 positive_head, positive_tail, n_epochs,
-                                                 n_vertices, epochs_per_sample, initial_alpha,
-                                                 negative_sample_rate, seed, parallelize,
-                                                 grain_size, verbose);
+    return optimize_layout<tumap_gradient, false>(
+        gradient, head_embedding, tail, positive_head, positive_tail, n_epochs,
+        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, 
+        seed, parallelize, grain_size, verbose);
   }
 }
 
 // [[Rcpp::export]]
 arma::mat optimize_layout_largevis(arma::mat& head_embedding,
-                                            arma::mat& tail_embedding,
-                                            const arma::uvec positive_head,
-                                            const arma::uvec positive_tail,
-                                            unsigned int n_epochs, unsigned int n_vertices,
-                                            const arma::vec epochs_per_sample,
-                                            double gamma, double initial_alpha,
-                                            double negative_sample_rate,
-                                            unsigned int seed,
-                                            bool parallelize = true,
-                                            std::size_t grain_size = 1,
-                                            bool move_other = true,
-                                            bool verbose = false) {
+                                   Rcpp::Nullable<Rcpp::NumericMatrix> tail_embedding,
+                                   const arma::uvec positive_head,
+                                   const arma::uvec positive_tail,
+                                   unsigned int n_epochs, unsigned int n_vertices,
+                                   const arma::vec epochs_per_sample,
+                                   double gamma, double initial_alpha,
+                                   double negative_sample_rate,
+                                   unsigned int seed,
+                                   bool parallelize = true,
+                                   std::size_t grain_size = 1,
+                                   bool move_other = true,
+                                   bool verbose = false) {
   const largevis_gradient gradient(gamma);
+  arma::mat tail = tail_embedding.isNull() ? 
+  arma::mat(head_embedding.memptr(), head_embedding.n_rows, 
+            head_embedding.n_cols, false) :
+    Rcpp::as<arma::mat>(tail_embedding);
   if (move_other) {
-    return optimize_layout<largevis_gradient, true>(gradient, head_embedding, tail_embedding,
-                                  positive_head, positive_tail, n_epochs,
-                                  n_vertices, epochs_per_sample, initial_alpha,
-                                  negative_sample_rate, seed, parallelize,
-                                  grain_size, verbose);
+    return optimize_layout<largevis_gradient, true>(
+        gradient, head_embedding, tail, positive_head, positive_tail, n_epochs,
+        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, 
+        seed, parallelize, grain_size, verbose);
   }
   else {
-    return optimize_layout<largevis_gradient, false>(gradient, head_embedding, tail_embedding,
-                                                    positive_head, positive_tail, n_epochs,
-                                                    n_vertices, epochs_per_sample, initial_alpha,
-                                                    negative_sample_rate, seed, parallelize,
-                                                    grain_size, verbose);
+    return optimize_layout<largevis_gradient, false>(
+        gradient, head_embedding, tail, positive_head, positive_tail, n_epochs,
+        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, 
+        seed, parallelize, grain_size, verbose);
   }
 }

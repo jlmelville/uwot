@@ -1072,8 +1072,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (nrow(init) != n_vertices || ncol(init) != n_components) {
       stop("init matrix does not match necessary configuration for X")
     }
-    # Clone matrix to avoid C++ code modifying the input data
-    embedding <- matrix(init, nrow = n_vertices, ncol = n_components)
+    embedding <- init
   }
   else {
     init <- match.arg(tolower(init), c(
@@ -1141,7 +1140,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (tolower(method) == "umap") {
     embedding <- optimize_layout_umap(
       head_embedding = embedding,
-      tail_embedding = embedding,
+      tail_embedding = NULL,
       positive_head = positive_head,
       positive_tail = positive_tail,
       n_epochs = n_epochs,
@@ -1158,12 +1157,14 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     )
   }
   else if (method == "tumap") {
-    embedding <- optimize_layout_tumap(embedding,
-      tail_embedding = embedding,
+    embedding <- optimize_layout_tumap(
+      head_embedding = embedding,
+      tail_embedding = NULL,
       positive_head = positive_head,
       positive_tail = positive_tail,
       n_epochs = n_epochs,
-      n_vertices, epochs_per_sample,
+      n_vertices = n_vertices, 
+      epochs_per_sample = epochs_per_sample,
       initial_alpha = alpha,
       negative_sample_rate = negative_sample_rate,
       seed = get_seed(),
@@ -1174,12 +1175,14 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     )
   }
   else {
-    embedding <- optimize_layout_largevis(embedding,
-      tail_embedding = embedding,
+    embedding <- optimize_layout_largevis(
+      head_embedding = embedding,
+      tail_embedding = NULL,
       positive_head = positive_head,
       positive_tail = positive_tail,
       n_epochs = n_epochs,
-      n_vertices, epochs_per_sample,
+      n_vertices = n_vertices, 
+      epochs_per_sample = epochs_per_sample,
       gamma = gamma,
       initial_alpha = alpha,
       negative_sample_rate = negative_sample_rate,
