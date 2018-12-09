@@ -67,6 +67,7 @@ umap_transform <- function(X, model,
   method <- model$method
   scale_info <- model$scale_info
   metric <- model$metric
+  pca_models <- model$pca_models
 
   a <- model$a
   b <- model$b
@@ -112,6 +113,10 @@ umap_transform <- function(X, model,
       Xsub <- X[, subset, drop = FALSE]
     }
 
+    if (!is.null(pca_models) && !is.null(pca_models[[as.character(i)]])) {
+      Xsub <- apply_pca(X = Xsub, pca_res = pca_models[[as.character(i)]])
+    }
+    
     nn <- annoy_search(Xsub,
       k = n_neighbors, ann = ann, search_k = search_k,
       n_threads = n_threads, grain_size = grain_size,
@@ -305,4 +310,8 @@ apply_scaling <- function(X, scale_info, verbose = FALSE) {
   }
 
   X
+}
+# Apply a previously calculated set of PCA rotations
+apply_pca <- function(X, pca_res) {
+  sweep(X, 2, pca_res$center) %*% pca_res$rotation
 }

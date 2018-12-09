@@ -227,11 +227,41 @@ expect_ok_matrix(res_trans)
 # PCA dimensionality reduction
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, alpha = 0.5,
-            init = "spca", verbose = FALSE, n_threads = 0, pca = 2)
-expect_ok_matrix(res)
+            init = "spca", verbose = FALSE, n_threads = 0, pca = 2,
+            ret_model = TRUE)
+expect_ok_matrix(res$embedding)
+expect_is(res$pca_models, "list")
+expect_equal(length(res$pca_models), 1)
+expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
+expect_equal(res$pca_models[["1"]]$center, c(4.86, 3.31, 1.45, 0.22), 
+             check.attributes = FALSE)
 
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, alpha = 0.5,
             metric = list("euclidean" = 1:2, "euclidean" = 3:4),
             init = "spca", verbose = FALSE, n_threads = 0, pca = 1)
 expect_ok_matrix(res)
+
+# Mixed metrics, PCA and transform
+set.seed(1337)
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+            init = "spca", verbose = FALSE, n_threads = 0,
+            metric = list(euclidean = c(1, 2), cosine = 1:4, 
+                          euclidean = c(3, 4)),
+            pca = 2,
+            ret_model = TRUE)
+expect_ok_matrix(res$embedding)
+expect_is(res$pca_models, "list")
+expect_equal(length(res$pca_models), 2)
+expect_equal(names(res$pca_models), c("1", "3"))
+expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 2, nc = 2)
+expect_equal(res$pca_models[["1"]]$center, c(4.86, 3.31), 
+             check.attributes = FALSE)
+expect_ok_matrix(res$pca_models[["3"]]$rotation, nr = 2, nc = 2)
+expect_equal(res$pca_models[["3"]]$center, c(1.45, 0.22), 
+             check.attributes = FALSE)
+
+res_trans <- umap_transform(iris10, model = res, verbose = FALSE, n_threads = 0,
+                            n_epochs = 2)
+expect_ok_matrix(res_trans)

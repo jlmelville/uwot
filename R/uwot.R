@@ -967,11 +967,20 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   
   # For typical case of numeric matrix X and metric = "euclidean", save
   # PCA results here in case initialization uses PCA too
+  pca_models <- NULL
   pca_shortcut <- FALSE
   if (!is.null(pca) && length(metric) == 1 && metric == "euclidean" &&
       is.matrix(X) && ncol(X) > pca) {
     tsmessage("Reducing X column dimension to ", pca, " via PCA")
-    X <- pca_scores(X, ncol = pca)
+    pca_res <- pca_scores(X, ncol = pca, ret_extra = ret_model)
+    if (ret_model) {
+      X <- pca_res$scores
+      pca_models[["1"]] <- pca_res[c("center", "rotation")] 
+      pca_res <- NULL
+    }
+    else {
+      X <- pca_res
+    }
     pca_shortcut <- TRUE
   }
 
@@ -988,6 +997,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   
   V <- d2sr$V
   nns <- d2sr$nns
+  if (is.null(pca_models)) {
+    pca_models <- d2sr$pca_models
+  }
 
   if (!is.null(y)) {
     tsmessage("Processing y data")
@@ -1225,6 +1237,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       else {
         res$nn_index <- nns[[1]]$index
       }
+      if (!is.null(pca_models)) {
+        res$pca_models <- pca_models
+      }
     }
     if (ret_nn) {
       res$nn <- list()
@@ -1321,6 +1336,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     }
   }
   
+  pca_models <- list()
   for (i in 1:nblocks) {
     metric <- mnames[[i]]
     metric <- match.arg(metric, c("euclidean", "cosine", "manhattan", 
@@ -1356,7 +1372,15 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     if (!is.null(pca) && is.matrix(X) && metric == "euclidean" && 
         ncol(X) > pca && nrow(X) > pca) {
       tsmessage("Reducing column dimension to ", pca, " via PCA")
-      Xsub <- pca_scores(Xsub, pca)
+      pca_res <- pca_scores(Xsub, pca, ret_extra = ret_model)
+      if (ret_model) {
+        Xsub <- pca_res$scores
+        pca_models[[as.character(i)]] <- pca_res[c("center", "rotation")]
+        pca_res <- NULL
+      }
+      else {
+        Xsub <- pca_res
+      }
     }
     
     nn_sub <- nn_method
@@ -1397,7 +1421,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     V <- categorical_intersection_df(Xcat, V, weight = 0.5, verbose = verbose)
   }
   
-  list(V = V, nns = nns)
+  list(V = V, nns = nns, pca_models = pca_models)
 }
 
 x2nn <- function(X, n_neighbors, metric, nn_method,

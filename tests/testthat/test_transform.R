@@ -105,4 +105,7 @@ iris10_colrange <- scale_input(iris10, scale_type = "colrange", ret_model = TRUE
 iris10_crtrans <- apply_scaling(iris10, attr_to_scale_info(iris10_colrange))
 expect_equal(iris10_colrange, iris10_crtrans, check.attributes = FALSE)
 
-
+# test pca transform works
+iris10pca <- pca_scores(iris10, ncol = 2, ret_extra = TRUE)
+iris10pcat <- apply_pca(iris10, iris10pca)
+expect_equal(iris10pca$scores, iris10pcat, check.attributes = FALSE)

@@ -125,9 +125,12 @@ pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
   # irlba warns about using too large a percentage of total singular value
   # so don't use if dataset is small compared to ncol
   if (ncol < 0.5 * min(dim(X))) {
-    return(irlba_scores(X, ncol = ncol))
+    return(irlba_scores(X, ncol = ncol, ret_extra = ret_extra))
   }
 
+  # need extra data if we want to re-apply PCA to new points in umap_transform
+  rotation <- NULL
+  center <- NULL
   if (methods::is(X, "dist")) {
     res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ncol)
 
@@ -144,7 +147,7 @@ pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
   else {
     X <- scale(X, center = TRUE, scale = FALSE)
     # do SVD on X directly rather than forming covariance matrix
-    s <- svd(X, nu = ncol, nv = 0)
+    s <- svd(X, nu = ncol, nv = ifelse(ret_extra, ncol, 0))
     D <- diag(c(s$d[1:ncol]), ncol, ncol)
     if (verbose || ret_extra) {
       # calculate eigenvalues of covariance matrix from singular values
@@ -156,12 +159,18 @@ pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
       )
     }
     scores <- s$u %*% D
+    if (ret_extra) {
+      rotation <- s$v
+      center <- attr(X, "scaled:center")
+    }
   }
 
   if (ret_extra) {
     list(
       scores = scores,
-      lambda = lambda[1:ncol]
+      lambda = lambda[1:ncol],
+      rotation = rotation,
+      center = center
     )
   }
   else {
@@ -170,6 +179,13 @@ pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
 }
 
 # Get PCA scores via irlba
-irlba_scores <- function(X, ncol) {
-  irlba::prcomp_irlba(X, n = ncol, retx = TRUE, center = TRUE, scale = FALSE)$x
+irlba_scores <- function(X, ncol, ret_extra = FALSE) {
+  res <- irlba::prcomp_irlba(X, n = ncol, retx = TRUE, center = TRUE, 
+                             scale = FALSE)
+  if (ret_extra) {
+    list(scores = res$X, rotation = res$rotation, center = res$center)
+  }
+  else {
+    res$x
+  }
 }
