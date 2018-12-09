@@ -142,8 +142,8 @@ res_test <- umap_transform(iris10, res, n_threads = 1, verbose = FALSE)
 expect_ok_matrix(res_test)
 
 # return nn and a model
-res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+res <- tumap(iris10,
+            n_neighbors = 4, n_epochs = 2, alpha = 0.5,
             init = "rand", verbose = FALSE, n_threads = 1,
             ret_model = TRUE, ret_nn = TRUE)
 expect_is(res, "list")
