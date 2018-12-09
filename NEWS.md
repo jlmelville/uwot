@@ -1,6 +1,6 @@
-# uwot 0.0.0.9007
+# uwot 0.0.0.9007 (December 9 2018)
 
-## New features (December 9 2018)
+## New features
 
 * New parameter `pca`: set this to a positive integer to reduce matrix of
 data frames to that number of columns using PCA. Only works if 
