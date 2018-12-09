@@ -1177,7 +1177,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   else {
     embedding <- optimize_layout_largevis(
       head_embedding = embedding,
-      tail_embedding = NULL,
       positive_head = positive_head,
       positive_tail = positive_tail,
       n_epochs = n_epochs,
@@ -1189,7 +1188,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       seed = get_seed(),
       parallelize = parallelize,
       grain_size = grain_size,
-      move_other = TRUE,
       verbose = verbose
     )
   }

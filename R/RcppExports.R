@@ -21,8 +21,8 @@ optimize_layout_tumap <- function(head_embedding, tail_embedding, positive_head,
     .Call(`_uwot_optimize_layout_tumap`, head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, seed, parallelize, grain_size, move_other, verbose)
 }
 
-optimize_layout_largevis <- function(head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, parallelize = TRUE, grain_size = 1L, move_other = TRUE, verbose = FALSE) {
-    .Call(`_uwot_optimize_layout_largevis`, head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, parallelize, grain_size, move_other, verbose)
+optimize_layout_largevis <- function(head_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, parallelize = TRUE, grain_size = 1L, verbose = FALSE) {
+    .Call(`_uwot_optimize_layout_largevis`, head_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, seed, parallelize, grain_size, verbose)
 }
 
 calc_row_probabilities_parallel <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, parallelize = TRUE, grain_size = 1L, verbose = FALSE) {

@@ -344,33 +344,26 @@ arma::mat optimize_layout_tumap(arma::mat& head_embedding,
 
 // [[Rcpp::export]]
 arma::mat optimize_layout_largevis(arma::mat& head_embedding,
-                                   Rcpp::Nullable<Rcpp::NumericMatrix> tail_embedding,
                                    const arma::uvec positive_head,
                                    const arma::uvec positive_tail,
-                                   unsigned int n_epochs, unsigned int n_vertices,
+                                   unsigned int n_epochs, 
+                                   unsigned int n_vertices,
                                    const arma::vec epochs_per_sample,
                                    double gamma, double initial_alpha,
                                    double negative_sample_rate,
                                    unsigned int seed,
                                    bool parallelize = true,
                                    std::size_t grain_size = 1,
-                                   bool move_other = true,
                                    bool verbose = false) {
+  // We don't support adding extra points for LargeVis, so this is much simpler
+  // than the UMAP case
   const largevis_gradient gradient(gamma);
-  arma::mat tail = tail_embedding.isNull() ? 
-  arma::mat(head_embedding.memptr(), head_embedding.n_rows, 
-            head_embedding.n_cols, false) :
-    Rcpp::as<arma::mat>(tail_embedding);
-  if (move_other) {
-    return optimize_layout<largevis_gradient, true>(
-        gradient, head_embedding, tail, positive_head, positive_tail, n_epochs,
-        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, 
-        seed, parallelize, grain_size, verbose);
-  }
-  else {
-    return optimize_layout<largevis_gradient, false>(
-        gradient, head_embedding, tail, positive_head, positive_tail, n_epochs,
-        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate, 
-        seed, parallelize, grain_size, verbose);
-  }
+  arma::mat tail_embedding = arma::mat(head_embedding.memptr(), 
+                                       head_embedding.n_rows, 
+                                       head_embedding.n_cols, false);
+
+  return optimize_layout<largevis_gradient, true>(
+        gradient, head_embedding, tail_embedding, positive_head, positive_tail, 
+        n_epochs, n_vertices, epochs_per_sample, initial_alpha, 
+        negative_sample_rate, seed, parallelize, grain_size, verbose);
 }
