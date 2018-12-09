@@ -137,6 +137,9 @@ Coordinate initialization uses
 [RSpectra](https://cran.r-project.org/package=RSpectra) to do the
 eigendecomposition of the normalized Laplacian.
 
+The optional PCA initialization and initial dimensionality reduction uses
+[irlba](https://cran.r-project.org/package=irlba).
+
 The smooth k-nearest neighbor distance and stochastic gradient descent
 optimization routines are written in C++ (using
 [Rcpp](https://cran.r-project.org/package=Rcpp) and 
