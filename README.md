@@ -11,6 +11,13 @@ the basic method. Translated from the
 
 ## News
 
+*December 9 2018*. Added a `pca` argument that will reduce `X` to the specified
+number of dimensions (e.g. 50, commonly used in t-SNE routines). This should
+give a big speed up to the nearest neighbor search if you are using Euclidean 
+distance metric and you have lots of features (where lots might be as little as
+100-1000), for instance 
+[COIL-100](http://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php). 
+
 *December 5 2018*. Some deeply experimental mixed data type features are now
 available: you can now mix different metrics (e.g. euclidean for some
 columns and cosine for others). The type of data that can be used with `y`
@@ -89,6 +96,10 @@ iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Wid
 iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),
                                       "euclidean" = c("Petal.Length", "Petal.Width"),
                                       "categorical" = "Species"))
+                                      
+# MNIST with PCA reduction to 50 dimensions can speed up calculation without
+# affecting results much
+mnist_umap <- umap(mnist, pca = 50)
 ```
 
 ## Documentation
