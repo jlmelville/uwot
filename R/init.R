@@ -22,14 +22,16 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   # This effectively row-normalizes A: colSums is normally faster than rowSums
   # and because A is symmetric, they're equivalent
   M <- A / colSums(A)
-
+  
+  eig_res <- NULL
+  suppressWarnings(
   eig_res <- tryCatch(RSpectra::eigs(M, k = ndim + 1),
     error = function(c) {
       NULL
     }
-  )
+  ))
 
-  if (is.null(eig_res) || ncol(eig_res$vectors) < ndim + 1) {
+  if (is.null(eig_res) || eig_res$nconv < ndim + 1) {
     message(
       "Laplacian Eigenmap failed to converge, ",
       "using random initialization instead"
