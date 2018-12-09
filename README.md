@@ -101,7 +101,7 @@ approach of the UMAP publication.
 * [Examples](https://jlmelville.github.io/uwot/umap-examples.html) of the 
 output of UMAP on some datasets, compared to t-SNE.
 * How to use UMAP for 
-[Supervised and Metric Learning](https://jlmelville.github.io/uwot/metric-learning.html)
+[Supervised and Metric Learning](https://jlmelville.github.io/uwot/metric-learning.html).
 
 ## Implementation Details
 
