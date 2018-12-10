@@ -24,8 +24,6 @@
 #include <Rcpp.h>
 // [[Rcpp::depends(RcppParallel)]]
 #include <RcppParallel.h>
-// // [[Rcpp::depends(RcppProgress)]]
-// #include <progress.hpp>
 
 struct SmoothKnnWorker : public RcppParallel::Worker {
   const RcppParallel::RMatrix<double> nn_dist;
@@ -43,14 +41,10 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
   const double mean_distances;
   const double double_max = std::numeric_limits<double>::max();
 
-  // Progress progress;
-  // tthread::mutex mutex;
-
   SmoothKnnWorker(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix&  nn_idx,
                   Rcpp::NumericMatrix nn_weights,
                   const unsigned int n_iter, const double local_connectivity,
                   const double bandwidth, const double tol, const double min_k_dist_scale
-                    // , Progress& progress
   ) :
     nn_dist(nn_dist), nn_idx(nn_idx),
     nn_weights(nn_weights),
@@ -60,9 +54,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
     n_iter(n_iter), local_connectivity(local_connectivity), bandwidth(bandwidth),
     tol(tol), min_k_dist_scale(min_k_dist_scale),
     mean_distances(mean(nn_dist))
-    // , progress(progress)
   {  }
-
 
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<double> non_zero_distances(n_neighbors);
@@ -149,14 +141,6 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
       for (unsigned int k = 0; k < n_neighbors; k++) {
         nn_weights(i, k) = res[k];
       }
-
-      // {
-      //   tthread::lock_guard<tthread::mutex> guard(mutex);
-      //   progress.increment();
-      //   if (Progress::check_abort()) {
-      //     return;
-      //   }
-      // }
     }
   }
 };
@@ -178,10 +162,8 @@ Rcpp::NumericMatrix smooth_knn_distances_parallel(
 
   Rcpp::NumericMatrix nn_weights(n_vertices, nn_idx.ncol());
 
-  // Progress progress(n_vertices, verbose);
   SmoothKnnWorker worker(nn_dist, nn_idx, nn_weights, n_iter, local_connectivity,
                          bandwidth, tol, min_k_dist_scale
-                           // , progress
   );
 
   if (parallelize) {
