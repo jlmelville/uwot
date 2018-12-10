@@ -4,6 +4,7 @@
 
 * API change for consistency with Python UMAP:
   * `alpha` is now `learning_rate`.
+  * `gamma` is now `repulsion_strength`.
 
 # uwot 0.0.0.9007 (December 9 2018)
 

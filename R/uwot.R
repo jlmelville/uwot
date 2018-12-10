@@ -107,9 +107,9 @@
 #'   algorithm as similar to Laplacian eigenmaps. Larger values induce more
 #'   connectivity and a more global view of the data, smaller values concentrate
 #'   more locally.
-#' @param gamma Weighting applied to negative samples in low dimensional embedding
-#'   optimization. Values higher than one will result in greater weight
-#'   being given to negative samples.
+#' @param repulsion_strength Weighting applied to negative samples in low
+#'   dimensional embedding optimization. Values higher than one will result in
+#'   greater weight being given to negative samples.
 #' @param negative_sample_rate The number of negative edge/1-simplex samples to
 #'   use per positive edge/1-simplex sample in optimizing the low dimensional
 #'   embedding.
@@ -307,7 +307,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  init = "spectral",
                  spread = 1, min_dist = 0.01,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
-                 bandwidth = 1.0, gamma = 1.0,
+                 bandwidth = 1.0, repulsion_strength = 1.0,
                  negative_sample_rate = 5.0, a = NULL, b = NULL,
                  nn_method = NULL, n_trees = 50,
                  search_k = 2 * n_neighbors * n_trees,
@@ -326,7 +326,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     init = init, spread = spread, min_dist = min_dist,
     set_op_mix_ratio = set_op_mix_ratio,
     local_connectivity = local_connectivity, bandwidth = bandwidth,
-    gamma = gamma, negative_sample_rate = negative_sample_rate,
+    gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
     a = a, b = b, nn_method = nn_method, n_trees = n_trees,
     search_k = search_k, method = "umap", approx_pow = approx_pow,
     n_threads = n_threads, grain_size = grain_size,
@@ -441,9 +441,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   algorithm as similar to Laplacian eigenmaps. Larger values induce more
 #'   connectivity and a more global view of the data, smaller values concentrate
 #'   more locally.
-#' @param gamma Weighting applied to negative samples in low dimensional embedding
-#'   optimization. Values higher than one will result in greater weight
-#'   being given to negative samples.
+#' @param repulsion_strength Weighting applied to negative samples in low
+#'   dimensional embedding optimization. Values higher than one will result in
+#'   greater weight being given to negative samples.
 #' @param negative_sample_rate The number of negative edge/1-simplex samples to
 #'   use per positive edge/1-simplex sample in optimizing the low dimensional
 #'   embedding.
@@ -575,7 +575,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   n_epochs = NULL,
                   learning_rate = 1, scale = FALSE, init = "spectral",
                   set_op_mix_ratio = 1.0, local_connectivity = 1.0,
-                  bandwidth = 1.0, gamma = 1.0,
+                  bandwidth = 1.0, repulsion_strength = 1.0,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
@@ -593,7 +593,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_epochs = n_epochs, alpha = learning_rate, scale = scale, init = init,
     spread = NULL, min_dist = NULL, set_op_mix_ratio = set_op_mix_ratio,
     local_connectivity = local_connectivity, bandwidth = bandwidth,
-    gamma = gamma, negative_sample_rate = negative_sample_rate,
+    gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
     a = NULL, b = NULL, nn_method = nn_method, n_trees = n_trees,
     search_k = search_k, method = "tumap",
     n_threads = n_threads, grain_size = grain_size,
@@ -711,9 +711,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     that used in t-SNE and LargeVis.
 #'     \item A matrix of initial coordinates.
 #'   }
-#' @param gamma Weighting applied to negative samples in low dimensional embedding
-#'   optimization. Values higher than one will result in greater weight
-#'   being given to negative samples.
+#' @param repulsion_strength Weighting applied to negative samples in low
+#'   dimensional embedding optimization. Values higher than one will result in
+#'   greater weight being given to negative samples.
 #' @param negative_sample_rate The number of negative edge/1-simplex samples to
 #'   use per positive edge/1-simplex sample in optimizing the low dimensional
 #'   embedding.
@@ -808,7 +808,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   n_components = 2, metric = "euclidean", n_epochs = -1,
                   learning_rate = 1, scale = "maxabs", init = "lvrandom", 
-                  gamma = 7,
+                  repulsion_strength = 7,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
@@ -822,7 +822,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
     n_epochs = n_epochs, alpha = learning_rate, scale = scale, init = init,
-    gamma = gamma, negative_sample_rate = negative_sample_rate,
+    gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
     nn_method = nn_method, n_trees = n_trees, search_k = search_k,
     method = "largevis", perplexity = perplexity,
     pca = pca,

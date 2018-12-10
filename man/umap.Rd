@@ -8,9 +8,9 @@ umap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   n_epochs = NULL, learning_rate = 1, scale = FALSE,
   init = "spectral", spread = 1, min_dist = 0.01,
   set_op_mix_ratio = 1, local_connectivity = 1, bandwidth = 1,
-  gamma = 1, negative_sample_rate = 5, a = NULL, b = NULL,
-  nn_method = NULL, n_trees = 50, search_k = 2 * n_neighbors *
-  n_trees, approx_pow = FALSE, y = NULL,
+  repulsion_strength = 1, negative_sample_rate = 5, a = NULL,
+  b = NULL, nn_method = NULL, n_trees = 50, search_k = 2 *
+  n_neighbors * n_trees, approx_pow = FALSE, y = NULL,
   target_n_neighbors = n_neighbors, target_metric = "euclidean",
   target_weight = 0.5, pca = NULL, ret_model = FALSE,
   ret_nn = FALSE, n_threads = max(1,
@@ -133,9 +133,9 @@ algorithm as similar to Laplacian eigenmaps. Larger values induce more
 connectivity and a more global view of the data, smaller values concentrate
 more locally.}
 
-\item{gamma}{Weighting applied to negative samples in low dimensional embedding
-optimization. Values higher than one will result in greater weight
-being given to negative samples.}
+\item{repulsion_strength}{Weighting applied to negative samples in low
+dimensional embedding optimization. Values higher than one will result in
+greater weight being given to negative samples.}
 
 \item{negative_sample_rate}{The number of negative edge/1-simplex samples to
 use per positive edge/1-simplex sample in optimizing the low dimensional

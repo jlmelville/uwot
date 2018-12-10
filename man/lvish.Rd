@@ -7,7 +7,7 @@
 lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
   n_components = 2, metric = "euclidean", n_epochs = -1,
   learning_rate = 1, scale = "maxabs", init = "lvrandom",
-  gamma = 7, negative_sample_rate = 5, nn_method = NULL,
+  repulsion_strength = 7, negative_sample_rate = 5, nn_method = NULL,
   n_trees = 50, search_k = 2 * n_neighbors * n_trees,
   n_threads = max(1, RcppParallel::defaultNumThreads()/2),
   grain_size = 1, kernel = "gauss", pca = NULL, ret_nn = FALSE,
@@ -104,9 +104,9 @@ For lvish, the default is \code{"maxabs"}, for consistency with LargeVis.}
   \item A matrix of initial coordinates.
 }}
 
-\item{gamma}{Weighting applied to negative samples in low dimensional embedding
-optimization. Values higher than one will result in greater weight
-being given to negative samples.}
+\item{repulsion_strength}{Weighting applied to negative samples in low
+dimensional embedding optimization. Values higher than one will result in
+greater weight being given to negative samples.}
 
 \item{negative_sample_rate}{The number of negative edge/1-simplex samples to
 use per positive edge/1-simplex sample in optimizing the low dimensional
