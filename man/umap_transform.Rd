@@ -6,8 +6,8 @@
 \usage{
 umap_transform(X, model, init_weighted = TRUE, search_k = NULL,
   n_epochs = NULL, n_threads = max(1,
-  RcppParallel::defaultNumThreads()/2), grain_size = 1,
-  verbose = FALSE)
+  RcppParallel::defaultNumThreads()/2), n_sgd_threads = 1,
+  grain_size = 1, verbose = FALSE)
 }
 \arguments{
 \item{X}{The new data to be transformed, either a matrix of data frame. Must
@@ -31,12 +31,17 @@ embedded coordinates. A value between \code{30 - 100} is a reasonable trade
 off between speed and thoroughness. By default, this value is set to one
 third the number of epochs used to build the \code{model}.}
 
-\item{n_threads}{Number of threads to use. Default is half that recommended
-by RcppParallel.}
+\item{n_threads}{Number of threads to use, (except during stochastic gradient
+descent). Default is half that recommended by RcppParallel.}
+
+\item{n_sgd_threads}{Number of threads to use during stochastic gradient
+descent. If set to > 1, then results will not be reproducible, even if
+`set.seed` is called with a fixed seed before running.}
 
 \item{grain_size}{Minimum batch size for multithreading. If the number of
 items to process in a thread falls below this number, then no threads will
-be used. Used in conjunction with \code{n_threads}.}
+be used. Used in conjunction with \code{n_threads} and 
+\code{n_sgd_threads}.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }

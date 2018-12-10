@@ -223,12 +223,16 @@
 #'   could be sensitive to data scaling, so be wary of reusing nearest neighbor
 #'   data if modifying the \code{scale} parameter. This parameter can be used in
 #'   conjunction with \code{ret_model}.
-#' @param n_threads Number of threads to use. Default is half that recommended
-#'   by RcppParallel. For nearest neighbor search, only applies if
-#'   \code{nn_method = "annoy"}.
+#' @param n_threads Number of threads to use, (except during stochastic gradient
+#'   descent). Default is half that recommended by RcppParallel. For
+#'   nearest neighbor search, only applies if \code{nn_method = "annoy"}.
+#' @param n_sgd_threads Number of threads to use during stochastic gradient
+#'   descent. If set to > 1, then results will not be reproducible, even if
+#'   `set.seed` is called with a fixed seed before running.
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
-#'   be used. Used in conjunction with \code{n_threads}.
+#'   be used. Used in conjunction with \code{n_threads} and 
+#'   \code{n_sgd_threads}.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
@@ -318,6 +322,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  pca = NULL,
                  ret_model = FALSE, ret_nn = FALSE,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                 n_sgd_threads = 0,
                  grain_size = 1,
                  verbose = getOption("verbose", TRUE)) {
   uwot(
@@ -329,7 +334,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
     a = a, b = b, nn_method = nn_method, n_trees = n_trees,
     search_k = search_k, method = "umap", approx_pow = approx_pow,
-    n_threads = n_threads, grain_size = grain_size,
+    n_threads = n_threads, n_sgd_threads = n_sgd_threads, 
+    grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight, target_metric = target_metric,
     pca = pca,
@@ -548,12 +554,16 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   could be sensitive to data scaling, so be wary of reusing nearest neighbor
 #'   data if modifying the \code{scale} parameter. This parameter can be used in
 #'   conjunction with \code{ret_model}.
-#' @param n_threads Number of threads to use. Default is half that recommended
-#'   by RcppParallel. For nearest neighbor search, only applies if
-#'   \code{nn_method = "annoy"}.
+#' @param n_threads Number of threads to use, (except during stochastic gradient
+#'   descent). Default is half that recommended by RcppParallel. For
+#'   nearest neighbor search, only applies if \code{nn_method = "annoy"}.
+#' @param n_sgd_threads Number of threads to use during stochastic gradient
+#'   descent. If set to > 1, then results will not be reproducible, even if
+#'   `set.seed` is called with a fixed seed before running.
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
-#'   be used. Used in conjunction with \code{n_threads}.
+#'   be used. Used in conjunction with \code{n_threads} and 
+#'   \code{n_sgd_threads}.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
@@ -580,6 +590,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
                   n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                  n_sgd_threads = 0,
                   grain_size = 1,
                   y = NULL, target_n_neighbors = n_neighbors,
                   target_metric = "euclidean",
@@ -596,7 +607,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
     a = NULL, b = NULL, nn_method = nn_method, n_trees = n_trees,
     search_k = search_k, method = "tumap",
-    n_threads = n_threads, grain_size = grain_size,
+    n_threads = n_threads, n_sgd_threads = n_sgd_threads, 
+    grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight, target_metric = target_metric,
     pca = pca,
@@ -750,12 +762,16 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
-#' @param n_threads Number of threads to use. Default is half that recommended
-#'   by RcppParallel. For nearest neighbor search, only applies if
-#'   \code{nn_method = "annoy"}.
+#' @param n_threads Number of threads to use, (except during stochastic gradient
+#'   descent). Default is half that recommended by RcppParallel. For
+#'   nearest neighbor search, only applies if \code{nn_method = "annoy"}.
+#' @param n_sgd_threads Number of threads to use during stochastic gradient
+#'   descent. If set to > 1, then results will not be reproducible, even if
+#'   `set.seed` is called with a fixed seed before running.
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
-#'   be used. Used in conjunction with \code{n_threads}.
+#'   be used. Used in conjunction with \code{n_threads} and 
+#'   \code{n_sgd_threads}.
 #' @param kernel Type of kernel function to create input probabilities. Can be
 #'   one of \code{"gauss"} (the default) or \code{"knn"}. \code{"gauss"} uses
 #'   the usual Gaussian weighted similarities. \code{"knn"} assigns equal
@@ -813,6 +829,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
                   n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                  n_sgd_threads = 0,
                   grain_size = 1,
                   kernel = "gauss",
                   pca = NULL,
@@ -826,8 +843,9 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     nn_method = nn_method, n_trees = n_trees, search_k = search_k,
     method = "largevis", perplexity = perplexity,
     pca = pca,
-    n_threads = n_threads,
-    grain_size = grain_size, kernel = kernel,
+    n_threads = n_threads, n_sgd_threads = n_sgd_threads, 
+    grain_size = grain_size, 
+    kernel = kernel,
     ret_nn = ret_nn,
     verbose = verbose
   )
@@ -848,8 +866,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  target_metric = "euclidean",
                  target_weight = 0.5,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
-                 kernel = "gauss",
+                 n_sgd_threads = 0,
                  grain_size = 1,
+                 kernel = "gauss",
                  ret_model = FALSE, ret_nn = FALSE,
                  pca = NULL,
                  verbose = getOption("verbose", TRUE)) {
@@ -881,6 +900,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
   
+  if (n_threads < 0) {
+    stop("n_threads cannot be < 0")
+  }
+  if (n_sgd_threads < 0) {
+    stop("n_sgd_threads cannot be < 0")
+  }
   if (n_threads > 0) {
     RcppParallel::setThreadOptions(numThreads = n_threads)
   }
@@ -1151,10 +1176,14 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   tsmessage(
     "Commencing optimization for ", n_epochs, " epochs, with ",
     length(positive_head), " positive edges",
-    pluralize("thread", n_threads, " using")
+    pluralize("thread", n_sgd_threads, " using")
   )
 
-  parallelize <- n_threads > 0
+  parallelize <- n_sgd_threads > 0
+  if (n_sgd_threads > 0) {
+    RcppParallel::setThreadOptions(numThreads = n_sgd_threads)
+  }
+
   if (tolower(method) == "umap") {
     embedding <- optimize_layout_umap(
       head_embedding = embedding,

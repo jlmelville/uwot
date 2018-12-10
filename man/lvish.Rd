@@ -10,8 +10,8 @@ lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
   repulsion_strength = 7, negative_sample_rate = 5, nn_method = NULL,
   n_trees = 50, search_k = 2 * n_neighbors * n_trees,
   n_threads = max(1, RcppParallel::defaultNumThreads()/2),
-  grain_size = 1, kernel = "gauss", pca = NULL, ret_nn = FALSE,
-  verbose = getOption("verbose", TRUE))
+  n_sgd_threads = 0, grain_size = 1, kernel = "gauss", pca = NULL,
+  ret_nn = FALSE, verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -148,13 +148,18 @@ larger k, the more the accurate results, but the longer the search takes.
 With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 search. Only used if the \code{nn_method} is \code{"annoy"}.}
 
-\item{n_threads}{Number of threads to use. Default is half that recommended
-by RcppParallel. For nearest neighbor search, only applies if
-\code{nn_method = "annoy"}.}
+\item{n_threads}{Number of threads to use, (except during stochastic gradient
+descent). Default is half that recommended by RcppParallel. For
+nearest neighbor search, only applies if \code{nn_method = "annoy"}.}
+
+\item{n_sgd_threads}{Number of threads to use during stochastic gradient
+descent. If set to > 1, then results will not be reproducible, even if
+`set.seed` is called with a fixed seed before running.}
 
 \item{grain_size}{Minimum batch size for multithreading. If the number of
 items to process in a thread falls below this number, then no threads will
-be used. Used in conjunction with \code{n_threads}.}
+be used. Used in conjunction with \code{n_threads} and 
+\code{n_sgd_threads}.}
 
 \item{kernel}{Type of kernel function to create input probabilities. Can be
 one of \code{"gauss"} (the default) or \code{"knn"}. \code{"gauss"} uses

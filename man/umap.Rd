@@ -14,8 +14,8 @@ umap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   target_n_neighbors = n_neighbors, target_metric = "euclidean",
   target_weight = 0.5, pca = NULL, ret_model = FALSE,
   ret_nn = FALSE, n_threads = max(1,
-  RcppParallel::defaultNumThreads()/2), grain_size = 1,
-  verbose = getOption("verbose", TRUE))
+  RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
+  grain_size = 1, verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -264,13 +264,18 @@ could be sensitive to data scaling, so be wary of reusing nearest neighbor
 data if modifying the \code{scale} parameter. This parameter can be used in
 conjunction with \code{ret_model}.}
 
-\item{n_threads}{Number of threads to use. Default is half that recommended
-by RcppParallel. For nearest neighbor search, only applies if
-\code{nn_method = "annoy"}.}
+\item{n_threads}{Number of threads to use, (except during stochastic gradient
+descent). Default is half that recommended by RcppParallel. For
+nearest neighbor search, only applies if \code{nn_method = "annoy"}.}
+
+\item{n_sgd_threads}{Number of threads to use during stochastic gradient
+descent. If set to > 1, then results will not be reproducible, even if
+`set.seed` is called with a fixed seed before running.}
 
 \item{grain_size}{Minimum batch size for multithreading. If the number of
 items to process in a thread falls below this number, then no threads will
-be used. Used in conjunction with \code{n_threads}.}
+be used. Used in conjunction with \code{n_threads} and 
+\code{n_sgd_threads}.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }

@@ -11,6 +11,14 @@ the basic method. Translated from the
 
 ## News
 
+*December 10 2018*. Default behavior has changed so that multiple threads are no
+longer used during the stochastic gradient descent phase. This (along with some
+other minor changes) should ensure reproducibility (as long as you `set.seed`
+appropriately), at the cost of a loss in speed and is in line with the behavior
+of the Python UMAP implementation. If you don't care about reproducibility, the
+number of threads to use during SGD can be set with a new parameter,
+`n_sgd_threads`.
+
 *December 9 2018*. Added a `pca` argument that will reduce `X` to the specified
 number of dimensions (e.g. 50, commonly used in t-SNE routines). This should
 give a big speed up to the nearest neighbor search if you are using Euclidean 

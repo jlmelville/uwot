@@ -27,11 +27,15 @@
 #'   embedded coordinates. A value between \code{30 - 100} is a reasonable trade
 #'   off between speed and thoroughness. By default, this value is set to one
 #'   third the number of epochs used to build the \code{model}.
-#' @param n_threads Number of threads to use. Default is half that recommended
-#'   by RcppParallel.
+#' @param n_threads Number of threads to use, (except during stochastic gradient
+#'   descent). Default is half that recommended by RcppParallel.
+#' @param n_sgd_threads Number of threads to use during stochastic gradient
+#'   descent. If set to > 1, then results will not be reproducible, even if
+#'   `set.seed` is called with a fixed seed before running.
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
-#'   be used. Used in conjunction with \code{n_threads}.
+#'   be used. Used in conjunction with \code{n_threads} and 
+#'   \code{n_sgd_threads}.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of coordinates for \code{X} transformed into the space
 #'   of the \code{model}.
@@ -51,6 +55,7 @@ umap_transform <- function(X, model,
                            n_epochs = NULL,
                            n_threads =
                              max(1, RcppParallel::defaultNumThreads() / 2),
+                           n_sgd_threads = 1,
                            grain_size = 1,
                            verbose = FALSE) {
   if (is.null(n_epochs)) {
@@ -181,10 +186,13 @@ umap_transform <- function(X, model,
     tsmessage(
       "Commencing optimization for ", n_epochs, " epochs, with ",
       length(positive_head), " positive edges",
-      pluralize("thread", n_threads, " using")
+      pluralize("thread", n_sgd_threads, " using")
     )
-
-    parallelize <- n_threads > 0
+    
+    parallelize <- n_sgd_threads > 0
+    if (n_sgd_threads > 0) {
+      RcppParallel::setThreadOptions(numThreads = n_sgd_threads)
+    }
     if (tolower(method) == "umap") {
       embedding <- optimize_layout_umap(
         head_embedding = embedding,
