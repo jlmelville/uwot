@@ -66,9 +66,9 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
 
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<double> non_zero_distances(n_neighbors);
-
-    double sigma = 1.0;
+    
     for (std::size_t i = begin; i < end; i++) {
+      double sigma = 1.0;
       non_zero_distances.clear();
       double lo = 0.0;
       double hi = double_max;

@@ -58,11 +58,8 @@ struct PerplexityWorker : public RcppParallel::Worker {
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<double> d2(n_neighbors - 1, 0.0);
 
-    // first vertex: guess initial beta as 1.0
-    // subsequent vertices, guess the last optimized beta
-    double beta = 1.0;
-
     for (std::size_t i = begin; i < end; i++) {
+      double beta = 1.0;
       double lo = 0.0;
       double hi = double_max;
 
