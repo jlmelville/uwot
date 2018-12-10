@@ -2,21 +2,21 @@ context("Supervised")
 
 # categorical y
 res <- umap(iris10,
-  n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+  n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
   init = "rand", verbose = FALSE, n_threads = 1, y = ycat
 )
 expect_ok_matrix(res)
 
 # numeric y
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
             init = "rand", verbose = FALSE, n_threads = 1, y = ynum
 )
 expect_ok_matrix(res)
 
 # mixed categorical and numeric
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
             init = "rand", verbose = FALSE, n_threads = 1, 
             y = data.frame(ycat, ynum)
 )
@@ -24,7 +24,7 @@ expect_ok_matrix(res)
 
 # multiple categorical y
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
             init = "rand", verbose = FALSE, n_threads = 1, 
             y = data.frame(ycat, ycat2)
 )
@@ -32,7 +32,7 @@ expect_ok_matrix(res)
 
 # multiple numeric y
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
             init = "rand", verbose = FALSE, n_threads = 1, 
             y = data.frame(ynum, ynum2)
 )
@@ -40,7 +40,7 @@ expect_ok_matrix(res)
 
 # multiple numeric and categorical
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
             init = "rand", verbose = FALSE, n_threads = 1, 
             y = data.frame(ynum, ynum2, ycat, ycat2)
 )
@@ -49,7 +49,7 @@ expect_ok_matrix(res)
 # multiple numeric with different metrics and categorical
 set.seed(1337)
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
             init = "rand", verbose = FALSE, n_threads = 1, 
             target_metric = list("euclidean" = 1, "cosine" = 2),
             target_weight = 0.5,

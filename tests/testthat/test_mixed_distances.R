@@ -54,7 +54,7 @@ expect_ok_matrix(rescat)
 
 irismixed <- data.frame(iris10, ynum, ynum2, ycat, ycat2)
 resmixed <- umap(irismixed,
-                 n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+                 n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
                  init = "rand", verbose = FALSE, n_threads = 1, 
                  metric = list("euclidean" = 1:4, "euclidean" = 5, "cosine" = 6,
                                "categorical" = c("ycat", "ycat2"))
@@ -63,7 +63,7 @@ expect_ok_matrix(resmixed)
 
 irismixed <- data.frame(iris10, ynum, ynum2, ycat, ycat2)
 resmixed <- umap(irismixed,
-                 n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+                 n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
                  init = "rand", verbose = FALSE, n_threads = 1, 
                  metric = list("euclidean" = 1:4, "euclidean" = 5, "cosine" = 6,
                                "categorical" = c("ycat", "ycat2")),

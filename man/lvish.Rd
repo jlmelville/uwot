@@ -5,12 +5,12 @@
 \title{Dimensionality Reduction with a LargeVis-like method}
 \usage{
 lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
-  n_components = 2, metric = "euclidean", n_epochs = -1, alpha = 1,
-  scale = "maxabs", init = "lvrandom", gamma = 7,
-  negative_sample_rate = 5, nn_method = NULL, n_trees = 50,
-  search_k = 2 * n_neighbors * n_trees, n_threads = max(1,
-  RcppParallel::defaultNumThreads()/2), grain_size = 1,
-  kernel = "gauss", pca = NULL, ret_nn = FALSE,
+  n_components = 2, metric = "euclidean", n_epochs = -1,
+  learning_rate = 1, scale = "maxabs", init = "lvrandom",
+  gamma = 7, negative_sample_rate = 5, nn_method = NULL,
+  n_trees = 50, search_k = 2 * n_neighbors * n_trees,
+  n_threads = max(1, RcppParallel::defaultNumThreads()/2),
+  grain_size = 1, kernel = "gauss", pca = NULL, ret_nn = FALSE,
   verbose = getOption("verbose", TRUE))
 }
 \arguments{
@@ -66,7 +66,8 @@ dynamically based on dataset size, to give the same number of edge samples
 as the LargeVis defaults. This is usually substantially larger than the
 UMAP defaults.}
 
-\item{alpha}{Initial learning rate used in optimization of the coordinates.}
+\item{learning_rate}{Initial learning rate used in optimization of the 
+coordinates.}
 
 \item{scale}{Scaling to apply to \code{X} if it is a data frame or matrix:
 \itemize{
@@ -219,7 +220,7 @@ following:
 \examples{
 \dontrun{
 # Use perplexity rather than n_neighbors to control the size of the local
-neighborhood iris_lvish <- umap(iris, perplexity = 50, alpha = 0.5,
+neighborhood iris_lvish <- umap(iris, perplexity = 50, learning_rate = 0.5,
                                 init = "random")
 
 # Default number of epochs is much larger than for UMAP, assumes random

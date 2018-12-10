@@ -54,7 +54,7 @@ library(uwot)
 ## Example
 
 ```R
-iris_umap <- umap(iris, n_neighbors = 50, alpha = 0.5, init = "random")
+iris_umap <- umap(iris, n_neighbors = 50, learning_rate = 0.5, init = "random")
 
 # Load mnist from somewhere, e.g.
 # devtools::install_github("jlmelville/snedata")

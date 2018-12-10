@@ -1,3 +1,10 @@
+# uwot 0.0.0.9008
+
+## New features
+
+* API change for consistency with Python UMAP:
+  * `alpha` is now `learning_rate`.
+
 # uwot 0.0.0.9007 (December 9 2018)
 
 ## New features

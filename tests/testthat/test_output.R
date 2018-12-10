@@ -7,7 +7,7 @@ set.seed(1337)
 # and various architecture differences. So we'll just check that the output
 # is ok
 res <- umap(iris10,
-  n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+  n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
   init = "normlaplacian", verbose = FALSE, n_threads = 0
 )
 expect_ok_matrix(res)
@@ -15,21 +15,21 @@ expect_ok_matrix(res)
 # Results are repeatable with n_threads = 0 (or 1) and same seed
 set.seed(1337)
 res2 <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
             init = "normlaplacian", verbose = FALSE, n_threads = 0
 )
 expect_equal(res2, res)
 
 # Distance matrix input
 res <- umap(dist(iris10),
-  n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+  n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
   init = "laplacian", verbose = FALSE, n_threads = 0
 )
 expect_ok_matrix(res)
 
 # t-UMAP and cosine metric
 res <- tumap(iris10,
-  n_neighbors = 4, n_epochs = 2, alpha = 0.5, metric = "cosine",
+  n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, metric = "cosine",
   init = "spectral", verbose = FALSE, n_threads = 0
 )
 expect_ok_matrix(res)
@@ -37,19 +37,19 @@ expect_ok_matrix(res)
 
 # UMAP and cosine metric n_threads = 1 issue #5
 res <- umap(iris10,
-  n_neighbors = 4, n_epochs = 2, alpha = 0.5, metric = "cosine",
+  n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, metric = "cosine",
   init = "spectral", verbose = FALSE, n_threads = 1
 )
 expect_ok_matrix(res)
 
 # metric = Manhattan
 res <- umap(iris10,
-  n_neighbors = 4, n_epochs = 2, alpha = 0.5, metric = "manhattan",
+  n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, metric = "manhattan",
   init = "rand", verbose = FALSE, n_threads = 0
 )
 expect_ok_matrix(res)
 res <- umap(iris10,
-  n_neighbors = 4, n_epochs = 2, alpha = 0.5, metric = "manhattan",
+  n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, metric = "manhattan",
   init = "spca", verbose = FALSE, n_threads = 1
 )
 expect_ok_matrix(res)
@@ -59,7 +59,7 @@ iris10_pca <- prcomp(iris10, rank. = 2, retx = TRUE, center = TRUE,
                      scale. = FALSE)$x
 
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
             init = iris10_pca, verbose = FALSE, n_threads = 0
 )
 expect_ok_matrix(res)
@@ -71,7 +71,7 @@ expect_equal(iris10_pca, prcomp(iris10, rank. = 2, retx = TRUE, center = TRUE,
 # reset seed here so we can compare output with next test result
 set.seed(1337)
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
             init = "spca", verbose = FALSE, n_threads = 0,
             ret_nn = TRUE)
 expect_is(res, "list")
@@ -84,7 +84,7 @@ expect_ok_matrix(res$nn$euclidean$dist, nc = 4)
 # Use pre-calculated nn: should be the same as previous result
 set.seed(1337)
 res_nn <- umap(iris10,
-            nn_method = res$nn[[1]], n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+            nn_method = res$nn[[1]], n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
             init = "spca", verbose = FALSE, n_threads = 0)
 expect_ok_matrix(res_nn)
 expect_equal(res_nn, res$embedding)
@@ -92,13 +92,13 @@ expect_equal(res_nn, res$embedding)
 # X = NULL is ok if passing nn data and rand init
 set.seed(1337)
 res_nnxn <- umap(X = NULL,
-               nn_method = nn, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+               nn_method = nn, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
                init = "rand", verbose = FALSE, n_threads = 0)
 
 # Passing nn list directly is also ok
 set.seed(1337)
 res_nnl <- umap(iris10,
-               nn_method = res$nn, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+               nn_method = res$nn, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
                init = "rand", verbose = FALSE, n_threads = 0,
                ret_nn = TRUE)
 expect_ok_matrix(res_nnl$embedding)
@@ -108,7 +108,7 @@ expect_equal(res_nnxn, res_nnl$embedding)
 
 # Use multiple nn data
 res_nn2 <- umap(iris10,
-               nn_method = list(nn, nn), n_epochs = 2, alpha = 0.5, 
+               nn_method = list(nn, nn), n_epochs = 2, learning_rate = 0.5, 
                min_dist = 0.001,
                init = "spca", verbose = FALSE, n_threads = 0, ret_nn = TRUE)
 expect_ok_matrix(res_nn2$embedding)
@@ -117,21 +117,21 @@ expect_equal(names(res_nn2$nn), c("precomputed", "precomputed"))
 
 # lvish and force use of annoy
 res <- lvish(iris10,
-  perplexity = 4, n_epochs = 2, alpha = 0.5, nn_method = "annoy",
+  perplexity = 4, n_epochs = 2, learning_rate = 0.5, nn_method = "annoy",
   init = "lvrand", verbose = FALSE, n_threads = 1
 )
 expect_ok_matrix(res)
 
 # lvish with knn
 res <- lvish(iris10,
-  kernel = "knn", perplexity = 4, n_epochs = 2, alpha = 0.5,
+  kernel = "knn", perplexity = 4, n_epochs = 2, learning_rate = 0.5,
   init = "lvrand", verbose = FALSE, n_threads = 1
 )
 expect_ok_matrix(res)
 
 # return a model
 res <- umap(iris10,
-  n_neighbors = 4, n_epochs = 2, alpha = 0.5, min_dist = 0.001,
+  n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
   init = "rand", verbose = FALSE, n_threads = 1,
   ret_model = TRUE
 )
@@ -143,7 +143,7 @@ expect_ok_matrix(res_test)
 
 # return nn and a model
 res <- tumap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
             init = "rand", verbose = FALSE, n_threads = 1,
             ret_model = TRUE, ret_nn = TRUE)
 expect_is(res, "list")
@@ -164,7 +164,7 @@ expect_ok_matrix(res, nc = 1)
 
 # Supervised
 set.seed(1337)
-res_y <- umap(iris10, n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+res_y <- umap(iris10, n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
                min_dist = 0.001, init = "spca", verbose = FALSE, n_threads = 0,
                y = 1 / (1:10) ^ 2, target_n_neighbors = 2)
 expect_ok_matrix(res_y)
@@ -198,7 +198,7 @@ y_nn <- list(
 )
 
 set.seed(1337)
-res_ynn <- umap(iris10, n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+res_ynn <- umap(iris10, n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
                min_dist = 0.001, init = "spca", verbose = FALSE, n_threads = 0,
                y = y_nn)
 expect_ok_matrix(res_ynn)
@@ -216,7 +216,7 @@ expect_ok_matrix(res)
 # Multiple metrics
 set.seed(1337)
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
             init = "spca", verbose = FALSE, n_threads = 0,
             metric = list(euclidean = c(1, 2), euclidean = c(3, 4)),
             ret_model = TRUE)
@@ -226,7 +226,7 @@ expect_ok_matrix(res_trans)
 
 # PCA dimensionality reduction
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
             init = "spca", verbose = FALSE, n_threads = 0, pca = 2,
             ret_model = TRUE)
 expect_ok_matrix(res$embedding)
@@ -237,7 +237,7 @@ expect_equal(res$pca_models[["1"]]$center, c(4.86, 3.31, 1.45, 0.22),
              check.attributes = FALSE)
 
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
             metric = list("euclidean" = 1:2, "euclidean" = 3:4),
             init = "spca", verbose = FALSE, n_threads = 0, pca = 1)
 expect_ok_matrix(res)
@@ -245,7 +245,7 @@ expect_ok_matrix(res)
 # Mixed metrics, PCA and transform
 set.seed(1337)
 res <- umap(iris10,
-            n_neighbors = 4, n_epochs = 2, alpha = 0.5,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
             init = "spca", verbose = FALSE, n_threads = 0,
             metric = list(euclidean = c(1, 2), cosine = 1:4, 
                           euclidean = c(3, 4)),

@@ -60,7 +60,8 @@
 #'   \item{\code{"colrange"}} Scale each column in the range (0,1).
 #' }
 #' For UMAP, the default is \code{"none"}.
-#' @param alpha Initial learning rate used in optimization of the coordinates.
+#' @param learning_rate Initial learning rate used in optimization of the 
+#'   coordinates.
 #' @param init Type of initialization for the coordinates. Options are:
 #'   \itemize{
 #'     \item \code{"spectral"} Spectral embedding using the normalized Laplacian
@@ -246,7 +247,8 @@
 #'   the returned list contains the combined data.
 #' @examples
 #' \dontrun{
-#' iris_umap <- umap(iris, n_neighbors = 50, alpha = 0.5, init = "random")
+#' iris_umap <- umap(iris, n_neighbors = 50, learning_rate = 0.5, 
+#'                   init = "random")
 #'
 #' # Faster approximation to the gradient
 #' iris_umap <- umap(iris, n_neighbors = 15, approx_pow = TRUE)
@@ -301,7 +303,8 @@
 #' \url{http://www.jmlr.org/papers/v9/vandermaaten08a.html}
 #' @export
 umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
-                 n_epochs = NULL, alpha = 1, scale = FALSE, init = "spectral",
+                 n_epochs = NULL, learning_rate = 1, scale = FALSE, 
+                 init = "spectral",
                  spread = 1, min_dist = 0.01,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                  bandwidth = 1.0, gamma = 1.0,
@@ -319,7 +322,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  verbose = getOption("verbose", TRUE)) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
-    metric = metric, n_epochs = n_epochs, alpha = alpha, scale = scale,
+    metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
     init = init, spread = spread, min_dist = min_dist,
     set_op_mix_ratio = set_op_mix_ratio,
     local_connectivity = local_connectivity, bandwidth = bandwidth,
@@ -388,7 +391,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. By default, this value is set to \code{500} for datasets
 #'   containing 10,000 vertices or less, and \code{200} otherwise.
-#' @param alpha Initial learning rate used in optimization of the coordinates.
+#' @param learning_rate Initial learning rate used in optimization of the 
+#'   coordinates.
 #' @param scale Scaling to apply to \code{X} if it is a data frame or matrix:
 #' \itemize{
 #'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
@@ -569,7 +573,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @export
 tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   n_epochs = NULL,
-                  alpha = 1, scale = FALSE, init = "spectral",
+                  learning_rate = 1, scale = FALSE, init = "spectral",
                   set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                   bandwidth = 1.0, gamma = 1.0,
                   negative_sample_rate = 5.0,
@@ -586,7 +590,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
-    n_epochs = n_epochs, alpha = alpha, scale = scale, init = init,
+    n_epochs = n_epochs, alpha = learning_rate, scale = scale, init = init,
     spread = NULL, min_dist = NULL, set_op_mix_ratio = set_op_mix_ratio,
     local_connectivity = local_connectivity, bandwidth = bandwidth,
     gamma = gamma, negative_sample_rate = negative_sample_rate,
@@ -672,7 +676,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   dynamically based on dataset size, to give the same number of edge samples
 #'   as the LargeVis defaults. This is usually substantially larger than the
 #'   UMAP defaults.
-#' @param alpha Initial learning rate used in optimization of the coordinates.
+#' @param learning_rate Initial learning rate used in optimization of the 
+#'   coordinates.
 #' @param scale Scaling to apply to \code{X} if it is a data frame or matrix:
 #' \itemize{
 #'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
@@ -791,7 +796,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @examples
 #' \dontrun{
 #' # Use perplexity rather than n_neighbors to control the size of the local
-#' neighborhood iris_lvish <- umap(iris, perplexity = 50, alpha = 0.5,
+#' neighborhood iris_lvish <- umap(iris, perplexity = 50, learning_rate = 0.5,
 #'                                 init = "random")
 #'
 #' # Default number of epochs is much larger than for UMAP, assumes random
@@ -802,7 +807,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @export
 lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   n_components = 2, metric = "euclidean", n_epochs = -1,
-                  alpha = 1, scale = "maxabs", init = "lvrandom", gamma = 7,
+                  learning_rate = 1, scale = "maxabs", init = "lvrandom", 
+                  gamma = 7,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
@@ -815,7 +821,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
   uwot(X,
     n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
-    n_epochs = n_epochs, alpha = alpha, scale = scale, init = init,
+    n_epochs = n_epochs, alpha = learning_rate, scale = scale, init = init,
     gamma = gamma, negative_sample_rate = negative_sample_rate,
     nn_method = nn_method, n_trees = n_trees, search_k = search_k,
     method = "largevis", perplexity = perplexity,

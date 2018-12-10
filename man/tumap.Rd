@@ -5,11 +5,11 @@
 \title{Dimensionality Reduction Using t-Distributed UMAP (t-UMAP)}
 \usage{
 tumap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
-  n_epochs = NULL, alpha = 1, scale = FALSE, init = "spectral",
-  set_op_mix_ratio = 1, local_connectivity = 1, bandwidth = 1,
-  gamma = 1, negative_sample_rate = 5, nn_method = NULL,
-  n_trees = 50, search_k = 2 * n_neighbors * n_trees,
-  n_threads = max(1, RcppParallel::defaultNumThreads()/2),
+  n_epochs = NULL, learning_rate = 1, scale = FALSE,
+  init = "spectral", set_op_mix_ratio = 1, local_connectivity = 1,
+  bandwidth = 1, gamma = 1, negative_sample_rate = 5,
+  nn_method = NULL, n_trees = 50, search_k = 2 * n_neighbors *
+  n_trees, n_threads = max(1, RcppParallel::defaultNumThreads()/2),
   grain_size = 1, y = NULL, target_n_neighbors = n_neighbors,
   target_metric = "euclidean", target_weight = 0.5, pca = NULL,
   ret_model = FALSE, ret_nn = FALSE, verbose = getOption("verbose",
@@ -64,7 +64,8 @@ a vector, each factor column specified is processed individually.}
 embedded coordinates. By default, this value is set to \code{500} for datasets
 containing 10,000 vertices or less, and \code{200} otherwise.}
 
-\item{alpha}{Initial learning rate used in optimization of the coordinates.}
+\item{learning_rate}{Initial learning rate used in optimization of the 
+coordinates.}
 
 \item{scale}{Scaling to apply to \code{X} if it is a data frame or matrix:
 \itemize{
