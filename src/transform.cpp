@@ -41,11 +41,9 @@ struct AverageWorker : public RcppParallel::Worker {
   {  }
 
   void operator()(std::size_t begin, std::size_t end) {
-    std::vector<double> sumc(nc, 0.0);
+    std::vector<double> sumc(nc);
     for (std::size_t i = begin; i < end; i++) {
-      for (std::size_t k = 0; k < nc; k++) {
-        sumc[k] = 0.0;
-      }
+      std::fill(sumc.begin(), sumc.end(), 0.0);
 
       for (std::size_t j = 0; j < nnbrs; j++) {
         auto nbr = nn_index(i, j) - 1;
@@ -99,11 +97,10 @@ struct WeightedAverageWorker : public RcppParallel::Worker {
   {  }
 
   void operator()(std::size_t begin, std::size_t end) {
-    std::vector<double> sumc(nc, 0.0);
+    std::vector<double> sumc(nc);
     for (std::size_t i = begin; i < end; i++) {
-      for (std::size_t k = 0; k < nc; k++) {
-        sumc[k] = 0.0;
-      }
+      std::fill(sumc.begin(), sumc.end(), 0.0);
+      
       double sumw = 0.0;
 
       for (std::size_t j = 0; j < nnbrs; j++) {
