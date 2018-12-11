@@ -27,8 +27,7 @@ public:
   umap_gradient(const double a, const double b, const double gamma);
   const double grad_attr(const double dist_squared) const;
   const double grad_rep(const double dist_squared) const;
-  // static const constexpr double clip_max = 4.0;
-  const double clip_max;
+  static const constexpr double clip_max = 4.0;
 private:
   const double a;
   const double b;
@@ -42,8 +41,7 @@ public:
   apumap_gradient(const double a, const double b, const double gamma);
   const double grad_attr(const double dist_squared) const;
   const double grad_rep(const double dist_squared) const;
-  // static const constexpr double clip_max = 4.0;
-  const double clip_max;
+  static const constexpr double clip_max = 4.0;
 private:
   const double a;
   const double b;
@@ -62,8 +60,7 @@ public:
   tumap_gradient();
   const double grad_attr(const double dist_squared) const;
   const double grad_rep(const double dist_squared) const;
-  // static const constexpr double clip_max = 4.0;
-  const double clip_max;
+  static const constexpr double clip_max = 4.0;
 };
 
 class largevis_gradient {
@@ -71,8 +68,7 @@ public:
   largevis_gradient(const double gamma);
   const double grad_attr(const double dist_squared) const;
   const double grad_rep(const double dist_squared) const;
-  // static const constexpr double clip_max = 5.0;
-  const double clip_max;
+  static const constexpr double clip_max = 5.0;
 
 private:
   const double gamma_2;

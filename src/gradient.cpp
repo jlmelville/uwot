@@ -22,7 +22,7 @@
 // UMAP
 
 umap_gradient::umap_gradient(const double a, const double b, const double gamma) :
-  clip_max(4.0), a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b)
+  a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b)
   { }
 
 // The Python implementation does two pow calls: one for d^b, and one for
@@ -74,7 +74,7 @@ double fastPrecisePow(double a, double b) {
 
 // Approximate-Power UMAP: UMAP with an approximation to the slow pow calculation
 apumap_gradient::apumap_gradient(const double a, const double b, const double gamma) :
-  clip_max(4.0), a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b)
+  a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b)
   {  }
 
 const double apumap_gradient::grad_attr(const double dist_squared) const {
@@ -89,7 +89,7 @@ const double apumap_gradient::grad_rep(const double dist_squared) const {
 
 // t-UMAP
 
-tumap_gradient::tumap_gradient() : clip_max(4.0) {}
+tumap_gradient::tumap_gradient() {}
 
 const double tumap_gradient::grad_attr(const double dist_squared) const {
   return -2.0 / (dist_squared + 1.0);
@@ -102,8 +102,8 @@ const double tumap_gradient::grad_rep(const double dist_squared) const {
 
 // LargeVis
 
-largevis_gradient::largevis_gradient(const double gamma) : clip_max(5.0),
-gamma_2(gamma * 2.0) {}
+largevis_gradient::largevis_gradient(const double gamma) : 
+  gamma_2(gamma * 2.0) {}
 
 const double largevis_gradient::grad_attr(const double dist_squared) const {
   return -2.0 / (dist_squared + 1.0);
@@ -112,5 +112,3 @@ const double largevis_gradient::grad_attr(const double dist_squared) const {
 const double largevis_gradient::grad_rep(const double dist_squared) const {
   return gamma_2 / ((0.1 + dist_squared) * (dist_squared + 1.0));
 }
-
-
