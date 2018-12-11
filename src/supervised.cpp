@@ -78,17 +78,17 @@ NumericVector general_sset_intersection_cpp(
     for (auto k = indptr2[i]; k < indptr2[i + 1]; k++) {
       if (indices2[k] == j) {
           right_val = data2[k];
-        }
       }
+    }
       
-      if (left_val > left_min || right_val > right_min) {
-        if (mix_weight < 0.5) {
-          result_val[idx] = left_val * std::pow(right_val, (mix_weight / (1.0 - mix_weight)));
-        }
-        else {
-          result_val[idx] = right_val * std::pow(left_val, (((1.0 - mix_weight) / mix_weight)));
-        }
+    if (left_val > left_min || right_val > right_min) {
+      if (mix_weight < 0.5) {
+        result_val[idx] = left_val * std::pow(right_val, (mix_weight / (1.0 - mix_weight)));
       }
+      else {
+        result_val[idx] = right_val * std::pow(left_val, (((1.0 - mix_weight) / mix_weight)));
+      }
+    }
   }
   
   return result_val;
