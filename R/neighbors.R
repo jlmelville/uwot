@@ -19,12 +19,12 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
     }
     else {
       res <- annoy_nn(X,
-        k = k,
-        metric = metric,
-        n_trees = n_trees, search_k = search_k,
-        n_threads = n_threads,
-        ret_index = ret_index,
-        verbose = verbose
+                      k = k,
+                      metric = metric,
+                      n_trees = n_trees, search_k = search_k,
+                      n_threads = n_threads,
+                      ret_index = ret_index,
+                      verbose = verbose
       )
     }
   }
@@ -47,15 +47,15 @@ annoy_nn <- function(X, k = 10,
                      ret_index = FALSE,
                      verbose = FALSE) {
   ann <- annoy_build(X,
-    metric = metric, n_trees = n_trees,
-    n_threads = n_threads, grain_size = grain_size,
-    verbose = verbose
+                     metric = metric, n_trees = n_trees,
+                     n_threads = n_threads, grain_size = grain_size,
+                     verbose = verbose
   )
 
   res <- annoy_search(X,
-    k = k, ann = ann, search_k = search_k,
-    n_threads = n_threads,
-    grain_size = grain_size, verbose = verbose
+                      k = k, ann = ann, search_k = search_k,
+                      n_threads = n_threads,
+                      grain_size = grain_size, verbose = verbose
   )
 
   res <- list(idx = res$idx, dist = res$dist)
@@ -125,10 +125,10 @@ annoy_search <- function(X, k, ann,
     }
 
     res <- search_nn_func(index_file,
-      nrow(X), ncol(X),
-      k, search_k,
-      grain_size = grain_size,
-      verbose = verbose
+                          X,
+                          k, search_k,
+                          grain_size = grain_size,
+                          verbose = verbose
     )
     idx <- res$item
     dist <- res$distance
@@ -157,7 +157,6 @@ annoy_search <- function(X, k, ann,
 
   list(idx = idx + 1, dist = dist)
 }
-
 
 FNN_nn <- function(X, k = 10, include_self = TRUE) {
   if (include_self) {
