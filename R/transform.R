@@ -55,7 +55,7 @@ umap_transform <- function(X, model,
                            n_epochs = NULL,
                            n_threads =
                              max(1, RcppParallel::defaultNumThreads() / 2),
-                           n_sgd_threads = 1,
+                           n_sgd_threads = 0,
                            grain_size = 1,
                            verbose = FALSE) {
   if (is.null(n_epochs)) {
