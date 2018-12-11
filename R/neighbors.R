@@ -125,7 +125,7 @@ annoy_search <- function(X, k, ann,
     }
 
     res <- search_nn_func(index_file,
-      X,
+      nrow(X), ncol(X),
       k, search_k,
       grain_size = grain_size,
       verbose = verbose

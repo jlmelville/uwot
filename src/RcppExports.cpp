@@ -7,50 +7,53 @@
 using namespace Rcpp;
 
 // annoy_euclidean_nns
-Rcpp::List annoy_euclidean_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
-RcppExport SEXP _uwot_annoy_euclidean_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+Rcpp::List annoy_euclidean_nns(const std::string& index_name, std::size_t nrow, std::size_t ncol, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
+RcppExport SEXP _uwot_annoy_euclidean_nns(SEXP index_nameSEXP, SEXP nrowSEXP, SEXP ncolSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type nrow(nrowSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type ncol(ncolSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type n(nSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type search_k(search_kSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(annoy_euclidean_nns(index_name, mat, n, search_k, grain_size, verbose));
+    rcpp_result_gen = Rcpp::wrap(annoy_euclidean_nns(index_name, nrow, ncol, n, search_k, grain_size, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // annoy_cosine_nns
-Rcpp::List annoy_cosine_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
-RcppExport SEXP _uwot_annoy_cosine_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+Rcpp::List annoy_cosine_nns(const std::string& index_name, std::size_t nrow, std::size_t ncol, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
+RcppExport SEXP _uwot_annoy_cosine_nns(SEXP index_nameSEXP, SEXP nrowSEXP, SEXP ncolSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type nrow(nrowSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type ncol(ncolSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type n(nSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type search_k(search_kSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(annoy_cosine_nns(index_name, mat, n, search_k, grain_size, verbose));
+    rcpp_result_gen = Rcpp::wrap(annoy_cosine_nns(index_name, nrow, ncol, n, search_k, grain_size, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // annoy_manhattan_nns
-Rcpp::List annoy_manhattan_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
-RcppExport SEXP _uwot_annoy_manhattan_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+Rcpp::List annoy_manhattan_nns(const std::string& index_name, std::size_t nrow, std::size_t ncol, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
+RcppExport SEXP _uwot_annoy_manhattan_nns(SEXP index_nameSEXP, SEXP nrowSEXP, SEXP ncolSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type nrow(nrowSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type ncol(ncolSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type n(nSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type search_k(search_kSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(annoy_manhattan_nns(index_name, mat, n, search_k, grain_size, verbose));
+    rcpp_result_gen = Rcpp::wrap(annoy_manhattan_nns(index_name, nrow, ncol, n, search_k, grain_size, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -234,9 +237,9 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_uwot_annoy_euclidean_nns", (DL_FUNC) &_uwot_annoy_euclidean_nns, 6},
-    {"_uwot_annoy_cosine_nns", (DL_FUNC) &_uwot_annoy_cosine_nns, 6},
-    {"_uwot_annoy_manhattan_nns", (DL_FUNC) &_uwot_annoy_manhattan_nns, 6},
+    {"_uwot_annoy_euclidean_nns", (DL_FUNC) &_uwot_annoy_euclidean_nns, 7},
+    {"_uwot_annoy_cosine_nns", (DL_FUNC) &_uwot_annoy_cosine_nns, 7},
+    {"_uwot_annoy_manhattan_nns", (DL_FUNC) &_uwot_annoy_manhattan_nns, 7},
     {"_uwot_optimize_layout_umap", (DL_FUNC) &_uwot_optimize_layout_umap, 18},
     {"_uwot_optimize_layout_tumap", (DL_FUNC) &_uwot_optimize_layout_tumap, 14},
     {"_uwot_optimize_layout_largevis", (DL_FUNC) &_uwot_optimize_layout_largevis, 13},
