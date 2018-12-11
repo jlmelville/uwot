@@ -19,33 +19,6 @@
 #include <cmath>
 #include "gradient.h"
 
-// UMAP
-
-umap_gradient::umap_gradient(const double a, const double b, const double gamma) :
-  a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b)
-  { }
-
-// The Python implementation does two pow calls: one for d^b, and one for
-// d^(b-1) I have replaced the second call with (d^b) / d, which saves on the
-// pow call at the cost of an extra multiply. There shouldn't be a risk of a
-// divide by zero because I don't allow dist_squared to get lower than the
-// machine limit double epsilon. Note that grad_rep has a (0.001 + dist_squared)
-// term in its denominator, and I assume that the 0.001 is to prevent
-// division-by-zero, so to be consistent with dealing with division by
-// dist_squared I could add it here. But I haven't (to be more consistent with
-// the original implementation).
-// If this ever needs to change back:
-// store a new const double field: const double b_m1 = b - 1.0
-//  return (a_b_m2 * std::pow(dist_squared, b_m1)) / (a * std::pow(dist_squared, b) + 1.0);
-const double umap_gradient::grad_attr(const double dist_squared) const {
-  const double pd2b = std::pow(dist_squared, b);
-  return (a_b_m2 * pd2b) / (dist_squared * (a * pd2b + 1.0));
-}
-
-const double umap_gradient::grad_rep(const double dist_squared) const {
-  return gamma_b_2 / ((0.001 + dist_squared) * (a * std::pow(dist_squared, b) + 1.0));
-}
-
 // https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
 // an approximation to pow
 double fastPrecisePow(double a, double b) {
@@ -72,20 +45,27 @@ double fastPrecisePow(double a, double b) {
   return r * u.d;
 }
 
-// Approximate-Power UMAP: UMAP with an approximation to the slow pow calculation
-apumap_gradient::apumap_gradient(const double a, const double b, const double gamma) :
+// UMAP implementation code
+template<double (*powfun)(double, double)>
+base_umap_gradient<powfun>::base_umap_gradient(const double a, const double b, const double gamma) :
   a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b)
-  {  }
+{ }
 
-const double apumap_gradient::grad_attr(const double dist_squared) const {
-  const double pd2b = fastPrecisePow(dist_squared, b);
+template<double (*powfun)(double, double)>
+const double base_umap_gradient<powfun>::grad_attr(const double dist_squared) const {
+  const double pd2b = powfun(dist_squared, b);
   return (a_b_m2 * pd2b) / (dist_squared * (a * pd2b + 1.0));
 }
 
-const double apumap_gradient::grad_rep(const double dist_squared) const {
-  return gamma_b_2 /
-    ((0.001 + dist_squared) * (a * fastPrecisePow(dist_squared, b) + 1.0));
+template<double (*powfun)(double, double)>
+const double base_umap_gradient<powfun>::grad_rep(const double dist_squared) const {
+  return gamma_b_2 / ((0.001 + dist_squared) * (a * powfun(dist_squared, b) + 1.0));
 }
+
+// UMAP using standard power function
+template class base_umap_gradient<std::pow>;
+// apUMAP using approximate power function
+template class base_umap_gradient<fastPrecisePow>;
 
 // t-UMAP
 
@@ -98,7 +78,6 @@ const double tumap_gradient::grad_attr(const double dist_squared) const {
 const double tumap_gradient::grad_rep(const double dist_squared) const {
   return 2.0 / ((0.001 + dist_squared) * (dist_squared + 1.0));
 }
-
 
 // LargeVis
 

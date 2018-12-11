@@ -17,14 +17,14 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
-// The standard UMAP gradient
-
 #ifndef UWOT_GRADIENT_H
 #define UWOT_GRADIENT_H
 
-class umap_gradient {
+// Class templated on the powfun function as suggested by Aaron Lun
+template<double (*powfun)(double, double)>
+class base_umap_gradient {
 public:
-  umap_gradient(const double a, const double b, const double gamma);
+  base_umap_gradient(const double a, const double b, const double gamma);
   const double grad_attr(const double dist_squared) const;
   const double grad_rep(const double dist_squared) const;
   static const constexpr double clip_max = 4.0;
@@ -35,19 +35,12 @@ private:
   const double gamma_b_2;
 };
 
+// UMAP
+typedef base_umap_gradient<std::pow> umap_gradient;
+
 // apUMAP: UMAP with an approximate power calculation
-class apumap_gradient {
-public:
-  apumap_gradient(const double a, const double b, const double gamma);
-  const double grad_attr(const double dist_squared) const;
-  const double grad_rep(const double dist_squared) const;
-  static const constexpr double clip_max = 4.0;
-private:
-  const double a;
-  const double b;
-  const double a_b_m2;
-  const double gamma_b_2;
-};
+double fastPrecisePow(double, double);
+typedef base_umap_gradient<fastPrecisePow> apumap_gradient;
 
 // t-UMAP: the UMAP function with a = 1, and b = 1, which results in the Cauchy
 // distribution as used in t-SNE. This massively simplifies the gradient,
