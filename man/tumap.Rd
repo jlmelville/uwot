@@ -170,7 +170,8 @@ nearest neighbor search, only applies if \code{nn_method = "annoy"}.}
 
 \item{n_sgd_threads}{Number of threads to use during stochastic gradient
 descent. If set to > 1, then results will not be reproducible, even if
-`set.seed` is called with a fixed seed before running.}
+`set.seed` is called with a fixed seed before running. Set to 
+\code{"auto"} go use the same value as \code{n_threads}.}
 
 \item{grain_size}{Minimum batch size for multithreading. If the number of
 items to process in a thread falls below this number, then no threads will

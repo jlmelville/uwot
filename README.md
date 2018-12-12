@@ -17,7 +17,7 @@ other minor changes) should ensure reproducibility (as long as you `set.seed`
 appropriately), at the cost of a loss in speed and is in line with the behavior
 of the Python UMAP implementation. If you don't care about reproducibility, the
 number of threads to use during SGD can be set with a new parameter,
-`n_sgd_threads`.
+`n_sgd_threads`. Set it to `n_sgd_threads = "auto"` to get the old behavior.
 
 *December 9 2018*. Added a `pca` argument that will reduce `X` to the specified
 number of dimensions (e.g. 50, commonly used in t-SNE routines). This should

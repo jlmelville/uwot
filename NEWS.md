@@ -5,8 +5,7 @@
 * New parameter: `n_sgd_threads`, which controls the number of threads used
 in the stochastic gradient descent. By default this is now single-threaded
 and should result in reproducible results when using `set.seed`. To get back
-the old, less consistent, but faster settings, set `n_sgd_threads` 
-appropriately (e.g. `max(1, RcppParallel::defaultNumThreads() / 2)`).
+the old, less consistent, but faster settings, set `n_sgd_threads = "auto"`.
 * API change for consistency with Python UMAP:
   * `alpha` is now `learning_rate`.
   * `gamma` is now `repulsion_strength`.
