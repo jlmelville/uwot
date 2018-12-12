@@ -183,7 +183,7 @@ irlba_scores <- function(X, ncol, ret_extra = FALSE) {
   res <- irlba::prcomp_irlba(X, n = ncol, retx = TRUE, center = TRUE, 
                              scale = FALSE)
   if (ret_extra) {
-    list(scores = res$X, rotation = res$rotation, center = res$center)
+    list(scores = res$x, rotation = res$rotation, center = res$center)
   }
   else {
     res$x
