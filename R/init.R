@@ -22,7 +22,11 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   # This effectively row-normalizes A: colSums is normally faster than rowSums
   # and because A is symmetric, they're equivalent
   M <- A / colSums(A)
-  
+  connected <- connected_components(M)
+  if (connected$n_components > 1) {
+    tsmessage("Found ", connected$n_components, " connected components, ", 
+              "Laplacian Eigenmap may have trouble converging")
+  }
   eig_res <- NULL
   suppressWarnings(
   eig_res <- tryCatch(RSpectra::eigs(M, k = ndim + 1),
@@ -84,11 +88,23 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
 # spectral decomposition of the normalized Laplacian + some noise
 spectral_init <- function(A, ndim = 2, verbose = FALSE) {
   tsmessage("Initializing from normalized Laplacian + noise")
+  connected <- connected_components(A)
+  if (connected$n_components > 1) {
+    tsmessage("Found ", connected$n_components, " connected components, ", 
+              "spectral initialization may have trouble converging")
+  }
   coords <- normalized_laplacian_init(A, ndim, verbose = FALSE)
   expansion <- 10.0 / max(coords)
   (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.001),
     ncol = ndim
   )
+}
+
+# Return the number of connected components in a graph (respresented as a 
+# sparse matrix).
+connected_components <- function(X) {
+  Xt <- Matrix::t(X)
+  connected_components_undirected(nrow(X), Xt@i, Xt@p, X@i, X@p)
 }
 
 # UMAP random initialization: uniform between +10 and -10 along each axis

@@ -6,6 +6,21 @@
 
 using namespace Rcpp;
 
+// connected_components_undirected
+List connected_components_undirected(const unsigned long N, const IntegerVector indices1, const IntegerVector indptr1, const IntegerVector indices2, const IntegerVector indptr2);
+RcppExport SEXP _uwot_connected_components_undirected(SEXP NSEXP, SEXP indices1SEXP, SEXP indptr1SEXP, SEXP indices2SEXP, SEXP indptr2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const unsigned long >::type N(NSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type indices1(indices1SEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type indptr1(indptr1SEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type indices2(indices2SEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type indptr2(indptr2SEXP);
+    rcpp_result_gen = Rcpp::wrap(connected_components_undirected(N, indices1, indptr1, indices2, indptr2));
+    return rcpp_result_gen;
+END_RCPP
+}
 // annoy_euclidean_nns
 Rcpp::List annoy_euclidean_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
 RcppExport SEXP _uwot_annoy_euclidean_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
@@ -234,6 +249,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_uwot_connected_components_undirected", (DL_FUNC) &_uwot_connected_components_undirected, 5},
     {"_uwot_annoy_euclidean_nns", (DL_FUNC) &_uwot_annoy_euclidean_nns, 6},
     {"_uwot_annoy_cosine_nns", (DL_FUNC) &_uwot_annoy_cosine_nns, 6},
     {"_uwot_annoy_manhattan_nns", (DL_FUNC) &_uwot_annoy_manhattan_nns, 6},
