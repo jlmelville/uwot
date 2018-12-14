@@ -55,8 +55,8 @@ res <- umap(iris10,
 expect_ok_matrix(res)
 
 # init with matrix
-iris10_pca <- prcomp(iris10, rank. = 2, retx = TRUE, center = TRUE,
-                     scale. = FALSE)$x
+iris10_pca <- prcomp(iris10, retx = TRUE, center = TRUE,
+                     scale. = FALSE)$x[, 1:2]
 
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
