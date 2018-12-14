@@ -138,18 +138,9 @@ pca_init <- function(X, ndim = 2, verbose = FALSE) {
 # is returned also containing the eigenvalues
 pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
                        verbose = FALSE) {
-  # irlba warns about using too large a percentage of total singular value
-  # so don't use if dataset is small compared to ncol
-  if (ncol < 0.5 * min(dim(X))) {
-    return(irlba_scores(X, ncol = ncol, ret_extra = ret_extra))
-  }
-
-  # need extra data if we want to re-apply PCA to new points in umap_transform
-  rotation <- NULL
-  center <- NULL
   if (methods::is(X, "dist")) {
     res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ncol)
-
+    
     if (ret_extra || verbose) {
       lambda <- res_mds$eig
       varex <- sum(lambda[1:ncol]) / sum(lambda)
@@ -159,28 +150,46 @@ pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
       )
     }
     scores <- res_mds$points
+    return(scores)
   }
-  else {
-    X <- scale(X, center = TRUE, scale = FALSE)
-    # do SVD on X directly rather than forming covariance matrix
-    s <- svd(X, nu = ncol, nv = ifelse(ret_extra, ncol, 0))
-    D <- diag(c(s$d[1:ncol]), ncol, ncol)
-    if (verbose || ret_extra) {
-      # calculate eigenvalues of covariance matrix from singular values
-      lambda <- (s$d^2) / (nrow(X) - 1)
-      varex <- sum(lambda[1:ncol]) / sum(lambda)
-      tsmessage(
-        "PCA: ", ncol, " components explained ", formatC(varex * 100),
-        "% variance"
-      )
-    }
-    scores <- s$u %*% D
-    if (ret_extra) {
-      rotation <- s$v
-      center <- attr(X, "scaled:center")
-    }
+  
+  # irlba warns about using too large a percentage of total singular value
+  # so don't use if dataset is small compared to ncol
+  if (ncol < 0.5 * min(dim(X))) {
+    return(irlba_scores(X, ncol = ncol, ret_extra = ret_extra, 
+                        verbose = verbose))
   }
 
+  svd_scores(X = X, ncol = ncol, ret_extra = ret_extra, verbose = verbose)
+}
+
+# Get scores by SVD
+svd_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
+                       verbose = FALSE) {
+  # need extra data if we want to re-apply PCA to new points in umap_transform
+  rotation <- NULL
+  center <- NULL
+  
+  X <- scale(X, center = TRUE, scale = FALSE)
+  # do SVD on X directly rather than forming covariance matrix
+  s <- svd(X, nu = ncol, nv = ifelse(ret_extra, ncol, 0))
+  D <- diag(c(s$d[1:ncol]), ncol, ncol)
+  if (verbose || ret_extra) {
+    # calculate eigenvalues of covariance matrix from singular values
+    lambda <- (s$d^2) / (nrow(X) - 1)
+    varex <- sum(lambda[1:ncol]) / sum(lambda)
+    tsmessage(
+      "PCA: ", ncol, " components explained ", formatC(varex * 100),
+      "% variance"
+    )
+  }
+  scores <- s$u %*% D
+  if (ret_extra) {
+    rotation <- s$v
+    center <- attr(X, "scaled:center")
+  }
+  
+  
   if (ret_extra) {
     list(
       scores = scores,
