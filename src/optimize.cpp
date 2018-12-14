@@ -132,7 +132,7 @@ struct SgdWorker : public RcppParallel::Worker {
         for (arma::uword d = 0; d < ncol; d++) {
           double grad_d = alpha * clip(grad_coeff * 
             (head_embedding.at(j, d) - tail_embedding.at(k, d)), 
-            gradient.clip_max);
+            Gradient::clip_max);
           head_embedding.at(j, d) += grad_d;
           move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, k, d);
         }
@@ -157,7 +157,7 @@ struct SgdWorker : public RcppParallel::Worker {
           for (arma::uword d = 0; d < ncol; d++) {
             head_embedding.at(j, d) += alpha * clip(grad_coeff * 
               (head_embedding.at(j, d) - tail_embedding.at(k, d)), 
-              gradient.clip_max);
+              Gradient::clip_max);
           }
         }
         epoch_of_next_negative_sample[i] += 
