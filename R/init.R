@@ -195,9 +195,16 @@ pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
 }
 
 # Get PCA scores via irlba
-irlba_scores <- function(X, ncol, ret_extra = FALSE) {
-  res <- irlba::prcomp_irlba(X, n = ncol, retx = TRUE, center = TRUE, 
+irlba_scores <- function(X, ncol, ret_extra = FALSE, verbose = FALSE) {
+  res <- irlba::prcomp_irlba(X, n = ncol, retx = TRUE, center = TRUE,
                              scale = FALSE)
+  if (verbose) {
+    varex <- sum(res$sdev[1:ncol] ^ 2) / res$totalvar
+    tsmessage(
+      "PCA: ", ncol, " components explained ", formatC(varex * 100),
+      "% variance"
+    )
+  }
   if (ret_extra) {
     list(scores = res$x, rotation = res$rotation, center = res$center)
   }
