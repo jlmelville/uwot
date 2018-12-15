@@ -1121,6 +1121,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (nrow(init) != n_vertices || ncol(init) != n_components) {
       stop("init matrix does not match necessary configuration for X")
     }
+    tsmessage("Initializing from user-supplied matrix")
     embedding <- init
   }
   else {
