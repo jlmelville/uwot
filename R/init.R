@@ -136,7 +136,7 @@ pca_init <- function(X, ndim = 2, verbose = FALSE) {
 # Calculates a matrix containing the first ncol columns of the PCA scores.
 # Returns the score matrix unless ret_extra is TRUE, in which case a list
 # is returned also containing the eigenvalues
-pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
+pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
                        verbose = FALSE) {
   if (methods::is(X, "dist")) {
     res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ncol)
@@ -156,21 +156,21 @@ pca_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
   # irlba warns about using too large a percentage of total singular value
   # so don't use if dataset is small compared to ncol
   if (ncol < 0.5 * min(dim(X))) {
-    return(irlba_scores(X, ncol = ncol, ret_extra = ret_extra, 
+    return(irlba_scores(X, ncol = ncol, center = center, ret_extra = ret_extra, 
                         verbose = verbose))
   }
 
-  svd_scores(X = X, ncol = ncol, ret_extra = ret_extra, verbose = verbose)
+  svd_scores(X = X, ncol = ncol, center = center, ret_extra = ret_extra, verbose = verbose)
 }
 
 # Get scores by SVD
-svd_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
+svd_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
                        verbose = FALSE) {
   # need extra data if we want to re-apply PCA to new points in umap_transform
   rotation <- NULL
-  center <- NULL
+  xcenter <- NULL
   
-  X <- scale(X, center = TRUE, scale = FALSE)
+  X <- scale(X, center = center, scale = FALSE)
   # do SVD on X directly rather than forming covariance matrix
   s <- svd(X, nu = ncol, nv = ifelse(ret_extra, ncol, 0))
   D <- diag(c(s$d[1:ncol]), ncol, ncol)
@@ -186,16 +186,15 @@ svd_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
   scores <- s$u %*% D
   if (ret_extra) {
     rotation <- s$v
-    center <- attr(X, "scaled:center")
+    xcenter <- attr(X, "scaled:center")
   }
-  
   
   if (ret_extra) {
     list(
       scores = scores,
       lambda = lambda[1:ncol],
       rotation = rotation,
-      center = center
+      center = xcenter
     )
   }
   else {
@@ -204,8 +203,8 @@ svd_scores <- function(X, ncol = min(dim(X)), ret_extra = FALSE,
 }
 
 # Get PCA scores via irlba
-irlba_scores <- function(X, ncol, ret_extra = FALSE, verbose = FALSE) {
-  res <- irlba::prcomp_irlba(X, n = ncol, retx = TRUE, center = TRUE,
+irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FALSE) {
+  res <- irlba::prcomp_irlba(X, n = ncol, retx = TRUE, center = center,
                              scale = FALSE)
   if (verbose) {
     varex <- sum(res$sdev[1:ncol] ^ 2) / res$totalvar

@@ -321,5 +321,8 @@ apply_scaling <- function(X, scale_info, verbose = FALSE) {
 }
 # Apply a previously calculated set of PCA rotations
 apply_pca <- function(X, pca_res) {
-  sweep(X, 2, pca_res$center) %*% pca_res$rotation
+  if (!is.null(pca_res$center)) {
+    X <- sweep(X, 2, pca_res$center)
+  }
+  X %*% pca_res$rotation
 }
