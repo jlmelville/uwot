@@ -12,6 +12,7 @@ the old, less consistent, but faster settings, set `n_sgd_threads = "auto"`.
 
 ## Bug fixes and minor improvements
 
+* Hamming distance support was actually using Euclidean distance.
 * Smooth knn/perplexity calibration results had a small dependency on the 
 number of threads used.
 

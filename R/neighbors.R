@@ -72,15 +72,13 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
   nr <- nrow(X)
   nc <- ncol(X)
 
-  if (metric == "cosine") {
-    ann <- methods::new(RcppAnnoy::AnnoyAngular, nc)
-  }
-  else if (metric == "manhattan") {
-    ann <- methods::new(RcppAnnoy::AnnoyManhattan, nc)
-  }
-  else {
-    ann <- methods::new(RcppAnnoy::AnnoyEuclidean, nc)
-  }
+  ann <- switch(metric,
+                cosine =  methods::new(RcppAnnoy::AnnoyAngular, nc),
+                manhattan = methods::new(RcppAnnoy::AnnoyManhattan, nc),
+                euclidean = methods::new(RcppAnnoy::AnnoyEuclidean, nc),
+                hamming = methods::new(RcppAnnoy::AnnoyHamming, nc),
+                stop("BUG: unknown Annoy metric '", metric, "'")
+  )
 
   tsmessage("Building Annoy index with metric = ", metric)
   progress <- Progress$new(max = nr, display = verbose)
@@ -111,19 +109,14 @@ annoy_search <- function(X, k, ann,
     tsmessage("Searching Annoy index using ", pluralize("thread", n_threads))
 
     ann_class <- class(ann)
-    if (endsWith(ann_class, "Angular")) {
-      search_nn_func <- annoy_cosine_nns
-    }
-    else if (endsWith(ann_class, "Manhattan")) {
-      search_nn_func <- annoy_manhattan_nns
-    }
-    else if (endsWith(ann_class, "Euclidean")) {
-      search_nn_func <- annoy_euclidean_nns
-    }
-    else {
-      stop("BUG: Unknown ANN class '", ann_class, "'")
-    }
-
+    search_nn_func <- switch(ann_class,
+                  Rcpp_AnnoyAngular = annoy_cosine_nns,
+                  Rcpp_AnnoyManhattan = annoy_manhattan_nns,
+                  Rcpp_AnnoyEuclidean = annoy_euclidean_nns,
+                  Rcpp_AnnoyHamming = annoy_hamming_nns,
+                  stop("BUG: unknown Annoy class '", ann_class, "'")
+    )
+    
     res <- search_nn_func(index_file,
                           X,
                           k, search_k,

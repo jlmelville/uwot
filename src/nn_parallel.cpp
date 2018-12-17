@@ -1,7 +1,6 @@
 #include <Rcpp.h>
 // [[Rcpp::depends(RcppParallel)]]
 #include <RcppParallel.h>
-// // [[Rcpp::depends(RcppProgress)]]
 
 #if defined(__MINGW32__)
 #undef Realloc
@@ -108,6 +107,26 @@ Rcpp::List annoy_manhattan_nns(const std::string& index_name,
   Rcpp::IntegerMatrix idx(nrow, n);
   
   NNWorker<int32_t, float, Manhattan, Kiss64Random>
+    worker(index_name, mat, dist, idx, ncol, n, search_k);
+  
+  RcppParallel::parallelFor(0, nrow, worker, grain_size);
+  
+  return Rcpp::List::create(Rcpp::Named("item") = idx,
+                            Rcpp::Named("distance") = dist);
+}
+
+// [[Rcpp::export]]
+Rcpp::List annoy_hamming_nns(const std::string& index_name,
+                             const Rcpp::NumericMatrix& mat,
+                             std::size_t n, std::size_t search_k,
+                             std::size_t grain_size = 1,
+                             bool verbose = false) {
+  std::size_t nrow = mat.rows();
+  std::size_t ncol = mat.cols();
+  Rcpp::NumericMatrix dist(nrow, n);
+  Rcpp::IntegerMatrix idx(nrow, n);
+  
+  NNWorker<int32_t, uint64_t, Hamming, Kiss64Random>
     worker(index_name, mat, dist, idx, ncol, n, search_k);
   
   RcppParallel::parallelFor(0, nrow, worker, grain_size);
