@@ -48,7 +48,6 @@ annoy_nn <- function(X, k = 10,
                      verbose = FALSE) {
   ann <- annoy_build(X,
                      metric = metric, n_trees = n_trees,
-                     n_threads = n_threads, grain_size = grain_size,
                      verbose = verbose
   )
 
@@ -66,9 +65,7 @@ annoy_nn <- function(X, k = 10,
 }
 
 annoy_build <- function(X, metric = "euclidean", n_trees = 50,
-                        n_threads =
-                          max(1, RcppParallel::defaultNumThreads() / 2),
-                        grain_size = 1, verbose = FALSE) {
+                        verbose = FALSE) {
   nr <- nrow(X)
   nc <- ncol(X)
 
