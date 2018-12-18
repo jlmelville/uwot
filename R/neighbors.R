@@ -100,52 +100,73 @@ annoy_search <- function(X, k, ann,
                          grain_size = 1,
                          verbose = FALSE) {
   if (n_threads > 0) {
-    index_file <- tempfile()
-    ann$save(index_file)
-
-    tsmessage("Searching Annoy index using ", pluralize("thread", n_threads))
-
-    ann_class <- class(ann)
-    search_nn_func <- switch(ann_class,
-                  Rcpp_AnnoyAngular = annoy_cosine_nns,
-                  Rcpp_AnnoyManhattan = annoy_manhattan_nns,
-                  Rcpp_AnnoyEuclidean = annoy_euclidean_nns,
-                  Rcpp_AnnoyHamming = annoy_hamming_nns,
-                  stop("BUG: unknown Annoy class '", ann_class, "'")
-    )
-    
-    res <- search_nn_func(index_file,
-                          X,
-                          k, search_k,
-                          grain_size = grain_size,
-                          verbose = verbose
-    )
-    idx <- res$item
-    dist <- res$distance
-
-    unlink(index_file)
+    annoy_res <- annoy_search_parallel(X = X, k = k, ann = ann,
+                                 search_k = search_k,
+                                 n_threads = n_threads,
+                                 grain_size = grain_size,
+                                 verbose = verbose)
+    res <- list(idx = annoy_res$item + 1, dist = annoy_res$distance)
   }
   else {
-    tsmessage("Searching Annoy index")
-    nr <- nrow(X)
-    search_progress <- Progress$new(max = nr, display = verbose)
-    idx <- matrix(nrow = nr, ncol = k)
-    dist <- matrix(nrow = nr, ncol = k)
-    for (i in 1:nr) {
-      res <- ann$getNNsByVectorList(X[i, ], k, search_k, TRUE)
-      if (length(res$item) != k) {
-        stop(
-          "search_k/n_trees settings were unable to find ", k,
-          " neighbors for item ", i
-        )
-      }
-      idx[i, ] <- res$item
-      dist[i, ] <- res$distance
-      search_progress$increment()
-    }
+    res <- annoy_search_serial(X = X, k = k, ann = ann,
+                               search_k = search_k,
+                               verbose = verbose)
   }
+  res
+}
 
+annoy_search_serial <- function(X, k, ann,
+                                search_k = 100 * k,
+                                verbose = FALSE) {
+  tsmessage("Searching Annoy index")
+  nr <- nrow(X)
+  search_progress <- Progress$new(max = nr, display = verbose)
+  idx <- matrix(nrow = nr, ncol = k)
+  dist <- matrix(nrow = nr, ncol = k)
+  for (i in 1:nr) {
+    res <- ann$getNNsByVectorList(X[i, ], k, search_k, TRUE)
+    if (length(res$item) != k) {
+      stop(
+        "search_k/n_trees settings were unable to find ", k,
+        " neighbors for item ", i
+      )
+    }
+    idx[i, ] <- res$item
+    dist[i, ] <- res$distance
+    search_progress$increment()
+  }
   list(idx = idx + 1, dist = dist)
+}
+
+annoy_search_parallel <- function(X, k, ann,
+                                  search_k = 100 * k,
+                                  n_threads =
+                                    max(1, RcppParallel::defaultNumThreads() / 2),
+                                  grain_size = 1,
+                                  verbose = FALSE) {
+  index_file <- tempfile()
+  ann$save(index_file)
+  
+  tsmessage("Searching Annoy index using ", pluralize("thread", n_threads))
+  
+  ann_class <- class(ann)
+  search_nn_func <- switch(ann_class,
+                           Rcpp_AnnoyAngular = annoy_cosine_nns,
+                           Rcpp_AnnoyManhattan = annoy_manhattan_nns,
+                           Rcpp_AnnoyEuclidean = annoy_euclidean_nns,
+                           Rcpp_AnnoyHamming = annoy_hamming_nns,
+                           stop("BUG: unknown Annoy class '", ann_class, "'")
+  )
+  
+  res <- search_nn_func(index_file,
+                        X,
+                        k, search_k,
+                        grain_size = grain_size,
+                        verbose = verbose
+  )
+  unlink(index_file)
+  res$idx <- res$idx + 1
+  res
 }
 
 FNN_nn <- function(X, k = 10, include_self = TRUE) {
