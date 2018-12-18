@@ -223,7 +223,7 @@
 #'   could be sensitive to data scaling, so be wary of reusing nearest neighbor
 #'   data if modifying the \code{scale} parameter. This parameter can be used in
 #'   conjunction with \code{ret_model}.
-#' @param n_threads Number of threads to use, (except during stochastic gradient
+#' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half that recommended by RcppParallel. For
 #'   nearest neighbor search, only applies if \code{nn_method = "annoy"}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
@@ -555,7 +555,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   could be sensitive to data scaling, so be wary of reusing nearest neighbor
 #'   data if modifying the \code{scale} parameter. This parameter can be used in
 #'   conjunction with \code{ret_model}.
-#' @param n_threads Number of threads to use, (except during stochastic gradient
+#' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half that recommended by RcppParallel. For
 #'   nearest neighbor search, only applies if \code{nn_method = "annoy"}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
@@ -764,7 +764,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
-#' @param n_threads Number of threads to use, (except during stochastic gradient
+#' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half that recommended by RcppParallel. For
 #'   nearest neighbor search, only applies if \code{nn_method = "annoy"}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient

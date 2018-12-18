@@ -264,7 +264,7 @@ could be sensitive to data scaling, so be wary of reusing nearest neighbor
 data if modifying the \code{scale} parameter. This parameter can be used in
 conjunction with \code{ret_model}.}
 
-\item{n_threads}{Number of threads to use, (except during stochastic gradient
+\item{n_threads}{Number of threads to use (except during stochastic gradient
 descent). Default is half that recommended by RcppParallel. For
 nearest neighbor search, only applies if \code{nn_method = "annoy"}.}
 
