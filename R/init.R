@@ -17,6 +17,11 @@
 # normalized in any specific way.
 #' @import Matrix
 laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
+  if (nrow(A) < 3) {
+    tsmessage("Graph too small, using random initialization instead")
+    return(rand_init(nrow(A), ndim))
+  }
+  
   tsmessage("Initializing from Laplacian Eigenmap")
   # Equivalent to: D <- diag(colSums(A)); M <- solve(D) %*% A
   # This effectively row-normalizes A: colSums is normally faster than rowSums
@@ -24,8 +29,11 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   M <- A / colSums(A)
   connected <- connected_components(M)
   if (connected$n_components > 1) {
-    tsmessage("Found ", connected$n_components, " connected components, ", 
-              "Laplacian Eigenmap may have trouble converging")
+    tsmessage("Found ", connected$n_components, " connected components, ",
+              "initializing each component separately")
+    fn_name <- as.character(match.call()[[1]])
+    return(subgraph_init(fn_name, connected, A = A, ndim = ndim, 
+                         verbose = verbose))
   }
   eig_res <- NULL
   suppressWarnings(
@@ -48,8 +56,20 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
 
 # Use a normalized Laplacian.
 normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
+  if (nrow(A) < 3) {
+    tsmessage("Graph too small, using random initialization instead")
+    return(rand_init(nrow(A), ndim))
+  }
   tsmessage("Initializing from normalized Laplacian")
-
+  connected <- connected_components(A)
+  if (connected$n_components > 1) {
+    tsmessage("Found ", connected$n_components, " connected components, ",
+              "initializing each component separately")
+    fn_name <- as.character(match.call()[[1]])
+    return(subgraph_init(fn_name, connected, A = A, ndim = ndim, 
+                         verbose = verbose))
+  }
+  
   n <- nrow(A)
   # Normalized Laplacian: clear and close to UMAP code, but very slow in R
   # I <- diag(1, nrow = n, ncol = n)
@@ -68,11 +88,12 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     maxitr = 5 * n,
     tol = 1e-4
   )
+  suppressWarnings(
   res <- tryCatch(RSpectra::eigs_sym(L, k = k, which = "SM", opt = opt),
     error = function(c) {
       NULL
     }
-  )
+  ))
   if (is.null(res) || ncol(res$vectors) < ndim) {
     message(
       "Spectral initialization failed to converge, ",
@@ -87,17 +108,44 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
 # Default UMAP initialization
 # spectral decomposition of the normalized Laplacian + some noise
 spectral_init <- function(A, ndim = 2, verbose = FALSE) {
+  if (nrow(A) < 3) {
+    tsmessage("Graph too small, using random initialization instead")
+    return(rand_init(nrow(A), ndim))
+  }
   tsmessage("Initializing from normalized Laplacian + noise")
   connected <- connected_components(A)
   if (connected$n_components > 1) {
-    tsmessage("Found ", connected$n_components, " connected components, ", 
-              "spectral initialization may have trouble converging")
+    tsmessage("Found ", connected$n_components, " connected components, ",
+              "initializing each component separately")
+    fn_name <- as.character(match.call()[[1]])
+    return(subgraph_init(fn_name, connected, A = A, ndim = ndim, 
+                         verbose = verbose))
   }
   coords <- normalized_laplacian_init(A, ndim, verbose = FALSE)
   expansion <- 10.0 / max(coords)
   (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.001),
     ncol = ndim
   )
+}
+
+# Recursively calls the spectral initialization function named fn_name
+# for each subgraph specified by connected
+subgraph_init <- function(fn_name, connected, A, ndim = 2, verbose = FALSE) {
+  init <- NULL
+  for (i in 1:connected$n_components) {
+    subg_idx <- connected$labels == i - 1
+    subg <- A[subg_idx, subg_idx]
+    tsmessage("Initializing subcomponent of size ", nrow(subg))
+    init_conn <- do.call(fn_name, list(A = subg, ndim = ndim, 
+                                       verbose = verbose))
+    if (is.null(init)) {
+      init <- init_conn
+    }
+    else {
+      init <- rbind(init, init_conn)
+    }
+  }
+  init
 }
 
 # Return the number of connected components in a graph (respresented as a 

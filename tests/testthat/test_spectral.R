@@ -18,7 +18,7 @@ test_that("normalized laplacian", {
       0.1642, -5.549e-05, -0.04843, -0.1747, 0.1684, 0.6611
     )
 
-  res <- normalized_laplacian_init(x2d(iris[1:10, ]))
+  res <- normalized_laplacian_init(Matrix::drop0(x2d(iris[1:10, ])))
   expect_equal(abs(res), abs(expected_norm_lap), tolerance = 1e-2)
 })
 
@@ -70,4 +70,8 @@ test_that("connected components", {
   cc_res <- connected_components(graph100)
   expect_equal(cc_res$n_components, g100_nc)
   expect_equal(cc_res$labels, g100_labels)
+  
+  # test recursive initialization of components
+  sgraph <- graph + Matrix::t(graph)
+  expect_ok_matrix(spectral_init(sgraph), nr = 5, nc = 2)
 })
