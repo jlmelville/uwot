@@ -35,22 +35,27 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
     return(subgraph_init(fn_name, connected, A = A, ndim = ndim, 
                          verbose = verbose))
   }
-  eig_res <- NULL
+  
+  res <- NULL
+  k <- ndim + 1
+  n <- nrow(M)
   suppressWarnings(
-  eig_res <- tryCatch(RSpectra::eigs(M, k = ndim + 1),
-    error = function(c) {
-      NULL
-    }
+    res <- tryCatch(RSpectra::eigs(M, k = k, which = "LM", 
+                                   opt = list(tol = 1e-4)),
+      error = function(c) {
+        NULL
+      }
   ))
 
-  if (is.null(eig_res) || eig_res$nconv < ndim + 1) {
+  if (is.null(res) || ncol(res$vectors) < ndim) {
     message(
       "Laplacian Eigenmap failed to converge, ",
       "using random initialization instead"
     )
-    return(rand_init(nrow(A), ndim))
+    return(rand_init(n, ndim))
   }
-  vecs <- as.matrix(eig_res$vectors[, 2:(ndim + 1)])
+
+  vecs <- as.matrix(res$vectors[, 2:(ndim + 1)])
   Re(vecs)
 }
 
@@ -82,12 +87,7 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   Matrix::diag(L) <- 1 + Matrix::diag(L)
 
   k <- ndim + 1
-  ncv <- max(2 * k + 1, floor(sqrt(n)))
-  opt <- list(
-    ncv = ncv,
-    maxitr = 5 * n,
-    tol = 1e-4
-  )
+  opt <- list(tol = 1e-4)
   suppressWarnings(
   res <- tryCatch(RSpectra::eigs_sym(L, k = k, which = "SM", opt = opt),
     error = function(c) {
@@ -95,11 +95,20 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     }
   ))
   if (is.null(res) || ncol(res$vectors) < ndim) {
-    message(
-      "Spectral initialization failed to converge, ",
-      "using random initialization instead"
-    )
-    return(rand_init(n, ndim))
+    suppressWarnings(
+      res <- tryCatch(RSpectra::eigs_sym(L, k = k, which = "LM", sigma = 0,
+                                         opt = opt),
+                      error = function(c) {
+                        NULL
+                      }
+      ))
+    if (is.null(res) || ncol(res$vectors) < ndim) {
+      message(
+        "Spectral initialization failed to converge, ",
+        "using random initialization instead"
+      )
+      return(rand_init(n, ndim))
+    }
   }
   vec_indices <- rev(order(res$values, decreasing = TRUE)[1:ndim])
   as.matrix(Re(res$vectors[, vec_indices]))
