@@ -180,7 +180,15 @@ rand_init_lv <- function(n, ndim, verbose = FALSE) {
 scaled_pca <- function(X, ndim = 2, verbose = FALSE) {
   tsmessage("Initializing from scaled PCA")
   scores <- pca_scores(X, ncol = ndim, verbose = verbose)
-  scale(scores, scale = apply(scores, 2, stats::sd) / 1e-4)
+  shrink_coords(scores)
+}
+
+# Rescale embedding so that the standard deviation is the specified value.
+# Default gives initialization like t-SNE, but not random. Large initial 
+# distances lead to small gradients, and hence small updates, so should be
+# avoided
+shrink_coords <- function(X, sdev = 1e-4) {
+  scale(X, scale = apply(X, 2, stats::sd) / sdev)
 }
 
 # PCA
