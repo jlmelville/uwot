@@ -1009,7 +1009,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (!is.null(pca) && length(metric) == 1 && metric == "euclidean" &&
       is.matrix(X) && ncol(X) > pca) {
     tsmessage("Reducing X column dimension to ", pca, " via PCA")
-    pca_res <- pca_scores(X, ncol = pca, ret_extra = ret_model)
+    pca_res <- pca_scores(X, ncol = pca, ret_extra = ret_model, 
+                          verbose = verbose)
     if (ret_model) {
       X <- pca_res$scores
       pca_models[["1"]] <- pca_res[c("center", "rotation")] 
@@ -1153,6 +1154,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
         spca = scaled_pca(X, ndim = n_components, verbose = verbose),
         pca = pca_init(X, ndim = n_components, verbose = verbose),
+        sspectral = shrink_coords(spectral_init(V, ndim = n_components, 
+                                                verbose = verbose)),
         stop("Unknown initialization method: '", init, "'")
       )
     }
@@ -1414,7 +1417,8 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     if (!is.null(pca) && is.matrix(X) && metric == "euclidean" && 
         ncol(X) > pca && nrow(X) > pca) {
       tsmessage("Reducing column dimension to ", pca, " via PCA")
-      pca_res <- pca_scores(Xsub, pca, ret_extra = ret_model)
+      pca_res <- pca_scores(Xsub, pca, ret_extra = ret_model, 
+                            verbose = verbose)
       if (ret_model) {
         Xsub <- pca_res$scores
         pca_models[[as.character(i)]] <- pca_res[c("center", "rotation")]
