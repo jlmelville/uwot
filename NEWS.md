@@ -9,12 +9,17 @@ the old, less consistent, but faster settings, set `n_sgd_threads = "auto"`.
 * API change for consistency with Python UMAP:
   * `alpha` is now `learning_rate`.
   * `gamma` is now `repulsion_strength`.
+* Default spectral initialization now looks for disconnected components and
+initializes them separately (also applies to `laplacian` and `normlaplacian`).
 
 ## Bug fixes and minor improvements
 
-* Hamming distance support was actually using Euclidean distance.
+* Hamming distance support (was actually using Euclidean distance).
 * Smooth knn/perplexity calibration results had a small dependency on the 
 number of threads used.
+* Anomalously long spectral intialization times should now be reduced.
+* Internal changes and fixes thanks to a code review by Aaron Lun 
+(https://github.com/ltla)
 
 # uwot 0.0.0.9007 (December 9 2018)
 
