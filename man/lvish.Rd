@@ -83,26 +83,52 @@ coordinates.}
 For lvish, the default is \code{"maxabs"}, for consistency with LargeVis.}
 
 \item{init}{Type of initialization for the coordinates. Options are:
-\itemize{
-  \item \code{"spectral"} Spectral embedding using the normalized Laplacian
-  of the fuzzy 1-skeleton, with Gaussian noise added.
-  \item \code{"normlaplacian"}. Spectral embedding using the normalized
-  Laplacian of the fuzzy 1-skeleton, without noise.
-  \item \code{"random"}. Coordinates assigned using a uniform random
-  distribution between -10 and 10.
-  \item \code{"lvrandom"}. Coordinates assigned using a Gaussian
-  distribution with standard deviation 1e-4, as used in LargeVis
-  (Tang et al., 2016) and t-SNE.
-  \item \code{"laplacian"}. Spectral embedding using the Laplacian Eigenmap
-  (Belkin and Niyogi, 2002).
-  \item \code{"pca"}. The first two principal components from PCA of
-  \code{X} if \code{X} is a data frame, and from a 2-dimensional classical
-  MDS if \code{X} is of class \code{"dist"}.
-  \item \code{"spca"}. Like \code{"pca"}, but each dimension is then scaled
-  so the standard deviation is 1e-4, to give a distribution similar to
-  that used in t-SNE and LargeVis.
-  \item A matrix of initial coordinates.
-}}
+ \itemize{
+   \item \code{"spectral"} Spectral embedding using the normalized Laplacian
+   of the fuzzy 1-skeleton, with Gaussian noise added.
+   \item \code{"normlaplacian"}. Spectral embedding using the normalized
+   Laplacian of the fuzzy 1-skeleton, without noise.
+   \item \code{"random"}. Coordinates assigned using a uniform random
+   distribution between -10 and 10.
+   \item \code{"lvrandom"}. Coordinates assigned using a Gaussian
+   distribution with standard deviation 1e-4, as used in LargeVis
+   (Tang et al., 2016) and t-SNE.
+   \item \code{"laplacian"}. Spectral embedding using the Laplacian Eigenmap
+   (Belkin and Niyogi, 2002).
+   \item \code{"pca"}. The first two principal components from PCA of
+   \code{X} if \code{X} is a data frame, and from a 2-dimensional classical
+   MDS if \code{X} is of class \code{"dist"}.
+   \item \code{"spca"}. Like \code{"pca"}, but each dimension is then scaled
+   so the standard deviation is 1e-4, to give a distribution similar to
+   that used in t-SNE and LargeVis.
+   \item \code{"sspectral"} Like \code{"spectral"}, but each dimension is
+   then scaled so the standard deviation is 1e-4.
+   \item \code{"snormlaplacian"} Like \code{"normlaplacian"}, but each 
+   dimension is then scaled so the standard deviation is 1e-4.
+   \item \code{"slaplacian"} Like \code{"laplacian"}, but each dimension is
+   then scaled so the standard deviation is 1e-4.
+   \item A matrix of initial coordinates.
+ }
+For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},
+\code{"laplacian"}, \code{"sspectral"}, \code{"snormlaplacian"},
+\code{"slaplacian"}), if more than one connected component is identified,
+each connected component is initialized separately and the results are
+merged. If \code{verbose = TRUE} the number of connected components are
+logged to the console. The existence of multiple connected components
+implies that a global view of the data cannot be attained with this
+initialization. Either a PCA-based initialization or increasing the value of
+\code{n_neighbors} may be more appropriate.
+ 
+The scaled initializations (\code{"spca"}, \code{"sspectral"},
+\code{"snormlaplacian"}, \code{"slaplacian"}) might be useful as
+alternatives to the non-scaled equivalents if these result in initial
+coordinates with large inter-point distances or outliers. This usually
+results in small gradients during optimization and very little progress
+being made to the layout. Shrinking the initial embedding by rescaling can
+help under these circumstances. \code{"spca"} is usually recommended over
+\code{"pca"}, but for the spectral initializations the scaled versions
+usually aren't necessary unless you are using a large value of
+\code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher).}
 
 \item{repulsion_strength}{Weighting applied to negative samples in low
 dimensional embedding optimization. Values higher than one will result in

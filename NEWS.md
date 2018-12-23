@@ -1,4 +1,4 @@
-# uwot 0.0.0.9008
+# uwot 0.0.0.9008 (December 23 2018)
 
 ## New features
 
@@ -11,6 +11,10 @@ the old, less consistent, but faster settings, set `n_sgd_threads = "auto"`.
   * `gamma` is now `repulsion_strength`.
 * Default spectral initialization now looks for disconnected components and
 initializes them separately (also applies to `laplacian` and `normlaplacian`).
+* New `init` options: `sspectral`, `snormlaplacian` and `slaplacian`. These are
+like `spectral`, `normlaplacian`, `laplacian` respectively, but scaled so that
+each dimension has a standard deviation of 1e-4. This is like the difference
+between the `pca` and `spca` options.
 
 ## Bug fixes and minor improvements
 
@@ -19,7 +23,7 @@ initializes them separately (also applies to `laplacian` and `normlaplacian`).
 number of threads used.
 * Anomalously long spectral intialization times should now be reduced.
 * Internal changes and fixes thanks to a code review by Aaron Lun 
-(https://github.com/ltla)
+(https://github.com/ltla).
 
 # uwot 0.0.0.9007 (December 9 2018)
 

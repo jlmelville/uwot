@@ -265,3 +265,23 @@ expect_equal(res$pca_models[["3"]]$center, c(1.45, 0.22),
 res_trans <- umap_transform(iris10, model = res, verbose = FALSE, n_threads = 0,
                             n_epochs = 2)
 expect_ok_matrix(res_trans)
+
+
+# shrunk spectral initialization
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+            init = "snormlaplacian", verbose = FALSE, n_threads = 0
+)
+expect_ok_matrix(res)
+
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+            init = "slaplacian", verbose = FALSE, n_threads = 0
+)
+expect_ok_matrix(res)
+
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+            init = "sspectral", verbose = FALSE, n_threads = 0
+)
+expect_ok_matrix(res)

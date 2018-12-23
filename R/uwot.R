@@ -81,8 +81,35 @@
 #'     \item \code{"spca"}. Like \code{"pca"}, but each dimension is then scaled
 #'     so the standard deviation is 1e-4, to give a distribution similar to
 #'     that used in t-SNE.
+#'     \item \code{"sspectral"} Like \code{"spectral"}, but each dimension is
+#'     then scaled so the standard deviation is 1e-4.
+#'     \item \code{"snormlaplacian"} Like \code{"normlaplacian"}, but each 
+#'     dimension is then scaled so the standard deviation is 1e-4.
+#'     \item \code{"slaplacian"} Like \code{"laplacian"}, but each dimension is
+#'     then scaled so the standard deviation is 1e-4.
 #'     \item A matrix of initial coordinates.
 #'   }
+#'  For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},
+#'  \code{"laplacian"}, \code{"sspectral"}, \code{"snormlaplacian"},
+#'  \code{"slaplacian"}), if more than one connected component is identified,
+#'  each connected component is initialized separately and the results are
+#'  merged. If \code{verbose = TRUE} the number of connected components are
+#'  logged to the console. The existence of multiple connected components
+#'  implies that a global view of the data cannot be attained with this
+#'  initialization. Either a PCA-based initialization or increasing the value of
+#'  \code{n_neighbors} may be more appropriate.
+#'   
+#'  The scaled initializations (\code{"spca"}, \code{"sspectral"},
+#'  \code{"snormlaplacian"}, \code{"slaplacian"}) might be useful as
+#'  alternatives to the non-scaled equivalents if these result in initial
+#'  coordinates with large inter-point distances or outliers. This usually
+#'  results in small gradients during optimization and very little progress
+#'  being made to the layout. Shrinking the initial embedding by rescaling can
+#'  help under these circumstances. \code{"spca"} is usually recommended over
+#'  \code{"pca"}, but for the spectral initializations the scaled versions
+#'  usually aren't necessary unless you are using a large value of
+#'  \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher). 
+#'  
 #' @param spread The effective scale of embedded points. In combination with
 #'   \code{min_dist}, this determines how clustered/clumped the embedded points
 #'   are.
@@ -431,8 +458,34 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item \code{"spca"}. Like \code{"pca"}, but each dimension is then scaled
 #'     so the standard deviation is 1e-4, to give a distribution similar to
 #'     that used in t-SNE.
+#'     \item \code{"sspectral"} Like \code{"spectral"}, but each dimension is
+#'     then scaled so the standard deviation is 1e-4.
+#'     \item \code{"snormlaplacian"} Like \code{"normlaplacian"}, but each 
+#'     dimension is then scaled so the standard deviation is 1e-4.
+#'     \item \code{"slaplacian"} Like \code{"laplacian"}, but each dimension is
+#'     then scaled so the standard deviation is 1e-4.
 #'     \item A matrix of initial coordinates.
 #'   }
+#'  For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},
+#'  \code{"laplacian"}, \code{"sspectral"}, \code{"snormlaplacian"},
+#'  \code{"slaplacian"}), if more than one connected component is identified,
+#'  each connected component is initialized separately and the results are
+#'  merged. If \code{verbose = TRUE} the number of connected components are
+#'  logged to the console. The existence of multiple connected components
+#'  implies that a global view of the data cannot be attained with this
+#'  initialization. Either a PCA-based initialization or increasing the value of
+#'  \code{n_neighbors} may be more appropriate.
+#'   
+#'  The scaled initializations (\code{"spca"}, \code{"sspectral"},
+#'  \code{"snormlaplacian"}, \code{"slaplacian"}) might be useful as
+#'  alternatives to the non-scaled equivalents if these result in initial
+#'  coordinates with large inter-point distances or outliers. This usually
+#'  results in small gradients during optimization and very little progress
+#'  being made to the layout. Shrinking the initial embedding by rescaling can
+#'  help under these circumstances. \code{"spca"} is usually recommended over
+#'  \code{"pca"}, but for the spectral initializations the scaled versions
+#'  usually aren't necessary unless you are using a large value of
+#'  \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher).
 #' @param set_op_mix_ratio Interpolate between (fuzzy) union and intersection as
 #'   the set operation used to combine local fuzzy simplicial sets to obtain a
 #'   global fuzzy simplicial sets. Both fuzzy set operations use the product
@@ -723,8 +776,35 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item \code{"spca"}. Like \code{"pca"}, but each dimension is then scaled
 #'     so the standard deviation is 1e-4, to give a distribution similar to
 #'     that used in t-SNE and LargeVis.
+#'     \item \code{"sspectral"} Like \code{"spectral"}, but each dimension is
+#'     then scaled so the standard deviation is 1e-4.
+#'     \item \code{"snormlaplacian"} Like \code{"normlaplacian"}, but each 
+#'     dimension is then scaled so the standard deviation is 1e-4.
+#'     \item \code{"slaplacian"} Like \code{"laplacian"}, but each dimension is
+#'     then scaled so the standard deviation is 1e-4.
 #'     \item A matrix of initial coordinates.
 #'   }
+#'  For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},
+#'  \code{"laplacian"}, \code{"sspectral"}, \code{"snormlaplacian"},
+#'  \code{"slaplacian"}), if more than one connected component is identified,
+#'  each connected component is initialized separately and the results are
+#'  merged. If \code{verbose = TRUE} the number of connected components are
+#'  logged to the console. The existence of multiple connected components
+#'  implies that a global view of the data cannot be attained with this
+#'  initialization. Either a PCA-based initialization or increasing the value of
+#'  \code{n_neighbors} may be more appropriate.
+#'   
+#'  The scaled initializations (\code{"spca"}, \code{"sspectral"},
+#'  \code{"snormlaplacian"}, \code{"slaplacian"}) might be useful as
+#'  alternatives to the non-scaled equivalents if these result in initial
+#'  coordinates with large inter-point distances or outliers. This usually
+#'  results in small gradients during optimization and very little progress
+#'  being made to the layout. Shrinking the initial embedding by rescaling can
+#'  help under these circumstances. \code{"spca"} is usually recommended over
+#'  \code{"pca"}, but for the spectral initializations the scaled versions
+#'  usually aren't necessary unless you are using a large value of
+#'  \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher).
+#'   
 #' @param repulsion_strength Weighting applied to negative samples in low
 #'   dimensional embedding optimization. Values higher than one will result in
 #'   greater weight being given to negative samples.
@@ -1128,15 +1208,20 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   else {
     init <- match.arg(tolower(init), c(
       "spectral", "random", "lvrandom", "normlaplacian",
-      "laplacian", "spca", "pca"
+      "laplacian", "spca", "pca", "sspectral", "snormlaplacian", "slaplacian"
     ))
+    
+    do_shrink <- init %in% 
+      c("spca", "sspectral", "snormlaplacian", "slaplacian")
+    if (do_shrink) {
+      init <- substring(init, 2)
+    }
     
     # Don't repeat PCA initialization if we've already done it once
     if (pca_shortcut && init %in% c("spca", "pca") && pca >= n_components) {
       embedding <- X[, 1:n_components]
       if (init == "spca") {
         tsmessage("Initializing from scaled PCA")
-        embedding <- scale(embedding, scale = apply(embedding, 2, stats::sd) / 1e-4)
       }
       else {
         tsmessage("Initializing from PCA")
@@ -1154,14 +1239,15 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
         spca = scaled_pca(X, ndim = n_components, verbose = verbose),
         pca = pca_init(X, ndim = n_components, verbose = verbose),
-        sspectral = shrink_coords(spectral_init(V, ndim = n_components, 
-                                                verbose = verbose)),
         stop("Unknown initialization method: '", init, "'")
       )
     }
+    
+    if (do_shrink) {
+      embedding <- shrink_coords(embedding)
+    }
   }
-
-
+  
   if (is.null(n_epochs) || n_epochs <= 0) {
     if (method == "largevis") {
       n_epochs <- lvish_epochs(n_vertices, V)
