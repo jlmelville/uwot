@@ -1,3 +1,9 @@
+# uwot 0.0.0.9009
+
+## New features
+
+## Bug fixes and minor improvements
+
 # uwot 0.0.0.9008 (December 23 2018)
 
 ## New features
