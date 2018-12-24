@@ -17,42 +17,35 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
-
 #include "sampler.h"
 
-Sampler::Sampler(const arma::vec& epochs_per_sample, 
+Sampler::Sampler(const std::vector<double>& epochs_per_sample, 
                  double negative_sample_rate) :
-
-  _epochs_per_sample(epochs_per_sample.size()),
-  epoch_of_next_sample(epochs_per_sample.size()),
+  
+  epochs_per_sample(epochs_per_sample),
+  epoch_of_next_sample(epochs_per_sample),
   epochs_per_negative_sample(epochs_per_sample.size()),
   epoch_of_next_negative_sample(epochs_per_sample.size())
-  {
-    for (std::size_t i = 0; i < epochs_per_sample.size(); i++) {
-      _epochs_per_sample[i] = epochs_per_sample[i];
-      epoch_of_next_sample[i] = epochs_per_sample[i];
-      epochs_per_negative_sample[i] = epochs_per_sample[i] / negative_sample_rate;
-      epoch_of_next_negative_sample[i] = epochs_per_negative_sample[i];
-    }
+{
+  const std::size_t esz = epochs_per_sample.size();
+  const double nsr = 1.0 / negative_sample_rate;
+  for (std::size_t i = 0; i < esz; i++) {
+    epochs_per_negative_sample[i] = epochs_per_sample[i] * nsr;
+    epoch_of_next_negative_sample[i] = epochs_per_negative_sample[i];
   }
+}
 
 bool Sampler::is_sample_edge(std::size_t i, std::size_t n) const {
   return epoch_of_next_sample[i] <= n;
 }
 
 unsigned int Sampler::get_num_neg_samples(std::size_t i, std::size_t n) const {
-  auto n_neg_samples = static_cast<unsigned int>(
-    (n - epoch_of_next_negative_sample[i]) / 
-      epochs_per_negative_sample[i]);
-  
-  return n_neg_samples;
+  return static_cast<unsigned int>(
+    (n - epoch_of_next_negative_sample[i]) / epochs_per_negative_sample[i]);
 }
 
 void Sampler::next_sample(std::size_t i, unsigned int num_neg_samples) {
-  epoch_of_next_sample[i] += _epochs_per_sample[i];
-  
+  epoch_of_next_sample[i] += epochs_per_sample[i];
   epoch_of_next_negative_sample[i] += 
     num_neg_samples * epochs_per_negative_sample[i];
 }

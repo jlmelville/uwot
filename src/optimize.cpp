@@ -195,8 +195,10 @@ arma::mat optimize_layout(const T& gradient,
                           bool parallelize = true,
                           std::size_t grain_size = 1,
                           bool verbose = false) {
-
-  Sampler sampler(epochs_per_sample, negative_sample_rate);
+  auto _epochs_per_sample = 
+    arma::conv_to<std::vector<double>>::from(epochs_per_sample);
+  
+  Sampler sampler(_epochs_per_sample, negative_sample_rate);
   SgdWorker<T, DoMove> worker(gradient, positive_head, positive_tail, 
                               sampler,
                               head_embedding, tail_embedding, n_vertices, 

@@ -21,13 +21,11 @@
 #define UWOT_SAMPLER_H
 
 #include <vector>
-#include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
 
 // Weighted edge sampler
 class Sampler {
 public:
-  Sampler(const arma::vec& epochs_per_sample, 
+  Sampler(const std::vector<double>& epochs_per_sample, 
           double negative_sample_rate);
   
   bool is_sample_edge(std::size_t i, std::size_t n) const;
@@ -35,7 +33,7 @@ public:
   void next_sample(std::size_t i, unsigned int num_neg_samples);
   
 private:
-  std::vector<double> _epochs_per_sample;
+  std::vector<double> epochs_per_sample;
   std::vector<double> epoch_of_next_sample;
   std::vector<double> epochs_per_negative_sample;
   std::vector<double> epoch_of_next_negative_sample;
