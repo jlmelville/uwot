@@ -26,6 +26,7 @@
 // [[Rcpp::depends(RcppProgress)]]
 #include <progress.hpp>
 #include "gradient.h"
+#include "sampler.h"
 #include "tauprng.h"
 
 // Function to decide whether to move both vertices in an edge
@@ -65,48 +66,6 @@ double rdist(const arma::mat& m,
   
   return sum;
 }
-
-// Weighted edge sampler
-class Sampler {
-public:
-  Sampler(
-    const arma::vec& epochs_per_sample,
-    arma::vec& epoch_of_next_sample,
-    const arma::vec& epochs_per_negative_sample,
-    arma::vec& epoch_of_next_negative_sample
-  ) :
-  epochs_per_sample(epochs_per_sample),
-  epoch_of_next_sample(epoch_of_next_sample),
-  epochs_per_negative_sample(epochs_per_negative_sample),
-  epoch_of_next_negative_sample(epoch_of_next_negative_sample) 
-  {}
-  
-  bool is_sample_edge(std::size_t i, std::size_t n) const {
-    return epoch_of_next_sample[i] <= n;
-  }
-  
-  unsigned int get_num_neg_samples(std::size_t i, std::size_t n) const {
-    auto n_neg_samples = static_cast<unsigned int>(
-      (n - epoch_of_next_negative_sample[i]) / 
-        epochs_per_negative_sample[i]);
-    
-    return n_neg_samples;
-  }
-  
-  void next_sample(unsigned int i, unsigned int num_neg_samples) {
-    epoch_of_next_sample[i] += epochs_per_sample[i];
-    
-    epoch_of_next_negative_sample[i] += 
-      num_neg_samples * epochs_per_negative_sample[i];
-  }
-  
-private:
-  const arma::vec epochs_per_sample;
-  arma::vec epoch_of_next_sample;
-  const arma::vec epochs_per_negative_sample;
-  arma::vec epoch_of_next_negative_sample;
-};
-
 
 // Gradient: the type of gradient used in the optimization
 // DoMoveVertex: true if both ends of a positive edge should be updated
