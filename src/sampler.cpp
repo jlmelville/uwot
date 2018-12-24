@@ -42,8 +42,8 @@ unsigned int Sampler::get_num_neg_samples(std::size_t i, std::size_t n) const {
   return n_neg_samples;
 }
 
-void Sampler::next_sample(unsigned int i, unsigned int num_neg_samples) {
-  epoch_of_next_sample[i] += epochs_per_sample[i];
+void Sampler::next_sample(std::size_t i, unsigned int num_neg_samples) {
+  epoch_of_next_sample[i] += vepochs_per_sample[i];
   
   epoch_of_next_negative_sample[i] += 
     num_neg_samples * epochs_per_negative_sample[i];

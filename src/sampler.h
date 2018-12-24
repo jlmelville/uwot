@@ -31,7 +31,7 @@ public:
   
   bool is_sample_edge(std::size_t i, std::size_t n) const;
   unsigned int get_num_neg_samples(std::size_t i, std::size_t n) const;
-  void next_sample(unsigned int i, unsigned int num_neg_samples);
+  void next_sample(std::size_t i, unsigned int num_neg_samples);
   
 private:
   const arma::vec epochs_per_sample;
