@@ -20,6 +20,7 @@
 #ifndef UWOT_SAMPLER_H
 #define UWOT_SAMPLER_H
 
+#include <vector>
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
@@ -34,10 +35,10 @@ public:
   void next_sample(std::size_t i, unsigned int num_neg_samples);
   
 private:
-  const arma::vec epochs_per_sample;
-  arma::vec epoch_of_next_sample;
-  const arma::vec epochs_per_negative_sample;
-  arma::vec epoch_of_next_negative_sample;
+  std::vector<double> _epochs_per_sample;
+  std::vector<double> epoch_of_next_sample;
+  std::vector<double> epochs_per_negative_sample;
+  std::vector<double> epoch_of_next_negative_sample;
 };
 
 #endif // UWOT_SAMPLER_H

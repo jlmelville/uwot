@@ -24,11 +24,19 @@
 
 Sampler::Sampler(const arma::vec& epochs_per_sample, 
                  double negative_sample_rate) :
-  epochs_per_sample(epochs_per_sample),
-  epoch_of_next_sample(epochs_per_sample),
-  epochs_per_negative_sample(epochs_per_sample / negative_sample_rate),
-  epoch_of_next_negative_sample(epochs_per_negative_sample)
-  {}
+
+  _epochs_per_sample(epochs_per_sample.size()),
+  epoch_of_next_sample(epochs_per_sample.size()),
+  epochs_per_negative_sample(epochs_per_sample.size()),
+  epoch_of_next_negative_sample(epochs_per_sample.size())
+  {
+    for (std::size_t i = 0; i < epochs_per_sample.size(); i++) {
+      _epochs_per_sample[i] = epochs_per_sample[i];
+      epoch_of_next_sample[i] = epochs_per_sample[i];
+      epochs_per_negative_sample[i] = epochs_per_sample[i] / negative_sample_rate;
+      epoch_of_next_negative_sample[i] = epochs_per_negative_sample[i];
+    }
+  }
 
 bool Sampler::is_sample_edge(std::size_t i, std::size_t n) const {
   return epoch_of_next_sample[i] <= n;
@@ -43,7 +51,7 @@ unsigned int Sampler::get_num_neg_samples(std::size_t i, std::size_t n) const {
 }
 
 void Sampler::next_sample(std::size_t i, unsigned int num_neg_samples) {
-  epoch_of_next_sample[i] += vepochs_per_sample[i];
+  epoch_of_next_sample[i] += _epochs_per_sample[i];
   
   epoch_of_next_negative_sample[i] += 
     num_neg_samples * epochs_per_negative_sample[i];
