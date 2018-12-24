@@ -48,6 +48,23 @@ void move_other_vertex<true>(arma::mat& embedding,
   embedding.at(k, d) -= grad_d;
 }
 
+double clip(double val, double clip_max) {
+  return std::max(std::min(val, clip_max), -clip_max);
+}
+
+double rdist(const arma::mat& m,
+             const arma::mat& n,
+             const arma::uword a,
+             const arma::uword b,
+             const arma::uword ndim) {
+  double sum = 0.0;
+  for (arma::uword i = 0; i < ndim; i++) {
+    sum += (m.at(a, i) - n.at(b, i)) * (m.at(a, i) - n.at(b, i));
+  }
+  
+  return sum;
+}
+
 // Gradient: the type of gradient used in the optimization
 // DoMoveVertex: true if both ends of a positive edge should be updated
 template <typename Gradient,
@@ -120,48 +137,45 @@ struct SgdWorker : public RcppParallel::Worker {
     tau_prng prng(s1, s2, s3);
 
     for (std::size_t i = begin; i < end; i++) {
-      if (epoch_of_next_sample[i] <= n) {
-        arma::uword j = positive_head[i];
-        arma::uword k = positive_tail[i];
+      if (!is_sample_edge(i)) {
+        continue;
+      }
+      
+      arma::uword j = positive_head[i];
+      arma::uword k = positive_tail[i];
 
-        const double dist_squared = std::max(rdist(
-          head_embedding, tail_embedding, j, k, ncol), dist_eps);
-        const double grad_coeff = gradient.grad_attr(dist_squared);
+      const double dist_squared = std::max(rdist(
+        head_embedding, tail_embedding, j, k, ncol), dist_eps);
+      const double grad_coeff = gradient.grad_attr(dist_squared);
+
+      for (arma::uword d = 0; d < ncol; d++) {
+        double grad_d = alpha * clip(grad_coeff * 
+          (head_embedding.at(j, d) - tail_embedding.at(k, d)), 
+          Gradient::clip_max);
+        head_embedding.at(j, d) += grad_d;
+        move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, k, d);
+      }
+
+      const unsigned int n_neg_samples = get_num_neg_samples(i);
+      for (unsigned int p = 0; p < n_neg_samples; p++) {
+        arma::uword k = prng() % n_vertices;
+
+        if (j == k) {
+          continue;
+        }
+
+        const double dist_squared = std::max(
+          rdist(head_embedding, tail_embedding, j, k, ncol), dist_eps);
+        const double grad_coeff = gradient.grad_rep(dist_squared);
 
         for (arma::uword d = 0; d < ncol; d++) {
-          double grad_d = alpha * clip(grad_coeff * 
+          head_embedding.at(j, d) += alpha * clip(grad_coeff * 
             (head_embedding.at(j, d) - tail_embedding.at(k, d)), 
             Gradient::clip_max);
-          head_embedding.at(j, d) += grad_d;
-          move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, k, d);
         }
-
-        epoch_of_next_sample[i] += epochs_per_sample[i];
-
-        unsigned int n_neg_samples = static_cast<unsigned int>(
-          (n - epoch_of_next_negative_sample[i]) / 
-            epochs_per_negative_sample[i]);
-
-        for (unsigned int p = 0; p < n_neg_samples; p++) {
-          arma::uword k = prng() % n_vertices;
-
-          if (j == k) {
-            continue;
-          }
-
-          const double dist_squared = std::max(
-            rdist(head_embedding, tail_embedding, j, k, ncol), dist_eps);
-          const double grad_coeff = gradient.grad_rep(dist_squared);
-
-          for (arma::uword d = 0; d < ncol; d++) {
-            head_embedding.at(j, d) += alpha * clip(grad_coeff * 
-              (head_embedding.at(j, d) - tail_embedding.at(k, d)), 
-              Gradient::clip_max);
-          }
-        }
-        epoch_of_next_negative_sample[i] += 
-          n_neg_samples * epochs_per_negative_sample[i];
       }
+      
+      next_sample(i, n_neg_samples);
     }
   }
 
@@ -172,24 +186,25 @@ struct SgdWorker : public RcppParallel::Worker {
   void set_alpha(double alpha) {
     this->alpha = alpha;
   }
-
-  double clip(double val, double clip_max) {
-    return std::max(std::min(val, clip_max), -clip_max);
+  
+  bool is_sample_edge(std::size_t i) {
+    return epoch_of_next_sample[i] <= n;
   }
-
-  double rdist(const arma::mat& m,
-               const arma::mat& n,
-               const arma::uword a,
-               const arma::uword b,
-               const arma::uword ndim) {
-    double sum = 0.0;
-    for (arma::uword i = 0; i < ndim; i++) {
-      sum += (m.at(a, i) - n.at(b, i)) * (m.at(a, i) - n.at(b, i));
-    }
-
-    return sum;
+  
+  unsigned int get_num_neg_samples(std::size_t i) {
+    auto n_neg_samples = static_cast<unsigned int>(
+      (n - epoch_of_next_negative_sample[i]) / 
+        epochs_per_negative_sample[i]);
+    
+    return n_neg_samples;
   }
-
+  
+  void next_sample(unsigned int i, unsigned int num_neg_samples) {
+    epoch_of_next_sample[i] += epochs_per_sample[i];
+    
+    epoch_of_next_negative_sample[i] += 
+      num_neg_samples * epochs_per_negative_sample[i];
+  }
 };
 
 
