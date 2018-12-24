@@ -52,6 +52,7 @@ double clip(double val, double clip_max) {
   return std::max(std::min(val, clip_max), -clip_max);
 }
 
+// squared Euclidean distance between m[a, ] and n[b, ]
 double rdist(const arma::mat& m,
              const arma::mat& n,
              const arma::uword a,
@@ -65,6 +66,48 @@ double rdist(const arma::mat& m,
   return sum;
 }
 
+// Weighted edge sampler
+class Sampler {
+public:
+  Sampler(
+    const arma::vec& epochs_per_sample,
+    arma::vec& epoch_of_next_sample,
+    const arma::vec& epochs_per_negative_sample,
+    arma::vec& epoch_of_next_negative_sample
+  ) :
+  epochs_per_sample(epochs_per_sample),
+  epoch_of_next_sample(epoch_of_next_sample),
+  epochs_per_negative_sample(epochs_per_negative_sample),
+  epoch_of_next_negative_sample(epoch_of_next_negative_sample) 
+  {}
+  
+  bool is_sample_edge(std::size_t i, std::size_t n) const {
+    return epoch_of_next_sample[i] <= n;
+  }
+  
+  unsigned int get_num_neg_samples(std::size_t i, std::size_t n) const {
+    auto n_neg_samples = static_cast<unsigned int>(
+      (n - epoch_of_next_negative_sample[i]) / 
+        epochs_per_negative_sample[i]);
+    
+    return n_neg_samples;
+  }
+  
+  void next_sample(unsigned int i, unsigned int num_neg_samples) {
+    epoch_of_next_sample[i] += epochs_per_sample[i];
+    
+    epoch_of_next_negative_sample[i] += 
+      num_neg_samples * epochs_per_negative_sample[i];
+  }
+  
+private:
+  const arma::vec epochs_per_sample;
+  arma::vec epoch_of_next_sample;
+  const arma::vec epochs_per_negative_sample;
+  arma::vec epoch_of_next_negative_sample;
+};
+
+
 // Gradient: the type of gradient used in the optimization
 // DoMoveVertex: true if both ends of a positive edge should be updated
 template <typename Gradient,
@@ -76,11 +119,9 @@ struct SgdWorker : public RcppParallel::Worker {
   const Gradient gradient;
   const arma::uvec positive_head;
   const arma::uvec positive_tail;
-  const arma::vec epochs_per_sample;
-
-  arma::vec epoch_of_next_sample;
-  const arma::vec epochs_per_negative_sample;
-  arma::vec epoch_of_next_negative_sample;
+  
+  Sampler sampler;
+  
   arma::mat& head_embedding;
   arma::mat& tail_embedding;
   unsigned int n_vertices;
@@ -94,8 +135,8 @@ struct SgdWorker : public RcppParallel::Worker {
     const Gradient& gradient,
     const arma::uvec& positive_head,
     const arma::uvec& positive_tail,
-    const arma::vec& epochs_per_sample,
 
+    const arma::vec& epochs_per_sample,
     arma::vec& epoch_of_next_sample,
     const arma::vec& epochs_per_negative_sample,
     arma::vec& epoch_of_next_negative_sample,
@@ -108,10 +149,10 @@ struct SgdWorker : public RcppParallel::Worker {
 
     n(0), alpha(0.0), gradient(gradient),
     positive_head(positive_head), positive_tail(positive_tail),
-    epochs_per_sample(epochs_per_sample),
-    epoch_of_next_sample(epoch_of_next_sample),
-    epochs_per_negative_sample(epochs_per_negative_sample),
-    epoch_of_next_negative_sample(epoch_of_next_negative_sample),
+
+    sampler(epochs_per_sample, epoch_of_next_sample, epochs_per_negative_sample,
+            epoch_of_next_negative_sample),
+    
     head_embedding(head_embedding),
     tail_embedding(tail_embedding),
     n_vertices(n_vertices),
@@ -137,7 +178,7 @@ struct SgdWorker : public RcppParallel::Worker {
     tau_prng prng(s1, s2, s3);
 
     for (std::size_t i = begin; i < end; i++) {
-      if (!is_sample_edge(i)) {
+      if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
       
@@ -156,7 +197,7 @@ struct SgdWorker : public RcppParallel::Worker {
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, k, d);
       }
 
-      const unsigned int n_neg_samples = get_num_neg_samples(i);
+      const unsigned int n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (unsigned int p = 0; p < n_neg_samples; p++) {
         arma::uword k = prng() % n_vertices;
 
@@ -175,7 +216,7 @@ struct SgdWorker : public RcppParallel::Worker {
         }
       }
       
-      next_sample(i, n_neg_samples);
+      sampler.next_sample(i, n_neg_samples);
     }
   }
 
@@ -185,25 +226,6 @@ struct SgdWorker : public RcppParallel::Worker {
 
   void set_alpha(double alpha) {
     this->alpha = alpha;
-  }
-  
-  bool is_sample_edge(std::size_t i) {
-    return epoch_of_next_sample[i] <= n;
-  }
-  
-  unsigned int get_num_neg_samples(std::size_t i) {
-    auto n_neg_samples = static_cast<unsigned int>(
-      (n - epoch_of_next_negative_sample[i]) / 
-        epochs_per_negative_sample[i]);
-    
-    return n_neg_samples;
-  }
-  
-  void next_sample(unsigned int i, unsigned int num_neg_samples) {
-    epoch_of_next_sample[i] += epochs_per_sample[i];
-    
-    epoch_of_next_negative_sample[i] += 
-      num_neg_samples * epochs_per_negative_sample[i];
   }
 };
 
