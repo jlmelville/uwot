@@ -67,7 +67,6 @@ struct SgdWorker : public RcppParallel::Worker {
   arma::mat& head_embedding;
   arma::mat& tail_embedding;
   unsigned int n_vertices;
-  const arma::uword nrow;
   const arma::uword ncol;
   tthread::mutex mutex;
   std::mt19937 rng;
@@ -87,7 +86,6 @@ struct SgdWorker : public RcppParallel::Worker {
     arma::mat& head_embedding,
     arma::mat& tail_embedding,
     unsigned int n_vertices,
-    const arma::uword nrow,
     const arma::uword ncol,
     unsigned int seed) :
 
@@ -99,7 +97,8 @@ struct SgdWorker : public RcppParallel::Worker {
     epoch_of_next_negative_sample(epoch_of_next_negative_sample),
     head_embedding(head_embedding),
     tail_embedding(tail_embedding),
-    n_vertices(n_vertices), nrow(nrow), ncol(ncol),
+    n_vertices(n_vertices),
+    ncol(ncol),
     rng(seed), gen(-2147483647, 2147483646),
     dist_eps(std::numeric_limits<double>::epsilon())
   {  }
@@ -222,7 +221,7 @@ Progress progress(n_epochs, verbose);
                               epochs_per_negative_sample, 
                               epoch_of_next_negative_sample,
                               head_embedding, tail_embedding, n_vertices, 
-                              head_embedding.n_rows, head_embedding.n_cols,
+                              head_embedding.n_cols,
                               seed);
 
   for (auto n = 0U; n < n_epochs; n++) {
