@@ -78,9 +78,7 @@ struct SgdWorker : public RcppParallel::Worker {
   const Gradient gradient;
   const arma::uvec positive_head;
   const arma::uvec positive_tail;
-  
   Sampler sampler;
-  
   arma::mat& head_embedding;
   arma::mat& tail_embedding;
   unsigned int n_vertices;
@@ -94,12 +92,7 @@ struct SgdWorker : public RcppParallel::Worker {
     const Gradient& gradient,
     const arma::uvec& positive_head,
     const arma::uvec& positive_tail,
-
-    const arma::vec& epochs_per_sample,
-    arma::vec& epoch_of_next_sample,
-    const arma::vec& epochs_per_negative_sample,
-    arma::vec& epoch_of_next_negative_sample,
-
+    Sampler& sampler,
     arma::mat& head_embedding,
     arma::mat& tail_embedding,
     unsigned int n_vertices,
@@ -109,8 +102,7 @@ struct SgdWorker : public RcppParallel::Worker {
     n(0), alpha(0.0), gradient(gradient),
     positive_head(positive_head), positive_tail(positive_tail),
 
-    sampler(epochs_per_sample, epoch_of_next_sample, epochs_per_negative_sample,
-            epoch_of_next_negative_sample),
+    sampler(sampler),
     
     head_embedding(head_embedding),
     tail_embedding(tail_embedding),
@@ -203,23 +195,18 @@ arma::mat optimize_layout(const T& gradient,
                           bool parallelize = true,
                           std::size_t grain_size = 1,
                           bool verbose = false) {
-Progress progress(n_epochs, verbose);
 
-  const auto n_epochs_per_sample = epochs_per_sample.size();
-  double alpha = initial_alpha;
-
-  arma::vec epochs_per_negative_sample(epochs_per_sample / negative_sample_rate);
-  arma::vec epoch_of_next_negative_sample(epochs_per_negative_sample);
-  arma::vec epoch_of_next_sample(epochs_per_sample);
-
+  Sampler sampler(epochs_per_sample, negative_sample_rate);
   SgdWorker<T, DoMove> worker(gradient, positive_head, positive_tail, 
-                              epochs_per_sample, epoch_of_next_sample, 
-                              epochs_per_negative_sample, 
-                              epoch_of_next_negative_sample,
+                              sampler,
                               head_embedding, tail_embedding, n_vertices, 
                               head_embedding.n_cols,
                               seed);
-
+  
+  Progress progress(n_epochs, verbose);
+  const auto n_epochs_per_sample = epochs_per_sample.size();
+  double alpha = initial_alpha;
+  
   for (auto n = 0U; n < n_epochs; n++) {
     worker.set_alpha(alpha);
     worker.set_n(n);

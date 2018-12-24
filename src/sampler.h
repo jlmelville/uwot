@@ -26,12 +26,9 @@
 // Weighted edge sampler
 class Sampler {
 public:
-  Sampler(
-    const arma::vec& epochs_per_sample,
-    arma::vec& epoch_of_next_sample,
-    const arma::vec& epochs_per_negative_sample,
-    arma::vec& epoch_of_next_negative_sample
-  );
+  Sampler(const arma::vec& epochs_per_sample, 
+          double negative_sample_rate);
+  
   bool is_sample_edge(std::size_t i, std::size_t n) const;
   unsigned int get_num_neg_samples(std::size_t i, std::size_t n) const;
   void next_sample(unsigned int i, unsigned int num_neg_samples);

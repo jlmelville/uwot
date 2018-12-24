@@ -22,17 +22,13 @@
 
 #include "sampler.h"
 
-Sampler::Sampler(
-  const arma::vec& epochs_per_sample,
-  arma::vec& epoch_of_next_sample,
-  const arma::vec& epochs_per_negative_sample,
-  arma::vec& epoch_of_next_negative_sample
-) :
+Sampler::Sampler(const arma::vec& epochs_per_sample, 
+                 double negative_sample_rate) :
   epochs_per_sample(epochs_per_sample),
-  epoch_of_next_sample(epoch_of_next_sample),
-  epochs_per_negative_sample(epochs_per_negative_sample),
-  epoch_of_next_negative_sample(epoch_of_next_negative_sample) 
-{}
+  epoch_of_next_sample(epochs_per_sample),
+  epochs_per_negative_sample(epochs_per_sample / negative_sample_rate),
+  epoch_of_next_negative_sample(epochs_per_negative_sample)
+  {}
 
 bool Sampler::is_sample_edge(std::size_t i, std::size_t n) const {
   return epoch_of_next_sample[i] <= n;
