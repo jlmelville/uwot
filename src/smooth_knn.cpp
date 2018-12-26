@@ -151,11 +151,11 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
 Rcpp::NumericMatrix smooth_knn_distances_parallel(
     const Rcpp::NumericMatrix& nn_dist,
     const Rcpp::IntegerMatrix& nn_idx,
-    const unsigned int n_iter,
-    const double local_connectivity,
-    const double bandwidth,
-    const double tol,
-    const double min_k_dist_scale,
+    const unsigned int n_iter = 64,
+    const double local_connectivity = 1.0,
+    const double bandwidth = 1.0,
+    const double tol = 1e-5,
+    const double min_k_dist_scale = 1e-3,
     const bool parallelize = true,
     const std::size_t grain_size = 1,
     const bool verbose = false) {
