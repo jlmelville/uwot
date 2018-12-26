@@ -121,10 +121,10 @@ perplexity_similarities <- function(nn, perplexity = NULL,
   symmetrize(affinity_matrix)
 }
 
-# Convert the matrix of NN indices to a sparse asymetric matrix where each
+# Convert the matrix of NN indices to a sparse asymmetric matrix where each
 # edge has a weight of val (scalar or vector)
 # return a sparse matrix with dimensions of nrow(nn_idx) x max_nbr_id
-nn_to_sparse <- function(nn_idx, val = 1, byrow = FALSE, self_nbr = FALSE,
+nn_to_sparse <- function(nn_idx, val = 1, self_nbr = FALSE,
                          max_nbr_id = ifelse(self_nbr,
                            nrow(nn_idx), max(nn_idx)
                          )) {
@@ -137,14 +137,8 @@ nn_to_sparse <- function(nn_idx, val = 1, byrow = FALSE, self_nbr = FALSE,
   else {
     xs <- val
   }
-  if (byrow) {
-    is <- rep(1:nd, each = k)
-    js <- as.vector(nn_idx)
-  }
-  else {
-    is <- rep(1:nd, times = k)
-    js <- as.vector(nn_idx)
-  }
+  is <- rep(1:nd, times = k)
+  js <- as.vector(nn_idx)
 
   dims <- c(nrow(nn_idx), max_nbr_id)
   res <- sparseMatrix(i = is, j = js, x = xs, dims = dims)
