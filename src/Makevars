@@ -1,7 +1,5 @@
 # Turn on C++11 support to get access to long long (guaranteed 64-bit ints)
 CXX_STD = CXX11
-# This was needed to allow sufficiently large sparse matrix support in Armadillo
-PKG_CPPFLAGS = -DARMA_64BIT_WORD=1
 
 # RcppParallel
 PKG_LIBS += $(shell ${R_HOME}/bin/Rscript -e "RcppParallel::RcppParallelLibs()")
