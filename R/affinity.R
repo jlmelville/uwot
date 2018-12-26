@@ -108,6 +108,8 @@ perplexity_similarities <- function(nn, perplexity = NULL,
       grain_size = grain_size,
       verbose = verbose
     )
+    affinity_matrix <- nn_to_sparse(nn$idx, as.vector(affinity_matrix),
+                                    self_nbr = TRUE, max_nbr_id = nrow(nn$idx))
   }
   else {
     # knn kernel

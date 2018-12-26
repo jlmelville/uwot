@@ -161,13 +161,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_row_probabilities_parallel
-arma::sp_mat calc_row_probabilities_parallel(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx, const double perplexity, const unsigned int n_iter, const double tol, const bool parallelize, const std::size_t grain_size, const bool verbose);
+Rcpp::NumericMatrix calc_row_probabilities_parallel(const Rcpp::NumericMatrix nn_dist, const Rcpp::IntegerMatrix nn_idx, const double perplexity, const unsigned int n_iter, const double tol, const bool parallelize, const std::size_t grain_size, const bool verbose);
 RcppExport SEXP _uwot_calc_row_probabilities_parallel(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP perplexitySEXP, SEXP n_iterSEXP, SEXP tolSEXP, SEXP parallelizeSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type nn_dist(nn_distSEXP);
-    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix& >::type nn_idx(nn_idxSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix >::type nn_dist(nn_distSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::IntegerMatrix >::type nn_idx(nn_idxSEXP);
     Rcpp::traits::input_parameter< const double >::type perplexity(perplexitySEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type n_iter(n_iterSEXP);
     Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);

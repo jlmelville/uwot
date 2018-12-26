@@ -80,10 +80,15 @@ res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx,
   perplexity = 4,
   parallelize = FALSE, verbose = FALSE
 )
+res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
+             self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx))
+
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 
 RcppParallel::setThreadOptions(numThreads = 1)
 res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx, perplexity = 4, verbose = FALSE)
+res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
+                    self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx))
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 
 # Taken from LargeVis C++ implementation
@@ -113,7 +118,7 @@ normiris <- scale(x2m(uiris), center = TRUE, scale = FALSE)
 normiris <- normiris / max(abs(normiris))
 niris10_nn149 <- dist_nn(dist(normiris), k = 149)
 res <- calc_row_probabilities(niris10_nn149$dist, niris10_nn149$idx, perplexity = 50, verbose = FALSE, ret_extra = TRUE)
-expect_equal(1 / res$sigma^2, Prow_niris_p150_k50_betas, tol = 1e-5)
+expect_equal(1 / res$sigma ^ 2, Prow_niris_p150_k50_betas, tol = 1e-5)
 
 # Taken from the LargeVis C++ implementation
 Prow_iris_p150_k50_rowSums <- c(
