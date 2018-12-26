@@ -150,8 +150,7 @@ The optional PCA initialization and initial dimensionality reduction uses
 
 The smooth k-nearest neighbor distance and stochastic gradient descent
 optimization routines are written in C++ (using
-[Rcpp](https://cran.r-project.org/package=Rcpp) and 
-[RcppArmadillo](https://cran.r-project.org/package=RcppArmadillo)), aping
+[Rcpp](https://cran.r-project.org/package=Rcpp), aping
 the Python code as closely as possible. It is my first time using Rcpp, so 
 let's assume I did a horrible job.
 
