@@ -156,7 +156,7 @@ struct SgdWorker : public RcppParallel::Worker {
       
       const unsigned int n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (unsigned int p = 0; p < n_neg_samples; p++) {
-        std::size_t k = prng() % head_nrow;
+        std::size_t k = prng() % tail_nrow;
         if (j == k) {
           continue;
         }

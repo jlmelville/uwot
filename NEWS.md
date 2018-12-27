@@ -4,6 +4,9 @@
 
 ## Bug fixes and minor improvements
 
+* Fixed bug that affected `umap_transform`, where negative sampling was over 
+the size of the test data (should be the training data).
+
 # uwot 0.0.0.9008 (December 23 2018)
 
 ## New features

@@ -285,3 +285,15 @@ res <- umap(iris10,
             init = "sspectral", verbose = FALSE, n_threads = 0
 )
 expect_ok_matrix(res)
+
+
+# umap transform when test datset size > train dataset size
+set.seed(1337)
+res <- umap(iris10[1:4, ],
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
+            init = "rand", verbose = FALSE, ret_model = TRUE)
+expect_is(res, "list")
+expect_ok_matrix(res$embedding, nr = 4)
+
+res_test <- umap_transform(iris10[5:10, ], res, verbose = FALSE, n_epochs = 10)
+expect_ok_matrix(res_test, nr = 6)
