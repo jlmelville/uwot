@@ -84,7 +84,6 @@ struct SgdWorker : public RcppParallel::Worker {
   Sampler sampler;
   std::vector<double>& head_embedding;
   std::vector<double>& tail_embedding;
-  unsigned int n_vertices;
   const std::size_t ncol;
   const std::size_t head_nrow;
   const std::size_t tail_nrow;
@@ -100,7 +99,6 @@ struct SgdWorker : public RcppParallel::Worker {
     Sampler& sampler,
     std::vector<double>& head_embedding,
     std::vector<double>& tail_embedding,
-    unsigned int n_vertices,
     const std::size_t ncol,
     unsigned int seed) :
     
@@ -111,7 +109,6 @@ struct SgdWorker : public RcppParallel::Worker {
     
     head_embedding(head_embedding),
     tail_embedding(tail_embedding),
-    n_vertices(n_vertices),
     ncol(ncol), 
     head_nrow(head_embedding.size() / ncol), 
     tail_nrow(tail_embedding.size() / ncol),
@@ -159,8 +156,7 @@ struct SgdWorker : public RcppParallel::Worker {
       
       const unsigned int n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (unsigned int p = 0; p < n_neg_samples; p++) {
-        std::size_t k = prng() % n_vertices;
-        
+        std::size_t k = prng() % head_nrow;
         if (j == k) {
           continue;
         }
