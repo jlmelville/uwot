@@ -53,23 +53,22 @@ double clip(double val, double clip_max) {
   return std::max(std::min(val, clip_max), -clip_max);
 }
 
-
-// squared Euclidean distance between m[a, ] and n[b, ]
-double rdist(const std::vector<double>& m,
-             const std::vector<double>& n,
-             const std::size_t a,
-             const std::size_t b,
-             const std::size_t ndim,
-             const std::size_t nrowm,
-             const std::size_t nrown) {
+// squared Euclidean distance between m[, a] and n[, b]
+double cdist2(
+    const std::vector<double>& m,
+    const std::vector<double>& n,
+    const std::size_t a,
+    const std::size_t b,
+    const std::size_t nrow) {
   double sum = 0.0;
-  for (std::size_t j = 0; j < ndim; j++) {
-    const double diff = m[nrowm * j + a] - n[nrown * j + b];
+  const size_t nrowa = a * nrow;
+  const size_t nrowb = b * nrow;
+  for (std::size_t j = 0; j < nrow; j++) {
+    const double diff = m[nrowa + j] - n[nrowb + j];
     sum += diff * diff;
   }
   return sum;
 }
-
 
 // Gradient: the type of gradient used in the optimization
 // DoMoveVertex: true if both ends of a positive edge should be updated
@@ -140,36 +139,33 @@ struct SgdWorker : public RcppParallel::Worker {
       std::size_t j = positive_head[i];
       std::size_t k = positive_tail[i];
       
-      const double dist_squared = std::max(rdist(
-        head_embedding, tail_embedding, j, k, ndim, head_nvert, tail_nvert),
+      const double dist_squared = std::max(cdist2(
+        head_embedding, tail_embedding, j, k, ndim),
         dist_eps);
       const double grad_coeff = gradient.grad_attr(dist_squared);
-      
       for (std::size_t d = 0; d < ndim; d++) {
-        double dy = head_embedding[head_nvert * d + j] - 
-          tail_embedding[tail_nvert * d + k];
+        double dy = head_embedding[ndim * j + d] -
+          tail_embedding[ndim * k + d];
         double grad_d = alpha * clip(grad_coeff * dy, Gradient::clip_max);
-        head_embedding[head_nvert * d + j] += grad_d;
-        move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, k, d, 
-                                        tail_nvert);
+        head_embedding[ndim * j + d] += grad_d;
+        move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, k, ndim);
       }
-      
+
       const unsigned int n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (unsigned int p = 0; p < n_neg_samples; p++) {
         std::size_t k = prng() % tail_nvert;
         if (j == k) {
           continue;
         }
-        const double dist_squared = std::max(rdist(
-          head_embedding, tail_embedding, j, k, ndim, head_nvert, tail_nvert), 
+        const double dist_squared = std::max(cdist2(
+          head_embedding, tail_embedding, j, k, ndim),
           dist_eps);
         const double grad_coeff = gradient.grad_rep(dist_squared);
-        
         for (std::size_t d = 0; d < ndim; d++) {
-          double dy = head_embedding[head_nvert * d + j] - 
-            tail_embedding[tail_nvert * d + k];
+          double dy = head_embedding[ndim * j + d] -
+            tail_embedding[ndim * k + d];
           double grad_d = alpha * clip(grad_coeff * dy, Gradient::clip_max);
-          head_embedding[head_nvert * d + j] += grad_d;
+          head_embedding[ndim * j + d] += grad_d;
         }
       }
       
@@ -205,7 +201,7 @@ std::vector<double> optimize_layout(
     bool verbose = false) 
 {
   Sampler sampler(epochs_per_sample, negative_sample_rate);
-
+  
   SgdWorker<T, DoMove> worker(gradient, 
                               positive_head, positive_tail,
                               sampler,
@@ -312,7 +308,7 @@ Rcpp::NumericMatrix optimize_layout_umap(
   if (delete_tail_ptr) {
     delete(tail_vec_ptr);
   }
-
+  
   return Rcpp::NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
                              result.begin());
 }
@@ -353,15 +349,15 @@ Rcpp::NumericMatrix optimize_layout_tumap(
   
   if (move_other) {
     result = optimize_layout<tumap_gradient, true>(
-        gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
-        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
-        seed, parallelize, grain_size, verbose);
+      gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
+      n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
+      seed, parallelize, grain_size, verbose);
   }
   else {
     result = optimize_layout<tumap_gradient, false>(
-        gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
-        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
-        seed, parallelize, grain_size, verbose);
+      gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
+      n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
+      seed, parallelize, grain_size, verbose);
   }
   
   if (delete_tail_ptr) {
@@ -392,9 +388,9 @@ Rcpp::NumericMatrix optimize_layout_largevis(
   const largevis_gradient gradient(gamma);
   auto head_vec = Rcpp::as<std::vector<double>>(head_embedding);
   std::vector<double> result = optimize_layout<largevis_gradient, true>(
-        gradient, head_vec, head_vec, positive_head, positive_tail,
-        n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-        negative_sample_rate, seed, parallelize, grain_size, verbose);
+    gradient, head_vec, head_vec, positive_head, positive_tail,
+    n_epochs, n_vertices, epochs_per_sample, initial_alpha,
+    negative_sample_rate, seed, parallelize, grain_size, verbose);
   
   return Rcpp::NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
                              result.begin());

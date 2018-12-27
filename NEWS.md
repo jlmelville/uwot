@@ -2,6 +2,10 @@
 
 ## New features
 
+* Data is now stored column-wise during optimization, which should result in
+an increase in performance for larger values of `n_components` (e.g. 
+approximately 50% faster optimization time with MNIST and `n_components = 50`).
+
 ## Bug fixes and minor improvements
 
 * Fixed bug that affected `umap_transform`, where negative sampling was over 

@@ -919,18 +919,18 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   ret_nn = FALSE,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X,
-    n_neighbors = n_neighbors, n_components = n_components,
-    metric = metric,
-    n_epochs = n_epochs, alpha = learning_rate, scale = scale, init = init,
-    gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
-    nn_method = nn_method, n_trees = n_trees, search_k = search_k,
-    method = "largevis", perplexity = perplexity,
-    pca = pca,
-    n_threads = n_threads, n_sgd_threads = n_sgd_threads, 
-    grain_size = grain_size, 
-    kernel = kernel,
-    ret_nn = ret_nn,
-    verbose = verbose
+       n_neighbors = n_neighbors, n_components = n_components,
+       metric = metric,
+       n_epochs = n_epochs, alpha = learning_rate, scale = scale, init = init,
+       gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
+       nn_method = nn_method, n_trees = n_trees, search_k = search_k,
+       method = "largevis", perplexity = perplexity,
+       pca = pca,
+       n_threads = n_threads, n_sgd_threads = n_sgd_threads, 
+       grain_size = grain_size, 
+       kernel = kernel,
+       ret_nn = ret_nn,
+       verbose = verbose
   )
 }
 
@@ -960,23 +960,23 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     a <- ab_res[1]
     b <- ab_res[2]
   }
-
+  
   if (n_neighbors < 2) {
     stop("n_neighbors must be >= 2")
   }
-
+  
   if (set_op_mix_ratio < 0.0 || set_op_mix_ratio > 1.0) {
     stop("set_op_mix_ratio must be between 0.0 and 1.0")
   }
-
+  
   if (local_connectivity < 1.0) {
     stop("local_connectivity cannot be < 1.0")
   }
-
+  
   if (!is.null(y) && is.numeric(y) && any(is.na(y))) {
     stop("numeric y cannot contain NA")
   }
-
+  
   if (!is.null(pca)) {
     if (!is.numeric(pca) || pca < 1) {
       stop("'pca' must be a positive integer")
@@ -995,7 +995,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (n_threads > 0) {
     RcppParallel::setThreadOptions(numThreads = n_threads)
   }
-
+  
   # Store categorical columns to be used to generate the graph
   Xcat <- NULL
   if (is.null(X)) {
@@ -1027,7 +1027,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   else {
     cat_ids <- NULL
     if (methods::is(X, "data.frame")) {
-
+      
       cat_res <- find_categoricals(metric)
       metric <- cat_res$metrics
       cat_ids <- cat_res$categoricals
@@ -1050,15 +1050,15 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                 time_stamp = FALSE)
     }
     X <- scale_input(X,
-      scale_type = scale, ret_model = ret_model,
-      verbose = verbose
+                     scale_type = scale, ret_model = ret_model,
+                     verbose = verbose
     )
   }
-
+  
   if (method == "largevis" && kernel == "knn") {
     n_neighbors <- perplexity
   }
-
+  
   if (n_neighbors > n_vertices) {
     # If nn_method is a list, we will determine n_neighbors later
     if (!is.list(nn_method)) {
@@ -1073,7 +1073,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       }
     }
   }
-
+  
   if (!is.list(metric)) {
     metrics <- list(c())
     names(metrics) <- metric
@@ -1101,24 +1101,24 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
     pca_shortcut <- TRUE
   }
-
+  
   d2sr <- data2set(X, Xcat, n_neighbors, metrics, nn_method,
-                n_trees, search_k,
-                method,
-                set_op_mix_ratio, local_connectivity, bandwidth,
-                perplexity, kernel,
-                n_threads, grain_size,
-                ret_model,
-                pca = pca,
-                n_vertices = n_vertices,
-                verbose = verbose)
+                   n_trees, search_k,
+                   method,
+                   set_op_mix_ratio, local_connectivity, bandwidth,
+                   perplexity, kernel,
+                   n_threads, grain_size,
+                   ret_model,
+                   pca = pca,
+                   n_vertices = n_vertices,
+                   verbose = verbose)
   
   V <- d2sr$V
   nns <- d2sr$nns
   if (is.null(pca_models)) {
     pca_models <- d2sr$pca_models
   }
-
+  
   if (!is.null(y)) {
     tsmessage("Processing y data")
     
@@ -1147,7 +1147,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       }
       
       yindexes <- which(vapply(y, is.numeric, logical(1)))
-
+      
       if (length(yindexes) > 0) {
         y <- as.matrix(y[, yindexes])
       }
@@ -1166,20 +1166,20 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       y <- NULL
     }
     
-
+    
     if (!is.null(y)) {
       yd2sr <- data2set(y, ycat, target_n_neighbors, target_metrics, nn_method,
-                       n_trees, search_k,
-                       method,
-                       set_op_mix_ratio = 1.0,
-                       local_connectivity = 1.0,
-                       bandwidth = 1.0,
-                       perplexity = perplexity, kernel = kernel,
-                       n_threads = n_threads, grain_size = grain_size,
-                       ret_model = FALSE,
-                       pca = pca,
-                       n_vertices = n_vertices,
-                       verbose = verbose)
+                        n_trees, search_k,
+                        method,
+                        set_op_mix_ratio = 1.0,
+                        local_connectivity = 1.0,
+                        bandwidth = 1.0,
+                        perplexity = perplexity, kernel = kernel,
+                        n_threads = n_threads, grain_size = grain_size,
+                        ret_model = FALSE,
+                        pca = pca,
+                        n_vertices = n_vertices,
+                        verbose = verbose)
       
       tsmessage("Intersecting X and Y sets with target weight = ", 
                 formatC(target_weight))
@@ -1192,12 +1192,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                                        verbose = verbose)
     }
   }
-
+  
   if (!(ret_model || ret_nn)) {
     nns <- NULL
     gc()
   }
-
+  
   if (methods::is(init, "matrix")) {
     if (nrow(init) != n_vertices || ncol(init) != n_components) {
       stop("init matrix does not match necessary configuration for X")
@@ -1229,17 +1229,17 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
     else {
       embedding <- switch(init,
-        spectral = spectral_init(V, ndim = n_components, verbose = verbose),
-        random = rand_init(n_vertices, n_components, verbose = verbose),
-        lvrandom = rand_init_lv(n_vertices, n_components, verbose = verbose),
-        normlaplacian = normalized_laplacian_init(V,
-          ndim = n_components,
-          verbose = verbose
-        ),
-        laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
-        spca = scaled_pca(X, ndim = n_components, verbose = verbose),
-        pca = pca_init(X, ndim = n_components, verbose = verbose),
-        stop("Unknown initialization method: '", init, "'")
+                          spectral = spectral_init(V, ndim = n_components, verbose = verbose),
+                          random = rand_init(n_vertices, n_components, verbose = verbose),
+                          lvrandom = rand_init_lv(n_vertices, n_components, verbose = verbose),
+                          normlaplacian = normalized_laplacian_init(V,
+                                                                    ndim = n_components,
+                                                                    verbose = verbose
+                          ),
+                          laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
+                          spca = scaled_pca(X, ndim = n_components, verbose = verbose),
+                          pca = pca_init(X, ndim = n_components, verbose = verbose),
+                          stop("Unknown initialization method: '", init, "'")
       )
     }
     
@@ -1261,25 +1261,26 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       }
     }
   }
-
+  
   V@x[V@x < max(V@x) / n_epochs] <- 0
   V <- Matrix::drop0(V)
   epochs_per_sample <- make_epochs_per_sample(V@x, n_epochs)
-
+  
   positive_head <- V@i
   positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
-
+  
   tsmessage(
     "Commencing optimization for ", n_epochs, " epochs, with ",
     length(positive_head), " positive edges",
     pluralize("thread", n_sgd_threads, " using")
   )
-
+  
   parallelize <- n_sgd_threads > 0
   if (n_sgd_threads > 0) {
     RcppParallel::setThreadOptions(numThreads = n_sgd_threads)
   }
-
+  
+  embedding <- t(embedding)
   if (tolower(method) == "umap") {
     embedding <- optimize_layout_umap(
       head_embedding = embedding,
@@ -1334,12 +1335,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       verbose = verbose
     )
   }
-
+  embedding <- t(embedding)
   gc()
   # Center the points before returning
   embedding <- scale(embedding, center = TRUE, scale = FALSE)
   tsmessage("Optimization finished")
-
+  
   if (ret_model || ret_nn) {
     nblocks <- length(nns)
     res <- list(embedding = embedding)
@@ -1383,7 +1384,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   else {
     res <- embedding
   }
-
+  
   res
 }
 
@@ -1421,15 +1422,15 @@ x2nv <- function(X) {
 }
 
 data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
-                   n_trees, search_k,
-                   method,
-                   set_op_mix_ratio, local_connectivity, bandwidth,
-                   perplexity, kernel,
-                   n_threads, grain_size,
-                   ret_model,
-                   n_vertices = x2nv(X),
-                   pca = NULL,
-                   verbose = FALSE) {
+                     n_trees, search_k,
+                     method,
+                     set_op_mix_ratio, local_connectivity, bandwidth,
+                     perplexity, kernel,
+                     n_threads, grain_size,
+                     ret_model,
+                     n_vertices = x2nv(X),
+                     pca = NULL,
+                     verbose = FALSE) {
   V <- NULL
   nns <- list()
   nblocks <- length(metrics)
@@ -1450,7 +1451,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     metrics <- replicate(nblocks, NULL, simplify = FALSE)
     names(metrics) <- rep("precomputed", nblocks)
   }
-
+  
   
   if (nblocks > 1) {
     tsmessage("Found ", nblocks, " blocks of data")
@@ -1608,13 +1609,13 @@ validate_nn <- function(nn_method, n_vertices, n_neighbors = NULL) {
   }
   if (nrow(nn_method$idx) != n_vertices) {
     stop("Precalculated 'dist' matrix must have ", n_vertices, " rows, but
-           found ", nrow(nn_method$dist))
+         found ", nrow(nn_method$dist))
   }
   if (ncol(nn_method$dist) != n_neighbors) {
     stop("Precalculated 'dist' matrix must have ", n_neighbors, " cols, but
-           found ", ncol(nn_method$dist))
+         found ", ncol(nn_method$dist))
   }
-}
+  }
 
 nn2set <- function(method, nn,
                    set_op_mix_ratio, local_connectivity, bandwidth,
@@ -1663,13 +1664,13 @@ x2set <- function(X, n_neighbors, metric, nn_method,
              ret_model,
              n_vertices = n_vertices,
              verbose = verbose)
-
+  
   if (any(is.infinite(nn$dist))) {
     stop("Infinite distances found in nearest neighbors")
   }
   gc()
-
-
+  
+  
   V <- nn2set(method, nn,
               set_op_mix_ratio, local_connectivity, bandwidth,
               perplexity, kernel,
@@ -1679,7 +1680,7 @@ x2set <- function(X, n_neighbors, metric, nn_method,
     stop("Non-finite entries in the input matrix")
   }
   gc()
-
+  
   list(
     nn = nn,
     V = V
@@ -1690,7 +1691,7 @@ set_intersect <- function(A, B, weight = 0.5, reset = TRUE) {
   A <- general_simplicial_set_intersection(
     A, B, weight
   )
-
+  
   # https://github.com/lmcinnes/umap/issues/58#issuecomment-437633658
   # For now always reset
   if (reset) {
@@ -1751,7 +1752,7 @@ find_ab_params <- function(spread = 1, min_dist = 0.001) {
   yv[xv >= min_dist] <- exp(-(xv[xv >= min_dist] - min_dist) / spread)
   result <- try({
     stats::nls(yv ~ 1 / (1 + a * xv^(2 * b)),
-      start = list(a = 1, b = 1)
+               start = list(a = 1, b = 1)
     )$m$getPars()
   }, silent = TRUE)
   if (class(result) == "try-error") {
@@ -1766,7 +1767,7 @@ find_ab_params <- function(spread = 1, min_dist = 0.001) {
 # The default number of edge samples used by LargeVis
 lvish_samples <- function(n_vertices) {
   n_samples <- 0
-
+  
   if (n_vertices < 10000) {
     n_samples <- 1000
   }
@@ -1776,7 +1777,7 @@ lvish_samples <- function(n_vertices) {
   else {
     n_samples <- n_vertices / 100
   }
-
+  
   round(n_samples * 1000000)
 }
 
@@ -1798,67 +1799,67 @@ scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
   else if (tolower(scale_type) == "z") {
     scale_type <- "scale"
   }
-
+  
   scale_type <- match.arg(
     tolower(scale_type),
     c("none", "scale", "range", "colrange", "maxabs")
   )
   switch(scale_type,
-    range = {
-      tsmessage("Range scaling X")
-      min_X <- min(X)
-      X <- X - min_X
-
-      max_X <- max(X)
-      X <- X / max_X
-
-      if (ret_model) {
-        attr(X, "scaled:range:min") <- min_X
-        attr(X, "scaled:range:max") <- max_X
-      }
-    },
-    colrange = {
-      tsmessage("Column range scaling X")
-      min_X <- apply(X, 2, min)
-      X <- sweep(X, 2, min_X)
-
-      max_X <- apply(X, 2, max)
-      X <- sweep(X, 2, max_X, `/`)
-
-      if (ret_model) {
-        attr(X, "scaled:colrange:min") <- min_X
-        attr(X, "scaled:colrange:max") <- max_X
-      }
-    },
-    maxabs = {
-      tsmessage("Normalizing by max-abs")
-      X <- base::scale(X, scale = FALSE)
-      max_abs <- max(abs(X))
-      X <- X / max_abs
-
-      if (ret_model) {
-        attr(X, "scaled:maxabs") <- max_abs
-      }
-    },
-    scale = {
-      tsmessage("Scaling to zero mean and unit variance")
-
-      varf <- function(x) {
-        sum((x - sum(x) / length(x))^2)
-      }
-      non_zero_var_cols <- apply(X, 2, varf) >= .Machine$double.xmin
-
-      if (length(non_zero_var_cols) == 0) {
-        stop("Matrix has zero variance")
-      }
-      X <- X[, non_zero_var_cols]
-      tsmessage("Kept ", ncol(X), " non-zero-variance columns")
-      X <- base::scale(X, scale = TRUE)
-
-      if (ret_model) {
-        attr(X, "scaled:nzvcols") <- which(non_zero_var_cols)
-      }
-    }
+         range = {
+           tsmessage("Range scaling X")
+           min_X <- min(X)
+           X <- X - min_X
+           
+           max_X <- max(X)
+           X <- X / max_X
+           
+           if (ret_model) {
+             attr(X, "scaled:range:min") <- min_X
+             attr(X, "scaled:range:max") <- max_X
+           }
+         },
+         colrange = {
+           tsmessage("Column range scaling X")
+           min_X <- apply(X, 2, min)
+           X <- sweep(X, 2, min_X)
+           
+           max_X <- apply(X, 2, max)
+           X <- sweep(X, 2, max_X, `/`)
+           
+           if (ret_model) {
+             attr(X, "scaled:colrange:min") <- min_X
+             attr(X, "scaled:colrange:max") <- max_X
+           }
+         },
+         maxabs = {
+           tsmessage("Normalizing by max-abs")
+           X <- base::scale(X, scale = FALSE)
+           max_abs <- max(abs(X))
+           X <- X / max_abs
+           
+           if (ret_model) {
+             attr(X, "scaled:maxabs") <- max_abs
+           }
+         },
+         scale = {
+           tsmessage("Scaling to zero mean and unit variance")
+           
+           varf <- function(x) {
+             sum((x - sum(x) / length(x))^2)
+           }
+           non_zero_var_cols <- apply(X, 2, varf) >= .Machine$double.xmin
+           
+           if (length(non_zero_var_cols) == 0) {
+             stop("Matrix has zero variance")
+           }
+           X <- X[, non_zero_var_cols]
+           tsmessage("Kept ", ncol(X), " non-zero-variance columns")
+           X <- base::scale(X, scale = TRUE)
+           
+           if (ret_model) {
+             attr(X, "scaled:nzvcols") <- which(non_zero_var_cols)
+           }
+         }
   )
   X
 }
