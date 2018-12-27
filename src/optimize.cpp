@@ -53,6 +53,7 @@ double clip(double val, double clip_max) {
   return std::max(std::min(val, clip_max), -clip_max);
 }
 
+
 // squared Euclidean distance between m[a, ] and n[b, ]
 double rdist(const std::vector<double>& m,
              const std::vector<double>& n,
@@ -116,7 +117,7 @@ struct SgdWorker : public RcppParallel::Worker {
     tail_nrow(tail_embedding.size() / ncol),
     rng(seed), gen(-2147483647, 2147483646),
     dist_eps(std::numeric_limits<double>::epsilon())
-  {  }
+  { }
   
   void  operator()(std::size_t begin, std::size_t end) {
     // Each window gets its own fast PRNG state, so no locking needed inside the loop.
@@ -143,7 +144,7 @@ struct SgdWorker : public RcppParallel::Worker {
       std::size_t k = positive_tail[i];
       
       const double dist_squared = std::max(rdist(
-        head_embedding, tail_embedding, j, k, ncol, head_nrow, tail_nrow), 
+        head_embedding, tail_embedding, j, k, ncol, head_nrow, tail_nrow),
         dist_eps);
       const double grad_coeff = gradient.grad_attr(dist_squared);
       
@@ -191,27 +192,30 @@ struct SgdWorker : public RcppParallel::Worker {
 
 
 template<typename T, bool DoMove = true>
-std::vector<double> optimize_layout(const T& gradient,
-                                    std::vector<double>& head_embedding,
-                                    std::vector<double>& tail_embedding,
-                                    const std::vector<unsigned int>& positive_head,
-                                    const std::vector<unsigned int>& positive_tail,
-                                    unsigned int n_epochs, unsigned int n_vertices,
-                                    const std::vector<double>& epochs_per_sample,
-                                    double initial_alpha,
-                                    double negative_sample_rate,
-                                    unsigned int seed,
-                                    bool parallelize = true,
-                                    std::size_t grain_size = 1,
-                                    bool verbose = false) {
+std::vector<double> optimize_layout(
+    const T& gradient,
+    std::vector<double>& head_embedding,
+    std::vector<double>& tail_embedding,
+    const std::vector<unsigned int>& positive_head,
+    const std::vector<unsigned int>& positive_tail,
+    unsigned int n_epochs, 
+    unsigned int n_vertices,
+    const std::vector<double>& epochs_per_sample,
+    double initial_alpha,
+    double negative_sample_rate,
+    unsigned int seed,
+    bool parallelize = true,
+    std::size_t grain_size = 1,
+    bool verbose = false) 
+{
   Sampler sampler(epochs_per_sample, negative_sample_rate);
 
-  SgdWorker<T, DoMove> worker(gradient, positive_head, positive_tail,
-                                 sampler,
-                                 head_embedding, tail_embedding,
-                                 n_vertices,
-                                 head_embedding.size() / n_vertices,
-                                 seed);
+  SgdWorker<T, DoMove> worker(gradient, 
+                              positive_head, positive_tail,
+                              sampler,
+                              head_embedding, tail_embedding,
+                              head_embedding.size() / n_vertices,
+                              seed);
   
   
   Progress progress(n_epochs, verbose);
@@ -241,22 +245,26 @@ std::vector<double> optimize_layout(const T& gradient,
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix optimize_layout_umap(Rcpp::NumericMatrix head_embedding,
-                               Rcpp::Nullable<Rcpp::NumericMatrix> tail_embedding,
-                               const std::vector<unsigned int> positive_head,
-                               const std::vector<unsigned int> positive_tail,
-                               unsigned int n_epochs, unsigned int n_vertices,
-                               const std::vector<double> epochs_per_sample,
-                               double a, double b,
-                               double gamma, double initial_alpha,
-                               double negative_sample_rate,
-                               unsigned int seed,
-                               bool approx_pow,
-                               bool parallelize = true,
-                               std::size_t grain_size = 1,
-                               bool move_other = true,
-                               bool verbose = false) {
-  
+Rcpp::NumericMatrix optimize_layout_umap(
+    Rcpp::NumericMatrix head_embedding,
+    Rcpp::Nullable<Rcpp::NumericMatrix> tail_embedding,
+    const std::vector<unsigned int> positive_head,
+    const std::vector<unsigned int> positive_tail,
+    unsigned int n_epochs, 
+    unsigned int n_vertices,
+    const std::vector<double> epochs_per_sample,
+    double a, 
+    double b,
+    double gamma, 
+    double initial_alpha,
+    double negative_sample_rate,
+    unsigned int seed,
+    bool approx_pow,
+    bool parallelize = true,
+    std::size_t grain_size = 1,
+    bool move_other = true,
+    bool verbose = false) 
+{
   // For normal UMAP, tail_embedding is NULL and we want to pass 
   // a shallow copy of head_embedding as tail_embedding.
   // When updating new values, tail_embedding is the new coordinate to optimize
@@ -316,19 +324,22 @@ Rcpp::NumericMatrix optimize_layout_umap(Rcpp::NumericMatrix head_embedding,
 
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix optimize_layout_tumap(Rcpp::NumericMatrix head_embedding,
-                                Rcpp::Nullable<Rcpp::NumericMatrix> tail_embedding,
-                                const std::vector<unsigned int> positive_head,
-                                const std::vector<unsigned int> positive_tail,
-                                unsigned int n_epochs, unsigned int n_vertices,
-                                const std::vector<double> epochs_per_sample,
-                                double initial_alpha,
-                                double negative_sample_rate,
-                                unsigned int seed,
-                                bool parallelize = true,
-                                std::size_t grain_size = 1,
-                                bool move_other = true,
-                                bool verbose = false) {
+Rcpp::NumericMatrix optimize_layout_tumap(
+    Rcpp::NumericMatrix head_embedding,
+    Rcpp::Nullable<Rcpp::NumericMatrix> tail_embedding,
+    const std::vector<unsigned int> positive_head,
+    const std::vector<unsigned int> positive_tail,
+    unsigned int n_epochs, 
+    unsigned int n_vertices,
+    const std::vector<double> epochs_per_sample,
+    double initial_alpha,
+    double negative_sample_rate,
+    unsigned int seed,
+    bool parallelize = true,
+    std::size_t grain_size = 1,
+    bool move_other = true,
+    bool verbose = false) 
+{
   const tumap_gradient gradient;
   auto head_vec = Rcpp::as<std::vector<double>>(head_embedding);
   std::vector<double>* tail_vec_ptr = nullptr;
@@ -366,18 +377,20 @@ Rcpp::NumericMatrix optimize_layout_tumap(Rcpp::NumericMatrix head_embedding,
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix optimize_layout_largevis(Rcpp::NumericMatrix head_embedding,
-                                   const std::vector<unsigned int> positive_head,
-                                   const std::vector<unsigned int> positive_tail,
-                                   unsigned int n_epochs, 
-                                   unsigned int n_vertices,
-                                   const std::vector<double> epochs_per_sample,
-                                   double gamma, double initial_alpha,
-                                   double negative_sample_rate,
-                                   unsigned int seed,
-                                   bool parallelize = true,
-                                   std::size_t grain_size = 1,
-                                   bool verbose = false) {
+Rcpp::NumericMatrix optimize_layout_largevis(
+    Rcpp::NumericMatrix head_embedding,
+    const std::vector<unsigned int> positive_head,
+    const std::vector<unsigned int> positive_tail,
+    unsigned int n_epochs, 
+    unsigned int n_vertices,
+    const std::vector<double> epochs_per_sample,
+    double gamma, double initial_alpha,
+    double negative_sample_rate,
+    unsigned int seed,
+    bool parallelize = true,
+    std::size_t grain_size = 1,
+    bool verbose = false) 
+{
   // We don't support adding extra points for LargeVis, so this is much simpler
   // than the UMAP case
   const largevis_gradient gradient(gamma);
