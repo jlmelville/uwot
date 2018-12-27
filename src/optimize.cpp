@@ -84,7 +84,7 @@ struct SgdWorker : public RcppParallel::Worker {
   Sampler sampler;
   std::vector<double>& head_embedding;
   std::vector<double>& tail_embedding;
-  const std::size_t ncol;
+  const std::size_t ndim;
   const std::size_t head_nrow;
   const std::size_t tail_nrow;
   tthread::mutex mutex;
@@ -99,7 +99,7 @@ struct SgdWorker : public RcppParallel::Worker {
     Sampler& sampler,
     std::vector<double>& head_embedding,
     std::vector<double>& tail_embedding,
-    const std::size_t ncol,
+    const std::size_t ndim,
     unsigned int seed) :
     
     n(0), alpha(0.0), gradient(gradient),
@@ -109,9 +109,9 @@ struct SgdWorker : public RcppParallel::Worker {
     
     head_embedding(head_embedding),
     tail_embedding(tail_embedding),
-    ncol(ncol), 
-    head_nrow(head_embedding.size() / ncol), 
-    tail_nrow(tail_embedding.size() / ncol),
+    ndim(ndim), 
+    head_nrow(head_embedding.size() / ndim), 
+    tail_nrow(tail_embedding.size() / ndim),
     rng(seed), gen(-2147483647, 2147483646),
     dist_eps(std::numeric_limits<double>::epsilon())
   { }
@@ -141,11 +141,11 @@ struct SgdWorker : public RcppParallel::Worker {
       std::size_t k = positive_tail[i];
       
       const double dist_squared = std::max(rdist(
-        head_embedding, tail_embedding, j, k, ncol, head_nrow, tail_nrow),
+        head_embedding, tail_embedding, j, k, ndim, head_nrow, tail_nrow),
         dist_eps);
       const double grad_coeff = gradient.grad_attr(dist_squared);
       
-      for (std::size_t d = 0; d < ncol; d++) {
+      for (std::size_t d = 0; d < ndim; d++) {
         double dy = head_embedding[head_nrow * d + j] - 
           tail_embedding[tail_nrow * d + k];
         double grad_d = alpha * clip(grad_coeff * dy, Gradient::clip_max);
@@ -161,11 +161,11 @@ struct SgdWorker : public RcppParallel::Worker {
           continue;
         }
         const double dist_squared = std::max(rdist(
-          head_embedding, tail_embedding, j, k, ncol, head_nrow, tail_nrow), 
+          head_embedding, tail_embedding, j, k, ndim, head_nrow, tail_nrow), 
           dist_eps);
         const double grad_coeff = gradient.grad_rep(dist_squared);
         
-        for (std::size_t d = 0; d < ncol; d++) {
+        for (std::size_t d = 0; d < ndim; d++) {
           double dy = head_embedding[head_nrow * d + j] - 
             tail_embedding[tail_nrow * d + k];
           double grad_d = alpha * clip(grad_coeff * dy, Gradient::clip_max);
