@@ -31,43 +31,27 @@
 // Default empty version does nothing: used in umap_transform when
 // some of the vertices should be held fixed
 template <bool DoMoveVertex = false>
-void move_other_vertex(std::vector<double>& embedding,
-                       const double& grad_d,
-                       const std::size_t& i,
-                       const std::size_t& j,
-                       const std::size_t& nr) {
+void move_other_vertex(
+    std::vector<double>& embedding,
+    const double grad_d,
+    const std::size_t i,
+    const std::size_t nrj) {
 }
 
 // Specialization to move the vertex: used in umap when both
 // vertices in an edge should be moved
 template <>
-void move_other_vertex<true>(std::vector<double>& embedding,
-                             const double& grad_d,
-                             const std::size_t& i,
-                             const std::size_t& j,
-                             const std::size_t& nr) {
-  embedding[nr * j + i] -= grad_d;
+void move_other_vertex<true>(
+    std::vector<double>& embedding,
+    const double grad_d,
+    const std::size_t i,
+    const std::size_t nrj) {
+  embedding[nrj + i] -= grad_d;
 }
 
-double clip(double val, double clip_max) {
-  return std::max(std::min(val, clip_max), -clip_max);
-}
-
-// squared Euclidean distance between m[, a] and n[, b]
-double cdist2(
-    const std::vector<double>& m,
-    const std::vector<double>& n,
-    const std::size_t a,
-    const std::size_t b,
-    const std::size_t nrow) {
-  double sum = 0.0;
-  const size_t nrowa = a * nrow;
-  const size_t nrowb = b * nrow;
-  for (std::size_t j = 0; j < nrow; j++) {
-    const double diff = m[nrowa + j] - n[nrowb + j];
-    sum += diff * diff;
-  }
-  return sum;
+const double clamp(const double v, const double lo, const double hi) {
+  const double t = v < lo ? lo : v;
+  return t > hi ? hi : t;
 }
 
 // Gradient: the type of gradient used in the optimization
@@ -131,41 +115,53 @@ struct SgdWorker : public RcppParallel::Worker {
     }
     tau_prng prng(s1, s2, s3);
     
+    std::vector<double> dys(ndim);
     for (std::size_t i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
       
-      std::size_t j = positive_head[i];
-      std::size_t k = positive_tail[i];
+      const std::size_t dj = ndim * positive_head[i];
+      const std::size_t dk = ndim * positive_tail[i];
+
+      double dist_squared = 0.0;
+      for (std::size_t d = 0; d < ndim; d++) {
+        const double diff = head_embedding[dj + d] - tail_embedding[dk + d];
+        dys[d] = diff;
+        dist_squared += diff * diff;
+      }
+      dist_squared = std::max(dist_eps, dist_squared);
       
-      const double dist_squared = std::max(cdist2(
-        head_embedding, tail_embedding, j, k, ndim),
-        dist_eps);
       const double grad_coeff = gradient.grad_attr(dist_squared);
       for (std::size_t d = 0; d < ndim; d++) {
-        double dy = head_embedding[ndim * j + d] -
-          tail_embedding[ndim * k + d];
-        double grad_d = alpha * clip(grad_coeff * dy, Gradient::clip_max);
-        head_embedding[ndim * j + d] += grad_d;
-        move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, k, ndim);
+        const double grad_d = alpha * clamp(grad_coeff * dys[d], 
+                                            Gradient::clamp_lo,
+                                            Gradient::clamp_hi);
+        head_embedding[dj + d] += grad_d;
+        move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
       }
 
       const unsigned int n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (unsigned int p = 0; p < n_neg_samples; p++) {
-        std::size_t k = prng() % tail_nvert;
-        if (j == k) {
+        const std::size_t dkn = (prng() % tail_nvert) * ndim;
+        if (dj == dkn) {
           continue;
         }
-        const double dist_squared = std::max(cdist2(
-          head_embedding, tail_embedding, j, k, ndim),
-          dist_eps);
+
+        double dist_squared = 0.0;
+        for (std::size_t d = 0; d < ndim; d++) {
+          const double diff = head_embedding[dj + d] - tail_embedding[dkn + d];
+          dys[d] = diff;
+          dist_squared += diff * diff;
+        }
+        dist_squared = std::max(dist_eps, dist_squared);
+        
         const double grad_coeff = gradient.grad_rep(dist_squared);
         for (std::size_t d = 0; d < ndim; d++) {
-          double dy = head_embedding[ndim * j + d] -
-            tail_embedding[ndim * k + d];
-          double grad_d = alpha * clip(grad_coeff * dy, Gradient::clip_max);
-          head_embedding[ndim * j + d] += grad_d;
+          const double grad_d = alpha * clamp(grad_coeff * dys[d], 
+                                              Gradient::clamp_lo,
+                                              Gradient::clamp_hi);
+          head_embedding[dj + d] += grad_d;
         }
       }
       
