@@ -26,11 +26,11 @@
 class Sampler {
 public:
   Sampler(const std::vector<double>& epochs_per_sample, 
-          double negative_sample_rate);
+          const double negative_sample_rate);
   
-  bool is_sample_edge(std::size_t i, std::size_t n) const;
-  unsigned int get_num_neg_samples(std::size_t i, std::size_t n) const;
-  void next_sample(std::size_t i, unsigned int num_neg_samples);
+  bool is_sample_edge(const std::size_t i, const std::size_t n) const;
+  const std::size_t get_num_neg_samples(const std::size_t i, const std::size_t n) const;
+  void next_sample(const std::size_t i, const std::size_t num_neg_samples);
   
 private:
   std::vector<double> epochs_per_sample;

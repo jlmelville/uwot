@@ -141,8 +141,8 @@ struct SgdWorker : public RcppParallel::Worker {
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
       }
 
-      const unsigned int n_neg_samples = sampler.get_num_neg_samples(i, n);
-      for (unsigned int p = 0; p < n_neg_samples; p++) {
+      const std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
+      for (std::size_t p = 0; p < n_neg_samples; p++) {
         const std::size_t dkn = (prng() % tail_nvert) * ndim;
         if (dj == dkn) {
           continue;

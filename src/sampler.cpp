@@ -20,7 +20,7 @@
 #include "sampler.h"
 
 Sampler::Sampler(const std::vector<double>& epochs_per_sample, 
-                 double negative_sample_rate) :
+                 const double negative_sample_rate) :
   
   epochs_per_sample(epochs_per_sample),
   epoch_of_next_sample(epochs_per_sample),
@@ -35,16 +35,20 @@ Sampler::Sampler(const std::vector<double>& epochs_per_sample,
   }
 }
 
-bool Sampler::is_sample_edge(std::size_t i, std::size_t n) const {
+bool Sampler::is_sample_edge(const std::size_t i, const std::size_t n) const {
   return epoch_of_next_sample[i] <= n;
 }
 
-unsigned int Sampler::get_num_neg_samples(std::size_t i, std::size_t n) const {
-  return static_cast<unsigned int>(
+const std::size_t Sampler::get_num_neg_samples(
+    const std::size_t i, 
+    const std::size_t n) const 
+{
+  return static_cast<std::size_t>(
     (n - epoch_of_next_negative_sample[i]) / epochs_per_negative_sample[i]);
 }
 
-void Sampler::next_sample(std::size_t i, unsigned int num_neg_samples) {
+void Sampler::next_sample(const std::size_t i, 
+                          const std::size_t num_neg_samples) {
   epoch_of_next_sample[i] += epochs_per_sample[i];
   epoch_of_next_negative_sample[i] += 
     num_neg_samples * epochs_per_negative_sample[i];
