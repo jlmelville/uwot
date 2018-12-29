@@ -157,10 +157,10 @@ must be a list consisting of two elements:
   \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
   containing the distances of the nearest neighbors.
 }
-Multiple nearest neighbor data (e.g. from two different precalulated 
+Multiple nearest neighbor data (e.g. from two different precomputed 
 metrics) can be passed by passing a list containing the nearest neighbor
 data lists as items. 
-The \code{n_neighbors} parameter is ignored when using precalculated
+The \code{n_neighbors} parameter is ignored when using precomputed
 nearest neighbor data.}
 
 \item{n_trees}{Number of trees to build when constructing the nearest
@@ -219,7 +219,7 @@ data if modifying the \code{scale} parameter.}
 }
 \value{
 A matrix of optimized coordinates, or if \code{ret_nn = TRUE},
-  returns the nearest neigbor data as a list containing a matrix \code{idx}
+  returns the nearest neighbor data as a list containing a matrix \code{idx}
   with the integer ids of the neighbors; and a matrix \code{dist} with the
   distances. This list can be used as input to the \code{nn_method}
   parameter.

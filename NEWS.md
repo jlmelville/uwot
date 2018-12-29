@@ -34,7 +34,7 @@ between the `pca` and `spca` options.
 * Hamming distance support (was actually using Euclidean distance).
 * Smooth knn/perplexity calibration results had a small dependency on the 
 number of threads used.
-* Anomalously long spectral intialization times should now be reduced.
+* Anomalously long spectral initialization times should now be reduced.
 * Internal changes and fixes thanks to a code review by Aaron Lun 
 (https://github.com/ltla).
 

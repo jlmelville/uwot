@@ -165,10 +165,10 @@
 #'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
 #'     containing the distances of the nearest neighbors.
 #'   }
-#'   Multiple nearest neighbor data (e.g. from two different precalulated 
+#'   Multiple nearest neighbor data (e.g. from two different precomputed 
 #'   metrics) can be passed by passing a list containing the nearest neighbor
 #'   data lists as items. 
-#'   The \code{n_neighbors} parameter is ignored when using precalculated
+#'   The \code{n_neighbors} parameter is ignored when using precomputed
 #'   nearest neighbor data.
 #' @param n_trees Number of trees to build when constructing the nearest
 #'   neighbor index. The more trees specified, the larger the index, but the
@@ -268,7 +268,7 @@
 #'     list containing extra information that can be used to add new data to an
 #'     existing embedding via \code{\link{umap_transform}}. In this case, the
 #'     coordinates are available in the list item \code{embedding}.
-#'     \item if \code{ret_nn = TRUE}, returns the nearest neigbor data as a
+#'     \item if \code{ret_nn = TRUE}, returns the nearest neighbor data as a
 #'     list called \code{nn}. This contains one list for each \code{metric}
 #'     calculated, itself containing a matrix \code{idx} with the integer ids of 
 #'     the neighbors; and a matrix \code{dist} with the distances. The \code{nn} 
@@ -317,7 +317,7 @@
 #' (pp. 585-591).
 #' \url{http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf}
 #'
-#' McInnes, L., & Healey, J. (2018).
+#' McInnes, L., & Healy, J. (2018).
 #' UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
 #' \emph{arXiv preprint} \emph{arXiv}:1802.03426.
 #' \url{https://arxiv.org/abs/1802.03426}
@@ -374,7 +374,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
 #' Dimensionality Reduction Using t-Distributed UMAP (t-UMAP)
 #'
-#' A faster (but less flexible) version of the UMAP gradient. FOr more detail on
+#' A faster (but less flexible) version of the UMAP gradient. For more detail on
 #' UMAP, see the  \code{\link{umap}} function.
 #'
 #' By setting the UMAP curve parameters \code{a} and \code{b} to \code{1}, you
@@ -526,7 +526,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
 #'     containing the distances of the nearest neighbors.
 #'   }
-#'   Multiple nearest neighbor data (e.g. from two different precalulated 
+#'   Multiple nearest neighbor data (e.g. from two different precomputed 
 #'   metrics) can be passed by passing a list containing the nearest neighbor
 #'   data lists as items. 
 #'   The \code{n_neighbors} parameter is ignored when using precalculated
@@ -626,7 +626,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     list containing extra information that can be used to add new data to an
 #'     existing embedding via \code{\link{umap_transform}}. In this case, the
 #'     coordinates are available in the list item \code{embedding}.
-#'     \item if \code{ret_nn = TRUE}, returns the nearest neigbor data as a
+#'     \item if \code{ret_nn = TRUE}, returns the nearest neighbor data as a
 #'     list called \code{nn}. This contains one list for each \code{metric}
 #'     calculated, itself containing a matrix \code{idx} with the integer ids of 
 #'     the neighbors; and a matrix \code{dist} with the distances. The \code{nn} 
@@ -830,10 +830,10 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
 #'     containing the distances of the nearest neighbors.
 #'   }
-#'   Multiple nearest neighbor data (e.g. from two different precalulated 
+#'   Multiple nearest neighbor data (e.g. from two different precomputed 
 #'   metrics) can be passed by passing a list containing the nearest neighbor
 #'   data lists as items. 
-#'   The \code{n_neighbors} parameter is ignored when using precalculated
+#'   The \code{n_neighbors} parameter is ignored when using precomputed
 #'   nearest neighbor data.
 #' @param n_trees Number of trees to build when constructing the nearest
 #'   neighbor index. The more trees specified, the larger the index, but the
@@ -881,7 +881,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   data if modifying the \code{scale} parameter.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates, or if \code{ret_nn = TRUE},
-#'   returns the nearest neigbor data as a list containing a matrix \code{idx}
+#'   returns the nearest neighbor data as a list containing a matrix \code{idx}
 #'   with the integer ids of the neighbors; and a matrix \code{dist} with the
 #'   distances. This list can be used as input to the \code{nn_method}
 #'   parameter.

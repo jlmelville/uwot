@@ -444,7 +444,7 @@ non-numeric columns come after the numeric columns.
 
 ### Categorical columns
 
-Supervized UMAP allows for a factor column to be used. You may now also specify
+supervised UMAP allows for a factor column to be used. You may now also specify
 factor columns in the `X` data. Use the special `metric` name `"categorical"`.
 For example, to use the `Species` factor in standard UMAP for `iris` along
 with the usual four numeric columns, use:
@@ -494,7 +494,7 @@ usual.
 * Categorical data does not appear in the model returned when `ret_model = TRUE`
 and so does not affect the project of data used in `umap_transform`. You can
 still use the UMAP model to project new data, but factor columns in the new
-data are ignored (effectively working like supervized UMAP).
+data are ignored (effectively working like supervised UMAP).
 
 ### `y` data
 

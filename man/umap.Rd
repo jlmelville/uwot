@@ -194,10 +194,10 @@ must be a list consisting of two elements:
   \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
   containing the distances of the nearest neighbors.
 }
-Multiple nearest neighbor data (e.g. from two different precalulated 
+Multiple nearest neighbor data (e.g. from two different precomputed 
 metrics) can be passed by passing a list containing the nearest neighbor
 data lists as items. 
-The \code{n_neighbors} parameter is ignored when using precalculated
+The \code{n_neighbors} parameter is ignored when using precomputed
 nearest neighbor data.}
 
 \item{n_trees}{Number of trees to build when constructing the nearest
@@ -313,7 +313,7 @@ A matrix of optimized coordinates, or:
     list containing extra information that can be used to add new data to an
     existing embedding via \code{\link{umap_transform}}. In this case, the
     coordinates are available in the list item \code{embedding}.
-    \item if \code{ret_nn = TRUE}, returns the nearest neigbor data as a
+    \item if \code{ret_nn = TRUE}, returns the nearest neighbor data as a
     list called \code{nn}. This contains one list for each \code{metric}
     calculated, itself containing a matrix \code{idx} with the integer ids of 
     the neighbors; and a matrix \code{dist} with the distances. The \code{nn} 
@@ -370,7 +370,7 @@ In \emph{Advances in neural information processing systems}
 (pp. 585-591).
 \url{http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf}
 
-McInnes, L., & Healey, J. (2018).
+McInnes, L., & Healy, J. (2018).
 UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
 \emph{arXiv preprint} \emph{arXiv}:1802.03426.
 \url{https://arxiv.org/abs/1802.03426}

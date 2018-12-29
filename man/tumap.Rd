@@ -173,7 +173,7 @@ must be a list consisting of two elements:
   \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
   containing the distances of the nearest neighbors.
 }
-Multiple nearest neighbor data (e.g. from two different precalulated 
+Multiple nearest neighbor data (e.g. from two different precomputed 
 metrics) can be passed by passing a list containing the nearest neighbor
 data lists as items. 
 The \code{n_neighbors} parameter is ignored when using precalculated
@@ -288,7 +288,7 @@ A matrix of optimized coordinates, or:
     list containing extra information that can be used to add new data to an
     existing embedding via \code{\link{umap_transform}}. In this case, the
     coordinates are available in the list item \code{embedding}.
-    \item if \code{ret_nn = TRUE}, returns the nearest neigbor data as a
+    \item if \code{ret_nn = TRUE}, returns the nearest neighbor data as a
     list called \code{nn}. This contains one list for each \code{metric}
     calculated, itself containing a matrix \code{idx} with the integer ids of 
     the neighbors; and a matrix \code{dist} with the distances. The \code{nn} 
@@ -299,7 +299,7 @@ A matrix of optimized coordinates, or:
   the returned list contains the combined data.
 }
 \description{
-A faster (but less flexible) version of the UMAP gradient. FOr more detail on
+A faster (but less flexible) version of the UMAP gradient. For more detail on
 UMAP, see the  \code{\link{umap}} function.
 }
 \details{
