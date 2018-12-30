@@ -231,6 +231,9 @@
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
 #'   is recommended, although there's no guarantee that this is appropriate for
 #'   all settings.
+#' @param pca_center If \code{TRUE}, center the columns of \code{X} before 
+#'   carrying out PCA. For binary data, it's recommended to set this to 
+#'   \code{FALSE}.
 #' @param ret_model If \code{TRUE}, then return extra data that can be used to
 #'   add new data to an existing embedding via \code{\link{umap_transform}}. The
 #'   embedded coordinates are returned as the list item \code{embedding}. If
@@ -347,7 +350,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  y = NULL, target_n_neighbors = n_neighbors,
                  target_metric = "euclidean",
                  target_weight = 0.5,
-                 pca = NULL,
+                 pca = NULL, pca_center = TRUE,
                  ret_model = FALSE, ret_nn = FALSE,
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  n_sgd_threads = 0,
@@ -366,7 +369,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight, target_metric = target_metric,
-    pca = pca,
+    pca = pca, pca_center = pca_center,
     ret_model = ret_model, ret_nn = ret_nn,
     verbose = verbose
   )
@@ -589,6 +592,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
 #'   is recommended, although there's no guarantee that this is appropriate for
 #'   all settings.
+#' @param pca_center If \code{TRUE}, center the columns of \code{X} before 
+#'   carrying out PCA. For binary data, it's recommended to set this to 
+#'   \code{FALSE}.
 #' @param ret_model If \code{TRUE}, then return extra data that can be used to
 #'   add new data to an existing embedding via \code{\link{umap_transform}}. The
 #'   embedded coordinates are returned as the list item \code{embedding}. If
@@ -650,7 +656,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   y = NULL, target_n_neighbors = n_neighbors,
                   target_metric = "euclidean",
                   target_weight = 0.5,
-                  pca = NULL,
+                  pca = NULL, pca_center = TRUE,
                   ret_model = FALSE, ret_nn = FALSE,
                   verbose = getOption("verbose", TRUE)) {
   uwot(
@@ -666,7 +672,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight, target_metric = target_metric,
-    pca = pca,
+    pca = pca, pca_center = pca_center,
     ret_model = ret_model, ret_nn = ret_nn,
     verbose = verbose
   )
@@ -871,6 +877,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
 #'   is recommended, although there's no guarantee that this is appropriate for
 #'   all settings.
+#' @param pca_center If \code{TRUE}, center the columns of \code{X} before 
+#'   carrying out PCA. For binary data, it's recommended to set this to 
+#'   \code{FALSE}.
 #' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
 #'   nearest neighbor data that can be used as input to \code{nn_method} to
 #'   avoid the overhead of repeatedly calculating the nearest neighbors when
@@ -915,7 +924,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   n_sgd_threads = 0,
                   grain_size = 1,
                   kernel = "gauss",
-                  pca = NULL,
+                  pca = NULL, pca_center = TRUE,
                   ret_nn = FALSE,
                   verbose = getOption("verbose", TRUE)) {
   uwot(X,
@@ -925,7 +934,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
        gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
        nn_method = nn_method, n_trees = n_trees, search_k = search_k,
        method = "largevis", perplexity = perplexity,
-       pca = pca,
+       pca = pca, pca_center = pca_center,
        n_threads = n_threads, n_sgd_threads = n_sgd_threads, 
        grain_size = grain_size, 
        kernel = kernel,
@@ -953,7 +962,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  grain_size = 1,
                  kernel = "gauss",
                  ret_model = FALSE, ret_nn = FALSE,
-                 pca = NULL,
+                 pca = NULL, pca_center = TRUE,
                  verbose = getOption("verbose", TRUE)) {
   if (method == "umap" && (is.null(a) || is.null(b))) {
     ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
@@ -1093,8 +1102,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (!is.null(pca) && length(metric) == 1 && metric != "hamming" &&
       is.matrix(X) && ncol(X) > pca) {
     tsmessage("Reducing X column dimension to ", pca, " via PCA")
-    pca_res <- pca_scores(X, ncol = pca, ret_extra = ret_model, 
-                          verbose = verbose)
+    pca_res <- pca_scores(X, ncol = pca, center = pca_center, 
+                          ret_extra = ret_model, verbose = verbose)
     if (ret_model) {
       X <- pca_res$scores
       pca_models[["1"]] <- pca_res[c("center", "rotation")] 
@@ -1113,7 +1122,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                    perplexity, kernel,
                    n_threads, grain_size,
                    ret_model,
-                   pca = pca,
+                   pca = pca, pca_center = pca_center,
                    n_vertices = n_vertices,
                    verbose = verbose)
   
@@ -1434,7 +1443,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
                      n_threads, grain_size,
                      ret_model,
                      n_vertices = x2nv(X),
-                     pca = NULL,
+                     pca = NULL, pca_center = TRUE,
                      verbose = FALSE) {
   V <- NULL
   nns <- list()
@@ -1510,6 +1519,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
         ncol(X) > pca && nrow(X) > pca) {
       tsmessage("Reducing column dimension to ", pca, " via PCA")
       pca_res <- pca_scores(Xsub, pca, ret_extra = ret_model, 
+                            center = pca_center,
                             verbose = verbose)
       if (ret_model) {
         Xsub <- pca_res$scores

@@ -236,6 +236,17 @@ expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
 expect_equal(res$pca_models[["1"]]$center, c(4.86, 3.31, 1.45, 0.22), 
              check.attributes = FALSE)
 
+# no centering
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+            init = "spca", verbose = FALSE, n_threads = 0, pca = 2, 
+            pca_center = FALSE, ret_model = TRUE)
+expect_ok_matrix(res$embedding)
+expect_is(res$pca_models, "list")
+expect_equal(length(res$pca_models), 1)
+expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
+expect_null(res$pca_models[["1"]]$center)
+
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
             metric = list("euclidean" = 1:2, "euclidean" = 3:4),

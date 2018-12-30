@@ -11,7 +11,8 @@ lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
   n_trees = 50, search_k = 2 * n_neighbors * n_trees,
   n_threads = max(1, RcppParallel::defaultNumThreads()/2),
   n_sgd_threads = 0, grain_size = 1, kernel = "gauss", pca = NULL,
-  ret_nn = FALSE, verbose = getOption("verbose", TRUE))
+  pca_center = TRUE, ret_nn = FALSE, verbose = getOption("verbose",
+  TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -205,6 +206,10 @@ increase the performance of the nearest neighbor search at the cost of a
 potential decrease in accuracy. In many t-SNE applications, a value of 50
 is recommended, although there's no guarantee that this is appropriate for
 all settings.}
+
+\item{pca_center}{If \code{TRUE}, center the columns of \code{X} before 
+carrying out PCA. For binary data, it's recommended to set this to 
+\code{FALSE}.}
 
 \item{ret_nn}{If \code{TRUE}, then in addition to the embedding, also return
 nearest neighbor data that can be used as input to \code{nn_method} to

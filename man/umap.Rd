@@ -12,8 +12,8 @@ umap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   b = NULL, nn_method = NULL, n_trees = 50, search_k = 2 *
   n_neighbors * n_trees, approx_pow = FALSE, y = NULL,
   target_n_neighbors = n_neighbors, target_metric = "euclidean",
-  target_weight = 0.5, pca = NULL, ret_model = FALSE,
-  ret_nn = FALSE, n_threads = max(1,
+  target_weight = 0.5, pca = NULL, pca_center = TRUE,
+  ret_model = FALSE, ret_nn = FALSE, n_threads = max(1,
   RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
   grain_size = 1, verbose = getOption("verbose", TRUE))
 }
@@ -268,6 +268,10 @@ increase the performance of the nearest neighbor search at the cost of a
 potential decrease in accuracy. In many t-SNE applications, a value of 50
 is recommended, although there's no guarantee that this is appropriate for
 all settings.}
+
+\item{pca_center}{If \code{TRUE}, center the columns of \code{X} before 
+carrying out PCA. For binary data, it's recommended to set this to 
+\code{FALSE}.}
 
 \item{ret_model}{If \code{TRUE}, then return extra data that can be used to
 add new data to an existing embedding via \code{\link{umap_transform}}. The

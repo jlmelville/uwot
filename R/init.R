@@ -192,9 +192,9 @@ shrink_coords <- function(X, sdev = 1e-4) {
 }
 
 # PCA
-pca_init <- function(X, ndim = 2, verbose = FALSE) {
+pca_init <- function(X, ndim = 2, center = TRUE, verbose = FALSE) {
   tsmessage("Initializing from PCA")
-  pca_scores(X, ncol = ndim, verbose = verbose)
+  pca_scores(X, ncol = ndim, center = center, verbose = verbose)
 }
 
 
