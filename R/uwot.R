@@ -998,6 +998,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   
   # Store categorical columns to be used to generate the graph
   Xcat <- NULL
+  # number of original columns in data frame (or matrix)
+  # will be used only if using df or matrix and ret_model = TRUE
+  norig_col <- NULL
   if (is.null(X)) {
     if (!is.list(nn_method)) {
       stop("If X is NULL, must provide NN data in nn_method")
@@ -1026,6 +1029,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
   else {
     cat_ids <- NULL
+    norig_col <- ncol(X)
     if (methods::is(X, "data.frame")) {
       
       cat_res <- find_categoricals(metric)
@@ -1358,7 +1362,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         b = b,
         gamma = gamma,
         approx_pow = approx_pow,
-        metric = metrics
+        metric = metrics,
+        norig_col = norig_col
       ))
       if (nblocks > 1) {
         res$nn_index <- list()

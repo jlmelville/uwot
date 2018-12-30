@@ -33,3 +33,6 @@ expect_error(umap(iris10, n_threads = 0, pca = 0), "positive integer")
 
 expect_error(umap(iris10, n_threads = -1), "n_threads")
 expect_error(umap(iris10, n_sgd_threads = -1), "n_sgd_threads")
+
+model <- umap(iris10, n_neighbors = 2, ret_model = TRUE, n_epochs = 2)
+expect_error(umap_transform(iris10[, 1:2], model), "Incorrect dimensions")

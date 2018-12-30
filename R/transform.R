@@ -73,13 +73,17 @@ umap_transform <- function(X, model,
   scale_info <- model$scale_info
   metric <- model$metric
   pca_models <- model$pca_models
-  
+
   a <- model$a
   b <- model$b
   gamma <- model$gamma
   alpha <- model$alpha
   negative_sample_rate <- model$negative_sample_rate
   approx_pow <- model$approx_pow
+  norig_col <- model$norig_col
+  if (ncol(X) != norig_col) {
+    stop("Incorrect dimensions: X must have ", norig_col, " columns")
+  }
   
   if (methods::is(X, "data.frame")) {
     indexes <- which(vapply(X, is.numeric, logical(1)))
