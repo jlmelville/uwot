@@ -259,8 +259,8 @@ entirely on target. The default of 0.5 balances the weighting equally
 between data and target. Only applies if \code{y} is non-\code{NULL}.}
 
 \item{pca}{If set to a positive integer value, reduce data to this number of
-columns using PCA. Only applied if the distance \code{metric} is
-\code{"euclidean"}, and the dimensions of the data is larger than the
+columns using PCA. Doesn't applied if the distance \code{metric} is
+\code{"hamming"}, or the dimensions of the data is larger than the
 number specified (i.e. number of rows and columns must be larger than the
 value of this parameter). If you have > 100 columns in a data frame or
 matrix, reducing the number of columns in this way may substantially

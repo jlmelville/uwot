@@ -222,8 +222,8 @@
 #'   entirely on target. The default of 0.5 balances the weighting equally
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param pca If set to a positive integer value, reduce data to this number of
-#'   columns using PCA. Only applied if the distance \code{metric} is
-#'   \code{"euclidean"}, and the dimensions of the data is larger than the
+#'   columns using PCA. Doesn't applied if the distance \code{metric} is
+#'   \code{"hamming"}, or the dimensions of the data is larger than the
 #'   number specified (i.e. number of rows and columns must be larger than the
 #'   value of this parameter). If you have > 100 columns in a data frame or
 #'   matrix, reducing the number of columns in this way may substantially
@@ -580,8 +580,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   entirely on target. The default of 0.5 balances the weighting equally
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param pca If set to a positive integer value, reduce data to this number of
-#'   columns using PCA. Only applied if the distance \code{metric} is
-#'   \code{"euclidean"}, and the dimensions of the data is larger than the
+#'   columns using PCA. Doesn't applied if the distance \code{metric} is
+#'   \code{"hamming"}, or the dimensions of the data is larger than the
 #'   number specified (i.e. number of rows and columns must be larger than the
 #'   value of this parameter). If you have > 100 columns in a data frame or
 #'   matrix, reducing the number of columns in this way may substantially
@@ -862,8 +862,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   otherwise, using \code{perplexity} nearest neighbors. The \code{n_neighbors}
 #'   parameter is ignored in this case.
 #' @param pca If set to a positive integer value, reduce data to this number of
-#'   columns using PCA. Only applied if the distance \code{metric} is
-#'   \code{"euclidean"}, and the dimensions of the data is larger than the
+#'   columns using PCA. Doesn't applied if the distance \code{metric} is
+#'   \code{"hamming"}, or the dimensions of the data is larger than the
 #'   number specified (i.e. number of rows and columns must be larger than the
 #'   value of this parameter). If you have > 100 columns in a data frame or
 #'   matrix, reducing the number of columns in this way may substantially
@@ -1086,11 +1086,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     metrics <- metric
   }
   
-  # For typical case of numeric matrix X and metric = "euclidean", save
+  # For typical case of numeric matrix X and not using hamming distance, save
   # PCA results here in case initialization uses PCA too
   pca_models <- NULL
   pca_shortcut <- FALSE
-  if (!is.null(pca) && length(metric) == 1 && metric == "euclidean" &&
+  if (!is.null(pca) && length(metric) == 1 && metric != "hamming" &&
       is.matrix(X) && ncol(X) > pca) {
     tsmessage("Reducing X column dimension to ", pca, " via PCA")
     pca_res <- pca_scores(X, ncol = pca, ret_extra = ret_model, 
@@ -1506,7 +1506,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       }
     }
     
-    if (!is.null(pca) && is.matrix(X) && metric == "euclidean" && 
+    if (!is.null(pca) && is.matrix(X) && metric != "hamming" && 
         ncol(X) > pca && nrow(X) > pca) {
       tsmessage("Reducing column dimension to ", pca, " via PCA")
       pca_res <- pca_scores(Xsub, pca, ret_extra = ret_model, 

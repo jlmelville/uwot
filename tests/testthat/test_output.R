@@ -244,10 +244,11 @@ expect_ok_matrix(res)
 
 # Mixed metrics, PCA and transform
 set.seed(1337)
-res <- umap(iris10,
+ib10 <- cbind(iris10, hamm)
+res <- umap(ib10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
             init = "spca", verbose = FALSE, n_threads = 0,
-            metric = list(euclidean = c(1, 2), cosine = 1:4, 
+            metric = list(euclidean = c(1, 2), hamming = 5:8, 
                           euclidean = c(3, 4)),
             pca = 2,
             ret_model = TRUE)
@@ -262,7 +263,7 @@ expect_ok_matrix(res$pca_models[["3"]]$rotation, nr = 2, nc = 2)
 expect_equal(res$pca_models[["3"]]$center, c(1.45, 0.22), 
              check.attributes = FALSE)
 
-res_trans <- umap_transform(iris10, model = res, verbose = FALSE, n_threads = 0,
+res_trans <- umap_transform(ib10, model = res, verbose = FALSE, n_threads = 0,
                             n_epochs = 2)
 expect_ok_matrix(res_trans)
 

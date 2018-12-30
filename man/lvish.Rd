@@ -196,8 +196,8 @@ otherwise, using \code{perplexity} nearest neighbors. The \code{n_neighbors}
 parameter is ignored in this case.}
 
 \item{pca}{If set to a positive integer value, reduce data to this number of
-columns using PCA. Only applied if the distance \code{metric} is
-\code{"euclidean"}, and the dimensions of the data is larger than the
+columns using PCA. Doesn't applied if the distance \code{metric} is
+\code{"hamming"}, or the dimensions of the data is larger than the
 number specified (i.e. number of rows and columns must be larger than the
 value of this parameter). If you have > 100 columns in a data frame or
 matrix, reducing the number of columns in this way may substantially
