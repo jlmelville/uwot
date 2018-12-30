@@ -496,6 +496,30 @@ and so does not affect the project of data used in `umap_transform`. You can
 still use the UMAP model to project new data, but factor columns in the new
 data are ignored (effectively working like supervised UMAP).
 
+### Overriding global options
+
+Some global parameters can be overridden for a specific data block by providing
+a list as the value for the metric, containing the vector of columns as the
+only unnamed element, and then the over-riding keyword arguments. An example:
+
+umap(X, pca = 40, pca_center = TRUE, 
+     metric = list(
+       euclidean = 1:200,
+       euclidean = list(201:300, pca = NULL),
+       manhattan = list(300:500, pca_center = FALSE)
+     ))
+
+In this case, the first `euclidean` block with be reduced to 40 dimensions by
+PCA with centering applied. The second `euclidean` block will not have PCA
+applied to it. The `manhattan` block will have PCA applied to it, but no
+centering is carried out.
+
+Currently, only `pca` and `pca_center` are supported for overriding by this 
+method, because this feature exists only to allow for the case where you have
+mixed real-valued and binary data, and you want to carry out PCA on both. It's
+typical to carry out centering on real-value data before PCA, but *not* to do
+so with binary data.
+
 ### `y` data
 
 The handling of `y` data has been extended to allow for data frames, and

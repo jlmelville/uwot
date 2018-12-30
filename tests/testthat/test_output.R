@@ -205,11 +205,11 @@ expect_ok_matrix(res_ynn)
 # Should be the same result
 expect_equal(res_ynn, res_y)
 
-hamm <- structure(c(0L, 0L, 1L, 0L, 1L, 1L, 1L, 0L, 0L, 0L, 0L, 0L, 0L,
+bin10 <- structure(c(0L, 0L, 1L, 0L, 1L, 1L, 1L, 0L, 0L, 0L, 0L, 0L, 0L,
                     0L, 1L, 1L, 1L, 1L, 0L, 1L, 0L, 1L, 0L, 0L, 0L, 0L, 0L, 1L, 1L,
                     0L, 1L, 0L, 0L, 1L, 1L, 0L, 0L, 1L, 1L, 0L), .Dim = c(10L, 4L
                     ))
-res <- umap(hamm, n_neighbors = 4, metric = "hamming", verbose = FALSE,
+res <- umap(bin10, n_neighbors = 4, metric = "hamming", verbose = FALSE,
             n_threads = 1)
 expect_ok_matrix(res)
 
@@ -255,11 +255,11 @@ expect_ok_matrix(res)
 
 # Mixed metrics, PCA and transform
 set.seed(1337)
-ib10 <- cbind(iris10, hamm)
+ib10 <- cbind(iris10, bin10, bin10)
 res <- umap(ib10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
             init = "spca", verbose = FALSE, n_threads = 0,
-            metric = list(euclidean = c(1, 2), hamming = 5:8, 
+            metric = list(euclidean = c(1, 2), hamming = 5:12, 
                           euclidean = c(3, 4)),
             pca = 2,
             ret_model = TRUE)
@@ -275,6 +275,46 @@ expect_equal(res$pca_models[["3"]]$center, c(1.45, 0.22),
              check.attributes = FALSE)
 
 res_trans <- umap_transform(ib10, model = res, verbose = FALSE, n_threads = 0,
+                            n_epochs = 2)
+expect_ok_matrix(res_trans)
+
+# Override pca command in third block
+set.seed(1337)
+res <- umap(ib10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+            init = "spca", verbose = FALSE, n_threads = 0,
+            metric = list(euclidean = c(1, 2), 
+                          hamming = 5:8, 
+                          euclidean = list(c(3, 4), pca = NULL)),
+            pca = 2,
+            ret_model = TRUE)
+expect_ok_matrix(res$embedding)
+expect_is(res$pca_models, "list")
+expect_equal(length(res$pca_models), 1)
+expect_equal(names(res$pca_models), "1")
+expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 2, nc = 2)
+expect_equal(res$pca_models[["1"]]$center, c(4.86, 3.31), 
+             check.attributes = FALSE)
+
+res_trans <- umap_transform(ib10, model = res, verbose = FALSE, n_threads = 0,
+                            n_epochs = 2)
+expect_ok_matrix(res_trans)
+
+# Turn off PCA centering for binary data
+set.seed(1337)
+res <- umap(bin10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+            init = "spca", verbose = FALSE, n_threads = 0,
+            metric = "manhattan", pca = 2, pca_center = FALSE,
+            ret_model = TRUE)
+expect_ok_matrix(res$embedding)
+expect_is(res$pca_models, "list")
+expect_equal(length(res$pca_models), 1)
+expect_equal(names(res$pca_models), "1")
+expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
+expect_null(res$pca_models[["1"]]$center)
+
+res_trans <- umap_transform(bin10, model = res, verbose = FALSE, n_threads = 0,
                             n_epochs = 2)
 expect_ok_matrix(res_trans)
 

@@ -5,11 +5,28 @@
 * Data is now stored column-wise during optimization, which should result in
 an increase in performance for larger values of `n_components` (e.g. 
 approximately 50% faster optimization time with MNIST and `n_components = 50`).
+* New parameter: `pca_center`, which controls whether to center the data before
+applying PCA. It would be typical to set this to `FALSE` if you are applying
+PCA to binary data (although note you can't use this with setting with 
+`metric = "hamming"`)
+* PCA will now be used when the `metric` is `"manhattan"` and `"cosine"`. It's
+still *not* applied when using `"hamming"` (data still needs to be in binary
+format, not real-valued).
+* If using mixed datatypes, you may override the `pca` and `pca_center`
+parameter values for a given data block by using a list for the value of the
+metric, with the column ids/names as an unnamed item and the overriding values
+as named items, e.g. instead of `manhattan = 1:100`, use 
+`manhattan = list(1:100, pca_center = FALSE)` to turn off PCA centering for 
+just that block. This functionality exists mainly for the case where you have
+mixed binary and real-valued data and want to apply PCA to both data types. It's
+normal to apply centering to real-valued data but not to binary data.
 
 ## Bug fixes and minor improvements
 
 * Fixed bug that affected `umap_transform`, where negative sampling was over 
 the size of the test data (should be the training data).
+* Some other performance improvements (around 10% faster for the optimization
+stage with MNIST).
 
 # uwot 0.0.0.9008 (December 23 2018)
 

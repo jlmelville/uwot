@@ -33,18 +33,32 @@
 #'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean"). If \code{X} is a data frame or matrix, 
-#' then multiple metrics can be specified, by passing a list to this argument,
-#' where the name of each item in the list is one of the metric names above. 
-#' The value of each list item should be a vector giving the names or integer 
-#' ids of the columns to be included in a calculation. Each metric calculation
-#' results in a separate fuzzy simplicial set, which are intersected together
-#' to produce the final set. Metric names can be repeated. Because non-numeric
-#' columns are removed from the data frame, it is safer to use column names than
-#' integer ids. Factor columns can also be used by specifying the metric name
-#' \code{"categorical"}. Factor columns are treated different from numeric 
-#' columns and although multiple factor columns can be specified in
-#' a vector, each factor column specified is processed individually.
+#' distance metric is always "euclidean"). 
+#' 
+#' If \code{X} is a data frame or matrix, then multiple metrics can be
+#' specified, by passing a list to this argument, where the name of each item in
+#' the list is one of the metric names above. The value of each list item should
+#' be a vector giving the names or integer ids of the columns to be included in
+#' a calculation, e.g. \code{metric = list(euclidean = 1:4, manhattan = 5:10)}.
+#' 
+#' Each metric calculation results in a separate fuzzy simplicial set, which are
+#' intersected together to produce the final set. Metric names can be repeated.
+#' Because non-numeric columns are removed from the data frame, it is safer to
+#' use column names than integer ids.
+#' 
+#' Factor columns can also be used by specifying the metric name
+#' \code{"categorical"}. Factor columns are treated different from numeric
+#' columns and although multiple factor columns can be specified in a vector,
+#' each factor column specified is processed individually.
+#' 
+#' For a given data block, you may override the \code{pca} and \code{pca_center}
+#' arguments for that block, by providing a list with one unnamed item
+#' containing the column names or ids, and then any of the \code{pca} or
+#' \code{pca_center} overrides as named items, e.g. \code{metric =
+#' list(euclidean = 1:4, manhattan = list(5:10, pca_center = FALSE))}. This
+#' exists to allow mixed binary and real-valued data to be included and to have
+#' PCA applied to both, but with centering applied only to the real-valued data
+#' (it is typical not to apply centering to binary data before PCA is applied).
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. By default, this value is set to \code{500} for datasets
 #'   containing 10,000 vertices or less, and \code{200} otherwise.
@@ -413,18 +427,32 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean"). If \code{X} is a data frame or matrix, 
-#' then multiple metrics can be specified, by passing a list to this argument,
-#' where the name of each item in the list is one of the metric names above. 
-#' The value of each list item should be a vector giving the names or integer 
-#' ids of the columns to be included in a calculation. Each metric calculation
-#' results in a separate fuzzy simplicial set, which are intersected together
-#' to produce the final set. Metric names can be repeated. Because non-numeric
-#' columns are removed from the data frame, it is safer to use column names than
-#' integer ids. Factor columns can also be used by specifying the metric name
-#' \code{"categorical"}. Factor columns are treated different from numeric 
-#' columns and although multiple factor columns can be specified in
-#' a vector, each factor column specified is processed individually.
+#' distance metric is always "euclidean"). 
+#' 
+#' If \code{X} is a data frame or matrix, then multiple metrics can be
+#' specified, by passing a list to this argument, where the name of each item in
+#' the list is one of the metric names above. The value of each list item should
+#' be a vector giving the names or integer ids of the columns to be included in
+#' a calculation, e.g. \code{metric = list(euclidean = 1:4, manhattan = 5:10)}.
+#' 
+#' Each metric calculation results in a separate fuzzy simplicial set, which are
+#' intersected together to produce the final set. Metric names can be repeated.
+#' Because non-numeric columns are removed from the data frame, it is safer to
+#' use column names than integer ids.
+#' 
+#' Factor columns can also be used by specifying the metric name
+#' \code{"categorical"}. Factor columns are treated different from numeric
+#' columns and although multiple factor columns can be specified in a vector,
+#' each factor column specified is processed individually.
+#' 
+#' For a given data block, you may override the \code{pca} and \code{pca_center}
+#' arguments for that block, by providing a list with one unnamed item
+#' containing the column names or ids, and then any of the \code{pca} or
+#' \code{pca_center} overrides as named items, e.g. \code{metric =
+#' list(euclidean = 1:4, manhattan = list(5:10, pca_center = FALSE))}. This
+#' exists to allow mixed binary and real-valued data to be included and to have
+#' PCA applied to both, but with centering applied only to the real-valued data
+#' (it is typical not to apply centering to binary data before PCA is applied).
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. By default, this value is set to \code{500} for datasets
 #'   containing 10,000 vertices or less, and \code{200} otherwise.
@@ -732,18 +760,32 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean"). If \code{X} is a data frame or matrix, 
-#' then multiple metrics can be specified, by passing a list to this argument,
-#' where the name of each item in the list is one of the metric names above. 
-#' The value of each list item should be a vector giving the names or integer 
-#' ids of the columns to be included in a calculation. Each metric calculation
-#' results in a separate fuzzy simplicial set, which are intersected together
-#' to produce the final set. Metric names can be repeated. Because non-numeric
-#' columns are removed from the data frame, it is safer to use column names than
-#' integer ids. Factor columns can also be used by specifying the metric name
-#' \code{"categorical"}. Factor columns are treated different from numeric 
-#' columns and although multiple factor columns can be specified in
-#' a vector, each factor column specified is processed individually.
+#' distance metric is always "euclidean"). 
+#' 
+#' If \code{X} is a data frame or matrix, then multiple metrics can be
+#' specified, by passing a list to this argument, where the name of each item in
+#' the list is one of the metric names above. The value of each list item should
+#' be a vector giving the names or integer ids of the columns to be included in
+#' a calculation, e.g. \code{metric = list(euclidean = 1:4, manhattan = 5:10)}.
+#' 
+#' Each metric calculation results in a separate fuzzy simplicial set, which are
+#' intersected together to produce the final set. Metric names can be repeated.
+#' Because non-numeric columns are removed from the data frame, it is safer to
+#' use column names than integer ids.
+#' 
+#' Factor columns can also be used by specifying the metric name
+#' \code{"categorical"}. Factor columns are treated different from numeric
+#' columns and although multiple factor columns can be specified in a vector,
+#' each factor column specified is processed individually.
+#' 
+#' For a given data block, you may override the \code{pca} and \code{pca_center}
+#' arguments for that block, by providing a list with one unnamed item
+#' containing the column names or ids, and then any of the \code{pca} or
+#' \code{pca_center} overrides as named items, e.g. \code{metric =
+#' list(euclidean = 1:4, manhattan = list(5:10, pca_center = FALSE))}. This
+#' exists to allow mixed binary and real-valued data to be included and to have
+#' PCA applied to both, but with centering applied only to the real-valued data
+#' (it is typical not to apply centering to binary data before PCA is applied).
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. The default is calculate the number of epochs
 #'   dynamically based on dataset size, to give the same number of edge samples
@@ -1487,10 +1529,38 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     metric <- mnames[[i]]
     metric <- match.arg(metric, c("euclidean", "cosine", "manhattan", 
                                   "hamming", "precomputed"))
+    # Defaults for this block which can be overridden
+    pca_i <- pca
+    pca_center_i <- pca_center
     
     subset <- metrics[[i]]
     if (is.null(subset)) {
       Xsub <- X
+    }
+    else if (is.list(subset)) {
+      # e.g. "euclidean" = list(1:10, pca_center = FALSE),
+      lsres <- lsplit_unnamed(subset)
+      if (is.null(lsres$unnamed)) {
+        stop("Error: no subset provided for block ", i)
+      }
+      if (length(lsres$unnamed) != 1) {
+        stop("Error: only one unnamed item should be provided for block ", i)
+      }
+      subset <- lsres$unnamed[[1]]
+      
+      # possible overrides
+      if (!is.null(lsres$named)) {
+        lsnamed <- lsres$named
+        lsnames <- names(lsnamed)
+        if (!is.null(lsnamed$pca_center)) {
+          pca_center_i <- lsnamed$pca_center
+        }
+        # PCA argument can be NULL, so need to check if it was explicitly provided
+        if ("pca" %in% lsnames) {
+          pca_i <- lsnamed$pca
+        }
+      }
+      Xsub <- X[, subset, drop = FALSE]
     }
     else {
       Xsub <- X[, subset, drop = FALSE]
@@ -1515,11 +1585,11 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       }
     }
     
-    if (!is.null(pca) && is.matrix(X) && metric != "hamming" && 
-        ncol(X) > pca && nrow(X) > pca) {
-      tsmessage("Reducing column dimension to ", pca, " via PCA")
-      pca_res <- pca_scores(Xsub, pca, ret_extra = ret_model, 
-                            center = pca_center,
+    if (!is.null(pca_i) && is.matrix(X) && metric != "hamming" && 
+        ncol(X) > pca_i && nrow(X) > pca_i) {
+      tsmessage("Reducing column dimension to ", pca_i, " via PCA")
+      pca_res <- pca_scores(Xsub, pca_i, ret_extra = ret_model, 
+                            center = pca_center_i,
                             verbose = verbose)
       if (ret_model) {
         Xsub <- pca_res$scores

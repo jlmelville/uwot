@@ -81,3 +81,31 @@ find_categoricals <- function(metrics) {
   }
   res
 }
+
+# Splits a list into its named and unnamed components:
+# > lsplit_unnamed(list(1:10, pca_center = FALSE))
+# $named
+# $named$pca_center
+# [1] FALSE
+#
+#
+# $unnamed
+# $unnamed[[1]]
+#  [1]  1  2  3  4  5  6  7  8  9 10
+lsplit_unnamed <- function(l) {
+  lnames <- names(l)
+  if (is.null(lnames)) {
+    return(list(unnamed = l))
+  }
+  is_named <- lnames != ""
+  nids <- which(is_named)
+  uids <- which(!is_named)
+  if (length(uids) == 0) {
+    return(list(named = l[nids]))
+  }
+  
+  list(
+    named = l[nids],
+    unnamed = l[uids]
+  )
+}

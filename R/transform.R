@@ -120,6 +120,9 @@ umap_transform <- function(X, model,
     else {
       ann <- nn_index[[i]]
       subset <- metric[[i]]
+      if (is.list(subset)) {
+        subset <- lsplit_unnamed(subset)$unnamed[[1]]
+      }
       Xsub <- X[, subset, drop = FALSE]
     }
     
