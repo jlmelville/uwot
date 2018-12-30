@@ -250,7 +250,7 @@ expect_null(res$pca_models[["1"]]$center)
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
             metric = list("euclidean" = 1:2, "euclidean" = 3:4),
-            init = "spca", verbose = FALSE, n_threads = 0, pca = 1)
+            init = "spca", verbose = FALSE, n_threads = 0, pca = 2)
 expect_ok_matrix(res)
 
 # Mixed metrics, PCA and transform

@@ -20,6 +20,8 @@ expect_error(umap(iris10, n_threads = 0, nn_method = list(idx = matrix(1:40, nro
 expect_error(umap(iris10, n_threads = 0, n_neighbors = 4, nn_method = "fnn", metric = "cosine"), "FNN")
 expect_error(umap(iris10, n_threads = 0, n_neighbors = 4, nn_method = "fnn", ret_model = TRUE), "FNN")
 expect_error(lvish(iris10, n_threads = 0, perplexity = 50), "perplexity")
+expect_error(tumap(iris10, n_components = 0), "n_components")
+expect_error(umap(iris10, pca = 1), "'pca' must be >=")
 
 expect_error(umap(iris10, n_threads = 0, n_neighbors = 4, y = c(1:9, NA)), "numeric y")
 expect_error(umap(X = NULL, n_threads = 0, n_neighbors = 4, nn_method = nn, 

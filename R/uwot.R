@@ -1028,9 +1028,16 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     stop("numeric y cannot contain NA")
   }
   
+  if (!is.numeric(n_components) || n_components < 1) {
+    stop("'n_components' must be a positive integer")
+  }
+  
   if (!is.null(pca)) {
     if (!is.numeric(pca) || pca < 1) {
       stop("'pca' must be a positive integer")
+    }
+    if (pca < n_components) {
+      stop("'pca' must be >= n_components")
     }
   }
   
