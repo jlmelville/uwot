@@ -108,6 +108,7 @@ umap_transform <- function(X, model,
   graph <- NULL
   embedding <- NULL
   for (i in 1:nblocks) {
+    tsmessage("Processing block ", i, " of ", nblocks)
     if (nblocks == 1) {
       ann <- nn_index
       Xsub <- X
@@ -119,9 +120,9 @@ umap_transform <- function(X, model,
     }
     
     if (!is.null(pca_models) && !is.null(pca_models[[as.character(i)]])) {
-      Xsub <- apply_pca(X = Xsub, pca_res = pca_models[[as.character(i)]])
+      Xsub <- apply_pca(X = Xsub, pca_res = pca_models[[as.character(i)]], 
+                        verbose = verbose)
     }
-    
     nn <- annoy_search(Xsub,
                        k = n_neighbors, ann = ann, search_k = search_k,
                        n_threads = n_threads, grain_size = grain_size,
@@ -321,7 +322,8 @@ apply_scaling <- function(X, scale_info, verbose = FALSE) {
   X
 }
 # Apply a previously calculated set of PCA rotations
-apply_pca <- function(X, pca_res) {
+apply_pca <- function(X, pca_res, verbose = FALSE) {
+  tsmessage("Applying PCA reducing to ", ncol(X), " dimensions")
   if (!is.null(pca_res$center)) {
     X <- sweep(X, 2, pca_res$center)
   }
