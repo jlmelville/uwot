@@ -171,55 +171,33 @@ The project documentation contains some more [examples](https://jlmelville.githu
 
 ## Performance
 
-To get a feel for the performance of `uwot`, here are some timings for
-processing the MNIST dataset on my not-particularly-beefy laptop, compared with
-some other packages with their default settings:
+*December 31 2018* Updated timings, keeping better track of versions numbers. Comparisons with Python packages coming later.
 
-| Method                                                                    |   Time       |
-|---------------------------------------------------------------------------|--------------|
-| `uwot(n_threads = 1)`                                                     | 3.5 minutes  |
-| [Barnes-Hut t-SNE (Rtsne 0.15)](https://cran.r-project.org/package=Rtsne) | 14 minutes   |
-| [largeVis](https://github.com/elbamos/largeVis)                           | 56 minutes   |
-| [official LargeVis implementation](https://github.com/lferry007/LargeVis) | 10 minutes   |
-| [UMAP (Python)](https://github.com/lmcinnes/umap)                         | 2 minutes    |
-| `uwot(n_threads = 4)`                                                     | 2 minutes    |
-| `uwot(n_threads = 1, approx_pow = TRUE)`                                  | 3 minutes    | 
-| `uwot(n_threads = 4, approx_pow = TRUE)`                                  | 1.5 minutes  | 
+To get a feel for the performance of `uwot`, here are some timings for processing the MNIST dataset, compared with some other
+R packages (ignoring any that just call out to the Python implementation):
 
-The difference in performance between the Python UMAP (powered by the JIT-magic of
-[Numba](https://numba.pydata.org/)) and `uwot` with one thread is due to:
+|Package |Version|Args|Time|	
+|--------|-------|----|----|
+|[Rtsne](https://cran.r-project.org/package=Rtsne)|[0.15](https://github.com/jkrijthe/Rtsne/commit/f3f42504eeac627e4d886b1489ee289f8f9d082b)|`partial_pca = TRUE`|14m 13s|
+|[largeVis](https://github.com/elbamos/largevis)|[e51871e](					 https://github.com/elbamos/largeVis/commit/e51871e689642177c184527efab668d248717fa9)|`save_neighbors = FALSE, save_edges = FALSE, threads = 4`|33m 58s|
+|[umap](https://cran.r-project.org/package=umap)|[09f6020](https://github.com/tkonopka/umap/commit/09f60205c572fc1fbfa3e985b48572098fc9b17d)|`method = "naive"`| 9m 14s|
+|uwot|0.0.0.9009|`n_threads = 0`| 3m 11s|
+|uwot|0.0.0.9009|`n_threads = 4`| 2m  0s|
+|uwot|0.0.0.9009|`n_threads = 4, approx_pow = TRUE`| 1m 24s|
+|uwot|0.0.0.9009|`n_threads = 4, approx_pow = TRUE, n_sgd_threads = 4`| 1m 16s|
 
-* nearest neighbor search: takes 40 seconds in Python which also has the
-experimental parallel support in Numba turned on, versus just over 2 minutes in
-single-threaded `uwot`. Using 4 threads for the index search part reduces this
-to 1 minute. This part is the performance bottleneck at the moment. The Python
-version of UMAP uses [pynndescent](https://github.com/lmcinnes/pynndescent),
-a nearest neighbor descent approach, rather than Annoy. Alternative nearest
-neighbors libraries e.g. [kgraph](https://github.com/aaalgo/kgraph) (which is
-based on the same paper as pynndescent), or 
-[HNSW](https://github.com/nmslib/hnsw) would be interesting to try, but all of
-the ones I've looked at either don't currently build on Windows or have
-non-portable compilation flags, so will require some fiddling with.
-* the optimization stage: takes 60 seconds in Python (no parallel option
-here), versus about 66 seconds with `uwot` with one thread . I think the
-difference here is due to the `pow` operations in the gradient. If you like
-living dangerously, you can try using the `fastPrecisePow` approximation to the
-`pow` function suggested by
-[Martin Ankerl](https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/):
+For `uwot`, the bottleneck with typical settings is the nearest neighbor search, which is currently provided by Annoy, whereas the
+Python implementation uses [pynndescent](https://github.com/lmcinnes/pynndescent), a nearest neighbor descent approach. 
 
-```R
-# Set approx_pow = TRUE to use the approximation
-mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, approx_pow = TRUE, verbose = TRUE)
-```
-
-For what I think seem like typical values of `b` (between `0.7` and `0.9`)
+On the optimization side of things, `uwot` defaults are conservative. Using `approx_pow = TRUE` uses the `fastPrecisePow` 
+approximation to the `pow` function suggested by [Martin Ankerl](https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/). For what I think seem like typical values of `b` (between `0.7` and `0.9`)
 and the squared distance (`0`-`1000`), I found the maximum relative error was 
 about `0.06`. However, I haven't done much testing, beyond looking to see that
 the MNIST results are not obviously worsened. Results in the table above with
 `approx_pow = TRUE` do show a worthwhile improvement.
 
-I would welcome any further suggestions on improvements (particularly speeding
-up the optimization loop). However, it's certainly fast enough for my needs.
+Using `n_sgd_threads` with more than 1 thread will not give reproducible results, but should not behave any worse than LargeVis in that
+regard, so for many visualization needs, this is also worth trying.
 
 ## Memory Usage
 
