@@ -184,7 +184,7 @@ R packages (ignoring any that just call out to the Python implementation):
 |uwot|0.0.0.9009|`n_threads = 0`| 3m 11s|
 |uwot|0.0.0.9009|`n_threads = 4`| 2m  0s|
 |uwot|0.0.0.9009|`n_threads = 4, approx_pow = TRUE`| 1m 24s|
-|uwot|0.0.0.9009|`n_threads = 0, approx_pow = TRUE, n_sgd_threads = 4`| 1m 16s|
+|uwot|0.0.0.9009|`n_threads = 4, approx_pow = TRUE, n_sgd_threads = 4`| 1m 16s|
 
 For `uwot`, the bottleneck with typical settings is the nearest neighbor search, which is currently provided by Annoy, whereas the
 Python implementation uses [pynndescent](https://github.com/lmcinnes/pynndescent), a nearest neighbor descent approach. 
