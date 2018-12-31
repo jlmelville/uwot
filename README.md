@@ -237,12 +237,16 @@ neighbor index search, the smooth knn/perplexity calibration, and the
 optimization, which is the same approach that
 [LargeVis](https://github.com/lferry007/LargeVis) takes.
 
-You can (and should) adjust the number of threads via the `n_threads` parameter;
-for now, the default is half of whatever RcppParallel thinks should be the
-default. I have also exposed the `grain_size` parameter. If a thread would
+You can (and should) adjust the number of threads via the `n_threads`, which 
+controls the nearest neighbor and smooth knn calibration, and the 
+`n_sgd_threads` parameter, which controls the number of threads used during
+optimization. For the `n_threads`, the default is half of whatever RcppParallel 
+thinks should be the default. For `n_sgd_threads` the default is `0`, which 
+ensures reproducibility of results with a fixed seed. 
+
+I have also exposed the `grain_size` parameter. If a thread would
 process less than `grain_size` number of items, then no multithreading is
-carried out. Set `n_threads = 0` to use the previous non-threaded search; with
-`n_threads = 1`, you get the new multi-threaded code but with only one thread.
+carried out.
 
 I've not experienced any problems with using multiple threads for a little
 while, but if you have any problems with crashing sessions, please file an 
@@ -267,12 +271,12 @@ would be a good extension.
 Euclidean distance is supported for building the target graph. Again, see the 
 [Nearest Neighbor Data Format](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
 for a possible alternative.
-* Even if you use `set.seed`, results of the embeddings are not repeatable,
-unless you only use one thread (i.e. use the argument `n_threads = 1`). This is
-because there is no locking carried out on the underlying coordinate matrix, and
-work is partitioned by edge not vertex and a given vertex may be processed by
-different threads. The order in which reads and writes occur is of course at the
-whim of the thread scheduler.
+* If `n_sgd_threads` is set larger than `1`, then weven if you use `set.seed`,
+results of the embeddings are not repeatable, This is because there is no
+locking carried out on the underlying coordinate matrix, and work is partitioned
+by edge not vertex and a given vertex may be processed by different threads. The
+order in which reads and writes occur is of course at the whim of the thread
+scheduler. This is the same behavior as largeVis. 
 * I haven't applied `uwot` on anything much larger than MNIST and Fashion MNIST 
 (so at least around 100,000 rows with 500-1,000 columns works fine). Bear in mind
 that Annoy itself says it works best with dimensions < 100, but still works
