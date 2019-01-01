@@ -57,6 +57,9 @@ annoy_nn <- function(X, k = 10,
                       grain_size = grain_size, verbose = verbose
   )
 
+  nn_acc <- sum(res$idx == 1:nrow(X)) / nrow(X)
+  tsmessage("Annoy recall = ", formatC(nn_acc * 100.0), "%")
+  
   res <- list(idx = res$idx, dist = res$dist)
   if (ret_index) {
     res$index <- ann
@@ -77,7 +80,8 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
                 stop("BUG: unknown Annoy metric '", metric, "'")
   )
 
-  tsmessage("Building Annoy index with metric = ", metric)
+  tsmessage("Building Annoy index with metric = ", metric, 
+            ", n_trees = ", n_trees)
   progress <- Progress$new(max = nr, display = verbose)
 
   # Add items
@@ -118,7 +122,7 @@ annoy_search <- function(X, k, ann,
 annoy_search_serial <- function(X, k, ann,
                                 search_k = 100 * k,
                                 verbose = FALSE) {
-  tsmessage("Searching Annoy index")
+  tsmessage("Searching Annoy index, search_k = ", search_k)
   nr <- nrow(X)
   search_progress <- Progress$new(max = nr, display = verbose)
   idx <- matrix(nrow = nr, ncol = k)
@@ -147,7 +151,8 @@ annoy_search_parallel <- function(X, k, ann,
   index_file <- tempfile()
   ann$save(index_file)
   
-  tsmessage("Searching Annoy index using ", pluralize("thread", n_threads))
+  tsmessage("Searching Annoy index using ", pluralize("thread", n_threads),
+            ", search_k = ", search_k)
   
   ann_class <- class(ann)
   search_nn_func <- switch(ann_class,

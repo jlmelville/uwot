@@ -27,6 +27,8 @@ normal to apply centering to real-valued data but not to binary data.
 the size of the test data (should be the training data).
 * Some other performance improvements (around 10% faster for the optimization
 stage with MNIST).
+* When `verbose = TRUE`, log the Annoy recall accuracy, which may help tune
+values of `n_trees` and `search_k`.
 
 # uwot 0.0.0.9008 (December 23 2018)
 
