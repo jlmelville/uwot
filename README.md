@@ -176,8 +176,8 @@ The project documentation contains some more [examples](https://jlmelville.githu
 To get a feel for the performance of `uwot`, here are some timings for processing the MNIST dataset, compared with some other
 methods. I wouldn't take them very seriously, but they show that `uwot` is competitive with other methods.
 
-|Package |Version|Args|Time|	
-|--------|-------|----|----|
+|Package |Version|Arguments|Time|	
+|--------|-------|---------|----|
 |[Rtsne](https://cran.r-project.org/package=Rtsne)|[0.15](https://github.com/jkrijthe/Rtsne/commit/f3f42504eeac627e4d886b1489ee289f8f9d082b)|`partial_pca = TRUE`|14m 13s|
 |[openTSNE (Python)](https://github.com/pavlin-policar/openTSNE)|0.3.0-py37h830ac7b_1000|`n_jobs=4`| 6m  4s|
 |[openTSNE (Python)](https://github.com/pavlin-policar/openTSNE)|0.3.0-py37h830ac7b_1000|`n_jobs=4, negative_gradient_method="bh"`| 17m  56s|
@@ -274,7 +274,7 @@ would be a good extension.
 Euclidean distance is supported for building the target graph. Again, see the 
 [Nearest Neighbor Data Format](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
 for a possible alternative.
-* If `n_sgd_threads` is set larger than `1`, then weven if you use `set.seed`,
+* If `n_sgd_threads` is set larger than `1`, then even if you use `set.seed`,
 results of the embeddings are not repeatable, This is because there is no
 locking carried out on the underlying coordinate matrix, and work is partitioned
 by edge not vertex and a given vertex may be processed by different threads. The
