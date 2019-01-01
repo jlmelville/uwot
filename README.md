@@ -193,7 +193,7 @@ methods. I wouldn't take them very seriously, but they show that `uwot` is compe
 |uwot|0.0.0.9009|`n_threads = 4, approx_pow = TRUE, n_sgd_threads = 4`| 1m 16s|
 |uwot|0.0.0.9009|`n_threads = 4, approx_pow = TRUE, pca = 50`| 48s|
 
-Some notes on how these numbers were generated: I ran this on a Windows machine, using R 3.2.0 and Python 3.7.0. 
+Some notes on how these numbers were generated: I ran this on a Windows machine, using R 3.5.2 and Python 3.7.0. 
 The official LargeVis implementation was built with Visual Studio 2017 Community Edition and may not be properly optimized 
 (the VS solution is available in [my fork](https://github.com/jlmelville/LargeVis)). 
 
