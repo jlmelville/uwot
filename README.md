@@ -171,16 +171,20 @@ The project documentation contains some more [examples](https://jlmelville.githu
 
 ## Performance
 
-*December 31 2018* Updated timings, keeping better track of versions numbers. Comparisons with Python packages coming later.
+*December 31 2018* Updated timings, keeping better track of versions numbers.
 
 To get a feel for the performance of `uwot`, here are some timings for processing the MNIST dataset, compared with some other
-R packages (ignoring any that just call out to the Python implementation):
+methods. I ran this on a Windows machine, using R 3.2.0 and Python 3.7.0. The official LargeVis implementation was built with Visual Studio 2017 Community Edition and may not be properly optimized (the VS solution is available in [my fork](https://github.com/jlmelville/LargeVis)).
 
 |Package |Version|Args|Time|	
 |--------|-------|----|----|
 |[Rtsne](https://cran.r-project.org/package=Rtsne)|[0.15](https://github.com/jkrijthe/Rtsne/commit/f3f42504eeac627e4d886b1489ee289f8f9d082b)|`partial_pca = TRUE`|14m 13s|
-|[largeVis](https://github.com/elbamos/largevis)|[e51871e](					 https://github.com/elbamos/largeVis/commit/e51871e689642177c184527efab668d248717fa9)|`save_neighbors = FALSE, save_edges = FALSE, threads = 4`|33m 58s|
-|[umap](https://cran.r-project.org/package=umap)|[09f6020](https://github.com/tkonopka/umap/commit/09f60205c572fc1fbfa3e985b48572098fc9b17d)|`method = "naive"`| 9m 14s|
+|[openTSNE (Python)](https://github.com/pavlin-policar/openTSNE)|0.3.0-py37h830ac7b_1000|`n_jobs=4`| 6m  4s|
+|[openTSNE (Python)](https://github.com/pavlin-policar/openTSNE)|0.3.0-py37h830ac7b_1000|`n_jobs=4, negative_gradient_method="bh"`| 17m  56s|
+|[LargeVis (C++)](https://github.com/lferry007/LargeVis)|[feb8121](https://github.com/lferry007/LargeVis/commit/feb8121e8eb9652477f7f564903d189ee663796f)|`-threads 4`|12m 43s|
+|[largeVis (R package)](https://github.com/elbamos/largevis)|[e51871e](					 https://github.com/elbamos/largeVis/commit/e51871e689642177c184527efab668d248717fa9)|`save_neighbors = FALSE, save_edges = FALSE, threads = 4`|33m 58s|
+|[UMAP (Python)](https://github.com/lmcinnes/umap)|0.3.7-py37_1000||1m 25s|
+|[umap (R package)](https://cran.r-project.org/package=umap)|[09f6020](https://github.com/tkonopka/umap/commit/09f60205c572fc1fbfa3e985b48572098fc9b17d)|`method = "naive"`| 9m 14s|
 |uwot|0.0.0.9009|`n_threads = 0`| 3m 11s|
 |uwot|0.0.0.9009|`n_threads = 4`| 2m  0s|
 |uwot|0.0.0.9009|`n_threads = 4, approx_pow = TRUE`| 1m 24s|
