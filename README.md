@@ -174,13 +174,14 @@ The project documentation contains some more [examples](https://jlmelville.githu
 *December 31 2018* Updated timings, keeping better track of versions numbers.
 
 To get a feel for the performance of `uwot`, here are some timings for processing the MNIST dataset, compared with some other
-methods. I ran this on a Windows machine, using R 3.2.0 and Python 3.7.0. The official LargeVis implementation was built with Visual Studio 2017 Community Edition and may not be properly optimized (the VS solution is available in [my fork](https://github.com/jlmelville/LargeVis)).
+methods.
 
 |Package |Version|Args|Time|	
 |--------|-------|----|----|
 |[Rtsne](https://cran.r-project.org/package=Rtsne)|[0.15](https://github.com/jkrijthe/Rtsne/commit/f3f42504eeac627e4d886b1489ee289f8f9d082b)|`partial_pca = TRUE`|14m 13s|
 |[openTSNE (Python)](https://github.com/pavlin-policar/openTSNE)|0.3.0-py37h830ac7b_1000|`n_jobs=4`| 6m  4s|
 |[openTSNE (Python)](https://github.com/pavlin-policar/openTSNE)|0.3.0-py37h830ac7b_1000|`n_jobs=4, negative_gradient_method="bh"`| 17m  56s|
+|[FIt-SNE (C++)](https://github.com/KlugerLab/FIt-SNE)|[1.0.0](https://github.com/KlugerLab/FIt-SNE/releases/download/v1.0.0/FItSNE-Windows-1.0.0.zip)|`nthreads = 4`|1m 11s|
 |[LargeVis (C++)](https://github.com/lferry007/LargeVis)|[feb8121](https://github.com/lferry007/LargeVis/commit/feb8121e8eb9652477f7f564903d189ee663796f)|`-threads 4`|12m 43s|
 |[largeVis (R package)](https://github.com/elbamos/largevis)|[e51871e](					 https://github.com/elbamos/largeVis/commit/e51871e689642177c184527efab668d248717fa9)|`save_neighbors = FALSE, save_edges = FALSE, threads = 4`|33m 58s|
 |[UMAP (Python)](https://github.com/lmcinnes/umap)|0.3.7-py37_1000||1m 25s|
@@ -189,6 +190,26 @@ methods. I ran this on a Windows machine, using R 3.2.0 and Python 3.7.0. The of
 |uwot|0.0.0.9009|`n_threads = 4`| 2m  0s|
 |uwot|0.0.0.9009|`n_threads = 4, approx_pow = TRUE`| 1m 24s|
 |uwot|0.0.0.9009|`n_threads = 4, approx_pow = TRUE, n_sgd_threads = 4`| 1m 16s|
+|uwot|0.0.0.9009|`n_threads = 4, approx_pow = TRUE, pca = 50`| 48s|
+
+Some notes on how these numbers were generated: I ran this on a Windows machine, using R 3.2.0 and Python 3.7.0. 
+The official LargeVis implementation was built with Visual Studio 2017 Community Edition and may not be properly optimized 
+(the VS solution is available in [my fork](https://github.com/jlmelville/LargeVis)). 
+
+For R packages, the MNIST data was downloaded via the [snedata](https://github.com/jlmelville/snedata) package.
+For Python packages, the `sklearn.datasets.fetch_mldata('MNIST original')` was used. The LargeVis source code contains a MNIST
+example with the data already present. 
+
+For FIt-SNE, I used the 
+[provided Windows binary](https://github.com/KlugerLab/FIt-SNE/releases/download/v1.0.0/FItSNE-Windows-1.0.0.zip)
+via the R wrapper (and hence used the MNIST data from the `snedata` package), and the reported time also includes the 13 seconds
+it takes to reduce the dimensionality to 50 via PCA, using [irlba](https://cran.r-project.org/package=irlba) 
+(this is the same packages used by Rtsne and uwot). I resorted to PCA because when I passed the full matrix, I got an extremely 
+strange layout. I have yet to investigate further as to where the problem lies. I will update this if I work out what's going on.
+
+The default openTSNE uses the same FFT approach that FIt-SNE does, so I don't know why it's much slower, apart from the 
+use of the numpy version of FFT rather than the [FFTW](http://www.fftw.org/) library, but my understanding was that it shouldn't
+make much difference with a dataset the size of MNIST. Perhaps this is a Windows thing.
 
 For `uwot`, the bottleneck with typical settings is the nearest neighbor search, which is currently provided by Annoy, whereas the
 Python implementation uses [pynndescent](https://github.com/lmcinnes/pynndescent), a nearest neighbor descent approach. 
