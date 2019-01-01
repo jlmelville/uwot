@@ -1,4 +1,4 @@
-# uwot 0.0.0.9009 (1 Janary 2019)
+# uwot 0.0.0.9009 (1 January 2019)
 
 ## New features
 
