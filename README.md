@@ -270,10 +270,6 @@ package). Neither approach is supremely efficient at the moment. Proper sparse
 matrix support is limited by the nearest neighbor search routine: Annoy is
 intended for dense vectors. Adding a library for sparse nearest neighbor search
 would be a good extension.
-* For supervised dimensionality reduction using a numeric vector, only the
-Euclidean distance is supported for building the target graph. Again, see the 
-[Nearest Neighbor Data Format](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
-for a possible alternative.
 * If `n_sgd_threads` is set larger than `1`, then even if you use `set.seed`,
 results of the embeddings are not repeatable, This is because there is no
 locking carried out on the underlying coordinate matrix, and work is partitioned
@@ -284,11 +280,17 @@ scheduler. This is the same behavior as largeVis.
 (so at least around 100,000 rows with 500-1,000 columns works fine). Bear in mind
 that Annoy itself says it works best with dimensions < 100, but still works
 "surprisingly well" up to 1000.
+* Experience with 
+[COIL-100](http://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php), 
+which has 49,152 features, suggests that Annoy will *definitely* struggle with
+datasets of this dimensionality. I strongly recommend using the `pca` option
+to reduce the dimensionality, e.g `pca = 100`.
 * The spectral initialization default for `umap` (and the Laplacian eigenmap
 initialization, `init = "laplacian"`) can sometimes run into problems. If it
 fails to converge it will fall back to random initialization, but on occasion
-I've seen it take an extremely long time (a couple of hours) to converge. If
-initialization is taking more than a few minutes, I suggest stopping the 
+I've seen it take an extremely long time (a couple of hours) to converge. Recent
+changes have hopefully reduced the chance of this happening, but if
+initialization is taking more than a few minutes, I suggest stopping the
 calculation and using the scaled PCA (`init = "spca"`) instead.
 * `R CMD check` currently reports the following note: 
 `GNU make is a SystemRequirements.`, which is expected and due to using 
