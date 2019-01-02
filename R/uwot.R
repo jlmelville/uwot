@@ -356,7 +356,7 @@
 #' @export
 umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_epochs = NULL, learning_rate = 1, scale = FALSE, 
-                 init = "spectral", init_sdev = 1e-4,
+                 init = "spectral", init_sdev = NULL,
                  spread = 1, min_dist = 0.01,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                  bandwidth = 1.0, repulsion_strength = 1.0,
@@ -681,7 +681,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   n_epochs = NULL,
                   learning_rate = 1, scale = FALSE, 
-                  init = "spectral", init_sdev = 1e-4,
+                  init = "spectral", init_sdev = NULL,
                   set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                   bandwidth = 1.0, repulsion_strength = 1.0,
                   negative_sample_rate = 5.0,
@@ -971,7 +971,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   n_components = 2, metric = "euclidean", n_epochs = -1,
                   learning_rate = 1, scale = "maxabs", 
-                  init = "lvrandom", init_sdev = 1e-4,
+                  init = "lvrandom", init_sdev = NULL,
                   repulsion_strength = 7,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
@@ -1004,7 +1004,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_epochs = NULL,
                  alpha = 1, scale = FALSE, 
-                 init = "spectral", init_sdev = 1e-4,
+                 init = "spectral", init_sdev = NULL,
                  spread = 1, min_dist = 0.01,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                  bandwidth = 1.0, gamma = 1.0,
@@ -1289,10 +1289,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       "laplacian", "spca", "pca", "sspectral", "snormlaplacian", "slaplacian"
     ))
     
-    do_shrink <- init %in% 
-      c("spca", "sspectral", "snormlaplacian", "slaplacian")
-    if (do_shrink) {
+    do_shrink <- !is.null(init_sdev)
+    if (init %in% 
+        c("spca", "sspectral", "snormlaplacian", "slaplacian")) {
       init <- substring(init, 2)
+      do_shrink <- TRUE
     }
     
     if (init_is_spectral(init)) {
@@ -1331,6 +1332,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
     
     if (do_shrink) {
+      if (is.null(init_sdev)) {
+        init_sdev <- 1e-4
+      }
       embedding <- shrink_coords(embedding, init_sdev)
     }
   }
