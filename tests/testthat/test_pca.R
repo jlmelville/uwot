@@ -17,7 +17,6 @@ test_that("PCA initialization", {
 
 test_that("1 component initialization works", {
   expect_ok_matrix(pca_init(iris10, ndim = 1), nc = 1)
-  expect_ok_matrix(scaled_pca(iris10, ndim = 1), nc = 1)
 })
 
 test_that("PCA returns model data", {

@@ -1,5 +1,21 @@
 # uwot 0.0.0.9010
 
+## New features
+
+* New parameter: `init_sdev` which specifies how large the standard deviation
+of each column of the initial coordinates should be. This will scale any input
+coordinates (including user-provided matrix coordinates). `init = "spca"` can
+now be thought of as an alias of `init = "pca", init_sdev = 1e-4`. 
+This may be too aggressive scaling for some datasets. The typical UMAP spectral
+initializations tend to result in standard deviations of around `2` to `5`, so
+this might be more appropriate in some cases.
+* As a result of adding `init_sdev`, the `init` options `sspectral`,
+`slaplacian` and `snormlaplacian` have been removed (they weren't around for
+very long anyway). You can get the same behavior by e.g. 
+`init = "spectral", init_sdev = 1e-4`. `init = "spca"` is sticking around 
+because I use it a lot.
+
+
 ## Bug fixes and minor improvements
 
 * If requesting a spectral initialization, but multiple disconnected components
@@ -7,7 +23,6 @@ are present, fall back to `init = "spca"`.
 
 # uwot 0.0.0.9009 (1 January 2019)
 
-## New features
 
 * Data is now stored column-wise during optimization, which should result in
 an increase in performance for larger values of `n_components` (e.g. 

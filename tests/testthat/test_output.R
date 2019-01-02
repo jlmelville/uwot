@@ -322,7 +322,7 @@ expect_ok_matrix(res_trans)
 # shrunk spectral initialization
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
-            init = "snormlaplacian", verbose = FALSE, n_threads = 0
+            init = "pca", verbose = FALSE, n_threads = 0, init_sdev = 2
 )
 expect_ok_matrix(res)
 
@@ -335,7 +335,8 @@ expect_ok_matrix(res)
 
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
-            init = "sspectral", verbose = FALSE, n_threads = 0
+            init = "spectral", verbose = FALSE, n_threads = 0,
+            init_sdev = 5
 )
 expect_ok_matrix(res)
 

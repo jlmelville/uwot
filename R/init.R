@@ -176,13 +176,6 @@ rand_init_lv <- function(n, ndim, verbose = FALSE) {
   matrix(stats::rnorm(ndim * n, sd = 1e-4), n)
 }
 
-# PCA but then scale the vectors to a t-SNE-like stdev of 1e-4
-scaled_pca <- function(X, ndim = 2, verbose = FALSE) {
-  tsmessage("Initializing from scaled PCA")
-  scores <- pca_scores(X, ncol = ndim, verbose = verbose)
-  shrink_coords(scores)
-}
-
 # Rescale embedding so that the standard deviation is the specified value.
 # Default gives initialization like t-SNE, but not random. Large initial 
 # distances lead to small gradients, and hence small updates, so should be
@@ -287,7 +280,6 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
 }
 
 init_is_spectral <- function(init) {
-  res <- pmatch(tolower(init), c("normlaplacian", "spectral", "laplacian",
-                                 "snormlaplacian", "sspectral", "slaplacian"))
+  res <- pmatch(tolower(init), c("normlaplacian", "spectral", "laplacian"))
   length(res) > 0 && !is.na(res)
 }
