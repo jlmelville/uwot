@@ -218,8 +218,10 @@ On the optimization side of things, `uwot` defaults are conservative. Using `app
 approximation to the `pow` function suggested by [Martin Ankerl](https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/). For what I think seem like typical values of `b` (between `0.7` and `0.9`)
 and the squared distance (`0`-`1000`), I found the maximum relative error was 
 about `0.06`. However, I haven't done much testing, beyond looking to see that
-the MNIST results are not obviously worsened. Results in the table above with
-`approx_pow = TRUE` do show a worthwhile improvement.
+results from the 
+[examples page](https://jlmelville.github.io/uwot/umap-examples.html) are not 
+obviously worsened. Results in the table above with `approx_pow = TRUE` do show 
+a worthwhile improvement.
 
 Using `n_sgd_threads` with more than 1 thread will not give reproducible results, but should not behave any worse than LargeVis in that
 regard, so for many visualization needs, this is also worth trying.
