@@ -6,15 +6,15 @@
 \usage{
 tumap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   n_epochs = NULL, learning_rate = 1, scale = FALSE,
-  init = "spectral", set_op_mix_ratio = 1, local_connectivity = 1,
-  bandwidth = 1, repulsion_strength = 1, negative_sample_rate = 5,
-  nn_method = NULL, n_trees = 50, search_k = 2 * n_neighbors *
-  n_trees, n_threads = max(1, RcppParallel::defaultNumThreads()/2),
-  n_sgd_threads = 0, grain_size = 1, y = NULL,
-  target_n_neighbors = n_neighbors, target_metric = "euclidean",
-  target_weight = 0.5, pca = NULL, pca_center = TRUE,
-  ret_model = FALSE, ret_nn = FALSE, verbose = getOption("verbose",
-  TRUE))
+  init = "spectral", init_sdev = 1e-04, set_op_mix_ratio = 1,
+  local_connectivity = 1, bandwidth = 1, repulsion_strength = 1,
+  negative_sample_rate = 5, nn_method = NULL, n_trees = 50,
+  search_k = 2 * n_neighbors * n_trees, n_threads = max(1,
+  RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
+  grain_size = 1, y = NULL, target_n_neighbors = n_neighbors,
+  target_metric = "euclidean", target_weight = 0.5, pca = NULL,
+  pca_center = TRUE, ret_model = FALSE, ret_nn = FALSE,
+  verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -142,6 +142,11 @@ help under these circumstances. \code{"spca"} is usually recommended over
 \code{"pca"}, but for the spectral initializations the scaled versions
 usually aren't necessary unless you are using a large value of
 \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher).}
+
+\item{init_sdev}{If non-\code{NULL}, scales each dimension of the initialized
+coordinates (including any user-supplied matrix) to this standard
+deviation. By default no scaling is carried out, except when \code{init =
+"spca"}, in which case the value is \code{0.0001}.}
 
 \item{set_op_mix_ratio}{Interpolate between (fuzzy) union and intersection as
 the set operation used to combine local fuzzy simplicial sets to obtain a

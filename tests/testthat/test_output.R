@@ -328,7 +328,8 @@ expect_ok_matrix(res)
 
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
-            init = "slaplacian", verbose = FALSE, n_threads = 0
+            init = "laplacian", verbose = FALSE, n_threads = 0,
+            init_sdev = 0.1
 )
 expect_ok_matrix(res)
 

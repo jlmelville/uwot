@@ -123,7 +123,10 @@
 #'  \code{"pca"}, but for the spectral initializations the scaled versions
 #'  usually aren't necessary unless you are using a large value of
 #'  \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher). 
-#'  
+#' @param init_sdev If non-\code{NULL}, scales each dimension of the initialized
+#'   coordinates (including any user-supplied matrix) to this standard
+#'   deviation. By default no scaling is carried out, except when \code{init =
+#'   "spca"}, in which case the value is \code{0.0001}.
 #' @param spread The effective scale of embedded points. In combination with
 #'   \code{min_dist}, this determines how clustered/clumped the embedded points
 #'   are.
@@ -353,7 +356,7 @@
 #' @export
 umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_epochs = NULL, learning_rate = 1, scale = FALSE, 
-                 init = "spectral",
+                 init = "spectral", init_sdev = 1e-4,
                  spread = 1, min_dist = 0.01,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                  bandwidth = 1.0, repulsion_strength = 1.0,
@@ -373,7 +376,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
-    init = init, spread = spread, min_dist = min_dist,
+    init = init, init_sdev = init_sdev,
+    spread = spread, min_dist = min_dist,
     set_op_mix_ratio = set_op_mix_ratio,
     local_connectivity = local_connectivity, bandwidth = bandwidth,
     gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
@@ -517,6 +521,10 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'  \code{"pca"}, but for the spectral initializations the scaled versions
 #'  usually aren't necessary unless you are using a large value of
 #'  \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher).
+#' @param init_sdev If non-\code{NULL}, scales each dimension of the initialized
+#'   coordinates (including any user-supplied matrix) to this standard
+#'   deviation. By default no scaling is carried out, except when \code{init =
+#'   "spca"}, in which case the value is \code{0.0001}.
 #' @param set_op_mix_ratio Interpolate between (fuzzy) union and intersection as
 #'   the set operation used to combine local fuzzy simplicial sets to obtain a
 #'   global fuzzy simplicial sets. Both fuzzy set operations use the product
@@ -672,7 +680,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @export
 tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   n_epochs = NULL,
-                  learning_rate = 1, scale = FALSE, init = "spectral",
+                  learning_rate = 1, scale = FALSE, 
+                  init = "spectral", init_sdev = 1e-4,
                   set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                   bandwidth = 1.0, repulsion_strength = 1.0,
                   negative_sample_rate = 5.0,
@@ -690,7 +699,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
-    n_epochs = n_epochs, alpha = learning_rate, scale = scale, init = init,
+    n_epochs = n_epochs, alpha = learning_rate, scale = scale,
+    init = init, init_sdev = init_sdev,
     spread = NULL, min_dist = NULL, set_op_mix_ratio = set_op_mix_ratio,
     local_connectivity = local_connectivity, bandwidth = bandwidth,
     gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
@@ -852,7 +862,10 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'  \code{"pca"}, but for the spectral initializations the scaled versions
 #'  usually aren't necessary unless you are using a large value of
 #'  \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher).
-#'   
+#' @param init_sdev If non-\code{NULL}, scales each dimension of the initialized
+#'   coordinates (including any user-supplied matrix) to this standard
+#'   deviation. By default no scaling is carried out, except when \code{init =
+#'   "spca"}, in which case the value is \code{0.0001}.
 #' @param repulsion_strength Weighting applied to negative samples in low
 #'   dimensional embedding optimization. Values higher than one will result in
 #'   greater weight being given to negative samples.
@@ -957,7 +970,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @export
 lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   n_components = 2, metric = "euclidean", n_epochs = -1,
-                  learning_rate = 1, scale = "maxabs", init = "lvrandom", 
+                  learning_rate = 1, scale = "maxabs", 
+                  init = "lvrandom", init_sdev = 1e-4,
                   repulsion_strength = 7,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
@@ -972,7 +986,8 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
   uwot(X,
        n_neighbors = n_neighbors, n_components = n_components,
        metric = metric,
-       n_epochs = n_epochs, alpha = learning_rate, scale = scale, init = init,
+       n_epochs = n_epochs, alpha = learning_rate, scale = scale, 
+       init = init, init_sdev = init_sdev,
        gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
        nn_method = nn_method, n_trees = n_trees, search_k = search_k,
        method = "largevis", perplexity = perplexity,
@@ -988,7 +1003,8 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 # Function that does all the real work
 uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_epochs = NULL,
-                 alpha = 1, scale = FALSE, init = "spectral",
+                 alpha = 1, scale = FALSE, 
+                 init = "spectral", init_sdev = 1e-4,
                  spread = 1, min_dist = 0.01,
                  set_op_mix_ratio = 1.0, local_connectivity = 1.0,
                  bandwidth = 1.0, gamma = 1.0,
@@ -1315,7 +1331,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
     
     if (do_shrink) {
-      embedding <- shrink_coords(embedding)
+      embedding <- shrink_coords(embedding, init_sdev)
     }
   }
   
