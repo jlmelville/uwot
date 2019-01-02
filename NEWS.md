@@ -1,3 +1,10 @@
+# uwot 0.0.0.9010
+
+## Bug fixes and minor improvements
+
+* If requesting a spectral initialization, but multiple disconnected components
+are present, fall back to `init = "spca"`.
+
 # uwot 0.0.0.9009 (1 January 2019)
 
 ## New features

@@ -285,3 +285,9 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
     res$x
   }
 }
+
+init_is_spectral <- function(init) {
+  res <- pmatch(tolower(init), c("normlaplacian", "spectral", "laplacian",
+                                 "snormlaplacian", "sspectral", "slaplacian"))
+  length(res) > 0 && !is.na(res)
+}

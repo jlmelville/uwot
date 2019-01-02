@@ -1279,6 +1279,15 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       init <- substring(init, 2)
     }
     
+    if (init_is_spectral(init)) {
+    connected <- connected_components(V)
+      if (connected$n_components > 1) {
+        tsmessage("Found ", connected$n_components, " connected components, ",
+                  "falling back to 'spca' initialization")
+        init <- "spca"
+      }
+    }
+    
     # Don't repeat PCA initialization if we've already done it once
     if (pca_shortcut && init %in% c("spca", "pca") && pca >= n_components) {
       embedding <- X[, 1:n_components]
