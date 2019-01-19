@@ -679,6 +679,3 @@ Nearest neighbor data for `y` is not returned from `umap` for re-use.
 package is [umapr](https://github.com/ropenscilabs/umapr).
 * `uwot` uses the [RcppProgress](https://cran.r-project.org/package=RcppProgress)
 package to show a text-based progress bar when `verbose = TRUE`.
-* My somewhat convoluted method to ensure the C++ random numbers are repeatable
-makes use of a (not convoluted) `get_seed` function suggested in a blog post by 
-[Rory Nolan](http://rorynolan.rbind.io/2018/05/08/rcsetseed/).

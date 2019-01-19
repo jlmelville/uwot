@@ -15,14 +15,15 @@ very long anyway). You can get the same behavior by e.g.
 `init = "spectral", init_sdev = 1e-4`. `init = "spca"` is sticking around 
 because I use it a lot.
 
-
 ## Bug fixes and minor improvements
 
 * If requesting a spectral initialization, but multiple disconnected components
-are present, fall back to `init = "spca"`.
+are present, fall back to `init = "spca"`. 
+* Removed dependency on C++ `<random>` header. This breaks backwards
+compatibility in the sense that results with a given seed will not be the same
+as with previous versions.
 
 # uwot 0.0.0.9009 (1 January 2019)
-
 
 * Data is now stored column-wise during optimization, which should result in
 an increase in performance for larger values of `n_components` (e.g. 

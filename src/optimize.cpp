@@ -18,7 +18,7 @@
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <limits>
-#include <random>
+#include <memory>
 // [[Rcpp::depends(RcppProgress)]]
 #include <progress.hpp>
 // [[Rcpp::depends(RcppParallel)]]
@@ -71,8 +71,6 @@ struct SgdWorker : public RcppParallel::Worker {
   const std::size_t head_nvert;
   const std::size_t tail_nvert;
   tthread::mutex mutex;
-  std::mt19937 rng;
-  std::uniform_int_distribution<long> gen;
   const double dist_eps;
   
   SgdWorker(
@@ -82,8 +80,7 @@ struct SgdWorker : public RcppParallel::Worker {
     Sampler& sampler,
     std::vector<double>& head_embedding,
     std::vector<double>& tail_embedding,
-    const std::size_t ndim,
-    unsigned int seed) :
+    const std::size_t ndim) :
     
     n(0), alpha(0.0), gradient(gradient),
     positive_head(positive_head), positive_tail(positive_tail),
@@ -95,26 +92,18 @@ struct SgdWorker : public RcppParallel::Worker {
     ndim(ndim), 
     head_nvert(head_embedding.size() / ndim), 
     tail_nvert(tail_embedding.size() / ndim),
-    rng(seed), gen(-2147483647, 2147483646),
     dist_eps(std::numeric_limits<double>::epsilon())
   { }
   
   void  operator()(std::size_t begin, std::size_t end) {
-    // Each window gets its own fast PRNG state, so no locking needed inside the loop.
-    // Want separate seeds though, so seed the fast PRNG with three random numbers
-    // taken from the mt19937 generator, which is shared across windows, so is locked.
-    // Probably this is a bit of a waste of time:
-    // Could use the mt19937 seed, the begin and the epoch number as seeds?
-    // Doesn't waste much time, though.
-    long s1, s2, s3;
+    std::unique_ptr<tau_prng> prng(nullptr);
+   
+    // Each window gets its own PRNG state, to prevent locking inside the loop.
     {
       tthread::lock_guard<tthread::mutex> guard(mutex);
-      s1 = gen(rng);
-      s2 = gen(rng); // technically this needs to always be > 7
-      s3 = gen(rng); // should be > 15
+      prng.reset(new tau_prng());
     }
-    tau_prng prng(s1, s2, s3);
-    
+
     std::vector<double> dys(ndim);
     for (std::size_t i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
@@ -143,7 +132,7 @@ struct SgdWorker : public RcppParallel::Worker {
 
       const std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (std::size_t p = 0; p < n_neg_samples; p++) {
-        const std::size_t dkn = (prng() % tail_nvert) * ndim;
+        const std::size_t dkn = ((*prng)() % tail_nvert) * ndim;
         if (dj == dkn) {
           continue;
         }
@@ -191,7 +180,6 @@ std::vector<double> optimize_layout(
     const std::vector<double>& epochs_per_sample,
     double initial_alpha,
     double negative_sample_rate,
-    unsigned int seed,
     bool parallelize = true,
     std::size_t grain_size = 1,
     bool verbose = false) 
@@ -202,8 +190,7 @@ std::vector<double> optimize_layout(
                               positive_head, positive_tail,
                               sampler,
                               head_embedding, tail_embedding,
-                              head_embedding.size() / n_vertices,
-                              seed);
+                              head_embedding.size() / n_vertices);
   
   
   Progress progress(n_epochs, verbose);
@@ -246,7 +233,6 @@ Rcpp::NumericMatrix optimize_layout_umap(
     double gamma, 
     double initial_alpha,
     double negative_sample_rate,
-    unsigned int seed,
     bool approx_pow,
     bool parallelize = true,
     std::size_t grain_size = 1,
@@ -276,13 +262,13 @@ Rcpp::NumericMatrix optimize_layout_umap(
       result = optimize_layout<apumap_gradient, true>(
         gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
         n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-        negative_sample_rate, seed, parallelize, grain_size, verbose);
+        negative_sample_rate, parallelize, grain_size, verbose);
     }
     else {
       result = optimize_layout<apumap_gradient, false>(
         gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
         n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-        negative_sample_rate, seed, parallelize, grain_size, verbose);
+        negative_sample_rate, parallelize, grain_size, verbose);
     }
   }
   else {
@@ -291,13 +277,13 @@ Rcpp::NumericMatrix optimize_layout_umap(
       result = optimize_layout<umap_gradient, true>(
         gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
         n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-        negative_sample_rate, seed, parallelize, grain_size, verbose);
+        negative_sample_rate, parallelize, grain_size, verbose);
     }
     else {
       result = optimize_layout<umap_gradient, false>(
         gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
         n_epochs,n_vertices, epochs_per_sample, initial_alpha,
-        negative_sample_rate, seed, parallelize, grain_size, verbose);
+        negative_sample_rate, parallelize, grain_size, verbose);
     }
   }
   
@@ -322,7 +308,6 @@ Rcpp::NumericMatrix optimize_layout_tumap(
     const std::vector<double> epochs_per_sample,
     double initial_alpha,
     double negative_sample_rate,
-    unsigned int seed,
     bool parallelize = true,
     std::size_t grain_size = 1,
     bool move_other = true,
@@ -347,13 +332,13 @@ Rcpp::NumericMatrix optimize_layout_tumap(
     result = optimize_layout<tumap_gradient, true>(
       gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
       n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
-      seed, parallelize, grain_size, verbose);
+      parallelize, grain_size, verbose);
   }
   else {
     result = optimize_layout<tumap_gradient, false>(
       gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
       n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
-      seed, parallelize, grain_size, verbose);
+      parallelize, grain_size, verbose);
   }
   
   if (delete_tail_ptr) {
@@ -374,7 +359,6 @@ Rcpp::NumericMatrix optimize_layout_largevis(
     const std::vector<double> epochs_per_sample,
     double gamma, double initial_alpha,
     double negative_sample_rate,
-    unsigned int seed,
     bool parallelize = true,
     std::size_t grain_size = 1,
     bool verbose = false) 
@@ -386,7 +370,7 @@ Rcpp::NumericMatrix optimize_layout_largevis(
   std::vector<double> result = optimize_layout<largevis_gradient, true>(
     gradient, head_vec, head_vec, positive_head, positive_tail,
     n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-    negative_sample_rate, seed, parallelize, grain_size, verbose);
+    negative_sample_rate, parallelize, grain_size, verbose);
   
   return Rcpp::NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
                              result.begin());

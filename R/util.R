@@ -29,11 +29,6 @@ summarize <- function(X, msg = "") {
   )
 }
 
-# http://rorynolan.rbind.io/2018/05/08/rcsetseed/
-get_seed <- function() {
-  sample.int(.Machine$integer.max, 1)
-}
-
 # pluralize("thread", 1) => "1 thread"
 # pluralize("thread", 2) => "2 threads"
 pluralize <- function(str, n, prefix = NULL, inc_num = TRUE) {
