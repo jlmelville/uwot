@@ -81,7 +81,7 @@ mnist_umap_s <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, 
                     
 # Add new points to an existing embedding
 mnist_train <- head(mnist, 60000)
-mnist_test <- tail(mnist, 70000)
+mnist_test <- tail(mnist, 10000)
 
 # You must set ret_model = TRUE to return extra data we need
 # coordinates are in mnist_train_umap$embedding
