@@ -27,7 +27,6 @@
 
 // based on code in the dqsample package
 uint64_t random64() {
-  // return (Rcpp::runif(1, 0.0, 1.0))[0] * std::numeric_limits<uint64_t>::max();
   return R::runif(0, 1) * std::numeric_limits<uint64_t>::max();
 }
 
