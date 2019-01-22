@@ -132,7 +132,7 @@ irlba_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   suppressWarnings(
     res <- tryCatch(res <- irlba::partial_eigen(L, n = k, symmetric = TRUE, 
                                                 smallest = TRUE, tol = 1e-3, 
-                                                maxit = 1000),
+                                                maxit = 1000, verbose = TRUE),
                     error = function(c) {
                       NULL
                     }
