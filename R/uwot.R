@@ -1268,7 +1268,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   else {
     init <- match.arg(tolower(init), c(
       "spectral", "random", "lvrandom", "normlaplacian",
-      "laplacian", "spca", "pca"))
+      "laplacian", "spca", "pca", "inormlaplacian", "ispectral"))
     
     if (init_is_spectral(init)) {
     connected <- connected_components(V)
@@ -1302,6 +1302,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                           # we handle scaling pca below
                           spca = pca_init(X, ndim = n_components, verbose = verbose),
                           pca = pca_init(X, ndim = n_components, verbose = verbose),
+                          ispectral = irlba_spectral_init(V, ndim = n_components, verbose = verbose),
+                          inormlaplacian = irlba_normalized_laplacian_init(V,
+                                                                    ndim = n_components,
+                                                                    verbose = verbose
+                          ),
                           stop("Unknown initialization method: '", init, "'")
       )
     }

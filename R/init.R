@@ -114,6 +114,41 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   as.matrix(Re(res$vectors[, vec_indices]))
 }
 
+# Use irlba's partial_eigen instead of RSpectra
+irlba_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
+  if (nrow(A) < 3) {
+    tsmessage("Graph too small, using random initialization instead")
+    return(rand_init(nrow(A), ndim))
+  }
+  tsmessage("Initializing from normalized Laplacian (using irlba)")
+
+  n <- nrow(A)
+  Dsq <- sqrt(Matrix::colSums(A))
+  L <- -Matrix::t(A / Dsq) / Dsq
+  Matrix::diag(L) <- 1 + Matrix::diag(L)
+  
+  k <- ndim + 1
+  
+  suppressWarnings(
+    res <- tryCatch(res <- irlba::partial_eigen(L, n = k, symmetric = TRUE, 
+                                                smallest = TRUE, tol = 1e-3, 
+                                                maxit = 1000),
+                    error = function(c) {
+                      NULL
+                    }
+    ))
+  if (is.null(res) || ncol(res$vectors) < ndim) {
+    message(
+      "Spectral initialization failed to converge, ",
+      "using random initialization instead"
+    )
+    return(rand_init(n, ndim))
+  }
+  vec_indices <- rev(order(res$values, decreasing = TRUE)[1:ndim])
+  as.matrix(Re(res$vectors[, vec_indices]))
+}
+
+
 # Default UMAP initialization
 # spectral decomposition of the normalized Laplacian + some noise
 spectral_init <- function(A, ndim = 2, verbose = FALSE) {
@@ -134,6 +169,20 @@ spectral_init <- function(A, ndim = 2, verbose = FALSE) {
   expansion <- 10.0 / max(coords)
   (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.001),
     ncol = ndim
+  )
+}
+
+irlba_spectral_init <- function(A, ndim = 2, verbose = FALSE) {
+  if (nrow(A) < 3) {
+    tsmessage("Graph too small, using random initialization instead")
+    return(rand_init(nrow(A), ndim))
+  }
+  tsmessage("Initializing from normalized Laplacian (using irlba) + noise")
+
+  coords <- irlba_normalized_laplacian_init(A, ndim, verbose = FALSE)
+  expansion <- 10.0 / max(coords)
+  (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.001),
+                                ncol = ndim
   )
 }
 
@@ -280,6 +329,7 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
 }
 
 init_is_spectral <- function(init) {
-  res <- pmatch(tolower(init), c("normlaplacian", "spectral", "laplacian"))
+  res <- pmatch(tolower(init), c("normlaplacian", "spectral", "laplacian",
+                                 "inormlaplacian", "ispectral"))
   length(res) > 0 && !is.na(res)
 }
