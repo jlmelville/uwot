@@ -72,13 +72,7 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
   nr <- nrow(X)
   nc <- ncol(X)
 
-  ann <- switch(metric,
-                cosine =  methods::new(RcppAnnoy::AnnoyAngular, nc),
-                manhattan = methods::new(RcppAnnoy::AnnoyManhattan, nc),
-                euclidean = methods::new(RcppAnnoy::AnnoyEuclidean, nc),
-                hamming = methods::new(RcppAnnoy::AnnoyHamming, nc),
-                stop("BUG: unknown Annoy metric '", metric, "'")
-  )
+  ann <- create_ann(metric, nc)
 
   tsmessage("Building Annoy index with metric = ", metric, 
             ", n_trees = ", n_trees)
@@ -93,6 +87,18 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
   # Build index
   ann$build(n_trees)
 
+  ann
+}
+
+# create RcppAnnoy class from metric name with ndim dimensions
+create_ann <- function(name, ndim) {
+  ann <- switch(name,
+                cosine =  methods::new(RcppAnnoy::AnnoyAngular, ndim),
+                manhattan = methods::new(RcppAnnoy::AnnoyManhattan, ndim),
+                euclidean = methods::new(RcppAnnoy::AnnoyEuclidean, ndim),
+                hamming = methods::new(RcppAnnoy::AnnoyHamming, ndim),
+                stop("BUG: unknown Annoy metric '", name, "'")
+  )
   ann
 }
 
