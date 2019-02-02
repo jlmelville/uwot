@@ -1457,6 +1457,96 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   res
 }
 
+save_uwot <- function(model, file) {
+  wd <- getwd()
+  tryCatch({
+    # create directory to store files in
+    mod_dir <- tempfile(pattern = "dir")
+    dir.create(mod_dir)
+    uwot_dir <- file.path(mod_dir, "uwot")
+    dir.create(uwot_dir)
+
+    # save model
+    model_tmpfname <- file.path(uwot_dir, "model")
+    saveRDS(model, file = model_tmpfname)
+  
+    # save each nn index
+    metrics <- names(model$metric)
+    n_metrics <- length(metrics)
+    for (i in 1:n_metrics) {
+      nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
+      if (n_metrics == 1) {
+        model$nn_index$save(nn_tmpfname)
+        model$nn_index$unload()
+        model$nn_index$load(nn_tmpfname)
+      }
+      else {
+        model$nn_index[[i]]$save(nn_tmpfname)
+        model$nn_index[[i]]$unload()
+        model$nn_index[[i]]$load(nn_tmpfname)
+      }
+    }
+    
+    # archive the files under the temp dir into the single target file
+    # change directory so the archive only contains one directory
+    setwd(mod_dir)
+    utils::tar(tarfile = file, files = "uwot/")
+  },
+  finally = {
+    setwd(wd)
+    if (file.exists(mod_dir)) {
+      unlink(mod_dir, recursive = TRUE)
+    }
+  })
+}
+
+load_uwot <- function(file) {
+  model <- NULL
+  
+  tryCatch({
+    # create directory to store files in
+    mod_dir <- tempfile(pattern = "dir")
+    dir.create(mod_dir)
+  
+    utils::untar(file, exdir = mod_dir)
+    
+    model_fname <- file.path(mod_dir, "uwot/model")
+    if (!file.exists(model_fname)) {
+      stop("Can't find model in ", file)
+    }
+    model <- readRDS(file = model_fname)
+    
+    metrics <- names(model$metric)
+    n_metrics <- length(metrics)
+    
+    for (i in 1:n_metrics) {
+      nn_fname <- file.path(mod_dir, paste0("uwot/nn", i))
+      if (!file.exists(nn_fname)) {
+        stop("Can't find nearest neighbor index ", nn_fname, " in ", file)
+      }
+      metric <- metrics[[i]]
+      # can provide any value for ndim as we get a new value when we load
+      ann <- create_ann(metric, ndim = 1)
+      ann$load(nn_fname)
+      if (n_metrics == 1) {
+        model$nn_index <- ann
+      }
+      else {
+        model$nn_index[[i]] <- ann
+      }
+    }
+    
+    
+  },
+  finally = {
+    if (file.exists(mod_dir)) {
+      unlink(mod_dir, recursive = TRUE)
+    }
+  })
+
+  model
+}
+
 # Get the number of vertices in X
 x2nv <- function(X) {
   if (is.list(X)) {
@@ -1977,3 +2067,4 @@ attr_to_scale_info <- function(X) {
 .onUnload <- function(libpath) {
   library.dynam.unload("uwot", libpath)
 }
+
