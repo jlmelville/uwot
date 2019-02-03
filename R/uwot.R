@@ -1457,6 +1457,28 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   res
 }
 
+#' Save or Load a Model
+#' 
+#' Functions to write a UMAP model to a file, and to restore.
+#' 
+#' @param model a UMAP model create by \code{\link{umap}}.
+#' @param file name of the file where the model is to be saved or read from.
+#' 
+#' @examples 
+#' # create model
+#' model <- umap(iris[1:100, ], ret_model = TRUE)
+#' 
+#' # save
+#' model_file <- tempfile("iris_umap")
+#' save_uwot(model, file = model_file)
+#' 
+#' # restore
+#' model2 <- load_uwot(file = model_file)
+#' 
+#' identical(model, model2)
+#' 
+#' unlink(model_file)
+#' @export
 save_uwot <- function(model, file) {
   wd <- getwd()
   tryCatch({
@@ -1500,6 +1522,27 @@ save_uwot <- function(model, file) {
   })
 }
 
+#' Save or Load a Model
+#' 
+#' Functions to write a UMAP model to a file, and to restore.
+#' 
+#' @param file name of the file where the model is to be saved or read from.
+#' 
+#' @examples 
+#' # create model
+#' model <- umap(iris[1:100, ], ret_model = TRUE)
+#' 
+#' # save
+#' model_file <- tempfile("iris_umap")
+#' save_uwot(model, file = model_file)
+#' 
+#' # restore
+#' model2 <- load_uwot(file = model_file)
+#' 
+#' identical(model, model2)
+#' 
+#' unlink(model_file)
+#' @export
 load_uwot <- function(file) {
   model <- NULL
   
