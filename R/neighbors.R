@@ -122,6 +122,12 @@ annoy_search <- function(X, k, ann,
                                search_k = search_k,
                                verbose = verbose)
   }
+  
+  # Convert from Angular to Cosine distance
+  if (methods::is(ann, "Rcpp_AnnoyAngular")) {
+    res$dist <- 0.5 * (res$dist * res$dist)
+  }
+
   res
 }
 

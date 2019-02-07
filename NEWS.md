@@ -22,6 +22,8 @@ are present, fall back to `init = "spca"`.
 * Removed dependency on C++ `<random>` header. This breaks backwards
 compatibility in the sense that results with a given seed will not be the same
 as with previous versions.
+* `metric = "cosine"` results were incorrectly using the unmodified Annoy
+angular distance.
 
 # uwot 0.0.0.9009 (1 January 2019)
 
