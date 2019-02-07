@@ -24,7 +24,7 @@ given in the
 [smallvis documentation](https://jlmelville.github.io/smallvis/datasets.htm). 
 `iris` you already have if you are using R. `s1k` is part of the
 [sneer](https://github.com/jlmelville/sneer) package. `frey`, `oli`, `mnist`,
-`fashion` and `kuzishiji` can be downloaded via
+`fashion` and `kuzushiji` can be downloaded via
 [snedata](https://github.com/jlmelville/snedata). `coil20` and `coil100` can be
 fetched via [coil20](https://github.com/jlmelville/coil20).
 
@@ -41,7 +41,15 @@ x2m <- function(X) {
   }
   m
 }
+```
 
+At the time I generated this document (late December 2018), the `kuzushiji`
+dataset had some duplicate and all-black images that needed filtering. This
+seems to have been remedied as of early February 2019. I re-ran both UMAP and
+t-SNE on the fixed dataset, but the results weren't noticeably different. For
+the record, the clean-up routines I ran were:
+
+```R
 # Remove all-black images in Kuzushiji MNIST (https://github.com/rois-codh/kmnist/issues/1)
 kuzushiji <- kuzushiji[-which(apply(x2m(kuzushiji), 1, sum) == 0), ]
 # Remove duplicate images (https://github.com/rois-codh/kmnist/issues/5)

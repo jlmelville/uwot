@@ -1568,7 +1568,7 @@ div.tocify {
 <p>Here are some examples of the output of <code>uwot</code>’s implementation of UMAP, compared to t-SNE output.</p>
 <div id="data-preparation" class="section level2">
 <h2>Data preparation</h2>
-<p>For details on the datasets, follow their links. Somewhat more detail is also given in the <a href="https://jlmelville.github.io/smallvis/datasets.htm">smallvis documentation</a>. <code>iris</code> you already have if you are using R. <code>s1k</code> is part of the <a href="https://github.com/jlmelville/sneer">sneer</a> package. <code>frey</code>, <code>oli</code>, <code>mnist</code>, <code>fashion</code> and <code>kuzishiji</code> can be downloaded via <a href="https://github.com/jlmelville/snedata">snedata</a>. <code>coil20</code> and <code>coil100</code> can be fetched via <a href="https://github.com/jlmelville/coil20">coil20</a>.</p>
+<p>For details on the datasets, follow their links. Somewhat more detail is also given in the <a href="https://jlmelville.github.io/smallvis/datasets.htm">smallvis documentation</a>. <code>iris</code> you already have if you are using R. <code>s1k</code> is part of the <a href="https://github.com/jlmelville/sneer">sneer</a> package. <code>frey</code>, <code>oli</code>, <code>mnist</code>, <code>fashion</code> and <code>kuzushiji</code> can be downloaded via <a href="https://github.com/jlmelville/snedata">snedata</a>. <code>coil20</code> and <code>coil100</code> can be fetched via <a href="https://github.com/jlmelville/coil20">coil20</a>.</p>
 <pre class="r"><code>mnist &lt;- snedata::download_mnist()
 
 # For some functions we need to strip out non-numeric columns and convert data to matrix
@@ -1580,9 +1580,9 @@ x2m &lt;- function(X) {
     m &lt;- X
   }
   m
-}
-
-# Remove all-black images in Kuzushiji MNIST (https://github.com/rois-codh/kmnist/issues/1)
+}</code></pre>
+<p>At the time I generated this document (late December 2018), the <code>kuzushiji</code> dataset had some duplicate and all-black images that needed filtering. This seems to have been remedied as of early February 2019. I re-ran both UMAP and t-SNE on the fixed dataset, but the results weren’t noticeably different. For the record, the clean-up routines I ran were:</p>
+<pre class="r"><code># Remove all-black images in Kuzushiji MNIST (https://github.com/rois-codh/kmnist/issues/1)
 kuzushiji &lt;- kuzushiji[-which(apply(x2m(kuzushiji), 1, sum) == 0), ]
 # Remove duplicate images (https://github.com/rois-codh/kmnist/issues/5)
 kuzushiji &lt;- kuzushiji[-which(duplicated(x2m(kuzushiji))), ]</code></pre>
