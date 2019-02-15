@@ -72,3 +72,11 @@ resmixed <- umap(irismixed,
 expect_ok_matrix(resmixed$embedding)
 expect_ok_matrix(umap_transform(irismixed, resmixed, n_threads = 1))
 expect_equal(names(resmixed$nn), c("euclidean", "euclidean", "cosine"))
+
+# #20: allow matrix column for categorical
+int_column <- c(1, 2, 3, 4, 4, 4, 2, 1, 2, 1)
+irisic <- cbind(iris10, int_column)
+resic <- umap(irisic, n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+              init = "spca", verbose = FALSE, n_threads = 0, 
+              metric = list("euclidean" = 1:4, "categorical" = 5))
+expect_ok_matrix(resic)

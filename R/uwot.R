@@ -49,7 +49,8 @@
 #' Factor columns can also be used by specifying the metric name
 #' \code{"categorical"}. Factor columns are treated different from numeric
 #' columns and although multiple factor columns can be specified in a vector,
-#' each factor column specified is processed individually.
+#' each factor column specified is processed individually. If you specify
+#' a non-factor column, it will be coerced to a factor.
 #' 
 #' For a given data block, you may override the \code{pca} and \code{pca_center}
 #' arguments for that block, by providing a list with one unnamed item
@@ -441,7 +442,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' Factor columns can also be used by specifying the metric name
 #' \code{"categorical"}. Factor columns are treated different from numeric
 #' columns and although multiple factor columns can be specified in a vector,
-#' each factor column specified is processed individually.
+#' each factor column specified is processed individually. If you specify
+#' a non-factor column, it will be coerced to a factor.
 #' 
 #' For a given data block, you may override the \code{pca} and \code{pca_center}
 #' arguments for that block, by providing a list with one unnamed item
@@ -774,7 +776,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' Factor columns can also be used by specifying the metric name
 #' \code{"categorical"}. Factor columns are treated different from numeric
 #' columns and although multiple factor columns can be specified in a vector,
-#' each factor column specified is processed individually.
+#' each factor column specified is processed individually. If you specify
+#' a non-factor column, it will be coerced to a factor.
 #' 
 #' For a given data block, you may override the \code{pca} and \code{pca_center}
 #' arguments for that block, by providing a list with one unnamed item
@@ -1086,14 +1089,19 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   else {
     cat_ids <- NULL
     norig_col <- ncol(X)
-    if (methods::is(X, "data.frame")) {
-      
+    if (methods::is(X, "data.frame") || methods::is(X, "matrix")) {
+      if (methods::is(X, "matrix")) {
+        X <- data.frame(X)
+      }
       cat_res <- find_categoricals(metric)
       metric <- cat_res$metrics
       cat_ids <- cat_res$categoricals
+      # Convert categorical columns to factors if they aren't already
       if (!is.null(cat_ids)) {
+        X[, cat_ids] <- lapply(X[, cat_ids, drop = FALSE], factor)
         Xcat <- X[, cat_ids, drop = FALSE]
       }
+
       indexes <- which(vapply(X, is.numeric, logical(1)))
       if (length(indexes) == 0) {
         stop("No numeric columns found")

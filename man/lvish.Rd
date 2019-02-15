@@ -64,7 +64,8 @@ use column names than integer ids.
 Factor columns can also be used by specifying the metric name
 \code{"categorical"}. Factor columns are treated different from numeric
 columns and although multiple factor columns can be specified in a vector,
-each factor column specified is processed individually.
+each factor column specified is processed individually. If you specify
+a non-factor column, it will be coerced to a factor.
 
 For a given data block, you may override the \code{pca} and \code{pca_center}
 arguments for that block, by providing a list with one unnamed item
