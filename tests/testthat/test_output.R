@@ -357,13 +357,13 @@ expect_ok_matrix(res_test, nr = 6)
 
 # test n_refine_iters improves NN results
 
-set.seed(1337); res <- tumap(iris, n_neighbors = 4, n_epochs = 2, 
+set.seed(1337); res <- tumap(iris[1:25, ], n_neighbors = 4, n_epochs = 2, 
                              learning_rate = 0.5, init = "rand", 
                              verbose = FALSE, n_threads = 1, 
                              nn_method = "annoy", ret_model = TRUE, 
                              ret_nn = TRUE, n_trees = 5, 
                              search_k = 10)
-set.seed(1337); res2 <- tumap(iris, n_neighbors = 4, n_epochs = 2, 
+set.seed(1337); res2 <- tumap(iris[1:25, ], n_neighbors = 4, n_epochs = 2, 
                               learning_rate = 0.5, init = "rand", 
                               verbose = FALSE, n_threads = 1, 
                               nn_method = "annoy", ret_model = TRUE, 
