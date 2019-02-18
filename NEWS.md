@@ -2,6 +2,11 @@
 
 ## New features
 
+* New parameter: `n_refine_iters`, which specifies how many iterations of
+[nearest neighbor descent](https://doi.org/10.1145/1963405.1963487) to carry out
+to refine the results of the Annoy approximate neighbor search. When set to 
+greater than zero, the `search_k` parameter is reduced. Default is currently 0.
+LargeVis uses 3 iterations, which is a good place to start.
 * New parameter: `init_sdev` which specifies how large the standard deviation
 of each column of the initial coordinates should be. This will scale any input
 coordinates (including user-provided matrix coordinates). `init = "spca"` can
@@ -24,6 +29,8 @@ compatibility in the sense that results with a given seed will not be the same
 as with previous versions.
 * `metric = "cosine"` results were incorrectly using the unmodified Annoy
 angular distance.
+* Numeric matrix columns can be specified as the target for the `categorical`
+metric (fixes https://github.com/jlmelville/uwot/issues/20).
 
 # uwot 0.0.0.9009 (1 January 2019)
 
