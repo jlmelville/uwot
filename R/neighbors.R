@@ -289,15 +289,15 @@ refine_nn <- function(X,
   tsmessage("Refining using nearest neighbor descent for ", n_iters, 
             " iterations")
   
+  idx <- nn$idx
+  dist <- nn$dist
   # As a minor optimization, we will use L2 internally if the user asks for
   # Euclidean and only take the square root of the final distances.
   actual_metric <- metric
   if (metric == "euclidean") {
     actual_metric <- "l2"
+    dist <- dist * dist
   }
-  
-  idx <- nn$idx
-  dist <- nn$dist
   
   # C++ code expects zero-indexing
   idx <- idx - 1
