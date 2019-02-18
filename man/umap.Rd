@@ -10,12 +10,13 @@ umap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   set_op_mix_ratio = 1, local_connectivity = 1, bandwidth = 1,
   repulsion_strength = 1, negative_sample_rate = 5, a = NULL,
   b = NULL, nn_method = NULL, n_trees = 50, search_k = 2 *
-  n_neighbors * n_trees, approx_pow = FALSE, y = NULL,
-  target_n_neighbors = n_neighbors, target_metric = "euclidean",
-  target_weight = 0.5, pca = NULL, pca_center = TRUE,
-  ret_model = FALSE, ret_nn = FALSE, n_threads = max(1,
-  RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
-  grain_size = 1, verbose = getOption("verbose", TRUE))
+  n_neighbors * n_trees, n_refine_iters = 0, approx_pow = FALSE,
+  y = NULL, target_n_neighbors = n_neighbors,
+  target_metric = "euclidean", target_weight = 0.5, pca = NULL,
+  pca_center = TRUE, ret_model = FALSE, ret_nn = FALSE,
+  n_threads = max(1, RcppParallel::defaultNumThreads()/2),
+  n_sgd_threads = 0, grain_size = 1, verbose = getOption("verbose",
+  TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -223,6 +224,10 @@ larger k, the more the accurate results, but the longer the search takes.
 With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 search. Only used if the \code{nn_method} is \code{"annoy"}.}
 
+\item{n_refine_iters}{Number of iterations of nearest neighbor descent 
+(Dong and co-workers, 2011) to carry out to refine the approximate nearest
+neighbor list. Only used if the \code{nn_method} is \code{"annoy"}.}
+
 \item{approx_pow}{If \code{TRUE}, use an approximation to the power function
 in the UMAP gradient, from
 \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.}
@@ -387,6 +392,13 @@ Laplacian eigenmaps and spectral techniques for embedding and clustering.
 In \emph{Advances in neural information processing systems}
 (pp. 585-591).
 \url{http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf}
+
+Dong, W., Moses, C., & Li, K. (2011, March). 
+Efficient k-nearest neighbor graph construction for generic similarity measures. 
+In \emph{Proceedings of the 20th international conference on World wide web}
+(pp. 577-586).
+ACM. 
+\url{doi.org/10.1145/1963405.1963487}
 
 McInnes, L., & Healy, J. (2018).
 UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
