@@ -185,7 +185,7 @@ methods. I wouldn't take them very seriously, but they show that `uwot` is compe
 |[FIt-SNE (C++)](https://github.com/KlugerLab/FIt-SNE)|[1.0.0](https://github.com/KlugerLab/FIt-SNE/releases/download/v1.0.0/FItSNE-Windows-1.0.0.zip)|`nthreads = 4` + PCA to 50D|1m 11s|
 |[LargeVis (C++)](https://github.com/lferry007/LargeVis)|[feb8121](https://github.com/lferry007/LargeVis/commit/feb8121e8eb9652477f7f564903d189ee663796f)|`-threads 4`|12m 43s|
 |[largeVis (R package)](https://github.com/elbamos/largevis)|[e51871e](					 https://github.com/elbamos/largeVis/commit/e51871e689642177c184527efab668d248717fa9)|`save_neighbors = FALSE, save_edges = FALSE, threads = 4`|33m 58s|
-|`uwot::lvish`|[0.0.0.9010](https://github.com/jlmelville/uwot/releases/tag/v0.0.0.9010)|`n_threads = 4, n_sgd_threads = 4`| 5m 52s|
+|`uwot::lvish`|[0.0.0.9009](https://github.com/jlmelville/uwot/releases/tag/v0.0.0.9009)|`n_threads = 4, n_sgd_threads = 4`| 5m 52s|
 |[UMAP (Python)](https://github.com/lmcinnes/umap)|0.3.7-py37_1000||1m 25s|
 |[umap (R package)](https://cran.r-project.org/package=umap)|[09f6020](https://github.com/tkonopka/umap/commit/09f60205c572fc1fbfa3e985b48572098fc9b17d)|`method = "naive"`| 9m 14s|
 |uwot|[0.0.0.9009](https://github.com/jlmelville/uwot/releases/tag/v0.0.0.9009)|`n_threads = 0`| 3m 11s|
