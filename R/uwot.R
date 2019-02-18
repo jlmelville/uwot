@@ -1448,7 +1448,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       res <- append(res, list(
         scale_info = attr_to_scale_info(X),
         n_neighbors = n_neighbors,
-        search_k = search_k,
+        # Can't use nn descent during transform, so if used in training, 
+        # double the Annoy search parameter to compensate
+        search_k = ifelse(n_refine_iters > 0, search_k * 2, search_k),
         local_connectivity = local_connectivity,
         n_epochs = n_epochs,
         alpha = alpha,
