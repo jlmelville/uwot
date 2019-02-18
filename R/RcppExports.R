@@ -5,6 +5,10 @@ connected_components_undirected <- function(N, indices1, indptr1, indices2, indp
     .Call(`_uwot_connected_components_undirected`, N, indices1, indptr1, indices2, indptr2)
 }
 
+nn_descent <- function(data, idx, dist, metric = "euclidean", max_candidates = 50L, n_iters = 10L, delta = 0.001, rho = 0.5, verbose = FALSE) {
+    .Call(`_uwot_nn_descent`, data, idx, dist, metric, max_candidates, n_iters, delta, rho, verbose)
+}
+
 annoy_euclidean_nns <- function(index_name, mat, n, search_k, grain_size = 1L, verbose = FALSE) {
     .Call(`_uwot_annoy_euclidean_nns`, index_name, mat, n, search_k, grain_size, verbose)
 }
