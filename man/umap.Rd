@@ -9,8 +9,9 @@ umap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   init = "spectral", init_sdev = NULL, spread = 1, min_dist = 0.01,
   set_op_mix_ratio = 1, local_connectivity = 1, bandwidth = 1,
   repulsion_strength = 1, negative_sample_rate = 5, a = NULL,
-  b = NULL, nn_method = NULL, n_trees = 50, search_k = 2 *
-  n_neighbors * n_trees, n_refine_iters = 0, approx_pow = FALSE,
+  b = NULL, nn_method = NULL, n_trees = 50,
+  search_k = ifelse(n_refine_iters > 0, n_neighbors * n_trees, 2 *
+  n_neighbors * n_trees), n_refine_iters = 0, approx_pow = FALSE,
   y = NULL, target_n_neighbors = n_neighbors,
   target_metric = "euclidean", target_weight = 0.5, pca = NULL,
   pca_center = TRUE, ret_model = FALSE, ret_nn = FALSE,

@@ -8,8 +8,9 @@ lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
   n_components = 2, metric = "euclidean", n_epochs = -1,
   learning_rate = 1, scale = "maxabs", init = "lvrandom",
   init_sdev = NULL, repulsion_strength = 7, negative_sample_rate = 5,
-  nn_method = NULL, n_trees = 50, search_k = 2 * n_neighbors *
-  n_trees, n_refine_iters = 0, n_threads = max(1,
+  nn_method = NULL, n_trees = 50, search_k = ifelse(n_refine_iters >
+  0, n_neighbors * n_trees, 2 * n_neighbors * n_trees),
+  n_refine_iters = 0, n_threads = max(1,
   RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
   grain_size = 1, kernel = "gauss", pca = NULL, pca_center = TRUE,
   ret_nn = FALSE, verbose = getOption("verbose", TRUE))
