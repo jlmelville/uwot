@@ -117,6 +117,10 @@ For t-UMAP, the default is \code{"none"}.}
    so the standard deviation is 1e-4, to give a distribution similar to that
    used in t-SNE. This is an alias for \code{init = "pca", init_sdev =
    1e-4}.
+   \item \code{"agspectral"} An "approximate global" modification of
+   \code{"spectral"} which all edges in the graph to a value of 1, and then
+   sets a random number of edges (\code{negative_sample_rate} edges per
+   vertex) to 0.1, to approximate the effect of non-local affinities.
    \item A matrix of initial coordinates.
  }
 For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},

@@ -333,3 +333,71 @@ init_is_spectral <- function(init) {
                                  "inormlaplacian", "ispectral"))
   length(res) > 0 && !is.na(res)
 }
+
+rand_nbr_graph <- function(n_vertices, n_nbrs, val) {
+  nn_to_sparse(rand_nbr_idx(n_vertices, n_nbrs), 
+               val = val, 
+               max_nbr_id = n_vertices)
+}
+
+rand_nbr_idx <- function(n_vertices, n_nbrs) {
+  idx <- matrix(nrow = n_vertices, ncol = n_nbrs)
+  nv1 <- n_vertices - 1
+  for (i in 1:n_vertices) {
+    ids <- sample.int(nv1, n_nbrs)
+    id_sel <- ids >= 1
+    ids[id_sel] <- ids[id_sel] + 1
+    idx[i, ] <- ids
+  }
+  idx
+}
+
+# V: the current affinity graph
+# n_pos: number of neighbors to retain per item
+# n_neg: number of "negative" (i.e. non-)neighbors per item
+# pos_affinity: value for the positive affinity (associated with nbrs)
+# neg_affinity: value for the negative affinity (associated with neg nbrs)
+approx_affinity_graph <- function(V, n_neg,
+                                  pos_affinity = 1, neg_affinity = 0.1, 
+                                  verbose = FALSE) {
+  pos_V <- V
+  pos_V@x <- rep(pos_affinity, length(pos_V@x))
+  pos_V <- 0.5 * (pos_V + Matrix::t(pos_V))
+  
+  neg_V <- rand_nbr_graph(nrow(pos_V), n_nbrs = n_neg, val = neg_affinity)
+  neg_V <- 0.5 * (neg_V + Matrix::t(neg_V))
+  
+  # the cleanup below will ensure that where the same value got a pos and neg
+  # affinity it will end up positive
+  graph <- pos_V + neg_V
+  
+  # clamp small values to neg_affinity
+  graph@x[graph@x < pos_affinity] <- neg_affinity
+  # and large values to pos_affinity
+  graph@x <- pmin(graph@x, pos_affinity)
+  
+  Matrix::drop0(graph)
+}
+
+
+# Initialize using a spectral decomposition of an "approximate global" graph
+# Uses the same graph as standard UMAP, but with each entry set to 1. A measure
+# of global structure is added by randomly setting some of the remaining zero
+# to a smaller value (0.1 in this case).
+# This routine is inspired by some ideas in
+# 2-D Embedding of Large and High-dimensional Data with Minimal Memory and Computational Time Requirements
+# Witold Dzwinel, Rafal Wcislo, Stan Matwin
+# https://arxiv.org/abs/1902.01108
+#
+# Randomized Near Neighbor Graphs, Giant Components, and Applications in Data Science
+# George C. Linderman, Gal Mishne, Yuval Kluger, Stefan Steinerberger
+# https://arxiv.org/abs/1711.04712
+agspectral_init <- function(V, n_neg_nbrs, pos_affinity = 1, neg_affinity = 0.1, 
+                            verbose = FALSE) {
+  graph <- approx_affinity_graph(V, n_neg_nbrs,
+                                 pos_affinity = pos_affinity, 
+                                 neg_affinity = neg_affinity,
+                                 verbose = verbose)
+  connected <- connected_components(graph)
+  spectral_init(graph, verbose = verbose)
+}

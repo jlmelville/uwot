@@ -97,6 +97,10 @@
 #'     so the standard deviation is 1e-4, to give a distribution similar to that
 #'     used in t-SNE. This is an alias for \code{init = "pca", init_sdev =
 #'     1e-4}.
+#'     \item \code{"agspectral"} An "approximate global" modification of
+#'     \code{"spectral"} which all edges in the graph to a value of 1, and then
+#'     sets a random number of edges (\code{negative_sample_rate} edges per
+#'     vertex) to 0.1, to approximate the effect of non-local affinities.
 #'     \item A matrix of initial coordinates.
 #'   }
 #'  For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},
@@ -504,6 +508,10 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     so the standard deviation is 1e-4, to give a distribution similar to that
 #'     used in t-SNE. This is an alias for \code{init = "pca", init_sdev =
 #'     1e-4}.
+#'     \item \code{"agspectral"} An "approximate global" modification of
+#'     \code{"spectral"} which all edges in the graph to a value of 1, and then
+#'     sets a random number of edges (\code{negative_sample_rate} edges per
+#'     vertex) to 0.1, to approximate the effect of non-local affinities.
 #'     \item A matrix of initial coordinates.
 #'   }
 #'  For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},
@@ -847,6 +855,10 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     so the standard deviation is 1e-4, to give a distribution similar to that
 #'     used in t-SNE and LargeVis. This is an alias for \code{init = "pca",
 #'     init_sdev = 1e-4}.
+#'     \item \code{"agspectral"} An "approximate global" modification of
+#'     \code{"spectral"} which all edges in the graph to a value of 1, and then
+#'     sets a random number of edges (\code{negative_sample_rate} edges per
+#'     vertex) to 0.1, to approximate the effect of non-local affinities.
 #'     \item A matrix of initial coordinates.
 #'   }
 #'  For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},
@@ -1306,7 +1318,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   else {
     init <- match.arg(tolower(init), c(
       "spectral", "random", "lvrandom", "normlaplacian",
-      "laplacian", "spca", "pca", "inormlaplacian", "ispectral"))
+      "laplacian", "spca", "pca", "inormlaplacian", "ispectral",
+      "agspectral"))
     
     if (init_is_spectral(init)) {
     connected <- connected_components(V)
@@ -1343,8 +1356,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                           ispectral = irlba_spectral_init(V, ndim = n_components, verbose = verbose),
                           inormlaplacian = irlba_normalized_laplacian_init(V,
                                                                     ndim = n_components,
-                                                                    verbose = verbose
-                          ),
+                                                                    verbose = verbose),
+                          agspectral = agspectral_init(V, n_neg_nbrs = negative_sample_rate,
+                                                       verbose = verbose),
                           stop("Unknown initialization method: '", init, "'")
       )
     }
