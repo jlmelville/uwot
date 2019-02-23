@@ -20,7 +20,7 @@ Imports: Rcpp,
     methods,
     FNN,
     RSpectra,
-    RcppAnnoy,
+    RcppAnnoy (>= 0.0.11),
     RcppParallel,
     irlba
 SystemRequirements: GNU make
