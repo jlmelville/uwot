@@ -58,11 +58,11 @@ kuzushiji <- kuzushiji[-which(duplicated(x2m(kuzushiji))), ]
 
 ## UMAP settings
 
-For UMAP, I stick with the defaults, with the exception of `iris`, `coil20`,
-and `coil100`. The spectral initialization with the default `n_neighbors` leads
-to disconnected components, which can lead to a poor global picture of the data.
-The Python UMAP implementation goes to fairly involved lengths to ameliorate
-theses issues, but `uwot` does not.
+For UMAP, I stick with the defaults, with the exception of `iris`, `coil20`, and
+`coil100` and `norb`. The spectral initialization with the default `n_neighbors`
+leads to disconnected components, which can lead to a poor global picture of the
+data. The Python UMAP implementation goes to fairly involved lengths to
+ameliorate theses issues, but `uwot` does not.
 
 For these datasets, a perfectly good alternative that provides a global
 initialization is to use the first two components from PCA, scaled so their 
@@ -82,7 +82,7 @@ s1k_umap <- umap(s1k)
 # Big datasets (mnist, fashion, kuzushiji)
 mnist_umap <- umap(mnist, pca = 100)
 
-# coil20 and coil100
+# norb, coil20 and coil100
 coil20_umap <- umap(coil20, pca = 100, init = "spca")
 ```
 
@@ -230,6 +230,16 @@ cursive Japanese handwriting.
 |                             |                           |
 :----------------------------:|:--------------------------:
 ![kuzushiji UMAP](../img/examples/kmnist_umap.png)|![kuzushiji t-SNE](../img/examples/kmnist_tsne.png)
+
+## norb
+
+The [small NORB dataset](https://cs.nyu.edu/~ylclab/data/norb-v1.0-small/),
+pairs of images of 50 toys photographed at different angles and under different
+lighting conditions.
+
+|                             |                           |
+:----------------------------:|:--------------------------:
+![norb UMAP](../img/examples/norb_umap.png)|![norb t-SNE](../img/examples/norb_tsne.png)
 
 The more compact nature of UMAP's results compared to t-SNE is obvious for all
 datasets.
