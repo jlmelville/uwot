@@ -393,11 +393,10 @@ approx_affinity_graph <- function(V, n_neg,
 # George C. Linderman, Gal Mishne, Yuval Kluger, Stefan Steinerberger
 # https://arxiv.org/abs/1711.04712
 agspectral_init <- function(V, n_neg_nbrs, pos_affinity = 1, neg_affinity = 0.1, 
-                            verbose = FALSE) {
+                            ndim = 2, verbose = FALSE) {
   graph <- approx_affinity_graph(V, n_neg_nbrs,
                                  pos_affinity = pos_affinity, 
                                  neg_affinity = neg_affinity,
                                  verbose = verbose)
-  connected <- connected_components(graph)
-  spectral_init(graph, verbose = verbose)
+  spectral_init(graph, ndim = ndim, verbose = verbose)
 }

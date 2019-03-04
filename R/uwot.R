@@ -1358,7 +1358,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                                                                     ndim = n_components,
                                                                     verbose = verbose),
                           agspectral = agspectral_init(V, n_neg_nbrs = negative_sample_rate,
-                                                       verbose = verbose),
+                                                       ndim = n_components, verbose = verbose),
                           stop("Unknown initialization method: '", init, "'")
       )
     }
