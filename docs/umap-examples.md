@@ -15,7 +15,8 @@ new datasets. Removed neighborhood preservation values until I've double checked
 they are working correctly.
 
 Here are some examples of the output of `uwot`'s implementation of UMAP, 
-compared to t-SNE output. 
+compared to t-SNE output. As you will see, UMAP's output results in more
+compact, separated clusters compared to t-SNE.
 
 ## Data preparation
 
@@ -174,6 +175,28 @@ to [Saul Roweis](https://cs.nyu.edu/~roweis/data.html).
 :----------------------------:|:--------------------------:
 ![frey UMAP](../img/examples/frey_umap.png)|![frey t-SNE](../img/examples/frey_tsne.png)
 
+## isofaces
+
+Yet more faces, this time the dataset used in 
+[Isomap](http://web.mit.edu/cocosci/isomap/datasets.html), consisting of images
+of the same face under different rotations and lighting conditions. 
+Unfortunately, it's no longer available at the MIT website, but it can be found
+via [the Wayback Machine](https://web.archive.org/web/20160913051505/http://isomap.stanford.edu/face_data.mat.Z).
+I wrote [a gist for processing the data in R](https://gist.github.com/jlmelville/339dfeb80c3e836e887d70a37679b244).
+
+In the images below the points are colored by the first pose angle.
+
+|                             |                           |
+:----------------------------:|:--------------------------:
+![isofaces UMAP](../img/examples/isofaces_umap.png)|![isofaces t-SNE](../img/examples/isofaces_tsne.png)
+
+## swiss
+
+The [Swiss Roll](http://web.mit.edu/cocosci/isomap/datasets.html) data used in 
+Isomap. A famous dataset, but perhaps not that representative of typical 
+real world datasets. t-SNE is know to not handle this well, but UMAP makes
+an impressive go at unfolding it.
+
 ## coil20
 
 The [COIL-20 Columbia Object Image Library](http://www.cs.columbia.edu/CAVE/software/softlib/coil-20.php).
@@ -204,6 +227,16 @@ much of the loop structure as the lower perplexity:
 :----------------------------:|:--------------------------:
 ![coil100 t-UMAP (spca)](../img/examples/coil100_tumap.png)|![coil100 t-SNE (perplexity 50)](../img/examples/coil100_tsne_perp50.png)
 
+## swiss roll
+
+The [Swiss Roll](http://web.mit.edu/cocosci/isomap/datasets.html) data used in 
+Isomap. A famous dataset, but perhaps not that representative of typical 
+real world datasets. t-SNE is know to not handle this well, but UMAP makes
+an impressive go at unfolding it.
+
+|                             |                           |
+:----------------------------:|:--------------------------:
+![swiss UMAP](../img/examples/swiss_umap.png)|![swiss t-SNE](../img/examples/swiss_tsne.png)
 
 ## mnist
 
@@ -241,5 +274,43 @@ lighting conditions.
 :----------------------------:|:--------------------------:
 ![norb UMAP](../img/examples/norb_umap.png)|![norb t-SNE](../img/examples/norb_tsne.png)
 
-The more compact nature of UMAP's results compared to t-SNE is obvious for all
-datasets.
+## cifar10
+
+The [CIFAR-10 dataset](https://www.cs.toronto.edu/~kriz/cifar.html),
+consisting of 60000 32 x 32 color images evenly divided across 10 classes 
+(e.g. airplane, cat, truck, bird). t-SNE was applied to CIFAR-10 in the 
+[Barnes-Hut t-SNE paper](http://jmlr.org/papers/v15/vandermaaten14a.html), but
+in the main paper, only the results after passing through a convolutional neural
+network were published. t-SNE on the original pixel data was only given in the 
+[supplementary information (PDF)](https://lvdmaaten.github.io/publications/misc/Supplement_JMLR_2014.pdf)
+which is oddly hard to find a link to via JMLR or the article itself.
+
+|                             |                           |
+:----------------------------:|:--------------------------:
+![cifar10 UMAP](../img/examples/cifar10_umap.png)|![cifar10 t-SNE](../img/examples/cifar10_tsne.png)
+
+Yikes. What is going on with the UMAP result? I see the same thing in the Python
+UMAP implementation (although maybe less pronounced), so I don't think this is
+a bug in `uwot`. There is an outlying cluster of automobile images in the bottom
+left, which seem to be variations on the same image. The same cluster is
+present in the t-SNE plot (also in the bottom left), but is comfortably close
+to the rest of the data.
+
+The existence of these near-duplicates in CIFAR-10 doesn't seem to have been 
+widely known or appreciated until quite recently, see for instance
+[this twitter thread](https://twitter.com/colinraffel/status/1030532862930382848)
+and [this paper by Recht and co-workers](https://arxiv.org/abs/1806.00451).
+Such manipulations are in line with the practice of data augmentation that is
+popular in deep learning, but you would need to be aware of it to avoid the
+test set results being contaminated. These images seem like a good argument for 
+applying UMAP or t-SNE to your dataset as a way to spot this sort of thing.
+
+We can get better results with UMAP by using the scaled PCA initialization 
+(below on the left) and by using the t-UMAP settings (below, right):
+
+|                             |                           |
+:----------------------------:|:--------------------------:
+![cifar10 UMAP (spca)](../img/examples/cifar10_umaps.png)|![cifar10 t-UMAP (spca)](../img/examples/cifar10_tumaps.png)
+
+That rogue cluster is still present (off to the lower right now), but either
+image is more comparable to the t-SNE result.
