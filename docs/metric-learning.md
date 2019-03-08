@@ -75,7 +75,7 @@ vizier::embed_plot(fashion_sumap, fashion, cex = 0.5, title = "Fashion Supervise
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![Fashion UMAP](../img/umap_fashion_all.png)|![Fashion Supervised UMAP](../img/sumap_fashion_all.png)
+![Fashion UMAP](../img/metric-learning/umap_fashion_all.png)|![Fashion Supervised UMAP](../img/metric-learning/sumap_fashion_all.png)
 
 Clearly, the supervised UMAP has done a much better job of separating out the
 classes, although it has also retained the relative location of the clusters
@@ -124,7 +124,7 @@ vizier::embed_plot(fashion_sumap_train$embedding, fashion_train, cex = 0.5, titl
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![Fashion UMAP Train](../img/umap_fashion_train.png)|![Fashion Supervised UMAP Train](../img/sumap_fashion_train.png)
+![Fashion UMAP Train](../img/metric-learning/umap_fashion_train.png)|![Fashion Supervised UMAP Train](../img/metric-learning/sumap_fashion_train.png)
 
 Everything looks in order here. The standard UMAP training plot is flipped along
 the y-axis compared to the full dataset, but that doesn't matter.
@@ -155,7 +155,7 @@ vizier::embed_plot(fashion_sumap_test, fashion_test, cex = 0.5, title = "Fashion
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![Fashion UMAP Test](../img/umap_fashion_test.png)|![Fashion Supervised UMAP Train](../img/sumap_fashion_test.png)
+![Fashion UMAP Test](../img/metric-learning/umap_fashion_test.png)|![Fashion Supervised UMAP Train](../img/metric-learning/sumap_fashion_test.png)
 
 The test data results are very obviously embedded in a similar way to the
 training data. Of particular interest are the test results with the supervised
@@ -252,7 +252,7 @@ here's a plot of the first two principal components, using the
 dia_pca <- irlba::prcomp_irlba(dia, n = 2, scale. = TRUE)
 vizier::embed_plot(dia_pca$x, diamonds$price, title = "Diamonds PCA", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
 ```
-![Diamonds PCA](../img/dia_pca.png)
+![Diamonds PCA](../img/metric-learning/dia_pca.png)
 
 Because the different columns have different units and meaning, I set `scale. =
 TRUE` to equalize their variances. The color scheme is "Spectral" palette from
@@ -269,7 +269,7 @@ dia_umap <- umap(dia, scale = TRUE, verbose = TRUE)
 vizier::embed_plot(dia_umap, diamonds$price, title = "Diamonds UMAP", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
 ```
 
-![Diamonds UMAP](../img/dia_umap.png)
+![Diamonds UMAP](../img/metric-learning/dia_umap.png)
 
 Not bad. The high price diamonds are clumped together in their own little 
 clusters in the middle of the plot. On this occasion, I prefer the layout that's
@@ -280,7 +280,7 @@ dia_umap_from_pca <- umap(dia, scale = TRUE, verbose = TRUE, init = dia_pca$x)
 vizier::embed_plot(dia_umap_from_pca, diamonds$price, title = "Diamonds UMAP (PCA init)", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
 ```
 
-![Diamonds UMAP from PCA](../img/dia_umap_from_pca.png)
+![Diamonds UMAP from PCA](../img/metric-learning/dia_umap_from_pca.png)
 
 This maintains the global structure of the PCA result. Rather than have to
 separately create the PCA, you can also use `init = "pca"` and get the same
@@ -295,7 +295,7 @@ dia_sumap <- umap(dia, scale = TRUE, verbose = TRUE, y = diamonds$price)
 vizier::embed_plot(dia_sumap, diamonds$price, title = "Diamonds Supervised UMAP", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
 ```
 
-![Diamonds Supervised UMAP](../img/dia_sumap.png)
+![Diamonds Supervised UMAP](../img/metric-learning/dia_sumap.png)
 
 As expected, the embedding is now even more well-organized along the price of 
 the diamonds.
