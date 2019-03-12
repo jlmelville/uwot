@@ -25,7 +25,7 @@ given in the
 [smallvis documentation](https://jlmelville.github.io/smallvis/datasets.htm). 
 `iris` you already have if you are using R. `s1k` is part of the
 [sneer](https://github.com/jlmelville/sneer) package. `frey`, `oli`, `mnist`,
-`fashion` and `kuzushiji` can be downloaded via
+`fashion`, `kuzushiji`, `norb` and `cifar10` can be downloaded via
 [snedata](https://github.com/jlmelville/snedata). `coil20` and `coil100` can be
 fetched via [coil20](https://github.com/jlmelville/coil20).
 
@@ -73,6 +73,12 @@ PCA but is more compact, i.e. less space between clusters. For visualizations,
 as long as the relative orientation and rough distances between clusters are 
 maintained, the exact distances between them are not that interesting to me.
 
+Dimensionality was reduced to 100 by applying PCA to the data. It's commonly
+applied to data before or as part of t-SNE, so to avoid any differences from
+this pre-processing, I applied PCA to the UMAP data. I used 100 components,
+rather than the usual 50 just to be on the safe side. This seemed to have
+no major effect on the resulting visualizations.
+
 ```R
 # For iris 
 iris_umap <- umap(iris, init = "spca")
@@ -97,8 +103,10 @@ only, I used the [smallvis](https://github.com/jlmelville/smallvis) package.
 For t-SNE, I also employ the following non-defaults:
 
 * `perplexity = 15`, which is closer to the neighborhood size used by UMAP
-* for large datasets, `initial_dims = 100`, rather than the usual `50` just to
-ensure there is no distortion from the initial PCA. 
+* as mentioned in the UMAP settings section, for large datasets, 
+`initial_dims = 100`, which applies PCA to the input, keeping the first 100
+components, rather than the usual `50` to minmize distortion from the initial
+PCA.
 * As `uwot` also makes use of `irlba`, there is no reason not to use 
 `partial_pca`.
 
@@ -314,3 +322,44 @@ We can get better results with UMAP by using the scaled PCA initialization
 
 That rogue cluster is still present (off to the lower right now), but either
 image is more comparable to the t-SNE result.
+
+## tasic2018
+
+The `tasic2018` dataset is a transcriptomics dataset of mouse brain cell RNA-seq
+data from the [Allen Brain Atlas](http://celltypes.brain-map.org/rnaseq/mouse)
+(originally reported by 
+[Tasic and co-workers](http://dx.doi.org/10.1038/s41586-018-0654-5).
+There is gene expression data for 14,249 cells from the primary visual cortex,
+and 9,573 cells from the anterior lateral motor cortex to give a dataset of size
+n = 23,822 overall. Expression data for 45,768 genes were obtained in the
+original data, but the dataset used here follows the pre-processing treatment of
+[Kobak and Berens](https://doi.org/10.1101/453449) which applied a normalization
+and log transformation and then only kept the top 3000 most variable genes.
+
+The data can be generated from the Allen Brain Atlas website and processed 
+in Python by following the instructions in this 
+[Berens lab notebook](https://github.com/berenslab/rna-seq-tsne/blob/master/demo.ipynb).
+I output the data to CSV format for reading into R and assembling into a data
+frame with the following extra exporting code:
+
+```python
+np.savetxt("path/to/allen-visp-alm/tasic2018-log3k.csv", logCPM, delimiter=",")
+np.savetxt("path/to/allen-visp-alm/tasic2018-areas.csv", tasic2018.areas, delimiter=",", fmt = "%d")
+np.savetxt("path/to/allen-visp-alm/tasic2018-genes.csv", tasic2018.genes[selectedGenes], delimiter=",", fmt='%s')
+np.savetxt("path/to/allen-visp-alm/tasic2018-clusters.csv", tasic2018.clusters, delimiter=",", fmt='%d')
+np.savetxt("path/to/allen-visp-alm/tasic2018-cluster-names.csv", tasic2018.clusterNames, delimiter=",", fmt='%s')
+np.savetxt("path/to/allen-visp-alm/tasic2018-cluster-colors.csv", tasic2018.clusterColors, delimiter=",", fmt='%s')
+```
+
+|                             |                           |
+:----------------------------:|:--------------------------:
+![tasic2018 UMAP](../img/examples/tasic2018_umap.png)|![tasic2018 t-SNE](../img/examples/tasic2018_tsne.png)
+
+Again, the default UMAP settings produce clusters that are bit too well-separated
+to clearly see in these images. So here are the results from using t-UMAP (the
+same as setting `a = 1, b = 1`), on the left, and then using `a = 2, b = 2` on
+the right:
+
+|                             |                           |
+:----------------------------:|:--------------------------:
+![tasic2018 t-UMAP](../img/examples/tasic2018_tumap.png)|![tasic2018 UMAP (a = 2, b = 2)](../img/examples/tasic2018_umap2.png)
