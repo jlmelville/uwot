@@ -363,3 +363,41 @@ the right:
 |                             |                           |
 :----------------------------:|:--------------------------:
 ![tasic2018 t-UMAP](../img/examples/tasic2018_tumap.png)|![tasic2018 UMAP (a = 2, b = 2)](../img/examples/tasic2018_umap2.png)
+
+## macosko2015
+
+Another [transcriptomics data set](https://doi.org/10.1016/j.cell.2015.05.002), 
+used as an example in [openTSNE](https://github.com/pavlin-policar/openTSNE).
+This contains data for 44,808 cells from the mouse retina. 
+
+The raw data was fetched similarly to this [shell script from the Hemberg Lab](https://github.com/hemberg-lab/scRNA.seq.datasets/blob/master/bash/macosko.sh)
+and then the data was prepared using the 
+[openTSNE notebook by Pavlin Policar](https://github.com/pavlin-policar/openTSNE/blob/master/examples/prepare_macosko_2015.ipynb).
+Similarly to the `tasic2018` dataset, data was log normalized and the 3,000 most variable genes were retained.
+
+I exported the data (without the Z-scaling and PCA dimensionality reduction),
+as a CSV file, e.g.:
+
+```python
+np.savetxt("/path/to/macosko2015/macosko2015-log3k.csv", x, delimiter=",")
+# Use these as column names
+np.savetxt("/path/to/macosko2015/macosko2015-genenames.csv", data.T.columns.values[gene_mask].astype(str), delimiter=",", fmt = "%s")
+np.savetxt("/path/to/macosko2015/macosko2015-clusterids.csv", cluster_ids.values.astype(int), delimiter=",", fmt = "%d")
+```
+
+|                             |                           |
+:----------------------------:|:--------------------------:
+![macosko2015 UMAP](../img/examples/macosko2015_umap.png)|![macosko2015 t-SNE](../img/examples/macosko2015_tsne.png)
+
+This is another result where the UMAP defaults might need a bit of fiddling with
+if you don't like how separated the clusters are.
+
+The openTSNE results use Z-scaling of the inputs before applying t-SNE, so below
+are the results for UMAP and t-SNE with Z-scaling applied (for `umap`, pass
+`scale = "Z"` as an argument so you don't have to do it manually). I've also
+applied the scaled PCA initialzation to the UMAP result, which once again
+reduces the spacing between clusters:
+
+|                             |                           |
+:----------------------------:|:--------------------------:
+![macosko2015 t-UMAP, Z-scaled, spca](../img/examples/macosko2015_tumapsz.png)|![macosko2015 t-SNE Z-scaled](../img/examples/macosko2015_tsnez.png)
