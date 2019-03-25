@@ -166,8 +166,8 @@ spectral_init <- function(A, ndim = 2, verbose = FALSE) {
                          verbose = verbose))
   }
   coords <- normalized_laplacian_init(A, ndim, verbose = FALSE)
-  expansion <- 10.0 / max(coords)
-  (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.001),
+  expansion <- 10.0 / max(abs(coords))
+  (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.0001),
     ncol = ndim
   )
 }

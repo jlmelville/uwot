@@ -25,6 +25,13 @@ because I use it a lot.
 
 ## Bug fixes and minor improvements
 
+* Spectral initialization (the default) was sometimes generating coordinates
+that had too large a range, due to an erroneous scale factor that failed to
+account for negative coordinate values. This could give rise to embeddings with
+very noticeable outliers distant from the main clusters.
+* Also during spectral initialization, the amount of noise being added had a
+standard deviation an order of magnitude too large compared to the Python
+implementation (this probably didn't make any difference though).
 * If requesting a spectral initialization, but multiple disconnected components
 are present, fall back to `init = "spca"`. 
 * Removed dependency on C++ `<random>` header. This breaks backwards
