@@ -123,7 +123,7 @@ iris_tsne <- smallvis::smallvis(iris, perplexity = 15, Y_init = "rand", exaggera
 s1k_tsne <- Rtsne::Rtsne(x2m(s1k), perplexity = 15, initial_dims = 100,
                        partial_pca = TRUE, exaggeration_factor = 4)
 
-# Big datasets (coil20, coil100, mnist, fashion, kuzushiji)
+# Big datasets (coil20, coil100, mnist, fashion, kuzushiji etc.)
 mnist_tsne <- Rtsne::Rtsne(x2m(mnist), perplexity = 15, initial_dims = 100,
                        partial_pca = TRUE, exaggeration_factor = 12)
 ```
@@ -297,12 +297,14 @@ which is oddly hard to find a link to via JMLR or the article itself.
 :----------------------------:|:--------------------------:
 ![cifar10 UMAP](../img/examples/cifar10_umap.png)|![cifar10 t-SNE](../img/examples/cifar10_tsne.png)
 
-Yikes. What is going on with the UMAP result? I see the same thing in the Python
-UMAP implementation (although maybe less pronounced), so I don't think this is
-a bug in `uwot`. There is an outlying cluster of automobile images in the bottom
-left, which seem to be variations on the same image. The same cluster is
-present in the t-SNE plot (also in the bottom left), but is comfortably close
-to the rest of the data.
+There is an outlying orange cluster (which isn't easy to see) in the top right
+of the UMAP plot. I see the same thing in the Python implementation, so I don't
+think this is a bug in `uwot` (although I also said that in a previous version
+of this page, and it turned out there *was* a bug in `uwot`. The current result
+really is closer to the Python version now, though). That cluster of images is
+of some automobiles but they all seem to be variations of the same image. The
+same cluster is present in the t-SNE plot (bottom left), but is more comfortably
+close to the rest of the data.
 
 The existence of these near-duplicates in CIFAR-10 doesn't seem to have been 
 widely known or appreciated until quite recently, see for instance
