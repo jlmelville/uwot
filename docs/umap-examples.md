@@ -396,10 +396,8 @@ if you don't like how separated the clusters are.
 
 The openTSNE results use Z-scaling of the inputs before applying t-SNE, so below
 are the results for UMAP and t-SNE with Z-scaling applied (for `umap`, pass
-`scale = "Z"` as an argument so you don't have to do it manually). I've also
-applied the scaled PCA initialzation to the UMAP result, which once again
-reduces the spacing between clusters:
+`scale = "Z"` as an argument so you don't have to do it manually):
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![macosko2015 t-UMAP, Z-scaled, spca](../img/examples/macosko2015_tumapsz.png)|![macosko2015 t-SNE Z-scaled](../img/examples/macosko2015_tsnez.png)
+![macosko2015 t-UMAP, Z-scaled](../img/examples/macosko2015_tumapz.png)|![macosko2015 t-SNE Z-scaled](../img/examples/macosko2015_tsnez.png)
