@@ -325,6 +325,34 @@ We can get better results with UMAP by using the scaled PCA initialization
 That rogue cluster is still present (off to the lower right now), but either
 image is more comparable to the t-SNE result.
 
+As the visualization of CIFAR-10 isn't very successful with UMAP or t-SNE, here
+are some results using the activations of a convnet, similar to that used in
+the BH t-SNE paper. For the convnet, I used a [keras](https://keras.io/) 
+implementation, taken from the 
+[Machine Learning in Action blog](https://appliedmachinelearning.blog/2018/03/24/achieving-90-accuracy-in-object-recognition-task-on-cifar-10-dataset-with-keras-convolutional-neural-networks/). Features were Z-scaled as
+carried out in the blog, but I used 100 epochs and a batch size of 128 and I also
+used the [RMSprop (PDF)](https://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf) 
+optimizer favored in the 
+[Deep Learning with Python book](https://www.manning.com/books/deep-learning-with-python)
+(with `lr=1e-4` and `decay=1e-6`). Without any data augmentation, this gave a 
+test set error of `0.1655`, slightly lower than the test set result given in the
+BH t-SNE paper (which used a different architecture and without the benefit of
+an extra 4 years of deep learning research). After retraining with all 60000
+images, the flattened output of the final max-pool layer was used, giving 2048
+features (the BH t-SNE paper network had 1024 output activations). UMAP and
+t-SNE results are below. For the UMAP results, I used the t-UMAP settings with
+scaled PCA initialization.
+
+|                             |                           |
+:----------------------------:|:--------------------------:
+![cifar10 activations t-UMAP](../img/examples/cifar10act_umap.png)|![cifar10 activations t-SNE](../img/examples/cifar10act_tsne.png)
+
+Results don't look quite as good as those in the BH t-SNE paper, but they are
+still an improvement. The orange cluster of automobiles remains as an outlier,
+even in the activation space. You can also see it in the BH t-SNE paper in the 
+lower image in Figure 5 (orange cluster at the bottom, slightly left of center).
+
+
 ## tasic2018
 
 The `tasic2018` dataset is a transcriptomics dataset of mouse brain cell RNA-seq
