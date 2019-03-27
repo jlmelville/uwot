@@ -26,7 +26,7 @@
 #include "Rcpp.h"
 
 // based on code in the dqsample package
-uint64_t random64() {
+static uint64_t random64() {
   return R::runif(0, 1) * std::numeric_limits<uint64_t>::max();
 }
 
@@ -58,6 +58,12 @@ public:
       ((((state2 << 3) & 0xffffffff) ^ state2) >> 11);
 
     return state0 ^ state1 ^ state2;
+  }
+  
+  // return a value in (0, n]
+  std::size_t operator()(const std::size_t n) {
+    std::size_t result = (*this)() % n;
+    return result;
   }
 };
 
