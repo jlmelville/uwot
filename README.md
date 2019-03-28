@@ -11,6 +11,22 @@ the basic method. Translated from the
 
 ## News
 
+*March 27 2018*. Default behavior of the stochastic gradient descent 
+optimization has changed again: the random number generator is now from the 
+[PCG family](http://www.pcg-random.org/), linked via the 
+[dqrng](https://cran.r-project.org/package=dqrng) package. This replaces the old
+routine, based on my translation of the Python UMAP implementation of the
+Tausworthe "taus88" PRNG into C++. If you have any concern about the quality of
+the random numbers used to optimize UMAP, stick with this new default PRNG. 
+However it is slower, so to get the old behavior back set `pcg_rand = FALSE`.
+
+For visualization purposes, it seems reasonable to use the old PRNG 
+(`pcg_rand = FALSE`), along with multiple threads during SGD 
+(`n_sgd_threads = "auto"`), and the UMAP gradient approximation 
+(`approx_pow = TRUE`), which combined will show a very noticeable speed up 
+during optimizaton. I have added a new parameter, `fast_sgd`, which if set to
+`TRUE`, sets these options for you.
+
 *December 10 2018*. Default behavior has changed so that multiple threads are no
 longer used during the stochastic gradient descent phase. This (along with some
 other minor changes) should ensure reproducibility (as long as you `set.seed`
@@ -73,12 +89,15 @@ mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
 mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8)
 
 # Use a different metric
-mnist_umap_cosine <- umap(mnist ,n_neighbors = 15, metric = "cosine", min_dist = 0.001, verbose = TRUE, n_threads = 8)
+mnist_umap_cosine <- umap(mnist, n_neighbors = 15, metric = "cosine", min_dist = 0.001, verbose = TRUE, n_threads = 8)
+
+# If you are only interested in visualization, `fast_sgd = TRUE` gives a much faster optimization
+mnist_umap_fast_sgd <- umap(mnist, n_neighbors = 15, metric = "cosine", min_dist = 0.001, verbose = TRUE, fast_sgd = TRUE)
 
 # Supervised dimension reduction
 mnist_umap_s <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8, 
                      y = mnist$Label, target_weight = 0.5)
-                    
+
 # Add new points to an existing embedding
 mnist_train <- head(mnist, 60000)
 mnist_test <- tail(mnist, 10000)

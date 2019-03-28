@@ -2,6 +2,21 @@
 
 ## New features
 
+* New parameter: `pcg_rand`. If `TRUE` (the default), then a random number 
+generator from [the PCG family](http://www.pcg-random.org/) is used during the
+stochastic optimization phase. The old PRNG, a direct translation of
+an implementation of the Tausworthe "taus88" PRNG used in the Python
+version of UMAP, can be obtained by setting `pcg_rand = FALSE`. The new PRNG is
+slower, but is likely superior in its statistical randomness. This change in
+behavior will be break backwards compatibility: you will now get slightly
+different results even with the same seed.
+* New parameter: `fast_sgd`. If `TRUE`, then the following combination of
+parameters are set: `n_sgd_threads = "auto"`, `pcg_rand = FALSE` and `approx_pow
+= TRUE`. These will result in a substantially faster optimization phase, at the
+cost of being slightly less accurate and results not being exactly repeatable.
+`fast_sgd = FALSE` by default but if you are only interested in visualization,
+then `fast_sgd` gives perfectly good results. For more generic dimensionality
+reduction and reproducibility, keep `fast_sgd = FALSE`.
 * New parameter: `n_refine_iters`, which specifies how many iterations of
 [nearest neighbor descent](https://doi.org/10.1145/1963405.1963487) to carry out
 to refine the results of the Annoy approximate neighbor search. When set to 
@@ -35,8 +50,7 @@ implementation (this probably didn't make any difference though).
 * If requesting a spectral initialization, but multiple disconnected components
 are present, fall back to `init = "spca"`. 
 * Removed dependency on C++ `<random>` header. This breaks backwards
-compatibility in the sense that results with a given seed will not be the same
-as with previous versions.
+compatibility even if you set `pcg_rand = FALSE`.
 * `metric = "cosine"` results were incorrectly using the unmodified Annoy
 angular distance.
 * Numeric matrix columns can be specified as the target for the `categorical`

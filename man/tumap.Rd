@@ -14,8 +14,9 @@ tumap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
   grain_size = 1, y = NULL, target_n_neighbors = n_neighbors,
   target_metric = "euclidean", target_weight = 0.5, pca = NULL,
-  pca_center = TRUE, ret_model = FALSE, ret_nn = FALSE,
-  verbose = getOption("verbose", TRUE))
+  pca_center = TRUE, pcg_rand = TRUE, fast_opt = FALSE,
+  ret_model = FALSE, ret_nn = FALSE, verbose = getOption("verbose",
+  TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -285,6 +286,11 @@ all settings.}
 \item{pca_center}{If \code{TRUE}, center the columns of \code{X} before 
 carrying out PCA. For binary data, it's recommended to set this to 
 \code{FALSE}.}
+
+\item{pcg_rand}{If \code{TRUE}, use the PCG random number generator (O'Neill, 
+2014) during optimization. Otherwise, use the faster (but probably less
+statistically good) Tausworthe "taus88" generator. The default is 
+\code{TRUE}.}
 
 \item{ret_model}{If \code{TRUE}, then return extra data that can be used to
 add new data to an existing embedding via \code{\link{umap_transform}}. The
