@@ -1,6 +1,7 @@
 find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                     metric = "euclidean",
                     n_trees = 50, search_k = 2 * k * n_trees,
+                    n_refine_iters = 0,
                     n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                     grain_size = 1,
                     ret_index = FALSE,
@@ -26,9 +27,26 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                       ret_index = ret_index,
                       verbose = verbose
       )
+      
+      if (n_refine_iters > 0) {
+        ref_res <- refine_nn(X, 
+                             nn = res,
+                             metric = metric,
+                             n_iters = n_refine_iters,
+                             max_candidates = 50,
+                             delta = 0.001, 
+                             rho = 0.5,
+                             verbose = verbose)
+        if (res$recall < 1) {
+          nn_acc <- sum(res$idx == 1:nrow(X)) / nrow(X)
+          tsmessage("NN descent recall = ", formatC(nn_acc * 100.0), "%")
+        }
+        res$idx <- ref_res$idx
+        res$dist <- ref_res$dist
+      }
     }
   }
-
+  
   res
 }
 
@@ -51,7 +69,7 @@ annoy_nn <- function(X, k = 10,
                      metric = metric, n_trees = n_trees,
                      verbose = verbose
   )
-
+  
   res <- annoy_search(X,
                       k = k, ann = ann, search_k = search_k,
                       n_threads = n_threads,
@@ -72,22 +90,22 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
                         verbose = FALSE) {
   nr <- nrow(X)
   nc <- ncol(X)
-
+  
   ann <- create_ann(metric, nc)
-
+  
   tsmessage("Building Annoy index with metric = ", metric, 
             ", n_trees = ", n_trees)
   progress <- Progress$new(max = nr, display = verbose)
-
+  
   # Add items
   for (i in 1:nr) {
     ann$addItem(i - 1, X[i, ])
     progress$increment()
   }
-
+  
   # Build index
   ann$build(n_trees)
-
+  
   ann
 }
 
@@ -112,10 +130,10 @@ annoy_search <- function(X, k, ann,
                          verbose = FALSE) {
   if (n_threads > 0) {
     annoy_res <- annoy_search_parallel(X = X, k = k, ann = ann,
-                                 search_k = search_k,
-                                 n_threads = n_threads,
-                                 grain_size = grain_size,
-                                 verbose = verbose)
+                                       search_k = search_k,
+                                       n_threads = n_threads,
+                                       grain_size = grain_size,
+                                       verbose = verbose)
     res <- list(idx = annoy_res$item + 1, dist = annoy_res$distance)
   }
   else {
@@ -127,7 +145,7 @@ annoy_search <- function(X, k, ann,
   if (methods::is(ann, "Rcpp_AnnoyAngular")) {
     res$dist <- 0.5 * (res$dist * res$dist)
   }
-
+  
   res
 }
 
@@ -190,40 +208,40 @@ FNN_nn <- function(X, k = 10, include_self = TRUE) {
   if (include_self) {
     k <- k - 1
   }
-
+  
   fnn <- FNN::get.knn(X, k)
   idx <- fnn$nn.index
   dist <- fnn$nn.dist
-
+  
   if (include_self) {
     idx <- cbind(seq_len(nrow(X)), idx)
     dist <- cbind(rep(0, nrow(X)), dist)
   }
-
+  
   list(idx = idx, dist = dist)
 }
 
 dist_nn <- function(X, k, include_self = TRUE) {
   X <- as.matrix(X)
-
+  
   if (!include_self) {
     k <- k + 1
   }
-
+  
   nn_idx <- t(apply(X, 2, order))[, 1:k]
   nn_dist <- matrix(0, nrow = nrow(X), ncol = k)
   for (i in seq_len(nrow(nn_idx))) {
     nn_dist[i, ] <- X[i, nn_idx[i, ]]
   }
-
+  
   if (!include_self) {
     nn_idx <- nn_idx[, 2:ncol(nn_idx)]
     nn_dist <- nn_dist[, 2:ncol(nn_dist)]
   }
-
+  
   attr(nn_idx, "dimnames") <- NULL
   attr(nn_dist, "dimnames") <- NULL
-
+  
   list(idx = nn_idx, dist = nn_dist)
 }
 
@@ -231,11 +249,11 @@ sparse_nn <- function(X, k, include_self = TRUE) {
   if (include_self) {
     k <- k - 1
   }
-
+  
   n <- nrow(X)
   nn_idx <- matrix(0, nrow = n, ncol = k)
   nn_dist <- matrix(0, nrow = n, ncol = k)
-
+  
   for (i in 1:n) {
     dists <- X[, i]
     is_nonzero <- dists != 0
@@ -246,20 +264,55 @@ sparse_nn <- function(X, k, include_self = TRUE) {
         " defined distances"
       )
     }
-
+    
     k_order <- order(dist_nonzero)[1:k]
-
+    
     idx_nonzero <- which(is_nonzero, arr.ind = TRUE)
-
+    
     nn_idx[i, ] <- idx_nonzero[k_order]
     nn_dist[i, ] <- dist_nonzero[k_order]
   }
-
+  
   if (include_self) {
     nn_idx <- cbind(1:n, nn_idx)
     nn_dist <- cbind(rep(0, n), nn_dist)
   }
-
+  
   list(idx = nn_idx, dist = nn_dist)
 }
 
+refine_nn <- function(X, 
+                      nn,
+                      metric = "euclidean",
+                      n_iters = 10,
+                      max_candidates = 50,
+                      delta = 0.001, 
+                      rho = 0.5,
+                      verbose = FALSE) {
+  tsmessage("Refining using nearest neighbor descent for ", n_iters, 
+            " iterations")
+  
+  idx <- nn$idx
+  dist <- nn$dist
+  # As a minor optimization, we will use L2 internally if the user asks for
+  # Euclidean and only take the square root of the final distances.
+  actual_metric <- metric
+  if (metric == "euclidean") {
+    actual_metric <- "l2"
+    dist <- dist * dist
+  }
+  
+  # C++ code expects zero-indexing
+  idx <- idx - 1
+  
+  res <- nn_descent(X, idx, dist,
+                    metric = actual_metric,
+                    n_iters = n_iters, max_candidates = max_candidates,
+                    delta = delta, rho = rho, verbose = FALSE)
+  
+  if (metric == "euclidean") {
+    res$dist <- sqrt(res$dist)
+  }
+  res$idx <- res$idx + 1
+  res
+}
