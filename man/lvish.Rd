@@ -13,7 +13,8 @@ lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
   n_refine_iters = 0, n_threads = max(1,
   RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
   grain_size = 1, kernel = "gauss", pca = NULL, pca_center = TRUE,
-  ret_nn = FALSE, verbose = getOption("verbose", TRUE))
+  pcg_rand = TRUE, fast_sgd = FALSE, ret_nn = FALSE,
+  verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -233,6 +234,21 @@ all settings.}
 \item{pca_center}{If \code{TRUE}, center the columns of \code{X} before 
 carrying out PCA. For binary data, it's recommended to set this to 
 \code{FALSE}.}
+
+\item{pcg_rand}{If \code{TRUE}, use the PCG random number generator (O'Neill, 
+2014) during optimization. Otherwise, use the faster (but probably less
+statistically good) Tausworthe "taus88" generator. The default is 
+\code{TRUE}.}
+
+\item{fast_sgd}{If \code{TRUE}, then the following combination of parameters
+is set: \code{pcg_rand = TRUE} and \code{n_sgd_threads = "auto"}. The
+default is \code{FALSE}. Setting this to \code{TRUE} will speed up the
+stochastic optimization phase, but give a potentially less accurate
+embedding, and which will not be exactly reproducible even with a fixed
+seed. For visualization, \code{fast_sgd = TRUE} will give perfectly good
+results. For more generic dimensionality reduction, it's safer to leave
+\code{fast_sgd = FALSE}. If \code{fast_sgd = TRUE}, then user-supplied
+values of \code{pcg_rand} and \code{n_sgd_threads}, are ignored.}
 
 \item{ret_nn}{If \code{TRUE}, then in addition to the embedding, also return
 nearest neighbor data that can be used as input to \code{nn_method} to

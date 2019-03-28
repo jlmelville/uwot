@@ -57,7 +57,8 @@ const double clamp(const double v, const double lo, const double hi) {
 // Gradient: the type of gradient used in the optimization
 // DoMoveVertex: true if both ends of a positive edge should be updated
 template <typename Gradient,
-          bool DoMoveVertex = true>
+          bool DoMoveVertex = true,
+          typename Rand = pcg_prng>
 struct SgdWorker : public RcppParallel::Worker {
   int n; // epoch counter
   double alpha;
@@ -96,12 +97,13 @@ struct SgdWorker : public RcppParallel::Worker {
   { }
   
   void  operator()(std::size_t begin, std::size_t end) {
-    std::unique_ptr<tau_prng> prng(nullptr);
+    std::unique_ptr<Rand> prng(nullptr);
    
     // Each window gets its own PRNG state, to prevent locking inside the loop.
     {
       tthread::lock_guard<tthread::mutex> guard(mutex);
-      prng.reset(new tau_prng());
+      prng.reset(new Rand());
+      
     }
 
     std::vector<double> dys(ndim);
@@ -168,7 +170,7 @@ struct SgdWorker : public RcppParallel::Worker {
 };
 
 
-template<typename T, bool DoMove = true>
+template<typename T, bool DoMove = true, typename Rand = pcg_prng>
 std::vector<double> optimize_layout(
     const T& gradient,
     std::vector<double>& head_embedding,
@@ -186,7 +188,7 @@ std::vector<double> optimize_layout(
 {
   Sampler sampler(epochs_per_sample, negative_sample_rate);
   
-  SgdWorker<T, DoMove> worker(gradient, 
+  SgdWorker<T, DoMove, Rand> worker(gradient, 
                               positive_head, positive_tail,
                               sampler,
                               head_embedding, tail_embedding,
@@ -234,6 +236,7 @@ Rcpp::NumericMatrix optimize_layout_umap(
     double initial_alpha,
     double negative_sample_rate,
     bool approx_pow,
+    bool pcg_rand = true,
     bool parallelize = true,
     std::size_t grain_size = 1,
     bool move_other = true,
@@ -259,31 +262,63 @@ Rcpp::NumericMatrix optimize_layout_umap(
   if (approx_pow) {
     const apumap_gradient gradient(a, b, gamma);
     if (move_other) {
-      result = optimize_layout<apumap_gradient, true>(
-        gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-        n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-        negative_sample_rate, parallelize, grain_size, verbose);
+      if (pcg_rand) {
+        result = optimize_layout<apumap_gradient, true, pcg_prng>(
+          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
+          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
+          negative_sample_rate, parallelize, grain_size, verbose);
+      }
+      else {
+        result = optimize_layout<apumap_gradient, true, tau_prng>(
+          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
+          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
+          negative_sample_rate, parallelize, grain_size, verbose);
+      }
     }
     else {
-      result = optimize_layout<apumap_gradient, false>(
-        gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-        n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-        negative_sample_rate, parallelize, grain_size, verbose);
+      if (pcg_rand) {
+        result = optimize_layout<apumap_gradient, false, pcg_prng>(
+          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
+          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
+          negative_sample_rate, parallelize, grain_size, verbose);
+      }
+      else {
+        result = optimize_layout<apumap_gradient, false, tau_prng>(
+          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
+          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
+          negative_sample_rate, parallelize, grain_size, verbose);
+      }
     }
   }
   else {
     const umap_gradient gradient(a, b, gamma);
     if (move_other) {
-      result = optimize_layout<umap_gradient, true>(
-        gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-        n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-        negative_sample_rate, parallelize, grain_size, verbose);
+      if (pcg_rand) {
+        result = optimize_layout<umap_gradient, true, pcg_prng>(
+          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
+          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
+          negative_sample_rate, parallelize, grain_size, verbose);
+      }
+      else {
+        result = optimize_layout<umap_gradient, true, tau_prng>(
+          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
+          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
+          negative_sample_rate, parallelize, grain_size, verbose);
+      }
     }
     else {
-      result = optimize_layout<umap_gradient, false>(
-        gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-        n_epochs,n_vertices, epochs_per_sample, initial_alpha,
-        negative_sample_rate, parallelize, grain_size, verbose);
+      if (pcg_rand) {
+        result = optimize_layout<umap_gradient, false, pcg_prng>(
+          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
+          n_epochs,n_vertices, epochs_per_sample, initial_alpha,
+          negative_sample_rate, parallelize, grain_size, verbose);
+      }
+      else {
+        result = optimize_layout<umap_gradient, false, tau_prng>(
+          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
+          n_epochs,n_vertices, epochs_per_sample, initial_alpha,
+          negative_sample_rate, parallelize, grain_size, verbose);
+      }
     }
   }
   
@@ -308,6 +343,7 @@ Rcpp::NumericMatrix optimize_layout_tumap(
     const std::vector<double> epochs_per_sample,
     double initial_alpha,
     double negative_sample_rate,
+    bool pcg_rand = true,
     bool parallelize = true,
     std::size_t grain_size = 1,
     bool move_other = true,
@@ -329,16 +365,32 @@ Rcpp::NumericMatrix optimize_layout_tumap(
   std::vector<double> result;
   
   if (move_other) {
-    result = optimize_layout<tumap_gradient, true>(
-      gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
-      n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
-      parallelize, grain_size, verbose);
+    if (pcg_rand) {
+      result = optimize_layout<tumap_gradient, true, pcg_prng>(
+        gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
+        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
+        parallelize, grain_size, verbose);
+    }
+    else {
+      result = optimize_layout<tumap_gradient, true, tau_prng>(
+        gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
+        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
+        parallelize, grain_size, verbose);      
+    }
   }
   else {
-    result = optimize_layout<tumap_gradient, false>(
-      gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
-      n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
-      parallelize, grain_size, verbose);
+    if (pcg_rand) {
+      result = optimize_layout<tumap_gradient, false, pcg_prng>(
+        gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
+        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
+        parallelize, grain_size, verbose);
+    }
+    else {
+      result = optimize_layout<tumap_gradient, false, tau_prng>(
+        gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail, n_epochs,
+        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
+        parallelize, grain_size, verbose);      
+    }
   }
   
   if (delete_tail_ptr) {
@@ -359,6 +411,7 @@ Rcpp::NumericMatrix optimize_layout_largevis(
     const std::vector<double> epochs_per_sample,
     double gamma, double initial_alpha,
     double negative_sample_rate,
+    bool pcg_rand = true,
     bool parallelize = true,
     std::size_t grain_size = 1,
     bool verbose = false) 
@@ -367,10 +420,21 @@ Rcpp::NumericMatrix optimize_layout_largevis(
   // than the UMAP case
   const largevis_gradient gradient(gamma);
   auto head_vec = Rcpp::as<std::vector<double>>(head_embedding);
-  std::vector<double> result = optimize_layout<largevis_gradient, true>(
-    gradient, head_vec, head_vec, positive_head, positive_tail,
-    n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-    negative_sample_rate, parallelize, grain_size, verbose);
+  
+  std::vector<double> result;
+  
+  if (pcg_rand) {
+    result = optimize_layout<largevis_gradient, true, pcg_prng>(
+      gradient, head_vec, head_vec, positive_head, positive_tail,
+      n_epochs, n_vertices, epochs_per_sample, initial_alpha,
+      negative_sample_rate, parallelize, grain_size, verbose);
+  }
+  else {
+    result = optimize_layout<largevis_gradient, true, tau_prng>(
+      gradient, head_vec, head_vec, positive_head, positive_tail,
+      n_epochs, n_vertices, epochs_per_sample, initial_alpha,
+      negative_sample_rate, parallelize, grain_size, verbose);
+  }
   
   return Rcpp::NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
                              result.begin());

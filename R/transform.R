@@ -81,6 +81,12 @@ umap_transform <- function(X, model,
   negative_sample_rate <- model$negative_sample_rate
   approx_pow <- model$approx_pow
   norig_col <- model$norig_col
+  pcg_rand <- model$pcg_rand
+  if (is.null(pcg_rand)) {
+    tsmessage("Using PCG for random number generation")
+    pcg_rand <- TRUE
+  }
+  
   if (ncol(X) != norig_col) {
     stop("Incorrect dimensions: X must have ", norig_col, " columns")
   }
@@ -214,6 +220,7 @@ umap_transform <- function(X, model,
         a = a, b = b, gamma = gamma,
         initial_alpha = alpha, negative_sample_rate,
         approx_pow = approx_pow,
+        pcg_rand = pcg_rand,
         parallelize = parallelize,
         grain_size = grain_size,
         move_other = FALSE,
@@ -230,6 +237,7 @@ umap_transform <- function(X, model,
         n_vertices, epochs_per_sample,
         initial_alpha = alpha,
         negative_sample_rate = negative_sample_rate,
+        pcg_rand = pcg_rand,
         parallelize = parallelize,
         grain_size = grain_size,
         move_other = FALSE,

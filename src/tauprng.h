@@ -24,6 +24,8 @@
 
 #include <limits>
 #include "Rcpp.h"
+// linked from dqrng
+#include "pcg_random.hpp"
 
 // based on code in the dqsample package
 static uint64_t random64() {
@@ -66,5 +68,23 @@ public:
     return result;
   }
 };
+
+class pcg_prng {
+
+  pcg32 gen;
+  
+public:
+  pcg_prng() { 
+    gen.seed(random64());
+  }
+
+  // return a value in (0, n]
+  std::size_t operator()(const std::size_t n) {
+    std::size_t result = gen(n);
+    return result;
+  }
+};
+
+
 
 #endif // UWOT_TAUPRNG_H

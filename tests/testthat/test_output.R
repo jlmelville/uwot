@@ -373,3 +373,12 @@ expect_true(sum(res2$nn$euclidean$dist) < sum(res$nn$euclidean$dist))
 expect_equal(res$search_k, 10)
 # search_k should be doubled in exported model to compensate for lack of nn descent
 expect_equal(res2$search_k, 20)
+
+# taus88 prng
+res <- umap(iris10, pcg_rand = FALSE,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+            init = "spectral", verbose = FALSE, n_threads = 0,
+            init_sdev = 5
+)
+expect_ok_matrix(res)
+
