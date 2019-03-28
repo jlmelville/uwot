@@ -1,7 +1,6 @@
 find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                     metric = "euclidean",
                     n_trees = 50, search_k = 2 * k * n_trees,
-                    n_refine_iters = 0,
                     n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                     grain_size = 1,
                     ret_index = FALSE,
@@ -27,19 +26,6 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                       ret_index = ret_index,
                       verbose = verbose
       )
-      
-      if (n_refine_iters > 0) {
-        ref_res <- refine_nn(X, 
-                         nn = res,
-                         metric = metric,
-                         n_iters = n_refine_iters,
-                         max_candidates = 50,
-                         delta = 0.001, 
-                         rho = 0.5,
-                         verbose = verbose)
-        res$idx <- ref_res$idx
-        res$dist <- ref_res$dist
-      }
     }
   }
 
@@ -75,7 +61,7 @@ annoy_nn <- function(X, k = 10,
   nn_acc <- sum(res$idx == 1:nrow(X)) / nrow(X)
   tsmessage("Annoy recall = ", formatC(nn_acc * 100.0), "%")
   
-  res <- list(idx = res$idx, dist = res$dist)
+  res <- list(idx = res$idx, dist = res$dist, recall = nn_acc)
   if (ret_index) {
     res$index <- ann
   }
@@ -137,7 +123,6 @@ annoy_search <- function(X, k, ann,
                                search_k = search_k,
                                verbose = verbose)
   }
-  
   # Convert from Angular to Cosine distance
   if (methods::is(ann, "Rcpp_AnnoyAngular")) {
     res$dist <- 0.5 * (res$dist * res$dist)
@@ -278,38 +263,3 @@ sparse_nn <- function(X, k, include_self = TRUE) {
   list(idx = nn_idx, dist = nn_dist)
 }
 
-refine_nn <- function(X, 
-                      nn,
-                      metric = "euclidean",
-                      n_iters = 10,
-                      max_candidates = 50,
-                      delta = 0.001, 
-                      rho = 0.5,
-                      verbose = FALSE) {
-  tsmessage("Refining using nearest neighbor descent for ", n_iters, 
-            " iterations")
-  
-  idx <- nn$idx
-  dist <- nn$dist
-  # As a minor optimization, we will use L2 internally if the user asks for
-  # Euclidean and only take the square root of the final distances.
-  actual_metric <- metric
-  if (metric == "euclidean") {
-    actual_metric <- "l2"
-    dist <- dist * dist
-  }
-  
-  # C++ code expects zero-indexing
-  idx <- idx - 1
-  
-  res <- nn_descent(X, idx, dist,
-                    metric = actual_metric,
-                    n_iters = n_iters, max_candidates = max_candidates,
-                    delta = delta, rho = rho, verbose = FALSE)
-
-  if (metric == "euclidean") {
-    res$dist <- sqrt(res$dist)
-  }
-  res$idx <- res$idx + 1
-  res
-}

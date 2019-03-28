@@ -8,13 +8,11 @@ lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
   n_components = 2, metric = "euclidean", n_epochs = -1,
   learning_rate = 1, scale = "maxabs", init = "lvrandom",
   init_sdev = NULL, repulsion_strength = 7, negative_sample_rate = 5,
-  nn_method = NULL, n_trees = 50, search_k = ifelse(n_refine_iters >
-  0, n_neighbors * n_trees, 2 * n_neighbors * n_trees),
-  n_refine_iters = 0, n_threads = max(1,
-  RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
-  grain_size = 1, kernel = "gauss", pca = NULL, pca_center = TRUE,
-  pcg_rand = TRUE, fast_sgd = FALSE, ret_nn = FALSE,
-  verbose = getOption("verbose", TRUE))
+  nn_method = NULL, n_trees = 50, search_k = 2 * n_neighbors *
+  n_trees, n_threads = max(1, RcppParallel::defaultNumThreads()/2),
+  n_sgd_threads = 0, grain_size = 1, kernel = "gauss", pca = NULL,
+  pca_center = TRUE, pcg_rand = TRUE, fast_sgd = FALSE,
+  ret_nn = FALSE, verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -192,10 +190,6 @@ Annoy nearest neighbor search. Only used if the \code{nn_method} is
 larger k, the more the accurate results, but the longer the search takes.
 With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 search. Only used if the \code{nn_method} is \code{"annoy"}.}
-
-\item{n_refine_iters}{Number of iterations of nearest neighbor descent 
-(Dong and co-workers, 2011) to carry out to refine the approximate nearest
-neighbor list. Only used if the \code{nn_method} is \code{"annoy"}.}
 
 \item{n_threads}{Number of threads to use (except during stochastic gradient
 descent). Default is half that recommended by RcppParallel. For

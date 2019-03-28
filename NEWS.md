@@ -17,14 +17,6 @@ cost of being slightly less accurate and results not being exactly repeatable.
 `fast_sgd = FALSE` by default but if you are only interested in visualization,
 then `fast_sgd` gives perfectly good results. For more generic dimensionality
 reduction and reproducibility, keep `fast_sgd = FALSE`.
-* New parameter: `n_refine_iters`, which specifies how many iterations of
-[nearest neighbor descent](https://doi.org/10.1145/1963405.1963487) to carry out
-to refine the results of the Annoy approximate neighbor search. When set to 
-greater than zero, the `search_k` parameter is reduced. Default is currently 0,
-so it's not currently on by default, because although the accuracy of the
-neighbor data is likely to be improved, the overall run time is slightly
-increased. If you want to use it, LargeVis uses 3 iterations, which is a good
-place to start.
 * New parameter: `init_sdev` which specifies how large the standard deviation
 of each column of the initial coordinates should be. This will scale any input
 coordinates (including user-provided matrix coordinates). `init = "spca"` can

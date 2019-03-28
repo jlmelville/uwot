@@ -9,8 +9,7 @@ tumap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   init = "spectral", init_sdev = NULL, set_op_mix_ratio = 1,
   local_connectivity = 1, bandwidth = 1, repulsion_strength = 1,
   negative_sample_rate = 5, nn_method = NULL, n_trees = 50,
-  search_k = ifelse(n_refine_iters > 0, n_neighbors * n_trees, 2 *
-  n_neighbors * n_trees), n_refine_iters = 0, n_threads = max(1,
+  search_k = 2 * n_neighbors * n_trees, n_threads = max(1,
   RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
   grain_size = 1, y = NULL, target_n_neighbors = n_neighbors,
   target_metric = "euclidean", target_weight = 0.5, pca = NULL,
@@ -208,10 +207,6 @@ Annoy nearest neighbor search. Only used if the \code{nn_method} is
 larger k, the more the accurate results, but the longer the search takes.
 With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 search. Only used if the \code{nn_method} is \code{"annoy"}.}
-
-\item{n_refine_iters}{Number of iterations of nearest neighbor descent 
-(Dong and co-workers, 2011) to carry out to refine the approximate nearest
-neighbor list. Only used if the \code{nn_method} is \code{"annoy"}.}
 
 \item{n_threads}{Number of threads to use (except during stochastic gradient
 descent). Default is half that recommended by RcppParallel. For

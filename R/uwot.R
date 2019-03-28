@@ -193,9 +193,6 @@
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
-#' @param n_refine_iters Number of iterations of nearest neighbor descent 
-#'   (Dong and co-workers, 2011) to carry out to refine the approximate nearest
-#'   neighbor list. Only used if the \code{nn_method} is \code{"annoy"}.
 #' @param approx_pow If \code{TRUE}, use an approximation to the power function
 #'   in the UMAP gradient, from
 #'   \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.
@@ -353,13 +350,6 @@
 #' (pp. 585-591).
 #' \url{http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf}
 #'
-#' Dong, W., Moses, C., & Li, K. (2011, March). 
-#' Efficient k-nearest neighbor graph construction for generic similarity measures. 
-#' In \emph{Proceedings of the 20th international conference on World wide web}
-#' (pp. 577-586).
-#' ACM. 
-#' \url{doi.org/10.1145/1963405.1963487}
-#'
 #' McInnes, L., & Healy, J. (2018).
 #' UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
 #' \emph{arXiv preprint} \emph{arXiv}:1802.03426.
@@ -390,10 +380,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  bandwidth = 1.0, repulsion_strength = 1.0,
                  negative_sample_rate = 5.0, a = NULL, b = NULL,
                  nn_method = NULL, n_trees = 50,
-                 search_k = ifelse(n_refine_iters > 0, 
-                                   n_neighbors * n_trees,
-                                   2 * n_neighbors * n_trees),
-                 n_refine_iters = 0,
+                 search_k = 2 * n_neighbors * n_trees,
                  approx_pow = FALSE,
                  y = NULL, target_n_neighbors = n_neighbors,
                  target_metric = "euclidean",
@@ -415,7 +402,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     local_connectivity = local_connectivity, bandwidth = bandwidth,
     gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
     a = a, b = b, nn_method = nn_method, n_trees = n_trees,
-    search_k = search_k, n_refine_iters = n_refine_iters,
+    search_k = search_k,
     method = "umap", approx_pow = approx_pow,
     n_threads = n_threads, n_sgd_threads = n_sgd_threads, 
     grain_size = grain_size,
@@ -612,9 +599,6 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
-#' @param n_refine_iters Number of iterations of nearest neighbor descent 
-#'   (Dong and co-workers, 2011) to carry out to refine the approximate nearest
-#'   neighbor list. Only used if the \code{nn_method} is \code{"annoy"}.
 #' @param y Optional target data for supervised dimension reduction. Can be a
 #' vector, matrix or data frame. Use the \code{target_metric} parameter to 
 #' specify the metrics to use, using the same syntax as \code{metric}. Usually
@@ -737,10 +721,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   bandwidth = 1.0, repulsion_strength = 1.0,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
-                  search_k = ifelse(n_refine_iters > 0, 
-                                    n_neighbors * n_trees,
-                                    2 * n_neighbors * n_trees),
-                  n_refine_iters = 0,
+                  search_k = 2 * n_neighbors * n_trees,
                   n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                   n_sgd_threads = 0,
                   grain_size = 1,
@@ -761,7 +742,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     local_connectivity = local_connectivity, bandwidth = bandwidth,
     gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
     a = NULL, b = NULL, nn_method = nn_method, n_trees = n_trees,
-    search_k = search_k, n_refine_iters = n_refine_iters,
+    search_k = search_k,
     method = "tumap",
     n_threads = n_threads, n_sgd_threads = n_sgd_threads, 
     grain_size = grain_size,
@@ -961,9 +942,6 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
-#' @param n_refine_iters Number of iterations of nearest neighbor descent 
-#'   (Dong and co-workers, 2011) to carry out to refine the approximate nearest
-#'   neighbor list. Only used if the \code{nn_method} is \code{"annoy"}.
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half that recommended by RcppParallel. For
 #'   nearest neighbor search, only applies if \code{nn_method = "annoy"}. If 
@@ -1049,10 +1027,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   repulsion_strength = 7,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
-                  search_k = ifelse(n_refine_iters > 0, 
-                                    n_neighbors * n_trees,
-                                    2 * n_neighbors * n_trees),
-                  n_refine_iters = 0,
+                  search_k = 2 * n_neighbors * n_trees,
                   n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                   n_sgd_threads = 0,
                   grain_size = 1,
@@ -1069,7 +1044,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
        init = init, init_sdev = init_sdev,
        gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
        nn_method = nn_method, 
-       n_trees = n_trees, search_k = search_k, n_refine_iters = n_refine_iters,
+       n_trees = n_trees, search_k = search_k,
        method = "largevis", perplexity = perplexity,
        pca = pca, pca_center = pca_center,
        n_threads = n_threads, n_sgd_threads = n_sgd_threads, 
@@ -1092,8 +1067,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  bandwidth = 1.0, gamma = 1.0,
                  negative_sample_rate = 5.0, a = NULL, b = NULL,
                  nn_method = NULL, n_trees = 50,
-                 search_k = n_neighbors * n_trees,
-                 n_refine_iters = 3,
+                 search_k = 2 * n_neighbors * n_trees,
                  method = "umap", 
                  perplexity = 50, approx_pow = FALSE,
                  y = NULL, target_n_neighbors = n_neighbors,
@@ -1278,7 +1252,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
   
   d2sr <- data2set(X, Xcat, n_neighbors, metrics, nn_method,
-                   n_trees, search_k, n_refine_iters,
+                   n_trees, search_k, 
                    method,
                    set_op_mix_ratio, local_connectivity, bandwidth,
                    perplexity, kernel,
@@ -1344,7 +1318,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     
     if (!is.null(y)) {
       yd2sr <- data2set(y, ycat, target_n_neighbors, target_metrics, nn_method,
-                        n_trees, search_k, n_refine_iters,
+                        n_trees, search_k,
                         method,
                         set_op_mix_ratio = 1.0,
                         local_connectivity = 1.0,
@@ -1538,7 +1512,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         n_neighbors = n_neighbors,
         # Can't use nn descent during transform, so if used in training, 
         # double the Annoy search parameter to compensate
-        search_k = ifelse(n_refine_iters > 0, search_k * 2, search_k),
+        search_k = search_k,
         local_connectivity = local_connectivity,
         n_epochs = n_epochs,
         alpha = alpha,
@@ -1747,7 +1721,7 @@ x2nv <- function(X) {
 }
 
 data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
-                     n_trees, search_k, n_refine_iters,
+                     n_trees, search_k,
                      method,
                      set_op_mix_ratio, local_connectivity, bandwidth,
                      perplexity, kernel,
@@ -1883,7 +1857,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     }
     
     x2set_res <- x2set(Xsub, n_neighbors, metric, nn_method = nn_sub,
-                       n_trees, search_k, n_refine_iters,
+                       n_trees, search_k,
                        method,
                        set_op_mix_ratio, local_connectivity, bandwidth,
                        perplexity, kernel,
@@ -1913,7 +1887,6 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
 
 x2nn <- function(X, n_neighbors, metric, nn_method,
                  n_trees, search_k,
-                 n_refine_iters,
                  n_threads, grain_size,
                  ret_model,
                  n_vertices = x2nv(X),
@@ -1939,7 +1912,6 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
     nn <- find_nn(X, n_neighbors,
                   method = nn_method, metric = metric,
                   n_trees = n_trees, search_k = search_k, 
-                  n_refine_iters = n_refine_iters,
                   n_threads = n_threads, grain_size = grain_size,
                   ret_index = ret_model, verbose = verbose
     )
@@ -2006,7 +1978,7 @@ nn2set <- function(method, nn,
 
 
 x2set <- function(X, n_neighbors, metric, nn_method,
-                  n_trees, search_k, n_refine_iters,
+                  n_trees, search_k,
                   method,
                   set_op_mix_ratio, local_connectivity, bandwidth,
                   perplexity, kernel,
@@ -2015,7 +1987,7 @@ x2set <- function(X, n_neighbors, metric, nn_method,
                   n_vertices = x2nv(X),
                   verbose = FALSE) {
   nn <- x2nn(X, n_neighbors, metric, nn_method,
-             n_trees, search_k, n_refine_iters,
+             n_trees, search_k,
              n_threads, grain_size,
              ret_model,
              n_vertices = n_vertices,
