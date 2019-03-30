@@ -291,7 +291,9 @@ consisting of 60000 32 x 32 color images evenly divided across 10 classes
 in the main paper, only the results after passing through a convolutional neural
 network were published. t-SNE on the original pixel data was only given in the 
 [supplementary information (PDF)](https://lvdmaaten.github.io/publications/misc/Supplement_JMLR_2014.pdf)
-which is oddly hard to find a link to via JMLR or the article itself.
+which is oddly hard to find a link to via JMLR or the article itself, and in
+the less widely-cited 
+[preliminary investigation into BH t-SNE](https://arxiv.org/abs/1301.3342).
 
 |                             |                           |
 :----------------------------:|:--------------------------:
