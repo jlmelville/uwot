@@ -198,12 +198,6 @@ In the images below the points are colored by the first pose angle.
 :----------------------------:|:--------------------------:
 ![isofaces UMAP](../img/examples/isofaces_umap.png)|![isofaces t-SNE](../img/examples/isofaces_tsne.png)
 
-## swiss
-
-The [Swiss Roll](http://web.mit.edu/cocosci/isomap/datasets.html) data used in 
-Isomap. A famous dataset, but perhaps not that representative of typical 
-real world datasets. t-SNE is know to not handle this well, but UMAP makes
-an impressive go at unfolding it.
 
 ## coil20
 
