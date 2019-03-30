@@ -140,6 +140,7 @@ approach of the UMAP publication.
 output of UMAP on some datasets, compared to t-SNE.
 * How to use UMAP for 
 [Supervised and Metric Learning](https://jlmelville.github.io/uwot/metric-learning.html).
+* The effect of using [approximations to speed up the stochastic gradient descent](https://jlmelville.github.io/uwot/fast-sgd.html)
 
 ## Implementation Details
 
