@@ -89,7 +89,7 @@ s1k_umap <- umap(s1k)
 # Big datasets (mnist, fashion, kuzushiji)
 mnist_umap <- umap(mnist, pca = 100)
 
-# norb, coil20 and coil100
+# norb, coil20 and coil100, tasic2018
 coil20_umap <- umap(coil20, pca = 100, init = "spca")
 ```
 
