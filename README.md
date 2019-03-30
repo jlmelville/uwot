@@ -185,7 +185,7 @@ The right hand image is the result of using `uwot`.
 
 |                                   |                                 |
 |-----------------------------------|---------------------------------|
-| ![mnist-py.png](img/mnist-py.png) | ![mnist-r.png](img/mnist-r.png) |
+| ![mnist-py.png](img/readme/mnist-py.png) | ![mnist-r.png](img/readme/mnist-r.png) |
 
 The project documentation contains some more [examples](https://jlmelville.github.io/uwot/umap-examples.html).
 
@@ -388,7 +388,7 @@ believe they would be identical, but they look pretty similar:
 
 |                                               |                                         |
 |-----------------------------------------------|-----------------------------------------|
-| ![mnist-largevis.png](img/mnist-largevis.png) | ![mnist-lvish.png](img/mnist-lvish.png) |
+| ![mnist-largevis.png](img/readme/mnist-largevis.png) | ![mnist-lvish.png](img/readme/mnist-lvish.png) |
 
 Because the default number of neighbors is 3 times the `perplexity`, and the
 default `perplexity = 50`, the nearest neighbor search needs to find 150 nearest
