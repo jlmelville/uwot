@@ -1,3 +1,7 @@
+# uwot 0.1.0
+
+Initial CRAN release.
+
 # uwot 0.0.0.9010 (31 March 2019)
 
 ## New features

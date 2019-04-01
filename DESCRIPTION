@@ -1,6 +1,6 @@
 Package: uwot
 Title: The Uniform Manifold Approximation and Projection (UMAP) Method for Dimensionality Reduction
-Version: 0.0.0.9010
+Version: 0.1.0
 Authors@R: person("James", "Melville", email = "jlmelville@gmail.com", role = c("aut", "cre"))
 Description: The dimensionality reduction method UMAP 
   (McInnes and Healy, 2018, <arxiv:1802.03426>). It is similar 
