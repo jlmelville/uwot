@@ -8,6 +8,8 @@ output:
       collapsed: false
 ---
 
+This is part of the documentation for [UWOT](https://github.com/jlmelville/uwot).
+
 The distill publication 
 [How to Use t-SNE Effectively](https://distill.pub/2016/misread-tsne/) provides
 some interactive examples of t-SNE on a variety of simple datasets and
