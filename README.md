@@ -137,7 +137,10 @@ Apart from the man pages in R: you may be interested in:
 using algorithmic terminology similar to t-SNE, rather than the more topological
 approach of the UMAP publication.
 * [Examples](https://jlmelville.github.io/uwot/umap-examples.html) of the 
-output of UMAP on some datasets, compared to t-SNE.
+output of UMAP on some datasets, compared to t-SNE. 
+* Some results of running 
+[UMAP on the simple datasets](https://jlmelville.github.io/uwot/umap-simple.html) 
+from [How to Use t-SNE Effectively](https://distill.pub/2016/misread-tsne/).
 * How to use UMAP for 
 [Supervised and Metric Learning](https://jlmelville.github.io/uwot/metric-learning.html).
 * The effect of using [approximations to speed up the stochastic gradient descent](https://jlmelville.github.io/uwot/fast-sgd.html).
