@@ -1,4 +1,4 @@
-# uwot 0.0.0.9010
+# uwot 0.0.0.9010 (31 March 2019)
 
 ## New features
 
@@ -20,10 +20,12 @@ reduction and reproducibility, keep `fast_sgd = FALSE`.
 * New parameter: `init_sdev` which specifies how large the standard deviation
 of each column of the initial coordinates should be. This will scale any input
 coordinates (including user-provided matrix coordinates). `init = "spca"` can
-now be thought of as an alias of `init = "pca", init_sdev = 1e-4`. 
-This may be too aggressive scaling for some datasets. The typical UMAP spectral
+now be thought of as an alias of `init = "pca", init_sdev = 1e-4`. This may be
+too aggressive scaling for some datasets. The typical UMAP spectral
 initializations tend to result in standard deviations of around `2` to `5`, so
-this might be more appropriate in some cases.
+this might be more appropriate in some cases. If spectral initialization detects
+multiple components in the affinity graph and falls back to scaled PCA, it
+uses `init_sdev = 1`.
 * As a result of adding `init_sdev`, the `init` options `sspectral`,
 `slaplacian` and `snormlaplacian` have been removed (they weren't around for
 very long anyway). You can get the same behavior by e.g. 
