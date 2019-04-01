@@ -145,7 +145,7 @@
 #'   locally. In practice this should be not more than the local intrinsic
 #'   dimension of the manifold.
 #' @param bandwidth The effective bandwidth of the kernel if we view the
-#'   algorithm as similar to Laplacian eigenmaps. Larger values induce more
+#'   algorithm as similar to Laplacian Eigenmaps. Larger values induce more
 #'   connectivity and a more global view of the data, smaller values concentrate
 #'   more locally.
 #' @param repulsion_strength Weighting applied to negative samples in low
@@ -557,7 +557,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   locally. In practice this should be not more than the local intrinsic
 #'   dimension of the manifold.
 #' @param bandwidth The effective bandwidth of the kernel if we view the
-#'   algorithm as similar to Laplacian eigenmaps. Larger values induce more
+#'   algorithm as similar to Laplacian Eigenmaps. Larger values induce more
 #'   connectivity and a more global view of the data, smaller values concentrate
 #'   more locally.
 #' @param repulsion_strength Weighting applied to negative samples in low

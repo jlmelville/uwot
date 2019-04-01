@@ -172,7 +172,7 @@ locally. In practice this should be not more than the local intrinsic
 dimension of the manifold.}
 
 \item{bandwidth}{The effective bandwidth of the kernel if we view the
-algorithm as similar to Laplacian eigenmaps. Larger values induce more
+algorithm as similar to Laplacian Eigenmaps. Larger values induce more
 connectivity and a more global view of the data, smaller values concentrate
 more locally.}
 

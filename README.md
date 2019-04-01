@@ -24,7 +24,7 @@ For visualization purposes, it seems reasonable to use the old PRNG
 (`pcg_rand = FALSE`), along with multiple threads during SGD 
 (`n_sgd_threads = "auto"`), and the UMAP gradient approximation 
 (`approx_pow = TRUE`), which combined will show a very noticeable speed up 
-during optimizaton. I have added a new parameter, `fast_sgd`, which if set to
+during optimization. I have added a new parameter, `fast_sgd`, which if set to
 `TRUE`, sets these options for you.
 
 *December 10 2018*. Default behavior has changed so that multiple threads are no
@@ -312,7 +312,7 @@ that Annoy itself says it works best with dimensions < 100, but still works
 which has 49,152 features, suggests that Annoy will *definitely* struggle with
 datasets of this dimensionality. I strongly recommend using the `pca` option
 to reduce the dimensionality, e.g `pca = 100`.
-* The spectral initialization default for `umap` (and the Laplacian eigenmap
+* The spectral initialization default for `umap` (and the Laplacian Eigenmap
 initialization, `init = "laplacian"`) can sometimes run into problems. If it
 fails to converge it will fall back to random initialization, but on occasion
 I've seen it take an extremely long time (a couple of hours) to converge. Recent
