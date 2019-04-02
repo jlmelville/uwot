@@ -1670,7 +1670,11 @@ mnist_umap_fast &lt;- umap(mnist, pca = 100, fast_sgd = TRUE, verbose = TRUE)</c
 </tr>
 </tbody>
 </table>
+</div>
+<div id="recommendations" class="section level2">
+<h2>Recommendations</h2>
 <p>From these results, I’d say that the <code>fast_sgd = TRUE</code> settings give results which are effectively indistinguishable from the slower settings, so if you want to save a bit of time, there seems no harm in using them. The actual time savings you’ll see depend on how long the nearest neighbor search takes, and any initial PCA you carry out on the input (as we do in all these examples) can take a fair amount of the run time. For example on NORB, the PCA takes up 5 minutes of the six-and-a-half minute total run time, so there’s not a lot of time to be saved. But for MNIST and Fashion, you can effectively halve the run time (with six threads, anyway).</p>
+<p>If reproducibility is important to you, then using multiple threads in the optimization is out of the question, although that’s what gives the biggest speed increase. However, you could still consider setting <code>approx_pow = TRUE, pcg_random = FALSE</code>. For MNIST-sized datasets (<code>mnist</code>, <code>fashion</code>, <code>kuzushiji</code>) I saw a reasonable speed up of around 25%. For datasets where the PCA and nearest neighbor search dominates, the gains are smaller: a 10-15% speedup for <code>tasic2018</code> and <code>macosko2015</code>, and only 5% for <code>norb</code>. If you need to set <code>n_epochs</code> higher, then these time savings will increase.</p>
 </div>
 
 

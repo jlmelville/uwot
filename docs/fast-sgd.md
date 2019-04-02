@@ -132,12 +132,23 @@ of the two plots is pretty similar.
 :----------------------------:|:--------------------------:
 ![macosko2015 slow](../img/fast-sgd/macosko2015_slow.png)|![macosko2015 fast](../img/fast-sgd/macosko2015_fast.png)
 
+## Recommendations
+
 From these results, I'd say that the `fast_sgd = TRUE` settings give results
 which are effectively indistinguishable from the slower settings, so if you want
 to save a bit of time, there seems no harm in using them. The actual time
 savings you'll see depend on how long the nearest neighbor search takes, and any
 initial PCA you carry out on the input (as we do in all these examples) can take
-a fair amount of the run time. For example on NORB, the PCA takes up 5 minutes of
-the six-and-a-half minute total run time, so there's not a lot of time to be
-saved. But for MNIST and Fashion, you can effectively halve the run time (with 
+a fair amount of the run time. For example on NORB, the PCA takes up 5 minutes
+of the six-and-a-half minute total run time, so there's not a lot of time to be
+saved. But for MNIST and Fashion, you can effectively halve the run time (with
 six threads, anyway).
+
+If reproducibility is important to you, then using multiple threads in the 
+optimization is out of the question, although that's what gives the 
+biggest speed increase. However, you could still consider setting 
+`approx_pow = TRUE, pcg_random = FALSE`. For MNIST-sized datasets (`mnist`, 
+`fashion`, `kuzushiji`) I saw a reasonable speed up of around 25%. For datasets
+where the PCA and nearest neighbor search dominates, the gains are smaller:
+a 10-15% speedup for `tasic2018` and `macosko2015`, and only 5% for `norb`.
+If you need to set `n_epochs` higher, then these time savings will increase.
