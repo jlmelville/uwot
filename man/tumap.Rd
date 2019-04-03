@@ -347,3 +347,7 @@ get back the Cauchy distribution as used in t-SNE and LargeVis. It also
 results in a substantially simplified gradient expression. This can give
 a speed improvement of around 50\%.
 }
+\examples{
+iris_tumap <- tumap(iris, n_neighbors = 50, learning_rate = 0.5)   
+
+}

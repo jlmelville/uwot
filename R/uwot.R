@@ -311,9 +311,11 @@
 #'   Both \code{ret_model} and \code{ret_nn} can be \code{TRUE}, in which case
 #'   the returned list contains the combined data.
 #' @examples
-#' \dontrun{
+#' 
 #' iris_umap <- umap(iris, n_neighbors = 50, learning_rate = 0.5, 
 #'                   init = "random")
+#' 
+#' \dontrun{
 #'
 #' # Faster approximation to the gradient
 #' iris_umap <- umap(iris, n_neighbors = 15, approx_pow = TRUE)
@@ -712,6 +714,10 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   }
 #'   Both \code{ret_model} and \code{ret_nn} can be \code{TRUE}, in which case
 #'   the returned list contains the combined data.
+#' 
+#' @examples
+#' iris_tumap <- tumap(iris, n_neighbors = 50, learning_rate = 0.5)   
+#'
 #' @export
 tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   n_epochs = NULL,
@@ -1008,16 +1014,19 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' (pp. 287-297).
 #' International World Wide Web Conferences Steering Committee.
 #' \url{https://arxiv.org/abs/1602.00370}
+#' 
 #' @examples
-#' \dontrun{
-#' # Use perplexity rather than n_neighbors to control the size of the local
-#' neighborhood iris_lvish <- umap(iris, perplexity = 50, learning_rate = 0.5,
-#'                                 init = "random")
-#'
 #' # Default number of epochs is much larger than for UMAP, assumes random
 #' # initialization
-#' # If using a more global initialization, can use fewer epochs
-#' iris_lvish_short <- umap(iris, perpelxity = 50, n_epochs = 1000)
+#' # If using a more global initialization, can use fewer epochs 
+#' iris_lvish_short <- lvish(iris, perplexity = 50, n_epochs = 1000, 
+#'                           init = "pca")
+#' 
+#' \dontrun{
+#' # Use perplexity rather than n_neighbors to control the size of the local
+#' # neighborhood 
+#' iris_lvish <- lvish(iris, perplexity = 50, learning_rate = 0.5, 
+#'                     init = "random")
 #' }
 #' @export
 lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,

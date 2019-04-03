@@ -369,9 +369,11 @@ the following help text is lifted verbatim from the Python reference
 implementation at \url{https://github.com/lmcinnes/umap}.
 }
 \examples{
-\dontrun{
+
 iris_umap <- umap(iris, n_neighbors = 50, learning_rate = 0.5, 
                   init = "random")
+
+\dontrun{
 
 # Faster approximation to the gradient
 iris_umap <- umap(iris, n_neighbors = 15, approx_pow = TRUE)

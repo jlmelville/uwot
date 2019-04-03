@@ -288,15 +288,17 @@ following:
 }
 }
 \examples{
-\dontrun{
-# Use perplexity rather than n_neighbors to control the size of the local
-neighborhood iris_lvish <- umap(iris, perplexity = 50, learning_rate = 0.5,
-                                init = "random")
-
 # Default number of epochs is much larger than for UMAP, assumes random
 # initialization
-# If using a more global initialization, can use fewer epochs
-iris_lvish_short <- umap(iris, perpelxity = 50, n_epochs = 1000)
+# If using a more global initialization, can use fewer epochs 
+iris_lvish_short <- lvish(iris, perplexity = 50, n_epochs = 1000, 
+                          init = "pca")
+
+\dontrun{
+# Use perplexity rather than n_neighbors to control the size of the local
+# neighborhood 
+iris_lvish <- lvish(iris, perplexity = 50, learning_rate = 0.5, 
+                    init = "random")
 }
 }
 \references{
