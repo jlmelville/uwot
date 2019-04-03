@@ -63,12 +63,12 @@ latter case, the model produced is based only on the numeric data.
 A transformation is possible, but factor columns in the new data are ignored.
 }
 \examples{
-\dontrun{
+
 iris_train <- iris[1:100, ]
 iris_test <- iris[101:150, ]
 
 # You must set ret_model = TRUE to return extra data needed
-iris_train_umap <- umap(iris_train, verbose = TRUE, ret_model = TRUE)
-iris_test_umap <- umap_transform(iris_test, iris_train_umap, verbose = TRUE)
-}
+iris_train_umap <- umap(iris_train, ret_model = TRUE)
+iris_test_umap <- umap_transform(iris_test, iris_train_umap)
+
 }
