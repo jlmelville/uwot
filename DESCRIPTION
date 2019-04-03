@@ -2,10 +2,14 @@ Package: uwot
 Title: The Uniform Manifold Approximation and Projection (UMAP) Method for Dimensionality Reduction
 Version: 0.1.0
 Authors@R: person("James", "Melville", email = "jlmelville@gmail.com", role = c("aut", "cre"))
-Description: The dimensionality reduction method UMAP 
-  (McInnes and Healy, 2018, <arxiv:1802.03426>). It is similar 
-  to, but faster than, the t-Distributed Stochastic Neighbor Embedding (t-SNE) 
-  method.
+Description: An implementation of the Uniform Manifold Approximation and 
+  Projection dimensionality reduction by McInnes et al. (2018) 
+  <arXiv:1802.03426>. It also provides a means to transform new data and to 
+  carry out supervised dimensionality reduction. An implementation of the 
+  related LargeVis method of Tang et al. (2016) <arXiv:1602.00370> is also 
+  provided. This is a complete re-implementation in R (and C++, via the Rcpp
+  package): no Python installation is required. See the uwot website for more 
+  documentation and examples.
 License: GPL-3
 URL: https://github.com/jlmelville/uwot
 BugReports: https://github.com/jlmelville/uwot/issues
