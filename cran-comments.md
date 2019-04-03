@@ -1,3 +1,12 @@
+## Resubmission
+
+This is a resubmission. In this version I have:
+
+* Expanded the Description field of the DESCRIPTION file, including explaining
+the UMAP acronym and corrected the arXiv reference.
+
+* Provided runnable examples in the .Rd files for every exported function.
+
 ## Release Summary
 
 * This is a new release.
@@ -24,13 +33,14 @@ GNU make is a SystemRequirements.
 
 This is expected due to linking to the RcppParallel package.
 
-There was a message about possibly mis-spelled wordss in DESCRIPTION:
+There was a message about possibly mis-spelled words in DESCRIPTION:
   
-     Healy (7:16)
-     McInnes (7:4)
-     SNE (8:75)
-     UMAP (2:59, 6:50)
-     arxiv (7:30)
+  McInnes (7:42)
+  Rcpp (11:73)
+  UMAP (2:59)
+  al (7:53, 10:38)
+  et (7:50, 10:35)
+  uwot (12:57)
      
 These are spelled correctly.
 
