@@ -101,11 +101,10 @@ struct PerplexityWorker : public RcppParallel::Worker {
       
       // This will index over d2, skipping when i == j
       std::size_t widx = 0;
-      const double one_over_Z = 1 / Z;
       for (unsigned int k = 0; k < n_neighbors; k++) {
         unsigned int j = nn_idx(i, k) - 1;
         if (i != j) {
-          res(i, k) = d2[widx] * one_over_Z;
+          res(i, k) = d2[widx] / Z;
           ++widx;
         }
         else {
