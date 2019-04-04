@@ -71,7 +71,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
         if (Z > 0) {
           H = std::log(Z) + beta * sum_D2_W / Z;
         }
-        
+
         if (std::abs(H - target) < tol) {
           break;
         }
@@ -99,11 +99,14 @@ struct PerplexityWorker : public RcppParallel::Worker {
         d2[k] = W;
       }
       
+      // This will index over d2, skipping when i == j
+      std::size_t widx = 0;
       const double one_over_Z = 1 / Z;
       for (unsigned int k = 0; k < n_neighbors; k++) {
         unsigned int j = nn_idx(i, k) - 1;
         if (i != j) {
-          res(i, k) = d2[k - 1] * one_over_Z;
+          res(i, k) = d2[widx] * one_over_Z;
+          ++widx;
         }
         else {
           res(i, k) = 0.0;
