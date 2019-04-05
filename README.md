@@ -78,12 +78,20 @@ library(uwot)
 ## Example
 
 ```R
+# Non-numeric columns are ignored, so in a lot of cases you can pass a data
+# frame directly to umap
 iris_umap <- umap(iris, n_neighbors = 50, learning_rate = 0.5, init = "random")
 
 # Load mnist from somewhere, e.g.
 # devtools::install_github("jlmelville/snedata")
 # mnist <- snedata::download_mnist()
 mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
+
+# For high dimensional datasets (> 100-1000 columns) using PCA to reduce 
+# dimensionality is highly recommended to avoid the nearest neighbor search 
+# taking a long time. Keeping only 50 dimensions can speed up calculations 
+# without affecting the visualization much
+mnist_umap <- umap(mnist, pca = 50)
 
 # Use a specific number of threads
 mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8)
@@ -123,10 +131,6 @@ iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Wid
 iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),
                                       "euclidean" = c("Petal.Length", "Petal.Width"),
                                       "categorical" = "Species"))
-                                      
-# MNIST with PCA reduction to 50 dimensions can speed up calculation without
-# affecting results much
-mnist_umap <- umap(mnist, pca = 50)
 ```
 
 ## Documentation
