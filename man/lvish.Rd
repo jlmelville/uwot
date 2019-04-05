@@ -291,15 +291,14 @@ following:
 # Default number of epochs is much larger than for UMAP, assumes random
 # initialization
 # If using a more global initialization, can use fewer epochs 
-iris_lvish_short <- lvish(iris, perplexity = 50, n_epochs = 1000, 
+iris_lvish_short <- lvish(iris, perplexity = 50, n_epochs = 200, 
                           init = "pca")
 
-\dontrun{
 # Use perplexity rather than n_neighbors to control the size of the local
-# neighborhood 
+# neighborhood
+# 200 epochs may be too small for a random initialization
 iris_lvish <- lvish(iris, perplexity = 50, learning_rate = 0.5, 
-                    init = "random")
-}
+                    init = "random", n_epochs = 200)
 }
 \references{
 Tang, J., Liu, J., Zhang, M., & Mei, Q. (2016, April).

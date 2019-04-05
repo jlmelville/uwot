@@ -311,30 +311,31 @@
 #'   Both \code{ret_model} and \code{ret_nn} can be \code{TRUE}, in which case
 #'   the returned list contains the combined data.
 #' @examples
-#' 
+#' # Non-numeric columns are automatically removed so you can pass data frames
+#' # directly in a lot of cases without pre-processing
 #' iris_umap <- umap(iris, n_neighbors = 50, learning_rate = 0.5, 
 #'                   init = "random")
-#' 
-#' \dontrun{
+#'                   
+#' # Although not an issue for the iris dataset, for high dimensional data
+#' # (> 100 columns), using PCA to reduce dimensionality is highly
+#' # recommended to avoid nearest neighbor searches taking a long time
+#' # 50 dimensions is a good value to start with. If there are fewer columns 
+#' # in the input than the requested number of components, the parameter is 
+#' # ignored. 
+#' iris_umap <- umap(iris, pca = 50)
 #'
 #' # Faster approximation to the gradient
 #' iris_umap <- umap(iris, n_neighbors = 15, approx_pow = TRUE)
-#'
-#' # Load mnist from somewhere, e.g.
-#' # devtools::install_github("jlmelville/snedata")
-#' # mnist <- snedata::download_mnist()
-#' mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
-#'
-#' # Supervised dimension reduction
-#' mnist_sumap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE,
-#'                     y = mnist$Label, target_weight = 0.5)
-#'
-#' # Return NN info
-#' mnist_umap <- umap(mnist, verbose = TRUE, ret_nn = TRUE)
-#'
-#' # Re-use NN info for greater efficiency
-#' mnist_umap_spca <- umap(mnist, verbose = TRUE, init = "spca", nn_method = mnist_umap$nn)
 #' 
+#' # Can specify min_dist and spread parameters to control separation and size
+#' # of clusters
+#' iris_umap <- umap(iris, n_neighbors = 15, min_dist = 1, spread = 5)
+#'
+#' # Supervised dimension reduction using the 'Species' factor column
+#' iris_sumap <- umap(iris, n_neighbors = 15, min_dist = 0.001,
+#'                     y = iris$Species, target_weight = 0.5)
+#'
+#' \donttest{
 #' # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
 #' iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),
 #'                                       "euclidean" = c("Petal.Length", "Petal.Width")))
@@ -343,8 +344,14 @@
 #' iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),
 #'                                       "euclidean" = c("Petal.Length", "Petal.Width"),
 #'                                       "categorical" = "Species"))
-#'  
+#' # Return NN info
+#' iris_umap <- umap(iris, ret_nn = TRUE)
+#'
+#' # Re-use NN info for greater efficiency
+#' # Here we use random initialization
+#' iris_umap_spca <- umap(iris, init = "rand", nn_method = iris_umap$nn)
 #' }
+#' 
 #' @references
 #' Belkin, M., & Niyogi, P. (2002).
 #' Laplacian eigenmaps and spectral techniques for embedding and clustering.
@@ -1019,15 +1026,14 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' # Default number of epochs is much larger than for UMAP, assumes random
 #' # initialization
 #' # If using a more global initialization, can use fewer epochs 
-#' iris_lvish_short <- lvish(iris, perplexity = 50, n_epochs = 1000, 
+#' iris_lvish_short <- lvish(iris, perplexity = 50, n_epochs = 200, 
 #'                           init = "pca")
 #' 
-#' \dontrun{
 #' # Use perplexity rather than n_neighbors to control the size of the local
-#' # neighborhood 
+#' # neighborhood
+#' # 200 epochs may be too small for a random initialization
 #' iris_lvish <- lvish(iris, perplexity = 50, learning_rate = 0.5, 
-#'                     init = "random")
-#' }
+#'                     init = "random", n_epochs = 200)
 #' @export
 lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   n_components = 2, metric = "euclidean", n_epochs = -1,
