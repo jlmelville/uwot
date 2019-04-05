@@ -5,7 +5,7 @@
 \title{Add New Points to an Existing Embedding}
 \usage{
 umap_transform(X, model, init_weighted = TRUE, search_k = NULL,
-  n_epochs = NULL, n_threads = max(1,
+  tmpdir = tempdir(), n_epochs = NULL, n_threads = max(1,
   RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
   grain_size = 1, verbose = FALSE)
 }
@@ -25,6 +25,11 @@ use an unweighted average.}
 \item{search_k}{Number of nodes to search during the neighbor retrieval. The
 larger k, the more the accurate results, but the longer the search takes.
 Default is the value used in building the \code{model} is used.}
+
+\item{tmpdir}{Temporary directory to store nearest neighbor indexes during 
+nearest neighbor search. Default is \code{\link{tempdir}}. The index is
+only written to disk if \code{n_threads > 1}; otherwise, this parameter is
+ignored.}
 
 \item{n_epochs}{Number of epochs to use during the optimization of the
 embedded coordinates. A value between \code{30 - 100} is a reasonable trade

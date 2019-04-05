@@ -12,7 +12,8 @@ lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
   n_trees, n_threads = max(1, RcppParallel::defaultNumThreads()/2),
   n_sgd_threads = 0, grain_size = 1, kernel = "gauss", pca = NULL,
   pca_center = TRUE, pcg_rand = TRUE, fast_sgd = FALSE,
-  ret_nn = FALSE, verbose = getOption("verbose", TRUE))
+  ret_nn = FALSE, tmpdir = tempdir(), verbose = getOption("verbose",
+  TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -252,6 +253,11 @@ manipulating unrelated parameters (e.g. \code{min_dist}, \code{n_epochs},
 \code{FALSE}, just return the coordinates. Note that the nearest neighbors
 could be sensitive to data scaling, so be wary of reusing nearest neighbor
 data if modifying the \code{scale} parameter.}
+
+\item{tmpdir}{Temporary directory to store nearest neighbor indexes during 
+nearest neighbor search. Default is \code{\link{tempdir}}. The index is
+only written to disk if \code{n_threads > 1} and 
+\code{nn_method = "annoy"}; otherwise, this parameter is ignored.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }

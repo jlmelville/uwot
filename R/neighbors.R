@@ -1,6 +1,7 @@
 find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                     metric = "euclidean",
                     n_trees = 50, search_k = 2 * k * n_trees,
+                    tmpdir = tempdir(),
                     n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                     grain_size = 1,
                     ret_index = FALSE,
@@ -22,6 +23,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                       k = k,
                       metric = metric,
                       n_trees = n_trees, search_k = search_k,
+                      tmpdir = tmpdir,
                       n_threads = n_threads,
                       ret_index = ret_index,
                       verbose = verbose
@@ -43,6 +45,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
 annoy_nn <- function(X, k = 10,
                      metric = "euclidean",
                      n_trees = 50, search_k = 2 * k * n_trees,
+                     tmpdir = tempdir(),
                      n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                      grain_size = 1,
                      ret_index = FALSE,
@@ -54,6 +57,7 @@ annoy_nn <- function(X, k = 10,
 
   res <- annoy_search(X,
                       k = k, ann = ann, search_k = search_k,
+                      tmpdir = tmpdir,
                       n_threads = n_threads,
                       grain_size = grain_size, verbose = verbose
   )
@@ -106,6 +110,7 @@ create_ann <- function(name, ndim) {
 # Search a pre-built Annoy index for neighbors of X
 annoy_search <- function(X, k, ann,
                          search_k = 100 * k,
+                         tmpdir = tempdir(),
                          n_threads =
                            max(1, RcppParallel::defaultNumThreads() / 2),
                          grain_size = 1,
@@ -113,6 +118,7 @@ annoy_search <- function(X, k, ann,
   if (n_threads > 0) {
     annoy_res <- annoy_search_parallel(X = X, k = k, ann = ann,
                                  search_k = search_k,
+                                 tmpdir = tmpdir,
                                  n_threads = n_threads,
                                  grain_size = grain_size,
                                  verbose = verbose)
@@ -156,11 +162,12 @@ annoy_search_serial <- function(X, k, ann,
 
 annoy_search_parallel <- function(X, k, ann,
                                   search_k = 100 * k,
+                                  tmpdir = tempdir(),
                                   n_threads =
                                     max(1, RcppParallel::defaultNumThreads() / 2),
                                   grain_size = 1,
                                   verbose = FALSE) {
-  index_file <- tempfile()
+  index_file <- tempfile(tmpdir = tmpdir)
   ann$save(index_file)
   
   tsmessage("Searching Annoy index using ", pluralize("thread", n_threads),

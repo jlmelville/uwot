@@ -16,7 +16,8 @@ umap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   pcg_rand = TRUE, fast_sgd = FALSE, ret_model = FALSE,
   ret_nn = FALSE, n_threads = max(1,
   RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
-  grain_size = 1, verbose = getOption("verbose", TRUE))
+  grain_size = 1, tmpdir = tempdir(), verbose = getOption("verbose",
+  TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -342,6 +343,11 @@ descent. If set to > 1, then results will not be reproducible, even if
 items to process in a thread falls below this number, then no threads will
 be used. Used in conjunction with \code{n_threads} and 
 \code{n_sgd_threads}.}
+
+\item{tmpdir}{Temporary directory to store nearest neighbor indexes during 
+nearest neighbor search. Default is \code{\link{tempdir}}. The index is
+only written to disk if \code{n_threads > 1} and 
+\code{nn_method = "annoy"}; otherwise, this parameter is ignored.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }

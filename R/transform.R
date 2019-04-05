@@ -23,6 +23,10 @@
 #' @param search_k Number of nodes to search during the neighbor retrieval. The
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   Default is the value used in building the \code{model} is used.
+#' @param tmpdir Temporary directory to store nearest neighbor indexes during 
+#'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
+#'   only written to disk if \code{n_threads > 1}; otherwise, this parameter is
+#'   ignored.
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. A value between \code{30 - 100} is a reasonable trade
 #'   off between speed and thoroughness. By default, this value is set to one
@@ -52,6 +56,7 @@
 umap_transform <- function(X, model,
                            init_weighted = TRUE,
                            search_k = NULL,
+                           tmpdir = tempdir(),
                            n_epochs = NULL,
                            n_threads =
                              max(1, RcppParallel::defaultNumThreads() / 2),
@@ -138,6 +143,7 @@ umap_transform <- function(X, model,
     }
     nn <- annoy_search(Xsub,
                        k = n_neighbors, ann = ann, search_k = search_k,
+                       tmpdir = tmpdir,
                        n_threads = n_threads, grain_size = grain_size,
                        verbose = verbose
     )

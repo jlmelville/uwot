@@ -294,6 +294,10 @@
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads} and 
 #'   \code{n_sgd_threads}.
+#' @param tmpdir Temporary directory to store nearest neighbor indexes during 
+#'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
+#'   only written to disk if \code{n_threads > 1} and 
+#'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
@@ -401,6 +405,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
                  n_sgd_threads = 0,
                  grain_size = 1,
+                 tmpdir = tempdir(),
                  verbose = getOption("verbose", TRUE)) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
@@ -421,6 +426,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     pcg_rand = pcg_rand,
     fast_sgd = fast_sgd,
     ret_model = ret_model, ret_nn = ret_nn,
+    tmpdir = tempdir(),
     verbose = verbose
   )
 }
@@ -705,6 +711,10 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads} and 
 #'   \code{n_sgd_threads}.
+#' @param tmpdir Temporary directory to store nearest neighbor indexes during 
+#'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
+#'   only written to disk if \code{n_threads > 1} and 
+#'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
@@ -745,6 +755,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   pcg_rand = TRUE,
                   fast_sgd = FALSE,
                   ret_model = FALSE, ret_nn = FALSE,
+                  tmpdir = tempdir(),
                   verbose = getOption("verbose", TRUE)) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
@@ -765,6 +776,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     pcg_rand = pcg_rand,
     fast_sgd = fast_sgd,
     ret_model = ret_model, ret_nn = ret_nn,
+    tmpdir = tmpdir,
     verbose = verbose
   )
 }
@@ -1008,6 +1020,10 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \code{FALSE}, just return the coordinates. Note that the nearest neighbors
 #'   could be sensitive to data scaling, so be wary of reusing nearest neighbor
 #'   data if modifying the \code{scale} parameter.
+#' @param tmpdir Temporary directory to store nearest neighbor indexes during 
+#'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
+#'   only written to disk if \code{n_threads > 1} and 
+#'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of optimized coordinates, or if \code{ret_nn = TRUE},
 #'   returns the nearest neighbor data as a list containing a matrix \code{idx}
@@ -1051,6 +1067,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   pcg_rand = TRUE,
                   fast_sgd = FALSE,
                   ret_nn = FALSE,
+                  tmpdir = tempdir(),
                   verbose = getOption("verbose", TRUE)) {
   uwot(X,
        n_neighbors = n_neighbors, n_components = n_components,
@@ -1068,6 +1085,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
        ret_nn = ret_nn,
        pcg_rand = pcg_rand,
        fast_sgd = fast_sgd,
+       tmpdir = tmpdir,
        verbose = verbose
   )
 }
@@ -1096,6 +1114,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  pca = NULL, pca_center = TRUE,
                  pcg_rand = TRUE,
                  fast_sgd = FALSE,
+                 tmpdir = tempdir(),
                  verbose = getOption("verbose", TRUE)) {
   if (method == "umap" && (is.null(a) || is.null(b))) {
     ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
@@ -1275,6 +1294,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                    ret_model,
                    pca = pca, pca_center = pca_center,
                    n_vertices = n_vertices,
+                   tmpdir = tmpdir,
                    verbose = verbose)
   
   V <- d2sr$V
@@ -1343,6 +1363,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                         ret_model = FALSE,
                         pca = pca,
                         n_vertices = n_vertices,
+                        tmpdir = tmpdir,
                         verbose = verbose)
       
       tsmessage("Intersecting X and Y sets with target weight = ", 
@@ -1743,6 +1764,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
                      n_threads, grain_size,
                      ret_model,
                      n_vertices = x2nv(X),
+                     tmpdir = tempdir(),
                      pca = NULL, pca_center = TRUE,
                      verbose = FALSE) {
   V <- NULL
@@ -1879,6 +1901,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
                        n_threads, grain_size,
                        ret_model,
                        n_vertices = n_vertices,
+                       tmpdir = tmpdir,
                        verbose = verbose)
     Vblock <- x2set_res$V
     nn <- x2set_res$nn
@@ -1902,6 +1925,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
 
 x2nn <- function(X, n_neighbors, metric, nn_method,
                  n_trees, search_k,
+                 tmpdir = tempdir(),
                  n_threads, grain_size,
                  ret_model,
                  n_vertices = x2nv(X),
@@ -1927,6 +1951,7 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
     nn <- find_nn(X, n_neighbors,
                   method = nn_method, metric = metric,
                   n_trees = n_trees, search_k = search_k, 
+                  tmpdir = tmpdir,
                   n_threads = n_threads, grain_size = grain_size,
                   ret_index = ret_model, verbose = verbose
     )
@@ -2000,11 +2025,16 @@ x2set <- function(X, n_neighbors, metric, nn_method,
                   n_threads, grain_size,
                   ret_model,
                   n_vertices = x2nv(X),
+                  tmpdir = tempdir(),
                   verbose = FALSE) {
-  nn <- x2nn(X, n_neighbors, metric, nn_method,
-             n_trees, search_k,
-             n_threads, grain_size,
-             ret_model,
+  nn <- x2nn(X, 
+             n_neighbors = n_neighbors, 
+             metric = metric, 
+             nn_method = nn_method,
+             n_trees = n_trees, search_k = search_k,
+             tmpdir = tmpdir,
+             n_threads = n_threads, grain_size = grain_size,
+             ret_model = ret_model,
              n_vertices = n_vertices,
              verbose = verbose)
   

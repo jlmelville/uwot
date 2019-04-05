@@ -14,8 +14,8 @@ tumap(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   grain_size = 1, y = NULL, target_n_neighbors = n_neighbors,
   target_metric = "euclidean", target_weight = 0.5, pca = NULL,
   pca_center = TRUE, pcg_rand = TRUE, fast_sgd = FALSE,
-  ret_model = FALSE, ret_nn = FALSE, verbose = getOption("verbose",
-  TRUE))
+  ret_model = FALSE, ret_nn = FALSE, tmpdir = tempdir(),
+  verbose = getOption("verbose", TRUE))
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
@@ -317,6 +317,11 @@ manipulating unrelated parameters (e.g. \code{min_dist}, \code{n_epochs},
 could be sensitive to data scaling, so be wary of reusing nearest neighbor
 data if modifying the \code{scale} parameter. This parameter can be used in
 conjunction with \code{ret_model}.}
+
+\item{tmpdir}{Temporary directory to store nearest neighbor indexes during 
+nearest neighbor search. Default is \code{\link{tempdir}}. The index is
+only written to disk if \code{n_threads > 1} and 
+\code{nn_method = "annoy"}; otherwise, this parameter is ignored.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }
