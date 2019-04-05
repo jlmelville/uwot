@@ -31,7 +31,7 @@ smooth_knn <- function(nn,
     pluralize("thread", n_threads, " using")
   )
   parallelize <- n_threads > 0
-  affinity_matrix <- smooth_knn_distances_parallel(
+  affinity_matrix_res <- smooth_knn_distances_parallel(
     nn_dist = nn$dist,
     nn_idx = nn$idx,
     n_iter = 64,
@@ -43,7 +43,10 @@ smooth_knn <- function(nn,
     grain_size = grain_size,
     verbose = verbose
   )
-  affinity_matrix
+  if (verbose && affinity_matrix_res$n_failures > 0) {
+    tsmessage(affinity_matrix_res$n_failures, " smooth knn distance failures")
+  }
+  affinity_matrix_res$matrix
 }
 
 # Given nearest neighbor data and a measure of distance compute
@@ -100,7 +103,7 @@ perplexity_similarities <- function(nn, perplexity = NULL,
       pluralize("thread", n_threads, " using")
     )
     parallelize <- n_threads > 0
-    affinity_matrix <- calc_row_probabilities_parallel(
+    affinity_matrix_res <- calc_row_probabilities_parallel(
       nn_dist = nn$dist,
       nn_idx = nn$idx,
       perplexity = perplexity,
@@ -108,6 +111,10 @@ perplexity_similarities <- function(nn, perplexity = NULL,
       grain_size = grain_size,
       verbose = verbose
     )
+    affinity_matrix <- affinity_matrix_res$matrix
+    if (verbose && affinity_matrix_res$n_failures > 0) {
+      tsmessage(affinity_matrix_res$n_failures, " perplexity failures")
+    }
     affinity_matrix <- nn_to_sparse(nn$idx, as.vector(affinity_matrix),
                                     self_nbr = TRUE, max_nbr_id = nrow(nn$idx))
   }

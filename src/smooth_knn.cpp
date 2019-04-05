@@ -40,6 +40,9 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
   const double min_k_dist_scale;
   const double mean_distances;
   const double double_max = std::numeric_limits<double>::max();
+  
+  tthread::mutex mutex;
+  std::size_t n_search_fails;
 
   SmoothKnnWorker(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix&  nn_idx,
                   Rcpp::NumericMatrix nn_weights,
@@ -53,10 +56,13 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
     target(std::log2(n_neighbors)),
     n_iter(n_iter), local_connectivity(local_connectivity), bandwidth(bandwidth),
     tol(tol), min_k_dist_scale(min_k_dist_scale),
-    mean_distances(mean(nn_dist))
+    mean_distances(mean(nn_dist)),
+    n_search_fails(0)
   {  }
 
   void operator()(std::size_t begin, std::size_t end) {
+    // number of binary search failures in this window
+    std::size_t n_window_search_fails = 0;
     std::vector<double> non_zero_distances;
     non_zero_distances.reserve(n_neighbors);
     
@@ -65,7 +71,12 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
       non_zero_distances.clear();
       double lo = 0.0;
       double hi = double_max;
-
+      // best value seen is used only if binary search fails
+      // NB there is already a safeguard against sigma getting too large
+      // so this is less of a problem than with the perplexity search
+      double sigma_best = sigma;
+      double adiff_min = double_max;
+      
       auto ith_distances = nn_dist.row(i);
       for (std::size_t k = 0; k < ith_distances.length(); k++) {
         if (ith_distances[k] > 0.0) {
@@ -92,6 +103,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
         rho = *std::max_element(non_zero_distances.begin(), non_zero_distances.end());
       }
 
+      bool converged = false;
       for (unsigned int iter = 0; iter < n_iter; iter++) {
         double val = 0.0;
         // NB we iterate from 1, not 0: don't use the self-distance.
@@ -101,8 +113,17 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
           val += std::exp(-dist / sigma);
         }
 
-        if (std::abs(val - target) < tol) {
+        const double adiff = std::abs(val - target);
+        if (adiff < tol) {
+          converged = true;
           break;
+        }
+        
+        // store best sigma in case binary search fails (usually in the presence
+        // of multiple degenerate distances)
+        if (adiff < adiff_min) {
+          adiff_min = adiff;
+          sigma_best = sigma;
         }
 
         if (val > target) {
@@ -118,6 +139,10 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
             sigma = 0.5 * (lo + hi);
           }
         }
+      }
+      if (!converged) {
+        ++n_window_search_fails;
+        sigma = sigma_best;
       }
 
       if (rho > 0.0) {
@@ -143,12 +168,17 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
         nn_weights(i, k) = res[k];
       }
     }
+    // Update global count of failures
+    {
+      tthread::lock_guard<tthread::mutex> guard(mutex);
+      n_search_fails += n_window_search_fails;
+    }
   }
 };
 
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix smooth_knn_distances_parallel(
+Rcpp::List smooth_knn_distances_parallel(
     const Rcpp::NumericMatrix& nn_dist,
     const Rcpp::IntegerMatrix& nn_idx,
     const unsigned int n_iter = 64,
@@ -173,6 +203,9 @@ Rcpp::NumericMatrix smooth_knn_distances_parallel(
   else {
     worker(0, n_vertices);
   }
-
-  return nn_weights;
+  
+  return Rcpp::List::create(
+      Rcpp::Named("matrix") = nn_weights,
+      Rcpp::Named("n_failures") = worker.n_search_fails
+  );
 }

@@ -160,7 +160,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_row_probabilities_parallel
-Rcpp::NumericMatrix calc_row_probabilities_parallel(const Rcpp::NumericMatrix nn_dist, const Rcpp::IntegerMatrix nn_idx, const double perplexity, const unsigned int n_iter, const double tol, const bool parallelize, const std::size_t grain_size, const bool verbose);
+Rcpp::List calc_row_probabilities_parallel(const Rcpp::NumericMatrix nn_dist, const Rcpp::IntegerMatrix nn_idx, const double perplexity, const unsigned int n_iter, const double tol, const bool parallelize, const std::size_t grain_size, const bool verbose);
 RcppExport SEXP _uwot_calc_row_probabilities_parallel(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP perplexitySEXP, SEXP n_iterSEXP, SEXP tolSEXP, SEXP parallelizeSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -178,7 +178,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // smooth_knn_distances_parallel
-Rcpp::NumericMatrix smooth_knn_distances_parallel(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx, const unsigned int n_iter, const double local_connectivity, const double bandwidth, const double tol, const double min_k_dist_scale, const bool parallelize, const std::size_t grain_size, const bool verbose);
+Rcpp::List smooth_knn_distances_parallel(const Rcpp::NumericMatrix& nn_dist, const Rcpp::IntegerMatrix& nn_idx, const unsigned int n_iter, const double local_connectivity, const double bandwidth, const double tol, const double min_k_dist_scale, const bool parallelize, const std::size_t grain_size, const bool verbose);
 RcppExport SEXP _uwot_smooth_knn_distances_parallel(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP n_iterSEXP, SEXP local_connectivitySEXP, SEXP bandwidthSEXP, SEXP tolSEXP, SEXP min_k_dist_scaleSEXP, SEXP parallelizeSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

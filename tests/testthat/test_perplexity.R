@@ -99,14 +99,15 @@ P_row <- matrix(c(
 res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx,
   perplexity = 4,
   parallelize = FALSE, verbose = FALSE
-)
+)$matrix
 res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
              self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx))
 
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 
 RcppParallel::setThreadOptions(numThreads = 1)
-res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx, perplexity = 4, verbose = FALSE)
+res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx, 
+                                       perplexity = 4, verbose = FALSE)$matrix
 res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
                     self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx))
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
