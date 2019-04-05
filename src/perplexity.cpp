@@ -178,12 +178,7 @@ Rcpp::List calc_row_probabilities_parallel(
   else {
     worker(0, n_vertices);
   }
-  
-  if (worker.n_search_fails > 0) {
-    Rcpp::Rcout << worker.n_search_fails << " perplexity search failures" 
-                << std::endl;
-  }
-  
+
   return Rcpp::List::create(
     Rcpp::Named("matrix") = res,
     Rcpp::Named("n_failures") = worker.n_search_fails
