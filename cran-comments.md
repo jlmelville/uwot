@@ -2,6 +2,22 @@
 
 This is a resubmission. In this version I have:
 
+* Replaced double-blanks in Description field of the DESCRIPTION with four
+spaces.
+
+* Added single quotes to 'Rcpp' in the Description field of the DESCRIPTION.
+
+* Added a URL to the uwot website in the Description field of the DESCRIPTION.
+
+* Replaced \dontrun with \donttest in examples in the Rd files.
+
+* Added a tmpdir parameter to functions to explicitly secify the temporary 
+directory used to store temporary data.
+
+## Resubmission
+
+This is a resubmission. In this version I have:
+
 * Expanded the Description field of the DESCRIPTION file, including explaining
 the UMAP acronym and corrected the arXiv reference.
 
