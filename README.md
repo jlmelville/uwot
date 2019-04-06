@@ -1,6 +1,9 @@
-# UWOT
+# uwot
 
 [![Travis-CI Build Status](https://travis-ci.org/jlmelville/uwot.svg?branch=master)](https://travis-ci.org/jlmelville/uwot) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/jlmelville/uwot?branch=master&svg=true)](https://ci.appveyor.com/project/jlmelville/uwot) [![Coverage Status](https://img.shields.io/codecov/c/github/jlmelville/uwot/master.svg)](https://codecov.io/github/jlmelville/uwot?branch=master)
+[![CRAN Status Badge](http://www.r-pkg.org/badges/version/uwot)](https://cran.r-project.org/package=uwot)
+[![CRAN Monthly Downloads](https://cranlogs.r-pkg.org/badges/uwot)](https://cran.r-project.org/package=uwot)
+![CRAN Downloads](http://cranlogs.r-pkg.org/badges/grand-total/uwot)
 
 An R implementation of the 
 [Uniform Manifold Approximation and Projection (UMAP)](https://arxiv.org/abs/1802.03426) 
@@ -11,7 +14,11 @@ the basic method. Translated from the
 
 ## News
 
-*March 27 2018*. Default behavior of the stochastic gradient descent 
+*April 6 2019*. uwot is now on [CRAN](https://cran.r-project.org/package=uwot).
+Also, some minor-to-horrible bugs in the `lvish` perplexity routine have been
+fixed.
+
+*March 27 2019*. Default behavior of the stochastic gradient descent 
 optimization has changed again: the random number generator is now from the 
 [PCG family](http://www.pcg-random.org/), linked via the 
 [dqrng](https://cran.r-project.org/package=dqrng) package. This replaces the old
@@ -27,29 +34,15 @@ For visualization purposes, it seems reasonable to use the old PRNG
 during optimization. I have added a new parameter, `fast_sgd`, which if set to
 `TRUE`, sets these options for you.
 
-*December 10 2018*. Default behavior has changed so that multiple threads are no
-longer used during the stochastic gradient descent phase. This (along with some
-other minor changes) should ensure reproducibility (as long as you `set.seed`
-appropriately), at the cost of a loss in speed and is in line with the behavior
-of the Python UMAP implementation. If you don't care about reproducibility, the
-number of threads to use during SGD can be set with a new parameter,
-`n_sgd_threads`. Set it to `n_sgd_threads = "auto"` to get the old behavior.
-
-*December 9 2018*. Added a `pca` argument that will reduce `X` to the specified
-number of dimensions (e.g. 50, commonly used in t-SNE routines). This should
-give a big speed up to the nearest neighbor search if you are using Euclidean 
-distance metric and you have lots of features (where lots might be as little as
-100-1000), for instance 
-[COIL-100](http://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php). 
-
-*December 5 2018*. Some deeply experimental mixed data type features are now
-available: you can now mix different metrics (e.g. euclidean for some
-columns and cosine for others). The type of data that can be used with `y`
-in supervised UMAP has also been expanded. See 
-[Mixed Data Types](https://github.com/jlmelville/uwot#mixed-data-types)
-for more details.
-
 ## Installing
+
+### From CRAN
+
+```R
+install.packages("uwot")
+```
+
+### From github
 
 `uwot` makes use of C++ code which must be compiled. You may have to carry out
 a few extra steps before being able to build this package:
@@ -67,17 +60,18 @@ may be helpful here to work out what you can get away with. To be on the safe
 side, I would advise building `uwot` without a custom `Makevars`.
 
 ```R
-install.packages("devtools")
-devtools::install_github("jlmelville/uwot")
-library(uwot)
-
-# See function man page for help
-?umap
+install.packages("remotes")
+remotes::install_github("jlmelville/uwot")
 ```
 
 ## Example
 
 ```R
+library(uwot)
+
+# See function man page for help
+?umap
+
 # Non-numeric columns are ignored, so in a lot of cases you can pass a data
 # frame directly to umap
 iris_umap <- umap(iris, n_neighbors = 50, learning_rate = 0.5, init = "random")
