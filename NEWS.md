@@ -1,6 +1,25 @@
-# uwot 0.1.0
+# uwot 0.1.2
 
 Initial CRAN release.
+
+## New features
+
+* New parameter, `tmpdir`, which allows the user to specify the temporary
+directory where nearest neighbor indexes will be written during Annoy 
+nearest neighbor search. The default is `base::tempdir()`. Only used if
+`n_threads > 1` and `nn_method = "annoy"`.
+
+## Bug fixes and minor improvements
+
+* Fixed an issue with `lvish` where there was an off-by-one error when 
+calculating input probabilities.
+
+* Added a safe-guard to `lvish` to prevent the gaussian precision, beta,
+becoming overly large when the binary search fails during perplexity 
+calibration. 
+
+* The `lvish` perplexity calibration uses the log-sum-exp trick to avoid
+numeric underflow if beta becomes large.
 
 # uwot 0.0.0.9010 (31 March 2019)
 
