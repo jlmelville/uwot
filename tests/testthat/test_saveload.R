@@ -7,7 +7,7 @@ test_that("can save and load simple model", {
               metric = "euclidean", verbose = FALSE, n_threads = 0, 
               ret_model = TRUE)
   
-  mod_fname <- tempfile()
+  mod_fname <- tempfile(tmpdir = tempdir())
   save_uwot(model, file = mod_fname)
   expect_true(file.exists(mod_fname))
   
@@ -38,7 +38,7 @@ test_that("can save and load mixed distance model", {
                   verbose = FALSE, n_threads = 0,
                   ret_nn = TRUE, ret_model = TRUE)
   
-  mod_fname <- tempfile()
+  mod_fname <- tempfile(tmpdir = tempdir())
   save_uwot(model, file = mod_fname)
   expect_true(file.exists(mod_fname))
   
