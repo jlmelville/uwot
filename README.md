@@ -422,6 +422,9 @@ mnist_lv <- lvish(mnist, kernel = "knn", perplexity = 15, n_epochs = 1500,
                   init = "lvrand", verbose = TRUE)
 ```
 
+See the [lvish examples](https://jlmelville.github.io/uwot/lvish.html) page for 
+more results.
+
 ## Mixed Data Types
 
 The default approach of UMAP is that all your data is numeric and will be 
