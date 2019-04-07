@@ -1,31 +1,8 @@
-## Resubmission
-
-This is a resubmission. In this version I have:
-
-* Replaced double-blanks in Description field of the DESCRIPTION with four
-spaces.
-
-* Added single quotes to 'Rcpp' in the Description field of the DESCRIPTION.
-
-* Added a URL to the uwot website in the Description field of the DESCRIPTION.
-
-* Replaced \dontrun with \donttest in examples in the Rd files.
-
-* Added a tmpdir parameter to functions to explicitly secify the temporary 
-directory used to store temporary data.
-
-## Resubmission
-
-This is a resubmission. In this version I have:
-
-* Expanded the Description field of the DESCRIPTION file, including explaining
-the UMAP acronym and corrected the arXiv reference.
-
-* Provided runnable examples in the .Rd files for every exported function.
-
 ## Release Summary
 
-* This is a new release.
+This is a patch release for a bug in C++ nearest neighbor code that could crash
+the session and therefore needs to be fixed ASAP. I apologize for the quick
+submission of a new release so soon after initial acceptance.
 
 ## Test environments
 
