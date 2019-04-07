@@ -143,6 +143,8 @@ from [How to Use t-SNE Effectively](https://distill.pub/2016/misread-tsne/).
 [Supervised and Metric Learning](https://jlmelville.github.io/uwot/metric-learning.html).
 * The effect of using [approximations to speed up the stochastic gradient descent](https://jlmelville.github.io/uwot/fast-sgd.html).
 * An exploration of some [initialization options](https://jlmelville.github.io/uwot/init.html).
+* A list of examples of using the LargeVis-like
+[`lvish`](https://jlmelville.github.io/uwot/lvish.html) method.
 
 ## Implementation Details
 
