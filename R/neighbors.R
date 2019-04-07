@@ -189,7 +189,6 @@ annoy_search_parallel <- function(X, k, ann,
                         verbose = verbose
   )
   unlink(index_file)
-  res$idx <- res$idx + 1
   res
 }
 
