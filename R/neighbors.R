@@ -168,8 +168,9 @@ annoy_search_parallel <- function(X, k, ann,
                                   grain_size = 1,
                                   verbose = FALSE) {
   index_file <- tempfile(tmpdir = tmpdir)
+  tsmessage("Writing NN index file to temp file ", index_file)
   ann$save(index_file)
-  
+  fsize <- file.size(index_file)
   tsmessage("Searching Annoy index using ", pluralize("thread", n_threads),
             ", search_k = ", search_k)
   
@@ -189,12 +190,15 @@ annoy_search_parallel <- function(X, k, ann,
                         verbose = verbose
   )
   unlink(index_file)
-  
-  if (any(res$item) == -1) {
-    stop(
-      "search_k/n_trees settings were unable to find ", k,
-      " neighbors for all items"
-    )
+  if (any(res$item == -1)) {
+    msg <- paste0("search_k/n_trees settings were unable to find ", k, 
+                  " neighbors for all items.")
+    if (fsize > 2147483647) {
+      msg <- paste0(msg, " Index file may have been too large to process.",
+                    " Try repeating with n_threads = 0, reducing n_trees,",
+                    " or reducing to a smaller dimensionality, e.g. pca = 50")
+    }
+    stop(msg)
   }
   
   res
