@@ -95,7 +95,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
             rho += interpolation * (non_zero_distances[index] - non_zero_distances[index - 1]);
           }
         }
-        else {
+        else if (non_zero_distances.size() > 0) {
           rho = interpolation * non_zero_distances[0];
         }
       }
