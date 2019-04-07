@@ -1,8 +1,7 @@
 ## Release Summary
 
-This is a patch release for a bug in C++ nearest neighbor code that could crash
-the session and therefore needs to be fixed ASAP. I apologize for the quick
-submission of a new release so soon after initial acceptance.
+This is a patch release for a bug in C++ nearest neighbor code that could cause
+the session to terminate.
 
 ## Test environments
 
@@ -19,12 +18,18 @@ submission of a new release so soon after initial acceptance.
 
 There were no ERRORs or WARNINGs.
 
-There was one NOTE:
+There were two NOTEs:
 
 * checking for GNU extensions in Makefiles ... NOTE
 GNU make is a SystemRequirements.
 
 This is expected due to linking to the RcppParallel package.
+
+* Days since last update: 1
+
+I apologize for the submission of a new release so soon after initial
+acceptance. The bug is unlikely to occur in practice but because it causes the
+session to crash, I considered it urgent to fix it ASAP.
 
 There was a message about possibly mis-spelled words in DESCRIPTION:
   
