@@ -21,66 +21,66 @@ BEGIN_RCPP
 END_RCPP
 }
 // annoy_euclidean_nns
-Rcpp::List annoy_euclidean_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
-RcppExport SEXP _uwot_annoy_euclidean_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+Rcpp::List annoy_euclidean_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n_neighbors, std::size_t search_k, std::size_t grain_size, bool verbose);
+RcppExport SEXP _uwot_annoy_euclidean_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP n_neighborsSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< std::size_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type n_neighbors(n_neighborsSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type search_k(search_kSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(annoy_euclidean_nns(index_name, mat, n, search_k, grain_size, verbose));
+    rcpp_result_gen = Rcpp::wrap(annoy_euclidean_nns(index_name, mat, n_neighbors, search_k, grain_size, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // annoy_cosine_nns
-Rcpp::List annoy_cosine_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
-RcppExport SEXP _uwot_annoy_cosine_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+Rcpp::List annoy_cosine_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n_neighbors, std::size_t search_k, std::size_t grain_size, bool verbose);
+RcppExport SEXP _uwot_annoy_cosine_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP n_neighborsSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< std::size_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type n_neighbors(n_neighborsSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type search_k(search_kSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(annoy_cosine_nns(index_name, mat, n, search_k, grain_size, verbose));
+    rcpp_result_gen = Rcpp::wrap(annoy_cosine_nns(index_name, mat, n_neighbors, search_k, grain_size, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // annoy_manhattan_nns
-Rcpp::List annoy_manhattan_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
-RcppExport SEXP _uwot_annoy_manhattan_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+Rcpp::List annoy_manhattan_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n_neighbors, std::size_t search_k, std::size_t grain_size, bool verbose);
+RcppExport SEXP _uwot_annoy_manhattan_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP n_neighborsSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< std::size_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type n_neighbors(n_neighborsSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type search_k(search_kSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(annoy_manhattan_nns(index_name, mat, n, search_k, grain_size, verbose));
+    rcpp_result_gen = Rcpp::wrap(annoy_manhattan_nns(index_name, mat, n_neighbors, search_k, grain_size, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // annoy_hamming_nns
-Rcpp::List annoy_hamming_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n, std::size_t search_k, std::size_t grain_size, bool verbose);
-RcppExport SEXP _uwot_annoy_hamming_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP nSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+Rcpp::List annoy_hamming_nns(const std::string& index_name, const Rcpp::NumericMatrix& mat, std::size_t n_neighbors, std::size_t search_k, std::size_t grain_size, bool verbose);
+RcppExport SEXP _uwot_annoy_hamming_nns(SEXP index_nameSEXP, SEXP matSEXP, SEXP n_neighborsSEXP, SEXP search_kSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const std::string& >::type index_name(index_nameSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type mat(matSEXP);
-    Rcpp::traits::input_parameter< std::size_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type n_neighbors(n_neighborsSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type search_k(search_kSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(annoy_hamming_nns(index_name, mat, n, search_k, grain_size, verbose));
+    rcpp_result_gen = Rcpp::wrap(annoy_hamming_nns(index_name, mat, n_neighbors, search_k, grain_size, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
