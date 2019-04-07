@@ -189,6 +189,14 @@ annoy_search_parallel <- function(X, k, ann,
                         verbose = verbose
   )
   unlink(index_file)
+  
+  if (any(res$item) == -1) {
+    stop(
+      "search_k/n_trees settings were unable to find ", k,
+      " neighbors for all items"
+    )
+  }
+  
   res
 }
 

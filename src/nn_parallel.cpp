@@ -47,7 +47,10 @@ struct NNWorker : public RcppParallel::Worker {
       std::vector<T> distances;
       
       index.get_nns_by_vector(fv.data(), n_neighbors, search_k, &result, &distances);
-
+      if (result.size() != n_neighbors || distances.size() != n_neighbors) { 
+        break;
+      }
+      
       for (std::size_t j = 0; j < n_neighbors; j++) {
         dists(i, j) = distances[j];
         idx(i, j) = result[j];
@@ -66,7 +69,8 @@ Rcpp::List annoy_euclidean_nns(const std::string& index_name,
   std::size_t ncol = mat.cols();
   Rcpp::NumericMatrix dist(nrow, n_neighbors);
   Rcpp::IntegerMatrix idx(nrow, n_neighbors);
-
+  idx.fill(-1);
+  
   NNWorker<int32_t, float, Euclidean, Kiss64Random>
     worker(index_name, mat, dist, idx, ncol, n_neighbors, search_k);
   RcppParallel::parallelFor(0, nrow, worker, grain_size);
@@ -85,6 +89,7 @@ Rcpp::List annoy_cosine_nns(const std::string& index_name,
   std::size_t ncol = mat.cols();
   Rcpp::NumericMatrix dist(nrow, n_neighbors);
   Rcpp::IntegerMatrix idx(nrow, n_neighbors);
+  idx.fill(-1);
   
   NNWorker<int32_t, float, Angular, Kiss64Random>
     worker(index_name, mat, dist, idx, ncol, n_neighbors, search_k);
@@ -104,6 +109,7 @@ Rcpp::List annoy_manhattan_nns(const std::string& index_name,
   std::size_t ncol = mat.cols();
   Rcpp::NumericMatrix dist(nrow, n_neighbors);
   Rcpp::IntegerMatrix idx(nrow, n_neighbors);
+  idx.fill(-1);
   
   NNWorker<int32_t, float, Manhattan, Kiss64Random>
     worker(index_name, mat, dist, idx, ncol, n_neighbors, search_k);
@@ -124,6 +130,7 @@ Rcpp::List annoy_hamming_nns(const std::string& index_name,
   std::size_t ncol = mat.cols();
   Rcpp::NumericMatrix dist(nrow, n_neighbors);
   Rcpp::IntegerMatrix idx(nrow, n_neighbors);
+  idx.fill(-1);
   
   NNWorker<int32_t, uint64_t, Hamming, Kiss64Random>
     worker(index_name, mat, dist, idx, ncol, n_neighbors, search_k);

@@ -1,3 +1,16 @@
+# uwot 0.1.3
+
+## Bug fixes and minor improvements
+
+* Fixed an issue where if the Annoy nearest neighbor search was unable to find k
+neighbors for an item, the session would crash. Note that there appears to be an
+issue where Annoy is unable to load an index after its written to disk that can
+trigger this problem. It seems to be caused by very high dimensional datasets. A
+work-around is to set `n_threads = 0` (the index will not be written to disk and
+re-loaded under these circumstances), at the cost of a longer search time, or to
+use the `pca` parameter to reduce the dimensionality. It's also possible that
+using a lower value of `n_trees` can help (might reduce accuracy unacceptably).
+
 # uwot 0.1.2
 
 Initial CRAN release.
