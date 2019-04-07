@@ -303,7 +303,11 @@ $$
 where $a$ and $b$ are determined by a non-linear least squares fit based on the
 `min_dist` and `spread` parameters that control the tightness of the squashing
 function. By setting $a = 1$ and $b = 1$ you get t-SNE weighting back.
-The current UMAP defaults result in $a = 1.929$ and $b = 0.7915$.
+The current UMAP defaults result in $a = 1.929$ and $b = 0.7915$. 
+*April 7 2019*: Actually, I got this wrong. The UMAP defaults use 
+`min_dist = 0.1, spread = 1`, which results in $a = 1.577$ and $b = 0.8951$.
+If you use `min_dist = 0.001, spread = 1` then you get the result for 
+$a = 1.929$ and $b = 0.7915$.
 
 The attractive and repulsive UMAP gradient expressions are, respectively:
 
