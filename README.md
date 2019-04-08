@@ -141,6 +141,7 @@ output of UMAP on some datasets, compared to t-SNE.
 from [How to Use t-SNE Effectively](https://distill.pub/2016/misread-tsne/).
 * How to use UMAP for 
 [Supervised and Metric Learning](https://jlmelville.github.io/uwot/metric-learning.html).
+* An attempt to illustrate the effect of [`min_dist` and `spread`](https://jlmelville.github.io/uwot/abparams.html).
 * The effect of using [approximations to speed up the stochastic gradient descent](https://jlmelville.github.io/uwot/fast-sgd.html).
 * An exploration of some [initialization options](https://jlmelville.github.io/uwot/init.html).
 * A list of examples of using the LargeVis-like
