@@ -1120,6 +1120,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
     a <- ab_res[1]
     b <- ab_res[2]
+    tsmessage("UMAP embedding parameters a = ", formatC(a), " b = ", formatC(b))
   }
   
   if (n_neighbors < 2) {
