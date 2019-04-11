@@ -1,3 +1,11 @@
+# uwot 0.1.4
+
+## Bug fixes and minor improvements
+
+* Fix for `ERROR: there is already an InterruptableProgressMonitor instance defined`
+
+
+
 # uwot 0.1.3
 
 ## Bug fixes and minor improvements

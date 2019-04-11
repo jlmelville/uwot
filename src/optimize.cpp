@@ -212,6 +212,7 @@ std::vector<double> optimize_layout(
     alpha = initial_alpha * (1.0 - (double(n) / double(n_epochs)));
     
     if (Progress::check_abort()) {
+      progress.cleanup();
       return head_embedding;
     }
     if (verbose) {
