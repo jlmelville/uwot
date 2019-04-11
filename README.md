@@ -7,7 +7,7 @@
 
 An R implementation of the 
 [Uniform Manifold Approximation and Projection (UMAP)](https://arxiv.org/abs/1802.03426) 
-method for dimensionality reduction (McInnes and Healy, 2018), that also 
+method for dimensionality reduction (McInnes et al. 2018), that also 
 implements the supervised and metric (out-of-sample) learning extensions to
 the basic method. Translated from the 
 [Python implementation](https://github.com/lmcinnes/umap).
