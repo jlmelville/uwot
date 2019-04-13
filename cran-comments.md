@@ -1,3 +1,9 @@
+## CRAN checks
+
+A gcc-UBSAN issue is reported, due to a library used by the RcppParallel 
+package. The RcppParallel package CRAN check also reports this issue, so I don't
+think it's something that I can fix in this package.
+
 ## Release Summary
 
 This is a patch release for a bug in C++ nearest neighbor code that could cause
