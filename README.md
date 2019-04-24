@@ -166,7 +166,11 @@ If you need other metrics, and can generate the nearest neighbor info
 externally, you can pass the data directly to `uwot` via the `nn_method` 
 parameter. See the 
 [Nearest Neighbor Data Format section](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
-for more details.
+for more details. Please note that the Hamming support is a lot slower than the
+other metrics. I do not recommend using it if you have more than a few hundred
+features, and even then expect it to take several minutes during the index 
+building phase in situations where the Euclidean metric would take only a few
+seconds.
 
 Coordinate initialization uses
 [RSpectra](https://cran.r-project.org/package=RSpectra) to do the
