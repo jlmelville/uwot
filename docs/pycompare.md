@@ -250,7 +250,7 @@ candidate list size used in nearest neighbor descent, which can quickly cause
 a large increase in memory and run time if you aren't careful. Also, you can't 
 fiddle with these parameters in `UMAP` version 0.3.8 anyway.
 
-`uwot` results... well, they're less impressive than `UMAP`'a. The `tasic2018`
+`uwot` results... well, they're less impressive than `UMAP`'s. The `tasic2018`
 results are pretty bad, and the `macosko2015` results can be fairly described as
 horrendous. The accuracies show a rough correlation with the percentage of
 variance explained by 100 components. Results for `tasic2018` and especially

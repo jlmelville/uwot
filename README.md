@@ -139,6 +139,8 @@ output of UMAP on some datasets, compared to t-SNE.
 * Some results of running 
 [UMAP on the simple datasets](https://jlmelville.github.io/uwot/umap-simple.html) 
 from [How to Use t-SNE Effectively](https://distill.pub/2016/misread-tsne/).
+* A comparison of 
+[`uwot` output to the Python UMAP implementation](https://jlmelville.github.io/uwot/pycompare).
 * How to use UMAP for 
 [Supervised and Metric Learning](https://jlmelville.github.io/uwot/metric-learning.html).
 * An attempt to illustrate the effect of [`min_dist` and `spread`](https://jlmelville.github.io/uwot/abparams.html).
