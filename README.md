@@ -59,6 +59,11 @@ Mac owners more.
 may be helpful here to work out what you can get away with. To be on the safe
 side, I would advise building `uwot` without a custom `Makevars`.
 
+**Everybody** Ensure your `.Rprofile` files do not print any messages. 
+This project's `Makevars` file relies on a clean output to correctly configure [RcppParallel](https://cran.r-project.org/package=RcppParallel). If compilation
+fails and you see startup messages in the build output, this is what is
+happening.
+
 ```R
 install.packages("remotes")
 remotes::install_github("jlmelville/uwot")
