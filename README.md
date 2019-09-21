@@ -2,14 +2,15 @@
 
 [![Travis-CI Build Status](https://travis-ci.org/jlmelville/uwot.svg?branch=master)](https://travis-ci.org/jlmelville/uwot) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/jlmelville/uwot?branch=master&svg=true)](https://ci.appveyor.com/project/jlmelville/uwot) [![Coverage Status](https://img.shields.io/codecov/c/github/jlmelville/uwot/master.svg)](https://codecov.io/github/jlmelville/uwot?branch=master)
 [![CRAN Status Badge](http://www.r-pkg.org/badges/version/uwot)](https://cran.r-project.org/package=uwot)
+[![Dependencies](https://tinyverse.netlify.com/badge/uwot)](https://cran.r-project.org/package=uwot)
 [![CRAN Monthly Downloads](https://cranlogs.r-pkg.org/badges/uwot)](https://cran.r-project.org/package=uwot)
 ![CRAN Downloads](http://cranlogs.r-pkg.org/badges/grand-total/uwot)
 
-An R implementation of the 
-[Uniform Manifold Approximation and Projection (UMAP)](https://arxiv.org/abs/1802.03426) 
-method for dimensionality reduction (McInnes et al. 2018), that also 
+An R implementation of the
+[Uniform Manifold Approximation and Projection (UMAP)](https://arxiv.org/abs/1802.03426)
+method for dimensionality reduction (McInnes et al. 2018), that also
 implements the supervised and metric (out-of-sample) learning extensions to
-the basic method. Translated from the 
+the basic method. Translated from the
 [Python implementation](https://github.com/lmcinnes/umap).
 
 ## News
@@ -18,19 +19,19 @@ the basic method. Translated from the
 Also, some minor-to-horrible bugs in the `lvish` perplexity routine have been
 fixed.
 
-*March 27 2019*. Default behavior of the stochastic gradient descent 
-optimization has changed again: the random number generator is now from the 
-[PCG family](http://www.pcg-random.org/), linked via the 
+*March 27 2019*. Default behavior of the stochastic gradient descent
+optimization has changed again: the random number generator is now from the
+[PCG family](http://www.pcg-random.org/), linked via the
 [dqrng](https://cran.r-project.org/package=dqrng) package. This replaces the old
 routine, based on my translation of the Python UMAP implementation of the
 Tausworthe "taus88" PRNG into C++. If you have any concern about the quality of
-the random numbers used to optimize UMAP, stick with this new default PRNG. 
+the random numbers used to optimize UMAP, stick with this new default PRNG.
 However it is slower, so to get the old behavior back set `pcg_rand = FALSE`.
 
-For visualization purposes, it seems reasonable to use the old PRNG 
-(`pcg_rand = FALSE`), along with multiple threads during SGD 
-(`n_sgd_threads = "auto"`), and the UMAP gradient approximation 
-(`approx_pow = TRUE`), which combined will show a very noticeable speed up 
+For visualization purposes, it seems reasonable to use the old PRNG
+(`pcg_rand = FALSE`), along with multiple threads during SGD
+(`n_sgd_threads = "auto"`), and the UMAP gradient approximation
+(`approx_pow = TRUE`), which combined will show a very noticeable speed up
 during optimization. I have added a new parameter, `fast_sgd`, which if set to
 `TRUE`, sets these options for you.
 
@@ -47,11 +48,11 @@ install.packages("uwot")
 `uwot` makes use of C++ code which must be compiled. You may have to carry out
 a few extra steps before being able to build this package:
 
-**Windows**: install 
-[Rtools](https://cran.r-project.org/bin/windows/Rtools/) and ensure 
+**Windows**: install
+[Rtools](https://cran.r-project.org/bin/windows/Rtools/) and ensure
 `C:\Rtools\bin` is on your path.
 
-**Mac OS X**: using a custom `~/.R/Makevars` 
+**Mac OS X**: using a custom `~/.R/Makevars`
 [may cause linking errors](https://github.com/jlmelville/uwot/issues/1).
 This sort of thing is a potential problem on all platforms but seems to bite
 Mac owners more.
@@ -59,7 +60,7 @@ Mac owners more.
 may be helpful here to work out what you can get away with. To be on the safe
 side, I would advise building `uwot` without a custom `Makevars`.
 
-**Everybody**: ensure your `.Rprofile` files do not print any messages. 
+**Everybody**: ensure your `.Rprofile` files do not print any messages.
 This project's `Makevars` file relies on a clean output to correctly configure [RcppParallel](https://cran.r-project.org/package=RcppParallel). If compilation
 fails and you see startup messages in the build output, this is what is
 happening.
@@ -86,9 +87,9 @@ iris_umap <- umap(iris, n_neighbors = 50, learning_rate = 0.5, init = "random")
 # mnist <- snedata::download_mnist()
 mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
 
-# For high dimensional datasets (> 100-1000 columns) using PCA to reduce 
-# dimensionality is highly recommended to avoid the nearest neighbor search 
-# taking a long time. Keeping only 50 dimensions can speed up calculations 
+# For high dimensional datasets (> 100-1000 columns) using PCA to reduce
+# dimensionality is highly recommended to avoid the nearest neighbor search
+# taking a long time. Keeping only 50 dimensions can speed up calculations
 # without affecting the visualization much
 mnist_umap <- umap(mnist, pca = 50)
 
@@ -102,7 +103,7 @@ mnist_umap_cosine <- umap(mnist, n_neighbors = 15, metric = "cosine", min_dist =
 mnist_umap_fast_sgd <- umap(mnist, n_neighbors = 15, metric = "cosine", min_dist = 0.001, verbose = TRUE, fast_sgd = TRUE)
 
 # Supervised dimension reduction
-mnist_umap_s <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8, 
+mnist_umap_s <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8,
                      y = mnist$Label, target_weight = 0.5)
 
 # Add new points to an existing embedding
@@ -139,14 +140,14 @@ Apart from the man pages in R: you may be interested in:
 * A [description of UMAP](https://jlmelville.github.io/uwot/umap-for-tsne.html)
 using algorithmic terminology similar to t-SNE, rather than the more topological
 approach of the UMAP publication.
-* [Examples](https://jlmelville.github.io/uwot/umap-examples.html) of the 
-output of UMAP on some datasets, compared to t-SNE. 
-* Some results of running 
-[UMAP on the simple datasets](https://jlmelville.github.io/uwot/umap-simple.html) 
+* [Examples](https://jlmelville.github.io/uwot/umap-examples.html) of the
+output of UMAP on some datasets, compared to t-SNE.
+* Some results of running
+[UMAP on the simple datasets](https://jlmelville.github.io/uwot/umap-simple.html)
 from [How to Use t-SNE Effectively](https://distill.pub/2016/misread-tsne/).
-* A comparison of 
+* A comparison of
 [`uwot` output to the Python UMAP implementation](https://jlmelville.github.io/uwot/pycompare).
-* How to use UMAP for 
+* How to use UMAP for
 [Supervised and Metric Learning](https://jlmelville.github.io/uwot/metric-learning.html).
 * An attempt to illustrate the effect of [`min_dist` and `spread`](https://jlmelville.github.io/uwot/abparams.html).
 * The effect of using [approximations to speed up the stochastic gradient descent](https://jlmelville.github.io/uwot/fast-sgd.html).
@@ -167,13 +168,13 @@ distance metrics (set by the `metric` parameter) are:
 * Manhattan
 * Hamming
 
-If you need other metrics, and can generate the nearest neighbor info 
-externally, you can pass the data directly to `uwot` via the `nn_method` 
-parameter. See the 
+If you need other metrics, and can generate the nearest neighbor info
+externally, you can pass the data directly to `uwot` via the `nn_method`
+parameter. See the
 [Nearest Neighbor Data Format section](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
 for more details. Please note that the Hamming support is a lot slower than the
 other metrics. I do not recommend using it if you have more than a few hundred
-features, and even then expect it to take several minutes during the index 
+features, and even then expect it to take several minutes during the index
 building phase in situations where the Euclidean metric would take only a few
 seconds.
 
@@ -187,15 +188,15 @@ The optional PCA initialization and initial dimensionality reduction uses
 The smooth k-nearest neighbor distance and stochastic gradient descent
 optimization routines are written in C++ (using
 [Rcpp](https://cran.r-project.org/package=Rcpp), aping
-the Python code as closely as possible. It is my first time using Rcpp, so 
+the Python code as closely as possible. It is my first time using Rcpp, so
 let's assume I did a horrible job.
 
 For the datasets I've tried it with, the results look at least
-reminiscent of those obtained using the 
+reminiscent of those obtained using the
 [official Python implementation](https://github.com/lmcinnes/umap).
 Below are results for the 70,000 MNIST digits (downloaded using the
 [snedata](https://github.com/jlmelville/snedata) package). On the left
-is the result of using the official Python UMAP implementation 
+is the result of using the official Python UMAP implementation
 (via the [reticulate](https://cran.r-project.org/package=reticulate) package).
 The right hand image is the result of using `uwot`.
 
@@ -212,7 +213,7 @@ The project documentation contains some more [examples](https://jlmelville.githu
 To get a feel for the performance of `uwot`, here are some timings for processing the MNIST dataset, compared with some other
 methods. I wouldn't take them very seriously, but they show that `uwot` is competitive with other methods.
 
-|Package |Version|Arguments|Time|	
+|Package |Version|Arguments|Time|
 |--------|-------|---------|----|
 |[Rtsne](https://cran.r-project.org/package=Rtsne)|[0.15](https://github.com/jkrijthe/Rtsne/commit/f3f42504eeac627e4d886b1489ee289f8f9d082b)|`partial_pca = TRUE`|14m 13s|
 |[openTSNE (Python)](https://github.com/pavlin-policar/openTSNE)|0.3.0-py37h830ac7b_1000|`n_jobs=4`| 6m  4s|
@@ -220,7 +221,7 @@ methods. I wouldn't take them very seriously, but they show that `uwot` is compe
 |[FIt-SNE (C++)](https://github.com/KlugerLab/FIt-SNE)|[1.0.0](https://github.com/KlugerLab/FIt-SNE/releases/download/v1.0.0/FItSNE-Windows-1.0.0.zip)|`nthreads = 4`|2m 43s|
 |[FIt-SNE (C++)](https://github.com/KlugerLab/FIt-SNE)|[1.0.0](https://github.com/KlugerLab/FIt-SNE/releases/download/v1.0.0/FItSNE-Windows-1.0.0.zip)|`nthreads = 4` + PCA to 50D|1m 11s|
 |[LargeVis (C++)](https://github.com/lferry007/LargeVis)|[feb8121](https://github.com/lferry007/LargeVis/commit/feb8121e8eb9652477f7f564903d189ee663796f)|`-threads 4`|12m 43s|
-|[largeVis (R package)](https://github.com/elbamos/largevis)|[e51871e](					 https://github.com/elbamos/largeVis/commit/e51871e689642177c184527efab668d248717fa9)|`save_neighbors = FALSE, save_edges = FALSE, threads = 4`|33m 58s|
+|[largeVis (R package)](https://github.com/elbamos/largevis)|[e51871e](https://github.com/elbamos/largeVis/commit/e51871e689642177c184527efab668d248717fa9)|`save_neighbors = FALSE, save_edges = FALSE, threads = 4`|33m 58s|
 |`uwot::lvish`|[0.0.0.9009](https://github.com/jlmelville/uwot/releases/tag/v0.0.0.9009)|`n_threads = 4, n_sgd_threads = 4`| 5m 52s|
 |[UMAP (Python)](https://github.com/lmcinnes/umap)|0.3.7-py37_1000||1m 25s|
 |[umap (R package)](https://cran.r-project.org/package=umap)|[09f6020](https://github.com/tkonopka/umap/commit/09f60205c572fc1fbfa3e985b48572098fc9b17d)|`method = "naive"`| 9m 14s|
@@ -230,34 +231,34 @@ methods. I wouldn't take them very seriously, but they show that `uwot` is compe
 |uwot|[0.0.0.9009](https://github.com/jlmelville/uwot/releases/tag/v0.0.0.9009)|`n_threads = 4, approx_pow = TRUE, n_sgd_threads = 4`| 1m 16s|
 |uwot|[0.0.0.9009](https://github.com/jlmelville/uwot/releases/tag/v0.0.0.9009)|`n_threads = 4, approx_pow = TRUE, pca = 50`| 48s|
 
-Some notes on how these numbers were generated: I ran this on a Windows machine, using R 3.5.2 and Python 3.7.0. 
-The official LargeVis implementation was built with Visual Studio 2017 Community Edition and may not be properly optimized 
-(the VS solution is available in [my fork](https://github.com/jlmelville/LargeVis)). 
+Some notes on how these numbers were generated: I ran this on a Windows machine, using R 3.5.2 and Python 3.7.0.
+The official LargeVis implementation was built with Visual Studio 2017 Community Edition and may not be properly optimized
+(the VS solution is available in [my fork](https://github.com/jlmelville/LargeVis)).
 
 For R packages, the MNIST data was downloaded via the [snedata](https://github.com/jlmelville/snedata) package.
 For Python packages, the `sklearn.datasets.fetch_mldata('MNIST original')` was used. The LargeVis source code contains a MNIST
-example with the data already present. 
+example with the data already present.
 
-For FIt-SNE, I used the 
+For FIt-SNE, I used the
 [provided Windows binary](https://github.com/KlugerLab/FIt-SNE/releases/download/v1.0.0/FItSNE-Windows-1.0.0.zip)
 via the R wrapper (and hence used the MNIST data from the `snedata` package). The reported time for second FIt-SNE entry in the table
-and includes the 13 seconds it takes to reduce the dimensionality to 50 via PCA, using [irlba](https://cran.r-project.org/package=irlba) 
+and includes the 13 seconds it takes to reduce the dimensionality to 50 via PCA, using [irlba](https://cran.r-project.org/package=irlba)
 (this is the same package and dimension reduction used by Rtsne and the last reported time for uwot).
 
-The default openTSNE uses the same FFT approach that FIt-SNE does, so I don't know why it's much slower, apart from the 
+The default openTSNE uses the same FFT approach that FIt-SNE does, so I don't know why it's much slower, apart from the
 use of the numpy version of FFT rather than the [FFTW](http://www.fftw.org/) library, but my understanding was that it shouldn't
 make much difference with a dataset the size of MNIST. Perhaps this is a Windows thing.
 
 For `uwot`, the bottleneck with typical settings is the nearest neighbor search, which is currently provided by Annoy, whereas the
-Python implementation uses [pynndescent](https://github.com/lmcinnes/pynndescent), a nearest neighbor descent approach. 
+Python implementation uses [pynndescent](https://github.com/lmcinnes/pynndescent), a nearest neighbor descent approach.
 
-On the optimization side of things, `uwot` defaults are conservative. Using `approx_pow = TRUE` uses the `fastPrecisePow` 
+On the optimization side of things, `uwot` defaults are conservative. Using `approx_pow = TRUE` uses the `fastPrecisePow`
 approximation to the `pow` function suggested by [Martin Ankerl](https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/). For what I think seem like typical values of `b` (between `0.7` and `0.9`)
-and the squared distance (`0`-`1000`), I found the maximum relative error was 
+and the squared distance (`0`-`1000`), I found the maximum relative error was
 about `0.06`. However, I haven't done much testing, beyond looking to see that
-results from the 
-[examples page](https://jlmelville.github.io/uwot/umap-examples.html) are not 
-obviously worsened. Results in the table above with `approx_pow = TRUE` do show 
+results from the
+[examples page](https://jlmelville.github.io/uwot/umap-examples.html) are not
+obviously worsened. Results in the table above with `approx_pow = TRUE` do show
 a worthwhile improvement.
 
 Using `n_sgd_threads` with more than 1 thread will not give reproducible results, but should not behave any worse than LargeVis in that
@@ -279,28 +280,28 @@ neighbor index search, the smooth knn/perplexity calibration, and the
 optimization, which is the same approach that
 [LargeVis](https://github.com/lferry007/LargeVis) takes.
 
-You can (and should) adjust the number of threads via the `n_threads`, which 
-controls the nearest neighbor and smooth knn calibration, and the 
+You can (and should) adjust the number of threads via the `n_threads`, which
+controls the nearest neighbor and smooth knn calibration, and the
 `n_sgd_threads` parameter, which controls the number of threads used during
-optimization. For the `n_threads`, the default is half of whatever RcppParallel 
-thinks should be the default. For `n_sgd_threads` the default is `0`, which 
-ensures reproducibility of results with a fixed seed. 
+optimization. For the `n_threads`, the default is half of whatever RcppParallel
+thinks should be the default. For `n_sgd_threads` the default is `0`, which
+ensures reproducibility of results with a fixed seed.
 
 I have also exposed the `grain_size` parameter. If a thread would
 process less than `grain_size` number of items, then no multithreading is
 carried out.
 
 I've not experienced any problems with using multiple threads for a little
-while, but if you have any problems with crashing sessions, please file an 
+while, but if you have any problems with crashing sessions, please file an
 issue.
 
 ## Limitations and Other Issues
 
-* As noted in the 
+* As noted in the
 [Implementation Details](https://github.com/jlmelville/uwot#implementation-details),
 only Euclidean, Cosine, Hamming, and Manhattan distances are supported for finding
 nearest neighbors from data frame and dense matrix input. For other metrics,
-you can pass nearest neighbor data directly: see the 
+you can pass nearest neighbor data directly: see the
 [Nearest Neighbor Data Format](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
 section. Or if you can calculate a distance matrix for your data, you can pass
 it in as `dist` object. For larger distance matrices, you can pass in a
@@ -314,13 +315,13 @@ results of the embeddings are not repeatable, This is because there is no
 locking carried out on the underlying coordinate matrix, and work is partitioned
 by edge not vertex and a given vertex may be processed by different threads. The
 order in which reads and writes occur is of course at the whim of the thread
-scheduler. This is the same behavior as largeVis. 
-* I haven't applied `uwot` on anything much larger than MNIST and Fashion MNIST 
+scheduler. This is the same behavior as largeVis.
+* I haven't applied `uwot` on anything much larger than MNIST and Fashion MNIST
 (so at least around 100,000 rows with 500-1,000 columns works fine). Bear in mind
 that Annoy itself says it works best with dimensions < 100, but still works
 "surprisingly well" up to 1000.
-* Experience with 
-[COIL-100](http://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php), 
+* Experience with
+[COIL-100](http://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php),
 which has 49,152 features, suggests that Annoy will *definitely* struggle with
 datasets of this dimensionality. I strongly recommend using the `pca` option
 to reduce the dimensionality, e.g `pca = 100`.
@@ -331,8 +332,8 @@ I've seen it take an extremely long time (a couple of hours) to converge. Recent
 changes have hopefully reduced the chance of this happening, but if
 initialization is taking more than a few minutes, I suggest stopping the
 calculation and using the scaled PCA (`init = "spca"`) instead.
-* `R CMD check` currently reports the following note: 
-`GNU make is a SystemRequirements.`, which is expected and due to using 
+* `R CMD check` currently reports the following note:
+`GNU make is a SystemRequirements.`, which is expected and due to using
 RcppParallel. On Linux, it sometimes notes that the `libs` sub-directory is over
 1 MB. I am unsure if this is anything to worry about.
 
@@ -343,8 +344,8 @@ Some other dimensionality reduction methods are also available in `uwot`:
 ### t-UMAP
 
 If you choose the UMAP curve parameters to be `a = 1` and `b = 1`, you get
-back the Cauchy distribution used in 
-[t-Distributed Stochastic Neighbor Embedding](https://lvdmaaten.github.io/tsne/) 
+back the Cauchy distribution used in
+[t-Distributed Stochastic Neighbor Embedding](https://lvdmaaten.github.io/tsne/)
 and [LargeVis](https://arxiv.org/abs/1602.00370). This also happens to
 significantly simplify the gradient leading to a noticeable speed-up: for MNIST,
 I saw the optimization time drop from 66 seconds to 18 seconds. The trade off is
@@ -359,7 +360,7 @@ mnist_tumap <- tumap(mnist, n_neighbors = 15, verbose = TRUE)
 Note that using `umap(a = 1, b = 1)` doesn't use the simplified gradient, so
 you won't see any speed-up that way.
 
-### lvish: a LargeVis-ish method.
+### lvish: a LargeVis-ish method
 
 As UMAP's implementation is similar to LargeVis in some respects, this package
 also offers a LargeVis-like method, `lvish`:
@@ -367,7 +368,7 @@ also offers a LargeVis-like method, `lvish`:
 ```R
 # perplexity, init and n_epoch values shown are the defaults
 # use perplexity instead of n_neighbors to control local neighborhood size
-mnist_lv <- lvish(mnist, perplexity = 50, init = "lvrand", n_epochs = 5000, 
+mnist_lv <- lvish(mnist, perplexity = 50, init = "lvrand", n_epochs = 5000,
                   verbose = TRUE)
 # Make hilarious Lembas bread joke
 ```
@@ -385,7 +386,7 @@ The `search_k` parameter is twice as large than Annoy's default to compensate.
 * The other nearest neighbor index parameter, `n_trees`, is not dynamically
 chosen based on data set size. In LargeVis, it ranges between 10 (for N <
 100,000) and 100 (for N > 5,000,000). The `lvish` default of 50 would cover
-datasets up to N = 5,000,000, and combined with the default `search_k`, 
+datasets up to N = 5,000,000, and combined with the default `search_k`,
 seems suitable for the datasets I've looked at.
 * Negative edges are generated by uniform sampling of vertexes rather than their
 degree ^ 0.75.
@@ -436,21 +437,21 @@ mnist_lv <- lvish(mnist, kernel = "knn", perplexity = 15, n_epochs = 1500,
                   init = "lvrand", verbose = TRUE)
 ```
 
-See the [lvish examples](https://jlmelville.github.io/uwot/lvish.html) page for 
+See the [lvish examples](https://jlmelville.github.io/uwot/lvish.html) page for
 more results.
 
 ## Mixed Data Types
 
-The default approach of UMAP is that all your data is numeric and will be 
+The default approach of UMAP is that all your data is numeric and will be
 treated as one block using the Euclidean distance metric. To use a different
 metric, set the `metric` parameter, e.g. `metric = "cosine"`.
 
-Treating the data as one block may not always be appropriate. `uwot` now 
+Treating the data as one block may not always be appropriate. `uwot` now
 supports a highly experimental approach to mixed data types. It is not based on
 any deep understanding of topology and sets, so consider it subject
 to change, breakage or completely disappearing.
 
-To use different metrics for different parts of a data frame, pass a list to 
+To use different metrics for different parts of a data frame, pass a list to
 the `metric` parameter. The name of each item is the metric to use and the
 value is a vector containing the names of the columns (or their integer id, but
 I strongly recommend names) to apply that metric to, e.g.:
@@ -459,10 +460,10 @@ I strongly recommend names) to apply that metric to, e.g.:
 metric = list("euclidean" = c("A1", "A2"), "cosine" = c("B1", "B2", "B3"))
 ```
 
-this will treat columns `A1` and `A2` as one block of data, and generate 
+this will treat columns `A1` and `A2` as one block of data, and generate
 neighbor data using the Euclidean distance, while a different set of neighbors
 will be generated with columns `B1`, `B2` and `B3`, using the cosine distance.
-This will create two different simplicial sets. The final set used for 
+This will create two different simplicial sets. The final set used for
 optimization is the intersection of these two sets. This is exactly the same
 process that is used when carrying out supervised UMAP (except the contribution
 is always equal between the two sets and can't be controlled by the user).
@@ -472,7 +473,7 @@ petal and sepal data separately in the `iris` dataset, but to use Euclidean
 distances for both, use:
 
 ```R
-metric = list("euclidean" = c("Petal.Width", "Petal.Length"), 
+metric = list("euclidean" = c("Petal.Width", "Petal.Length"),
               "euclidean" = c("Sepal.Width", "Sepal.Length"))
 ```
 
@@ -490,7 +491,7 @@ but internally, `uwot` strips out the non-numeric columns from the data, and if
 you use Z-scaling (i.e. specify `scale = "Z"`), zero variance columns will also
 be removed. This is very likely to change the index of the columns. If you
 really want to use numeric column indexes, I strongly advise not using the
-`scale` argument and re-arranging your data frame if necessary so that all 
+`scale` argument and re-arranging your data frame if necessary so that all
 non-numeric columns come after the numeric columns.
 
 ### Categorical columns
@@ -506,7 +507,7 @@ metric = list("euclidean" = 1:4, "categorical" = "Species")
 
 Factor columns are treated differently from numeric columns:
 
-* They are always treated separately, one column at a time. If you have two 
+* They are always treated separately, one column at a time. If you have two
 factor columns, `cat1`, and `cat2`, and you would like them included in UMAP,
 you should write:
 
@@ -523,7 +524,7 @@ metric = list("categorical" = c("cat1", "cat2"), ...)
 but that doesn't combine `cat1` and `cat2` into one block, just saves some
 typing.
 
-* Because of the way categorical data is intersected into a simplicial set, you 
+* Because of the way categorical data is intersected into a simplicial set, you
 cannot have an X `metric` that specifies only `categorical` entries. You
 *must* specify at least one of the standard Annoy metrics for numeric data.
 For `iris`, the following is an error:
@@ -553,7 +554,7 @@ Some global parameters can be overridden for a specific data block by providing
 a list as the value for the metric, containing the vector of columns as the
 only unnamed element, and then the over-riding keyword arguments. An example:
 
-umap(X, pca = 40, pca_center = TRUE, 
+umap(X, pca = 40, pca_center = TRUE,
      metric = list(
        euclidean = 1:200,
        euclidean = list(201:300, pca = NULL),
@@ -565,7 +566,7 @@ PCA with centering applied. The second `euclidean` block will not have PCA
 applied to it. The `manhattan` block will have PCA applied to it, but no
 centering is carried out.
 
-Currently, only `pca` and `pca_center` are supported for overriding by this 
+Currently, only `pca` and `pca_center` are supported for overriding by this
 method, because this feature exists only to allow for the case where you have
 mixed real-valued and binary data, and you want to carry out PCA on both. It's
 typical to carry out centering on real-value data before PCA, but *not* to do
@@ -574,11 +575,11 @@ so with binary data.
 ### `y` data
 
 The handling of `y` data has been extended to allow for data frames, and
-`target_metric` works like `metric`: multiple numeric blocks with different 
-metrics can be specified, and categorical data can be specified with 
+`target_metric` works like `metric`: multiple numeric blocks with different
+metrics can be specified, and categorical data can be specified with
 `categorical`. However, unlike `X`, the default behavior for `y` is to include
 all factor columns. Any numeric data found will be treated as one block, so if
-you have multiple numeric columns that you want treated separately, you should 
+you have multiple numeric columns that you want treated separately, you should
 specify each column separately:
 
 ```R
@@ -606,7 +607,7 @@ contains the indexes (starting at `1`) of the nearest neighbors of each item
 the first element in row `i` should always be `i`. If it isn't then either you
 are using a really weird non-metric distance or your approximate nearest
 neighbor method is returning way too approximate results. In either case, you
-should expect bad results. 
+should expect bad results.
 * `dist`: a matrix of dimension `n_vertices x n_neighbors`, where each row
 contains the distances of the nearest neighbors of each item (vertex) in the
 dataset, in Each item is always the nearest neighbor of itself, so the first
@@ -662,15 +663,15 @@ you passed in, and the list item names will be `precomputed`.
 
 ### Multiple neighbor data
 
-As discussed under the 
+As discussed under the
 [Mixed Data Types](https://github.com/jlmelville/uwot#mixed-data-types) section,
-you can apply multiple distance metrics to different parts of matrix or 
-data frame input data. if you do this, then `ret_nn` will return all the 
-neighbor data. The list under `nn` will now contain as many items as metrics, 
+you can apply multiple distance metrics to different parts of matrix or
+data frame input data. if you do this, then `ret_nn` will return all the
+neighbor data. The list under `nn` will now contain as many items as metrics,
 in the order they were specified. For instance, if the `metric` argument is:
 
 ```R
-metric = list("euclidean" = c("Petal.Width", "Petal.Length"), 
+metric = list("euclidean" = c("Petal.Width", "Petal.Length"),
               "cosine" = c("Sepal.Width", "Sepal.Length"))
 ```
 
