@@ -1702,8 +1702,8 @@ load_uwot <- function(file) {
         stop("Can't find nearest neighbor index ", nn_fname, " in ", file)
       }
       metric <- metrics[[i]]
-      # can provide any value for ndim as we get a new value when we load
-      ann <- create_ann(metric, ndim = 1)
+      # 31: need to specify the index dimensionality when creating the index
+      ann <- create_ann(metric, ndim = length(model$metric[[i]]))
       ann$load(nn_fname)
       if (n_metrics == 1) {
         model$nn_index <- ann
