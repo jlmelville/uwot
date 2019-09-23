@@ -46,9 +46,10 @@ These are spelled correctly.
 
 ## CRAN checks
 
-A gcc-UBSAN issue is reported, due to a library used by the RcppParallel 
-package. The RcppParallel package CRAN check also reports this issue, so I don't
-think it's something that I can fix in this package.
+A gcc-UBSAN issue is reported. This originates from the dependency RcppAnnoy and 
+is ultimately due to how memory management is implemented in the Annoy 
+library that RcppAnnoy wraps. This is a purposeful design decision in Annoy 
+and not something that can be fixed in this package (or in RcppAnnoy).
 
 ## Downstream dependencies
 
