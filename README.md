@@ -15,6 +15,9 @@ the basic method. Translated from the
 
 ## News
 
+*September 23 2019* Version 0.1.4 released on CRAN. This ensures compatibility
+with RcppAnnoy 0.0.13 when using `load_uwot`.
+
 *April 6 2019*. uwot is now on [CRAN](https://cran.r-project.org/package=uwot).
 Also, some minor-to-horrible bugs in the `lvish` perplexity routine have been
 fixed.
