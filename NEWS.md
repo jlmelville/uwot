@@ -6,6 +6,7 @@
 of RcppAnnoy (<https://github.com/jlmelville/uwot/issues/31>). My thanks to
 Dirk Eddelbuettel and Erik Bernhardsson for aid in identifying the problem.
 * Fix for `ERROR: there is already an InterruptableProgressMonitor instance defined`
+* If `verbose = TRUE`, the `a`, `b` curve parameters are now logged.
 
 # uwot 0.1.3
 
