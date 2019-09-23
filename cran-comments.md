@@ -12,7 +12,6 @@ the RcppAnnoy dependency.
 * local Windows 10 build, R 3.6.1
 * Windows Server 2008 (on rhub) R-devel
 * Windows Server 2012 (on appveyor) R 3.6.1
-* win-builder (devel)
 
 ## R CMD check results
 
