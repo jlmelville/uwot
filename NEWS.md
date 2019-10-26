@@ -1,3 +1,11 @@
+# uwot 0.1.5
+
+## Bug fixes and minor improvements
+
+* Initialization of supervised UMAP should now be faster 
+(<https://github.com/jlmelville/uwot/issues/34>). Contributed by 
+[Aaron Lun](https://github.com/LTLA).
+
 # uwot 0.1.4
 
 ## Bug fixes and minor improvements
