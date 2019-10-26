@@ -63,7 +63,19 @@ Mac owners more.
 may be helpful here to work out what you can get away with. To be on the safe
 side, I would advise building `uwot` without a custom `Makevars`.
 
-**Everybody**: ensure your `.Rprofile` files do not print any messages.
+**Everybody**: if your `.Rprofile` files print any messages, be sure to wrap
+them in `if (interactive()) { ... }` statements:
+
+```R
+# Example of a good .Rprofile file:
+if (interactive()) {
+    cat("I am printing this message in interactive sessions\n")
+}
+
+# Example of a bad .Rprofile file:
+cat("I am printing this message all of the time\n")
+```
+
 This project's `Makevars` file relies on a clean output to correctly configure [RcppParallel](https://cran.r-project.org/package=RcppParallel). If compilation
 fails and you see startup messages in the build output, this is what is
 happening.
