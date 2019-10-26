@@ -66,20 +66,14 @@ NumericVector general_sset_intersection_cpp(
   for (auto idx = 0; idx < result_row.length(); idx++) {
     auto i = result_col[idx];
     auto j = result_row[idx];
-    
-    double left_val = left_min;
-    for (auto k = indptr1[i]; k < indptr1[i + 1]; k++) {
-      if (indices1[k] == j) {
-        left_val = data1[k];
-      }
-    }
-    
-    double right_val = right_min;
-    for (auto k = indptr2[i]; k < indptr2[i + 1]; k++) {
-      if (indices2[k] == j) {
-          right_val = data2[k];
-      }
-    }
+
+    auto left_end = indices1.begin() + indptr1[i + 1];
+    auto left_it = std::lower_bound(indices1.begin() + indptr1[i], left_end, j);
+    double left_val = (left_it!=left_end && *left_it==j ? data1[left_it - indices1.begin()] : left_min);
+
+    auto right_end = indices2.begin() + indptr2[i + 1];
+    auto right_it = std::lower_bound(indices2.begin() + indptr2[i], right_end, j);
+    double right_val = (right_it!=right_end && *right_it==j ? data2[right_it - indices2.begin()] : right_min);
       
     if (left_val > left_min || right_val > right_min) {
       if (mix_weight < 0.5) {
