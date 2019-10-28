@@ -3,7 +3,7 @@ Title: The Uniform Manifold Approximation and Projection (UMAP) Method for Dimen
 Version: 0.1.5
 Authors@R: 
     c(person("James", "Melville", email = "jlmelville@gmail.com", role = c("aut", "cre")),
-    person("Aaron", "Lun", role="ctb"))
+    person("Aaron", "Lun", role="ctb"),person("Mohamed Nadhir", "Djekidel", role="ctb"))
 Description: An implementation of the Uniform Manifold Approximation and 
     Projection dimensionality reduction by McInnes et al. (2018) 
     <arXiv:1802.03426>. It also provides means to transform new data and to 
