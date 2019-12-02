@@ -4,16 +4,34 @@
 \alias{lvish}
 \title{Dimensionality Reduction with a LargeVis-like method}
 \usage{
-lvish(X, perplexity = 50, n_neighbors = perplexity * 3,
-  n_components = 2, metric = "euclidean", n_epochs = -1,
-  learning_rate = 1, scale = "maxabs", init = "lvrandom",
-  init_sdev = NULL, repulsion_strength = 7, negative_sample_rate = 5,
-  nn_method = NULL, n_trees = 50, search_k = 2 * n_neighbors *
-  n_trees, n_threads = max(1, RcppParallel::defaultNumThreads()/2),
-  n_sgd_threads = 0, grain_size = 1, kernel = "gauss", pca = NULL,
-  pca_center = TRUE, pcg_rand = TRUE, fast_sgd = FALSE,
-  ret_nn = FALSE, tmpdir = tempdir(), verbose = getOption("verbose",
-  TRUE))
+lvish(
+  X,
+  perplexity = 50,
+  n_neighbors = perplexity * 3,
+  n_components = 2,
+  metric = "euclidean",
+  n_epochs = -1,
+  learning_rate = 1,
+  scale = "maxabs",
+  init = "lvrandom",
+  init_sdev = NULL,
+  repulsion_strength = 7,
+  negative_sample_rate = 5,
+  nn_method = NULL,
+  n_trees = 50,
+  search_k = 2 * n_neighbors * n_trees,
+  n_threads = max(1, RcppParallel::defaultNumThreads()/2),
+  n_sgd_threads = 0,
+  grain_size = 1,
+  kernel = "gauss",
+  pca = NULL,
+  pca_center = TRUE,
+  pcg_rand = TRUE,
+  fast_sgd = FALSE,
+  ret_nn = FALSE,
+  tmpdir = tempdir(),
+  verbose = getOption("verbose", TRUE)
+)
 }
 \arguments{
 \item{X}{Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},

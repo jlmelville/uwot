@@ -4,10 +4,18 @@
 \alias{umap_transform}
 \title{Add New Points to an Existing Embedding}
 \usage{
-umap_transform(X, model, init_weighted = TRUE, search_k = NULL,
-  tmpdir = tempdir(), n_epochs = NULL, n_threads = max(1,
-  RcppParallel::defaultNumThreads()/2), n_sgd_threads = 0,
-  grain_size = 1, verbose = FALSE)
+umap_transform(
+  X,
+  model,
+  init_weighted = TRUE,
+  search_k = NULL,
+  tmpdir = tempdir(),
+  n_epochs = NULL,
+  n_threads = max(1, RcppParallel::defaultNumThreads()/2),
+  n_sgd_threads = 0,
+  grain_size = 1,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{X}{The new data to be transformed, either a matrix of data frame. Must
