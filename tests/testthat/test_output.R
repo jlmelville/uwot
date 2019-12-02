@@ -363,3 +363,12 @@ res <- umap(iris10, pcg_rand = FALSE,
 )
 expect_ok_matrix(res)
 
+# https://github.com/jlmelville/uwot/issues/39
+res <- umap(iris10, n_neighbors = 4, n_threads = 0.5)
+expect_ok_matrix(res)
+res <- umap(iris10, n_neighbors = 4, n_threads = 1.5)
+expect_ok_matrix(res)
+res <- umap(iris10, n_neighbors = 4, n_sgd_threads = 0.5)
+expect_ok_matrix(res)
+res <- umap(iris10, n_neighbors = 4, n_sgd_threads = 1.5)
+expect_ok_matrix(res)
