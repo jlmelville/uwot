@@ -1163,7 +1163,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
   if (n_threads %% 1 != 0) {
     n_threads <- round(n_threads)
-    message("Non-integer 'n_threads' provided. Setting to ", n_threads)
+    tsmessage("Non-integer 'n_threads' provided. Setting to ", n_threads)
   }
   if (n_sgd_threads == "auto") {
     n_sgd_threads <- n_threads
@@ -1173,7 +1173,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
   if (n_sgd_threads %% 1 != 0) {
     n_sgd_threads <- round(n_sgd_threads)
-    message("Non-integer 'n_sgd_threads' provided. Setting to ", n_sgd_threads)
+    tsmessage("Non-integer 'n_sgd_threads' provided. Setting to ", n_sgd_threads)
   }
   if (n_threads > 0) {
     RcppParallel::setThreadOptions(numThreads = n_threads)
