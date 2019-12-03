@@ -19,7 +19,7 @@ Encoding: UTF-8
 LazyData: true
 Suggests: testthat,
     covr
-RoxygenNote: 7.0.1
+RoxygenNote: 7.0.2
 Depends: Matrix
 LinkingTo: Rcpp, RcppProgress, RcppParallel, RcppAnnoy, dqrng
 Imports: Rcpp,
