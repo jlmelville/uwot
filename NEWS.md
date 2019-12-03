@@ -2,6 +2,10 @@
 
 ## Bug fixes and minor improvements
 
+* Passing a floating point value smaller than one to `n_threads` caused a crash.
+This was particularly insidious if running with a system with only one default
+thread available as the default `n_threads` becomes `0.5`. Now `n_threads` 
+(and `n_sgd_threads`) are rounded to the nearest integer.
 * Initialization of supervised UMAP should now be faster
 (<https://github.com/jlmelville/uwot/issues/34>). Contributed by
 [Aaron Lun](https://github.com/LTLA).

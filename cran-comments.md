@@ -1,11 +1,11 @@
 ## Release Summary
 
-This is a patch release to maintain compatibility with a forthcoming version of
-the RcppAnnoy dependency.
+This is a patch release to fix a bug which causes a crash on machines with only
+one default thread available.
 
 ## Test environments
 
-* ubuntu 14.04 (on travis-ci), R 3.4.4, R 3.6.0, R-devel
+* ubuntu 16.04 (on travis-ci), R 3.5.3, R 3.6.1, R-devel
 * ubuntu 16.04 (on rhub), R 3.6.1
 * fedora 30 (on rhub), R-devel
 * mac OS X High Sierra (on travis-ci), R 3.5.3, R 3.6.1
@@ -46,18 +46,21 @@ These are spelled correctly.
 
 ## CRAN checks
 
+r-patched-solaris-x86	has an ERROR. This is because the RcppAnnoy package is
+unavailable.
+
 A gcc-UBSAN issue is reported. This originates from the dependency RcppAnnoy and 
 is ultimately due to how memory management is implemented in the Annoy 
 library that RcppAnnoy wraps. This is a purposeful design decision in Annoy 
 and not something that can be fixed in this package (or in RcppAnnoy).
 
+
 ## Downstream dependencies
 
 There are 4 downstream dependencies. 
 
-* 'dyndimred' fails R CMD CHECK because of test failures when it attempts to 
-install the 'destiny' package, which is not available on R 3.6.1. This is 
-unrelated to the new version of uwot. When these tests are disabled, the other
-tests, and R CMD CHECK as a whole, completes successfully.
+* 'embed' fails R CMD CHECK because of test failures due to what seems to be
+incompatibilities with the latest 'tensorflow' library. This is unrelated to 
+'uwot' and tests that use 'uwot' pass as expected.
 
 * The other three dependencies completed R CMD CHECK without issues.
