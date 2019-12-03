@@ -39,7 +39,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
   const double tol;
   const double min_k_dist_scale;
   const double mean_distances;
-  const double double_max = std::numeric_limits<double>::max();
+  const double double_max = (std::numeric_limits<double>::max)();
   
   tthread::mutex mutex;
   std::size_t n_search_fails;
@@ -109,7 +109,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
         // NB we iterate from 1, not 0: don't use the self-distance.
         // Makes using Rcpp sugar sufficiently awkward so do the explicit loop
         for (unsigned int k = 1; k < n_neighbors; k++) {
-          double dist = std::max(0.0, ith_distances[k] - rho);
+          double dist = (std::max)(0.0, ith_distances[k] - rho);
           val += std::exp(-dist / sigma);
         }
 
@@ -147,10 +147,10 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
 
       if (rho > 0.0) {
         double mean = std::accumulate(ith_distances.begin(), ith_distances.end(), 0.0) / ith_distances.length();
-        sigma = std::max(min_k_dist_scale * mean, sigma);
+        sigma = (std::max)(min_k_dist_scale * mean, sigma);
       }
       else {
-        sigma = std::max(min_k_dist_scale * mean_distances, sigma);
+        sigma = (std::max)(min_k_dist_scale * mean_distances, sigma);
       }
 
       std::vector<double> res(n_neighbors, 0.0);

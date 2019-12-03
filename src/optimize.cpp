@@ -103,7 +103,6 @@ struct SgdWorker : public RcppParallel::Worker {
     {
       tthread::lock_guard<tthread::mutex> guard(mutex);
       prng.reset(new Rand());
-      
     }
 
     std::vector<double> dys(ndim);
@@ -121,7 +120,7 @@ struct SgdWorker : public RcppParallel::Worker {
         dys[d] = diff;
         dist_squared += diff * diff;
       }
-      dist_squared = std::max(dist_eps, dist_squared);
+      dist_squared = (std::max)(dist_eps, dist_squared);
       
       const double grad_coeff = gradient.grad_attr(dist_squared);
       for (std::size_t d = 0; d < ndim; d++) {
@@ -145,7 +144,7 @@ struct SgdWorker : public RcppParallel::Worker {
           dys[d] = diff;
           dist_squared += diff * diff;
         }
-        dist_squared = std::max(dist_eps, dist_squared);
+        dist_squared = (std::max)(dist_eps, dist_squared);
         
         const double grad_coeff = gradient.grad_rep(dist_squared);
         for (std::size_t d = 0; d < ndim; d++) {

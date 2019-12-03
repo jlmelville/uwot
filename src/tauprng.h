@@ -29,7 +29,7 @@
 
 // based on code in the dqsample package
 static uint64_t random64() {
-  return R::runif(0, 1) * std::numeric_limits<uint64_t>::max();
+  return R::runif(0, 1) * (std::numeric_limits<uint64_t>::max)();
 }
 
 class tau_prng {

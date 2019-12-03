@@ -33,7 +33,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
   const double target;
   const unsigned int n_iter;
   const double tol;
-  const double double_max = std::numeric_limits<double>::max();
+  const double double_max = (std::numeric_limits<double>::max)();
   
   tthread::mutex mutex;
   std::size_t n_search_fails;
