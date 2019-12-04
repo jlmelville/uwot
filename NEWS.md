@@ -2,6 +2,11 @@
 
 ## Bug fixes and minor improvements
 
+* The R API was being accessed from inside multi-threaded code to seed the 
+(non-R) random number generators. Probably this was causing users in downstream
+projects (seurat and monocle) to experience strange RcppParallel-related 
+crashes. Thanks to [aldojongejan](https://github.com/aldojongejan)
+for reporting this (<https://github.com/jlmelville/uwot/issues/39>).
 * Passing a floating point value smaller than one to `n_threads` caused a crash.
 This was particularly insidious if running with a system with only one default
 thread available as the default `n_threads` becomes `0.5`. Now `n_threads` 

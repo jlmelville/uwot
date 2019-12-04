@@ -1,7 +1,6 @@
 ## Release Summary
 
-This is a patch release to fix a bug which causes a crash on machines with only
-one default thread available.
+This is a patch release to fix bugs which cause the R session to crash.
 
 ## Test environments
 
