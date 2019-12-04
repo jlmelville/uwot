@@ -98,7 +98,7 @@ lsplit_unnamed <- function(l) {
   if (length(uids) == 0) {
     return(list(named = l[nids]))
   }
-  
+
   list(
     named = l[nids],
     unnamed = l[uids]

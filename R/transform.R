@@ -3,14 +3,14 @@
 #' Carry out an embedding of new data using an existing embedding. Requires
 #' using the result of calling \code{\link{umap}} or \code{\link{tumap}} with
 #' \code{ret_model = TRUE}.
-#' 
+#'
 #' Note that some settings are incompatible with the production of a UMAP model
 #' via \code{\link{umap}}: external neighbor data (passed via a list to the
 #' argument of the \code{nn_method} parameter), and factor columns that were
-#' included in the UMAP calculation via the \code{metric} parameter. In the 
-#' latter case, the model produced is based only on the numeric data. 
+#' included in the UMAP calculation via the \code{metric} parameter. In the
+#' latter case, the model produced is based only on the numeric data.
 #' A transformation is possible, but factor columns in the new data are ignored.
-#' 
+#'
 #' @param X The new data to be transformed, either a matrix of data frame. Must
 #'   have the same columns in the same order as the input data used to generate
 #'   the \code{model}.
@@ -23,7 +23,7 @@
 #' @param search_k Number of nodes to search during the neighbor retrieval. The
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   Default is the value used in building the \code{model} is used.
-#' @param tmpdir Temporary directory to store nearest neighbor indexes during 
+#' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
 #'   only written to disk if \code{n_threads > 1}; otherwise, this parameter is
 #'   ignored.
@@ -38,7 +38,7 @@
 #'   `set.seed` is called with a fixed seed before running.
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
-#'   be used. Used in conjunction with \code{n_threads} and 
+#'   be used. Used in conjunction with \code{n_threads} and
 #'   \code{n_sgd_threads}.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @return A matrix of coordinates for \code{X} transformed into the space
@@ -51,7 +51,6 @@
 #' # You must set ret_model = TRUE to return extra data needed
 #' iris_train_umap <- umap(iris_train, ret_model = TRUE)
 #' iris_test_umap <- umap_transform(iris_test, iris_train_umap)
-#'
 #' @export
 umap_transform <- function(X, model,
                            init_weighted = TRUE,
@@ -69,7 +68,7 @@ umap_transform <- function(X, model,
   if (is.null(search_k)) {
     search_k <- model$search_k
   }
-  
+
   nn_index <- model$nn_index
   n_neighbors <- model$n_neighbors
   local_connectivity <- model$local_connectivity
@@ -91,11 +90,11 @@ umap_transform <- function(X, model,
     tsmessage("Using PCG for random number generation")
     pcg_rand <- TRUE
   }
-  
+
   if (ncol(X) != norig_col) {
     stop("Incorrect dimensions: X must have ", norig_col, " columns")
   }
-  
+
   if (methods::is(X, "data.frame")) {
     indexes <- which(vapply(X, is.numeric, logical(1)))
     if (length(indexes) == 0) {
@@ -108,17 +107,17 @@ umap_transform <- function(X, model,
     "Read ", n_vertices, " rows and found ", ncol(X),
     " numeric columns"
   )
-  
+
   if (!is.null(scale_info)) {
     X <- apply_scaling(X, scale_info = scale_info, verbose = verbose)
   }
-  
+
   if (n_threads > 0) {
     RcppParallel::setThreadOptions(numThreads = n_threads)
   }
-  
+
   adjusted_local_connectivity <- max(0, local_connectivity - 1.0)
-  
+
   nblocks <- length(metric)
   graph <- NULL
   embedding <- NULL
@@ -136,28 +135,30 @@ umap_transform <- function(X, model,
       }
       Xsub <- X[, subset, drop = FALSE]
     }
-    
+
     if (!is.null(pca_models) && !is.null(pca_models[[as.character(i)]])) {
-      Xsub <- apply_pca(X = Xsub, pca_res = pca_models[[as.character(i)]], 
-                        verbose = verbose)
+      Xsub <- apply_pca(
+        X = Xsub, pca_res = pca_models[[as.character(i)]],
+        verbose = verbose
+      )
     }
     nn <- annoy_search(Xsub,
-                       k = n_neighbors, ann = ann, search_k = search_k,
-                       tmpdir = tmpdir,
-                       n_threads = n_threads, grain_size = grain_size,
-                       verbose = verbose
+      k = n_neighbors, ann = ann, search_k = search_k,
+      tmpdir = tmpdir,
+      n_threads = n_threads, grain_size = grain_size,
+      verbose = verbose
     )
     graph_block <- smooth_knn(nn,
-                              local_connectivity = adjusted_local_connectivity,
-                              n_threads = n_threads,
-                              grain_size = grain_size,
-                              verbose = verbose
+      local_connectivity = adjusted_local_connectivity,
+      n_threads = n_threads,
+      grain_size = grain_size,
+      verbose = verbose
     )
-    
+
     embedding_block <- init_new_embedding(train_embedding, nn, graph_block,
-                                          weighted = init_weighted,
-                                          n_threads = n_threads,
-                                          grain_size = grain_size, verbose = verbose
+      weighted = init_weighted,
+      n_threads = n_threads,
+      grain_size = grain_size, verbose = verbose
     )
     if (is.null(embedding)) {
       embedding <- embedding_block
@@ -165,10 +166,10 @@ umap_transform <- function(X, model,
     else {
       embedding <- embedding + embedding_block
     }
-    
+
     graph_block <- nn_to_sparse(nn$idx, as.vector(graph_block),
-                                self_nbr = FALSE,
-                                max_nbr_id = nrow(train_embedding)
+      self_nbr = FALSE,
+      max_nbr_id = nrow(train_embedding)
     )
     if (is.null(graph)) {
       graph <- graph_block
@@ -177,11 +178,11 @@ umap_transform <- function(X, model,
       graph <- set_intersect(graph, graph_block, weight = 0.5, reset = TRUE)
     }
   }
-  
+
   if (nblocks > 1) {
     embedding <- embedding / nblocks
   }
-  
+
   if (is.null(n_epochs)) {
     if (ncol(graph) <= 10000) {
       n_epochs <- 100
@@ -193,21 +194,21 @@ umap_transform <- function(X, model,
   else {
     n_epochs <- max(2, round(n_epochs / 3))
   }
-  
+
   if (n_epochs > 0) {
     graph@x[graph@x < max(graph@x) / n_epochs] <- 0
     graph <- Matrix::drop0(graph)
     epochs_per_sample <- make_epochs_per_sample(graph@x, n_epochs)
-    
+
     positive_head <- graph@i
     positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
-    
+
     tsmessage(
       "Commencing optimization for ", n_epochs, " epochs, with ",
       length(positive_head), " positive edges",
       pluralize("thread", n_sgd_threads, " using")
     )
-    
+
     parallelize <- n_sgd_threads > 0
     if (n_sgd_threads > 0) {
       RcppParallel::setThreadOptions(numThreads = n_sgd_threads)
@@ -266,8 +267,8 @@ init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
       pluralize("thread", n_threads, " using")
     )
     embedding <- init_transform_parallel(train_embedding, nn$idx, graph,
-                                         parallelize = parallelize,
-                                         grain_size = grain_size
+      parallelize = parallelize,
+      grain_size = grain_size
     )
   }
   else {
@@ -276,11 +277,11 @@ init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
       pluralize("thread", n_threads, " using")
     )
     embedding <- init_transform_av_parallel(train_embedding, nn$idx,
-                                            parallelize = parallelize,
-                                            grain_size = grain_size
+      parallelize = parallelize,
+      grain_size = grain_size
     )
   }
-  
+
   embedding
 }
 
@@ -289,7 +290,7 @@ init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
 init_transform <- function(train_embedding, nn_index, weights = NULL) {
   nr <- nrow(nn_index)
   nc <- ncol(train_embedding)
-  
+
   embedding <- matrix(nrow = nr, ncol = nc)
   if (is.null(weights)) {
     for (i in 1:nr) {
@@ -309,7 +310,7 @@ init_transform <- function(train_embedding, nn_index, weights = NULL) {
       )
     }
   }
-  
+
   embedding
 }
 
@@ -333,11 +334,11 @@ apply_scaling <- function(X, scale_info, verbose = FALSE) {
     tsmessage("Applying training data column filtering/scaling")
     X <- X[, scale_info[["scaled:nzvcols"]]]
     X <- scale(X,
-               center = scale_info[["scaled:center"]],
-               scale = scale_info[["scaled:scale"]]
+      center = scale_info[["scaled:center"]],
+      scale = scale_info[["scaled:scale"]]
     )
   }
-  
+
   X
 }
 # Apply a previously calculated set of PCA rotations

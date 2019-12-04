@@ -71,7 +71,7 @@ integer value in the range \code{2} to \code{100}.}
   \item \code{"categorical"} (see below)
 }
 Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-distance metric is always "euclidean"). 
+distance metric is always "euclidean").
 
 If \code{X} is a data frame or matrix, then multiple metrics can be
 specified, by passing a list to this argument, where the name of each item in
@@ -103,7 +103,7 @@ PCA applied to both, but with centering applied only to the real-valued data
 embedded coordinates. By default, this value is set to \code{500} for datasets
 containing 10,000 vertices or less, and \code{200} otherwise.}
 
-\item{learning_rate}{Initial learning rate used in optimization of the 
+\item{learning_rate}{Initial learning rate used in optimization of the
 coordinates.}
 
 \item{scale}{Scaling to apply to \code{X} if it is a data frame or matrix:
@@ -213,9 +213,9 @@ must be a list consisting of two elements:
   \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
   containing the distances of the nearest neighbors.
 }
-Multiple nearest neighbor data (e.g. from two different precomputed 
+Multiple nearest neighbor data (e.g. from two different precomputed
 metrics) can be passed by passing a list containing the nearest neighbor
-data lists as items. 
+data lists as items.
 The \code{n_neighbors} parameter is ignored when using precalculated
 nearest neighbor data.}
 
@@ -232,40 +232,40 @@ search. Only used if the \code{nn_method} is \code{"annoy"}.}
 
 \item{n_threads}{Number of threads to use (except during stochastic gradient
 descent). Default is half that recommended by RcppParallel. For
-nearest neighbor search, only applies if \code{nn_method = "annoy"}. If 
+nearest neighbor search, only applies if \code{nn_method = "annoy"}. If
 \code{n_threads > 1}, then the Annoy index will be temporarily written to
 disk in the location determined by \code{\link[base]{tempfile}}.}
 
 \item{n_sgd_threads}{Number of threads to use during stochastic gradient
 descent. If set to > 1, then results will not be reproducible, even if
-`set.seed` is called with a fixed seed before running. Set to 
+`set.seed` is called with a fixed seed before running. Set to
 \code{"auto"} go use the same value as \code{n_threads}.}
 
 \item{grain_size}{Minimum batch size for multithreading. If the number of
 items to process in a thread falls below this number, then no threads will
-be used. Used in conjunction with \code{n_threads} and 
+be used. Used in conjunction with \code{n_threads} and
 \code{n_sgd_threads}.}
 
 \item{y}{Optional target data for supervised dimension reduction. Can be a
-vector, matrix or data frame. Use the \code{target_metric} parameter to 
+vector, matrix or data frame. Use the \code{target_metric} parameter to
 specify the metrics to use, using the same syntax as \code{metric}. Usually
 either a single numeric or factor column is used, but more complex formats
 are possible. The following types are allowed:
   \itemize{
     \item Factor columns with the same length as \code{X}. \code{NA} is
     allowed for any observation with an unknown level, in which case
-    UMAP operates as a form of semi-supervised learning. Each column is 
+    UMAP operates as a form of semi-supervised learning. Each column is
     treated separately.
     \item Numeric data. \code{NA} is \emph{not} allowed in this case. Use the
     parameter \code{target_n_neighbors} to set the number of neighbors used
     with \code{y}. If unset, \code{n_neighbors} is used. Unlike factors,
     numeric columns are grouped into one block unless \code{target_metric}
-    specifies otherwise. For example, if you wish columns \code{a} and 
-    \code{b} to be treated separately, specify 
+    specifies otherwise. For example, if you wish columns \code{a} and
+    \code{b} to be treated separately, specify
     \code{target_metric = list(euclidean = "a", euclidean = "b")}. Otherwise,
-    the data will be effectively treated as a matrix with two columns. 
-    \item Nearest neighbor data, consisting of a list of two matrices, 
-    \code{idx} and \code{dist}. These represent the precalculated nearest 
+    the data will be effectively treated as a matrix with two columns.
+    \item Nearest neighbor data, consisting of a list of two matrices,
+    \code{idx} and \code{dist}. These represent the precalculated nearest
     neighbor indices and distances, respectively. This
     is the same format as that expected for precalculated data in
     \code{nn_method}. This format assumes that the underlying data was a
@@ -300,13 +300,13 @@ potential decrease in accuracy. In many t-SNE applications, a value of 50
 is recommended, although there's no guarantee that this is appropriate for
 all settings.}
 
-\item{pca_center}{If \code{TRUE}, center the columns of \code{X} before 
-carrying out PCA. For binary data, it's recommended to set this to 
+\item{pca_center}{If \code{TRUE}, center the columns of \code{X} before
+carrying out PCA. For binary data, it's recommended to set this to
 \code{FALSE}.}
 
-\item{pcg_rand}{If \code{TRUE}, use the PCG random number generator (O'Neill, 
+\item{pcg_rand}{If \code{TRUE}, use the PCG random number generator (O'Neill,
 2014) during optimization. Otherwise, use the faster (but probably less
-statistically good) Tausworthe "taus88" generator. The default is 
+statistically good) Tausworthe "taus88" generator. The default is
 \code{TRUE}.}
 
 \item{fast_sgd}{If \code{TRUE}, then the following combination of parameters
@@ -323,11 +323,11 @@ values of \code{pcg_rand} and \code{n_sgd_threads}, are ignored.}
 add new data to an existing embedding via \code{\link{umap_transform}}. The
 embedded coordinates are returned as the list item \code{embedding}. If
 \code{FALSE}, just return the coordinates. This parameter can be used in
-conjunction with \code{ret_nn}. Note that some settings are incompatible 
+conjunction with \code{ret_nn}. Note that some settings are incompatible
 with the production of a UMAP model: external neighbor data (passed via a
-list to \code{nn_method}), and factor columns that were included 
-via the \code{metric} parameter. In the latter case, the model produced is 
-based only on the numeric data. A transformation using new data is 
+list to \code{nn_method}), and factor columns that were included
+via the \code{metric} parameter. In the latter case, the model produced is
+based only on the numeric data. A transformation using new data is
 possible, but the factor columns in the new data are ignored.}
 
 \item{ret_nn}{If \code{TRUE}, then in addition to the embedding, also return
@@ -340,9 +340,9 @@ could be sensitive to data scaling, so be wary of reusing nearest neighbor
 data if modifying the \code{scale} parameter. This parameter can be used in
 conjunction with \code{ret_model}.}
 
-\item{tmpdir}{Temporary directory to store nearest neighbor indexes during 
+\item{tmpdir}{Temporary directory to store nearest neighbor indexes during
 nearest neighbor search. Default is \code{\link{tempdir}}. The index is
-only written to disk if \code{n_threads > 1} and 
+only written to disk if \code{n_threads > 1} and
 \code{nn_method = "annoy"}; otherwise, this parameter is ignored.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
@@ -356,9 +356,9 @@ A matrix of optimized coordinates, or:
     coordinates are available in the list item \code{embedding}.
     \item if \code{ret_nn = TRUE}, returns the nearest neighbor data as a
     list called \code{nn}. This contains one list for each \code{metric}
-    calculated, itself containing a matrix \code{idx} with the integer ids of 
-    the neighbors; and a matrix \code{dist} with the distances. The \code{nn} 
-    list (or a sub-list) can be used as input to the \code{nn_method} 
+    calculated, itself containing a matrix \code{idx} with the integer ids of
+    the neighbors; and a matrix \code{dist} with the distances. The \code{nn}
+    list (or a sub-list) can be used as input to the \code{nn_method}
     parameter.
   }
   Both \code{ret_model} and \code{ret_nn} can be \code{TRUE}, in which case
@@ -375,6 +375,5 @@ results in a substantially simplified gradient expression. This can give
 a speed improvement of around 50\%.
 }
 \examples{
-iris_tumap <- tumap(iris, n_neighbors = 50, learning_rate = 0.5)   
-
+iris_tumap <- tumap(iris, n_neighbors = 50, learning_rate = 0.5)
 }

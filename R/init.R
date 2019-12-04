@@ -21,7 +21,7 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
     tsmessage("Graph too small, using random initialization instead")
     return(rand_init(nrow(A), ndim))
   }
-  
+
   tsmessage("Initializing from Laplacian Eigenmap")
   # Equivalent to: D <- diag(colSums(A)); M <- solve(D) %*% A
   # This effectively row-normalizes A: colSums is normally faster than rowSums
@@ -29,23 +29,30 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   M <- A / colSums(A)
   connected <- connected_components(M)
   if (connected$n_components > 1) {
-    tsmessage("Found ", connected$n_components, " connected components, ",
-              "initializing each component separately")
+    tsmessage(
+      "Found ", connected$n_components, " connected components, ",
+      "initializing each component separately"
+    )
     fn_name <- as.character(match.call()[[1]])
-    return(subgraph_init(fn_name, connected, A = A, ndim = ndim, 
-                         verbose = verbose))
+    return(subgraph_init(fn_name, connected,
+      A = A, ndim = ndim,
+      verbose = verbose
+    ))
   }
-  
+
   res <- NULL
   k <- ndim + 1
   n <- nrow(M)
   suppressWarnings(
-    res <- tryCatch(RSpectra::eigs(M, k = k, which = "LM", 
-                                   opt = list(tol = 1e-4)),
-      error = function(c) {
-        NULL
-      }
-  ))
+    res <- tryCatch(RSpectra::eigs(M,
+      k = k, which = "LM",
+      opt = list(tol = 1e-4)
+    ),
+    error = function(c) {
+      NULL
+    }
+    )
+  )
 
   if (is.null(res) || ncol(res$vectors) < ndim) {
     message(
@@ -68,13 +75,17 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   tsmessage("Initializing from normalized Laplacian")
   connected <- connected_components(A)
   if (connected$n_components > 1) {
-    tsmessage("Found ", connected$n_components, " connected components, ",
-              "initializing each component separately")
+    tsmessage(
+      "Found ", connected$n_components, " connected components, ",
+      "initializing each component separately"
+    )
     fn_name <- as.character(match.call()[[1]])
-    return(subgraph_init(fn_name, connected, A = A, ndim = ndim, 
-                         verbose = verbose))
+    return(subgraph_init(fn_name, connected,
+      A = A, ndim = ndim,
+      verbose = verbose
+    ))
   }
-  
+
   n <- nrow(A)
   # Normalized Laplacian: clear and close to UMAP code, but very slow in R
   # I <- diag(1, nrow = n, ncol = n)
@@ -89,19 +100,23 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   k <- ndim + 1
   opt <- list(tol = 1e-4)
   suppressWarnings(
-  res <- tryCatch(RSpectra::eigs_sym(L, k = k, which = "SM", opt = opt),
-    error = function(c) {
-      NULL
-    }
-  ))
+    res <- tryCatch(RSpectra::eigs_sym(L, k = k, which = "SM", opt = opt),
+      error = function(c) {
+        NULL
+      }
+    )
+  )
   if (is.null(res) || ncol(res$vectors) < ndim) {
     suppressWarnings(
-      res <- tryCatch(RSpectra::eigs_sym(L, k = k, which = "LM", sigma = 0,
-                                         opt = opt),
-                      error = function(c) {
-                        NULL
-                      }
-      ))
+      res <- tryCatch(RSpectra::eigs_sym(L,
+        k = k, which = "LM", sigma = 0,
+        opt = opt
+      ),
+      error = function(c) {
+        NULL
+      }
+      )
+    )
     if (is.null(res) || ncol(res$vectors) < ndim) {
       message(
         "Spectral initialization failed to converge, ",
@@ -126,17 +141,20 @@ irlba_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   Dsq <- sqrt(Matrix::colSums(A))
   L <- -Matrix::t(A / Dsq) / Dsq
   Matrix::diag(L) <- 1 + Matrix::diag(L)
-  
+
   k <- ndim + 1
-  
+
   suppressWarnings(
-    res <- tryCatch(res <- irlba::partial_eigen(L, n = k, symmetric = TRUE, 
-                                                smallest = TRUE, tol = 1e-3, 
-                                                maxit = 1000, verbose = TRUE),
-                    error = function(c) {
-                      NULL
-                    }
-    ))
+    res <- tryCatch(res <- irlba::partial_eigen(L,
+      n = k, symmetric = TRUE,
+      smallest = TRUE, tol = 1e-3,
+      maxit = 1000, verbose = TRUE
+    ),
+    error = function(c) {
+      NULL
+    }
+    )
+  )
   if (is.null(res) || ncol(res$vectors) < ndim) {
     message(
       "Spectral initialization failed to converge, ",
@@ -159,11 +177,15 @@ spectral_init <- function(A, ndim = 2, verbose = FALSE) {
   tsmessage("Initializing from normalized Laplacian + noise")
   connected <- connected_components(A)
   if (connected$n_components > 1) {
-    tsmessage("Found ", connected$n_components, " connected components, ",
-              "initializing each component separately")
+    tsmessage(
+      "Found ", connected$n_components, " connected components, ",
+      "initializing each component separately"
+    )
     fn_name <- as.character(match.call()[[1]])
-    return(subgraph_init(fn_name, connected, A = A, ndim = ndim, 
-                         verbose = verbose))
+    return(subgraph_init(fn_name, connected,
+      A = A, ndim = ndim,
+      verbose = verbose
+    ))
   }
   coords <- normalized_laplacian_init(A, ndim, verbose = FALSE)
   expansion <- 10.0 / max(abs(coords))
@@ -182,7 +204,7 @@ irlba_spectral_init <- function(A, ndim = 2, verbose = FALSE) {
   coords <- irlba_normalized_laplacian_init(A, ndim, verbose = FALSE)
   expansion <- 10.0 / max(coords)
   (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.001),
-                                ncol = ndim
+    ncol = ndim
   )
 }
 
@@ -194,8 +216,10 @@ subgraph_init <- function(fn_name, connected, A, ndim = 2, verbose = FALSE) {
     subg_idx <- connected$labels == i - 1
     subg <- A[subg_idx, subg_idx]
     tsmessage("Initializing subcomponent of size ", nrow(subg))
-    init_conn <- do.call(fn_name, list(A = subg, ndim = ndim, 
-                                       verbose = verbose))
+    init_conn <- do.call(fn_name, list(
+      A = subg, ndim = ndim,
+      verbose = verbose
+    ))
     if (is.null(init)) {
       init <- init_conn
     }
@@ -206,7 +230,7 @@ subgraph_init <- function(fn_name, connected, A, ndim = 2, verbose = FALSE) {
   init
 }
 
-# Return the number of connected components in a graph (respresented as a 
+# Return the number of connected components in a graph (respresented as a
 # sparse matrix).
 connected_components <- function(X) {
   Xt <- Matrix::t(X)
@@ -226,7 +250,7 @@ rand_init_lv <- function(n, ndim, verbose = FALSE) {
 }
 
 # Rescale embedding so that the standard deviation is the specified value.
-# Default gives initialization like t-SNE, but not random. Large initial 
+# Default gives initialization like t-SNE, but not random. Large initial
 # distances lead to small gradients, and hence small updates, so should be
 # avoided
 shrink_coords <- function(X, sdev = 1e-4) {
@@ -247,7 +271,7 @@ pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
                        verbose = FALSE) {
   if (methods::is(X, "dist")) {
     res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ncol)
-    
+
     if (ret_extra || verbose) {
       lambda <- res_mds$eig
       varex <- sum(lambda[1:ncol]) / sum(lambda)
@@ -259,12 +283,14 @@ pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
     scores <- res_mds$points
     return(scores)
   }
-  
+
   # irlba warns about using too large a percentage of total singular value
   # so don't use if dataset is small compared to ncol
   if (ncol < 0.5 * min(dim(X))) {
-    return(irlba_scores(X, ncol = ncol, center = center, ret_extra = ret_extra, 
-                        verbose = verbose))
+    return(irlba_scores(X,
+      ncol = ncol, center = center, ret_extra = ret_extra,
+      verbose = verbose
+    ))
   }
 
   svd_scores(X = X, ncol = ncol, center = center, ret_extra = ret_extra, verbose = verbose)
@@ -276,7 +302,7 @@ svd_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
   # need extra data if we want to re-apply PCA to new points in umap_transform
   rotation <- NULL
   xcenter <- NULL
-  
+
   X <- scale(X, center = center, scale = FALSE)
   # do SVD on X directly rather than forming covariance matrix
   s <- svd(X, nu = ncol, nv = ifelse(ret_extra, ncol, 0))
@@ -295,7 +321,7 @@ svd_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
     rotation <- s$v
     xcenter <- attr(X, "scaled:center")
   }
-  
+
   if (ret_extra) {
     list(
       scores = scores,
@@ -311,10 +337,12 @@ svd_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
 
 # Get PCA scores via irlba
 irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FALSE) {
-  res <- irlba::prcomp_irlba(X, n = ncol, retx = TRUE, center = center,
-                             scale = FALSE)
+  res <- irlba::prcomp_irlba(X,
+    n = ncol, retx = TRUE, center = center,
+    scale = FALSE
+  )
   if (verbose) {
-    varex <- sum(res$sdev[1:ncol] ^ 2) / res$totalvar
+    varex <- sum(res$sdev[1:ncol]^2) / res$totalvar
     tsmessage(
       "PCA: ", ncol, " components explained ", formatC(varex * 100),
       "% variance"
@@ -329,15 +357,18 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
 }
 
 init_is_spectral <- function(init) {
-  res <- pmatch(tolower(init), c("normlaplacian", "spectral", "laplacian",
-                                 "inormlaplacian", "ispectral"))
+  res <- pmatch(tolower(init), c(
+    "normlaplacian", "spectral", "laplacian",
+    "inormlaplacian", "ispectral"
+  ))
   length(res) > 0 && !is.na(res)
 }
 
 rand_nbr_graph <- function(n_vertices, n_nbrs, val) {
-  nn_to_sparse(rand_nbr_idx(n_vertices, n_nbrs), 
-               val = val, 
-               max_nbr_id = n_vertices)
+  nn_to_sparse(rand_nbr_idx(n_vertices, n_nbrs),
+    val = val,
+    max_nbr_id = n_vertices
+  )
 }
 
 rand_nbr_idx <- function(n_vertices, n_nbrs) {
@@ -358,24 +389,24 @@ rand_nbr_idx <- function(n_vertices, n_nbrs) {
 # pos_affinity: value for the positive affinity (associated with nbrs)
 # neg_affinity: value for the negative affinity (associated with neg nbrs)
 approx_affinity_graph <- function(V, n_neg,
-                                  pos_affinity = 1, neg_affinity = 0.1, 
+                                  pos_affinity = 1, neg_affinity = 0.1,
                                   verbose = FALSE) {
   pos_V <- V
   pos_V@x <- rep(pos_affinity, length(pos_V@x))
   pos_V <- 0.5 * (pos_V + Matrix::t(pos_V))
-  
+
   neg_V <- rand_nbr_graph(nrow(pos_V), n_nbrs = n_neg, val = neg_affinity)
   neg_V <- 0.5 * (neg_V + Matrix::t(neg_V))
-  
+
   # the cleanup below will ensure that where the same value got a pos and neg
   # affinity it will end up positive
   graph <- pos_V + neg_V
-  
+
   # clamp small values to neg_affinity
   graph@x[graph@x < pos_affinity] <- neg_affinity
   # and large values to pos_affinity
   graph@x <- pmin(graph@x, pos_affinity)
-  
+
   Matrix::drop0(graph)
 }
 
@@ -392,11 +423,12 @@ approx_affinity_graph <- function(V, n_neg,
 # Randomized Near Neighbor Graphs, Giant Components, and Applications in Data Science
 # George C. Linderman, Gal Mishne, Yuval Kluger, Stefan Steinerberger
 # https://arxiv.org/abs/1711.04712
-agspectral_init <- function(V, n_neg_nbrs, pos_affinity = 1, neg_affinity = 0.1, 
+agspectral_init <- function(V, n_neg_nbrs, pos_affinity = 1, neg_affinity = 0.1,
                             ndim = 2, verbose = FALSE) {
   graph <- approx_affinity_graph(V, n_neg_nbrs,
-                                 pos_affinity = pos_affinity, 
-                                 neg_affinity = neg_affinity,
-                                 verbose = verbose)
+    pos_affinity = pos_affinity,
+    neg_affinity = neg_affinity,
+    verbose = verbose
+  )
   spectral_init(graph, ndim = ndim, verbose = verbose)
 }

@@ -27,4 +27,3 @@ expect_equal(min(iris10_range), 0)
 iris10_colrange <- scale_input(iris10, scale_type = "colrange")
 expect_equal(apply(iris10_colrange, 2, max), rep(1, 4), check.attributes = FALSE)
 expect_equal(apply(iris10_colrange, 2, min), rep(0, 4), check.attributes = FALSE)
-

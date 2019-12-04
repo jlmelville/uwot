@@ -34,7 +34,7 @@ use an unweighted average.}
 larger k, the more the accurate results, but the longer the search takes.
 Default is the value used in building the \code{model} is used.}
 
-\item{tmpdir}{Temporary directory to store nearest neighbor indexes during 
+\item{tmpdir}{Temporary directory to store nearest neighbor indexes during
 nearest neighbor search. Default is \code{\link{tempdir}}. The index is
 only written to disk if \code{n_threads > 1}; otherwise, this parameter is
 ignored.}
@@ -53,7 +53,7 @@ descent. If set to > 1, then results will not be reproducible, even if
 
 \item{grain_size}{Minimum batch size for multithreading. If the number of
 items to process in a thread falls below this number, then no threads will
-be used. Used in conjunction with \code{n_threads} and 
+be used. Used in conjunction with \code{n_threads} and
 \code{n_sgd_threads}.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
@@ -71,8 +71,8 @@ using the result of calling \code{\link{umap}} or \code{\link{tumap}} with
 Note that some settings are incompatible with the production of a UMAP model
 via \code{\link{umap}}: external neighbor data (passed via a list to the
 argument of the \code{nn_method} parameter), and factor columns that were
-included in the UMAP calculation via the \code{metric} parameter. In the 
-latter case, the model produced is based only on the numeric data. 
+included in the UMAP calculation via the \code{metric} parameter. In the
+latter case, the model produced is based only on the numeric data.
 A transformation is possible, but factor columns in the new data are ignored.
 }
 \examples{
@@ -83,5 +83,4 @@ iris_test <- iris[101:150, ]
 # You must set ret_model = TRUE to return extra data needed
 iris_train_umap <- umap(iris_train, ret_model = TRUE)
 iris_test_umap <- umap_transform(iris_test, iris_train_umap)
-
 }

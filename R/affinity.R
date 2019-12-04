@@ -116,7 +116,8 @@ perplexity_similarities <- function(nn, perplexity = NULL,
       tsmessage(affinity_matrix_res$n_failures, " perplexity failures")
     }
     affinity_matrix <- nn_to_sparse(nn$idx, as.vector(affinity_matrix),
-                                    self_nbr = TRUE, max_nbr_id = nrow(nn$idx))
+      self_nbr = TRUE, max_nbr_id = nrow(nn$idx)
+    )
   }
   else {
     # knn kernel

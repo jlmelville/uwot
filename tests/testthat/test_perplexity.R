@@ -35,24 +35,27 @@ expect_true(Matrix::isSymmetric(res))
 expect_equal(as.matrix(res), P_symm, tol = 1e-5, check.attributes = FALSE)
 
 Psymm9 <- matrix(
-c(0,      0.1111, 0.1112, 0.1110, 0.1116, 0.1113, 0.1112, 0.1115, 0.1106, 0.1112, 
-  0.1111, 0     , 0.1113, 0.1113, 0.1110, 0.1107, 0.1112, 0.1112, 0.1112, 0.1114, 
-  0.1112, 0.1113, 0     , 0.1113, 0.1112, 0.1106, 0.1114, 0.1112, 0.1112, 0.1113, 
-  0.1110, 0.1113, 0.1113, 0,      0.1110, 0.1105, 0.1114, 0.1111, 0.1113, 0.1114, 
-  0.1116, 0.1110, 0.1112, 0.1110, 0,      0.1113, 0.1113, 0.1115, 0.1106, 0.1111, 
-  0.1113, 0.1107, 0.1106, 0.1105, 0.1113, 0     , 0.1105, 0.1111, 0.1103, 0.1105, 
-  0.1112, 0.1112, 0.1114, 0.1114, 0.1113, 0.1105, 0     , 0.1113, 0.1112, 0.1112, 
-  0.1115, 0.1112, 0.1112, 0.1111, 0.1115, 0.1111, 0.1113, 0     , 0.1108, 0.1114, 
-  0.1106, 0.1112, 0.1112, 0.1113, 0.1106, 0.1103, 0.1112, 0.1108, 0     , 0.1111, 
-  0.1112, 0.1114, 0.1113, 0.1114, 0.1111, 0.1105, 0.1112, 0.1114, 0.1111, 0),
-byrow = TRUE, nrow = 10)
+  c(
+    0, 0.1111, 0.1112, 0.1110, 0.1116, 0.1113, 0.1112, 0.1115, 0.1106, 0.1112,
+    0.1111, 0, 0.1113, 0.1113, 0.1110, 0.1107, 0.1112, 0.1112, 0.1112, 0.1114,
+    0.1112, 0.1113, 0, 0.1113, 0.1112, 0.1106, 0.1114, 0.1112, 0.1112, 0.1113,
+    0.1110, 0.1113, 0.1113, 0, 0.1110, 0.1105, 0.1114, 0.1111, 0.1113, 0.1114,
+    0.1116, 0.1110, 0.1112, 0.1110, 0, 0.1113, 0.1113, 0.1115, 0.1106, 0.1111,
+    0.1113, 0.1107, 0.1106, 0.1105, 0.1113, 0, 0.1105, 0.1111, 0.1103, 0.1105,
+    0.1112, 0.1112, 0.1114, 0.1114, 0.1113, 0.1105, 0, 0.1113, 0.1112, 0.1112,
+    0.1115, 0.1112, 0.1112, 0.1111, 0.1115, 0.1111, 0.1113, 0, 0.1108, 0.1114,
+    0.1106, 0.1112, 0.1112, 0.1113, 0.1106, 0.1103, 0.1112, 0.1108, 0, 0.1111,
+    0.1112, 0.1114, 0.1113, 0.1114, 0.1111, 0.1105, 0.1112, 0.1114, 0.1111, 0
+  ),
+  byrow = TRUE, nrow = 10
+)
 
 res <- perplexity_similarities(
   perplexity = 9, verbose = FALSE,
   nn = find_nn(iris10,
-               k = 10, method = "fnn",
-               metric = "euclidean", n_threads = 0,
-               verbose = FALSE
+    k = 10, method = "fnn",
+    metric = "euclidean", n_threads = 0,
+    verbose = FALSE
   )
 )
 expect_true(Matrix::isSymmetric(res))
@@ -101,15 +104,18 @@ res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx,
   parallelize = FALSE, verbose = FALSE
 )$matrix
 res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
-             self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx))
+  self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx)
+)
 
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 
 RcppParallel::setThreadOptions(numThreads = 1)
-res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx, 
-                                       perplexity = 4, verbose = FALSE)$matrix
+res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx,
+  perplexity = 4, verbose = FALSE
+)$matrix
 res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
-                    self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx))
+  self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx)
+)
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 
 iris_dup <- duplicated(x2m(iris))
