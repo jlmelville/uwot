@@ -15,6 +15,12 @@ the basic method. Translated from the
 
 ## News
 
+*December 4 2019* Version 0.1.5 released on CRAN. This fixes a couple of crash bugs,
+including one where the R API was being called from inside a thread. This may have
+been causing the issues seen by users of
+[monocle](https://github.com/cole-trapnell-lab/monocle3/issues/186)
+and [seurat](https://github.com/satijalab/seurat/issues/2256).
+
 *September 23 2019* Version 0.1.4 released on CRAN. This ensures compatibility
 with RcppAnnoy 0.0.13 when using `load_uwot`.
 
