@@ -21,20 +21,17 @@
 //   scipy.sparse.csgraph.connected_components
 //   Author: Jake Vanderplas  -- <vanderplas@astro.washington.edu>
 //   License: BSD, (C) 2012
-// You may also use the (non-Rcpp) parts of the C++ algorithm under the same 
+// You may also use the (non-Rcpp) parts of the C++ algorithm under the same
 // license.
 
 #include <Rcpp.h>
 using namespace Rcpp;
 // [[Rcpp::export]]
-List connected_components_undirected(
-    const unsigned long N,
-    const IntegerVector indices1,
-    const IntegerVector indptr1,
-    const IntegerVector indices2,
-    const IntegerVector indptr2
-)
-{
+List connected_components_undirected(const unsigned long N,
+                                     const IntegerVector indices1,
+                                     const IntegerVector indptr1,
+                                     const IntegerVector indices2,
+                                     const IntegerVector indptr2) {
   const int VOID = -1;
   const int END = -2;
   std::vector<int> labels(N, VOID);
@@ -68,8 +65,5 @@ List connected_components_undirected(
       ++label;
     }
   }
-  return List::create(
-    _["n_components"] = label,
-    _["labels"] = labels
-  );
+  return List::create(_["n_components"] = label, _["labels"] = labels);
 }

@@ -17,9 +17,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <vector>
 #include <Rcpp.h>
 #include <RcppParallel.h>
+#include <vector>
 // [[Rcpp::depends(RcppParallel)]]
 
 struct AverageWorker : public RcppParallel::Worker {
@@ -31,14 +31,11 @@ struct AverageWorker : public RcppParallel::Worker {
   const std::size_t nnbrs;
   const double one_over_n;
 
-  AverageWorker(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index,
-                Rcpp::NumericMatrix embedding
-  ) :
-    train_embedding(train_embedding), nn_index(nn_index),
-    embedding(embedding),
-    nc(train_embedding.ncol()), nnbrs(nn_index.ncol()),
-    one_over_n(1.0 / nnbrs)
-  {  }
+  AverageWorker(Rcpp::NumericMatrix train_embedding,
+                Rcpp::IntegerMatrix nn_index, Rcpp::NumericMatrix embedding)
+      : train_embedding(train_embedding), nn_index(nn_index),
+        embedding(embedding), nc(train_embedding.ncol()),
+        nnbrs(nn_index.ncol()), one_over_n(1.0 / nnbrs) {}
 
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<double> sumc(nc);
@@ -59,20 +56,17 @@ struct AverageWorker : public RcppParallel::Worker {
   }
 };
 
-
 // [[Rcpp::export]]
-Rcpp::NumericMatrix init_transform_av_parallel(Rcpp::NumericMatrix train_embedding,
-                                               Rcpp::IntegerMatrix nn_index,
-                                               bool parallelize = true,
-                                               const std::size_t grain_size = 1) {
+Rcpp::NumericMatrix init_transform_av_parallel(
+    Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index,
+    bool parallelize = true, const std::size_t grain_size = 1) {
   Rcpp::NumericMatrix embedding(nn_index.nrow(), train_embedding.ncol());
 
   AverageWorker worker(train_embedding, nn_index, embedding);
 
   if (parallelize) {
     RcppParallel::parallelFor(0, nn_index.nrow(), worker, grain_size);
-  }
-  else {
+  } else {
     worker(0, nn_index.nrow());
   }
 
@@ -88,19 +82,19 @@ struct WeightedAverageWorker : public RcppParallel::Worker {
   const std::size_t nc;
   const std::size_t nnbrs;
 
-  WeightedAverageWorker(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index,
-                        const Rcpp::NumericMatrix& nn_weights, Rcpp::NumericMatrix embedding
-  ) :
-    train_embedding(train_embedding), nn_index(nn_index), nn_weights(nn_weights),
-    embedding(embedding),
-    nc(train_embedding.ncol()), nnbrs(nn_index.ncol())
-  {  }
+  WeightedAverageWorker(Rcpp::NumericMatrix train_embedding,
+                        Rcpp::IntegerMatrix nn_index,
+                        const Rcpp::NumericMatrix &nn_weights,
+                        Rcpp::NumericMatrix embedding)
+      : train_embedding(train_embedding), nn_index(nn_index),
+        nn_weights(nn_weights), embedding(embedding),
+        nc(train_embedding.ncol()), nnbrs(nn_index.ncol()) {}
 
   void operator()(std::size_t begin, std::size_t end) {
     std::vector<double> sumc(nc);
     for (std::size_t i = begin; i < end; i++) {
       std::fill(sumc.begin(), sumc.end(), 0.0);
-      
+
       double sumw = 0.0;
 
       for (std::size_t j = 0; j < nnbrs; j++) {
@@ -133,12 +127,12 @@ Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding,
                                             bool parallelize = true) {
   Rcpp::NumericMatrix embedding(nn_index.nrow(), train_embedding.ncol());
 
-  WeightedAverageWorker worker(train_embedding, nn_index, nn_weights, embedding);
+  WeightedAverageWorker worker(train_embedding, nn_index, nn_weights,
+                               embedding);
 
   if (parallelize) {
     RcppParallel::parallelFor(0, nn_index.nrow(), worker, grain_size);
-  }
-  else {
+  } else {
     worker(0, nn_index.nrow());
   }
 

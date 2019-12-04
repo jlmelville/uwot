@@ -22,11 +22,11 @@
 #ifndef UWOT_TAUPRNG_H
 #define UWOT_TAUPRNG_H
 
-#include <limits>
 #include "Rcpp.h"
+#include <limits>
 // linked from dqrng
-#include "pcg_random.hpp"
 #include "convert_seed.h"
+#include "pcg_random.hpp"
 
 // NOT THREAD SAFE
 // based on code in the dqsample package
@@ -43,26 +43,26 @@ struct tau_prng {
   uint64_t state0;
   uint64_t state1; // technically this needs to always be > 7
   uint64_t state2; // and this should be > 15
-  
+
   static constexpr uint64_t MAGIC0 = static_cast<uint64_t>(4294967294);
   static constexpr uint64_t MAGIC1 = static_cast<uint64_t>(4294967288);
   static constexpr uint64_t MAGIC2 = static_cast<uint64_t>(4294967280);
-  
+
   tau_prng(uint64_t state0, uint64_t state1, uint64_t state2)
-    : state0(state0), state1(state1 > 7 ? state1 : 8),
-      state2(state2 > 15 ? state2 : 16) {}
-  
+      : state0(state0), state1(state1 > 7 ? state1 : 8),
+        state2(state2 > 15 ? state2 : 16) {}
+
   int32_t operator()() {
     state0 = (((state0 & MAGIC0) << 12) & 0xffffffff) ^
-      ((((state0 << 13) & 0xffffffff) ^ state0) >> 19);
+             ((((state0 << 13) & 0xffffffff) ^ state0) >> 19);
     state1 = (((state1 & MAGIC1) << 4) & 0xffffffff) ^
-      ((((state1 << 2) & 0xffffffff) ^ state1) >> 25);
+             ((((state1 << 2) & 0xffffffff) ^ state1) >> 25);
     state2 = (((state2 & MAGIC2) << 17) & 0xffffffff) ^
-      ((((state2 << 3) & 0xffffffff) ^ state2) >> 11);
+             ((((state2 << 3) & 0xffffffff) ^ state2) >> 11);
 
     return state0 ^ state1 ^ state2;
   }
-  
+
   // return a value in (0, n]
   std::size_t operator()(const std::size_t n) {
     std::size_t result = (*this)() % n;
@@ -74,25 +74,21 @@ struct tau_factory {
   uint64_t seed1;
   uint64_t seed2;
   tau_factory() : seed1(random64()), seed2(random64()) {}
-  
+
   void reseed() {
     seed1 = random64();
     seed2 = random64();
   }
-  
-  tau_prng create(uint64_t seed) {
-    return tau_prng(seed1, seed2, seed);
-  }
+
+  tau_prng create(uint64_t seed) { return tau_prng(seed1, seed2, seed); }
 };
 
 struct pcg_prng {
 
   pcg32 gen;
-  
-  pcg_prng(uint64_t seed) {
-    gen.seed(seed);
-  }
-  
+
+  pcg_prng(uint64_t seed) { gen.seed(seed); }
+
   // return a value in (0, n]
   std::size_t operator()(const std::size_t n) {
     std::size_t result = gen(n);
@@ -103,13 +99,11 @@ struct pcg_prng {
 struct pcg_factory {
   uint32_t seed1;
   pcg_factory() : seed1(random32()) {}
-  
-  void reseed() {
-    seed1 = random32();
-  }
-  
+
+  void reseed() { seed1 = random32(); }
+
   pcg_prng create(uint32_t seed) {
-    uint32_t seeds[2] = { seed1, seed };
+    uint32_t seeds[2] = {seed1, seed};
     return pcg_prng(dqrng::convert_seed<uint64_t>(seeds, 2));
   }
 };

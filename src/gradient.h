@@ -20,15 +20,17 @@
 #ifndef UWOT_GRADIENT_H
 #define UWOT_GRADIENT_H
 
+#include <cmath>
+
 // Class templated on the powfun function as suggested by Aaron Lun
-template<double (*powfun)(double, double)>
-class base_umap_gradient {
+template <double (*powfun)(double, double)> class base_umap_gradient {
 public:
   base_umap_gradient(const double a, const double b, const double gamma);
   const double grad_attr(const double dist_squared) const;
   const double grad_rep(const double dist_squared) const;
   static const constexpr double clamp_hi = 4.0;
   static const constexpr double clamp_lo = -4.0;
+
 private:
   const double a;
   const double b;
@@ -65,6 +67,7 @@ public:
   const double grad_rep(const double dist_squared) const;
   static const constexpr double clamp_hi = 5.0;
   static const constexpr double clamp_lo = -5.0;
+
 private:
   const double gamma_2;
 };

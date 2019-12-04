@@ -16,18 +16,18 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
-#include <cmath>
 #include "gradient.h"
+#include <cmath>
 
 // https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
 // an approximation to pow
 double fastPrecisePow(double a, double b) {
   // calculate approximation with fraction of the exponent
-  int e = (int) b;
+  int e = (int)b;
   union {
     double d;
     int x[2];
-  } u = { a };
+  } u = {a};
   u.x[1] = (int)((b - e) * (u.x[1] - 1072632447) + 1072632447);
   u.x[0] = 0;
 
@@ -46,20 +46,23 @@ double fastPrecisePow(double a, double b) {
 }
 
 // UMAP implementation code
-template<double (*powfun)(double, double)>
-base_umap_gradient<powfun>::base_umap_gradient(const double a, const double b, const double gamma) :
-  a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b)
-{ }
+template <double (*powfun)(double, double)>
+base_umap_gradient<powfun>::base_umap_gradient(const double a, const double b,
+                                               const double gamma)
+    : a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b) {}
 
-template<double (*powfun)(double, double)>
-const double base_umap_gradient<powfun>::grad_attr(const double dist_squared) const {
+template <double (*powfun)(double, double)>
+const double
+base_umap_gradient<powfun>::grad_attr(const double dist_squared) const {
   const double pd2b = powfun(dist_squared, b);
   return (a_b_m2 * pd2b) / (dist_squared * (a * pd2b + 1.0));
 }
 
-template<double (*powfun)(double, double)>
-const double base_umap_gradient<powfun>::grad_rep(const double dist_squared) const {
-  return gamma_b_2 / ((0.001 + dist_squared) * (a * powfun(dist_squared, b) + 1.0));
+template <double (*powfun)(double, double)>
+const double
+base_umap_gradient<powfun>::grad_rep(const double dist_squared) const {
+  return gamma_b_2 /
+         ((0.001 + dist_squared) * (a * powfun(dist_squared, b) + 1.0));
 }
 
 // UMAP using standard power function
@@ -81,8 +84,8 @@ const double tumap_gradient::grad_rep(const double dist_squared) const {
 
 // LargeVis
 
-largevis_gradient::largevis_gradient(const double gamma) : 
-  gamma_2(gamma * 2.0) {}
+largevis_gradient::largevis_gradient(const double gamma)
+    : gamma_2(gamma * 2.0) {}
 
 const double largevis_gradient::grad_attr(const double dist_squared) const {
   return -2.0 / (dist_squared + 1.0);

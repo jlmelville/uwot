@@ -17,9 +17,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <Rcpp.h>
 #include <limits>
 #include <vector>
-#include <Rcpp.h>
 // [[Rcpp::depends(RcppParallel)]]
 #include <RcppParallel.h>
 
@@ -34,28 +34,22 @@ struct PerplexityWorker : public RcppParallel::Worker {
   const unsigned int n_iter;
   const double tol;
   const double double_max = (std::numeric_limits<double>::max)();
-  
+
   tthread::mutex mutex;
   std::size_t n_search_fails;
-  
-  PerplexityWorker(
-    Rcpp::NumericMatrix res,
-    const Rcpp::NumericMatrix nn_dist,
-    const Rcpp::IntegerMatrix nn_idx,
-    const double perplexity, 
-    const unsigned int n_iter,
-    const double tol
-  ) :
-    res(res), nn_dist(nn_dist), nn_idx(nn_idx), n_vertices(nn_dist.nrow()), 
-    n_neighbors(nn_dist.ncol()),target(std::log(perplexity)), n_iter(n_iter), 
-    tol(tol), n_search_fails(0)
-  {  }
-  
+
+  PerplexityWorker(Rcpp::NumericMatrix res, const Rcpp::NumericMatrix nn_dist,
+                   const Rcpp::IntegerMatrix nn_idx, const double perplexity,
+                   const unsigned int n_iter, const double tol)
+      : res(res), nn_dist(nn_dist), nn_idx(nn_idx), n_vertices(nn_dist.nrow()),
+        n_neighbors(nn_dist.ncol()), target(std::log(perplexity)),
+        n_iter(n_iter), tol(tol), n_search_fails(0) {}
+
   void operator()(std::size_t begin, std::size_t end) {
     // number of binary search failures in this window
     std::size_t n_window_search_fails = 0;
     std::vector<double> d2(n_neighbors - 1, 0.0);
-    
+
     for (std::size_t i = begin; i < end; i++) {
       double beta = 1.0;
       double lo = 0.0;
@@ -66,7 +60,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
       double beta_best = beta;
       double adiff_min = double_max;
       bool converged = false;
-      
+
       // calculate squared distances and remember the minimum
       double dmin = double_max;
       double dtmp;
@@ -83,7 +77,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
       for (unsigned int k = 1; k < n_neighbors; k++) {
         d2[k - 1] -= dmin;
       }
-      
+
       for (unsigned int iter = 0; iter < n_iter; iter++) {
         double Z = 0.0;
         double H = 0.0;
@@ -102,7 +96,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
           converged = true;
           break;
         }
-        
+
         // store best beta in case binary search fails
         if (adiff < adiff_min) {
           adiff_min = adiff;
@@ -112,13 +106,11 @@ struct PerplexityWorker : public RcppParallel::Worker {
         if (H < target) {
           hi = beta;
           beta = 0.5 * (lo + hi);
-        }
-        else {
+        } else {
           lo = beta;
           if (hi == double_max) {
             beta *= 2.0;
-          }
-          else {
+          } else {
             beta = 0.5 * (lo + hi);
           }
         }
@@ -127,7 +119,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
         ++n_window_search_fails;
         beta = beta_best;
       }
-      
+
       double Z = 0.0;
       for (unsigned int k = 0; k < n_neighbors - 1; k++) {
         double W = std::exp(-d2[k] * beta);
@@ -143,13 +135,12 @@ struct PerplexityWorker : public RcppParallel::Worker {
         if (i != j) {
           res(i, k) = d2[widx] / Z;
           ++widx;
-        }
-        else {
+        } else {
           res(i, k) = 0.0;
         }
       }
     }
-    
+
     // Update global count of failures
     {
       tthread::lock_guard<tthread::mutex> guard(mutex);
@@ -160,27 +151,20 @@ struct PerplexityWorker : public RcppParallel::Worker {
 
 // [[Rcpp::export]]
 Rcpp::List calc_row_probabilities_parallel(
-    const Rcpp::NumericMatrix nn_dist, 
-    const Rcpp::IntegerMatrix nn_idx,
-    const double perplexity,
-    const unsigned int n_iter = 200,
-    const double tol = 1e-5,
-    const bool parallelize = true,
-    const std::size_t grain_size = 1,
-    const bool verbose = false) {
+    const Rcpp::NumericMatrix nn_dist, const Rcpp::IntegerMatrix nn_idx,
+    const double perplexity, const unsigned int n_iter = 200,
+    const double tol = 1e-5, const bool parallelize = true,
+    const std::size_t grain_size = 1, const bool verbose = false) {
   Rcpp::NumericMatrix res = Rcpp::NumericMatrix(nn_dist.nrow(), nn_dist.ncol());
   const unsigned int n_vertices = nn_dist.nrow();
   PerplexityWorker worker(res, nn_dist, nn_idx, perplexity, n_iter, tol);
-  
+
   if (parallelize) {
     RcppParallel::parallelFor(0, n_vertices, worker, grain_size);
-  }
-  else {
+  } else {
     worker(0, n_vertices);
   }
 
-  return Rcpp::List::create(
-    Rcpp::Named("matrix") = res,
-    Rcpp::Named("n_failures") = worker.n_search_fails
-  );
+  return Rcpp::List::create(Rcpp::Named("matrix") = res,
+                            Rcpp::Named("n_failures") = worker.n_search_fails);
 }
