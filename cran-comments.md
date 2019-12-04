@@ -1,6 +1,6 @@
 ## Release Summary
 
-This is a patch release to fix bugs which cause the R session to crash.
+This is a patch release to fix two bugs which can cause the R session to crash.
 
 ## Test environments
 
@@ -52,7 +52,6 @@ A gcc-UBSAN issue is reported. This originates from the dependency RcppAnnoy and
 is ultimately due to how memory management is implemented in the Annoy 
 library that RcppAnnoy wraps. This is a purposeful design decision in Annoy 
 and not something that can be fixed in this package (or in RcppAnnoy).
-
 
 ## Downstream dependencies
 
