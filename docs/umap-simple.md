@@ -62,7 +62,7 @@ gauss2d <- snedata::two_clusters_data(n = 50, dim = 2)
 
 Setting `n_neighbors` too low clearly gives results which are too local.
 
-## Cluster Sizes
+## Cluster Densities
 
 In this example, one of the clusters (the yellow one) is much denser (and hence
 smaller) than the other.
@@ -77,6 +77,20 @@ gauss2d_scale <- snedata::two_different_clusters_data(n = 75, scale = 10, dim = 
 ![gauss_scale nbrs30](../img/simple/gauss_scale_nbrs30.png)|![gauss_scale nbrs50](../img/simple/gauss_scale_nbrs50.png)|![gauss_scale nbrs100](../img/simple/gauss_scale_nbrs100.png)
 
 Again like t-SNE, UMAP does not reproduce the relative cluster densities.
+
+## Cluster Size
+
+```R
+x100a <- snedata::gaussian_data(n = 100, dim = 50, color = "blue")
+> x1000b <- snedata::gaussian_data(n = 1000, dim = 50, color = "orange")
+> x1000b[, 1:50] <- x1000b[, 1:50] <- x1000b[, 1:50] + 10
+> x200 <- rbind(x100a, x100b)
+> x1100 <- rbind(x100a, x1000b)
+```
+
+| |
+|:--:|:--:
+![100 blue 100 orange](../img/simple/100_blue_100_orange.png)|![100 blue 1000 orange](../img/simple/100_blue_1000_orange.png)
 
 ## Distances Between Clusters
 
