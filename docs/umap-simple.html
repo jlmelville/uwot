@@ -1593,10 +1593,11 @@ div.tocify {
 <div id="cluster-size" class="section level2">
 <h2>Cluster Size</h2>
 <pre class="r"><code>x100a &lt;- snedata::gaussian_data(n = 100, dim = 50, color = &quot;blue&quot;)
-&gt; x1000b &lt;- snedata::gaussian_data(n = 1000, dim = 50, color = &quot;orange&quot;)
-&gt; x1000b[, 1:50] &lt;- x1000b[, 1:50] &lt;- x1000b[, 1:50] + 10
-&gt; x200 &lt;- rbind(x100a, x100b)
-&gt; x1100 &lt;- rbind(x100a, x1000b)</code></pre>
+x1000b &lt;- snedata::gaussian_data(n = 1000, dim = 50, color = &quot;orange&quot;)
+x1000b[, 1:50] &lt;- x1000b[, 1:50] &lt;- x1000b[, 1:50] + 10
+x200 &lt;- rbind(x100a, x100b)
+x1100 &lt;- rbind(x100a, x1000b)</code></pre>
+<p>As an aside, what about two clusters with the same density but different numbers of points? Below is an example with two clusters with equal sizes (100 points each), and then where the orange cluster contains 1000 points:</p>
 <table>
 <tbody>
 <tr class="odd">
@@ -1605,6 +1606,7 @@ div.tocify {
 </tr>
 </tbody>
 </table>
+<p>From this example you can see that UMAP will display clusters with more members as being larger. This can have implications for the visualization if you have a minority class that you are most interested in.</p>
 </div>
 <div id="distances-between-clusters" class="section level2">
 <h2>Distances Between Clusters</h2>

@@ -82,15 +82,23 @@ Again like t-SNE, UMAP does not reproduce the relative cluster densities.
 
 ```R
 x100a <- snedata::gaussian_data(n = 100, dim = 50, color = "blue")
-> x1000b <- snedata::gaussian_data(n = 1000, dim = 50, color = "orange")
-> x1000b[, 1:50] <- x1000b[, 1:50] <- x1000b[, 1:50] + 10
-> x200 <- rbind(x100a, x100b)
-> x1100 <- rbind(x100a, x1000b)
+x1000b <- snedata::gaussian_data(n = 1000, dim = 50, color = "orange")
+x1000b[, 1:50] <- x1000b[, 1:50] <- x1000b[, 1:50] + 10
+x200 <- rbind(x100a, x100b)
+x1100 <- rbind(x100a, x1000b)
 ```
+
+As an aside, what about two clusters with the same density but different numbers
+of points? Below is an example with two clusters with equal sizes (100 points 
+each), and then where the orange cluster contains 1000 points:
 
 | |
 |:--:|:--:
 ![100 blue 100 orange](../img/simple/100_blue_100_orange.png)|![100 blue 1000 orange](../img/simple/100_blue_1000_orange.png)
+
+From this example you can see that UMAP will display clusters with more members
+as being larger. This can have implications for the visualization if you have a 
+minority class that you are most interested in.
 
 ## Distances Between Clusters
 
