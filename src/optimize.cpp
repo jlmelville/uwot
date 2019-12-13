@@ -91,15 +91,8 @@ struct SgdWorker : public RcppParallel::Worker {
         rng_factory() {}
 
   void operator()(std::size_t begin, std::size_t end) {
-    // std::unique_ptr<Rand> prng(nullptr);
-
     // Each window gets its own PRNG state, to prevent locking inside the loop.
     auto prng = rng_factory.create(end);
-    //
-    // {
-    //   tthread::lock_guard<tthread::mutex> guard(mutex);
-    //   prng.reset(new Rand());
-    // }
 
     std::vector<double> dys(ndim);
     for (std::size_t i = begin; i < end; i++) {
