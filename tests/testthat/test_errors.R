@@ -42,3 +42,7 @@ expect_error(umap(iris10, n_sgd_threads = -1), "n_sgd_threads")
 
 model <- umap(iris10, n_neighbors = 2, ret_model = TRUE, n_epochs = 2)
 expect_error(umap_transform(iris10[, 1:2], model), "Incorrect dimensions")
+
+# #42: check init is a matrix or a string; complain otherwise
+expect_error(umap(iris10, n_neighbors = 4, init = as.matrix(iris[, 1:3])), "(10, 2)")
+expect_error(umap(iris10, n_neighbors = 4, init = iris), "matrix or string")

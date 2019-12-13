@@ -1414,10 +1414,15 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
   if (methods::is(init, "matrix")) {
     if (nrow(init) != n_vertices || ncol(init) != n_components) {
-      stop("init matrix does not match necessary configuration for X")
+      stop("init matrix does not match necessary configuration for X: ", "should
+           have dimensions (", n_vertices, ", ", n_components, ")")
     }
     tsmessage("Initializing from user-supplied matrix")
     embedding <- init
+  }
+  else if (!(methods::is(init, "character") && length(init) == 1)) {
+    stop("init should be either a matrix or string describing the ", 
+         "initialization method")
   }
   else {
     init <- match.arg(tolower(init), c(
