@@ -8,13 +8,19 @@ output:
       collapsed: false
 ---
 
-This is part of the documentation for [UWOT](https://github.com/jlmelville/uwot).
+This is part of the documentation for [uwot](https://github.com/jlmelville/uwot).
 
-The [UMAP paper](https://arxiv.org/abs/1802.03426) does not go into much 
-implementation detail. If you are coming to UMAP from t-SNE and don't know
-much about topology or fuzzy sets (and I certainly don't), you may find yourself
-hankering for some insight into how UMAP achieves its results and what
-connection there is with t-SNE and related methods.
+*January 1 2020:* I used to say that "the 
+[UMAP paper](https://arxiv.org/abs/1802.03426v1) does not go into much 
+implementation detail." That was true of the first version of the paper, but
+the [second version](https://arxiv.org/abs/1802.03426v2) adds an appendix that
+covers most of the material here. This is no coincidence, as I was added as a
+co-author, and this was my main contribution.
+
+If you are coming to UMAP from t-SNE and don't know much about topology or 
+fuzzy sets (and I certainly don't), you may find yourself hankering for some
+insight into how UMAP achieves its results and what connection there is with 
+t-SNE and related methods.
 
 Here are some details I have taken
 from scouring the [Python source code](https://github.com/lmcinnes/umap) and 
@@ -279,6 +285,12 @@ nearest neighbor (ignoring zero distances where neighbors are duplicates) and
 $\sigma_{i}$ is analogous to $\beta_{i}$ in the perplexity calibration used in
 SNE. In this case, $\sigma_{i}$ is determined such that 
 $\sum_{j} v_{j|i} = \log_{2} k$ where $k$ is the number of nearest neighbors.
+
+*January 1 2020:* I assume there is a connection here with the local scaling
+advocated for 
+[self-tuning spectral clustering](http://papers.nips.cc/paper/2619-self-tuning-spectral-clustering),
+given that spectral decomposition of the affinity graph is the default
+initialization method for UMAP.
 
 These weights are symmetrized by a slightly different method to SNE: 
 

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -85,8 +85,6 @@ overflow: auto;
 margin-left: 2%;
 position: fixed;
 border: 1px solid #ccc;
-webkit-border-radius: 6px;
-moz-border-radius: 6px;
 border-radius: 6px;
 }
 
@@ -114,9 +112,14 @@ font-size: 12px;
 .tocify-subheader .tocify-subheader {
 text-indent: 30px;
 }
-
 .tocify-subheader .tocify-subheader .tocify-subheader {
 text-indent: 40px;
+}
+.tocify-subheader .tocify-subheader .tocify-subheader .tocify-subheader {
+text-indent: 50px;
+}
+.tocify-subheader .tocify-subheader .tocify-subheader .tocify-subheader .tocify-subheader {
+text-indent: 60px;
 }
 
 .tocify .tocify-item > a, .tocify .nav-list .nav-header {
@@ -520,13 +523,13 @@ float: none;
 
           item.append($("<a/>", {
 
-            "text": self.text()
+            "html": self.html()
 
           }));
 
         } else {
 
-          item.text(self.text());
+          item.html(self.html());
 
         }
 
@@ -1357,7 +1360,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -1419,6 +1421,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -1431,48 +1434,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = false;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -1486,6 +1450,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -1521,8 +1491,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -1569,8 +1537,9 @@ div.tocify {
 </div>
 
 
-<p>This is part of the documentation for <a href="https://github.com/jlmelville/uwot">UWOT</a>.</p>
-<p>The <a href="https://arxiv.org/abs/1802.03426">UMAP paper</a> does not go into much implementation detail. If you are coming to UMAP from t-SNE and don’t know much about topology or fuzzy sets (and I certainly don’t), you may find yourself hankering for some insight into how UMAP achieves its results and what connection there is with t-SNE and related methods.</p>
+<p>This is part of the documentation for <a href="https://github.com/jlmelville/uwot">uwot</a>.</p>
+<p><em>January 1 2020:</em> I used to say that “the <a href="https://arxiv.org/abs/1802.03426v1">UMAP paper</a> does not go into much implementation detail.” That was true of the first version of the paper, but the <a href="https://arxiv.org/abs/1802.03426v2">second version</a> adds an appendix that covers most of the material here. This is no coincidence, as I was added as a co-author, and this was my main contribution.</p>
+<p>If you are coming to UMAP from t-SNE and don’t know much about topology or fuzzy sets (and I certainly don’t), you may find yourself hankering for some insight into how UMAP achieves its results and what connection there is with t-SNE and related methods.</p>
 <p>Here are some details I have taken from scouring the <a href="https://github.com/lmcinnes/umap">Python source code</a> and from asking UMAP creator <a href="https://github.com/lmcinnes">Leland McInnes</a>. In what follows, I assume that you are already familiar with how t-SNE works.</p>
 <p>Broadly, the UMAP implementation uses a similar approach to <a href="https://arxiv.org/abs/1602.00370">LargeVis</a>. LargeVis in turn uses concepts from <a href="https://lvdmaaten.github.io/tsne/">t-SNE</a>. t-SNE itself is a modification of the original <a href="https://papers.nips.cc/paper/2276-stochastic-neighbor-embedding">Stochastic Neighbor Embedding (SNE)</a> method.</p>
 <p>Different papers use different symbols and nomenclature, so to make sure we’re all on the same page, I will restate the relevant definitions from SNE and t-SNE before we take a look at LargeVis and UMAP.</p>
@@ -1686,6 +1655,7 @@ C_{UMAP} =
 v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \sigma_{i} \right]
 \]</span></p>
 <p>where <span class="math inline">\(r_{ij}\)</span> are the input distances, <span class="math inline">\(\rho_{i}\)</span> is the distance to the nearest neighbor (ignoring zero distances where neighbors are duplicates) and <span class="math inline">\(\sigma_{i}\)</span> is analogous to <span class="math inline">\(\beta_{i}\)</span> in the perplexity calibration used in SNE. In this case, <span class="math inline">\(\sigma_{i}\)</span> is determined such that <span class="math inline">\(\sum_{j} v_{j|i} = \log_{2} k\)</span> where <span class="math inline">\(k\)</span> is the number of nearest neighbors.</p>
+<p><em>January 1 2020:</em> I assume there is a connection here with the local scaling advocated for <a href="http://papers.nips.cc/paper/2619-self-tuning-spectral-clustering">self-tuning spectral clustering</a>, given that spectral decomposition of the affinity graph is the default initialization method for UMAP.</p>
 <p>These weights are symmetrized by a slightly different method to SNE:</p>
 <p><span class="math display">\[
 v_{ij} = \left(v_{j|i} + v_{i|j}\right) - v_{j|i}v_{i|j}
@@ -1758,6 +1728,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
