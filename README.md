@@ -184,6 +184,36 @@ from [How to Use t-SNE Effectively](https://distill.pub/2016/misread-tsne/).
 * A list of examples of using the LargeVis-like
 [`lvish`](https://jlmelville.github.io/uwot/lvish.html) method.
 
+## A Note on Reproducibility
+
+`uwot` relies on the underlying compiler and C++ standard library on your
+machine and this can result in differences in output even with the same input
+data, arguments, packages and R version. If you require reproducibility between
+machines, it is strongly suggested that you stick with the same OS and compiler
+version on all of them (e.g. a fixed LTS of a Linux distro and gcc version).
+Otherwise, the following can help:
+
+* Use the `tumap` method instead of `umap`. This avoid the use of `std::pow` in
+gradient calculations. This also has the advantage of being faster to optimize.
+However, this gives larger clusters in the output, and you don't have the 
+ability to control that with `a` and `b` (or `spread` and `min_dist`)
+parameters.
+* For `umap`, it's better to provide `a` and `b` directly with a fixed precision
+rather than allowing them to be calculated via the `spread` and `min_dist`
+parameters. For default UMAP, use `a = 1.8956, b = 0.8006`.
+* Use `approx_pow = TRUE`, which avoids the use of the `std::pow` function.
+* Use `init = "spca"` rather than `init = "spectral"` (although the latter is 
+the default and preferred method for UMAP initialization).
+
+In summary, your chances of reproducibility are increased by using:
+
+```R
+mnist_umap <- umap(mnist, a = 1.8956, b = 0.8006, approx_pow = TRUE, init = "spca")
+# or
+mnist_tumap <- tumap(mnist, init = "spca")
+```
+
+
 ## Implementation Details
 
 For small (N < 4096) and Euclidean distance, exact nearest neighbors are found
