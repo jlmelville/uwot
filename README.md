@@ -82,7 +82,8 @@ if (interactive()) {
 cat("I am printing this message all of the time\n")
 ```
 
-This project's `Makevars` file relies on a clean output to correctly configure [RcppParallel](https://cran.r-project.org/package=RcppParallel). If compilation
+This project's `Makevars` file relies on a clean output to correctly configure
+[RcppParallel](https://cran.r-project.org/package=RcppParallel). If compilation
 fails and you see startup messages in the build output, this is what is
 happening.
 
@@ -144,6 +145,13 @@ mnist_nn <- umap(mnist, ret_nn = TRUE)
 mnist_nn_spca <- umap(mnist, nn_method = mnist_nn$nn, init = spca)
 
 # No problem to have ret_nn = TRUE and ret_model = TRUE at the same time
+# Or just use the ret_extra parameter:
+mnist_nn_and_model <- umap(mnist, ret_extra = c("model", "nn"))
+
+# You can also get to the input fuzzy graph as a sparse matrix via "fgraph"
+mnist_with_fgraph <- umap(mnist, ret_extra = c("fgraph"))
+# equivalent for lvish is to use "P" (input probability matrix):
+mnist_with_P <- lvish(mnist, ret_extra = c("P"))
 
 # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
 iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),

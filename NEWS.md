@@ -1,3 +1,16 @@
+# uwot 0.1.6
+
+## New features
+
+* New parameter, `ret_extra`, a vector which can contain any combination of: 
+`"model"` (same as `ret_model = TRUE`), `"nn"` (same as `ret_nn = TRUE`) and 
+`fgraph` (see below).
+* New return value data: If the `ret_extra` vector contains `"fgraph"`, the 
+returned list will contain an `fgraph` item representing the fuzzy simplicial 
+input graph as a sparse N x N matrix. For `lvish`, use `"P"` instead of 
+`"fgraph`" (<https://github.com/jlmelville/uwot/issues/47>).
+
+
 # uwot 0.1.5
 
 ## Bug fixes and minor improvements

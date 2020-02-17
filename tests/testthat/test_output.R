@@ -417,3 +417,33 @@ res <- umap(iris10, n_neighbors = 4, n_sgd_threads = 0.5)
 expect_ok_matrix(res)
 res <- umap(iris10, n_neighbors = 4, n_sgd_threads = 1.5)
 expect_ok_matrix(res)
+
+# https://github.com/jlmelville/uwot/issues/47
+# return fuzzy graph
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
+            init = "spca", verbose = FALSE, n_threads = 0,
+            ret_extra = c("fgraph")
+)
+expect_is(res, "list")
+expect_ok_matrix(res$embedding)
+expect_is(res$fgraph, "Matrix")
+
+res <- tumap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+            init = "spca", verbose = FALSE, n_threads = 0,
+            ret_extra = c("fgraph")
+)
+expect_is(res, "list")
+expect_ok_matrix(res$embedding)
+expect_is(res$fgraph, "Matrix")
+
+# param is ret_P and returned value is P in lvish
+res <- lvish(iris10,
+             perplexity = 4, n_epochs = 2, learning_rate = 0.5,
+             init = "spca", verbose = FALSE, n_threads = 0,
+             ret_extra = c("P")
+)
+expect_is(res, "list")
+expect_ok_matrix(res$embedding)
+expect_is(res$P, "Matrix")

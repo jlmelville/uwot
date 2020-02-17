@@ -37,6 +37,7 @@ umap(
   fast_sgd = FALSE,
   ret_model = FALSE,
   ret_nn = FALSE,
+  ret_extra = c(),
   n_threads = max(1, RcppParallel::defaultNumThreads()/2),
   n_sgd_threads = 0,
   grain_size = 1,
@@ -336,12 +337,12 @@ and \code{approx_pow} are ignored.}
 add new data to an existing embedding via \code{\link{umap_transform}}. The
 embedded coordinates are returned as the list item \code{embedding}. If
 \code{FALSE}, just return the coordinates. This parameter can be used in
-conjunction with \code{ret_nn}. Note that some settings are incompatible
-with the production of a UMAP model: external neighbor data (passed via a
-list to \code{nn_method}), and factor columns that were included
-via the \code{metric} parameter. In the latter case, the model produced is
-based only on the numeric data. A transformation using new data is
-possible, but the factor columns in the new data are ignored.}
+conjunction with \code{ret_nn} and \code{ret_extra}. Note that some
+settings are incompatible with the production of a UMAP model: external
+neighbor data (passed via a list to \code{nn_method}), and factor columns
+that were included via the \code{metric} parameter. In the latter case, the
+model produced is based only on the numeric data. A transformation using
+new data is possible, but the factor columns in the new data are ignored.}
 
 \item{ret_nn}{If \code{TRUE}, then in addition to the embedding, also return
 nearest neighbor data that can be used as input to \code{nn_method} to
@@ -351,7 +352,25 @@ manipulating unrelated parameters (e.g. \code{min_dist}, \code{n_epochs},
 \code{FALSE}, just return the coordinates. Note that the nearest neighbors
 could be sensitive to data scaling, so be wary of reusing nearest neighbor
 data if modifying the \code{scale} parameter. This parameter can be used in
-conjunction with \code{ret_model}.}
+conjunction with \code{ret_model} and \code{ret_extra}.}
+
+\item{ret_extra}{A vector indicating what extra data to return. May contain
+any combination of the following strings:
+\itemize{
+  \item \code{"model"} Same as setting `ret_model = TRUE`.
+  \item \code{"nn"} Same as setting `ret_nn = TRUE`.
+  \item \code{"fgraph"} the high dimensional fuzzy graph (i.e. the fuzzy
+    simplicial set of the merged local views of the input data). The graph
+    is returned as a sparse symmetric N x N matrix of class
+    \link[Matrix]{dgCMatrix-class}, where a non-zero entry (i, j) gives the
+    membership strength of the edge connecting vertex i and vertex j. This
+    can be considered analogous to the input probability (or similarity or
+    affinity) used in t-SNE and LargeVis. Note that the graph is further
+    sparsified by removing edges with sufficiently low membership strength
+    that they would not be sampled by the probabilistic edge sampling
+    employed for optimization and therefore the number of non-zero elements
+   in the matrix is dependent on \code{n_epochs}.
+}}
 
 \item{n_threads}{Number of threads to use (except during stochastic gradient
 descent). Default is half that recommended by RcppParallel. For
@@ -379,19 +398,23 @@ only written to disk if \code{n_threads > 1} and
 \value{
 A matrix of optimized coordinates, or:
   \itemize{
-    \item if \code{ret_model = TRUE}, returns a
-    list containing extra information that can be used to add new data to an
-    existing embedding via \code{\link{umap_transform}}. In this case, the
-    coordinates are available in the list item \code{embedding}.
-    \item if \code{ret_nn = TRUE}, returns the nearest neighbor data as a
-    list called \code{nn}. This contains one list for each \code{metric}
-    calculated, itself containing a matrix \code{idx} with the integer ids of
-    the neighbors; and a matrix \code{dist} with the distances. The \code{nn}
-    list (or a sub-list) can be used as input to the \code{nn_method}
-    parameter.
+    \item if \code{ret_model = TRUE} (or \code{ret_extra} contains
+    \code{"model"}), returns a list containing extra information that can be
+    used to add new data to an existing embedding via
+    \code{\link{umap_transform}}. In this case, the coordinates are available
+    in the list item \code{embedding}.
+    \item if \code{ret_nn = TRUE} (or \code{ret_extra} contains \code{"nn"}),
+    returns the nearest neighbor data as a list called \code{nn}. This
+    contains one list for each \code{metric} calculated, itself containing a
+    matrix \code{idx} with the integer ids of the neighbors; and a matrix
+    \code{dist} with the distances. The \code{nn} list (or a sub-list) can be
+    used as input to the \code{nn_method} parameter.
+    \item if \code{ret_extra} contains \code{"fgraph"} returns the high
+    dimensional fuzzy graph as a sparse matrix called \code{fgraph}, of type
+    \link[Matrix]{dgCMatrix-class}.
   }
-  Both \code{ret_model} and \code{ret_nn} can be \code{TRUE}, in which case
-  the returned list contains the combined data.
+  The returned list contains the combined data from any combination of
+  specifying \code{ret_model}, \code{ret_nn} and \code{ret_extra}.
 }
 \description{
 Carry out dimensionality reduction of a dataset using the Uniform Manifold

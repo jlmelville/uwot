@@ -29,6 +29,7 @@ lvish(
   pcg_rand = TRUE,
   fast_sgd = FALSE,
   ret_nn = FALSE,
+  ret_extra = c(),
   tmpdir = tempdir(),
   verbose = getOption("verbose", TRUE)
 )
@@ -272,6 +273,21 @@ manipulating unrelated parameters (e.g. \code{min_dist}, \code{n_epochs},
 could be sensitive to data scaling, so be wary of reusing nearest neighbor
 data if modifying the \code{scale} parameter.}
 
+\item{ret_extra}{A vector indicating what extra data to return. May contain
+any combination of the following strings:
+\itemize{
+  \item \code{"nn"} same as setting `ret_nn = TRUE`.
+  \item \code{"fgraph"} the high dimensional probability matrix. The graph
+  is returned as a sparse symmetric N x N matrix of class
+  \link[Matrix]{dgCMatrix-class}, where a non-zero entry (i, j) gives the
+  input probability (or similarity or affinity) of the edge connecting
+  vertex i and vertex j. Note that the graph is further sparsified by
+  removing edges with sufficiently low membership strength that they would
+  not be sampled by the probabilistic edge sampling employed for
+  optimization and therefore the number of non-zero elements in the matrix
+  is dependent on \code{n_epochs}.
+}}
+
 \item{tmpdir}{Temporary directory to store nearest neighbor indexes during
 nearest neighbor search. Default is \code{\link{tempdir}}. The index is
 only written to disk if \code{n_threads > 1} and
@@ -280,11 +296,20 @@ only written to disk if \code{n_threads > 1} and
 \item{verbose}{If \code{TRUE}, log details to the console.}
 }
 \value{
-A matrix of optimized coordinates, or if \code{ret_nn = TRUE},
-  returns the nearest neighbor data as a list containing a matrix \code{idx}
-  with the integer ids of the neighbors; and a matrix \code{dist} with the
-  distances. This list can be used as input to the \code{nn_method}
-  parameter.
+A matrix of optimized coordinates, or:
+  \itemize{
+    \item if \code{ret_nn = TRUE} (or \code{ret_extra} contains \code{"nn"}),
+    returns the nearest neighbor data as a list called \code{nn}. This
+    contains one list for each \code{metric} calculated, itself containing a
+    matrix \code{idx} with the integer ids of the neighbors; and a matrix
+    \code{dist} with the distances. The \code{nn} list (or a sub-list) can be
+    used as input to the \code{nn_method} parameter.
+    \item if \code{ret_extra} contains \code{"P"}, returns the high
+    dimensional probability matrix as a sparse matrix called \code{P}, of
+    type \link[Matrix]{dgCMatrix-class}.
+  }
+  The returned list contains the combined data from any combination of
+  specifying \code{ret_nn} and \code{ret_extra}.
 }
 \description{
 Carry out dimensionality reduction of a dataset using a method similar to
