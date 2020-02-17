@@ -1727,65 +1727,119 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'
 #' @param model a UMAP model create by \code{\link{umap}}.
 #' @param file name of the file where the model is to be saved or read from.
-#'
+#' @param unload if \code{TRUE}, unload all nearest neighbor indexes for the
+#'   model. The \code{model} will no longer be valid for use in 
+#'   \code{\link{umap_transform}} and the temporary working directory used 
+#'   during model saving will be deleted. You will need to reload the model
+#'   with `load_uwot` to use the model. If \code{FALSE}, then the model can
+#'   be re-used without reloading, but you must manually unload the NN index 
+#'   when you are finished using it if you want to delete the temporary working
+#'   directory. To unload manually, use \code{\link{unload_uwot}}. The 
+#'   absolute path of the working directory is found in the `mod_dir` item of 
+#'   the return value. 
+#' @param verbose if \code{TRUE}, log information to the console.
+#' @return \code{model} with one extra item: `mod_dir`, which contains the path
+#' to the working directory. If \code{unload = FALSE} then this directory still
+#' exists after this function returns, and can be cleaned up with 
+#' \code{\link{unload_uwot}}. If you don't care about cleaning up this 
+#' directory, or \code{unload = TRUE}, then you can ignore the return value.
 #' @examples
 #' # create model
 #' model <- umap(iris[1:100, ], ret_model = TRUE)
 #'
-#' # save
+#' # save without unloading: this leaves behind a temporary working directory
 #' model_file <- tempfile("iris_umap")
 #' save_uwot(model, file = model_file)
+#' 
+#' # The model can continue to be used
+#' test_embedding <- umap_transform(iris[101:150, ], model)
+#' 
+#' # To manually unload the model from memory when finished and to clean up
+#' # the working directory (this doesn't touch your model file)
+#' unload_uwot(model)
+#' 
+#' # At this point, model cannot be used with umap_transform, this would fail:
+#' # test_embedding2 <- umap_transform(iris[101:150, ], model)
 #'
-#' # restore
+#' # restore the model: this also creates a temporary working directory
 #' model2 <- load_uwot(file = model_file)
+#' test_embedding2 <- umap_transform(iris[101:150, ], model2)
 #'
-#' identical(model, model2)
+#' # Unload and clean up the loaded model temp directory
+#' unload_uwot(model2)
 #'
+#' # clean up the model file
 #' unlink(model_file)
+#' 
+#' # save with unloading: this deletes the temporary working directory but 
+#' # doesn't allow the model to be re-used
+#' model3 <- umap(iris[1:100, ], ret_model = TRUE)
+#' model_file3 <- tempfile("iris_umap")
+#' save_uwot(model3, file = model_file3, unload = TRUE)
+#' 
+#' @seealso \code{\link{load_uwot}}, \code{\link{unload_uwot}}
 #' @export
-save_uwot <- function(model, file) {
+save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
+  if (!all_nn_indices_are_loaded(model)) {
+    stop("cannot save: NN index is unloaded")
+  }
+  
   wd <- getwd()
+  model_file <- abspath(file)
+  if (file.exists(model_file)) {
+    stop("model file ", model_file, " already exists")    
+  }
+  
   tryCatch(
     {
       # create directory to store files in
       mod_dir <- tempfile(pattern = "dir")
+      tsmessage("Creating temp model dir ", mod_dir)
       dir.create(mod_dir)
+      
+      # create the tempdir/uwot subdirectory
       uwot_dir <- file.path(mod_dir, "uwot")
+      tsmessage("Creating dir ", mod_dir)
       dir.create(uwot_dir)
-
-      # save model
+      
+      # save model file to tempdir/uwot/model
       model_tmpfname <- file.path(uwot_dir, "model")
       saveRDS(model, file = model_tmpfname)
-
-      # save each nn index
+      
+      # save each nn index inside tempdir/uwot/model
       metrics <- names(model$metric)
       n_metrics <- length(metrics)
       for (i in 1:n_metrics) {
         nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
         if (n_metrics == 1) {
           model$nn_index$save(nn_tmpfname)
-          model$nn_index$unload()
-          model$nn_index$load(nn_tmpfname)
         }
         else {
           model$nn_index[[i]]$save(nn_tmpfname)
-          model$nn_index[[i]]$unload()
-          model$nn_index[[i]]$load(nn_tmpfname)
         }
       }
-
+      
       # archive the files under the temp dir into the single target file
       # change directory so the archive only contains one directory
+      tsmessage("Changing to ", mod_dir)
       setwd(mod_dir)
-      utils::tar(tarfile = file, files = "uwot/")
+      tmp_model_file <- abspath(file)
+      tsmessage("Creating ", tmp_model_file)
+      utils::tar(tarfile = tmp_model_file, files = "uwot/")
     },
     finally = {
       setwd(wd)
-      if (file.exists(mod_dir)) {
-        unlink(mod_dir, recursive = TRUE)
+      if (model_file != tmp_model_file) {
+        tsmessage("Copying ", tmp_model_file, " to ", model_file)
+        file.copy(from = tmp_model_file, to = model_file)
+      }
+      model$mod_dir <- mod_dir
+      if (unload) {
+        unload_uwot(model, cleanup = TRUE, verbose = verbose)
       }
     }
   )
+  model
 }
 
 #' Save or Load a Model
@@ -1793,67 +1847,186 @@ save_uwot <- function(model, file) {
 #' Functions to write a UMAP model to a file, and to restore.
 #'
 #' @param file name of the file where the model is to be saved or read from.
+#' @param verbose if \code{TRUE}, log information to the console.
+#' @return The model saved at \code{file}, for use with 
+#' \code{\link{umap_transform}}. Additionally, it contains an extra item: 
+#' `mod_dir`, which contains the path to the temporary working directory used 
+#' during loading of the model. This directory cannot be removed until this
+#' model has been unloaded by using \code{\link{unload_uwot}}.
+#' @examples
+#' # create model
+#' model <- umap(iris[1:100, ], ret_model = TRUE)
+#'
+#' # save without unloading: this leaves behind a temporary working directory
+#' model_file <- tempfile("iris_umap")
+#' save_uwot(model, file = model_file)
+#' 
+#' # The model can continue to be used
+#' test_embedding <- umap_transform(iris[101:150, ], model)
+#' 
+#' # To manually unload the model from memory when finished and to clean up
+#' # the working directory (this doesn't touch your model file)
+#' unload_uwot(model)
+#' 
+#' # At this point, model cannot be used with umap_transform, this would fail:
+#' # test_embedding2 <- umap_transform(iris[101:150, ], model)
+#'
+#' # restore the model: this also creates a temporary working directory
+#' model2 <- load_uwot(file = model_file)
+#' test_embedding2 <- umap_transform(iris[101:150, ], model2)
+#'
+#' # Unload and clean up the loaded model temp directory
+#' unload_uwot(model2)
+#'
+#' # clean up the model file
+#' unlink(model_file)
+#' 
+#' # save with unloading: this deletes the temporary working directory but 
+#' # doesn't allow the model to be re-used
+#' model3 <- umap(iris[1:100, ], ret_model = TRUE)
+#' model_file3 <- tempfile("iris_umap")
+#' save_uwot(model3, file = model_file3, unload = TRUE)
+#' 
+#' @seealso \code{\link{save_uwot}}, \code{\link{unload_uwot}}
+#' @export
+load_uwot <- function(file, verbose = FALSE) {
+  # create directory to store files in
+  mod_dir <- tempfile(pattern = "dir")
+  tsmessage("Creating temp directory ", mod_dir)
+  dir.create(mod_dir)
+  
+  utils::untar(abspath(file), exdir = mod_dir, verbose = verbose)
+  
+  model_fname <- file.path(mod_dir, "uwot/model")
+  if (!file.exists(model_fname)) {
+    stop("Can't find model in ", file)
+  }
+  model <- readRDS(file = model_fname)
+  
+  metrics <- names(model$metric)
+  n_metrics <- length(metrics)
+  
+  for (i in 1:n_metrics) {
+    nn_fname <- file.path(mod_dir, paste0("uwot/nn", i))
+    if (!file.exists(nn_fname)) {
+      stop("Can't find nearest neighbor index ", nn_fname, " in ", file)
+    }
+    metric <- metrics[[i]]
+    # 31: need to specify the index dimensionality when creating the index
+    ann <- create_ann(metric, ndim = length(model$metric[[i]]))
+    ann$load(nn_fname)
+    if (n_metrics == 1) {
+      model$nn_index <- ann
+    }
+    else {
+      model$nn_index[[i]] <- ann
+    }
+  }
+  model$mod_dir <- mod_dir
+  
+  model
+}
+
+
+#' Unload a Model
+#'
+#' Unloads the UMAP model. This prevents the model being used with 
+#' \code{\link{umap_transform}}, but allows the temporary working directory
+#' associated with saving or loading the model to be removed.
+#'
+#' @param model a UMAP model create by \code{\link{umap}}.
+#' @param cleanup if \code{TRUE}, attempt to delete the temporary working
+#'   directory that was used in either the save or load of the model.
+#' @param verbose if \code{TRUE}, log information to the console.
 #'
 #' @examples
 #' # create model
 #' model <- umap(iris[1:100, ], ret_model = TRUE)
 #'
-#' # save
+#' # save without unloading: this leaves behind a temporary working directory
 #' model_file <- tempfile("iris_umap")
 #' save_uwot(model, file = model_file)
+#' 
+#' # The model can continue to be used
+#' test_embedding <- umap_transform(iris[101:150, ], model)
+#' 
+#' # To manually unload the model from memory when finished and to clean up
+#' # the working directory (this doesn't touch your model file)
+#' unload_uwot(model)
+#' 
+#' # At this point, model cannot be used with umap_transform, this would fail:
+#' # test_embedding2 <- umap_transform(iris[101:150, ], model)
 #'
-#' # restore
+#' # restore the model: this also creates a temporary working directory
 #' model2 <- load_uwot(file = model_file)
+#' test_embedding2 <- umap_transform(iris[101:150, ], model2)
 #'
-#' identical(model, model2)
+#' # Unload and clean up the loaded model temp directory
+#' unload_uwot(model2)
 #'
+#' # clean up the model file
 #' unlink(model_file)
+#' 
+#' # save with unloading: this deletes the temporary working directory but 
+#' # doesn't allow the model to be re-used
+#' model3 <- umap(iris[1:100, ], ret_model = TRUE)
+#' model_file3 <- tempfile("iris_umap")
+#' save_uwot(model3, file = model_file3, unload = TRUE)
+#' 
+#' @seealso \code{\link{save_uwot}}, \code{\link{load_uwot}}
 #' @export
-load_uwot <- function(file) {
-  model <- NULL
-
-  tryCatch(
-    {
-      # create directory to store files in
-      mod_dir <- tempfile(pattern = "dir")
-      dir.create(mod_dir)
-
-      utils::untar(file, exdir = mod_dir)
-
-      model_fname <- file.path(mod_dir, "uwot/model")
-      if (!file.exists(model_fname)) {
-        stop("Can't find model in ", file)
+unload_uwot <- function(model, cleanup = TRUE, verbose = FALSE) {
+  tsmessage("Unloading NN index: model will be invalid")
+  metrics <- names(model$metric)
+  n_metrics <- length(metrics)
+  for (i in 1:n_metrics) {
+    if (n_metrics == 1) {
+      model$nn_index$unload()
+    }
+    else {
+      model$nn_index[[i]]$unload()
+    }
+  }
+  
+  if (cleanup) {
+    if (is.null(model$mod_dir)) {
+      tsmessage("Model is missing temp dir location, can't clean up")
+      return();
+    }
+    else {
+      mod_dir <- model$mod_dir
+      if (!file.exists(mod_dir)) {
+        tsmessage("model temp dir location '", mod_dir, "' no longer exists")
+        return()
       }
-      model <- readRDS(file = model_fname)
-
-      metrics <- names(model$metric)
-      n_metrics <- length(metrics)
-
-      for (i in 1:n_metrics) {
-        nn_fname <- file.path(mod_dir, paste0("uwot/nn", i))
-        if (!file.exists(nn_fname)) {
-          stop("Can't find nearest neighbor index ", nn_fname, " in ", file)
-        }
-        metric <- metrics[[i]]
-        # 31: need to specify the index dimensionality when creating the index
-        ann <- create_ann(metric, ndim = length(model$metric[[i]]))
-        ann$load(nn_fname)
-        if (n_metrics == 1) {
-          model$nn_index <- ann
-        }
-        else {
-          model$nn_index[[i]] <- ann
-        }
-      }
-    },
-    finally = {
-      if (file.exists(mod_dir)) {
-        unlink(mod_dir, recursive = TRUE)
+      tsmessage("Deleting temp model dir ", mod_dir)
+      res <- unlink(mod_dir, recursive = TRUE)
+      if (res != 0) {
+        tsmessage("Unable to delete tempdir ", mod_dir)
       }
     }
-  )
+  }
+}
 
-  model
+all_nn_indices_are_loaded <- function(model) {
+  if (is.null(model$nn_index)) {
+    stop("Invalid model: has no 'nn_index'")
+  }
+  if (is.list(model$nn_index)) {
+    for (i in 1:length(model$nn_index)) {
+      if (model$nn_index[[i]]$getNTrees() == 0) {
+        return(FALSE)
+      }
+    }
+  }
+  else if (model$nn_index$getNTrees() == 0) {
+    return(FALSE)
+  }
+  TRUE
+}
+
+abspath <- function(filename) {
+  file.path(normalizePath(dirname(filename)), basename(filename))
 }
 
 # Get the number of vertices in X

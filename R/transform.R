@@ -62,6 +62,11 @@ umap_transform <- function(X, model,
                            n_sgd_threads = 0,
                            grain_size = 1,
                            verbose = FALSE) {
+  if (!all_nn_indices_are_loaded(model)) {
+    stop("cannot use model: NN index is unloaded." ,
+         " Try reloading with `load_uwot`")
+  }
+  
   if (is.null(n_epochs)) {
     n_epochs <- model$n_epochs
   }
@@ -348,4 +353,21 @@ apply_pca <- function(X, pca_res, verbose = FALSE) {
     X <- sweep(X, 2, pca_res$center)
   }
   X %*% pca_res$rotation
+}
+
+all_nn_indices_are_loaded <- function(model) {
+  if (is.null(model$nn_index)) {
+    stop("Invalid model: has no 'nn_index'")
+  }
+  if (is.list(model$nn_index)) {
+    for (i in 1:length(model$nn_index)) {
+      if (model$nn_index$getNTrees() == 0) {
+        return(FALSE)
+      }
+    }
+  }
+  else if (model$nn_index$getNTrees() == 0) {
+    return(FALSE)
+  }
+  TRUE
 }

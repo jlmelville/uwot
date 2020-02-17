@@ -4,10 +4,19 @@
 \alias{load_uwot}
 \title{Save or Load a Model}
 \usage{
-load_uwot(file)
+load_uwot(file, verbose = FALSE)
 }
 \arguments{
 \item{file}{name of the file where the model is to be saved or read from.}
+
+\item{verbose}{if \code{TRUE}, log information to the console.}
+}
+\value{
+The model saved at \code{file}, for use with 
+\code{\link{umap_transform}}. Additionally, it contains an extra item: 
+`mod_dir`, which contains the path to the temporary working directory used 
+during loading of the model. This directory cannot be removed until this
+model has been unloaded by using \code{\link{unload_uwot}}.
 }
 \description{
 Functions to write a UMAP model to a file, and to restore.
@@ -16,14 +25,37 @@ Functions to write a UMAP model to a file, and to restore.
 # create model
 model <- umap(iris[1:100, ], ret_model = TRUE)
 
-# save
+# save without unloading: this leaves behind a temporary working directory
 model_file <- tempfile("iris_umap")
 save_uwot(model, file = model_file)
 
-# restore
+# The model can continue to be used
+test_embedding <- umap_transform(iris[101:150, ], model)
+
+# To manually unload the model from memory when finished and to clean up
+# the working directory (this doesn't touch your model file)
+unload_uwot(model)
+
+# At this point, model cannot be used with umap_transform, this would fail:
+# test_embedding2 <- umap_transform(iris[101:150, ], model)
+
+# restore the model: this also creates a temporary working directory
 model2 <- load_uwot(file = model_file)
+test_embedding2 <- umap_transform(iris[101:150, ], model2)
 
-identical(model, model2)
+# Unload and clean up the loaded model temp directory
+unload_uwot(model2)
 
+# clean up the model file
 unlink(model_file)
+
+# save with unloading: this deletes the temporary working directory but 
+# doesn't allow the model to be re-used
+model3 <- umap(iris[1:100, ], ret_model = TRUE)
+model_file3 <- tempfile("iris_umap")
+save_uwot(model3, file = model_file3, unload = TRUE)
+
+}
+\seealso{
+\code{\link{save_uwot}}, \code{\link{unload_uwot}}
 }

@@ -14,6 +14,13 @@ if there is no prospect of the edge being sampled during optimization. This is
 controlled by `n_epochs`: the smaller the value, the more sparsifying will
 occur. If you are only interested in the fuzzy graph and not the embedded
 coordinates, set `n_epochs = 0`.
+* New function: `unload_uwot`, to unload the Annoy nearest neighbor indices in
+a model. This prevents the model from being used in `umap_transform`, but allows
+for the temporary working directory created by both `save_uwot` and `load_uwot`
+to be deleted. Previously, both `load_uwot` and `save_uwot` were attempting to
+delete the temporary working directories they used, but would alway silently
+fail because Annoy is making use of files in those directories.
+
 
 ## Bug fixes and minor improvements
 
@@ -26,6 +33,20 @@ If you want the input fuzzy graph (`ret_extra` vector contains `"fgraph"`), this
 will also prevent the graph having edges with very low membership being removed.
 You still get the old default epochs behavior by setting `n_epochs = NULL` or to
 a negative value.
+* `save_uwot` and `load_uwot` have been updated with a `verbose` parameter so
+it's easier to see what temporary files are being created.
+* `save_uwot` has a new parameter, `unload`, which if set to `TRUE` will delete
+the working directory for you, at the cost of unloading the model, so it can't 
+be used with `umap_transform` until you reload it with `load_uwot`.
+* `save_uwot` now returns the saved model with an extra field, `mod_dir`, which
+points to the location of the temporary working directory, so you should now
+assign the result of calling `save_uwot` to the model you saved, e.g.
+`model <- save_uwot(model, "my_model_file")`. This field is intended for use
+with `unload_uwot`.
+* `load_uwot` also returns the model with a `mod_dir` item for use with 
+`unload_uwot`.
+* `save_uwot` and `load_uwot` were not correctly handling relative paths
+
 
 # uwot 0.1.5
 
