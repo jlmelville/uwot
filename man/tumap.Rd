@@ -101,8 +101,10 @@ PCA applied to both, but with centering applied only to the real-valued data
 (it is typical not to apply centering to binary data before PCA is applied).}
 
 \item{n_epochs}{Number of epochs to use during the optimization of the
-embedded coordinates. By default, this value is set to \code{500} for datasets
-containing 10,000 vertices or less, and \code{200} otherwise.}
+embedded coordinates. By default, this value is set to \code{500} for
+datasets containing 10,000 vertices or less, and \code{200} otherwise.
+If \code{n_epochs = 0}, then coordinates determined by \code{"init"} will
+be returned.}
 
 \item{learning_rate}{Initial learning rate used in optimization of the
 coordinates.}
@@ -356,7 +358,9 @@ any combination of the following strings:
     sparsified by removing edges with sufficiently low membership strength
     that they would not be sampled by the probabilistic edge sampling
     employed for optimization and therefore the number of non-zero elements
-   in the matrix is dependent on \code{n_epochs}.
+    in the matrix is dependent on \code{n_epochs}. If you are only
+    interested in the fuzzy input graph (e.g. for clustering), setting
+    `n_epochs = 0` will avoid any further sparsifying.
 }}
 
 \item{tmpdir}{Temporary directory to store nearest neighbor indexes during

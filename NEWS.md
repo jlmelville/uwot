@@ -8,8 +8,24 @@
 * New return value data: If the `ret_extra` vector contains `"fgraph"`, the 
 returned list will contain an `fgraph` item representing the fuzzy simplicial 
 input graph as a sparse N x N matrix. For `lvish`, use `"P"` instead of 
-`"fgraph`" (<https://github.com/jlmelville/uwot/issues/47>).
+`"fgraph`" (<https://github.com/jlmelville/uwot/issues/47>). Note that there
+is a further sparsifying step where edges with a very low membership are removed
+if there is no prospect of the edge being sampled during optimization. This is
+controlled by `n_epochs`: the smaller the value, the more sparsifying will
+occur. If you are only interested in the fuzzy graph and not the embedded
+coordinates, set `n_epochs = 0`.
 
+## Bug fixes and minor improvements
+
+* New behavior when `n_epochs = 0`. This used to behave like (`n_epochs = NULL`)
+and gave a default number of epochs (dependent on the number of vertices in the
+dataset). Now it more usefully carries out all calculations except optimization,
+so the returned coordinates are those specified by the `init` parameter, so this
+is an easy way to access e.g. the spectral or PCA initialization coordinates.
+If you want the input fuzzy graph (`ret_extra` vector contains `"fgraph"`), this
+will also prevent the graph having edges with very low membership being removed.
+You still get the old default epochs behavior by setting `n_epochs = NULL` or to
+a negative value.
 
 # uwot 0.1.5
 

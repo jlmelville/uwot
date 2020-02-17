@@ -100,7 +100,8 @@ PCA applied to both, but with centering applied only to the real-valued data
 embedded coordinates. The default is calculate the number of epochs
 dynamically based on dataset size, to give the same number of edge samples
 as the LargeVis defaults. This is usually substantially larger than the
-UMAP defaults.}
+UMAP defaults. If \code{n_epochs = 0}, then coordinates determined by
+\code{"init"} will be returned.}
 
 \item{learning_rate}{Initial learning rate used in optimization of the
 coordinates.}
@@ -277,7 +278,7 @@ data if modifying the \code{scale} parameter.}
 any combination of the following strings:
 \itemize{
   \item \code{"nn"} same as setting `ret_nn = TRUE`.
-  \item \code{"fgraph"} the high dimensional probability matrix. The graph
+  \item \code{"P"} the high dimensional probability matrix. The graph
   is returned as a sparse symmetric N x N matrix of class
   \link[Matrix]{dgCMatrix-class}, where a non-zero entry (i, j) gives the
   input probability (or similarity or affinity) of the edge connecting
@@ -285,7 +286,9 @@ any combination of the following strings:
   removing edges with sufficiently low membership strength that they would
   not be sampled by the probabilistic edge sampling employed for
   optimization and therefore the number of non-zero elements in the matrix
-  is dependent on \code{n_epochs}.
+  is dependent on \code{n_epochs}. If you are only interested in the fuzzy
+  input graph (e.g. for clustering), setting `n_epochs = 0` will avoid any
+  further sparsifying.
 }}
 
 \item{tmpdir}{Temporary directory to store nearest neighbor indexes during

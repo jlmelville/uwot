@@ -61,8 +61,10 @@
 #' PCA applied to both, but with centering applied only to the real-valued data
 #' (it is typical not to apply centering to binary data before PCA is applied).
 #' @param n_epochs Number of epochs to use during the optimization of the
-#'   embedded coordinates. By default, this value is set to \code{500} for datasets
-#'   containing 10,000 vertices or less, and \code{200} otherwise.
+#'   embedded coordinates. By default, this value is set to \code{500} for
+#'   datasets containing 10,000 vertices or less, and \code{200} otherwise.
+#'   If \code{n_epochs = 0}, then coordinates determined by \code{"init"} will
+#'   be returned.
 #' @param scale Scaling to apply to \code{X} if it is a data frame or matrix:
 #' \itemize{
 #'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
@@ -296,7 +298,9 @@
 #'       sparsified by removing edges with sufficiently low membership strength
 #'       that they would not be sampled by the probabilistic edge sampling
 #'       employed for optimization and therefore the number of non-zero elements
-#'      in the matrix is dependent on \code{n_epochs}.
+#'       in the matrix is dependent on \code{n_epochs}. If you are only
+#'       interested in the fuzzy input graph (e.g. for clustering), setting
+#'       `n_epochs = 0` will avoid any further sparsifying.
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half that recommended by RcppParallel. For
@@ -527,8 +531,10 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' PCA applied to both, but with centering applied only to the real-valued data
 #' (it is typical not to apply centering to binary data before PCA is applied).
 #' @param n_epochs Number of epochs to use during the optimization of the
-#'   embedded coordinates. By default, this value is set to \code{500} for datasets
-#'   containing 10,000 vertices or less, and \code{200} otherwise.
+#'   embedded coordinates. By default, this value is set to \code{500} for
+#'   datasets containing 10,000 vertices or less, and \code{200} otherwise.
+#'   If \code{n_epochs = 0}, then coordinates determined by \code{"init"} will
+#'   be returned.
 #' @param learning_rate Initial learning rate used in optimization of the
 #'   coordinates.
 #' @param scale Scaling to apply to \code{X} if it is a data frame or matrix:
@@ -743,7 +749,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       sparsified by removing edges with sufficiently low membership strength
 #'       that they would not be sampled by the probabilistic edge sampling
 #'       employed for optimization and therefore the number of non-zero elements
-#'      in the matrix is dependent on \code{n_epochs}.
+#'       in the matrix is dependent on \code{n_epochs}. If you are only
+#'       interested in the fuzzy input graph (e.g. for clustering), setting
+#'       `n_epochs = 0` will avoid any further sparsifying.
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half that recommended by RcppParallel. For
@@ -917,7 +925,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   embedded coordinates. The default is calculate the number of epochs
 #'   dynamically based on dataset size, to give the same number of edge samples
 #'   as the LargeVis defaults. This is usually substantially larger than the
-#'   UMAP defaults.
+#'   UMAP defaults. If \code{n_epochs = 0}, then coordinates determined by
+#'   \code{"init"} will be returned.
 #' @param learning_rate Initial learning rate used in optimization of the
 #'   coordinates.
 #' @param scale Scaling to apply to \code{X} if it is a data frame or matrix:
@@ -1075,7 +1084,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   any combination of the following strings:
 #'   \itemize{
 #'     \item \code{"nn"} same as setting `ret_nn = TRUE`.
-#'     \item \code{"fgraph"} the high dimensional probability matrix. The graph
+#'     \item \code{"P"} the high dimensional probability matrix. The graph
 #'     is returned as a sparse symmetric N x N matrix of class
 #'     \link[Matrix]{dgCMatrix-class}, where a non-zero entry (i, j) gives the
 #'     input probability (or similarity or affinity) of the edge connecting
@@ -1083,7 +1092,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     removing edges with sufficiently low membership strength that they would
 #'     not be sampled by the probabilistic edge sampling employed for
 #'     optimization and therefore the number of non-zero elements in the matrix
-#'     is dependent on \code{n_epochs}.
+#'     is dependent on \code{n_epochs}. If you are only interested in the fuzzy
+#'     input graph (e.g. for clustering), setting `n_epochs = 0` will avoid any
+#'     further sparsifying.
 #'   }
 #' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
@@ -1555,7 +1566,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
 
-  if (is.null(n_epochs) || n_epochs <= 0) {
+  if (is.null(n_epochs) || n_epochs < 0) {
     if (method == "largevis") {
       n_epochs <- lvish_epochs(n_vertices, V)
     }
@@ -1569,84 +1580,87 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
 
-  V@x[V@x < max(V@x) / n_epochs] <- 0
-  V <- Matrix::drop0(V)
-  epochs_per_sample <- make_epochs_per_sample(V@x, n_epochs)
+  if (n_epochs > 0) {
+    V@x[V@x < max(V@x) / n_epochs] <- 0
+    V <- Matrix::drop0(V)
 
-  positive_head <- V@i
-  positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
+    epochs_per_sample <- make_epochs_per_sample(V@x, n_epochs)
 
-  tsmessage(
-    "Commencing optimization for ", n_epochs, " epochs, with ",
-    length(positive_head), " positive edges",
-    pluralize("thread", n_sgd_threads, " using")
-  )
+    positive_head <- V@i
+    positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
 
-  parallelize <- n_sgd_threads > 0
-  if (n_sgd_threads > 0) {
-    RcppParallel::setThreadOptions(numThreads = n_sgd_threads)
-  }
-
-  embedding <- t(embedding)
-  if (tolower(method) == "umap") {
-    embedding <- optimize_layout_umap(
-      head_embedding = embedding,
-      tail_embedding = NULL,
-      positive_head = positive_head,
-      positive_tail = positive_tail,
-      n_epochs = n_epochs,
-      n_vertices = n_vertices,
-      epochs_per_sample = epochs_per_sample,
-      a = a, b = b, gamma = gamma,
-      initial_alpha = alpha, negative_sample_rate,
-      approx_pow = approx_pow,
-      pcg_rand = pcg_rand,
-      parallelize = parallelize,
-      grain_size = grain_size,
-      move_other = TRUE,
-      verbose = verbose
+    tsmessage(
+      "Commencing optimization for ", n_epochs, " epochs, with ",
+      length(positive_head), " positive edges",
+      pluralize("thread", n_sgd_threads, " using")
     )
+
+    parallelize <- n_sgd_threads > 0
+    if (n_sgd_threads > 0) {
+      RcppParallel::setThreadOptions(numThreads = n_sgd_threads)
+    }
+
+    embedding <- t(embedding)
+    if (tolower(method) == "umap") {
+      embedding <- optimize_layout_umap(
+        head_embedding = embedding,
+        tail_embedding = NULL,
+        positive_head = positive_head,
+        positive_tail = positive_tail,
+        n_epochs = n_epochs,
+        n_vertices = n_vertices,
+        epochs_per_sample = epochs_per_sample,
+        a = a, b = b, gamma = gamma,
+        initial_alpha = alpha, negative_sample_rate,
+        approx_pow = approx_pow,
+        pcg_rand = pcg_rand,
+        parallelize = parallelize,
+        grain_size = grain_size,
+        move_other = TRUE,
+        verbose = verbose
+      )
+    }
+    else if (method == "tumap") {
+      embedding <- optimize_layout_tumap(
+        head_embedding = embedding,
+        tail_embedding = NULL,
+        positive_head = positive_head,
+        positive_tail = positive_tail,
+        n_epochs = n_epochs,
+        n_vertices = n_vertices,
+        epochs_per_sample = epochs_per_sample,
+        initial_alpha = alpha,
+        negative_sample_rate = negative_sample_rate,
+        pcg_rand = pcg_rand,
+        parallelize = parallelize,
+        grain_size = grain_size,
+        move_other = TRUE,
+        verbose = verbose
+      )
+    }
+    else {
+      embedding <- optimize_layout_largevis(
+        head_embedding = embedding,
+        positive_head = positive_head,
+        positive_tail = positive_tail,
+        n_epochs = n_epochs,
+        n_vertices = n_vertices,
+        epochs_per_sample = epochs_per_sample,
+        gamma = gamma,
+        initial_alpha = alpha,
+        negative_sample_rate = negative_sample_rate,
+        pcg_rand = pcg_rand,
+        parallelize = parallelize,
+        grain_size = grain_size,
+        verbose = verbose
+      )
+    }
+    embedding <- t(embedding)
+    gc()
+    # Center the points before returning
+    embedding <- scale(embedding, center = TRUE, scale = FALSE)
+    tsmessage("Optimization finished")
   }
-  else if (method == "tumap") {
-    embedding <- optimize_layout_tumap(
-      head_embedding = embedding,
-      tail_embedding = NULL,
-      positive_head = positive_head,
-      positive_tail = positive_tail,
-      n_epochs = n_epochs,
-      n_vertices = n_vertices,
-      epochs_per_sample = epochs_per_sample,
-      initial_alpha = alpha,
-      negative_sample_rate = negative_sample_rate,
-      pcg_rand = pcg_rand,
-      parallelize = parallelize,
-      grain_size = grain_size,
-      move_other = TRUE,
-      verbose = verbose
-    )
-  }
-  else {
-    embedding <- optimize_layout_largevis(
-      head_embedding = embedding,
-      positive_head = positive_head,
-      positive_tail = positive_tail,
-      n_epochs = n_epochs,
-      n_vertices = n_vertices,
-      epochs_per_sample = epochs_per_sample,
-      gamma = gamma,
-      initial_alpha = alpha,
-      negative_sample_rate = negative_sample_rate,
-      pcg_rand = pcg_rand,
-      parallelize = parallelize,
-      grain_size = grain_size,
-      verbose = verbose
-    )
-  }
-  embedding <- t(embedding)
-  gc()
-  # Center the points before returning
-  embedding <- scale(embedding, center = TRUE, scale = FALSE)
-  tsmessage("Optimization finished")
 
   if (ret_model || ret_nn || ret_fgraph) {
     nblocks <- length(nns)
