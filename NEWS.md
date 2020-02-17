@@ -36,7 +36,7 @@ a negative value.
 * `save_uwot` and `load_uwot` have been updated with a `verbose` parameter so
 it's easier to see what temporary files are being created.
 * `save_uwot` has a new parameter, `unload`, which if set to `TRUE` will delete
-the working directory for you, at the cost of unloading the model, so it can't 
+the working directory for you, at the cost of unloading the model, i.e. it can't 
 be used with `umap_transform` until you reload it with `load_uwot`.
 * `save_uwot` now returns the saved model with an extra field, `mod_dir`, which
 points to the location of the temporary working directory, so you should now
@@ -45,7 +45,7 @@ assign the result of calling `save_uwot` to the model you saved, e.g.
 with `unload_uwot`.
 * `load_uwot` also returns the model with a `mod_dir` item for use with 
 `unload_uwot`.
-* `save_uwot` and `load_uwot` were not correctly handling relative paths
+* `save_uwot` and `load_uwot` were not correctly handling relative paths.
 
 
 # uwot 0.1.5
