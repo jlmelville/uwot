@@ -20,6 +20,14 @@ for the temporary working directory created by both `save_uwot` and `load_uwot`
 to be deleted. Previously, both `load_uwot` and `save_uwot` were attempting to
 delete the temporary working directories they used, but would alway silently
 fail because Annoy is making use of files in those directories.
+* An attempt has been made to reduce the variability of results due to different
+compiler and C++ library versions on different machines. Visually results are
+unchanged in most cases, but this is a breaking change in terms of numerical
+output. The best chance of obtaining floating point determinism across machines
+is to use `init = "spca"`, fixed values of `a` and `b` (rather than allowing
+them to be calculated through setting `min_dist` and `spread`) and
+`approx_pow = TRUE`. Using the `tumap` method with `init = "spca"` is probably
+the most robust approach.
 
 ## Bug fixes and minor improvements
 
