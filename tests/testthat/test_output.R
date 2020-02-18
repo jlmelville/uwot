@@ -397,7 +397,8 @@ expect_ok_matrix(res$embedding, nr = 4)
 
 res_test <- umap_transform(iris10[5:10, ], res, verbose = FALSE, n_epochs = 10)
 expect_ok_matrix(res_test, nr = 6)
-
+# 31: ensure we store the ndim for single-metric models
+expect_equal(res$metric$euclidean$ndim, 4)
 
 # taus88 prng
 res <- umap(iris10,

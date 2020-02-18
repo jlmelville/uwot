@@ -1669,8 +1669,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       res <- append(res, list(
         scale_info = attr_to_scale_info(X),
         n_neighbors = n_neighbors,
-        # Can't use nn descent during transform, so if used in training,
-        # double the Annoy search parameter to compensate
         search_k = search_k,
         local_connectivity = local_connectivity,
         n_epochs = n_epochs,
@@ -1693,6 +1691,15 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       }
       else {
         res$nn_index <- nns[[1]]$index
+        if (is.null(res$metric[[1]])) {
+          # 31: Metric usually lists column indices or names, NULL means use all
+          # of them, but for loading the NN index we need the number of 
+          # columns explicitly (we don't have access to the column dimension of
+          # the input data at load time)
+          # To be sure of the dimensionality, fetch the first item from the 
+          # index and see how many elements are in the returned vector.
+          res$metric[[1]] <- list(ndim = length(res$nn_index$getItemsVector(0)))
+        }
       }
       if (!is.null(pca_models)) {
         res$pca_models <- pca_models
@@ -1913,7 +1920,18 @@ load_uwot <- function(file, verbose = FALSE) {
     }
     metric <- metrics[[i]]
     # 31: need to specify the index dimensionality when creating the index
-    ann <- create_ann(metric, ndim = length(model$metric[[i]]))
+    if (is.list(model$metric[[i]])) {
+      # in case where there is only one metric, the value is a one-item list
+      # named 'ndim' giving the number of dimensions directly: all columns
+      # are used in this metric
+      ndim <- model$metric[[i]]$ndim
+    }
+    else {
+      # otherwise, metric specifies the name or index used for each metric,
+      # so the dimension is the number of them
+      ndim = length(model$metric[[i]])
+    }
+    ann <- create_ann(metric, ndim = ndim)
     ann$load(nn_fname)
     if (n_metrics == 1) {
       model$nn_index <- ann

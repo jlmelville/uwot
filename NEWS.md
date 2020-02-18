@@ -21,7 +21,6 @@ to be deleted. Previously, both `load_uwot` and `save_uwot` were attempting to
 delete the temporary working directories they used, but would alway silently
 fail because Annoy is making use of files in those directories.
 
-
 ## Bug fixes and minor improvements
 
 * New behavior when `n_epochs = 0`. This used to behave like (`n_epochs = NULL`)
@@ -46,6 +45,14 @@ with `unload_uwot`.
 * `load_uwot` also returns the model with a `mod_dir` item for use with 
 `unload_uwot`.
 * `save_uwot` and `load_uwot` were not correctly handling relative paths.
+* A previous bug fix to `load_uwot` in uwot 0.1.4 to work with newer versions
+of RcppAnnoy (<https://github.com/jlmelville/uwot/issues/31>) failed in the 
+typical case of a single metric for the nearest neighbor search using all 
+available columns, giving an error message along the lines of:
+`Error: index size <size> is not a multiple of vector size <size>`. This has now
+been fixed, but required changes to both `save_uwot` and `load_uwot`, so 
+existing saved models must be regenerated. Thank you to reporter 
+[OuNao](https://github.com/OuNao).
 
 
 # uwot 0.1.5
