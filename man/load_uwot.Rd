@@ -27,7 +27,7 @@ model <- umap(iris[1:100, ], ret_model = TRUE)
 
 # save without unloading: this leaves behind a temporary working directory
 model_file <- tempfile("iris_umap")
-save_uwot(model, file = model_file)
+model <- save_uwot(model, file = model_file)
 
 # The model can continue to be used
 test_embedding <- umap_transform(iris[101:150, ], model)
@@ -53,7 +53,7 @@ unlink(model_file)
 # doesn't allow the model to be re-used
 model3 <- umap(iris[1:100, ], ret_model = TRUE)
 model_file3 <- tempfile("iris_umap")
-save_uwot(model3, file = model_file3, unload = TRUE)
+model3 <- save_uwot(model3, file = model_file3, unload = TRUE)
 
 }
 \seealso{
