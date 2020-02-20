@@ -454,7 +454,7 @@ iris_sumap <- umap(iris,
   n_neighbors = 15, min_dist = 0.001,
   y = iris$Species, target_weight = 0.5
 )
-\donttest{
+
 # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
 iris_umap <- umap(iris, metric = list(
   "euclidean" = c("Sepal.Length", "Sepal.Width"),
@@ -473,7 +473,6 @@ iris_umap <- umap(iris, ret_nn = TRUE)
 # Re-use NN info for greater efficiency
 # Here we use random initialization
 iris_umap_spca <- umap(iris, init = "rand", nn_method = iris_umap$nn)
-}
 
 }
 \references{
