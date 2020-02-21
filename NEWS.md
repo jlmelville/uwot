@@ -18,7 +18,7 @@ coordinates, set `n_epochs = 0`.
 a model. This prevents the model from being used in `umap_transform`, but allows
 for the temporary working directory created by both `save_uwot` and `load_uwot`
 to be deleted. Previously, both `load_uwot` and `save_uwot` were attempting to
-delete the temporary working directories they used, but would alway silently
+delete the temporary working directories they used, but would always silently
 fail because Annoy is making use of files in those directories.
 * An attempt has been made to reduce the variability of results due to different
 compiler and C++ library versions on different machines. Visually results are
