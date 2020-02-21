@@ -427,52 +427,30 @@ the following help text is lifted verbatim from the Python reference
 implementation at \url{https://github.com/lmcinnes/umap}.
 }
 \examples{
+
+iris30 <- iris[c(1:10, 51:60, 101:110), ]
+
 # Non-numeric columns are automatically removed so you can pass data frames
 # directly in a lot of cases without pre-processing
-iris_umap <- umap(iris,
-  n_neighbors = 50, learning_rate = 0.5,
-  init = "random"
-)
+iris_umap <- umap(iris30, n_neighbors = 5, learning_rate = 0.5, init = "random", n_epochs = 200)
 
-# Although not an issue for the iris dataset, for high dimensional data
-# (> 100 columns), using PCA to reduce dimensionality is highly
-# recommended to avoid nearest neighbor searches taking a long time
-# 50 dimensions is a good value to start with. If there are fewer columns
-# in the input than the requested number of components, the parameter is
-# ignored.
-iris_umap <- umap(iris, pca = 50)
-
-# Faster approximation to the gradient
-iris_umap <- umap(iris, n_neighbors = 15, approx_pow = TRUE)
+# Faster approximation to the gradient and return nearest neighbors
+iris_umap <- umap(iris30, n_neighbors = 5, approx_pow = TRUE, ret_nn = TRUE, n_epochs = 200)
 
 # Can specify min_dist and spread parameters to control separation and size
-# of clusters
-iris_umap <- umap(iris, n_neighbors = 15, min_dist = 1, spread = 5)
+# of clusters and reuse nearest neighbors for efficiency
+nn <- iris_umap$nn
+iris_umap <- umap(iris30, n_neighbors = 5, min_dist = 1, spread = 5, nn_method = nn, n_epochs = 200)
 
 # Supervised dimension reduction using the 'Species' factor column
-iris_sumap <- umap(iris,
-  n_neighbors = 15, min_dist = 0.001,
-  y = iris$Species, target_weight = 0.5
-)
+iris_sumap <- umap(iris30, n_neighbors = 5, min_dist = 0.001, y = iris30$Species, 
+                   target_weight = 0.5, n_epochs = 200)
 
 # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
-iris_umap <- umap(iris, metric = list(
+iris_umap <- umap(iris30, metric = list(
   "euclidean" = c("Sepal.Length", "Sepal.Width"),
   "euclidean" = c("Petal.Length", "Petal.Width")
 ))
-
-# Can also use individual factor columns
-iris_umap <- umap(iris, metric = list(
-  "euclidean" = c("Sepal.Length", "Sepal.Width"),
-  "euclidean" = c("Petal.Length", "Petal.Width"),
-  "categorical" = "Species"
-))
-# Return NN info
-iris_umap <- umap(iris, ret_nn = TRUE)
-
-# Re-use NN info for greater efficiency
-# Here we use random initialization
-iris_umap_spca <- umap(iris, init = "rand", nn_method = iris_umap$nn)
 
 }
 \references{
