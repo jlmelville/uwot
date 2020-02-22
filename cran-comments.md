@@ -1,16 +1,12 @@
-## Release Summary
-
-This is a patch release to fix two bugs which can cause the R session to crash.
-
 ## Test environments
 
-* ubuntu 16.04 (on travis-ci), R 3.5.3, R 3.6.1, R-devel
+* ubuntu 16.04 (on travis-ci), R 3.5.3, R 3.6.2, R-devel
 * ubuntu 16.04 (on rhub), R 3.6.1
-* fedora 30 (on rhub), R-devel
-* mac OS X High Sierra (on travis-ci), R 3.5.3, R 3.6.1
-* local Windows 10 build, R 3.6.1
+* fedora 31 (on rhub), R-devel
+* mac OS X High Sierra (on travis-ci), R 3.5.3, R 3.6.2
+* local Windows 10 build, R 3.6.2
 * Windows Server 2008 (on rhub) R-devel
-* Windows Server 2012 (on appveyor) R 3.6.1
+* Windows Server 2012 (on appveyor) R 3.6.2
 
 ## R CMD check results
 
@@ -48,6 +44,8 @@ These are spelled correctly.
 r-patched-solaris-x86	has an ERROR. This is because the RcppAnnoy package is
 unavailable.
 
+### UBSAN issue
+
 A gcc-UBSAN issue is reported. This originates from the dependency RcppAnnoy and 
 is ultimately due to how memory management is implemented in the Annoy 
 library that RcppAnnoy wraps. This is a purposeful design decision in Annoy 
@@ -55,10 +53,8 @@ and not something that can be fixed in this package (or in RcppAnnoy).
 
 ## Downstream dependencies
 
-There are 4 downstream dependencies. 
+There are 4 downstream CRAN dependencies and 3 Bioconductor dependencies:
 
-* 'embed' fails R CMD CHECK because of test failures due to what seems to be
-incompatibilities with the latest 'tensorflow' library. This is unrelated to 
-'uwot' and tests that use 'uwot' pass as expected.
-
-* The other three dependencies completed R CMD CHECK without issues.
+* Five of these packages report either NOTEs or a mixture of WARNINGs and NOTEs.
+None are related to 'uwot'.
+* The other two dependencies completed R CMD CHECK without issues.
