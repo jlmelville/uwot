@@ -5,6 +5,9 @@
 #' the following help text is lifted verbatim from the Python reference
 #' implementation at \url{https://github.com/lmcinnes/umap}.
 #'
+#' Note that the \code{grain_size} parameter no longer does anything and is
+#' present to avoid break backwards compatibility only.
+#'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
 #'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
 #'   sparse matrix is interpreted as a distance matrix and both implicit and
@@ -311,10 +314,7 @@
 #'   descent. If set to > 1, then results will not be reproducible, even if
 #'   `set.seed` is called with a fixed seed before running. Set to
 #'   \code{"auto"} go use the same value as \code{n_threads}.
-#' @param grain_size Minimum batch size for multithreading. If the number of
-#'   items to process in a thread falls below this number, then no threads will
-#'   be used. Used in conjunction with \code{n_threads} and
-#'   \code{n_sgd_threads}.
+#' @param grain_size Minimum batch size for multithreading. Now ignored.
 #' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
 #'   only written to disk if \code{n_threads > 1} and
@@ -451,6 +451,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' get back the Cauchy distribution as used in t-SNE and LargeVis. It also
 #' results in a substantially simplified gradient expression. This can give
 #' a speed improvement of around 50\%.
+#' 
+#' Note that the \code{grain_size} parameter no longer does anything and is
+#' present to avoid break backwards compatibility only.
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
 #'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
@@ -739,10 +742,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   descent. If set to > 1, then results will not be reproducible, even if
 #'   `set.seed` is called with a fixed seed before running. Set to
 #'   \code{"auto"} go use the same value as \code{n_threads}.
-#' @param grain_size Minimum batch size for multithreading. If the number of
-#'   items to process in a thread falls below this number, then no threads will
-#'   be used. Used in conjunction with \code{n_threads} and
-#'   \code{n_sgd_threads}.
+#' @param grain_size Minimum batch size for multithreading. Now ignored.
 #' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
 #'   only written to disk if \code{n_threads > 1} and
@@ -841,6 +841,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \code{\link{umap}}, but may need to be increased further depending on your
 #'   dataset. Using \code{init = "spectral"} can help.
 #' }
+#'
+#' Note that the \code{grain_size} parameter no longer does anything and is
+#' present to avoid break backwards compatibility only.
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
 #'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
@@ -1013,10 +1016,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   descent. If set to > 1, then results will not be reproducible, even if
 #'   `set.seed` is called with a fixed seed before running. Set to
 #'   \code{"auto"} go use the same value as \code{n_threads}.
-#' @param grain_size Minimum batch size for multithreading. If the number of
-#'   items to process in a thread falls below this number, then no threads will
-#'   be used. Used in conjunction with \code{n_threads} and
-#'   \code{n_sgd_threads}.
+#' @param grain_size Minimum batch size for multithreading. Now ignored.
 #' @param kernel Type of kernel function to create input probabilities. Can be
 #'   one of \code{"gauss"} (the default) or \code{"knn"}. \code{"gauss"} uses
 #'   the usual Gaussian weighted similarities. \code{"knn"} assigns equal

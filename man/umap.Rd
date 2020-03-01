@@ -387,10 +387,7 @@ descent. If set to > 1, then results will not be reproducible, even if
 `set.seed` is called with a fixed seed before running. Set to
 \code{"auto"} go use the same value as \code{n_threads}.}
 
-\item{grain_size}{Minimum batch size for multithreading. If the number of
-items to process in a thread falls below this number, then no threads will
-be used. Used in conjunction with \code{n_threads} and
-\code{n_sgd_threads}.}
+\item{grain_size}{Minimum batch size for multithreading. Now ignored.}
 
 \item{tmpdir}{Temporary directory to store nearest neighbor indexes during
 nearest neighbor search. Default is \code{\link{tempdir}}. The index is
@@ -425,6 +422,10 @@ Carry out dimensionality reduction of a dataset using the Uniform Manifold
 Approximation and Projection (UMAP) method (McInnes & Healy, 2018). Some of
 the following help text is lifted verbatim from the Python reference
 implementation at \url{https://github.com/lmcinnes/umap}.
+}
+\details{
+Note that the \code{grain_size} parameter no longer does anything and is
+present to avoid break backwards compatibility only.
 }
 \examples{
 

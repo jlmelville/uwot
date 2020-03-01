@@ -15,9 +15,18 @@ the basic method. Translated from the
 
 ## News
 
-*December 4 2019* Version 0.1.5 released on CRAN. This fixes a couple of crash bugs,
-including one where the R API was being called from inside a thread. This may have
-been causing the issues seen by users of
+*March 1 2020* Version 0.1.6 was rejected from CRAN due to undefined behavior
+issues that originate from RcppAnnoy and RcppParallel. I am hopeful that the
+Annoy behavior is fixed and a suitable version of RcppAnnoy will be released
+onto CRAN eventually. The RcppParallel issues originate with the use of
+[tbb](https://github.com/intel/tbb) and seems much harder to deal with. As there
+is no way to use RcppParallel without tbb yet, I am temporarily replacing the
+use of RcppParallel with just a subset of the code needed to run parallel for
+loops with the [tinythread++](https://tinythreadpp.bitsnbites.eu/) library.
+
+*December 4 2019* Version 0.1.5 released on CRAN. This fixes a couple of crash
+bugs, including one where the R API was being called from inside a thread. This
+may have been causing the issues seen by users of
 [monocle](https://github.com/cole-trapnell-lab/monocle3/issues/186)
 and [seurat](https://github.com/satijalab/seurat/issues/2256).
 
@@ -769,6 +778,15 @@ Nearest neighbor data for `y` is not returned from `umap` for re-use.
 ## License
 
 [GPLv3 or later](https://www.gnu.org/licenses/gpl-3.0.txt).
+
+uwot directly contains code that originates with
+[RcppParallel](https://github.com/RcppCore/RcppParallel),
+which is [GPLv2](https://cran.r-project.org/web/licenses/GPL-2).
+
+It also contains the TinyThread library which is licensed under the 
+[zlib/libpng](http://www.opensource.org/licenses/zlib-license.php) license as
+described
+[here](https://gitorious.org/tinythread/tinythreadpp/source/master:README.txt).
 
 ## See Also
 

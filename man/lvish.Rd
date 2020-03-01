@@ -223,10 +223,7 @@ descent. If set to > 1, then results will not be reproducible, even if
 `set.seed` is called with a fixed seed before running. Set to
 \code{"auto"} go use the same value as \code{n_threads}.}
 
-\item{grain_size}{Minimum batch size for multithreading. If the number of
-items to process in a thread falls below this number, then no threads will
-be used. Used in conjunction with \code{n_threads} and
-\code{n_sgd_threads}.}
+\item{grain_size}{Minimum batch size for multithreading. Now ignored.}
 
 \item{kernel}{Type of kernel function to create input probabilities. Can be
 one of \code{"gauss"} (the default) or \code{"knn"}. \code{"gauss"} uses
@@ -338,6 +335,9 @@ following:
   \code{\link{umap}}, but may need to be increased further depending on your
   dataset. Using \code{init = "spectral"} can help.
 }
+
+Note that the \code{grain_size} parameter no longer does anything and is
+present to avoid break backwards compatibility only.
 }
 \examples{
 # Default number of epochs is much larger than for UMAP, assumes random

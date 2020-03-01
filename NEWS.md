@@ -1,3 +1,18 @@
+# uwot 0.1.7
+
+## Bug fixes and minor improvements
+
+* uwot should no longer trigger undefined behavior in sanitizers, due to the
+temporary replacement of the RcppParallel package with code "borrowed" from
+that package and using tinythread++ rather than tbb 
+(<https://github.com/jlmelville/uwot/issues/52>).
+* Further sanitizer improvements in the nearest neighbor search code due to
+the upstream efforts of [erikbern](https://github.com/erikbern) and
+[eddelbuettel](https://github.com/eddelbuettel)
+(<https://github.com/jlmelville/uwot/issues/50>).
+* The `grain_size` parameter is now ignored and remains to avoid breaking
+backwards compatibility only.
+
 # uwot 0.1.6
 
 ## New features
