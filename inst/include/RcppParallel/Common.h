@@ -26,10 +26,6 @@ private:
    void operator=(const Worker&);
 };
 
-// Tag type used for disambiguating splitting constructors
-
-struct Split {};
-
 } // namespace RcppParallel
 
 
