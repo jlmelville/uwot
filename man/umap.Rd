@@ -433,19 +433,19 @@ iris30 <- iris[c(1:10, 51:60, 101:110), ]
 
 # Non-numeric columns are automatically removed so you can pass data frames
 # directly in a lot of cases without pre-processing
-iris_umap <- umap(iris30, n_neighbors = 5, learning_rate = 0.5, init = "random", n_epochs = 200)
+iris_umap <- umap(iris30, n_neighbors = 5, learning_rate = 0.5, init = "random", n_epochs = 20)
 
 # Faster approximation to the gradient and return nearest neighbors
-iris_umap <- umap(iris30, n_neighbors = 5, approx_pow = TRUE, ret_nn = TRUE, n_epochs = 200)
+iris_umap <- umap(iris30, n_neighbors = 5, approx_pow = TRUE, ret_nn = TRUE, n_epochs = 20)
 
 # Can specify min_dist and spread parameters to control separation and size
 # of clusters and reuse nearest neighbors for efficiency
 nn <- iris_umap$nn
-iris_umap <- umap(iris30, n_neighbors = 5, min_dist = 1, spread = 5, nn_method = nn, n_epochs = 200)
+iris_umap <- umap(iris30, n_neighbors = 5, min_dist = 1, spread = 5, nn_method = nn, n_epochs = 20)
 
 # Supervised dimension reduction using the 'Species' factor column
 iris_sumap <- umap(iris30, n_neighbors = 5, min_dist = 0.001, y = iris30$Species, 
-                   target_weight = 0.5, n_epochs = 200)
+                   target_weight = 0.5, n_epochs = 20)
 
 # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
 iris_umap <- umap(iris30, metric = list(

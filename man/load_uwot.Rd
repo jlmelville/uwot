@@ -26,7 +26,7 @@ iris_train <- iris[c(1:10, 51:60), ]
 iris_test <- iris[100:110, ]
 
 # create model
-model <- umap(iris_train, ret_model = TRUE, n_epochs = 200)
+model <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
 
 # save without unloading: this leaves behind a temporary working directory
 model_file <- tempfile("iris_umap")
@@ -54,7 +54,7 @@ unlink(model_file)
 
 # save with unloading: this deletes the temporary working directory but
 # doesn't allow the model to be re-used
-model3 <- umap(iris_train, ret_model = TRUE, n_epochs = 200)
+model3 <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
 model_file3 <- tempfile("iris_umap")
 model3 <- save_uwot(model3, file = model_file3, unload = TRUE)
 

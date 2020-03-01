@@ -341,19 +341,12 @@ present to avoid break backwards compatibility only.
 }
 \examples{
 # Default number of epochs is much larger than for UMAP, assumes random
+# initialization. Use perplexity rather than n_neighbors to control the size
+# of the local neighborhood 20 epochs may be too small for a random 
 # initialization
-# If using a more global initialization, can use fewer epochs
-iris_lvish_short <- lvish(iris,
-  perplexity = 50, n_epochs = 200,
-  init = "pca"
-)
-
-# Use perplexity rather than n_neighbors to control the size of the local
-# neighborhood
-# 200 epochs may be too small for a random initialization
 iris_lvish <- lvish(iris,
   perplexity = 50, learning_rate = 0.5,
-  init = "random", n_epochs = 200
+  init = "random", n_epochs = 20
 )
 }
 \references{

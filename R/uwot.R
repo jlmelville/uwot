@@ -345,19 +345,19 @@
 #' 
 #' # Non-numeric columns are automatically removed so you can pass data frames
 #' # directly in a lot of cases without pre-processing
-#' iris_umap <- umap(iris30, n_neighbors = 5, learning_rate = 0.5, init = "random", n_epochs = 200)
+#' iris_umap <- umap(iris30, n_neighbors = 5, learning_rate = 0.5, init = "random", n_epochs = 20)
 #'
 #' # Faster approximation to the gradient and return nearest neighbors
-#' iris_umap <- umap(iris30, n_neighbors = 5, approx_pow = TRUE, ret_nn = TRUE, n_epochs = 200)
+#' iris_umap <- umap(iris30, n_neighbors = 5, approx_pow = TRUE, ret_nn = TRUE, n_epochs = 20)
 #'
 #' # Can specify min_dist and spread parameters to control separation and size
 #' # of clusters and reuse nearest neighbors for efficiency
 #' nn <- iris_umap$nn
-#' iris_umap <- umap(iris30, n_neighbors = 5, min_dist = 1, spread = 5, nn_method = nn, n_epochs = 200)
+#' iris_umap <- umap(iris30, n_neighbors = 5, min_dist = 1, spread = 5, nn_method = nn, n_epochs = 20)
 #'
 #' # Supervised dimension reduction using the 'Species' factor column
 #' iris_sumap <- umap(iris30, n_neighbors = 5, min_dist = 0.001, y = iris30$Species, 
-#'                    target_weight = 0.5, n_epochs = 200)
+#'                    target_weight = 0.5, n_epochs = 20)
 #'
 #' # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
 #' iris_umap <- umap(iris30, metric = list(
@@ -1102,19 +1102,12 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'
 #' @examples
 #' # Default number of epochs is much larger than for UMAP, assumes random
+#' # initialization. Use perplexity rather than n_neighbors to control the size
+#' # of the local neighborhood 20 epochs may be too small for a random 
 #' # initialization
-#' # If using a more global initialization, can use fewer epochs
-#' iris_lvish_short <- lvish(iris,
-#'   perplexity = 50, n_epochs = 200,
-#'   init = "pca"
-#' )
-#'
-#' # Use perplexity rather than n_neighbors to control the size of the local
-#' # neighborhood
-#' # 200 epochs may be too small for a random initialization
 #' iris_lvish <- lvish(iris,
 #'   perplexity = 50, learning_rate = 0.5,
-#'   init = "random", n_epochs = 200
+#'   init = "random", n_epochs = 20
 #' )
 #' @export
 lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
@@ -1732,7 +1725,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' iris_test <- iris[100:110, ]
 #' 
 #' # create model
-#' model <- umap(iris_train, ret_model = TRUE, n_epochs = 200)
+#' model <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
 #' 
 #' # save without unloading: this leaves behind a temporary working directory
 #' model_file <- tempfile("iris_umap")
@@ -1760,7 +1753,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' 
 #' # save with unloading: this deletes the temporary working directory but
 #' # doesn't allow the model to be re-used
-#' model3 <- umap(iris_train, ret_model = TRUE, n_epochs = 200)
+#' model3 <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
 #' model_file3 <- tempfile("iris_umap")
 #' model3 <- save_uwot(model3, file = model_file3, unload = TRUE)
 #' 
@@ -1845,7 +1838,7 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
 #' iris_test <- iris[100:110, ]
 #' 
 #' # create model
-#' model <- umap(iris_train, ret_model = TRUE, n_epochs = 200)
+#' model <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
 #' 
 #' # save without unloading: this leaves behind a temporary working directory
 #' model_file <- tempfile("iris_umap")
@@ -1873,7 +1866,7 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
 #' 
 #' # save with unloading: this deletes the temporary working directory but
 #' # doesn't allow the model to be re-used
-#' model3 <- umap(iris_train, ret_model = TRUE, n_epochs = 200)
+#' model3 <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
 #' model_file3 <- tempfile("iris_umap")
 #' model3 <- save_uwot(model3, file = model_file3, unload = TRUE)
 #' 
@@ -1945,7 +1938,7 @@ load_uwot <- function(file, verbose = FALSE) {
 #' iris_test <- iris[100:110, ]
 #' 
 #' # create model
-#' model <- umap(iris_train, ret_model = TRUE, n_epochs = 200)
+#' model <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
 #' 
 #' # save without unloading: this leaves behind a temporary working directory
 #' model_file <- tempfile("iris_umap")
@@ -1973,7 +1966,7 @@ load_uwot <- function(file, verbose = FALSE) {
 #' 
 #' # save with unloading: this deletes the temporary working directory but
 #' # doesn't allow the model to be re-used
-#' model3 <- umap(iris_train, ret_model = TRUE, n_epochs = 200)
+#' model3 <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
 #' model_file3 <- tempfile("iris_umap")
 #' model3 <- save_uwot(model3, file = model_file3, unload = TRUE)
 #'
