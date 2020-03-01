@@ -1,10 +1,17 @@
+## Resubmission
+
+This is a resubmission. In this version I have:
+
+* Resolved usages of dependencies that resulted in UBSAN errors.
+
 ## Test environments
 
 * ubuntu 16.04 (on travis-ci), R 3.5.3, R 3.6.2, R-devel
 * ubuntu 16.04 (on rhub), R 3.6.1
 * fedora 31 (on rhub), R-devel
 * mac OS X High Sierra (on travis-ci), R 3.5.3, R 3.6.2
-* local Windows 10 build, R 3.6.2
+* local Windows 10 build, R 3.6.2, R 3.6.3
+* local Pop OS (Linux) build R 3.6.3
 * Windows Server 2008 (on rhub) R-devel
 * Windows Server 2012 (on appveyor) R 3.6.2
 
@@ -12,19 +19,13 @@
 
 There were no ERRORs or WARNINGs.
 
-There was one NOTE:
+* For r-hub with Windows Server 2008 R2 SP1, R-devel, 32/64 bit there was one 
+  NOTE:
 
-* checking for GNU extensions in Makefiles ... NOTE
-GNU make is a SystemRequirements.
-
-This is expected due to linking to the RcppParallel package.
-
-With r-hub checking on Windows only there was also:
-
-"N  checking for non-standard things in the check directory
-   Found the following files/directories:
-     'examples_x64' 'tests_i386' 'tests_x64'
-     'RcppHNSW-Ex_i386.Rout' 'RcppHNSW-Ex_x64.Rout' 'examples_i386'"
+checking for non-standard things in the check directory ... NOTE
+  'examples_i386' 'examples_x64' 'tests_i386' 'tests_x64'
+Found the following files/directories:
+  'uwot-Ex_i386.Rout' 'uwot-Ex_x64.Rout'
 
 This would seem to be something to do with r-hub rather than a real problem.
 
@@ -41,15 +42,15 @@ These are spelled correctly.
 
 ## CRAN checks
 
-r-patched-solaris-x86	has an ERROR. This is because the RcppAnnoy package is
+The following issues were reported in the previous submission:
+
+* r-patched-solaris-x86 had an ERROR, because the RcppAnnoy package was 
 unavailable.
 
-### UBSAN issue
+* A gcc-UBSAN issue was reported due to libraries used by RcppAnnoy and 
+RcppParallel.
 
-A gcc-UBSAN issue is reported. This originates from the dependency RcppAnnoy and 
-is ultimately due to how memory management is implemented in the Annoy 
-library that RcppAnnoy wraps. This is a purposeful design decision in Annoy 
-and not something that can be fixed in this package (or in RcppAnnoy).
+Both should now be fixed.
 
 ## Downstream dependencies
 
