@@ -17,10 +17,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <Rcpp.h>
-#include <RcppParallel.h>
 #include <vector>
-// [[Rcpp::depends(RcppParallel)]]
+
+#include <Rcpp.h>
+#include "RcppParallel.h"
 
 struct AverageWorker : public RcppParallel::Worker {
 

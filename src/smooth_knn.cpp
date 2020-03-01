@@ -17,13 +17,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <Rcpp.h>
 #include <algorithm>
 #include <limits>
 #include <numeric>
 #include <vector>
-// [[Rcpp::depends(RcppParallel)]]
-#include <RcppParallel.h>
+
+#include <Rcpp.h>
+#include "RcppParallel.h"
 
 struct SmoothKnnWorker : public RcppParallel::Worker {
   const RcppParallel::RMatrix<double> nn_dist;

@@ -56,7 +56,7 @@ expect_equal(embedding, wav, check.attributes = FALSE, tol = 1e-5)
 
 
 # Check threaded code
-RcppParallel::setThreadOptions(numThreads = 1)
+set_thread_options(n_threads = 1)
 embedding <- init_new_embedding(train_embedding, nn,
   graph = NULL,
   weighted = FALSE,

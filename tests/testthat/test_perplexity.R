@@ -109,7 +109,7 @@ res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
 
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 
-RcppParallel::setThreadOptions(numThreads = 1)
+set_thread_options(n_threads = 1)
 res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx,
   perplexity = 4, verbose = FALSE
 )$matrix
@@ -175,7 +175,7 @@ res <- perplexity_similarities(
 )
 expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tol = 1e-6)
 
-RcppParallel::setThreadOptions(numThreads = 1)
+set_thread_options(n_threads = 1)
 res <- perplexity_similarities(
   perplexity = 50, n_threads = 1, verbose = FALSE,
   nn = find_nn(normiris,

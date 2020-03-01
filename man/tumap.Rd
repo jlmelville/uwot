@@ -22,7 +22,7 @@ tumap(
   nn_method = NULL,
   n_trees = 50,
   search_k = 2 * n_neighbors * n_trees,
-  n_threads = max(1, RcppParallel::defaultNumThreads()/2),
+  n_threads = default_num_threads(),
   n_sgd_threads = 0,
   grain_size = 1,
   y = NULL,

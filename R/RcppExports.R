@@ -49,6 +49,10 @@ general_sset_intersection_cpp <- function(indptr1, indices1, data1, indptr2, ind
     .Call(`_uwot_general_sset_intersection_cpp`, indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val, mix_weight)
 }
 
+hardware_concurrency <- function() {
+    .Call(`_uwot_hardware_concurrency`)
+}
+
 init_transform_av_parallel <- function(train_embedding, nn_index, parallelize = TRUE, grain_size = 1L) {
     .Call(`_uwot_init_transform_av_parallel`, train_embedding, nn_index, parallelize, grain_size)
 }

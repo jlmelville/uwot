@@ -20,10 +20,7 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
 # or not
 smooth_knn <- function(nn,
                        local_connectivity = 1.0, bandwidth = 1.0,
-                       n_threads = max(
-                         1,
-                         RcppParallel::defaultNumThreads() / 2
-                       ),
+                       n_threads = default_num_threads(),
                        grain_size = 1,
                        verbose = FALSE) {
   tsmessage(
@@ -58,11 +55,7 @@ smooth_knn <- function(nn,
 fuzzy_simplicial_set <- function(nn,
                                  set_op_mix_ratio = 1.0,
                                  local_connectivity = 1.0, bandwidth = 1.0,
-                                 n_threads =
-                                   max(
-                                     1,
-                                     RcppParallel::defaultNumThreads() / 2
-                                   ),
+                                 n_threads = default_num_threads(),
                                  grain_size = 1,
                                  verbose = FALSE) {
   affinity_matrix <- smooth_knn(nn,
@@ -85,11 +78,7 @@ symmetrize <- function(P) {
 }
 
 perplexity_similarities <- function(nn, perplexity = NULL,
-                                    n_threads =
-                                      max(
-                                        1,
-                                        RcppParallel::defaultNumThreads() / 2
-                                      ),
+                                    n_threads = default_num_threads(),
                                     grain_size = 1,
                                     kernel = "gauss",
                                     verbose = FALSE) {

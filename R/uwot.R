@@ -411,7 +411,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  pcg_rand = TRUE,
                  fast_sgd = FALSE,
                  ret_model = FALSE, ret_nn = FALSE, ret_extra = c(),
-                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                 n_threads = default_num_threads(),
                  n_sgd_threads = 0,
                  grain_size = 1,
                  tmpdir = tempdir(),
@@ -779,7 +779,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
-                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                  n_threads = default_num_threads(),
                   n_sgd_threads = 0,
                   grain_size = 1,
                   y = NULL, target_n_neighbors = n_neighbors,
@@ -1125,7 +1125,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
-                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                  n_threads = default_num_threads(),
                   n_sgd_threads = 0,
                   grain_size = 1,
                   kernel = "gauss",
@@ -1173,7 +1173,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  y = NULL, target_n_neighbors = n_neighbors,
                  target_metric = "euclidean",
                  target_weight = 0.5,
-                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                 n_threads = default_num_threads(),
                  n_sgd_threads = 0,
                  grain_size = 1,
                  kernel = "gauss",
@@ -1243,7 +1243,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     tsmessage("Non-integer 'n_sgd_threads' provided. Setting to ", n_sgd_threads)
   }
   if (n_threads > 0) {
-    RcppParallel::setThreadOptions(numThreads = n_threads)
+    set_thread_options(n_threads = n_threads)
   }
 
   # Store categorical columns to be used to generate the graph
@@ -1574,7 +1574,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
     parallelize <- n_sgd_threads > 0
     if (n_sgd_threads > 0) {
-      RcppParallel::setThreadOptions(numThreads = n_sgd_threads)
+      set_thread_options(n_threads = n_sgd_threads)
     }
 
     embedding <- t(embedding)
@@ -2031,6 +2031,16 @@ all_nn_indices_are_loaded <- function(model) {
 
 abspath <- function(filename) {
   file.path(normalizePath(dirname(filename)), basename(filename))
+}
+
+# Half of whatever the C++ implementation thinks are the number of concurrent 
+# threads supported, but at least 1
+default_num_threads <- function() {
+  max(1, hardware_concurrency() / 2)
+}
+
+set_thread_options <- function(n_threads) {
+  Sys.setenv(RCPP_PARALLEL_NUM_THREADS = n_threads)
 }
 
 # Get the number of vertices in X
@@ -2578,7 +2588,6 @@ attr_to_scale_info <- function(X) {
 
 #' @useDynLib uwot, .registration=TRUE
 #' @importFrom Rcpp sourceCpp
-#' @importFrom RcppParallel RcppParallelLibs
 .onUnload <- function(libpath) {
   library.dynam.unload("uwot", libpath)
 }
