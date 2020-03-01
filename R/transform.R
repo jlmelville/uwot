@@ -57,8 +57,7 @@ umap_transform <- function(X, model,
                            search_k = NULL,
                            tmpdir = tempdir(),
                            n_epochs = NULL,
-                           n_threads =
-                             max(1, RcppParallel::defaultNumThreads() / 2),
+                           n_threads = default_num_threads(),
                            n_sgd_threads = 0,
                            grain_size = 1,
                            verbose = FALSE) {
@@ -118,7 +117,7 @@ umap_transform <- function(X, model,
   }
 
   if (n_threads > 0) {
-    RcppParallel::setThreadOptions(numThreads = n_threads)
+    set_thread_options(n_threads = n_threads)
   }
 
   adjusted_local_connectivity <- max(0, local_connectivity - 1.0)
@@ -216,7 +215,7 @@ umap_transform <- function(X, model,
 
     parallelize <- n_sgd_threads > 0
     if (n_sgd_threads > 0) {
-      RcppParallel::setThreadOptions(numThreads = n_sgd_threads)
+      set_thread_options(n_threads = n_sgd_threads)
     }
     embedding <- t(embedding)
     train_embedding <- t(train_embedding)
@@ -262,8 +261,7 @@ umap_transform <- function(X, model,
 }
 
 init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
-                               n_threads =
-                                 max(1, RcppParallel::defaultNumThreads() / 2),
+                               n_threads = default_num_threads(),
                                grain_size = 1, verbose = FALSE) {
   parallelize <- n_threads > 0
   if (weighted) {

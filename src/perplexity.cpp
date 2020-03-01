@@ -17,11 +17,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <Rcpp.h>
 #include <limits>
 #include <vector>
-// [[Rcpp::depends(RcppParallel)]]
-#include <RcppParallel.h>
+
+#include <Rcpp.h>
+#include "RcppParallel.h"
 
 struct PerplexityWorker : public RcppParallel::Worker {
   RcppParallel::RMatrix<double> res;

@@ -2,7 +2,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                     metric = "euclidean",
                     n_trees = 50, search_k = 2 * k * n_trees,
                     tmpdir = tempdir(),
-                    n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                    n_threads = default_num_threads(),
                     grain_size = 1,
                     ret_index = FALSE,
                     verbose = FALSE) {
@@ -46,7 +46,7 @@ annoy_nn <- function(X, k = 10,
                      metric = "euclidean",
                      n_trees = 50, search_k = 2 * k * n_trees,
                      tmpdir = tempdir(),
-                     n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                     n_threads = default_num_threads(),
                      grain_size = 1,
                      ret_index = FALSE,
                      verbose = FALSE) {
@@ -113,8 +113,7 @@ create_ann <- function(name, ndim) {
 annoy_search <- function(X, k, ann,
                          search_k = 100 * k,
                          tmpdir = tempdir(),
-                         n_threads =
-                           max(1, RcppParallel::defaultNumThreads() / 2),
+                         n_threads = default_num_threads(),
                          grain_size = 1,
                          verbose = FALSE) {
   if (n_threads > 0) {
@@ -169,8 +168,7 @@ annoy_search_serial <- function(X, k, ann,
 annoy_search_parallel <- function(X, k, ann,
                                   search_k = 100 * k,
                                   tmpdir = tempdir(),
-                                  n_threads =
-                                    max(1, RcppParallel::defaultNumThreads() / 2),
+                                  n_threads = default_num_threads(),
                                   grain_size = 1,
                                   verbose = FALSE) {
   index_file <- tempfile(tmpdir = tmpdir)

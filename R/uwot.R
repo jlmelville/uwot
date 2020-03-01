@@ -5,6 +5,9 @@
 #' the following help text is lifted verbatim from the Python reference
 #' implementation at \url{https://github.com/lmcinnes/umap}.
 #'
+#' Note that the \code{grain_size} parameter no longer does anything and is
+#' present to avoid break backwards compatibility only.
+#'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
 #'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
 #'   sparse matrix is interpreted as a distance matrix and both implicit and
@@ -311,10 +314,7 @@
 #'   descent. If set to > 1, then results will not be reproducible, even if
 #'   `set.seed` is called with a fixed seed before running. Set to
 #'   \code{"auto"} go use the same value as \code{n_threads}.
-#' @param grain_size Minimum batch size for multithreading. If the number of
-#'   items to process in a thread falls below this number, then no threads will
-#'   be used. Used in conjunction with \code{n_threads} and
-#'   \code{n_sgd_threads}.
+#' @param grain_size Minimum batch size for multithreading. Now ignored.
 #' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
 #'   only written to disk if \code{n_threads > 1} and
@@ -411,7 +411,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  pcg_rand = TRUE,
                  fast_sgd = FALSE,
                  ret_model = FALSE, ret_nn = FALSE, ret_extra = c(),
-                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                 n_threads = default_num_threads(),
                  n_sgd_threads = 0,
                  grain_size = 1,
                  tmpdir = tempdir(),
@@ -451,6 +451,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' get back the Cauchy distribution as used in t-SNE and LargeVis. It also
 #' results in a substantially simplified gradient expression. This can give
 #' a speed improvement of around 50\%.
+#' 
+#' Note that the \code{grain_size} parameter no longer does anything and is
+#' present to avoid break backwards compatibility only.
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
 #'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
@@ -739,10 +742,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   descent. If set to > 1, then results will not be reproducible, even if
 #'   `set.seed` is called with a fixed seed before running. Set to
 #'   \code{"auto"} go use the same value as \code{n_threads}.
-#' @param grain_size Minimum batch size for multithreading. If the number of
-#'   items to process in a thread falls below this number, then no threads will
-#'   be used. Used in conjunction with \code{n_threads} and
-#'   \code{n_sgd_threads}.
+#' @param grain_size Minimum batch size for multithreading. Now ignored.
 #' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
 #'   only written to disk if \code{n_threads > 1} and
@@ -779,7 +779,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
-                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                  n_threads = default_num_threads(),
                   n_sgd_threads = 0,
                   grain_size = 1,
                   y = NULL, target_n_neighbors = n_neighbors,
@@ -841,6 +841,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \code{\link{umap}}, but may need to be increased further depending on your
 #'   dataset. Using \code{init = "spectral"} can help.
 #' }
+#'
+#' Note that the \code{grain_size} parameter no longer does anything and is
+#' present to avoid break backwards compatibility only.
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
 #'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
@@ -1013,10 +1016,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   descent. If set to > 1, then results will not be reproducible, even if
 #'   `set.seed` is called with a fixed seed before running. Set to
 #'   \code{"auto"} go use the same value as \code{n_threads}.
-#' @param grain_size Minimum batch size for multithreading. If the number of
-#'   items to process in a thread falls below this number, then no threads will
-#'   be used. Used in conjunction with \code{n_threads} and
-#'   \code{n_sgd_threads}.
+#' @param grain_size Minimum batch size for multithreading. Now ignored.
 #' @param kernel Type of kernel function to create input probabilities. Can be
 #'   one of \code{"gauss"} (the default) or \code{"knn"}. \code{"gauss"} uses
 #'   the usual Gaussian weighted similarities. \code{"knn"} assigns equal
@@ -1125,7 +1125,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   negative_sample_rate = 5.0,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
-                  n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                  n_threads = default_num_threads(),
                   n_sgd_threads = 0,
                   grain_size = 1,
                   kernel = "gauss",
@@ -1173,7 +1173,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  y = NULL, target_n_neighbors = n_neighbors,
                  target_metric = "euclidean",
                  target_weight = 0.5,
-                 n_threads = max(1, RcppParallel::defaultNumThreads() / 2),
+                 n_threads = default_num_threads(),
                  n_sgd_threads = 0,
                  grain_size = 1,
                  kernel = "gauss",
@@ -1243,7 +1243,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     tsmessage("Non-integer 'n_sgd_threads' provided. Setting to ", n_sgd_threads)
   }
   if (n_threads > 0) {
-    RcppParallel::setThreadOptions(numThreads = n_threads)
+    set_thread_options(n_threads = n_threads)
   }
 
   # Store categorical columns to be used to generate the graph
@@ -1574,7 +1574,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
     parallelize <- n_sgd_threads > 0
     if (n_sgd_threads > 0) {
-      RcppParallel::setThreadOptions(numThreads = n_sgd_threads)
+      set_thread_options(n_threads = n_sgd_threads)
     }
 
     embedding <- t(embedding)
@@ -2031,6 +2031,16 @@ all_nn_indices_are_loaded <- function(model) {
 
 abspath <- function(filename) {
   file.path(normalizePath(dirname(filename)), basename(filename))
+}
+
+# Half of whatever the C++ implementation thinks are the number of concurrent 
+# threads supported, but at least 1
+default_num_threads <- function() {
+  max(1, hardware_concurrency() / 2)
+}
+
+set_thread_options <- function(n_threads) {
+  Sys.setenv(RCPP_PARALLEL_NUM_THREADS = n_threads)
 }
 
 # Get the number of vertices in X
@@ -2578,7 +2588,6 @@ attr_to_scale_info <- function(X) {
 
 #' @useDynLib uwot, .registration=TRUE
 #' @importFrom Rcpp sourceCpp
-#' @importFrom RcppParallel RcppParallelLibs
 .onUnload <- function(libpath) {
   library.dynam.unload("uwot", libpath)
 }

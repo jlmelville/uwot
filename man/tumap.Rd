@@ -22,7 +22,7 @@ tumap(
   nn_method = NULL,
   n_trees = 50,
   search_k = 2 * n_neighbors * n_trees,
-  n_threads = max(1, RcppParallel::defaultNumThreads()/2),
+  n_threads = default_num_threads(),
   n_sgd_threads = 0,
   grain_size = 1,
   y = NULL,
@@ -244,10 +244,7 @@ descent. If set to > 1, then results will not be reproducible, even if
 `set.seed` is called with a fixed seed before running. Set to
 \code{"auto"} go use the same value as \code{n_threads}.}
 
-\item{grain_size}{Minimum batch size for multithreading. If the number of
-items to process in a thread falls below this number, then no threads will
-be used. Used in conjunction with \code{n_threads} and
-\code{n_sgd_threads}.}
+\item{grain_size}{Minimum batch size for multithreading. Now ignored.}
 
 \item{y}{Optional target data for supervised dimension reduction. Can be a
 vector, matrix or data frame. Use the \code{target_metric} parameter to
@@ -400,6 +397,9 @@ By setting the UMAP curve parameters \code{a} and \code{b} to \code{1}, you
 get back the Cauchy distribution as used in t-SNE and LargeVis. It also
 results in a substantially simplified gradient expression. This can give
 a speed improvement of around 50\%.
+
+Note that the \code{grain_size} parameter no longer does anything and is
+present to avoid break backwards compatibility only.
 }
 \examples{
 iris_tumap <- tumap(iris, n_neighbors = 50, learning_rate = 0.5)

@@ -1,6 +1,6 @@
 #include <Rcpp.h>
-// [[Rcpp::depends(RcppParallel)]]
-#include <RcppParallel.h>
+#include "RcppParallel.h"
+
 
 #if defined(__MINGW32__)
 #undef Realloc

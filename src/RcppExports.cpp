@@ -233,6 +233,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// hardware_concurrency
+unsigned int hardware_concurrency();
+RcppExport SEXP _uwot_hardware_concurrency() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(hardware_concurrency());
+    return rcpp_result_gen;
+END_RCPP
+}
 // init_transform_av_parallel
 Rcpp::NumericMatrix init_transform_av_parallel(Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index, bool parallelize, const std::size_t grain_size);
 RcppExport SEXP _uwot_init_transform_av_parallel(SEXP train_embeddingSEXP, SEXP nn_indexSEXP, SEXP parallelizeSEXP, SEXP grain_sizeSEXP) {
@@ -276,6 +286,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_uwot_smooth_knn_distances_parallel", (DL_FUNC) &_uwot_smooth_knn_distances_parallel, 10},
     {"_uwot_fast_intersection_cpp", (DL_FUNC) &_uwot_fast_intersection_cpp, 6},
     {"_uwot_general_sset_intersection_cpp", (DL_FUNC) &_uwot_general_sset_intersection_cpp, 10},
+    {"_uwot_hardware_concurrency", (DL_FUNC) &_uwot_hardware_concurrency, 0},
     {"_uwot_init_transform_av_parallel", (DL_FUNC) &_uwot_init_transform_av_parallel, 4},
     {"_uwot_init_transform_parallel", (DL_FUNC) &_uwot_init_transform_parallel, 5},
     {NULL, NULL, 0}

@@ -27,8 +27,7 @@
 #include "tauprng.h"
 
 // Must come after any include that transitively include dqrng
-// [[Rcpp::depends(RcppParallel)]]
-#include <RcppParallel.h>
+#include "RcppParallel.h"
 
 // Function to decide whether to move both vertices in an edge
 // Default empty version does nothing: used in umap_transform when
