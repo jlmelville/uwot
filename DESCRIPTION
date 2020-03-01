@@ -28,4 +28,3 @@ Imports: Rcpp,
     RSpectra,
     RcppAnnoy (>= 0.0.11),
     irlba
-SystemRequirements: GNU make
