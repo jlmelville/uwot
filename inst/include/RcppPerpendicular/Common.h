@@ -2,8 +2,8 @@
 // header guards and namespaces to avoid any potential clashes. RcppParallel is
 // licensed under GPLv2
 
-#ifndef __RCPP_PERPENDICULAR_COMMON__
-#define __RCPP_PERPENDICULAR_COMMON__
+#ifndef RCPP_PERPENDICULAR_COMMON
+#define RCPP_PERPENDICULAR_COMMON
 
 #include <cstddef>
 
@@ -15,15 +15,15 @@ namespace RcppPerpendicular {
 // the tinythreads interface allows to pass only a void* to the
 // thread main rather than a generic type / template)
 
-struct Worker 
-{  
+struct Worker
+{
    // construct and destruct (delete virtually)
    Worker() {}
    virtual ~Worker() {}
-   
+
    // dispatch work over a range of values
-   virtual void operator()(std::size_t begin, std::size_t end) = 0;   
-   
+   virtual void operator()(std::size_t begin, std::size_t end) = 0;
+
    // disable copying and assignment
 private:
    Worker(const Worker&);
@@ -33,4 +33,4 @@ private:
 } // namespace RcppPerpendicular
 
 
-#endif // __RCPP_PERPENDICULAR_COMMON__
+#endif // RCPP_PERPENDICULAR_COMMON

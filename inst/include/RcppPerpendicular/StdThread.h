@@ -1,8 +1,8 @@
 // Taken from RcppParallel's TinyThread.h and then modified slightly to work
 // with std::thread and to rename header guards and namespaces to avoid any
 // potential clashes. RcppParallel is licensed under GPLv2
-#ifndef __RCPP_PERPENDICULAR_STDTHREAD__
-#define __RCPP_PERPENDICULAR_STDTHREAD__
+#ifndef RCPP_PERPENDICULAR_STDTHREAD
+#define RCPP_PERPENDICULAR_STDTHREAD
 
 #include <cstdlib>
 #include <stdio.h>
@@ -26,12 +26,12 @@ public:
     : begin_(begin), end_(end)
    {
    }
-  
+
    // Access begin() and end()
    std::size_t begin() const { return begin_; }
    std::size_t end() const { return end_; }
    std::size_t size() const { return end_ - begin_ ; }
-   
+
 private:
    std::size_t begin_;
    std::size_t end_;
@@ -39,10 +39,10 @@ private:
 
 
 // Because tinythread allows us to pass only a plain C function
-// we need to pass our worker and range within a struct that we 
+// we need to pass our worker and range within a struct that we
 // can cast to/from void*
 struct Work {
-   Work(IndexRange range, Worker& worker) 
+   Work(IndexRange range, Worker& worker)
     :  range(range), worker(worker)
    {
    }
@@ -67,7 +67,7 @@ extern "C" inline void workerThread(void* data) {
 // Function to calculate the ranges for a given input
 std::vector<IndexRange> splitInputRange(const IndexRange& range,
                                         std::size_t grainSize) {
-  
+
    // determine max number of threads
    std::size_t threads = std::thread::hardware_concurrency();
    char* numThreads = ::getenv("RCPP_PERPENDICULAR_NUM_THREADS");
@@ -76,7 +76,7 @@ std::vector<IndexRange> splitInputRange(const IndexRange& range,
       if (parsedThreads > 0)
          threads = parsedThreads;
    }
-       
+
    // compute grainSize (including enforcing requested minimum)
    std::size_t length = range.end() - range.begin();
    if (threads == 1)
@@ -85,35 +85,35 @@ std::vector<IndexRange> splitInputRange(const IndexRange& range,
       grainSize = (std::max)(length / threads, grainSize);
    else // imperfect division, divide by threads - 1
       grainSize = (std::max)(length / (threads-1), grainSize);
-  
+
    // allocate ranges
    std::vector<IndexRange> ranges;
    std::size_t begin = range.begin();
    while (begin < range.end()) {
       std::size_t end = (std::min)(begin + grainSize, range.end());
-      ranges.push_back(IndexRange(begin, end));      
+      ranges.push_back(IndexRange(begin, end));
       begin = end;
    }
-   
+
    return ranges;
 }
 
 } // anonymous namespace
 
 // Execute the Worker over the IndexRange in parallel
-inline void stParallelFor(std::size_t begin, std::size_t end, 
+inline void stParallelFor(std::size_t begin, std::size_t end,
                           Worker& worker, std::size_t grainSize = 1) {
-  
+
    // split the work
    IndexRange inputRange(begin, end);
    std::vector<IndexRange> ranges = splitInputRange(inputRange, grainSize);
-   
+
    // create threads
    std::vector<std::thread*> threads;
    for (std::size_t i = 0; i<ranges.size(); ++i) {
       threads.push_back(new std::thread(workerThread, new Work(ranges[i], worker)));
    }
-   
+
    // join and delete them
    for (std::size_t i = 0; i<threads.size(); ++i) {
       threads[i]->join();
@@ -123,4 +123,4 @@ inline void stParallelFor(std::size_t begin, std::size_t end,
 
 } // namespace RcppPerpendicular
 
-#endif // __RCPP_PERPENDICULAR_STDTHREAD__
+#endif // RCPP_PERPENDICULAR_STDTHREAD

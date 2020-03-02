@@ -3,8 +3,8 @@
 // GPLv2
 
 
-#ifndef __RCPP_PERPENDICULAR__
-#define __RCPP_PERPENDICULAR__
+#ifndef RCPP_PERPENDICULAR
+#define RCPP_PERPENDICULAR
 
 // TinyThread implementation
 #include "RcppPerpendicular/StdThread.h"
@@ -13,11 +13,11 @@
 
 namespace RcppPerpendicular {
 
-inline void parallelFor(std::size_t begin, std::size_t end, 
+inline void parallelFor(std::size_t begin, std::size_t end,
                         Worker& worker, std::size_t grainSize = 1) {
    stParallelFor(begin, end, worker, grainSize);
 }
 
 } // namespace RcppPerpendicular
 
-#endif // __RCPP_PERPENDICULAR__
+#endif // RCPP_PERPENDICULAR
