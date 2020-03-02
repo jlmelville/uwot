@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include "RcppParallel.h"
+#include "RcppPerpendicular.h"
 
 
 #if defined(__MINGW32__)
@@ -13,11 +13,11 @@
 #include <kissrandom.h>
 
 template <typename S, typename T, typename Distance, typename Random>
-struct NNWorker : public RcppParallel::Worker {
+struct NNWorker : public RcppPerpendicular::Worker {
   std::string index_name;
-  RcppParallel::RMatrix<double> mat;
-  RcppParallel::RMatrix<double> dists;
-  RcppParallel::RMatrix<int> idx;
+  RcppPerpendicular::RMatrix<double> mat;
+  RcppPerpendicular::RMatrix<double> dists;
+  RcppPerpendicular::RMatrix<int> idx;
   std::size_t ncol;
   std::size_t n_neighbors;
   std::size_t search_k;
@@ -33,7 +33,7 @@ struct NNWorker : public RcppParallel::Worker {
     index.load(index_name.c_str());
 
     for (std::size_t i = begin; i < end; i++) {
-      RcppParallel::RMatrix<double>::Row row = mat.row(i);
+      RcppPerpendicular::RMatrix<double>::Row row = mat.row(i);
       std::vector<T> fv(row.length());
       std::copy(row.begin(), row.end(), fv.begin());
       std::vector<S> result;
@@ -67,7 +67,7 @@ Rcpp::List annoy_euclidean_nns(const std::string &index_name,
 
   NNWorker<int32_t, float, Euclidean, Kiss64Random> worker(
       index_name, mat, dist, idx, ncol, n_neighbors, search_k);
-  RcppParallel::parallelFor(0, nrow, worker, grain_size);
+  RcppPerpendicular::parallelFor(0, nrow, worker, grain_size);
 
   return Rcpp::List::create(Rcpp::Named("item") = idx,
                             Rcpp::Named("distance") = dist);
@@ -86,7 +86,7 @@ Rcpp::List annoy_cosine_nns(const std::string &index_name,
 
   NNWorker<int32_t, float, Angular, Kiss64Random> worker(
       index_name, mat, dist, idx, ncol, n_neighbors, search_k);
-  RcppParallel::parallelFor(0, nrow, worker, grain_size);
+  RcppPerpendicular::parallelFor(0, nrow, worker, grain_size);
 
   return Rcpp::List::create(Rcpp::Named("item") = idx,
                             Rcpp::Named("distance") = dist);
@@ -107,7 +107,7 @@ Rcpp::List annoy_manhattan_nns(const std::string &index_name,
   NNWorker<int32_t, float, Manhattan, Kiss64Random> worker(
       index_name, mat, dist, idx, ncol, n_neighbors, search_k);
 
-  RcppParallel::parallelFor(0, nrow, worker, grain_size);
+  RcppPerpendicular::parallelFor(0, nrow, worker, grain_size);
 
   return Rcpp::List::create(Rcpp::Named("item") = idx,
                             Rcpp::Named("distance") = dist);
@@ -127,7 +127,7 @@ Rcpp::List annoy_hamming_nns(const std::string &index_name,
   NNWorker<int32_t, uint64_t, Hamming, Kiss64Random> worker(
       index_name, mat, dist, idx, ncol, n_neighbors, search_k);
 
-  RcppParallel::parallelFor(0, nrow, worker, grain_size);
+  RcppPerpendicular::parallelFor(0, nrow, worker, grain_size);
 
   return Rcpp::List::create(Rcpp::Named("item") = idx,
                             Rcpp::Named("distance") = dist);

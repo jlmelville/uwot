@@ -19,6 +19,7 @@
 
 #include <limits>
 #include <memory>
+
 // [[Rcpp::depends(RcppProgress)]]
 #include <progress.hpp>
 
@@ -27,7 +28,7 @@
 #include "tauprng.h"
 
 // Must come after any include that transitively include dqrng
-#include "RcppParallel.h"
+#include "RcppPerpendicular.h"
 
 // Function to decide whether to move both vertices in an edge
 // Default empty version does nothing: used in umap_transform when
@@ -54,7 +55,7 @@ const float clamp(const float v, const float lo, const float hi) {
 // DoMoveVertex: true if both ends of a positive edge should be updated
 template <typename Gradient, bool DoMoveVertex = true,
           typename RngFactory = pcg_factory>
-struct SgdWorker : public RcppParallel::Worker {
+struct SgdWorker : public RcppPerpendicular::Worker {
   int n; // epoch counter
   float alpha;
   const Gradient gradient;
@@ -66,7 +67,6 @@ struct SgdWorker : public RcppParallel::Worker {
   const std::size_t ndim;
   const std::size_t head_nvert;
   const std::size_t tail_nvert;
-  tthread::mutex mutex;
   const float dist_eps;
   RngFactory rng_factory;
   
@@ -92,45 +92,30 @@ struct SgdWorker : public RcppParallel::Worker {
   void operator()(std::size_t begin, std::size_t end) {
     // Each window gets its own PRNG state, to prevent locking inside the loop.
     auto prng = rng_factory.create(end);
-    // std::cout.precision(std::numeric_limits<float>::max_digits10);
-    // Rcpp::Rcerr << std::setprecision(std::numeric_limits<float>::max_digits10);
-    
+
     std::vector<float> dys(ndim);
     for (std::size_t i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
-        // const std::size_t dj = ndim * positive_head[i];
-        // const std::size_t dk = ndim * positive_tail[i];
-        // 
-        // Rcpp::Rcerr << "i" <<  i << " dj " << dj << " dk " << dk << " NO SAMPLE" << std::endl;
         continue;
       }
-      
       const std::size_t dj = ndim * positive_head[i];
       const std::size_t dk = ndim * positive_tail[i];
-      
-      // Rcpp::Rcerr << "i" <<  i << " dj " << dj << " dk " << dk << " ";
       
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
         const float diff = head_embedding[dj + d] - tail_embedding[dk + d];
         dys[d] = diff;
         dist_squared += diff * diff;
-        // Rcpp::Rcerr << "p h" << d << " " << head_embedding[dj + d] << " "
-        //             << "t" << d << " " << tail_embedding[dk + d];
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
       const float grad_coeff = gradient.grad_attr(dist_squared);
-      // Rcpp::Rcerr << " pd2 " << dist_squared << " pgc " << grad_coeff;
-      
+
       for (std::size_t d = 0; d < ndim; d++) {
         const float grad_d =
           alpha *
           clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
         head_embedding[dj + d] += grad_d;
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
-        // Rcpp::Rcerr << " pgd " << grad_d
-        //             << " ph" << d << " " << head_embedding[dj + d]
-        //             << " pt" << d << " " << tail_embedding[dk + d];
       }
       
       const std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
@@ -139,30 +124,22 @@ struct SgdWorker : public RcppParallel::Worker {
         if (dj == dkn) {
           continue;
         }
-        // Rcpp::Rcerr << " n" << p << " dkn " << dkn;
         float dist_squared = 0.0;
         for (std::size_t d = 0; d < ndim; d++) {
           const float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
           dys[d] = diff;
           dist_squared += diff * diff;
-          // Rcpp::Rcerr << " nh" << d << " " << head_embedding[dj + d]
-          //             << " nt" << d << " " << tail_embedding[dk + d];
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
         const float grad_coeff = gradient.grad_rep(dist_squared);
-        // Rcpp::Rcerr << " nd2 " << dist_squared << " ngc " << grad_coeff;
-        
+
         for (std::size_t d = 0; d < ndim; d++) {
           const float grad_d =
             alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
                           Gradient::clamp_hi);
           head_embedding[dj + d] += grad_d;
-          // Rcpp::Rcerr << " ngd " << grad_d
-          //             << " nh" << d << " " << head_embedding[dj + d];
         }
       }
-      
-      // Rcpp::Rcerr << std::endl;
       sampler.next_sample(i, n_neg_samples);
     }
   }
@@ -198,7 +175,7 @@ std::vector<float> optimize_layout(
     worker.set_n(n);
     worker.reseed();
     if (parallelize) {
-      RcppParallel::parallelFor(0, n_epochs_per_sample, worker, grain_size);
+      RcppPerpendicular::parallelFor(0, n_epochs_per_sample, worker, grain_size);
     } else {
       worker(0, n_epochs_per_sample);
     }

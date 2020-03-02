@@ -1,17 +1,17 @@
-#ifndef __RCPP_PARALLEL_TINYTHREAD__
-#define __RCPP_PARALLEL_TINYTHREAD__
+// Taken from RcppParallel's TinyThread.h and then modified slightly to work
+// with std::thread and to rename header guards and namespaces to avoid any
+// potential clashes. RcppParallel is licensed under GPLv2
+#ifndef __RCPP_PERPENDICULAR_STDTHREAD__
+#define __RCPP_PERPENDICULAR_STDTHREAD__
 
 #include <cstdlib>
+#include <stdio.h>
+#include <thread>
+#include <vector>
 
 #include "Common.h"
 
-#include <tthread/tinythread.h>
-
-#include <stdio.h>
-
-#include <vector>
-
-namespace RcppParallel {
+namespace RcppPerpendicular {
 
 namespace {
 
@@ -69,8 +69,8 @@ std::vector<IndexRange> splitInputRange(const IndexRange& range,
                                         std::size_t grainSize) {
   
    // determine max number of threads
-   std::size_t threads = tthread::thread::hardware_concurrency();
-   char* numThreads = ::getenv("RCPP_PARALLEL_NUM_THREADS");
+   std::size_t threads = std::thread::hardware_concurrency();
+   char* numThreads = ::getenv("RCPP_PERPENDICULAR_NUM_THREADS");
    if (numThreads != NULL) {
       int parsedThreads = ::atoi(numThreads);
       if (parsedThreads > 0)
@@ -82,27 +82,26 @@ std::vector<IndexRange> splitInputRange(const IndexRange& range,
    if (threads == 1)
       grainSize = length;
    else if ((length % threads) == 0) // perfect division
-      grainSize = std::max(length / threads, grainSize);
+      grainSize = (std::max)(length / threads, grainSize);
    else // imperfect division, divide by threads - 1
-      grainSize = std::max(length / (threads-1), grainSize);
+      grainSize = (std::max)(length / (threads-1), grainSize);
   
    // allocate ranges
    std::vector<IndexRange> ranges;
    std::size_t begin = range.begin();
    while (begin < range.end()) {
-      std::size_t end = std::min(begin + grainSize, range.end());
+      std::size_t end = (std::min)(begin + grainSize, range.end());
       ranges.push_back(IndexRange(begin, end));      
       begin = end;
    }
    
-   // return ranges  
    return ranges;
 }
 
 } // anonymous namespace
 
 // Execute the Worker over the IndexRange in parallel
-inline void ttParallelFor(std::size_t begin, std::size_t end, 
+inline void stParallelFor(std::size_t begin, std::size_t end, 
                           Worker& worker, std::size_t grainSize = 1) {
   
    // split the work
@@ -110,9 +109,9 @@ inline void ttParallelFor(std::size_t begin, std::size_t end,
    std::vector<IndexRange> ranges = splitInputRange(inputRange, grainSize);
    
    // create threads
-   std::vector<tthread::thread*> threads;
+   std::vector<std::thread*> threads;
    for (std::size_t i = 0; i<ranges.size(); ++i) {
-      threads.push_back(new tthread::thread(workerThread, new Work(ranges[i], worker)));
+      threads.push_back(new std::thread(workerThread, new Work(ranges[i], worker)));
    }
    
    // join and delete them
@@ -122,6 +121,6 @@ inline void ttParallelFor(std::size_t begin, std::size_t end,
    }
 }
 
-} // namespace RcppParallel
+} // namespace RcppPerpendicular
 
-#endif // __RCPP_PARALLEL_TINYTHREAD__
+#endif // __RCPP_PERPENDICULAR_STDTHREAD__

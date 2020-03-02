@@ -20,13 +20,13 @@
 #include <vector>
 
 #include <Rcpp.h>
-#include "RcppParallel.h"
+#include "RcppPerpendicular.h"
 
-struct AverageWorker : public RcppParallel::Worker {
+struct AverageWorker : public RcppPerpendicular::Worker {
 
-  const RcppParallel::RMatrix<double> train_embedding;
-  const RcppParallel::RMatrix<int> nn_index;
-  RcppParallel::RMatrix<double> embedding;
+  const RcppPerpendicular::RMatrix<double> train_embedding;
+  const RcppPerpendicular::RMatrix<int> nn_index;
+  RcppPerpendicular::RMatrix<double> embedding;
   const std::size_t nc;
   const std::size_t nnbrs;
   const double one_over_n;
@@ -65,7 +65,7 @@ Rcpp::NumericMatrix init_transform_av_parallel(
   AverageWorker worker(train_embedding, nn_index, embedding);
 
   if (parallelize) {
-    RcppParallel::parallelFor(0, nn_index.nrow(), worker, grain_size);
+    RcppPerpendicular::parallelFor(0, nn_index.nrow(), worker, grain_size);
   } else {
     worker(0, nn_index.nrow());
   }
@@ -73,12 +73,12 @@ Rcpp::NumericMatrix init_transform_av_parallel(
   return embedding;
 }
 
-struct WeightedAverageWorker : public RcppParallel::Worker {
+struct WeightedAverageWorker : public RcppPerpendicular::Worker {
 
-  const RcppParallel::RMatrix<double> train_embedding;
-  const RcppParallel::RMatrix<int> nn_index;
-  const RcppParallel::RMatrix<double> nn_weights;
-  RcppParallel::RMatrix<double> embedding;
+  const RcppPerpendicular::RMatrix<double> train_embedding;
+  const RcppPerpendicular::RMatrix<int> nn_index;
+  const RcppPerpendicular::RMatrix<double> nn_weights;
+  RcppPerpendicular::RMatrix<double> embedding;
   const std::size_t nc;
   const std::size_t nnbrs;
 
@@ -131,7 +131,7 @@ Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding,
                                embedding);
 
   if (parallelize) {
-    RcppParallel::parallelFor(0, nn_index.nrow(), worker, grain_size);
+    RcppPerpendicular::parallelFor(0, nn_index.nrow(), worker, grain_size);
   } else {
     worker(0, nn_index.nrow());
   }

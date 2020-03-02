@@ -32,7 +32,8 @@
 #'   off between speed and thoroughness. By default, this value is set to one
 #'   third the number of epochs used to build the \code{model}.
 #' @param n_threads Number of threads to use, (except during stochastic gradient
-#'   descent). Default is half that recommended by RcppParallel.
+#'   descent). Default is half the number of concurrent threads supported by the
+#'   system.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
 #'   descent. If set to > 1, then results will not be reproducible, even if
 #'   `set.seed` is called with a fixed seed before running.

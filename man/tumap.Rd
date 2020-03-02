@@ -234,10 +234,11 @@ With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 search. Only used if the \code{nn_method} is \code{"annoy"}.}
 
 \item{n_threads}{Number of threads to use (except during stochastic gradient
-descent). Default is half that recommended by RcppParallel. For
-nearest neighbor search, only applies if \code{nn_method = "annoy"}. If
-\code{n_threads > 1}, then the Annoy index will be temporarily written to
-disk in the location determined by \code{\link[base]{tempfile}}.}
+descent). Default is half the number of concurrent threads supported by the
+system. For nearest neighbor search, only applies if 
+\code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index 
+will be temporarily written to disk in the location determined by
+\code{\link[base]{tempfile}}.}
 
 \item{n_sgd_threads}{Number of threads to use during stochastic gradient
 descent. If set to > 1, then results will not be reproducible, even if

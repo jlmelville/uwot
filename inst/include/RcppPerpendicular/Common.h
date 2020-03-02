@@ -1,9 +1,13 @@
-#ifndef __RCPP_PARALLEL_COMMON__
-#define __RCPP_PARALLEL_COMMON__
+// Taken from RcppParallel's Common.h and then modified slightly to rename
+// header guards and namespaces to avoid any potential clashes. RcppParallel is
+// licensed under GPLv2
+
+#ifndef __RCPP_PERPENDICULAR_COMMON__
+#define __RCPP_PERPENDICULAR_COMMON__
 
 #include <cstddef>
 
-namespace RcppParallel {
+namespace RcppPerpendicular {
 
 // Work executed within a background thread. We implement dynamic
 // dispatch using vtables so we can have a stable type to cast
@@ -26,7 +30,7 @@ private:
    void operator=(const Worker&);
 };
 
-} // namespace RcppParallel
+} // namespace RcppPerpendicular
 
 
-#endif // __RCPP_PARALLEL_COMMON__
+#endif // __RCPP_PERPENDICULAR_COMMON__

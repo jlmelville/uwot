@@ -19,16 +19,17 @@
 
 #include <algorithm>
 #include <limits>
+#include <mutex>
 #include <numeric>
 #include <vector>
 
 #include <Rcpp.h>
-#include "RcppParallel.h"
+#include "RcppPerpendicular.h"
 
-struct SmoothKnnWorker : public RcppParallel::Worker {
-  const RcppParallel::RMatrix<double> nn_dist;
-  const RcppParallel::RMatrix<int> nn_idx;
-  RcppParallel::RMatrix<double> nn_weights;
+struct SmoothKnnWorker : public RcppPerpendicular::Worker {
+  const RcppPerpendicular::RMatrix<double> nn_dist;
+  const RcppPerpendicular::RMatrix<int> nn_idx;
+  RcppPerpendicular::RMatrix<double> nn_weights;
   const unsigned int n_vertices;
   const unsigned int n_neighbors;
 
@@ -41,7 +42,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
   const double mean_distances;
   const double double_max = (std::numeric_limits<double>::max)();
 
-  tthread::mutex mutex;
+  std::mutex mutex;
   std::size_t n_search_fails;
 
   SmoothKnnWorker(const Rcpp::NumericMatrix &nn_dist,
@@ -166,7 +167,7 @@ struct SmoothKnnWorker : public RcppParallel::Worker {
     }
     // Update global count of failures
     {
-      tthread::lock_guard<tthread::mutex> guard(mutex);
+      std::lock_guard<std::mutex> guard(mutex);
       n_search_fails += n_window_search_fails;
     }
   }
@@ -187,7 +188,7 @@ Rcpp::List smooth_knn_distances_parallel(
                          local_connectivity, bandwidth, tol, min_k_dist_scale);
 
   if (parallelize) {
-    RcppParallel::parallelFor(0, n_vertices, worker, grain_size);
+    RcppPerpendicular::parallelFor(0, n_vertices, worker, grain_size);
   } else {
     worker(0, n_vertices);
   }

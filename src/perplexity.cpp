@@ -18,15 +18,16 @@
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <limits>
+#include <mutex>
 #include <vector>
 
 #include <Rcpp.h>
-#include "RcppParallel.h"
+#include "RcppPerpendicular.h"
 
-struct PerplexityWorker : public RcppParallel::Worker {
-  RcppParallel::RMatrix<double> res;
-  const RcppParallel::RMatrix<double> nn_dist;
-  const RcppParallel::RMatrix<int> nn_idx;
+struct PerplexityWorker : public RcppPerpendicular::Worker {
+  RcppPerpendicular::RMatrix<double> res;
+  const RcppPerpendicular::RMatrix<double> nn_dist;
+  const RcppPerpendicular::RMatrix<int> nn_idx;
   const unsigned int n_vertices;
   const unsigned int n_neighbors;
 
@@ -35,7 +36,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
   const double tol;
   const double double_max = (std::numeric_limits<double>::max)();
 
-  tthread::mutex mutex;
+  std::mutex mutex;
   std::size_t n_search_fails;
 
   PerplexityWorker(Rcpp::NumericMatrix res, const Rcpp::NumericMatrix nn_dist,
@@ -143,7 +144,7 @@ struct PerplexityWorker : public RcppParallel::Worker {
 
     // Update global count of failures
     {
-      tthread::lock_guard<tthread::mutex> guard(mutex);
+      std::lock_guard<std::mutex> guard(mutex);
       n_search_fails += n_window_search_fails;
     }
   }
@@ -160,7 +161,7 @@ Rcpp::List calc_row_probabilities_parallel(
   PerplexityWorker worker(res, nn_dist, nn_idx, perplexity, n_iter, tol);
 
   if (parallelize) {
-    RcppParallel::parallelFor(0, n_vertices, worker, grain_size);
+    RcppPerpendicular::parallelFor(0, n_vertices, worker, grain_size);
   } else {
     worker(0, n_vertices);
   }

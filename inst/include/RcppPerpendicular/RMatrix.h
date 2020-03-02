@@ -1,10 +1,14 @@
-#ifndef __RCPP_PARALLEL_RMATRIX__
-#define __RCPP_PARALLEL_RMATRIX__
+// Taken from RcppParallel's RMatrix.h and then modified slightly to rename
+// header guards and namespaces to avoid any potential clashes. RcppParallel is
+// licensed under GPLv2
+
+#ifndef __RCPP_PERPENDICULAR_RMATRIX__
+#define __RCPP_PERPENDICULAR_RMATRIX__
 
 #include <cstddef>
 #include <iterator>
 
-namespace RcppParallel {
+namespace RcppPerpendicular {
 
 template <typename T>
 class RMatrix {
@@ -258,6 +262,6 @@ private:
    std::size_t ncol_;
 };
 
-} // namespace RcppParallel
+} // namespace RcppPerpendicular
 
-#endif // __RCPP_PARALLEL_RMATRIX__
+#endif // __RCPP_PERPENDICULAR_RMATRIX__
