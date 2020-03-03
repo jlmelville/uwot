@@ -23,18 +23,16 @@
 #include <vector>
 
 template <typename T>
-void row(const std::vector<double>& m, std::size_t nrow, std::size_t ncol, 
-         std::size_t r, std::vector<T>& out) 
-{
+void row(const std::vector<double> &m, std::size_t nrow, std::size_t ncol,
+         std::size_t r, std::vector<T> &out) {
   for (std::size_t j = 0; j < ncol; j++) {
     out[j] = m[r + j * nrow];
   }
 }
 
 template <typename T>
-void set_row(std::vector<T>& m, std::size_t nrow, std::size_t ncol, 
-             std::size_t r, const std::vector<T>& out) 
-{
+void set_row(std::vector<T> &m, std::size_t nrow, std::size_t ncol,
+             std::size_t r, const std::vector<T> &out) {
   for (std::size_t j = 0; j < ncol; j++) {
     m[r + j * nrow] = out[j];
   }

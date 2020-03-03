@@ -193,17 +193,18 @@ annoy_search_parallel <- function(X, k, ann,
   )
 
   ann_class <- class(ann)
-  search_nn_func <- switch(ann_class,
-    Rcpp_AnnoyAngular = annoy_cosine_nns,
-    Rcpp_AnnoyManhattan = annoy_manhattan_nns,
-    Rcpp_AnnoyEuclidean = annoy_euclidean_nns,
-    Rcpp_AnnoyHamming = annoy_hamming_nns,
+  metric <- switch(ann_class,
+    Rcpp_AnnoyAngular = "cosine",
+    Rcpp_AnnoyManhattan = "manhattan",
+    Rcpp_AnnoyEuclidean = "euclidean",
+    Rcpp_AnnoyHamming = "hamming",
     stop("BUG: unknown Annoy class '", ann_class, "'")
   )
 
-  res <- search_nn_func(index_file,
+  res <- annoy_search_parallel_cpp(index_file,
     X,
     k, search_k,
+    metric = metric,
     grain_size = grain_size,
     verbose = verbose
   )
