@@ -1,3 +1,10 @@
+# uwot 0.1.8
+
+## Big fixes and minor improvements
+
+* default for `n_threads` is now `NULL` to provide a bit more protection from
+changing dependencies.
+
 # uwot 0.1.7
 
 ## Bug fixes and minor improvements

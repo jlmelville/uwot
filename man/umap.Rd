@@ -38,7 +38,7 @@ umap(
   ret_model = FALSE,
   ret_nn = FALSE,
   ret_extra = c(),
-  n_threads = default_num_threads(),
+  n_threads = NULL,
   n_sgd_threads = 0,
   grain_size = 1,
   tmpdir = tempdir(),

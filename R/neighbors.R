@@ -2,10 +2,13 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                     metric = "euclidean",
                     n_trees = 50, search_k = 2 * k * n_trees,
                     tmpdir = tempdir(),
-                    n_threads = default_num_threads(),
+                    n_threads = NULL,
                     grain_size = 1,
                     ret_index = FALSE,
                     verbose = FALSE) {
+  if (is.null(n_threads)) {
+    n_threads <- default_num_threads()
+  }
   if (methods::is(X, "dist")) {
     res <- dist_nn(X, k, include_self = include_self)
   }
@@ -46,10 +49,13 @@ annoy_nn <- function(X, k = 10,
                      metric = "euclidean",
                      n_trees = 50, search_k = 2 * k * n_trees,
                      tmpdir = tempdir(),
-                     n_threads = default_num_threads(),
+                     n_threads = NULL,
                      grain_size = 1,
                      ret_index = FALSE,
                      verbose = FALSE) {
+  if (is.null(n_threads)) {
+    n_threads <- default_num_threads()
+  }
   ann <- annoy_build(X,
     metric = metric, n_trees = n_trees,
     verbose = verbose
@@ -113,9 +119,12 @@ create_ann <- function(name, ndim) {
 annoy_search <- function(X, k, ann,
                          search_k = 100 * k,
                          tmpdir = tempdir(),
-                         n_threads = default_num_threads(),
+                         n_threads = NULL,
                          grain_size = 1,
                          verbose = FALSE) {
+  if (is.null(n_threads)) {
+    n_threads <- default_num_threads()
+  }
   if (n_threads > 0) {
     annoy_res <- annoy_search_parallel(
       X = X, k = k, ann = ann,
@@ -168,9 +177,12 @@ annoy_search_serial <- function(X, k, ann,
 annoy_search_parallel <- function(X, k, ann,
                                   search_k = 100 * k,
                                   tmpdir = tempdir(),
-                                  n_threads = default_num_threads(),
+                                  n_threads = NULL,
                                   grain_size = 1,
                                   verbose = FALSE) {
+  if (is.null(n_threads)) {
+    n_threads <- default_num_threads()
+  }
   index_file <- tempfile(tmpdir = tmpdir)
   tsmessage("Writing NN index file to temp file ", index_file)
   ann$save(index_file)

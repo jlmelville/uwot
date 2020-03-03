@@ -20,9 +20,12 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
 # or not
 smooth_knn <- function(nn,
                        local_connectivity = 1.0, bandwidth = 1.0,
-                       n_threads = default_num_threads(),
+                       n_threads = NULL,
                        grain_size = 1,
                        verbose = FALSE) {
+  if (is.null(n_threads)) {
+    n_threads <- default_num_threads()
+  }
   tsmessage(
     "Commencing smooth kNN distance calibration",
     pluralize("thread", n_threads, " using")
@@ -55,9 +58,12 @@ smooth_knn <- function(nn,
 fuzzy_simplicial_set <- function(nn,
                                  set_op_mix_ratio = 1.0,
                                  local_connectivity = 1.0, bandwidth = 1.0,
-                                 n_threads = default_num_threads(),
+                                 n_threads = NULL,
                                  grain_size = 1,
                                  verbose = FALSE) {
+  if (is.null(n_threads)) {
+    n_threads <- default_num_threads()
+  }
   affinity_matrix <- smooth_knn(nn,
     local_connectivity = local_connectivity,
     bandwidth = bandwidth,
@@ -78,10 +84,13 @@ symmetrize <- function(P) {
 }
 
 perplexity_similarities <- function(nn, perplexity = NULL,
-                                    n_threads = default_num_threads(),
+                                    n_threads = NULL,
                                     grain_size = 1,
                                     kernel = "gauss",
                                     verbose = FALSE) {
+  if (is.null(n_threads)) {
+    n_threads <- default_num_threads()
+  }
   if (is.null(perplexity) && kernel != "knn") {
     stop("Must provide perplexity")
   }

@@ -11,7 +11,7 @@ umap_transform(
   search_k = NULL,
   tmpdir = tempdir(),
   n_epochs = NULL,
-  n_threads = default_num_threads(),
+  n_threads = NULL,
   n_sgd_threads = 0,
   grain_size = 1,
   verbose = FALSE

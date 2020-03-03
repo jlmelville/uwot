@@ -58,10 +58,13 @@ umap_transform <- function(X, model,
                            search_k = NULL,
                            tmpdir = tempdir(),
                            n_epochs = NULL,
-                           n_threads = default_num_threads(),
+                           n_threads = NULL,
                            n_sgd_threads = 0,
                            grain_size = 1,
                            verbose = FALSE) {
+  if (is.null(n_threads)) {
+    n_threads <- default_num_threads()
+  }
   if (!all_nn_indices_are_loaded(model)) {
     stop("cannot use model: NN index is unloaded." ,
          " Try reloading with `load_uwot`")
@@ -262,8 +265,11 @@ umap_transform <- function(X, model,
 }
 
 init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
-                               n_threads = default_num_threads(),
+                               n_threads = NULL,
                                grain_size = 1, verbose = FALSE) {
+  if (is.null(n_threads)) {
+    n_threads <- default_num_threads()
+  }
   parallelize <- n_threads > 0
   if (weighted) {
     tsmessage(
