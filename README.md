@@ -783,11 +783,6 @@ uwot directly contains code that originates with
 [RcppParallel](https://github.com/RcppCore/RcppParallel),
 which is [GPLv2](https://cran.r-project.org/web/licenses/GPL-2).
 
-It also contains the TinyThread library which is licensed under the 
-[zlib/libpng](http://www.opensource.org/licenses/zlib-license.php) license as
-described
-[here](https://gitorious.org/tinythread/tinythreadpp/source/master:README.txt).
-
 ## See Also
 
 * The [UMAP reference implementation](https://github.com/lmcinnes/umap) and

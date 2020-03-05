@@ -4,6 +4,8 @@
 
 * default for `n_threads` is now `NULL` to provide a bit more protection from
 changing dependencies.
+* parallel code now uses the standard C++11 implementation of threading rather 
+than tinythread++.
 
 # uwot 0.1.7
 
