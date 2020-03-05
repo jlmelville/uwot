@@ -62,7 +62,7 @@ struct NNWorker : public RcppPerpendicular::Worker {
 
     for (std::size_t i = begin; i < end; i++) {
       std::vector<typename UwotAnnoyDistance::T> fv(ncol);
-      row(mat, nrow, ncol, i, fv);
+      get_row(mat, nrow, ncol, i, fv);
 
       std::vector<typename UwotAnnoyDistance::S> result;
       std::vector<typename UwotAnnoyDistance::T> distances;

@@ -33,7 +33,6 @@ smooth_knn <- function(nn,
   parallelize <- n_threads > 0
   affinity_matrix_res <- smooth_knn_distances_parallel(
     nn_dist = nn$dist,
-    nn_idx = nn$idx,
     n_iter = 64,
     local_connectivity = local_connectivity,
     bandwidth = bandwidth,

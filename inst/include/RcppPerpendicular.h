@@ -6,10 +6,7 @@
 #ifndef RCPP_PERPENDICULAR
 #define RCPP_PERPENDICULAR
 
-// TinyThread implementation
 #include "RcppPerpendicular/StdThread.h"
-
-#include "RcppPerpendicular/RMatrix.h"
 
 namespace RcppPerpendicular {
 

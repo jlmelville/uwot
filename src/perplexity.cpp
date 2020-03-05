@@ -22,29 +22,32 @@
 #include <vector>
 
 #include <Rcpp.h>
+
 #include "RcppPerpendicular.h"
 
 struct PerplexityWorker : public RcppPerpendicular::Worker {
-  RcppPerpendicular::RMatrix<double> res;
-  const RcppPerpendicular::RMatrix<double> nn_dist;
-  const RcppPerpendicular::RMatrix<int> nn_idx;
-  const unsigned int n_vertices;
-  const unsigned int n_neighbors;
+  const std::vector<double> &nn_dist;
+  const std::vector<int> &nn_idx;
+  std::size_t n_vertices;
+  std::size_t n_neighbors;
 
-  const double target;
-  const unsigned int n_iter;
-  const double tol;
-  const double double_max = (std::numeric_limits<double>::max)();
+  double target;
+  std::size_t n_iter;
+  double tol;
+  double double_max = (std::numeric_limits<double>::max)();
+
+  std::vector<double> res;
 
   std::mutex mutex;
   std::size_t n_search_fails;
 
-  PerplexityWorker(Rcpp::NumericMatrix res, const Rcpp::NumericMatrix nn_dist,
-                   const Rcpp::IntegerMatrix nn_idx, const double perplexity,
-                   const unsigned int n_iter, const double tol)
-      : res(res), nn_dist(nn_dist), nn_idx(nn_idx), n_vertices(nn_dist.nrow()),
-        n_neighbors(nn_dist.ncol()), target(std::log(perplexity)),
-        n_iter(n_iter), tol(tol), n_search_fails(0) {}
+  PerplexityWorker(const std::vector<double> &nn_dist,
+                   const std::vector<int> &nn_idx, std::size_t n_vertices,
+                   double perplexity, std::size_t n_iter, double tol)
+      : nn_dist(nn_dist), nn_idx(nn_idx), n_vertices(n_vertices),
+        n_neighbors(nn_dist.size() / n_vertices), target(std::log(perplexity)),
+        n_iter(n_iter), tol(tol), res(n_vertices * n_neighbors),
+        n_search_fails(0) {}
 
   void operator()(std::size_t begin, std::size_t end) {
     // number of binary search failures in this window
@@ -65,8 +68,8 @@ struct PerplexityWorker : public RcppPerpendicular::Worker {
       // calculate squared distances and remember the minimum
       double dmin = double_max;
       double dtmp;
-      for (unsigned int k = 1; k < n_neighbors; k++) {
-        dtmp = nn_dist(i, k) * nn_dist(i, k);
+      for (std::size_t k = 1; k < n_neighbors; k++) {
+        dtmp = nn_dist[i + k * n_vertices] * nn_dist[i + k * n_vertices];
         d2[k - 1] = dtmp;
         if (dtmp < dmin) {
           dmin = dtmp;
@@ -75,15 +78,15 @@ struct PerplexityWorker : public RcppPerpendicular::Worker {
       // shift distances by minimum: this implements the log-sum-exp trick
       // D2, W and Z are their shifted versions
       // but P (and hence Shannon entropy) is unchanged
-      for (unsigned int k = 1; k < n_neighbors; k++) {
+      for (std::size_t k = 1; k < n_neighbors; k++) {
         d2[k - 1] -= dmin;
       }
 
-      for (unsigned int iter = 0; iter < n_iter; iter++) {
+      for (std::size_t iter = 0; iter < n_iter; iter++) {
         double Z = 0.0;
         double H = 0.0;
         double sum_D2_W = 0.0;
-        for (unsigned int k = 0; k < n_neighbors - 1; k++) {
+        for (std::size_t k = 0; k < n_neighbors - 1; k++) {
           double W = std::exp(-d2[k] * beta);
           Z += W;
           sum_D2_W += d2[k] * W;
@@ -92,7 +95,7 @@ struct PerplexityWorker : public RcppPerpendicular::Worker {
           H = std::log(Z) + beta * sum_D2_W / Z;
         }
 
-        const double adiff = std::abs(H - target);
+        double adiff = std::abs(H - target);
         if (adiff < tol) {
           converged = true;
           break;
@@ -122,7 +125,7 @@ struct PerplexityWorker : public RcppPerpendicular::Worker {
       }
 
       double Z = 0.0;
-      for (unsigned int k = 0; k < n_neighbors - 1; k++) {
+      for (std::size_t k = 0; k < n_neighbors - 1; k++) {
         double W = std::exp(-d2[k] * beta);
         Z += W;
         // no longer need d2 at this point, store final W there
@@ -131,13 +134,11 @@ struct PerplexityWorker : public RcppPerpendicular::Worker {
 
       // This will index over d2, skipping when i == j
       std::size_t widx = 0;
-      for (unsigned int k = 0; k < n_neighbors; k++) {
-        unsigned int j = nn_idx(i, k) - 1;
+      for (std::size_t k = 0; k < n_neighbors; k++) {
+        std::size_t j = nn_idx[i + k * n_vertices] - 1;
         if (i != j) {
-          res(i, k) = d2[widx] / Z;
+          res[i + k * n_vertices] = d2[widx] / Z;
           ++widx;
-        } else {
-          res(i, k) = 0.0;
         }
       }
     }
@@ -153,12 +154,18 @@ struct PerplexityWorker : public RcppPerpendicular::Worker {
 // [[Rcpp::export]]
 Rcpp::List calc_row_probabilities_parallel(
     const Rcpp::NumericMatrix nn_dist, const Rcpp::IntegerMatrix nn_idx,
-    const double perplexity, const unsigned int n_iter = 200,
-    const double tol = 1e-5, const bool parallelize = true,
-    const std::size_t grain_size = 1, const bool verbose = false) {
-  Rcpp::NumericMatrix res = Rcpp::NumericMatrix(nn_dist.nrow(), nn_dist.ncol());
-  const unsigned int n_vertices = nn_dist.nrow();
-  PerplexityWorker worker(res, nn_dist, nn_idx, perplexity, n_iter, tol);
+    double perplexity, unsigned int n_iter = 200, double tol = 1e-5,
+    bool parallelize = true, std::size_t grain_size = 1, bool verbose = false) {
+
+  std::size_t n_vertices = nn_dist.nrow();
+  std::size_t n_neighbors = nn_dist.ncol();
+
+  auto nn_distv = Rcpp::as<std::vector<double>>(nn_dist);
+  auto nn_idxv = Rcpp::as<std::vector<int>>(nn_idx);
+
+  Rcpp::NumericMatrix res = Rcpp::NumericMatrix(n_vertices, nn_dist.ncol());
+  PerplexityWorker worker(nn_distv, nn_idxv, n_vertices, perplexity, n_iter,
+                          tol);
 
   if (parallelize) {
     RcppPerpendicular::parallelFor(0, n_vertices, worker, grain_size);
@@ -166,6 +173,7 @@ Rcpp::List calc_row_probabilities_parallel(
     worker(0, n_vertices);
   }
 
-  return Rcpp::List::create(Rcpp::Named("matrix") = res,
+  return Rcpp::List::create(Rcpp::Named("matrix") = Rcpp::NumericMatrix(
+                                n_vertices, n_neighbors, worker.res.begin()),
                             Rcpp::Named("n_failures") = worker.n_search_fails);
 }

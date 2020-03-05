@@ -1,4 +1,3 @@
-#include <utility>
 #include <vector>
 
 #include "RcppPerpendicular.h"
@@ -21,11 +20,10 @@ Rcpp::List annoy_nns_impl(const std::string &index_name,
                                      search_k);
   RcppPerpendicular::parallelFor(0, nrow, worker, grain_size);
 
-  return Rcpp::List::create(
-      Rcpp::Named("item") =
-          std::move(Rcpp::IntegerMatrix(nrow, n_neighbors, worker.idx.begin())),
-      Rcpp::Named("distance") = std::move(
-          Rcpp::NumericMatrix(nrow, n_neighbors, worker.dists.begin())));
+  return Rcpp::List::create(Rcpp::Named("item") = Rcpp::IntegerMatrix(
+                                nrow, n_neighbors, worker.idx.begin()),
+                            Rcpp::Named("distance") = Rcpp::NumericMatrix(
+                                nrow, n_neighbors, worker.dists.begin()));
 }
 
 // [[Rcpp::export]]

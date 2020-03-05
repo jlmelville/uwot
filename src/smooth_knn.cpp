@@ -23,13 +23,31 @@
 #include <numeric>
 #include <vector>
 
-#include <Rcpp.h>
 #include "RcppPerpendicular.h"
+#include <Rcpp.h>
+
+#include "matrix.h"
+
+// As in R's internals and Rcpp, use Kahan Summation to compensate for
+// numerical error
+// https://stackoverflow.com/q/17866149/4096483
+double mean_average(std::vector<double> v) {
+  std::size_t n = v.size();
+  long double s = std::accumulate(v.begin(), v.end(), 0.0L);
+  s /= n;
+
+  long double t = 0.0;
+  for (std::size_t i = 0; i < n; i++) {
+    t += v[i] - s;
+  }
+  s += t / n;
+
+  return static_cast<double>(s);
+}
 
 struct SmoothKnnWorker : public RcppPerpendicular::Worker {
-  const RcppPerpendicular::RMatrix<double> nn_dist;
-  const RcppPerpendicular::RMatrix<int> nn_idx;
-  RcppPerpendicular::RMatrix<double> nn_weights;
+  const std::vector<double> &nn_dist;
+
   const unsigned int n_vertices;
   const unsigned int n_neighbors;
 
@@ -42,21 +60,22 @@ struct SmoothKnnWorker : public RcppPerpendicular::Worker {
   const double mean_distances;
   const double double_max = (std::numeric_limits<double>::max)();
 
+  std::vector<double> nn_weights;
+
   std::mutex mutex;
   std::size_t n_search_fails;
 
-  SmoothKnnWorker(const Rcpp::NumericMatrix &nn_dist,
-                  const Rcpp::IntegerMatrix &nn_idx,
-                  Rcpp::NumericMatrix nn_weights, const unsigned int n_iter,
+  SmoothKnnWorker(const std::vector<double> &nn_dist,
+                  const unsigned int n_vertices, const unsigned int n_iter,
                   const double local_connectivity, const double bandwidth,
                   const double tol, const double min_k_dist_scale)
-      : nn_dist(nn_dist), nn_idx(nn_idx), nn_weights(nn_weights),
-        n_vertices(nn_dist.nrow()), n_neighbors(nn_dist.ncol()),
-
+      : nn_dist(nn_dist), n_vertices(n_vertices),
+        n_neighbors(nn_dist.size() / n_vertices),
         target(std::log2(n_neighbors)), n_iter(n_iter),
         local_connectivity(local_connectivity), bandwidth(bandwidth), tol(tol),
-        min_k_dist_scale(min_k_dist_scale), mean_distances(mean(nn_dist)),
-        n_search_fails(0) {}
+        min_k_dist_scale(min_k_dist_scale),
+        mean_distances(mean_average(nn_dist)),
+        nn_weights(n_vertices * n_neighbors), n_search_fails(0) {}
 
   void operator()(std::size_t begin, std::size_t end) {
     // number of binary search failures in this window
@@ -75,8 +94,9 @@ struct SmoothKnnWorker : public RcppPerpendicular::Worker {
       double sigma_best = sigma;
       double adiff_min = double_max;
 
-      auto ith_distances = nn_dist.row(i);
-      for (std::size_t k = 0; k < ith_distances.length(); k++) {
+      std::vector<double> ith_distances(n_neighbors);
+      get_row(nn_dist, n_vertices, n_neighbors, i, ith_distances);
+      for (std::size_t k = 0; k < ith_distances.size(); k++) {
         if (ith_distances[k] > 0.0) {
           non_zero_distances.push_back(ith_distances[k]);
         }
@@ -106,7 +126,6 @@ struct SmoothKnnWorker : public RcppPerpendicular::Worker {
       for (unsigned int iter = 0; iter < n_iter; iter++) {
         double val = 0.0;
         // NB we iterate from 1, not 0: don't use the self-distance.
-        // Makes using Rcpp sugar sufficiently awkward so do the explicit loop
         for (unsigned int k = 1; k < n_neighbors; k++) {
           double dist = (std::max)(0.0, ith_distances[k] - rho);
           val += std::exp(-dist / sigma);
@@ -143,10 +162,8 @@ struct SmoothKnnWorker : public RcppPerpendicular::Worker {
       }
 
       if (rho > 0.0) {
-        double mean =
-            std::accumulate(ith_distances.begin(), ith_distances.end(), 0.0) /
-            ith_distances.length();
-        sigma = (std::max)(min_k_dist_scale * mean, sigma);
+        sigma =
+            (std::max)(min_k_dist_scale * mean_average(ith_distances), sigma);
       } else {
         sigma = (std::max)(min_k_dist_scale * mean_distances, sigma);
       }
@@ -161,9 +178,7 @@ struct SmoothKnnWorker : public RcppPerpendicular::Worker {
         }
       }
 
-      for (unsigned int k = 0; k < n_neighbors; k++) {
-        nn_weights(i, k) = res[k];
-      }
+      set_row(nn_weights, n_vertices, n_neighbors, i, res);
     }
     // Update global count of failures
     {
@@ -175,17 +190,18 @@ struct SmoothKnnWorker : public RcppPerpendicular::Worker {
 
 // [[Rcpp::export]]
 Rcpp::List smooth_knn_distances_parallel(
-    const Rcpp::NumericMatrix &nn_dist, const Rcpp::IntegerMatrix &nn_idx,
-    const unsigned int n_iter = 64, const double local_connectivity = 1.0,
-    const double bandwidth = 1.0, const double tol = 1e-5,
-    const double min_k_dist_scale = 1e-3, const bool parallelize = true,
-    const std::size_t grain_size = 1, const bool verbose = false) {
+    const Rcpp::NumericMatrix &nn_dist, const unsigned int n_iter = 64,
+    const double local_connectivity = 1.0, const double bandwidth = 1.0,
+    const double tol = 1e-5, const double min_k_dist_scale = 1e-3,
+    const bool parallelize = true, const std::size_t grain_size = 1,
+    const bool verbose = false) {
+
   const unsigned int n_vertices = nn_dist.nrow();
+  const unsigned int n_neighbors = nn_dist.ncol();
 
-  Rcpp::NumericMatrix nn_weights(n_vertices, nn_idx.ncol());
-
-  SmoothKnnWorker worker(nn_dist, nn_idx, nn_weights, n_iter,
-                         local_connectivity, bandwidth, tol, min_k_dist_scale);
+  auto nn_distv = Rcpp::as<std::vector<double>>(nn_dist);
+  SmoothKnnWorker worker(nn_distv, n_vertices, n_iter, local_connectivity,
+                         bandwidth, tol, min_k_dist_scale);
 
   if (parallelize) {
     RcppPerpendicular::parallelFor(0, n_vertices, worker, grain_size);
@@ -193,6 +209,8 @@ Rcpp::List smooth_knn_distances_parallel(
     worker(0, n_vertices);
   }
 
-  return Rcpp::List::create(Rcpp::Named("matrix") = nn_weights,
+  return Rcpp::List::create(Rcpp::Named("matrix") =
+                                Rcpp::NumericMatrix(n_vertices, n_neighbors,
+                                                    worker.nn_weights.begin()),
                             Rcpp::Named("n_failures") = worker.n_search_fails);
 }
