@@ -132,13 +132,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // smooth_knn_distances_parallel
-Rcpp::List smooth_knn_distances_parallel(const Rcpp::NumericMatrix& nn_dist, unsigned int n_iter, double local_connectivity, double bandwidth, double tol, double min_k_dist_scale, std::size_t n_threads, std::size_t grain_size, bool verbose);
+Rcpp::List smooth_knn_distances_parallel(const Rcpp::NumericMatrix& nn_dist, std::size_t n_iter, double local_connectivity, double bandwidth, double tol, double min_k_dist_scale, std::size_t n_threads, std::size_t grain_size, bool verbose);
 RcppExport SEXP _uwot_smooth_knn_distances_parallel(SEXP nn_distSEXP, SEXP n_iterSEXP, SEXP local_connectivitySEXP, SEXP bandwidthSEXP, SEXP tolSEXP, SEXP min_k_dist_scaleSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type nn_dist(nn_distSEXP);
-    Rcpp::traits::input_parameter< unsigned int >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type n_iter(n_iterSEXP);
     Rcpp::traits::input_parameter< double >::type local_connectivity(local_connectivitySEXP);
     Rcpp::traits::input_parameter< double >::type bandwidth(bandwidthSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);

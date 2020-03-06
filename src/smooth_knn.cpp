@@ -48,27 +48,26 @@ auto mean_average(std::vector<double> v) -> double {
 struct SmoothKnnWorker {
   const std::vector<double> &nn_dist;
 
-  const unsigned int n_vertices;
-  const unsigned int n_neighbors;
+  std::size_t n_vertices;
+  std::size_t n_neighbors;
 
-  const double target;
-  const unsigned int n_iter;
-  const double local_connectivity;
-  const double bandwidth;
-  const double tol;
-  const double min_k_dist_scale;
-  const double mean_distances;
-  const double double_max = (std::numeric_limits<double>::max)();
+  double target;
+  std::size_t n_iter;
+  double local_connectivity;
+  double bandwidth;
+  double tol;
+  double min_k_dist_scale;
+  double mean_distances;
+  double double_max = (std::numeric_limits<double>::max)();
 
   std::vector<double> nn_weights;
 
   std::mutex mutex;
   std::size_t n_search_fails;
 
-  SmoothKnnWorker(const std::vector<double> &nn_dist,
-                  const unsigned int n_vertices, const unsigned int n_iter,
-                  const double local_connectivity, const double bandwidth,
-                  const double tol, const double min_k_dist_scale)
+  SmoothKnnWorker(const std::vector<double> &nn_dist, std::size_t n_vertices,
+                  std::size_t n_iter, double local_connectivity,
+                  double bandwidth, double tol, double min_k_dist_scale)
       : nn_dist(nn_dist), n_vertices(n_vertices),
         n_neighbors(nn_dist.size() / n_vertices),
         target(std::log2(n_neighbors)), n_iter(n_iter),
@@ -123,15 +122,15 @@ struct SmoothKnnWorker {
       }
 
       bool converged = false;
-      for (unsigned int iter = 0; iter < n_iter; iter++) {
+      for (std::size_t iter = 0; iter < n_iter; iter++) {
         double val = 0.0;
         // NB we iterate from 1, not 0: don't use the self-distance.
-        for (unsigned int k = 1; k < n_neighbors; k++) {
+        for (std::size_t k = 1; k < n_neighbors; k++) {
           double dist = (std::max)(0.0, ith_distances[k] - rho);
           val += std::exp(-dist / sigma);
         }
 
-        const double adiff = std::abs(val - target);
+        double adiff = std::abs(val - target);
         if (adiff < tol) {
           converged = true;
           break;
@@ -190,13 +189,13 @@ struct SmoothKnnWorker {
 
 // [[Rcpp::export]]
 Rcpp::List smooth_knn_distances_parallel(
-    const Rcpp::NumericMatrix &nn_dist, unsigned int n_iter = 64,
+    const Rcpp::NumericMatrix &nn_dist, std::size_t n_iter = 64,
     double local_connectivity = 1.0, double bandwidth = 1.0, double tol = 1e-5,
     double min_k_dist_scale = 1e-3, std::size_t n_threads = 0,
     std::size_t grain_size = 1, bool verbose = false) {
 
-  unsigned int n_vertices = nn_dist.nrow();
-  unsigned int n_neighbors = nn_dist.ncol();
+  std::size_t n_vertices = nn_dist.nrow();
+  std::size_t n_neighbors = nn_dist.ncol();
 
   auto nn_distv = Rcpp::as<std::vector<double>>(nn_dist);
   SmoothKnnWorker worker(nn_distv, n_vertices, n_iter, local_connectivity,
