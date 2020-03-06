@@ -30,7 +30,6 @@ smooth_knn <- function(nn,
     "Commencing smooth kNN distance calibration",
     pluralize("thread", n_threads, " using")
   )
-  parallelize <- n_threads > 0
   affinity_matrix_res <- smooth_knn_distances_parallel(
     nn_dist = nn$dist,
     n_iter = 64,
@@ -38,7 +37,7 @@ smooth_knn <- function(nn,
     bandwidth = bandwidth,
     tol = 1e-5,
     min_k_dist_scale = 1e-3,
-    parallelize = parallelize,
+    n_threads = n_threads,
     grain_size = grain_size,
     verbose = verbose
   )
@@ -99,12 +98,11 @@ perplexity_similarities <- function(nn, perplexity = NULL,
       "Commencing calibration for perplexity = ", formatC(perplexity),
       pluralize("thread", n_threads, " using")
     )
-    parallelize <- n_threads > 0
     affinity_matrix_res <- calc_row_probabilities_parallel(
       nn_dist = nn$dist,
       nn_idx = nn$idx,
       perplexity = perplexity,
-      parallelize = parallelize,
+      n_threads = n_threads,
       grain_size = grain_size,
       verbose = verbose
     )

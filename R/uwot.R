@@ -315,7 +315,13 @@
 #'   descent. If set to > 1, then results will not be reproducible, even if
 #'   `set.seed` is called with a fixed seed before running. Set to
 #'   \code{"auto"} go use the same value as \code{n_threads}.
-#' @param grain_size Minimum batch size for multithreading. Now ignored.
+#' @param grain_size The minimum amount of work to do on each thread. If this
+#'   value is set high enough, then less than \code{n_threads} or
+#'   \code{n_sgd_threads} will be used for processing, which might give a
+#'   performance improvement if the overhead of thread management and context
+#'   switching was outweighing the improvement due to concurrent processing.
+#'   This should be left at default (\code{1}) and work will be spread evenly
+#'   over all the threads specified.
 #' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
 #'   only written to disk if \code{n_threads > 1} and
@@ -744,7 +750,13 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   descent. If set to > 1, then results will not be reproducible, even if
 #'   `set.seed` is called with a fixed seed before running. Set to
 #'   \code{"auto"} go use the same value as \code{n_threads}.
-#' @param grain_size Minimum batch size for multithreading. Now ignored.
+#' @param grain_size The minimum amount of work to do on each thread. If this
+#'   value is set high enough, then less than \code{n_threads} or
+#'   \code{n_sgd_threads} will be used for processing, which might give a
+#'   performance improvement if the overhead of thread management and context
+#'   switching was outweighing the improvement due to concurrent processing.
+#'   This should be left at default (\code{1}) and work will be spread evenly
+#'   over all the threads specified.
 #' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
 #'   only written to disk if \code{n_threads > 1} and
@@ -1019,7 +1031,13 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   descent. If set to > 1, then results will not be reproducible, even if
 #'   `set.seed` is called with a fixed seed before running. Set to
 #'   \code{"auto"} go use the same value as \code{n_threads}.
-#' @param grain_size Minimum batch size for multithreading. Now ignored.
+#' @param grain_size The minimum amount of work to do on each thread. If this
+#'   value is set high enough, then less than \code{n_threads} or
+#'   \code{n_sgd_threads} will be used for processing, which might give a
+#'   performance improvement if the overhead of thread management and context
+#'   switching was outweighing the improvement due to concurrent processing.
+#'   This should be left at default (\code{1}) and work will be spread evenly
+#'   over all the threads specified.
 #' @param kernel Type of kernel function to create input probabilities. Can be
 #'   one of \code{"gauss"} (the default) or \code{"knn"}. \code{"gauss"} uses
 #'   the usual Gaussian weighted similarities. \code{"knn"} assigns equal
@@ -1240,9 +1258,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (n_sgd_threads %% 1 != 0) {
     n_sgd_threads <- round(n_sgd_threads)
     tsmessage("Non-integer 'n_sgd_threads' provided. Setting to ", n_sgd_threads)
-  }
-  if (n_threads > 0) {
-    set_thread_options(n_threads = n_threads)
   }
 
   # Store categorical columns to be used to generate the graph
@@ -1571,11 +1586,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       pluralize("thread", n_sgd_threads, " using")
     )
 
-    parallelize <- n_sgd_threads > 0
-    if (n_sgd_threads > 0) {
-      set_thread_options(n_threads = n_sgd_threads)
-    }
-
     embedding <- t(embedding)
     if (tolower(method) == "umap") {
       embedding <- optimize_layout_umap(
@@ -1590,7 +1600,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         initial_alpha = alpha, negative_sample_rate,
         approx_pow = approx_pow,
         pcg_rand = pcg_rand,
-        parallelize = parallelize,
+        n_threads = n_sgd_threads,
         grain_size = grain_size,
         move_other = TRUE,
         verbose = verbose
@@ -1608,7 +1618,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         initial_alpha = alpha,
         negative_sample_rate = negative_sample_rate,
         pcg_rand = pcg_rand,
-        parallelize = parallelize,
+        n_threads = n_sgd_threads,
         grain_size = grain_size,
         move_other = TRUE,
         verbose = verbose
@@ -1626,7 +1636,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         initial_alpha = alpha,
         negative_sample_rate = negative_sample_rate,
         pcg_rand = pcg_rand,
-        parallelize = parallelize,
+        n_threads = n_sgd_threads,
         grain_size = grain_size,
         verbose = verbose
       )
@@ -2036,10 +2046,6 @@ abspath <- function(filename) {
 # threads supported, but at least 1
 default_num_threads <- function() {
   max(1, hardware_concurrency() / 2)
-}
-
-set_thread_options <- function(n_threads) {
-  Sys.setenv(RCPP_PERPENDICULAR_NUM_THREADS = n_threads)
 }
 
 # Get the number of vertices in X

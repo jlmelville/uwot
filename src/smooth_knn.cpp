@@ -190,21 +190,21 @@ struct SmoothKnnWorker {
 
 // [[Rcpp::export]]
 Rcpp::List smooth_knn_distances_parallel(
-    const Rcpp::NumericMatrix &nn_dist, const unsigned int n_iter = 64,
-    const double local_connectivity = 1.0, const double bandwidth = 1.0,
-    const double tol = 1e-5, const double min_k_dist_scale = 1e-3,
-    const bool parallelize = true, const std::size_t grain_size = 1,
-    const bool verbose = false) {
+    const Rcpp::NumericMatrix &nn_dist, unsigned int n_iter = 64,
+    double local_connectivity = 1.0, double bandwidth = 1.0, double tol = 1e-5,
+    double min_k_dist_scale = 1e-3, std::size_t n_threads = 0,
+    std::size_t grain_size = 1, bool verbose = false) {
 
-  const unsigned int n_vertices = nn_dist.nrow();
-  const unsigned int n_neighbors = nn_dist.ncol();
+  unsigned int n_vertices = nn_dist.nrow();
+  unsigned int n_neighbors = nn_dist.ncol();
 
   auto nn_distv = Rcpp::as<std::vector<double>>(nn_dist);
   SmoothKnnWorker worker(nn_distv, n_vertices, n_iter, local_connectivity,
                          bandwidth, tol, min_k_dist_scale);
 
-  if (parallelize) {
-    RcppPerpendicular::parallel_for(0, n_vertices, worker, grain_size);
+  if (n_threads > 0) {
+    RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads,
+                                    grain_size);
   } else {
     worker(0, n_vertices);
   }

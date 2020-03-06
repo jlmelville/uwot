@@ -48,7 +48,6 @@ expect_equal(res, V_intersect_local_bandwidth, tol = 1e-4)
 
 
 # parallel code path
-set_thread_options(n_threads = 1)
 # matrix
 res <- fuzzy_simplicial_set(
   set_op_mix_ratio = 1, local_connectivity = 1,
@@ -93,7 +92,6 @@ res <- fuzzy_simplicial_set(
 expect_equal(res, V_intersect_local_bandwidth, tol = 1e-4)
 
 # parallel code path
-set_thread_options(n_threads = 1)
 # matrix
 res <- fuzzy_simplicial_set(
   set_op_mix_ratio = 1, local_connectivity = 1,

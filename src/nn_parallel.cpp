@@ -7,9 +7,10 @@
 
 template <typename UwotAnnoyDistance>
 auto annoy_nns_impl(const std::string &index_name,
-                          const Rcpp::NumericMatrix &mat,
-                          std::size_t n_neighbors, std::size_t search_k,
-                          std::size_t grain_size = 1, bool verbose = false) -> Rcpp::List {
+                    const Rcpp::NumericMatrix &mat, std::size_t n_neighbors,
+                    std::size_t search_k, std::size_t n_threads = 0,
+                    std::size_t grain_size = 1, bool verbose = false)
+    -> Rcpp::List {
 
   std::size_t nrow = mat.rows();
   std::size_t ncol = mat.cols();
@@ -18,7 +19,7 @@ auto annoy_nns_impl(const std::string &index_name,
 
   NNWorker<UwotAnnoyDistance> worker(index_name, vmat, ncol, n_neighbors,
                                      search_k);
-  RcppPerpendicular::parallel_for(0, nrow, worker, grain_size);
+  RcppPerpendicular::parallel_for(0, nrow, worker, n_threads, grain_size);
 
   return Rcpp::List::create(Rcpp::Named("item") = Rcpp::IntegerMatrix(
                                 nrow, n_neighbors, worker.idx.begin()),
@@ -27,10 +28,12 @@ auto annoy_nns_impl(const std::string &index_name,
 }
 
 // [[Rcpp::export]]
-Rcpp::List annoy_search_parallel_cpp(
-    const std::string &index_name, const Rcpp::NumericMatrix &mat,
-    std::size_t n_neighbors, std::size_t search_k, const std::string metric,
-    std::size_t grain_size = 1, bool verbose = false) {
+Rcpp::List
+annoy_search_parallel_cpp(const std::string &index_name,
+                          const Rcpp::NumericMatrix &mat,
+                          std::size_t n_neighbors, std::size_t search_k,
+                          const std::string &metric, std::size_t n_threads = 0,
+                          std::size_t grain_size = 1, bool verbose = false) {
   if (metric == "euclidean") {
     return annoy_nns_impl<UwotAnnoyEuclidean>(index_name, mat, n_neighbors,
                                               search_k, grain_size, verbose);

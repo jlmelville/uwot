@@ -224,7 +224,13 @@ descent. If set to > 1, then results will not be reproducible, even if
 `set.seed` is called with a fixed seed before running. Set to
 \code{"auto"} go use the same value as \code{n_threads}.}
 
-\item{grain_size}{Minimum batch size for multithreading. Now ignored.}
+\item{grain_size}{The minimum amount of work to do on each thread. If this
+value is set high enough, then less than \code{n_threads} or
+\code{n_sgd_threads} will be used for processing, which might give a
+performance improvement if the overhead of thread management and context
+switching was outweighing the improvement due to concurrent processing.
+This should be left at default (\code{1}) and work will be spread evenly
+over all the threads specified.}
 
 \item{kernel}{Type of kernel function to create input probabilities. Can be
 one of \code{"gauss"} (the default) or \code{"knn"}. \code{"gauss"} uses

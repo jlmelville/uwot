@@ -205,6 +205,7 @@ annoy_search_parallel <- function(X, k, ann,
     X,
     k, search_k,
     metric = metric,
+    n_threads = n_threads,
     grain_size = grain_size,
     verbose = verbose
   )

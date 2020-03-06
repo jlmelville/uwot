@@ -101,7 +101,7 @@ P_row <- matrix(c(
 
 res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx,
   perplexity = 4,
-  parallelize = FALSE, verbose = FALSE
+  n_threads = 0, verbose = FALSE
 )$matrix
 res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
   self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx)
@@ -109,9 +109,8 @@ res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
 
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 
-set_thread_options(n_threads = 1)
 res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx,
-  perplexity = 4, verbose = FALSE
+  perplexity = 4, n_threads = 1, verbose = FALSE
 )$matrix
 res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
   self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx)
@@ -175,12 +174,11 @@ res <- perplexity_similarities(
 )
 expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tol = 1e-6)
 
-set_thread_options(n_threads = 1)
 res <- perplexity_similarities(
   perplexity = 50, n_threads = 1, verbose = FALSE,
   nn = find_nn(normiris,
     k = 149, method = "fnn",
-    metric = "euclidean", n_threads = 0,
+    metric = "euclidean", n_threads = 1,
     verbose = FALSE
   )
 )

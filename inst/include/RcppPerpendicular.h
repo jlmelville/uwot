@@ -37,26 +37,23 @@ auto worker_thread(Worker &worker, IndexRange range) -> void {
 }
 
 // Function to calculate the ranges for a given input
-inline auto split_input_range(const IndexRange &range, std::size_t grain_size)
+inline auto split_input_range(const IndexRange &range, std::size_t n_threads,
+                              std::size_t grain_size)
     -> std::vector<IndexRange> {
 
   // determine max number of threads
-  std::size_t threads = std::thread::hardware_concurrency();
-  char *numThreads = ::getenv("RCPP_PERPENDICULAR_NUM_THREADS");
-  if (numThreads != nullptr) {
-    int parsedThreads = ::atoi(numThreads);
-    if (parsedThreads > 0)
-      threads = parsedThreads;
+  if (n_threads == 0) {
+    n_threads = std::thread::hardware_concurrency();
   }
 
   // compute grain_size (including enforcing requested minimum)
   std::size_t length = range.end() - range.begin();
-  if (threads == 1)
+  if (n_threads == 1)
     grain_size = length;
-  else if ((length % threads) == 0) // perfect division
-    grain_size = (std::max)(length / threads, grain_size);
+  else if ((length % n_threads) == 0) // perfect division
+    grain_size = (std::max)(length / n_threads, grain_size);
   else // imperfect division, divide by threads - 1
-    grain_size = (std::max)(length / (threads - 1), grain_size);
+    grain_size = (std::max)(length / (n_threads - 1), grain_size);
 
   // allocate ranges
   std::vector<IndexRange> ranges;
@@ -73,14 +70,16 @@ inline auto split_input_range(const IndexRange &range, std::size_t grain_size)
 // Execute the Worker over the IndexRange in parallel
 template <typename Worker>
 inline void parallel_for(std::size_t begin, std::size_t end, Worker &worker,
-                        std::size_t grain_size = 1) {
+                         std::size_t n_threads, std::size_t grain_size = 1) {
   // split the work
   IndexRange input_range(begin, end);
-  std::vector<IndexRange> ranges = split_input_range(input_range, grain_size);
+  std::vector<IndexRange> ranges =
+      split_input_range(input_range, n_threads, grain_size);
 
   std::vector<std::thread> threads;
   for (auto &range : ranges) {
-    threads.push_back(std::thread(&worker_thread<Worker>, std::ref(worker), range));
+    threads.push_back(
+        std::thread(&worker_thread<Worker>, std::ref(worker), range));
   }
 
   for (auto &thread : threads) {

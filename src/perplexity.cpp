@@ -155,7 +155,8 @@ struct PerplexityWorker {
 Rcpp::List calc_row_probabilities_parallel(
     const Rcpp::NumericMatrix nn_dist, const Rcpp::IntegerMatrix nn_idx,
     double perplexity, unsigned int n_iter = 200, double tol = 1e-5,
-    bool parallelize = true, std::size_t grain_size = 1, bool verbose = false) {
+    std::size_t n_threads = 0, std::size_t grain_size = 1,
+    bool verbose = false) {
 
   std::size_t n_vertices = nn_dist.nrow();
   std::size_t n_neighbors = nn_dist.ncol();
@@ -167,8 +168,9 @@ Rcpp::List calc_row_probabilities_parallel(
   PerplexityWorker worker(nn_distv, nn_idxv, n_vertices, perplexity, n_iter,
                           tol);
 
-  if (parallelize) {
-    RcppPerpendicular::parallel_for(0, n_vertices, worker, grain_size);
+  if (n_threads > 0) {
+    RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads,
+                                    grain_size);
   } else {
     worker(0, n_vertices);
   }

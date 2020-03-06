@@ -120,10 +120,6 @@ umap_transform <- function(X, model,
     X <- apply_scaling(X, scale_info = scale_info, verbose = verbose)
   }
 
-  if (n_threads > 0) {
-    set_thread_options(n_threads = n_threads)
-  }
-
   adjusted_local_connectivity <- max(0, local_connectivity - 1.0)
 
   nblocks <- length(metric)
@@ -217,10 +213,6 @@ umap_transform <- function(X, model,
       pluralize("thread", n_sgd_threads, " using")
     )
 
-    parallelize <- n_sgd_threads > 0
-    if (n_sgd_threads > 0) {
-      set_thread_options(n_threads = n_sgd_threads)
-    }
     embedding <- t(embedding)
     train_embedding <- t(train_embedding)
     if (tolower(method) == "umap") {
@@ -236,7 +228,7 @@ umap_transform <- function(X, model,
         initial_alpha = alpha, negative_sample_rate,
         approx_pow = approx_pow,
         pcg_rand = pcg_rand,
-        parallelize = parallelize,
+        n_threads = n_sgd_threads,
         grain_size = grain_size,
         move_other = FALSE,
         verbose = verbose
@@ -253,7 +245,7 @@ umap_transform <- function(X, model,
         initial_alpha = alpha,
         negative_sample_rate = negative_sample_rate,
         pcg_rand = pcg_rand,
-        parallelize = parallelize,
+        n_threads = n_sgd_threads,
         grain_size = grain_size,
         move_other = FALSE,
         verbose = verbose
@@ -270,14 +262,13 @@ init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  parallelize <- n_threads > 0
   if (weighted) {
     tsmessage(
       "Initializing by weighted average of neighbor coordinates",
       pluralize("thread", n_threads, " using")
     )
     embedding <- init_transform_parallel(train_embedding, nn$idx, graph,
-      parallelize = parallelize,
+      n_threads = n_threads,
       grain_size = grain_size
     )
   }
@@ -287,8 +278,8 @@ init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
       pluralize("thread", n_threads, " using")
     )
     embedding <- init_transform_av_parallel(train_embedding, nn$idx,
-      parallelize = parallelize,
-      grain_size = grain_size
+                                            n_threads = n_threads,
+                                            grain_size = grain_size
     )
   }
 

@@ -66,7 +66,7 @@ struct AverageWorker {
 // [[Rcpp::export]]
 Rcpp::NumericMatrix init_transform_av_parallel(
     Rcpp::NumericMatrix train_embedding, Rcpp::IntegerMatrix nn_index,
-    bool parallelize = true, std::size_t grain_size = 1) {
+    std::size_t n_threads = 0, std::size_t grain_size = 1) {
 
   std::size_t n_train_vertices = train_embedding.nrow();
   std::size_t ndim = train_embedding.ncol();
@@ -75,15 +75,16 @@ Rcpp::NumericMatrix init_transform_av_parallel(
   auto train_embeddingv = Rcpp::as<std::vector<float>>(train_embedding);
   auto nn_indexv = Rcpp::as<std::vector<int>>(nn_index);
   // Convert to zero-indexing
-  for (int & i : nn_indexv) {
+  for (int &i : nn_indexv) {
     --i;
   }
 
   AverageWorker worker(train_embeddingv, n_train_vertices, nn_indexv,
                        n_test_vertices);
 
-  if (parallelize) {
-    RcppPerpendicular::parallel_for(0, n_test_vertices, worker, grain_size);
+  if (n_threads > 0) {
+    RcppPerpendicular::parallel_for(0, n_test_vertices, worker, n_threads,
+                                    grain_size);
   } else {
     worker(0, n_test_vertices);
   }
@@ -149,8 +150,8 @@ struct WeightedAverageWorker {
 Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding,
                                             Rcpp::IntegerMatrix nn_index,
                                             Rcpp::NumericMatrix nn_weights,
-                                            const std::size_t grain_size = 1,
-                                            bool parallelize = true) {
+                                            std::size_t n_threads = 0,
+                                            std::size_t grain_size = 1) {
 
   std::size_t n_train_vertices = train_embedding.nrow();
   std::size_t ndim = train_embedding.ncol();
@@ -159,7 +160,7 @@ Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding,
   auto train_embeddingv = Rcpp::as<std::vector<float>>(train_embedding);
   auto nn_indexv = Rcpp::as<std::vector<int>>(nn_index);
   // Convert to zero-indexing
-  for (int & i : nn_indexv) {
+  for (int &i : nn_indexv) {
     --i;
   }
   auto nn_weightsv = Rcpp::as<std::vector<float>>(nn_weights);
@@ -167,8 +168,9 @@ Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding,
   WeightedAverageWorker worker(train_embeddingv, n_train_vertices, nn_indexv,
                                nn_weightsv, n_test_vertices);
 
-  if (parallelize) {
-    RcppPerpendicular::parallel_for(0, n_test_vertices, worker, grain_size);
+  if (n_threads > 0) {
+    RcppPerpendicular::parallel_for(0, n_test_vertices, worker, n_threads,
+                                    grain_size);
   } else {
     worker(0, n_test_vertices);
   }

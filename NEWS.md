@@ -6,6 +6,9 @@
 changing dependencies.
 * parallel code now uses the standard C++11 implementation of threading rather 
 than tinythread++.
+* The `grain_size` parameter has been undeprecated. As the version that 
+deprecated this never made it to CRAN, this is unlikely to have affected many
+people.
 
 # uwot 0.1.7
 
