@@ -22,7 +22,9 @@
 
 // [[Rcpp::depends(RcppProgress)]]
 #include <progress.hpp>
+#include <utility>
 
+        
 #include "gradient.h"
 #include "sampler.h"
 #include "tauprng.h"
@@ -46,7 +48,7 @@ void move_other_vertex<true>(std::vector<float> &embedding,
   embedding[nrj + i] -= grad_d;
 }
 
-const float clamp(const float v, const float lo, const float hi) {
+auto clamp(const float v, const float lo, const float hi) -> const float {
   const float t = v < lo ? lo : v;
   return t > hi ? hi : t;
 }
@@ -71,14 +73,14 @@ struct SgdWorker : public RcppPerpendicular::Worker {
   RngFactory rng_factory;
   
   SgdWorker(const Gradient &gradient,
-            const std::vector<unsigned int> &positive_head,
-            const std::vector<unsigned int> &positive_tail, Sampler &sampler,
+            std::vector<unsigned int> positive_head,
+            std::vector<unsigned int> positive_tail, Sampler &sampler,
             std::vector<float> &head_embedding,
             std::vector<float> &tail_embedding, const std::size_t ndim)
     :
     
-    n(0), alpha(0.0), gradient(gradient), positive_head(positive_head),
-    positive_tail(positive_tail),
+    n(0), alpha(0.0), gradient(gradient), positive_head(std::move(positive_head)),
+    positive_tail(std::move(positive_tail)),
     
     sampler(sampler),
     
@@ -89,7 +91,7 @@ struct SgdWorker : public RcppPerpendicular::Worker {
     
     rng_factory() {}
   
-  void operator()(std::size_t begin, std::size_t end) {
+  void operator()(std::size_t begin, std::size_t end) override {
     // Each window gets its own PRNG state, to prevent locking inside the loop.
     auto prng = rng_factory.create(end);
 
@@ -152,14 +154,14 @@ struct SgdWorker : public RcppPerpendicular::Worker {
 };
 
 template <typename T, bool DoMove = true, typename RandFactory = pcg_factory>
-std::vector<float> optimize_layout(
+auto optimize_layout(
     const T &gradient, std::vector<float> &head_embedding,
     std::vector<float> &tail_embedding,
     const std::vector<unsigned int> &positive_head,
     const std::vector<unsigned int> &positive_tail, unsigned int n_epochs,
     unsigned int n_vertices, const std::vector<float> &epochs_per_sample,
     float initial_alpha, float negative_sample_rate, bool parallelize = true,
-    std::size_t grain_size = 1, bool verbose = false) {
+    std::size_t grain_size = 1, bool verbose = false) -> std::vector<float> {
   Sampler sampler(epochs_per_sample, negative_sample_rate);
   
   SgdWorker<T, DoMove, RandFactory> worker(

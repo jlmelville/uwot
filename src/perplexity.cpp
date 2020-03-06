@@ -49,7 +49,7 @@ struct PerplexityWorker : public RcppPerpendicular::Worker {
         n_iter(n_iter), tol(tol), res(n_vertices * n_neighbors),
         n_search_fails(0) {}
 
-  void operator()(std::size_t begin, std::size_t end) {
+  void operator()(std::size_t begin, std::size_t end) override {
     // number of binary search failures in this window
     std::size_t n_window_search_fails = 0;
     std::vector<double> d2(n_neighbors - 1, 0.0);

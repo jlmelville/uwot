@@ -31,7 +31,7 @@
 // As in R's internals and Rcpp, use Kahan Summation to compensate for
 // numerical error
 // https://stackoverflow.com/q/17866149/4096483
-double mean_average(std::vector<double> v) {
+auto mean_average(std::vector<double> v) -> double {
   std::size_t n = v.size();
   long double s = std::accumulate(v.begin(), v.end(), 0.0L);
   s /= n;
@@ -77,7 +77,7 @@ struct SmoothKnnWorker : public RcppPerpendicular::Worker {
         mean_distances(mean_average(nn_dist)),
         nn_weights(n_vertices * n_neighbors), n_search_fails(0) {}
 
-  void operator()(std::size_t begin, std::size_t end) {
+  void operator()(std::size_t begin, std::size_t end) override {
     // number of binary search failures in this window
     std::size_t n_window_search_fails = 0;
     std::vector<double> non_zero_distances;
@@ -96,9 +96,9 @@ struct SmoothKnnWorker : public RcppPerpendicular::Worker {
 
       std::vector<double> ith_distances(n_neighbors);
       get_row(nn_dist, n_vertices, n_neighbors, i, ith_distances);
-      for (std::size_t k = 0; k < ith_distances.size(); k++) {
-        if (ith_distances[k] > 0.0) {
-          non_zero_distances.push_back(ith_distances[k]);
+      for (double ith_distance : ith_distances) {
+        if (ith_distance > 0.0) {
+          non_zero_distances.push_back(ith_distance);
         }
       }
 

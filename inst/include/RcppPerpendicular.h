@@ -6,12 +6,10 @@
 #define RCPP_PERPENDICULAR
 
 #include <cstddef>
+#include <cstdio>
 #include <cstdlib>
-#include <stdio.h>
 #include <thread>
 #include <vector>
-
-// #include "RcppPerpendicular/StdThread.h"
 
 namespace RcppPerpendicular {
 
@@ -23,16 +21,15 @@ namespace RcppPerpendicular {
 
 struct Worker {
   // construct and destruct (delete virtually)
-  Worker() {}
-  virtual ~Worker() {}
+  Worker() = default;
+  virtual ~Worker() = default;
 
   // dispatch work over a range of values
   virtual void operator()(std::size_t begin, std::size_t end) = 0;
 
   // disable copying and assignment
-private:
-  Worker(const Worker &);
-  void operator=(const Worker &);
+  Worker(const Worker &) = delete;
+  void operator=(const Worker &) = delete;
 };
 
 namespace {
@@ -46,9 +43,9 @@ public:
   IndexRange(std::size_t begin, std::size_t end) : begin_(begin), end_(end) {}
 
   // Access begin() and end()
-  std::size_t begin() const { return begin_; }
-  std::size_t end() const { return end_; }
-  std::size_t size() const { return end_ - begin_; }
+  auto begin() const -> std::size_t { return begin_; }
+  auto end() const -> std::size_t { return end_; }
+  auto size() const -> std::size_t { return end_ - begin_; }
 
 private:
   std::size_t begin_;
@@ -76,13 +73,13 @@ extern "C" inline void workerThread(void *data) {
 }
 
 // Function to calculate the ranges for a given input
-std::vector<IndexRange> splitInputRange(const IndexRange &range,
-                                        std::size_t grainSize) {
+auto splitInputRange(const IndexRange &range, std::size_t grainSize)
+    -> std::vector<IndexRange> {
 
   // determine max number of threads
   std::size_t threads = std::thread::hardware_concurrency();
   char *numThreads = ::getenv("RCPP_PERPENDICULAR_NUM_THREADS");
-  if (numThreads != NULL) {
+  if (numThreads != nullptr) {
     int parsedThreads = ::atoi(numThreads);
     if (parsedThreads > 0)
       threads = parsedThreads;
@@ -102,7 +99,7 @@ std::vector<IndexRange> splitInputRange(const IndexRange &range,
   std::size_t begin = range.begin();
   while (begin < range.end()) {
     std::size_t end = (std::min)(begin + grainSize, range.end());
-    ranges.push_back(IndexRange(begin, end));
+    ranges.emplace_back(IndexRange(begin, end));
     begin = end;
   }
 
@@ -120,15 +117,14 @@ inline void parallelFor(std::size_t begin, std::size_t end, Worker &worker,
 
   // create threads
   std::vector<std::thread *> threads;
-  for (std::size_t i = 0; i < ranges.size(); ++i) {
-    threads.push_back(
-        new std::thread(workerThread, new Work(ranges[i], worker)));
+  for (auto &range : ranges) {
+    threads.push_back(new std::thread(workerThread, new Work(range, worker)));
   }
 
   // join and delete them
-  for (std::size_t i = 0; i < threads.size(); ++i) {
-    threads[i]->join();
-    delete threads[i];
+  for (auto &thread : threads) {
+    thread->join();
+    delete thread;
   }
 }
 

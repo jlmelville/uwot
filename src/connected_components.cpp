@@ -26,6 +26,7 @@
 
 #include <Rcpp.h>
 using namespace Rcpp;
+
 // [[Rcpp::export]]
 List connected_components_undirected(const unsigned long N,
                                      const IntegerVector indices1,

@@ -44,7 +44,7 @@ struct AverageWorker : public RcppPerpendicular::Worker {
         n_neighbors(nn_index.size() / n_test_vertices),
         embedding(n_test_vertices * n_neighbors) {}
 
-  void operator()(std::size_t begin, std::size_t end) {
+  void operator()(std::size_t begin, std::size_t end) override {
     std::vector<double> sumc(ndim);
     for (std::size_t i = begin; i < end; i++) {
       std::fill(sumc.begin(), sumc.end(), 0.0);
@@ -75,8 +75,8 @@ Rcpp::NumericMatrix init_transform_av_parallel(
   auto train_embeddingv = Rcpp::as<std::vector<float>>(train_embedding);
   auto nn_indexv = Rcpp::as<std::vector<int>>(nn_index);
   // Convert to zero-indexing
-  for (std::size_t i = 0; i < nn_indexv.size(); ++i) {
-    --nn_indexv[i];
+  for (int & i : nn_indexv) {
+    --i;
   }
 
   AverageWorker worker(train_embeddingv, n_train_vertices, nn_indexv,
@@ -116,7 +116,7 @@ struct WeightedAverageWorker : public RcppPerpendicular::Worker {
         n_neighbors(nn_index.size() / n_test_vertices),
         embedding(n_test_vertices * n_neighbors) {}
 
-  void operator()(std::size_t begin, std::size_t end) {
+  void operator()(std::size_t begin, std::size_t end) override {
     std::vector<double> sumc(ndim);
     for (std::size_t i = begin; i < end; i++) {
       std::fill(sumc.begin(), sumc.end(), 0.0);
@@ -159,8 +159,8 @@ Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding,
   auto train_embeddingv = Rcpp::as<std::vector<float>>(train_embedding);
   auto nn_indexv = Rcpp::as<std::vector<int>>(nn_index);
   // Convert to zero-indexing
-  for (std::size_t i = 0; i < nn_indexv.size(); ++i) {
-    --nn_indexv[i];
+  for (int & i : nn_indexv) {
+    --i;
   }
   auto nn_weightsv = Rcpp::as<std::vector<float>>(nn_weights);
 

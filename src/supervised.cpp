@@ -21,7 +21,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-NumericVector
+NumericVector 
 fast_intersection_cpp(const IntegerVector rows, const IntegerVector cols,
                       NumericVector values, const IntegerVector target,
                       double unknown_dist = 1.0, double far_dist = 5.0) {

@@ -6,10 +6,10 @@
 #include "nn_parallel.h"
 
 template <typename UwotAnnoyDistance>
-Rcpp::List annoy_nns_impl(const std::string &index_name,
+auto annoy_nns_impl(const std::string &index_name,
                           const Rcpp::NumericMatrix &mat,
                           std::size_t n_neighbors, std::size_t search_k,
-                          std::size_t grain_size = 1, bool verbose = false) {
+                          std::size_t grain_size = 1, bool verbose = false) -> Rcpp::List {
 
   std::size_t nrow = mat.rows();
   std::size_t ncol = mat.cols();

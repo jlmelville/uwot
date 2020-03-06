@@ -35,12 +35,12 @@ Sampler::Sampler(const std::vector<float> &epochs_per_sample,
   }
 }
 
-bool Sampler::is_sample_edge(const std::size_t i, const std::size_t n) const {
+auto Sampler::is_sample_edge(const std::size_t i, const std::size_t n) const -> bool {
   return epoch_of_next_sample[i] <= n;
 }
 
-const std::size_t Sampler::get_num_neg_samples(const std::size_t i,
-                                               const std::size_t n) const {
+auto Sampler::get_num_neg_samples(const std::size_t i,
+                                               const std::size_t n) const -> const std::size_t {
   return static_cast<std::size_t>((n - epoch_of_next_negative_sample[i]) /
                                   epochs_per_negative_sample[i]);
 }
