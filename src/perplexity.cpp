@@ -168,7 +168,7 @@ Rcpp::List calc_row_probabilities_parallel(
                           tol);
 
   if (parallelize) {
-    RcppPerpendicular::parallelFor(0, n_vertices, worker, grain_size);
+    RcppPerpendicular::parallel_for(0, n_vertices, worker, grain_size);
   } else {
     worker(0, n_vertices);
   }

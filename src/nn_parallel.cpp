@@ -18,7 +18,7 @@ auto annoy_nns_impl(const std::string &index_name,
 
   NNWorker<UwotAnnoyDistance> worker(index_name, vmat, ncol, n_neighbors,
                                      search_k);
-  RcppPerpendicular::parallelFor(0, nrow, worker, grain_size);
+  RcppPerpendicular::parallel_for(0, nrow, worker, grain_size);
 
   return Rcpp::List::create(Rcpp::Named("item") = Rcpp::IntegerMatrix(
                                 nrow, n_neighbors, worker.idx.begin()),

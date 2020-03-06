@@ -72,7 +72,7 @@ inline auto split_input_range(const IndexRange &range, std::size_t grain_size)
 
 // Execute the Worker over the IndexRange in parallel
 template <typename Worker>
-inline void parallelFor(std::size_t begin, std::size_t end, Worker &worker,
+inline void parallel_for(std::size_t begin, std::size_t end, Worker &worker,
                         std::size_t grain_size = 1) {
   // split the work
   IndexRange input_range(begin, end);

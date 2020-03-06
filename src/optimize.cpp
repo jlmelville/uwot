@@ -177,7 +177,7 @@ auto optimize_layout(
     worker.set_n(n);
     worker.reseed();
     if (parallelize) {
-      RcppPerpendicular::parallelFor(0, n_epochs_per_sample, worker, grain_size);
+      RcppPerpendicular::parallel_for(0, n_epochs_per_sample, worker, grain_size);
     } else {
       worker(0, n_epochs_per_sample);
     }

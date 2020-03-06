@@ -204,7 +204,7 @@ Rcpp::List smooth_knn_distances_parallel(
                          bandwidth, tol, min_k_dist_scale);
 
   if (parallelize) {
-    RcppPerpendicular::parallelFor(0, n_vertices, worker, grain_size);
+    RcppPerpendicular::parallel_for(0, n_vertices, worker, grain_size);
   } else {
     worker(0, n_vertices);
   }

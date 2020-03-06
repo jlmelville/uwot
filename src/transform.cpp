@@ -83,7 +83,7 @@ Rcpp::NumericMatrix init_transform_av_parallel(
                        n_test_vertices);
 
   if (parallelize) {
-    RcppPerpendicular::parallelFor(0, n_test_vertices, worker, grain_size);
+    RcppPerpendicular::parallel_for(0, n_test_vertices, worker, grain_size);
   } else {
     worker(0, n_test_vertices);
   }
@@ -168,7 +168,7 @@ Rcpp::NumericMatrix init_transform_parallel(Rcpp::NumericMatrix train_embedding,
                                nn_weightsv, n_test_vertices);
 
   if (parallelize) {
-    RcppPerpendicular::parallelFor(0, n_test_vertices, worker, grain_size);
+    RcppPerpendicular::parallel_for(0, n_test_vertices, worker, grain_size);
   } else {
     worker(0, n_test_vertices);
   }
