@@ -57,7 +57,7 @@ auto clamp(const float v, const float lo, const float hi) -> const float {
 // DoMoveVertex: true if both ends of a positive edge should be updated
 template <typename Gradient, bool DoMoveVertex = true,
           typename RngFactory = pcg_factory>
-struct SgdWorker : public RcppPerpendicular::Worker {
+struct SgdWorker {
   int n; // epoch counter
   float alpha;
   const Gradient gradient;
@@ -91,7 +91,7 @@ struct SgdWorker : public RcppPerpendicular::Worker {
     
     rng_factory() {}
   
-  void operator()(std::size_t begin, std::size_t end) override {
+  void operator()(std::size_t begin, std::size_t end) {
     // Each window gets its own PRNG state, to prevent locking inside the loop.
     auto prng = rng_factory.create(end);
 

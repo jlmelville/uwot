@@ -38,7 +38,7 @@ struct UwotAnnoyHamming {
 };
 
 template <typename UwotAnnoyDistance>
-struct NNWorker : public RcppPerpendicular::Worker {
+struct NNWorker {
   const std::string &index_name;
   const std::vector<double> &mat;
   std::size_t nrow;

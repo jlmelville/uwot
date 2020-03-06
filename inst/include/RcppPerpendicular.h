@@ -5,34 +5,10 @@
 #ifndef RCPP_PERPENDICULAR
 #define RCPP_PERPENDICULAR
 
-#include <cstddef>
-#include <cstdio>
-#include <cstdlib>
 #include <thread>
 #include <vector>
 
 namespace RcppPerpendicular {
-
-// Work executed within a background thread. We implement dynamic
-// dispatch using vtables so we can have a stable type to cast
-// to from the void* passed to the worker thread (required because
-// the tinythreads interface allows to pass only a void* to the
-// thread main rather than a generic type / template)
-
-struct Worker {
-  // construct and destruct (delete virtually)
-  Worker() = default;
-  virtual ~Worker() = default;
-
-  // dispatch work over a range of values
-  virtual void operator()(std::size_t begin, std::size_t end) = 0;
-
-  // disable copying and assignment
-  Worker(const Worker &) = delete;
-  void operator=(const Worker &) = delete;
-};
-
-namespace {
 
 // Class which represents a range of indexes to perform work on
 // (worker functions are passed this range so they know which
@@ -52,28 +28,16 @@ private:
   std::size_t end_;
 };
 
-// Because tinythread allows us to pass only a plain C function
-// we need to pass our worker and range within a struct that we
-// can cast to/from void*
-struct Work {
-  Work(IndexRange range, Worker &worker) : range(range), worker(worker) {}
-  IndexRange range;
-  Worker &worker;
-};
-
-// Thread which performs work (then deletes the work object
-// when it's done)
-extern "C" inline void workerThread(void *data) {
+template <typename Worker>
+auto worker_thread(Worker &worker, IndexRange range) -> void {
   try {
-    Work *pWork = static_cast<Work *>(data);
-    pWork->worker(pWork->range.begin(), pWork->range.end());
-    delete pWork;
+    worker(range.begin(), range.end());
   } catch (...) {
   }
 }
 
 // Function to calculate the ranges for a given input
-auto splitInputRange(const IndexRange &range, std::size_t grainSize)
+inline auto split_input_range(const IndexRange &range, std::size_t grain_size)
     -> std::vector<IndexRange> {
 
   // determine max number of threads
@@ -85,20 +49,20 @@ auto splitInputRange(const IndexRange &range, std::size_t grainSize)
       threads = parsedThreads;
   }
 
-  // compute grainSize (including enforcing requested minimum)
+  // compute grain_size (including enforcing requested minimum)
   std::size_t length = range.end() - range.begin();
   if (threads == 1)
-    grainSize = length;
+    grain_size = length;
   else if ((length % threads) == 0) // perfect division
-    grainSize = (std::max)(length / threads, grainSize);
+    grain_size = (std::max)(length / threads, grain_size);
   else // imperfect division, divide by threads - 1
-    grainSize = (std::max)(length / (threads - 1), grainSize);
+    grain_size = (std::max)(length / (threads - 1), grain_size);
 
   // allocate ranges
   std::vector<IndexRange> ranges;
   std::size_t begin = range.begin();
   while (begin < range.end()) {
-    std::size_t end = (std::min)(begin + grainSize, range.end());
+    std::size_t end = (std::min)(begin + grain_size, range.end());
     ranges.emplace_back(IndexRange(begin, end));
     begin = end;
   }
@@ -106,25 +70,21 @@ auto splitInputRange(const IndexRange &range, std::size_t grainSize)
   return ranges;
 }
 
-} // anonymous namespace
-
 // Execute the Worker over the IndexRange in parallel
+template <typename Worker>
 inline void parallelFor(std::size_t begin, std::size_t end, Worker &worker,
-                        std::size_t grainSize = 1) {
+                        std::size_t grain_size = 1) {
   // split the work
-  IndexRange inputRange(begin, end);
-  std::vector<IndexRange> ranges = splitInputRange(inputRange, grainSize);
+  IndexRange input_range(begin, end);
+  std::vector<IndexRange> ranges = split_input_range(input_range, grain_size);
 
-  // create threads
-  std::vector<std::thread *> threads;
+  std::vector<std::thread> threads;
   for (auto &range : ranges) {
-    threads.push_back(new std::thread(workerThread, new Work(range, worker)));
+    threads.push_back(std::thread(&worker_thread<Worker>, std::ref(worker), range));
   }
 
-  // join and delete them
   for (auto &thread : threads) {
-    thread->join();
-    delete thread;
+    thread.join();
   }
 }
 

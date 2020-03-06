@@ -15,6 +15,10 @@ the basic method. Translated from the
 
 ## News
 
+*March 4 2020* I had to cancel my submission of version 0.1.7 to CRAN because of
+a broken example in a library using uwot. In the mean time I have switched to
+using `std::thread` rather than tinythread++.
+
 *March 1 2020* Version 0.1.6 was rejected from CRAN due to undefined behavior
 issues that originate from RcppAnnoy and RcppParallel. I am hopeful that the
 Annoy behavior is fixed and a suitable version of RcppAnnoy will be released

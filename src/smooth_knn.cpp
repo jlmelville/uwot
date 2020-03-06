@@ -45,7 +45,7 @@ auto mean_average(std::vector<double> v) -> double {
   return static_cast<double>(s);
 }
 
-struct SmoothKnnWorker : public RcppPerpendicular::Worker {
+struct SmoothKnnWorker {
   const std::vector<double> &nn_dist;
 
   const unsigned int n_vertices;
@@ -77,7 +77,7 @@ struct SmoothKnnWorker : public RcppPerpendicular::Worker {
         mean_distances(mean_average(nn_dist)),
         nn_weights(n_vertices * n_neighbors), n_search_fails(0) {}
 
-  void operator()(std::size_t begin, std::size_t end) override {
+  void operator()(std::size_t begin, std::size_t end) {
     // number of binary search failures in this window
     std::size_t n_window_search_fails = 0;
     std::vector<double> non_zero_distances;
