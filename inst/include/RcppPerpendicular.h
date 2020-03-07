@@ -6,32 +6,17 @@
 #define RCPP_PERPENDICULAR
 
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace RcppPerpendicular {
 
-// Class which represents a range of indexes to perform work on
-// (worker functions are passed this range so they know which
-// elements are safe to read/write to)
-class IndexRange {
-public:
-  // Initialize with a begin and (exclusive) end index
-  IndexRange(std::size_t begin, std::size_t end) : begin_(begin), end_(end) {}
-
-  // Access begin() and end()
-  auto begin() const -> std::size_t { return begin_; }
-  auto end() const -> std::size_t { return end_; }
-  auto size() const -> std::size_t { return end_ - begin_; }
-
-private:
-  std::size_t begin_;
-  std::size_t end_;
-};
+using IndexRange = std::pair<std::size_t, std::size_t>;
 
 template <typename Worker>
-auto worker_thread(Worker &worker, IndexRange range) -> void {
+auto worker_thread(Worker &worker, const IndexRange &range) -> void {
   try {
-    worker(range.begin(), range.end());
+    worker(range.first, range.second);
   } catch (...) {
   }
 }
@@ -47,7 +32,7 @@ inline auto split_input_range(const IndexRange &range, std::size_t n_threads,
   }
 
   // compute grain_size (including enforcing requested minimum)
-  std::size_t length = range.end() - range.begin();
+  std::size_t length = range.second - range.first;
   if (n_threads == 1)
     grain_size = length;
   else if ((length % n_threads) == 0) // perfect division
@@ -57,9 +42,9 @@ inline auto split_input_range(const IndexRange &range, std::size_t n_threads,
 
   // allocate ranges
   std::vector<IndexRange> ranges;
-  std::size_t begin = range.begin();
-  while (begin < range.end()) {
-    std::size_t end = (std::min)(begin + grain_size, range.end());
+  std::size_t begin = range.first;
+  while (begin < range.second) {
+    std::size_t end = (std::min)(begin + grain_size, range.second);
     ranges.emplace_back(IndexRange(begin, end));
     begin = end;
   }
