@@ -24,7 +24,7 @@
 #include <progress.hpp>
 #include <utility>
 
-#include "tauprng.h"
+#include "rng.h"
 #include "uwot/gradient.h"
 #include "uwot/sampler.h"
 
