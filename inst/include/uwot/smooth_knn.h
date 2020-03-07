@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cmath>
 #include <limits>
 #include <numeric>
 #include <vector>
