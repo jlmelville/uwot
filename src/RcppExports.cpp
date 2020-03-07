@@ -6,16 +6,16 @@
 using namespace Rcpp;
 
 // connected_components_undirected
-List connected_components_undirected(const unsigned long N, IntegerVector indices1, IntegerVector indptr1, IntegerVector indices2, IntegerVector indptr2);
+List connected_components_undirected(std::size_t N, const std::vector<int>& indices1, const std::vector<int>& indptr1, const std::vector<int>& indices2, const std::vector<int>& indptr2);
 RcppExport SEXP _uwot_connected_components_undirected(SEXP NSEXP, SEXP indices1SEXP, SEXP indptr1SEXP, SEXP indices2SEXP, SEXP indptr2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const unsigned long >::type N(NSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type indices1(indices1SEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type indptr1(indptr1SEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type indices2(indices2SEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type indptr2(indptr2SEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type N(NSEXP);
+    Rcpp::traits::input_parameter< const std::vector<int>& >::type indices1(indices1SEXP);
+    Rcpp::traits::input_parameter< const std::vector<int>& >::type indptr1(indptr1SEXP);
+    Rcpp::traits::input_parameter< const std::vector<int>& >::type indices2(indices2SEXP);
+    Rcpp::traits::input_parameter< const std::vector<int>& >::type indptr2(indptr2SEXP);
     rcpp_result_gen = Rcpp::wrap(connected_components_undirected(N, indices1, indptr1, indices2, indptr2));
     return rcpp_result_gen;
 END_RCPP
