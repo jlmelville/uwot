@@ -28,7 +28,6 @@
 #include "sampler.h"
 #include "tauprng.h"
 
-// Must come after any include that transitively include dqrng
 #include "RcppPerpendicular.h"
 
 // Function to decide whether to move both vertices in an edge
