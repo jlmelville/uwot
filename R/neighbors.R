@@ -206,8 +206,7 @@ annoy_search_parallel <- function(X, k, ann,
     k, search_k,
     metric = metric,
     n_threads = n_threads,
-    grain_size = grain_size,
-    verbose = verbose
+    grain_size = grain_size
   )
   unlink(index_file)
   if (any(res$item == -1)) {

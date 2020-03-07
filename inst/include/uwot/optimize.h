@@ -38,8 +38,7 @@ namespace uwot {
 // Default empty version does nothing: used in umap_transform when
 // some of the vertices should be held fixed
 template <bool DoMoveVertex = false>
-void move_other_vertex(std::vector<float> &embedding, float grad_d,
-                       std::size_t i, std::size_t nrj) {}
+void move_other_vertex(std::vector<float> &, float, std::size_t, std::size_t) {}
 
 // Specialization to move the vertex: used in umap when both
 // vertices in an edge should be moved

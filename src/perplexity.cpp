@@ -27,10 +27,12 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-List calc_row_probabilities_parallel(
-    NumericMatrix nn_dist, IntegerMatrix nn_idx, double perplexity,
-    std::size_t n_iter = 200, double tol = 1e-5, std::size_t n_threads = 0,
-    std::size_t grain_size = 1, bool verbose = false) {
+List calc_row_probabilities_parallel(NumericMatrix nn_dist,
+                                     IntegerMatrix nn_idx, double perplexity,
+                                     std::size_t n_iter = 200,
+                                     double tol = 1e-5,
+                                     std::size_t n_threads = 0,
+                                     std::size_t grain_size = 1) {
 
   std::size_t n_vertices = nn_dist.nrow();
   std::size_t n_neighbors = nn_dist.ncol();

@@ -62,11 +62,11 @@ template <float (*powfun)(float, float)> class base_umap_gradient {
 public:
   base_umap_gradient(float a, float b, float gamma)
       : a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b){};
-  float grad_attr(float dist_squared) const {
+  auto grad_attr(float dist_squared) const -> float {
     float pd2b = powfun(dist_squared, b);
     return (a_b_m2 * pd2b) / (dist_squared * (a * pd2b + 1.0));
   }
-  float grad_rep(float dist_squared) const {
+  auto grad_rep(float dist_squared) const -> float {
     return gamma_b_2 /
            ((0.001 + dist_squared) * (a * powfun(dist_squared, b) + 1.0));
   }
@@ -95,10 +95,10 @@ using apumap_gradient = base_umap_gradient<fastPrecisePow>;
 class tumap_gradient {
 public:
   tumap_gradient() = default;
-  float grad_attr(float dist_squared) const {
+  auto grad_attr(float dist_squared) const -> float {
     return -2.0 / (dist_squared + 1.0);
   }
-  float grad_rep(float dist_squared) const {
+  auto grad_rep(float dist_squared) const -> float {
     return 2.0 / ((0.001 + dist_squared) * (dist_squared + 1.0));
   }
   static const constexpr float clamp_hi = 4.0;
@@ -108,10 +108,10 @@ public:
 class largevis_gradient {
 public:
   largevis_gradient(float gamma) : gamma_2(gamma * 2.0) {}
-  float grad_attr(float dist_squared) const {
+  auto grad_attr(float dist_squared) const -> float {
     return -2.0 / (dist_squared + 1.0);
   }
-  float grad_rep(float dist_squared) const {
+  auto grad_rep(float dist_squared) const -> float {
     return gamma_2 / ((0.1 + dist_squared) * (dist_squared + 1.0));
   }
 

@@ -44,7 +44,7 @@ struct tau_prng {
       : state0(state0), state1(state1 > 7 ? state1 : 8),
         state2(state2 > 15 ? state2 : 16) {}
 
-  int32_t operator()() {
+  auto operator()() -> int32_t {
     state0 = (((state0 & MAGIC0) << 12) & 0xffffffff) ^
              ((((state0 << 13) & 0xffffffff) ^ state0) >> 19);
     state1 = (((state1 & MAGIC1) << 4) & 0xffffffff) ^
@@ -56,7 +56,7 @@ struct tau_prng {
   }
 
   // return a value in (0, n]
-  std::size_t operator()(std::size_t n) {
+  auto operator()(std::size_t n) -> std::size_t {
     std::size_t result = (*this)() % n;
     return result;
   }

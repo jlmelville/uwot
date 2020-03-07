@@ -78,7 +78,7 @@ expect_equal(fuzzy_set_union(res, set_op_mix_ratio = 0), V_intersect,
 res_cpp_conn1 <- smooth_knn_distances_parallel(nn_4$dist,
   n_iter = 64, local_connectivity = 1.0,
   bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
-  n_threads = 0, verbose = FALSE
+  n_threads = 0
 )$matrix
 expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1),
   self_nbr = TRUE
@@ -87,7 +87,7 @@ expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1),
 res_cpp_conn1.5 <- smooth_knn_distances_parallel(nn_4$dist,
   n_iter = 64, local_connectivity = 1.5,
   bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
-  n_threads = 0, verbose = FALSE
+  n_threads = 0
 )$matrix
 expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1.5),
   self_nbr = TRUE
@@ -97,7 +97,7 @@ expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1.5),
 res_cpp_conn1 <- smooth_knn_distances_parallel(nn_4$dist,
   n_iter = 64, local_connectivity = 1.0,
   bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
-  n_threads = 1, grain_size = 1, verbose = FALSE
+  n_threads = 1, grain_size = 1
 )$matrix
 expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1),
   self_nbr = TRUE
@@ -106,7 +106,7 @@ expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1),
 res_cpp_conn1.5 <- smooth_knn_distances_parallel(nn_4$dist,
   n_iter = 64, local_connectivity = 1.5,
   bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
-  n_threads = 1, grain_size = 1, verbose = FALSE
+  n_threads = 1, grain_size = 1
 )$matrix
 expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1.5),
   self_nbr = TRUE
@@ -124,7 +124,7 @@ V_asymm_local_cross <- cbind(
 res_cpp_conn1.5_cross <- smooth_knn_distances_parallel(nn_4$dist,
   n_iter = 64, local_connectivity = 1.5,
   bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
-  n_threads = 0, verbose = FALSE
+  n_threads = 0
 )$matrix
 expect_equal(nn_to_sparse(
   nn_4$idx, as.vector(res_cpp_conn1.5_cross),
@@ -137,7 +137,7 @@ tol = 1e-4
 res_cpp_conn1.5_cross <- smooth_knn_distances_parallel(nn_4$dist,
   n_iter = 64, local_connectivity = 1.5,
   bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, 
-  n_threads = 1, verbose = FALSE
+  n_threads = 1
 )$matrix
 expect_equal(nn_to_sparse(
   nn_4$idx, as.vector(res_cpp_conn1.5_cross),

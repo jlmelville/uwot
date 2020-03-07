@@ -21,8 +21,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // annoy_search_parallel_cpp
-List annoy_search_parallel_cpp(const std::string& index_name, NumericMatrix mat, std::size_t n_neighbors, std::size_t search_k, const std::string& metric, std::size_t n_threads, std::size_t grain_size, bool verbose);
-RcppExport SEXP _uwot_annoy_search_parallel_cpp(SEXP index_nameSEXP, SEXP matSEXP, SEXP n_neighborsSEXP, SEXP search_kSEXP, SEXP metricSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+List annoy_search_parallel_cpp(const std::string& index_name, NumericMatrix mat, std::size_t n_neighbors, std::size_t search_k, const std::string& metric, std::size_t n_threads, std::size_t grain_size);
+RcppExport SEXP _uwot_annoy_search_parallel_cpp(SEXP index_nameSEXP, SEXP matSEXP, SEXP n_neighborsSEXP, SEXP search_kSEXP, SEXP metricSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -33,8 +33,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const std::string& >::type metric(metricSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type n_threads(n_threadsSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(annoy_search_parallel_cpp(index_name, mat, n_neighbors, search_k, metric, n_threads, grain_size, verbose));
+    rcpp_result_gen = Rcpp::wrap(annoy_search_parallel_cpp(index_name, mat, n_neighbors, search_k, metric, n_threads, grain_size));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -114,8 +113,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_row_probabilities_parallel
-List calc_row_probabilities_parallel(NumericMatrix nn_dist, IntegerMatrix nn_idx, double perplexity, std::size_t n_iter, double tol, std::size_t n_threads, std::size_t grain_size, bool verbose);
-RcppExport SEXP _uwot_calc_row_probabilities_parallel(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP perplexitySEXP, SEXP n_iterSEXP, SEXP tolSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+List calc_row_probabilities_parallel(NumericMatrix nn_dist, IntegerMatrix nn_idx, double perplexity, std::size_t n_iter, double tol, std::size_t n_threads, std::size_t grain_size);
+RcppExport SEXP _uwot_calc_row_probabilities_parallel(SEXP nn_distSEXP, SEXP nn_idxSEXP, SEXP perplexitySEXP, SEXP n_iterSEXP, SEXP tolSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -126,14 +125,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type n_threads(n_threadsSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_row_probabilities_parallel(nn_dist, nn_idx, perplexity, n_iter, tol, n_threads, grain_size, verbose));
+    rcpp_result_gen = Rcpp::wrap(calc_row_probabilities_parallel(nn_dist, nn_idx, perplexity, n_iter, tol, n_threads, grain_size));
     return rcpp_result_gen;
 END_RCPP
 }
 // smooth_knn_distances_parallel
-List smooth_knn_distances_parallel(NumericMatrix nn_dist, std::size_t n_iter, double local_connectivity, double bandwidth, double tol, double min_k_dist_scale, std::size_t n_threads, std::size_t grain_size, bool verbose);
-RcppExport SEXP _uwot_smooth_knn_distances_parallel(SEXP nn_distSEXP, SEXP n_iterSEXP, SEXP local_connectivitySEXP, SEXP bandwidthSEXP, SEXP tolSEXP, SEXP min_k_dist_scaleSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP, SEXP verboseSEXP) {
+List smooth_knn_distances_parallel(NumericMatrix nn_dist, std::size_t n_iter, double local_connectivity, double bandwidth, double tol, double min_k_dist_scale, std::size_t n_threads, std::size_t grain_size);
+RcppExport SEXP _uwot_smooth_knn_distances_parallel(SEXP nn_distSEXP, SEXP n_iterSEXP, SEXP local_connectivitySEXP, SEXP bandwidthSEXP, SEXP tolSEXP, SEXP min_k_dist_scaleSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -145,8 +143,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type min_k_dist_scale(min_k_dist_scaleSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type n_threads(n_threadsSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(smooth_knn_distances_parallel(nn_dist, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, n_threads, grain_size, verbose));
+    rcpp_result_gen = Rcpp::wrap(smooth_knn_distances_parallel(nn_dist, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, n_threads, grain_size));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -228,12 +225,12 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_uwot_connected_components_undirected", (DL_FUNC) &_uwot_connected_components_undirected, 5},
-    {"_uwot_annoy_search_parallel_cpp", (DL_FUNC) &_uwot_annoy_search_parallel_cpp, 8},
+    {"_uwot_annoy_search_parallel_cpp", (DL_FUNC) &_uwot_annoy_search_parallel_cpp, 7},
     {"_uwot_optimize_layout_umap", (DL_FUNC) &_uwot_optimize_layout_umap, 18},
     {"_uwot_optimize_layout_tumap", (DL_FUNC) &_uwot_optimize_layout_tumap, 14},
     {"_uwot_optimize_layout_largevis", (DL_FUNC) &_uwot_optimize_layout_largevis, 13},
-    {"_uwot_calc_row_probabilities_parallel", (DL_FUNC) &_uwot_calc_row_probabilities_parallel, 8},
-    {"_uwot_smooth_knn_distances_parallel", (DL_FUNC) &_uwot_smooth_knn_distances_parallel, 9},
+    {"_uwot_calc_row_probabilities_parallel", (DL_FUNC) &_uwot_calc_row_probabilities_parallel, 7},
+    {"_uwot_smooth_knn_distances_parallel", (DL_FUNC) &_uwot_smooth_knn_distances_parallel, 8},
     {"_uwot_fast_intersection_cpp", (DL_FUNC) &_uwot_fast_intersection_cpp, 6},
     {"_uwot_general_sset_intersection_cpp", (DL_FUNC) &_uwot_general_sset_intersection_cpp, 10},
     {"_uwot_hardware_concurrency", (DL_FUNC) &_uwot_hardware_concurrency, 0},

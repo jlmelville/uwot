@@ -5,8 +5,8 @@ connected_components_undirected <- function(N, indices1, indptr1, indices2, indp
     .Call(`_uwot_connected_components_undirected`, N, indices1, indptr1, indices2, indptr2)
 }
 
-annoy_search_parallel_cpp <- function(index_name, mat, n_neighbors, search_k, metric, n_threads = 0L, grain_size = 1L, verbose = FALSE) {
-    .Call(`_uwot_annoy_search_parallel_cpp`, index_name, mat, n_neighbors, search_k, metric, n_threads, grain_size, verbose)
+annoy_search_parallel_cpp <- function(index_name, mat, n_neighbors, search_k, metric, n_threads = 0L, grain_size = 1L) {
+    .Call(`_uwot_annoy_search_parallel_cpp`, index_name, mat, n_neighbors, search_k, metric, n_threads, grain_size)
 }
 
 optimize_layout_umap <- function(head_embedding, tail_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, a, b, gamma, initial_alpha, negative_sample_rate, approx_pow, pcg_rand = TRUE, n_threads = 0L, grain_size = 1L, move_other = TRUE, verbose = FALSE) {
@@ -21,12 +21,12 @@ optimize_layout_largevis <- function(head_embedding, positive_head, positive_tai
     .Call(`_uwot_optimize_layout_largevis`, head_embedding, positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample, gamma, initial_alpha, negative_sample_rate, pcg_rand, n_threads, grain_size, verbose)
 }
 
-calc_row_probabilities_parallel <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, n_threads = 0L, grain_size = 1L, verbose = FALSE) {
-    .Call(`_uwot_calc_row_probabilities_parallel`, nn_dist, nn_idx, perplexity, n_iter, tol, n_threads, grain_size, verbose)
+calc_row_probabilities_parallel <- function(nn_dist, nn_idx, perplexity, n_iter = 200L, tol = 1e-5, n_threads = 0L, grain_size = 1L) {
+    .Call(`_uwot_calc_row_probabilities_parallel`, nn_dist, nn_idx, perplexity, n_iter, tol, n_threads, grain_size)
 }
 
-smooth_knn_distances_parallel <- function(nn_dist, n_iter = 64L, local_connectivity = 1.0, bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, n_threads = 0L, grain_size = 1L, verbose = FALSE) {
-    .Call(`_uwot_smooth_knn_distances_parallel`, nn_dist, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, n_threads, grain_size, verbose)
+smooth_knn_distances_parallel <- function(nn_dist, n_iter = 64L, local_connectivity = 1.0, bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, n_threads = 0L, grain_size = 1L) {
+    .Call(`_uwot_smooth_knn_distances_parallel`, nn_dist, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, n_threads, grain_size)
 }
 
 fast_intersection_cpp <- function(rows, cols, values, target, unknown_dist = 1.0, far_dist = 5.0) {

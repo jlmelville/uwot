@@ -50,7 +50,7 @@ public:
       epoch_of_next_negative_sample[i] = epochs_per_negative_sample[i];
     }
   }
-  bool is_sample_edge(std::size_t i, std::size_t n) const {
+  auto is_sample_edge(std::size_t i, std::size_t n) const -> bool {
     return epoch_of_next_sample[i] <= n;
   }
   auto get_num_neg_samples(std::size_t i, std::size_t n) const -> std::size_t {

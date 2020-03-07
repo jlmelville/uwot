@@ -101,7 +101,7 @@ P_row <- matrix(c(
 
 res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx,
   perplexity = 4,
-  n_threads = 0, verbose = FALSE
+  n_threads = 0
 )$matrix
 res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
   self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx)
@@ -110,7 +110,7 @@ res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 
 res <- calc_row_probabilities_parallel(iris10_nn10$dist, iris10_nn10$idx,
-  perplexity = 4, n_threads = 1, verbose = FALSE
+  perplexity = 4, n_threads = 1
 )$matrix
 res <- nn_to_sparse(iris10_nn10$idx, as.vector(res),
   self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx)

@@ -38,8 +38,7 @@ smooth_knn <- function(nn,
     tol = 1e-5,
     min_k_dist_scale = 1e-3,
     n_threads = n_threads,
-    grain_size = grain_size,
-    verbose = verbose
+    grain_size = grain_size
   )
   if (verbose && affinity_matrix_res$n_failures > 0) {
     tsmessage(affinity_matrix_res$n_failures, " smooth knn distance failures")
@@ -103,8 +102,7 @@ perplexity_similarities <- function(nn, perplexity = NULL,
       nn_idx = nn$idx,
       perplexity = perplexity,
       n_threads = n_threads,
-      grain_size = grain_size,
-      verbose = verbose
+      grain_size = grain_size
     )
     affinity_matrix <- affinity_matrix_res$matrix
     if (verbose && affinity_matrix_res$n_failures > 0) {

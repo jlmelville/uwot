@@ -10,8 +10,8 @@ using namespace Rcpp;
 template <typename UwotAnnoyDistance>
 auto annoy_nns_impl(const std::string &index_name, NumericMatrix mat,
                     std::size_t n_neighbors, std::size_t search_k,
-                    std::size_t n_threads = 0, std::size_t grain_size = 1,
-                    bool verbose = false) -> List {
+                    std::size_t n_threads = 0, std::size_t grain_size = 1)
+    -> List {
 
   std::size_t nrow = mat.rows();
   std::size_t ncol = mat.cols();
@@ -32,20 +32,19 @@ List annoy_search_parallel_cpp(const std::string &index_name, NumericMatrix mat,
                                std::size_t n_neighbors, std::size_t search_k,
                                const std::string &metric,
                                std::size_t n_threads = 0,
-                               std::size_t grain_size = 1,
-                               bool verbose = false) {
+                               std::size_t grain_size = 1) {
   if (metric == "euclidean") {
     return annoy_nns_impl<UwotAnnoyEuclidean>(index_name, mat, n_neighbors,
-                                              search_k, grain_size, verbose);
+                                              search_k, n_threads, grain_size);
   } else if (metric == "cosine") {
     return annoy_nns_impl<UwotAnnoyCosine>(index_name, mat, n_neighbors,
-                                           search_k, grain_size, verbose);
+                                           search_k, n_threads, grain_size);
   } else if (metric == "manhattan") {
     return annoy_nns_impl<UwotAnnoyManhattan>(index_name, mat, n_neighbors,
-                                              search_k, grain_size, verbose);
+                                              search_k, n_threads, grain_size);
   } else if (metric == "hamming") {
     return annoy_nns_impl<UwotAnnoyHamming>(index_name, mat, n_neighbors,
-                                            search_k, grain_size, verbose);
+                                            search_k, n_threads, grain_size);
   } else {
     stop("Unknown metric '", metric, "'");
   }
