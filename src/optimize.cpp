@@ -29,6 +29,8 @@
 
 #include "rng.h"
 
+using namespace Rcpp;
+
 template <typename T, bool DoMove = true, typename RandFactory = pcg_factory>
 auto optimize_layout(const T &gradient, std::vector<float> &head_embedding,
                      std::vector<float> &tail_embedding,
@@ -73,9 +75,8 @@ auto optimize_layout(const T &gradient, std::vector<float> &head_embedding,
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix optimize_layout_umap(
-    Rcpp::NumericMatrix head_embedding,
-    Rcpp::Nullable<Rcpp::NumericMatrix> tail_embedding,
+NumericMatrix optimize_layout_umap(
+    NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding,
     const std::vector<unsigned int> positive_head,
     const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
     unsigned int n_vertices, const std::vector<float> epochs_per_sample,
@@ -87,14 +88,14 @@ Rcpp::NumericMatrix optimize_layout_umap(
   // a shallow copy of head_embedding as tail_embedding.
   // When updating new values, tail_embedding is the new coordinate to optimize
   // and gets passed as normal.
-  auto head_vec = Rcpp::as<std::vector<float>>(head_embedding);
+  auto head_vec = as<std::vector<float>>(head_embedding);
   std::vector<float> *tail_vec_ptr = nullptr;
   bool delete_tail_ptr = false;
   if (tail_embedding.isNull()) {
     tail_vec_ptr = &head_vec;
   } else {
     tail_vec_ptr =
-        new std::vector<float>(Rcpp::as<std::vector<float>>(tail_embedding));
+        new std::vector<float>(as<std::vector<float>>(tail_embedding));
     delete_tail_ptr = true;
   }
 
@@ -159,14 +160,13 @@ Rcpp::NumericMatrix optimize_layout_umap(
     delete (tail_vec_ptr);
   }
 
-  return Rcpp::NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
-                             result.begin());
+  return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
+                       result.begin());
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix optimize_layout_tumap(
-    Rcpp::NumericMatrix head_embedding,
-    Rcpp::Nullable<Rcpp::NumericMatrix> tail_embedding,
+NumericMatrix optimize_layout_tumap(
+    NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding,
     const std::vector<unsigned int> positive_head,
     const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
     unsigned int n_vertices, const std::vector<float> epochs_per_sample,
@@ -174,14 +174,14 @@ Rcpp::NumericMatrix optimize_layout_tumap(
     std::size_t n_threads = 0, std::size_t grain_size = 1,
     bool move_other = true, bool verbose = false) {
   const uwot::tumap_gradient gradient;
-  auto head_vec = Rcpp::as<std::vector<float>>(head_embedding);
+  auto head_vec = as<std::vector<float>>(head_embedding);
   std::vector<float> *tail_vec_ptr = nullptr;
   bool delete_tail_ptr = false;
   if (tail_embedding.isNull()) {
     tail_vec_ptr = &head_vec;
   } else {
     tail_vec_ptr =
-        new std::vector<float>(Rcpp::as<std::vector<float>>(tail_embedding));
+        new std::vector<float>(as<std::vector<float>>(tail_embedding));
     delete_tail_ptr = true;
   }
 
@@ -217,14 +217,13 @@ Rcpp::NumericMatrix optimize_layout_tumap(
     delete (tail_vec_ptr);
   }
 
-  return Rcpp::NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
-                             result.begin());
+  return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
+                       result.begin());
 }
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix optimize_layout_largevis(
-    Rcpp::NumericMatrix head_embedding,
-    const std::vector<unsigned int> positive_head,
+NumericMatrix optimize_layout_largevis(
+    NumericMatrix head_embedding, const std::vector<unsigned int> positive_head,
     const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
     unsigned int n_vertices, const std::vector<float> epochs_per_sample,
     float gamma, float initial_alpha, float negative_sample_rate,
@@ -233,7 +232,7 @@ Rcpp::NumericMatrix optimize_layout_largevis(
   // We don't support adding extra points for LargeVis, so this is much simpler
   // than the UMAP case
   const uwot::largevis_gradient gradient(gamma);
-  auto head_vec = Rcpp::as<std::vector<float>>(head_embedding);
+  auto head_vec = as<std::vector<float>>(head_embedding);
 
   std::vector<float> result;
 
@@ -249,6 +248,6 @@ Rcpp::NumericMatrix optimize_layout_largevis(
         n_threads, grain_size, verbose);
   }
 
-  return Rcpp::NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
-                             result.begin());
+  return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
+                       result.begin());
 }

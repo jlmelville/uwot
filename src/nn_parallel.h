@@ -19,9 +19,6 @@
 
 #include <vector>
 
-#include "RcppPerpendicular.h"
-#include "uwot/matrix.h"
-
 #if defined(__MINGW32__)
 #undef Realloc
 #undef Free
@@ -31,6 +28,8 @@
 
 #include <annoylib.h>
 #include <kissrandom.h>
+
+#include "uwot/matrix.h"
 
 struct UwotAnnoyEuclidean {
   using Distance = Euclidean;
