@@ -17,8 +17,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <atomic>
 #include <limits>
-#include <mutex>
 #include <vector>
 
 #include <Rcpp.h>
@@ -37,9 +37,7 @@ struct PerplexityWorker {
   double double_max = (std::numeric_limits<double>::max)();
 
   std::vector<double> res;
-
-  std::mutex mutex;
-  std::size_t n_search_fails;
+  std::atomic_size_t n_search_fails;
 
   PerplexityWorker(const std::vector<double> &nn_dist,
                    const std::vector<int> &nn_idx, std::size_t n_vertices,
@@ -144,10 +142,7 @@ struct PerplexityWorker {
     }
 
     // Update global count of failures
-    {
-      std::lock_guard<std::mutex> guard(mutex);
-      n_search_fails += n_window_search_fails;
-    }
+    n_search_fails += n_window_search_fails;
   }
 };
 
@@ -175,7 +170,9 @@ Rcpp::List calc_row_probabilities_parallel(
     worker(0, n_vertices);
   }
 
-  return Rcpp::List::create(Rcpp::Named("matrix") = Rcpp::NumericMatrix(
-                                n_vertices, n_neighbors, worker.res.begin()),
-                            Rcpp::Named("n_failures") = worker.n_search_fails);
+  return Rcpp::List::create(
+      Rcpp::Named("matrix") =
+          Rcpp::NumericMatrix(n_vertices, n_neighbors, worker.res.begin()),
+      Rcpp::Named("n_failures") =
+          static_cast<std::size_t>(worker.n_search_fails));
 }

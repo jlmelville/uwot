@@ -18,8 +18,8 @@
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algorithm>
+#include <atomic>
 #include <limits>
-#include <mutex>
 #include <numeric>
 #include <vector>
 
@@ -37,8 +37,8 @@ auto mean_average(std::vector<double> v) -> double {
   s /= n;
 
   long double t = 0.0;
-  for (std::size_t i = 0; i < n; i++) {
-    t += v[i] - s;
+  for (auto e : v) {
+    t += e - s;
   }
   s += t / n;
 
@@ -62,8 +62,7 @@ struct SmoothKnnWorker {
 
   std::vector<double> nn_weights;
 
-  std::mutex mutex;
-  std::size_t n_search_fails;
+  std::atomic_size_t n_search_fails;
 
   SmoothKnnWorker(const std::vector<double> &nn_dist, std::size_t n_vertices,
                   std::size_t n_iter, double local_connectivity,
@@ -179,11 +178,9 @@ struct SmoothKnnWorker {
 
       set_row(nn_weights, n_vertices, n_neighbors, i, res);
     }
+
     // Update global count of failures
-    {
-      std::lock_guard<std::mutex> guard(mutex);
-      n_search_fails += n_window_search_fails;
-    }
+    n_search_fails += n_window_search_fails;
   }
 };
 
@@ -208,8 +205,9 @@ Rcpp::List smooth_knn_distances_parallel(
     worker(0, n_vertices);
   }
 
-  return Rcpp::List::create(Rcpp::Named("matrix") =
-                                Rcpp::NumericMatrix(n_vertices, n_neighbors,
-                                                    worker.nn_weights.begin()),
-                            Rcpp::Named("n_failures") = worker.n_search_fails);
+  return Rcpp::List::create(
+      Rcpp::Named("matrix") = Rcpp::NumericMatrix(n_vertices, n_neighbors,
+                                                  worker.nn_weights.begin()),
+      Rcpp::Named("n_failures") =
+          static_cast<std::size_t>(worker.n_search_fails));
 }
