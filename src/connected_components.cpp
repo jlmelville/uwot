@@ -29,12 +29,12 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 List connected_components_undirected(const unsigned long N,
-                                     const IntegerVector indices1,
-                                     const IntegerVector indptr1,
-                                     const IntegerVector indices2,
-                                     const IntegerVector indptr2) {
-  const int VOID = -1;
-  const int END = -2;
+                                     IntegerVector indices1,
+                                     IntegerVector indptr1,
+                                     IntegerVector indices2,
+                                     IntegerVector indptr2) {
+  int VOID = -1;
+  int END = -2;
   std::vector<int> labels(N, VOID);
   std::vector<int> SS(labels);
   int label = 0;

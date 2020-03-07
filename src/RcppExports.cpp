@@ -6,16 +6,16 @@
 using namespace Rcpp;
 
 // connected_components_undirected
-List connected_components_undirected(const unsigned long N, const IntegerVector indices1, const IntegerVector indptr1, const IntegerVector indices2, const IntegerVector indptr2);
+List connected_components_undirected(const unsigned long N, IntegerVector indices1, IntegerVector indptr1, IntegerVector indices2, IntegerVector indptr2);
 RcppExport SEXP _uwot_connected_components_undirected(SEXP NSEXP, SEXP indices1SEXP, SEXP indptr1SEXP, SEXP indices2SEXP, SEXP indptr2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const unsigned long >::type N(NSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type indices1(indices1SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type indptr1(indptr1SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type indices2(indices2SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type indptr2(indptr2SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type indices1(indices1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type indptr1(indptr1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type indices2(indices2SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type indptr2(indptr2SEXP);
     rcpp_result_gen = Rcpp::wrap(connected_components_undirected(N, indices1, indptr1, indices2, indptr2));
     return rcpp_result_gen;
 END_RCPP
@@ -151,15 +151,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // fast_intersection_cpp
-NumericVector fast_intersection_cpp(const IntegerVector rows, const IntegerVector cols, NumericVector values, const IntegerVector target, double unknown_dist, double far_dist);
+NumericVector fast_intersection_cpp(IntegerVector rows, IntegerVector cols, NumericVector values, IntegerVector target, double unknown_dist, double far_dist);
 RcppExport SEXP _uwot_fast_intersection_cpp(SEXP rowsSEXP, SEXP colsSEXP, SEXP valuesSEXP, SEXP targetSEXP, SEXP unknown_distSEXP, SEXP far_distSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const IntegerVector >::type rows(rowsSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type cols(colsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type rows(rowsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type cols(colsSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type values(valuesSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type target(targetSEXP);
     Rcpp::traits::input_parameter< double >::type unknown_dist(unknown_distSEXP);
     Rcpp::traits::input_parameter< double >::type far_dist(far_distSEXP);
     rcpp_result_gen = Rcpp::wrap(fast_intersection_cpp(rows, cols, values, target, unknown_dist, far_dist));
@@ -167,19 +167,19 @@ BEGIN_RCPP
 END_RCPP
 }
 // general_sset_intersection_cpp
-NumericVector general_sset_intersection_cpp(const IntegerVector indptr1, const IntegerVector indices1, NumericVector data1, const IntegerVector indptr2, const IntegerVector indices2, NumericVector data2, const IntegerVector result_row, const IntegerVector result_col, NumericVector result_val, double mix_weight);
+NumericVector general_sset_intersection_cpp(IntegerVector indptr1, IntegerVector indices1, NumericVector data1, IntegerVector indptr2, IntegerVector indices2, NumericVector data2, IntegerVector result_row, IntegerVector result_col, NumericVector result_val, double mix_weight);
 RcppExport SEXP _uwot_general_sset_intersection_cpp(SEXP indptr1SEXP, SEXP indices1SEXP, SEXP data1SEXP, SEXP indptr2SEXP, SEXP indices2SEXP, SEXP data2SEXP, SEXP result_rowSEXP, SEXP result_colSEXP, SEXP result_valSEXP, SEXP mix_weightSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const IntegerVector >::type indptr1(indptr1SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type indices1(indices1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type indptr1(indptr1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type indices1(indices1SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type data1(data1SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type indptr2(indptr2SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type indices2(indices2SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type indptr2(indptr2SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type indices2(indices2SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type data2(data2SEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type result_row(result_rowSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type result_col(result_colSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type result_row(result_rowSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type result_col(result_colSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type result_val(result_valSEXP);
     Rcpp::traits::input_parameter< double >::type mix_weight(mix_weightSEXP);
     rcpp_result_gen = Rcpp::wrap(general_sset_intersection_cpp(indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val, mix_weight));

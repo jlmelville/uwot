@@ -56,8 +56,7 @@ struct UwotAnnoyHamming {
   using T = uint64_t;
 };
 
-template <typename UwotAnnoyDistance>
-struct NNWorker {
+template <typename UwotAnnoyDistance> struct NNWorker {
   const std::string &index_name;
   const std::vector<double> &mat;
   std::size_t nrow;
@@ -79,7 +78,7 @@ struct NNWorker {
         index(ncol);
     index.load(index_name.c_str());
 
-    for (std::size_t i = begin; i < end; i++) {
+    for (auto i = begin; i < end; i++) {
       std::vector<typename UwotAnnoyDistance::T> fv(ncol);
       uwot::get_row(mat, nrow, ncol, i, fv);
 

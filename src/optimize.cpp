@@ -24,9 +24,9 @@
 #include <progress.hpp>
 #include <utility>
 
-#include "gradient.h"
-#include "sampler.h"
 #include "tauprng.h"
+#include "uwot/gradient.h"
+#include "uwot/sampler.h"
 
 #include "RcppPerpendicular.h"
 
@@ -34,19 +34,19 @@
 // Default empty version does nothing: used in umap_transform when
 // some of the vertices should be held fixed
 template <bool DoMoveVertex = false>
-void move_other_vertex(std::vector<float> &embedding, const float grad_d,
-                       const std::size_t i, const std::size_t nrj) {}
+void move_other_vertex(std::vector<float> &embedding, float grad_d,
+                       std::size_t i, std::size_t nrj) {}
 
 // Specialization to move the vertex: used in umap when both
 // vertices in an edge should be moved
 template <>
-void move_other_vertex<true>(std::vector<float> &embedding, const float grad_d,
-                             const std::size_t i, const std::size_t nrj) {
+void move_other_vertex<true>(std::vector<float> &embedding, float grad_d,
+                             std::size_t i, std::size_t nrj) {
   embedding[nrj + i] -= grad_d;
 }
 
-auto clamp(const float v, const float lo, const float hi) -> const float {
-  const float t = v < lo ? lo : v;
+auto clamp(float v, float lo, float hi) -> float {
+  float t = v < lo ? lo : v;
   return t > hi ? hi : t;
 }
 
@@ -60,19 +60,19 @@ struct SgdWorker {
   const Gradient gradient;
   const std::vector<unsigned int> positive_head;
   const std::vector<unsigned int> positive_tail;
-  Sampler sampler;
+  uwot::Sampler sampler;
   std::vector<float> &head_embedding;
   std::vector<float> &tail_embedding;
-  const std::size_t ndim;
-  const std::size_t head_nvert;
-  const std::size_t tail_nvert;
-  const float dist_eps;
+  std::size_t ndim;
+  std::size_t head_nvert;
+  std::size_t tail_nvert;
+  float dist_eps;
   RngFactory rng_factory;
 
   SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
-            std::vector<unsigned int> positive_tail, Sampler &sampler,
+            std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
             std::vector<float> &head_embedding,
-            std::vector<float> &tail_embedding, const std::size_t ndim)
+            std::vector<float> &tail_embedding, std::size_t ndim)
       :
 
         n(0), alpha(0.0), gradient(gradient),
@@ -93,49 +93,47 @@ struct SgdWorker {
     auto prng = rng_factory.create(end);
 
     std::vector<float> dys(ndim);
-    for (std::size_t i = begin; i < end; i++) {
+    for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
-      const std::size_t dj = ndim * positive_head[i];
-      const std::size_t dk = ndim * positive_tail[i];
+      std::size_t dj = ndim * positive_head[i];
+      std::size_t dk = ndim * positive_tail[i];
 
       float dist_squared = 0.0;
       for (std::size_t d = 0; d < ndim; d++) {
-        const float diff = head_embedding[dj + d] - tail_embedding[dk + d];
+        float diff = head_embedding[dj + d] - tail_embedding[dk + d];
         dys[d] = diff;
         dist_squared += diff * diff;
       }
       dist_squared = (std::max)(dist_eps, dist_squared);
-      const float grad_coeff = gradient.grad_attr(dist_squared);
+      float grad_coeff = gradient.grad_attr(dist_squared);
 
       for (std::size_t d = 0; d < ndim; d++) {
-        const float grad_d =
-            alpha *
-            clamp(grad_coeff * dys[d], Gradient::clamp_lo, Gradient::clamp_hi);
+        float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+                                     Gradient::clamp_hi);
         head_embedding[dj + d] += grad_d;
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
       }
 
-      const std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
+      std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (std::size_t p = 0; p < n_neg_samples; p++) {
-        const std::size_t dkn = prng(tail_nvert) * ndim;
+        std::size_t dkn = prng(tail_nvert) * ndim;
         if (dj == dkn) {
           continue;
         }
         float dist_squared = 0.0;
         for (std::size_t d = 0; d < ndim; d++) {
-          const float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
+          float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
           dys[d] = diff;
           dist_squared += diff * diff;
         }
         dist_squared = (std::max)(dist_eps, dist_squared);
-        const float grad_coeff = gradient.grad_rep(dist_squared);
+        float grad_coeff = gradient.grad_rep(dist_squared);
 
         for (std::size_t d = 0; d < ndim; d++) {
-          const float grad_d =
-              alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
-                            Gradient::clamp_hi);
+          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+                                       Gradient::clamp_hi);
           head_embedding[dj + d] += grad_d;
         }
       }
@@ -160,7 +158,7 @@ auto optimize_layout(const T &gradient, std::vector<float> &head_embedding,
                      float initial_alpha, float negative_sample_rate,
                      std::size_t n_threads = 0, std::size_t grain_size = 1,
                      bool verbose = false) -> std::vector<float> {
-  Sampler sampler(epochs_per_sample, negative_sample_rate);
+  uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
 
   SgdWorker<T, DoMove, RandFactory> worker(
       gradient, positive_head, positive_tail, sampler, head_embedding,
@@ -221,54 +219,54 @@ Rcpp::NumericMatrix optimize_layout_umap(
 
   std::vector<float> result;
   if (approx_pow) {
-    const apumap_gradient gradient(a, b, gamma);
+    const uwot::apumap_gradient gradient(a, b, gamma);
     if (move_other) {
       if (pcg_rand) {
-        result = optimize_layout<apumap_gradient, true, pcg_factory>(
+        result = optimize_layout<uwot::apumap_gradient, true, pcg_factory>(
             gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
             negative_sample_rate, n_threads, grain_size, verbose);
       } else {
-        result = optimize_layout<apumap_gradient, true, tau_factory>(
+        result = optimize_layout<uwot::apumap_gradient, true, tau_factory>(
             gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
             negative_sample_rate, n_threads, grain_size, verbose);
       }
     } else {
       if (pcg_rand) {
-        result = optimize_layout<apumap_gradient, false, pcg_factory>(
+        result = optimize_layout<uwot::apumap_gradient, false, pcg_factory>(
             gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
             negative_sample_rate, n_threads, grain_size, verbose);
       } else {
-        result = optimize_layout<apumap_gradient, false, tau_factory>(
+        result = optimize_layout<uwot::apumap_gradient, false, tau_factory>(
             gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
             negative_sample_rate, n_threads, grain_size, verbose);
       }
     }
   } else {
-    const umap_gradient gradient(a, b, gamma);
+    const uwot::umap_gradient gradient(a, b, gamma);
     if (move_other) {
       if (pcg_rand) {
-        result = optimize_layout<umap_gradient, true, pcg_factory>(
+        result = optimize_layout<uwot::umap_gradient, true, pcg_factory>(
             gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
             negative_sample_rate, n_threads, grain_size, verbose);
       } else {
-        result = optimize_layout<umap_gradient, true, tau_factory>(
+        result = optimize_layout<uwot::umap_gradient, true, tau_factory>(
             gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
             negative_sample_rate, n_threads, grain_size, verbose);
       }
     } else {
       if (pcg_rand) {
-        result = optimize_layout<umap_gradient, false, pcg_factory>(
+        result = optimize_layout<uwot::umap_gradient, false, pcg_factory>(
             gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
             negative_sample_rate, n_threads, grain_size, verbose);
       } else {
-        result = optimize_layout<umap_gradient, false, tau_factory>(
+        result = optimize_layout<uwot::umap_gradient, false, tau_factory>(
             gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
             n_epochs, n_vertices, epochs_per_sample, initial_alpha,
             negative_sample_rate, n_threads, grain_size, verbose);
@@ -294,7 +292,7 @@ Rcpp::NumericMatrix optimize_layout_tumap(
     float initial_alpha, float negative_sample_rate, bool pcg_rand = true,
     std::size_t n_threads = 0, std::size_t grain_size = 1,
     bool move_other = true, bool verbose = false) {
-  const tumap_gradient gradient;
+  const uwot::tumap_gradient gradient;
   auto head_vec = Rcpp::as<std::vector<float>>(head_embedding);
   std::vector<float> *tail_vec_ptr = nullptr;
   bool delete_tail_ptr = false;
@@ -310,24 +308,24 @@ Rcpp::NumericMatrix optimize_layout_tumap(
 
   if (move_other) {
     if (pcg_rand) {
-      result = optimize_layout<tumap_gradient, true, pcg_factory>(
+      result = optimize_layout<uwot::tumap_gradient, true, pcg_factory>(
           gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
           n_epochs, n_vertices, epochs_per_sample, initial_alpha,
           negative_sample_rate, n_threads, grain_size, verbose);
     } else {
-      result = optimize_layout<tumap_gradient, true, tau_factory>(
+      result = optimize_layout<uwot::tumap_gradient, true, tau_factory>(
           gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
           n_epochs, n_vertices, epochs_per_sample, initial_alpha,
           negative_sample_rate, n_threads, grain_size, verbose);
     }
   } else {
     if (pcg_rand) {
-      result = optimize_layout<tumap_gradient, false, pcg_factory>(
+      result = optimize_layout<uwot::tumap_gradient, false, pcg_factory>(
           gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
           n_epochs, n_vertices, epochs_per_sample, initial_alpha,
           negative_sample_rate, n_threads, grain_size, verbose);
     } else {
-      result = optimize_layout<tumap_gradient, false, tau_factory>(
+      result = optimize_layout<uwot::tumap_gradient, false, tau_factory>(
           gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
           n_epochs, n_vertices, epochs_per_sample, initial_alpha,
           negative_sample_rate, n_threads, grain_size, verbose);
@@ -353,18 +351,18 @@ Rcpp::NumericMatrix optimize_layout_largevis(
     bool verbose = false) {
   // We don't support adding extra points for LargeVis, so this is much simpler
   // than the UMAP case
-  const largevis_gradient gradient(gamma);
+  const uwot::largevis_gradient gradient(gamma);
   auto head_vec = Rcpp::as<std::vector<float>>(head_embedding);
 
   std::vector<float> result;
 
   if (pcg_rand) {
-    result = optimize_layout<largevis_gradient, true, pcg_factory>(
+    result = optimize_layout<uwot::largevis_gradient, true, pcg_factory>(
         gradient, head_vec, head_vec, positive_head, positive_tail, n_epochs,
         n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
         n_threads, grain_size, verbose);
   } else {
-    result = optimize_layout<largevis_gradient, true, tau_factory>(
+    result = optimize_layout<uwot::largevis_gradient, true, tau_factory>(
         gradient, head_vec, head_vec, positive_head, positive_tail, n_epochs,
         n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
         n_threads, grain_size, verbose);

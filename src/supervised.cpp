@@ -21,10 +21,10 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-NumericVector 
-fast_intersection_cpp(const IntegerVector rows, const IntegerVector cols,
-                      NumericVector values, const IntegerVector target,
-                      double unknown_dist = 1.0, double far_dist = 5.0) {
+NumericVector fast_intersection_cpp(IntegerVector rows, IntegerVector cols,
+                                    NumericVector values, IntegerVector target,
+                                    double unknown_dist = 1.0,
+                                    double far_dist = 5.0) {
   double ex_unknown = std::exp(-unknown_dist);
   double ex_far = std::exp(-far_dist);
 
@@ -45,10 +45,9 @@ fast_intersection_cpp(const IntegerVector rows, const IntegerVector cols,
 
 // [[Rcpp::export]]
 NumericVector general_sset_intersection_cpp(
-    const IntegerVector indptr1, const IntegerVector indices1,
-    NumericVector data1, const IntegerVector indptr2,
-    const IntegerVector indices2, NumericVector data2,
-    const IntegerVector result_row, const IntegerVector result_col,
+    IntegerVector indptr1, IntegerVector indices1, NumericVector data1,
+    IntegerVector indptr2, IntegerVector indices2, NumericVector data2,
+    IntegerVector result_row, IntegerVector result_col,
     NumericVector result_val, double mix_weight = 0.5) {
 
   double left_min = std::max(Rcpp::min(data1) / 2.0, 1.0e-8);
