@@ -45,7 +45,7 @@ inline auto split_input_range(const IndexRange &range, std::size_t n_threads,
   std::size_t begin = range.first;
   while (begin < range.second) {
     std::size_t end = (std::min)(begin + grain_size, range.second);
-    ranges.emplace_back(IndexRange(begin, end));
+    ranges.emplace_back(std::make_pair(begin, end));
     begin = end;
   }
 
