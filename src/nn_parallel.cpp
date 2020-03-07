@@ -21,9 +21,9 @@ auto annoy_nns_impl(const std::string &index_name,
                                      search_k);
   RcppPerpendicular::parallel_for(0, nrow, worker, n_threads, grain_size);
 
-  return Rcpp::List::create(Rcpp::Named("item") = Rcpp::IntegerMatrix(
+  return Rcpp::List::create(Rcpp::_("item") = Rcpp::IntegerMatrix(
                                 nrow, n_neighbors, worker.idx.begin()),
-                            Rcpp::Named("distance") = Rcpp::NumericMatrix(
+                            Rcpp::_("distance") = Rcpp::NumericMatrix(
                                 nrow, n_neighbors, worker.dists.begin()));
 }
 

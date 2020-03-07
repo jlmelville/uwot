@@ -171,8 +171,8 @@ Rcpp::List calc_row_probabilities_parallel(
   }
 
   return Rcpp::List::create(
-      Rcpp::Named("matrix") =
+      Rcpp::_("matrix") =
           Rcpp::NumericMatrix(n_vertices, n_neighbors, worker.res.begin()),
-      Rcpp::Named("n_failures") =
+      Rcpp::_("n_failures") =
           static_cast<std::size_t>(worker.n_search_fails));
 }

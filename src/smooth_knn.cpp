@@ -206,8 +206,7 @@ Rcpp::List smooth_knn_distances_parallel(
   }
 
   return Rcpp::List::create(
-      Rcpp::Named("matrix") = Rcpp::NumericMatrix(n_vertices, n_neighbors,
-                                                  worker.nn_weights.begin()),
-      Rcpp::Named("n_failures") =
-          static_cast<std::size_t>(worker.n_search_fails));
+      Rcpp::_("matrix") = Rcpp::NumericMatrix(n_vertices, n_neighbors,
+                                              worker.nn_weights.begin()),
+      Rcpp::_("n_failures") = static_cast<std::size_t>(worker.n_search_fails));
 }
