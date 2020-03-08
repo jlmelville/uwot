@@ -39,21 +39,15 @@
 
 namespace uwot {
 
-// As in R's internals and Rcpp, use Kahan Summation to compensate for
-// numerical error
-// https://stackoverflow.com/q/17866149/4096483
+// Welford-style mean calculation
 auto mean_average(std::vector<double> v) -> double {
+  long double mean = 0.0;
   std::size_t n = v.size();
-  long double s = std::accumulate(v.begin(), v.end(), 0.0L);
-  s /= n;
 
-  long double t = 0.0;
-  for (auto e : v) {
-    t += e - s;
+  for (std::size_t i = 0; i < n; ++i) {
+    mean += (v[i] - mean) / (i + 1);
   }
-  s += t / n;
-
-  return static_cast<double>(s);
+  return static_cast<double>(mean);
 }
 
 struct SmoothKnnWorker {
