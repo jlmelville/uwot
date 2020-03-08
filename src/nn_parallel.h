@@ -65,18 +65,19 @@ template <typename UwotAnnoyDistance> struct NNWorker {
   std::vector<int> idx;
   std::vector<typename UwotAnnoyDistance::T> dists;
 
+  AnnoyIndex<typename UwotAnnoyDistance::S, typename UwotAnnoyDistance::T,
+             typename UwotAnnoyDistance::Distance, Kiss64Random>
+      index;
+
   NNWorker(const std::string &index_name, const std::vector<double> &mat,
            std::size_t ncol, std::size_t n_neighbors, std::size_t search_k)
       : index_name(index_name), mat(mat), nrow(mat.size() / ncol), ncol(ncol),
         n_neighbors(n_neighbors), search_k(search_k),
-        idx(nrow * n_neighbors, -1), dists(nrow * n_neighbors) {}
+        idx(nrow * n_neighbors, -1), dists(nrow * n_neighbors), index(ncol) {
+    index.load(index_name.c_str());
+  }
 
   void operator()(std::size_t begin, std::size_t end) {
-    AnnoyIndex<typename UwotAnnoyDistance::S, typename UwotAnnoyDistance::T,
-               typename UwotAnnoyDistance::Distance, Kiss64Random>
-        index(ncol);
-    index.load(index_name.c_str());
-
     for (auto i = begin; i < end; i++) {
       std::vector<typename UwotAnnoyDistance::T> fv(ncol);
       uwot::get_row(mat, nrow, ncol, i, fv);
