@@ -290,43 +290,47 @@ obvious answers here.
 ## Conclusions
 
 The good news is that for most datasets, the differences between `uwot`'s UMAP
-implementation and that of the Python `UMAP` implementation makes very little 
+implementation and that of the Python `UMAP` implementation makes very little
 difference. The bad news is that there *are* a couple of cases where we see
-differences. The biggest offender is `macosko2015` but there neither method
-is doing a perfect job. Nonetheless, `UMAP` is able to calculate nearest
-neighbors more accurately and more quickly than `uwot`.
+differences. The biggest offender is `macosko2015` but there neither method is
+doing a perfect job. Nonetheless, `UMAP` is able to calculate nearest neighbors
+more accurately and more quickly than `uwot`.
 
 One source of the difference is the use of Annoy as the nearest neighbor 
-calculation method. It does seem to be solidly slower than pynndescent, but
-in my experience, it can reach high accuracies. even if it takes a while. `uwot`
-usually can run the index searching with multiple threads, but to do so, it
-requires writing the index to disk. There is an issue with Annoy that if the
-index gets too large (> 2GB), Annoy can't read it back in, so the multi-threaded
-Annoy search can fail under circumstances when you could really use it. In that
-case, you must re-run with `n_threads = 0`.
+calculation method. It does seem to be solidly slower than pynndescent, but in
+my experience, it can reach high accuracies. even if it takes a while. **March 8
+2020**: On Windows, there used to be an issue where an Annoy index that was
+larger than 2GB on disk couldn't be read back in. Make sure you are using a
+version of [RcppAnnoy](https://cran.r-project.org/package=RcppAnnoy) 0.0.15 or
+later to avoid this.
 
-All that sounds very unsatisfying, and I agree, especially because one of the
-big advantages of `UMAP` is its speed. So in most cases, I would recommend using
-PCA to reduce high dimensionality datasets to something that Annoy can process
-in a few minutes at most. Unfortunately, we've also seen how this can limit the
-accuracy that the nearest neighbor search can achieve. Maybe a future version of
-`uwot` will use the rp-tree approach that `UMAP` does so well with.
+The time to search an Annoy index seems to start scaling quite badly with
+dimensionality > 1000, so if you can get away with picking 500-1000 random
+features and use that, you could try that. With 1,152 random features (i.e.
+1/16th the pixels in`norb`), visual results aren't *that* much worse with this
+approach and the nearest neighbor search runs 100 times faster (50 minutes vs 20
+seconds):
 
-For now, if you have a high-dimensional dataset, you should consider PCA. I
-don't have any solid advice for the number of components to retain if you do use
-PCA for preprocessing. Less than the usual t-SNE default of 50 is probably
-unwise. I use `pca = 100` in most examples, but as we've seen, that can
-still sufficiently perturbs the pairwise distances in the input data to give
-some differences in the output. It would be nice if you could use more components 
-to get a better trade-off of accuracy and speed, but even with fast partial PCA 
+|                             |                           |
+:----------------------------:|:--------------------------:
+![norb 18432 features](../img/pycompare/norb_nopca2.png)|![norb 1152 features](../img/pycompare/norb1152.png)
+
+
+Otherwise, if you have a high-dimensional dataset, you should consider PCA.
+I don't have any solid advice for the number of components to retain if you do
+use PCA for preprocessing. Less than the usual t-SNE default of 50 is probably
+unwise. I use `pca = 100` in most examples, but as we've seen, that can still
+sufficiently perturbs the pairwise distances in the input data to give some
+differences in the output. It would be nice if you could use more components to
+get a better trade-off of accuracy and speed, but even with fast partial PCA
 routines used by `uwot` (courtesy of 
 [irlba](https://cran.r-project.org/package=irlba)), extracting more than 100 
 components can be quite time-consuming.
 
 ### What about t-SNE?
 
-`uwot` is not the only dimensionality reduction to use PCA or Annoy for approximate 
-nearest neighbor search. LargeVis uses it, the t-SNE package
+`uwot` is not the only dimensionality reduction to use PCA or Annoy for
+approximate nearest neighbor search. LargeVis uses it, the t-SNE package
 [Fit-SNE](https://github.com/KlugerLab/FIt-SNE) has Annoy as an option and 
 [openTSNE](https://github.com/pavlin-policar/openTSNE) seems to have at least
 considered it (see e.g. https://github.com/pavlin-policar/openTSNE/issues/28).
