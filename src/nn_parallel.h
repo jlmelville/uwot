@@ -76,6 +76,10 @@ template <typename UwotAnnoyDistance> struct NNWorker {
         idx(nrow * n_neighbors, -1), dists(nrow * n_neighbors), index(ncol) {
     index.load(index_name.c_str());
   }
+  
+  ~NNWorker() { 
+    index.unload();
+  }
 
   void operator()(std::size_t begin, std::size_t end) {
     for (auto i = begin; i < end; i++) {
