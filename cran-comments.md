@@ -24,14 +24,36 @@ There were no ERRORs or WARNINGs.
 * For r-hub with Windows Server 2008 R2 SP1, R-devel, 32/64 bit there was one 
   NOTE:
 
+```
 checking for non-standard things in the check directory ... NOTE
   'examples_i386' 'examples_x64' 'tests_i386' 'tests_x64'
 Found the following files/directories:
   'uwot-Ex_i386.Rout' 'uwot-Ex_x64.Rout'
+```
 
 This would seem to be something to do with r-hub rather than a real problem.
 
-There was a message about possibly mis-spelled words in DESCRIPTION:
+* For r-hub with Ubuntu Linux 16.04 LTS, R-release, GCC there was one NOTE:
+
+```
+* checking installed package size ... NOTE
+  installed size is  6.4Mb
+  sub-directories of 1Mb or more:
+    libs   6.0Mb
+``` 
+
+* For r-hub with Fedora Linux, R-devel, clang, gfortran there was a similar NOTE:
+
+```
+* checking installed package size ... NOTE
+  installed size is  5.0Mb
+  sub-directories of 1Mb or more:
+    libs   4.5Mb
+```
+
+This is due to the underlying C++ implementation using templates.
+
+* There was a message about possibly mis-spelled words in DESCRIPTION:
   
   McInnes (7:42)
   Rcpp (11:73)
