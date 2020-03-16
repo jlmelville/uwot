@@ -3,6 +3,8 @@
 This is a resubmission. In this version I have:
 
 * Resolved usages of dependencies that resulted in UBSAN errors.
+* Changed a default argument which caused an example error in a downstream 
+dependency. 
 
 ## Test environments
 
@@ -54,8 +56,11 @@ Both should now be fixed.
 
 ## Downstream dependencies
 
-There are 4 downstream CRAN dependencies and 3 Bioconductor dependencies:
+There are 5 downstream CRAN dependencies and 3 Bioconductor dependencies:
 
 * Five of these packages report either NOTEs or a mixture of WARNINGs and NOTEs.
 None are related to 'uwot'.
-* The other two dependencies completed R CMD CHECK without issues.
+* The other three dependencies completed R CMD CHECK without issues.
+* The previous submission caused an error in an example in the iCellR package.
+This submission and changes in the latest version of iCellR have resolved this
+error.
