@@ -15,6 +15,13 @@ the basic method. Translated from the
 
 ## News
 
+*March 16 2020* A new version (0.1.8) is on CRAN. This is a minor release in terms of
+features, but you can now export the UMAP graph (<https://github.com/jlmelville/uwot/issues/47>),
+and there are some bug fixes for: loading Annoy indexes
+(<https://github.com/jlmelville/uwot/issues/31>), reproducibility across platforms
+(<https://github.com/jlmelville/uwot/issues/46>) and we no longer use RcppParallel for the
+multi-threading support, which should lead to fewer installation problems.
+
 *March 4 2020* I had to cancel my submission of version 0.1.7 to CRAN because of
 a broken example in a library using uwot. In the mean time I have switched to
 using `std::thread` rather than tinythread++.
@@ -81,24 +88,6 @@ Mac owners more.
 [The R for Mac OS X FAQ](https://cran.r-project.org/bin/macosx/RMacOSX-FAQ.html#Installation-of-source-packages)
 may be helpful here to work out what you can get away with. To be on the safe
 side, I would advise building `uwot` without a custom `Makevars`.
-
-**Everybody**: if your `.Rprofile` files print any messages, be sure to wrap
-them in `if (interactive()) { ... }` statements:
-
-```R
-# Example of a good .Rprofile file:
-if (interactive()) {
-    cat("I am printing this message in interactive sessions\n")
-}
-
-# Example of a bad .Rprofile file:
-cat("I am printing this message all of the time\n")
-```
-
-This project's `Makevars` file relies on a clean output to correctly configure
-[RcppParallel](https://cran.r-project.org/package=RcppParallel). If compilation
-fails and you see startup messages in the build output, this is what is
-happening.
 
 ```R
 install.packages("remotes")
