@@ -327,8 +327,13 @@ $$
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
 \frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + d_{ij}^2}  v_{ij} \left(\mathbf{y_i - y_j}\right) \\
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
-\frac{b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
+\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
 $$
+
+(*12 April 2020*: In previous versions of this document I had accidentally
+omitted a factor of 2 in the repulsive gradient equation above and in the SGD
+version two equations below. Thank you to Dmitry Kobak for spotting this.)
+
 While more complex-looking than the LargeVis gradient, there are obvious
 similarities. The 0.001 term in the denominator of the repulsive gradient plays
 the same role as the 0.1 in the LargeVis gradient (preventing division by zero).
@@ -348,7 +353,7 @@ $v_{ij} = 0$ for most pairs of edges, that term effectively disappears, leaving:
 
 $$
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
-\frac{b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}
+\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}
   \left(\mathbf{y_i - y_j}\right)
 $$
 

@@ -1674,8 +1674,10 @@ w_{ij} = 1 / \left(1 + ad_{ij}^{2b}\right)
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
 \frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + d_{ij}^2}  v_{ij} \left(\mathbf{y_i - y_j}\right) \\
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
-\frac{b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
-\]</span> While more complex-looking than the LargeVis gradient, there are obvious similarities. The 0.001 term in the denominator of the repulsive gradient plays the same role as the 0.1 in the LargeVis gradient (preventing division by zero).</p>
+\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
+\]</span></p>
+<p>(<em>12 April 2020</em>: In previous versions of this document I had accidentally omitted a factor of 2 in the repulsive gradient equation above and in the SGD version two equations below. Thank you to Dmitry Kobak for spotting this.)</p>
+<p>While more complex-looking than the LargeVis gradient, there are obvious similarities. The 0.001 term in the denominator of the repulsive gradient plays the same role as the 0.1 in the LargeVis gradient (preventing division by zero).</p>
 <p>UMAP uses the same sampling strategy as LargeVis, where sampling of positive edges is proportional to the weight of the edge (in this case <span class="math inline">\(v_{ij}\)</span>), and then the value of the gradient is calculated by assuming that <span class="math inline">\(v_{ij} = 1\)</span> for all edges. So for SGD purposes, the attractive gradient for UMAP is:</p>
 <p><span class="math display">\[
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
@@ -1684,7 +1686,7 @@ w_{ij} = 1 / \left(1 + ad_{ij}^{2b}\right)
 <p>The repulsive part of the gradient contains a <span class="math inline">\(1 - v_{ij}\)</span> term, but because <span class="math inline">\(v_{ij} = 0\)</span> for most pairs of edges, that term effectively disappears, leaving:</p>
 <p><span class="math display">\[
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
-\frac{b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}
+\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}
   \left(\mathbf{y_i - y_j}\right)
 \]</span></p>
 <p>Unlike LargeVis, negative sampling in UMAP uses a uniform distribution.</p>
