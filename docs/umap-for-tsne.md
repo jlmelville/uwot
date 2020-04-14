@@ -315,7 +315,7 @@ $$
 where $a$ and $b$ are determined by a non-linear least squares fit based on the
 `min_dist` and `spread` parameters that control the tightness of the squashing
 function. By setting $a = 1$ and $b = 1$ you get t-SNE weighting back.
-The current UMAP defaults result in $a = 1.929$ and $b = 0.7915$. 
+~~The current UMAP defaults result in a = 1.929 and b = 0.7915~~.
 *April 7 2019*: Actually, I got this wrong. The UMAP defaults use 
 `min_dist = 0.1, spread = 1`, which results in $a = 1.577$ and $b = 0.8951$.
 If you use `min_dist = 0.001, spread = 1` then you get the result for 
@@ -325,18 +325,21 @@ The attractive and repulsive UMAP gradient expressions are, respectively:
 
 $$
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
-\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + d_{ij}^2}  v_{ij} \left(\mathbf{y_i - y_j}\right) \\
+\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}  v_{ij} \left(\mathbf{y_i - y_j}\right) \\
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
-\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
+\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + ad_{ij}^{2b}\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
 $$
 
-(*12 April 2020*: In previous versions of this document I had accidentally
-omitted a factor of 2 in the repulsive gradient equation above and in the SGD
+(*April 13 2020*: In previous versions of this document I had completely messed
+up this expression by omitting a factor of 2 in the repulsive gradient equation 
+*and* missed out some important $a$s and $b$s. This also affected the SGD
 version two equations below. Thank you to Dmitry Kobak for spotting this.)
 
 While more complex-looking than the LargeVis gradient, there are obvious
-similarities. The 0.001 term in the denominator of the repulsive gradient plays
-the same role as the 0.1 in the LargeVis gradient (preventing division by zero).
+similarities, which become more clearer if you set $a=1$ and $b=1$, to get back
+the t-SNE/LargeVis output weight function. The 0.001 term in the denominator of
+the repulsive gradient plays the same role as the 0.1 in the LargeVis gradient
+(preventing division by zero).
 
 UMAP uses the same sampling strategy as LargeVis, where sampling of positive
 edges is proportional to the weight of the edge (in this case $v_{ij}$), and
@@ -345,7 +348,7 @@ for all edges. So for SGD purposes, the attractive gradient for UMAP is:
 
 $$
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
-\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + d_{ij}^2}\left(\mathbf{y_i - y_j}\right)
+\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}\left(\mathbf{y_i - y_j}\right)
 $$
 
 The repulsive part of the gradient contains a $1 - v_{ij}$ term, but because
@@ -353,7 +356,7 @@ $v_{ij} = 0$ for most pairs of edges, that term effectively disappears, leaving:
 
 $$
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
-\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}
+\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + ad_{ij}^{2b}\right)}
   \left(\mathbf{y_i - y_j}\right)
 $$
 

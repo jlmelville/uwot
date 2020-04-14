@@ -1668,25 +1668,25 @@ V_{symm} = V + V^{T} - V \circ V^{T}
 <p><span class="math display">\[
 w_{ij} = 1 / \left(1 + ad_{ij}^{2b}\right)
 \]</span></p>
-<p>where <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> are determined by a non-linear least squares fit based on the <code>min_dist</code> and <code>spread</code> parameters that control the tightness of the squashing function. By setting <span class="math inline">\(a = 1\)</span> and <span class="math inline">\(b = 1\)</span> you get t-SNE weighting back. The current UMAP defaults result in <span class="math inline">\(a = 1.929\)</span> and <span class="math inline">\(b = 0.7915\)</span>. <em>April 7 2019</em>: Actually, I got this wrong. The UMAP defaults use <code>min_dist = 0.1, spread = 1</code>, which results in <span class="math inline">\(a = 1.577\)</span> and <span class="math inline">\(b = 0.8951\)</span>. If you use <code>min_dist = 0.001, spread = 1</code> then you get the result for <span class="math inline">\(a = 1.929\)</span> and <span class="math inline">\(b = 0.7915\)</span>.</p>
+<p>where <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> are determined by a non-linear least squares fit based on the <code>min_dist</code> and <code>spread</code> parameters that control the tightness of the squashing function. By setting <span class="math inline">\(a = 1\)</span> and <span class="math inline">\(b = 1\)</span> you get t-SNE weighting back. <del>The current UMAP defaults result in a = 1.929 and b = 0.7915</del>. <em>April 7 2019</em>: Actually, I got this wrong. The UMAP defaults use <code>min_dist = 0.1, spread = 1</code>, which results in <span class="math inline">\(a = 1.577\)</span> and <span class="math inline">\(b = 0.8951\)</span>. If you use <code>min_dist = 0.001, spread = 1</code> then you get the result for <span class="math inline">\(a = 1.929\)</span> and <span class="math inline">\(b = 0.7915\)</span>.</p>
 <p>The attractive and repulsive UMAP gradient expressions are, respectively:</p>
 <p><span class="math display">\[
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
-\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + d_{ij}^2}  v_{ij} \left(\mathbf{y_i - y_j}\right) \\
+\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}  v_{ij} \left(\mathbf{y_i - y_j}\right) \\
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
-\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
+\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + ad_{ij}^{2b}\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
 \]</span></p>
-<p>(<em>12 April 2020</em>: In previous versions of this document I had accidentally omitted a factor of 2 in the repulsive gradient equation above and in the SGD version two equations below. Thank you to Dmitry Kobak for spotting this.)</p>
-<p>While more complex-looking than the LargeVis gradient, there are obvious similarities. The 0.001 term in the denominator of the repulsive gradient plays the same role as the 0.1 in the LargeVis gradient (preventing division by zero).</p>
+<p>(<em>April 13 2020</em>: In previous versions of this document I had completely messed up this expression by omitting a factor of 2 in the repulsive gradient equation <em>and</em> missed out some important <span class="math inline">\(a\)</span>s and <span class="math inline">\(b\)</span>s. This also affected the SGD version two equations below. Thank you to Dmitry Kobak for spotting this.)</p>
+<p>While more complex-looking than the LargeVis gradient, there are obvious similarities, which become more clearer if you set <span class="math inline">\(a=1\)</span> and <span class="math inline">\(b=1\)</span>, to get back the t-SNE/LargeVis output weight function. The 0.001 term in the denominator of the repulsive gradient plays the same role as the 0.1 in the LargeVis gradient (preventing division by zero).</p>
 <p>UMAP uses the same sampling strategy as LargeVis, where sampling of positive edges is proportional to the weight of the edge (in this case <span class="math inline">\(v_{ij}\)</span>), and then the value of the gradient is calculated by assuming that <span class="math inline">\(v_{ij} = 1\)</span> for all edges. So for SGD purposes, the attractive gradient for UMAP is:</p>
 <p><span class="math display">\[
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
-\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + d_{ij}^2}\left(\mathbf{y_i - y_j}\right)
+\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}\left(\mathbf{y_i - y_j}\right)
 \]</span></p>
 <p>The repulsive part of the gradient contains a <span class="math inline">\(1 - v_{ij}\)</span> term, but because <span class="math inline">\(v_{ij} = 0\)</span> for most pairs of edges, that term effectively disappears, leaving:</p>
 <p><span class="math display">\[
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
-\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}
+\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + ad_{ij}^{2b}\right)}
   \left(\mathbf{y_i - y_j}\right)
 \]</span></p>
 <p>Unlike LargeVis, negative sampling in UMAP uses a uniform distribution.</p>
