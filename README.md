@@ -5,6 +5,7 @@
 [![Dependencies](https://tinyverse.netlify.com/badge/uwot)](https://cran.r-project.org/package=uwot)
 [![CRAN Monthly Downloads](https://cranlogs.r-pkg.org/badges/uwot)](https://cran.r-project.org/package=uwot)
 ![CRAN Downloads](http://cranlogs.r-pkg.org/badges/grand-total/uwot)
+[![Last Commit](https://img.shields.io/github/last-commit/jlmelville/uwot)](https://github.com/jlmelville/uwot)
 
 An R implementation of the
 [Uniform Manifold Approximation and Projection (UMAP)](https://arxiv.org/abs/1802.03426)
