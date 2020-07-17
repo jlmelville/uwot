@@ -1653,7 +1653,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     res <- list(embedding = embedding)
     if (ret_model) {
       res <- append(res, list(
-        scale_info = attr_to_scale_info(X),
+        scale_info = if (!is.null(X)) { attr_to_scale_info(X) } else { NULL },
         n_neighbors = n_neighbors,
         search_k = search_k,
         local_connectivity = local_connectivity,
@@ -1684,7 +1684,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
           # the input data at load time)
           # To be sure of the dimensionality, fetch the first item from the 
           # index and see how many elements are in the returned vector.
-          res$metric[[1]] <- list(ndim = length(res$nn_index$getItemsVector(0)))
+          if(!is.null(X)){
+            res$metric[[1]] <- list(ndim = length(res$nn_index$getItemsVector(0)))
+          } else{
+            res$metric[[1]] <- list()
+          }
         }
       }
       if (!is.null(pca_models)) {

@@ -54,6 +54,7 @@
 #' iris_test_umap <- umap_transform(iris_test, iris_train_umap)
 #' @export
 umap_transform <- function(X, model,
+                           nn_method = NULL, 
                            init_weighted = TRUE,
                            search_k = NULL,
                            tmpdir = tempdir(),
@@ -65,11 +66,13 @@ umap_transform <- function(X, model,
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  if (!all_nn_indices_are_loaded(model)) {
-    stop("cannot use model: NN index is unloaded." ,
-         " Try reloading with `load_uwot`")
+  if(!is.list(nn_method)){
+    if (!all_nn_indices_are_loaded(model)) {
+      stop("cannot use model: NN index is unloaded." ,
+           " Try reloading with `load_uwot`")
+    }
   }
-  
+
   if (is.null(n_epochs)) {
     n_epochs <- model$n_epochs
   }
@@ -99,10 +102,10 @@ umap_transform <- function(X, model,
     pcg_rand <- TRUE
   }
 
+if(!is.null(X)){
   if (ncol(X) != norig_col) {
     stop("Incorrect dimensions: X must have ", norig_col, " columns")
   }
-
   if (methods::is(X, "data.frame")) {
     indexes <- which(vapply(X, is.numeric, logical(1)))
     if (length(indexes) == 0) {
@@ -111,6 +114,10 @@ umap_transform <- function(X, model,
     X <- as.matrix(X[, indexes])
   }
   n_vertices <- nrow(X)
+} else if( is.list(nn_method) ){
+  n_vertices <- nrow(nn_method$idx)
+}
+
   tsmessage(
     "Read ", n_vertices, " rows and found ", ncol(X),
     " numeric columns"
@@ -146,12 +153,17 @@ umap_transform <- function(X, model,
         verbose = verbose
       )
     }
-    nn <- annoy_search(Xsub,
-      k = n_neighbors, ann = ann, search_k = search_k,
-      tmpdir = tmpdir,
-      n_threads = n_threads, grain_size = grain_size,
-      verbose = verbose
-    )
+    if(!is.null(X)){
+      nn <- annoy_search(Xsub,
+                         k = n_neighbors, ann = ann, search_k = search_k,
+                         tmpdir = tmpdir,
+                         n_threads = n_threads, grain_size = grain_size,
+                         verbose = verbose
+      )
+    } else if(is.list(nn_method)){
+      nn <- nn_method
+    }
+
     graph_block <- smooth_knn(nn,
       local_connectivity = adjusted_local_connectivity,
       n_threads = n_threads,
