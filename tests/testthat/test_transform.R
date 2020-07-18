@@ -108,3 +108,19 @@ expect_equal(iris10_colrange, iris10_crtrans, check.attributes = FALSE)
 iris10pca <- pca_scores(iris10, ncol = 2, ret_extra = TRUE)
 iris10pcat <- apply_pca(iris10, iris10pca)
 expect_equal(iris10pca$scores, iris10pcat, check.attributes = FALSE)
+
+# #64
+test_that("can use pre-calculated neighbors in transform", {
+  set.seed(1337)
+  iris_train_nn <- annoy_nn(X = as.matrix(iris[c(1:10,51:60), -5]),
+                            k = 4, 
+                            metric = "euclidean", n_threads = 0,
+                            ret_index = TRUE)
+  iris_umap_train <- umap(X = NULL, nn_method = iris_train_nn, ret_model = TRUE)
+  query_ref_nn <- annoy_search(X = as.matrix(iris[101:110, -5]), 
+                               k = 4, 
+                               ann = iris_train_nn$index, n_threads = 0)
+  iris_umap_test <- umap_transform(X = NULL,  model = iris_umap_train, 
+                                   nn_method = query_ref_nn)
+  expect_ok_matrix(iris_umap_test)
+})
