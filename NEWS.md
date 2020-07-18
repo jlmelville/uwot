@@ -1,3 +1,16 @@
+# uwot 0.1.8.9000
+
+## Big fixes and minor improvements
+
+* New parameter, `nn_method`, for `umap_transform`: pass a list containing
+pre-computed nearest neighbor data (identical to that used in the `umap`
+function). You should not pass anything to the `X` parameter in this case. This
+extends the functionality for transforming new points to the case where nearest
+neighbor data between the original data and new data can be calculated external
+to `uwot`. Thanks to [Yuhan Hao](https://github.com/yuhanH) for contributing the
+PR (<https://github.com/jlmelville/uwot/issues/63> and
+<https://github.com/jlmelville/uwot/issues/64>).
+
 # uwot 0.1.8
 
 ## Big fixes and minor improvements
