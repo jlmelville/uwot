@@ -68,8 +68,8 @@
 #' iris_train_umap <- umap(iris_train, ret_model = TRUE)
 #' iris_test_umap <- umap_transform(iris_test, iris_train_umap)
 #' @export
-umap_transform <- function(X, model,
-                           nn_method = NULL, 
+umap_transform <- function(X = NULL, model = NULL,
+                           nn_method = NULL,
                            init_weighted = TRUE,
                            search_k = NULL,
                            tmpdir = tempdir(),
@@ -81,13 +81,24 @@ umap_transform <- function(X, model,
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  if(!is.list(nn_method)){
+  if (is.null(nn_method)) {
+    if (is.null(X)) {
+      stop('argument "X" is missing, with no default')
+    }
+    if (is.null(model)) {
+      stop('argument "model" is missing, with no default')
+    }
     if (!all_nn_indices_are_loaded(model)) {
       stop("cannot use model: NN index is unloaded." ,
            " Try reloading with `load_uwot`")
     }
   }
-
+  else {
+    if (!is.null(X)) {
+      tsmessage('argument "nn_method" is provided, ignoring argument "X"')
+    }
+  }
+  
   if (is.null(n_epochs)) {
     n_epochs <- model$n_epochs
   }
