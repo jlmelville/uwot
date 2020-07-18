@@ -1505,12 +1505,17 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (init_is_spectral(init)) {
       connected <- connected_components(V)
       if (connected$n_components > 1) {
-        tsmessage(
-          "Found ", connected$n_components, " connected components, ",
-          "falling back to 'spca' initialization with init_sdev = 1"
-        )
-        init <- "spca"
-        init_sdev <- 1
+        tsmessage("Found ", connected$n_components, " connected components, ", appendLF = FALSE)
+        if (is.null(X)) {
+          tsmessage("falling back to random initialization", time_stamp = FALSE)
+          init <- "random"
+        }
+        else {
+          tsmessage("falling back to 'spca' initialization with init_sdev = 1",
+                    time_stamp = FALSE)
+          init <- "spca"
+          init_sdev <- 1
+        }
       }
     }
 
