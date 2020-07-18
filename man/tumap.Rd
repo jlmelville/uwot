@@ -206,7 +206,7 @@ embedding.}
  }
 By default, if \code{X} has less than 4,096 vertices, the exact nearest
 neighbors are found. Otherwise, approximate nearest neighbors are used.
-You may also pass precalculated nearest neighbor data to this argument. It
+You may also pass pre-calculated nearest neighbor data to this argument. It
 must be a list consisting of two elements:
 \itemize{
   \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
@@ -216,10 +216,10 @@ must be a list consisting of two elements:
   \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
   containing the distances of the nearest neighbors.
 }
-Multiple nearest neighbor data (e.g. from two different precomputed
+Multiple nearest neighbor data (e.g. from two different pre-calculated
 metrics) can be passed by passing a list containing the nearest neighbor
 data lists as items.
-The \code{n_neighbors} parameter is ignored when using precalculated
+The \code{n_neighbors} parameter is ignored when using pre-calculated
 nearest neighbor data.}
 
 \item{n_trees}{Number of trees to build when constructing the nearest

@@ -5,8 +5,9 @@
 \title{Add New Points to an Existing Embedding}
 \usage{
 umap_transform(
-  X,
-  model,
+  X = NULL,
+  model = NULL,
+  nn_method = NULL,
   init_weighted = TRUE,
   search_k = NULL,
   tmpdir = tempdir(),
@@ -23,6 +24,22 @@ have the same columns in the same order as the input data used to generate
 the \code{model}.}
 
 \item{model}{Data associated with an existing embedding.}
+
+\item{nn_method}{Optional pre-calculated nearest neighbor data. It must be a 
+list consisting of two elements:
+  \itemize{
+    \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
+    containing the integer indexes of the nearest neighbors in \code{X}. Each
+    vertex is considered to be its own nearest neighbor, i.e.
+    \code{idx[, 1] == 1:n_vertices}.
+    \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
+    containing the distances of the nearest neighbors.
+  }
+  Multiple nearest neighbor data (e.g. from two different pre-calculated
+  metrics) can be passed by passing a list containing the nearest neighbor
+  data lists as items.
+  The \code{X} parameter is ignored when using pre-calculated nearest 
+  neighbor data.}
 
 \item{init_weighted}{If \code{TRUE}, then initialize the embedded coordinates
 of \code{X} using a weighted average of the coordinates of the nearest
