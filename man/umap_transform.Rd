@@ -15,7 +15,8 @@ umap_transform(
   n_threads = NULL,
   n_sgd_threads = 0,
   grain_size = 1,
-  verbose = FALSE
+  verbose = FALSE,
+  init = "weighted"
 )
 }
 \arguments{
@@ -45,7 +46,11 @@ list consisting of two elements:
 of \code{X} using a weighted average of the coordinates of the nearest
 neighbors from the original embedding in \code{model}, where the weights
 used are the edge weights from the UMAP smoothed knn distances. Otherwise,
-use an unweighted average.}
+use an un-weighted average.
+This parameter will be deprecated and removed at version 1.0 of this
+package. Use the \code{init} parameter as a replacement, replacing
+\code{init_weighted = TRUE} with \code{init = "weighted"} and
+\code{init_weighted = FALSE} with \code{init = "average"}.}
 
 \item{search_k}{Number of nodes to search during the neighbor retrieval. The
 larger k, the more the accurate results, but the longer the search takes.
@@ -75,6 +80,20 @@ be used. Used in conjunction with \code{n_threads} and
 \code{n_sgd_threads}.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
+
+\item{init}{how to initialize the transformed coordinates. One of:
+  \itemize{
+    \item \code{"weighted"} (The default). Use a weighted average of the
+    coordinates of the nearest neighbors from the original embedding in
+    \code{model}, where the weights used are the edge weights from the UMAP
+    smoothed knn distances. Equivalent to \code{init_weighted = TRUE}.
+    \item \code{"average"}. Use the mean average of the coordinates of 
+    the nearest neighbors from the original embedding in \code{model}.
+    Equivalent to \code{init_weighted = FALSE}.
+    \item A matrix of user-specified input coordinates, which must have
+    dimensions the same as \code{(nrow(X), ncol(model$embedding))}.
+  }
+This parameter should be used in preference to \code{init_weighted}.}
 }
 \value{
 A matrix of coordinates for \code{X} transformed into the space

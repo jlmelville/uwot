@@ -153,6 +153,11 @@ expect_ok_matrix(res$embedding)
 res_test <- umap_transform(iris10, res, n_threads = 1, verbose = FALSE)
 expect_ok_matrix(res_test)
 
+# test we can use 0 epochs
+res_test0 <- umap_transform(iris10, res, n_epochs = 0, n_threads = 1, verbose = FALSE)
+expect_ok_matrix(res_test)
+expect_equal(dim(res_test0), c(10, 2))
+
 # return nn and a model
 res <- tumap(iris10,
   n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,

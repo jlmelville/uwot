@@ -34,7 +34,11 @@
 #'   of \code{X} using a weighted average of the coordinates of the nearest
 #'   neighbors from the original embedding in \code{model}, where the weights
 #'   used are the edge weights from the UMAP smoothed knn distances. Otherwise,
-#'   use an unweighted average.
+#'   use an un-weighted average.
+#'   This parameter will be deprecated and removed at version 1.0 of this
+#'   package. Use the \code{init} parameter as a replacement, replacing
+#'   \code{init_weighted = TRUE} with \code{init = "weighted"} and
+#'   \code{init_weighted = FALSE} with \code{init = "average"}.
 #' @param search_k Number of nodes to search during the neighbor retrieval. The
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   Default is the value used in building the \code{model} is used.
@@ -57,6 +61,19 @@
 #'   be used. Used in conjunction with \code{n_threads} and
 #'   \code{n_sgd_threads}.
 #' @param verbose If \code{TRUE}, log details to the console.
+#' @param init how to initialize the transformed coordinates. One of:
+#'   \itemize{
+#'     \item \code{"weighted"} (The default). Use a weighted average of the
+#'     coordinates of the nearest neighbors from the original embedding in
+#'     \code{model}, where the weights used are the edge weights from the UMAP
+#'     smoothed knn distances. Equivalent to \code{init_weighted = TRUE}.
+#'     \item \code{"average"}. Use the mean average of the coordinates of 
+#'     the nearest neighbors from the original embedding in \code{model}.
+#'     Equivalent to \code{init_weighted = FALSE}.
+#'     \item A matrix of user-specified input coordinates, which must have
+#'     dimensions the same as \code{(nrow(X), ncol(model$embedding))}.
+#'   }
+#' This parameter should be used in preference to \code{init_weighted}.
 #' @return A matrix of coordinates for \code{X} transformed into the space
 #'   of the \code{model}.
 #' @examples
@@ -77,7 +94,8 @@ umap_transform <- function(X = NULL, model = NULL,
                            n_threads = NULL,
                            n_sgd_threads = 0,
                            grain_size = 1,
-                           verbose = FALSE) {
+                           verbose = FALSE,
+                           init = "weighted") {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -101,11 +119,23 @@ umap_transform <- function(X = NULL, model = NULL,
   
   if (is.null(n_epochs)) {
     n_epochs <- model$n_epochs
+    if (is.null(n_epochs)) {
+      if (ncol(graph) <= 10000) {
+        n_epochs <- 100
+      }
+      else {
+        n_epochs <- 30
+      }
+    }
+    else {
+      n_epochs <- max(2, round(n_epochs / 3))
+    }
   }
+  
   if (is.null(search_k)) {
     search_k <- model$search_k
   }
-
+  
   nn_index <- model$nn_index
   n_neighbors <- model$n_neighbors
   local_connectivity <- model$local_connectivity
@@ -128,22 +158,52 @@ umap_transform <- function(X = NULL, model = NULL,
     pcg_rand <- TRUE
   }
 
-if(!is.null(X)){
-  if (ncol(X) != norig_col) {
-    stop("Incorrect dimensions: X must have ", norig_col, " columns")
-  }
-  if (methods::is(X, "data.frame")) {
-    indexes <- which(vapply(X, is.numeric, logical(1)))
-    if (length(indexes) == 0) {
-      stop("No numeric columns found")
+  if(!is.null(X)){
+    if (ncol(X) != norig_col) {
+      stop("Incorrect dimensions: X must have ", norig_col, " columns")
     }
-    X <- as.matrix(X[, indexes])
+    if (methods::is(X, "data.frame")) {
+      indexes <- which(vapply(X, is.numeric, logical(1)))
+      if (length(indexes) == 0) {
+        stop("No numeric columns found")
+      }
+      X <- as.matrix(X[, indexes])
+    }
+    n_vertices <- nrow(X)
+  } else if( is.list(nn_method) ){
+    n_vertices <- nrow(nn_method$idx)
   }
-  n_vertices <- nrow(X)
-} else if( is.list(nn_method) ){
-  n_vertices <- nrow(nn_method$idx)
-}
-
+  
+  if (!is.null(init)) {
+    if (is.logical(init)) {
+      init_weighted <- init
+    }
+    else if (is.character(init)) {
+      init <- tolower(init)
+      if (init == "average") {
+        init_weighted <- FALSE
+      }
+      else if (init == "weighted") {
+        init_weighted <- TRUE
+      }
+      else {
+        stop("Unknown option for init: '", init, "'")
+      }
+    }
+    else if (is.matrix(init)) {
+      indim <- c(nrow(init), ncol(init))
+      xdim <- c(n_vertices, ncol(train_embedding))
+      if (!all(indim == xdim)) {
+        stop("Initial embedding matrix has wrong dimensions, expected (",
+             xdim[1], ", ", xdim[2], "), but was (",
+             indim[1], ", ", indim[2], ")")
+      }
+      init_weighted <- NULL
+    }
+    else {
+      stop("Invalid input format for 'init'")
+    }
+  }
   tsmessage(
     "Read ", n_vertices, " rows and found ", ncol(X),
     " numeric columns"
@@ -197,16 +257,18 @@ if(!is.null(X)){
       verbose = verbose
     )
 
-    embedding_block <- init_new_embedding(train_embedding, nn, graph_block,
-      weighted = init_weighted,
-      n_threads = n_threads,
-      grain_size = grain_size, verbose = verbose
-    )
-    if (is.null(embedding)) {
-      embedding <- embedding_block
-    }
-    else {
-      embedding <- embedding + embedding_block
+    if (is.logical(init_weighted)) {
+      embedding_block <- init_new_embedding(train_embedding, nn, graph_block,
+        weighted = init_weighted,
+        n_threads = n_threads,
+        grain_size = grain_size, verbose = verbose
+      )
+      if (is.null(embedding)) {
+        embedding <- embedding_block
+      }
+      else {
+        embedding <- embedding + embedding_block
+      }
     }
 
     graph_block <- nn_to_sparse(nn$idx, as.vector(graph_block),
@@ -221,20 +283,14 @@ if(!is.null(X)){
     }
   }
 
-  if (nblocks > 1) {
-    embedding <- embedding / nblocks
-  }
-
-  if (is.null(n_epochs)) {
-    if (ncol(graph) <= 10000) {
-      n_epochs <- 100
-    }
-    else {
-      n_epochs <- 30
+  if (is.logical(init_weighted)) {
+    if (nblocks > 1) {
+      embedding <- embedding / nblocks
     }
   }
   else {
-    n_epochs <- max(2, round(n_epochs / 3))
+    tsmessage("Initializing from user-supplied matrix")
+    embedding <- init
   }
 
   if (n_epochs > 0) {
@@ -289,9 +345,10 @@ if(!is.null(X)){
         verbose = verbose
       )
     }
+    embedding <- t(embedding)
   }
   tsmessage("Finished")
-  t(embedding)
+  embedding
 }
 
 init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,

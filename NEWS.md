@@ -10,6 +10,18 @@ neighbor data between the original data and new data can be calculated external
 to `uwot`. Thanks to [Yuhan Hao](https://github.com/yuhanH) for contributing the
 PR (<https://github.com/jlmelville/uwot/issues/63> and
 <https://github.com/jlmelville/uwot/issues/64>).
+* New parameter, `init`, for `umap_transform`: provides a variety of options for
+initializing the output coordinates, analogously to the same parameter in the
+`umap` function (but without as many options currently). This is intended to
+replace `init_weighted`, which should be considered deprecated, but won't be
+removed until uwot 1.0 (whenever that is). Instead of `init_weighted = TRUE`,
+use `init = "weighted"`; replace `init_weighted = FALSE` with 
+`init = "average"`. Additionally, you can pass a matrix to `init` to act as the 
+initial coordinates.
+* Also in `umap_transform`: previously, setting `n_epochs = 0` was ignored: at
+least one iteration of optimization was applied. Now, `n_epochs = 0` is
+respected, and will return the initialized coordinates without any further
+optimization.
 
 # uwot 0.1.8
 
