@@ -105,3 +105,22 @@ lsplit_unnamed <- function(l) {
   )
 }
 
+# Do work and update a progress bar
+progress_for <- function(n, nchunks, fun) {
+  message("0%   10   20   30   40   50   60   70   80   90   100%")
+  message("[----|----|----|----|----|----|----|----|----|----|")
+  remaining <- n
+  chunk_end <- 0
+  for (i in 1:nchunks) {
+    chunk_start <- chunk_end + 1
+    chunk_end <- chunk_start + round(remaining / (nchunks - i + 1)) - 1
+    remaining <- remaining - (chunk_end - chunk_start + 1)
+    
+    fun(chunk_start, chunk_end)
+    
+    message("*", appendLF = FALSE)
+    utils::flush.console()
+  }
+  message("|")
+}
+

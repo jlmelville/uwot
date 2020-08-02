@@ -30,6 +30,10 @@ initial coordinates.
 least one iteration of optimization was applied. Now, `n_epochs = 0` is
 respected, and will return the initialized coordinates without any further
 optimization.
+* Minor performance improvement for single-threaded nearest neighbor search when
+`verbose = TRUE`: the progress bar calculations were taking up a detectable
+amount of time and has now been fixed. With very small datasets (< 50 items) the
+progress bar will no longer appear when building the index.
 
 # uwot 0.1.8
 

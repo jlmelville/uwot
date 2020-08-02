@@ -122,13 +122,22 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
     "Building Annoy index with metric = ", metric,
     ", n_trees = ", n_trees
   )
-  progress <- Progress$new(max = nr, display = verbose)
-
-  # Add items
   ann <- annoy$ann
-  for (i in 1:nr) {
-    ann$addItem(i - 1, X[i, ])
-    progress$increment()
+  if (verbose) {
+    nstars <- 50
+    progress_for(
+      nr, nstars,
+      function(chunk_start, chunk_end) {
+        for (i in chunk_start:chunk_end) {
+          ann$addItem(i - 1, X[i, , drop = FALSE])
+        }
+      }
+    )
+  }
+  else {
+    for (i in 1:nr) {
+      ann$addItem(i - 1, X[i, ])
+    }
   }
 
   # Build index
@@ -222,20 +231,39 @@ annoy_search_serial <- function(X, k, ann,
                                 verbose = FALSE) {
   tsmessage("Searching Annoy index, search_k = ", search_k)
   nr <- nrow(X)
-  search_progress <- Progress$new(max = nr, display = verbose)
   idx <- matrix(nrow = nr, ncol = k)
   dist <- matrix(nrow = nr, ncol = k)
-  for (i in 1:nr) {
-    res <- ann$getNNsByVectorList(X[i, ], k, search_k, TRUE)
-    if (length(res$item) != k) {
-      stop(
-        "search_k/n_trees settings were unable to find ", k,
-        " neighbors for item ", i
-      )
+  if (verbose) {
+    nstars <- 50
+    progress_for(
+      nr, nstars,
+      function(chunk_start, chunk_end) {
+        for (i in chunk_start:chunk_end) {
+          res <- ann$getNNsByVectorList(X[i, ], k, search_k, TRUE)
+          if (length(res$item) != k) {
+            stop(
+              "search_k/n_trees settings were unable to find ", k,
+              " neighbors for item ", i
+            )
+          }
+          idx[i, ] <<- res$item
+          dist[i, ] <<- res$distance
+        }
+      }
+    )
+  }
+  else {
+    for (i in 1:nr) {
+      res <- ann$getNNsByVectorList(X[i, ], k, search_k, TRUE)
+      if (length(res$item) != k) {
+        stop(
+          "search_k/n_trees settings were unable to find ", k,
+          " neighbors for item ", i
+        )
+      }
+      idx[i, ] <- res$item
+      dist[i, ] <- res$distance
     }
-    idx[i, ] <- res$item
-    dist[i, ] <- res$distance
-    search_progress$increment()
   }
   list(idx = idx + 1, dist = dist)
 }
