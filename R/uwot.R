@@ -33,6 +33,7 @@
 #'   \item \code{"cosine"}
 #'   \item \code{"manhattan"}
 #'   \item \code{"hamming"}
+#'   \item \code{"correlation"} (a distance based on the Pearson correlation)
 #'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
@@ -487,6 +488,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"cosine"}
 #'   \item \code{"manhattan"}
 #'   \item \code{"hamming"}
+#'   \item \code{"correlation"} (a distance based on the Pearson correlation)
 #'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
@@ -885,6 +887,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"cosine"}
 #'   \item \code{"manhattan"}
 #'   \item \code{"hamming"}
+#'   \item \code{"correlation"} (a distance based on the Pearson correlation)
 #'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
@@ -1690,8 +1693,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
           # To be sure of the dimensionality, fetch the first item from the 
           # index and see how many elements are in the returned vector.
           if(!is.null(X)){
-            res$metric[[1]] <- list(ndim = length(res$nn_index$getItemsVector(0)))
-          } else{
+            rcppannoy <- get_rcppannoy(res$nn_index)
+            res$metric[[1]] <- list(ndim = length(rcppannoy$getItemsVector(0)))
+          } else {
             res$metric[[1]] <- list()
           }
         }
@@ -1817,10 +1821,10 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
       for (i in 1:n_metrics) {
         nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
         if (n_metrics == 1) {
-          model$nn_index$save(nn_tmpfname)
+          model$nn_index$ann$save(nn_tmpfname)
         }
         else {
-          model$nn_index[[i]]$save(nn_tmpfname)
+          model$nn_index[[i]]$ann$save(nn_tmpfname)
         }
       }
       
@@ -1932,7 +1936,11 @@ load_uwot <- function(file, verbose = FALSE) {
       # so the dimension is the number of them
       ndim = length(model$metric[[i]])
     }
-    ann <- create_ann(metric, ndim = ndim)
+    annoy_metric <- metric
+    if (metric == "correlation") {
+      annoy_metric <- "cosine"
+    }
+    ann <- create_ann(annoy_metric, ndim = ndim)
     ann$load(nn_fname)
     if (n_metrics == 1) {
       model$nn_index <- ann
@@ -2003,17 +2011,19 @@ unload_uwot <- function(model, cleanup = TRUE, verbose = FALSE) {
   n_metrics <- length(metrics)
   for (i in 1:n_metrics) {
     if (n_metrics == 1) {
-      model$nn_index$unload()
+      rcppannoy <- get_rcppannoy(model$nn_index)
+      rcppannoy$unload()
     }
     else {
-      model$nn_index[[i]]$unload()
+      rcppannoy <- get_rcppannoy(model$nn_index[[i]])
+      rcppannoy$unload()
     }
   }
   
   if (cleanup) {
     if (is.null(model$mod_dir)) {
       tsmessage("Model is missing temp dir location, can't clean up")
-      return();
+      return()
     }
     else {
       mod_dir <- model$mod_dir
@@ -2034,15 +2044,20 @@ all_nn_indices_are_loaded <- function(model) {
   if (is.null(model$nn_index)) {
     stop("Invalid model: has no 'nn_index'")
   }
-  if (is.list(model$nn_index)) {
+  
+  if (is.list(model$nn_index) && is.null(model$nn_index$type)) {
     for (i in 1:length(model$nn_index)) {
-      if (model$nn_index[[i]]$getNTrees() == 0) {
+      rcppannoy <- get_rcppannoy(model$nn_index[[i]])
+      if (rcppannoy$getNTrees() == 0) {
         return(FALSE)
       }
     }
   }
-  else if (model$nn_index$getNTrees() == 0) {
-    return(FALSE)
+  else {
+    rcppannoy <- get_rcppannoy(model$nn_index)
+    if (rcppannoy$getNTrees() == 0) {
+      return(FALSE)
+    }
   }
   TRUE
 }
@@ -2143,7 +2158,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     metric <- mnames[[i]]
     metric <- match.arg(metric, c(
       "euclidean", "cosine", "manhattan",
-      "hamming", "precomputed"
+      "hamming", "correlation", "precomputed"
     ))
     # Defaults for this block which can be overridden
     pca_i <- pca

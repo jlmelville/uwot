@@ -69,6 +69,7 @@ integer value in the range \code{2} to \code{100}.}
   \item \code{"cosine"}
   \item \code{"manhattan"}
   \item \code{"hamming"}
+  \item \code{"correlation"} (a distance based on the Pearson correlation)
   \item \code{"categorical"} (see below)
 }
 Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the

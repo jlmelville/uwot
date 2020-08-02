@@ -170,7 +170,7 @@ umap_transform <- function(X = NULL, model = NULL,
       X <- as.matrix(X[, indexes])
     }
     n_vertices <- nrow(X)
-  } else if( is.list(nn_method) ){
+  } else if (nn_is_precomputed(nn_method)){
     n_vertices <- nrow(nn_method$idx)
   }
   
@@ -242,11 +242,12 @@ umap_transform <- function(X = NULL, model = NULL,
     if(!is.null(X)){
       nn <- annoy_search(Xsub,
                          k = n_neighbors, ann = ann, search_k = search_k,
+                         prep_data = TRUE,
                          tmpdir = tmpdir,
                          n_threads = n_threads, grain_size = grain_size,
                          verbose = verbose
       )
-    } else if(is.list(nn_method)){
+    } else if (nn_is_precomputed(nn_method)){
       nn <- nn_method
     }
 
