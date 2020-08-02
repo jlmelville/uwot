@@ -36,7 +36,6 @@ res <- tumap(iris10,
 )
 expect_ok_matrix(res)
 
-
 # UMAP and cosine metric n_threads = 1 issue #5
 res <- umap(iris10,
   n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, metric = "cosine",
@@ -453,3 +452,32 @@ res <- lvish(iris10,
 expect_is(res, "list")
 expect_ok_matrix(res$embedding)
 expect_is(res$P, "Matrix")
+
+
+# 22 Pearson correlation
+set.seed(42)
+res_cor <- tumap(iris10, n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+                 metric = "correlation", init = "spectral", verbose = FALSE, 
+                 n_threads = 0, ret_model = TRUE)
+expect_ok_matrix(res_cor$embedding)
+
+# Ensure cosine results are different from correlation
+set.seed(42)
+res_cos <- tumap(iris10, n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+                 metric = "cosine", init = "spectral", verbose = FALSE, 
+                 n_threads = 0, ret_model = TRUE)
+expect_gt(sum((res_cor$embedding - res_cos$embedding) ^ 2), 1e-3)
+
+
+# Ensure correlation transform results differ from cosine
+set.seed(42)
+res_trans_cor <- umap_transform(x2m(iris[11:20, ]), res_cor, n_threads = 0, verbose = FALSE)
+expect_ok_matrix(res_trans_cor)
+
+# Switch metric and results should differ
+res_cor$nn_index$metric <- "cosine"
+set.seed(42)
+res_trans_cor2 <- umap_transform(x2m(iris[11:20, ]), res_cor, n_threads = 0, verbose = FALSE)
+expect_ok_matrix(res_trans_cor2)
+expect_gt(sum((res_trans_cor - res_trans_cor2) ^ 2), 1e-3)
+

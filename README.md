@@ -16,6 +16,10 @@ the basic method. Translated from the
 
 ## News
 
+*August 1 2020* New metric supported: Pearson correlation (with 
+`metric = "correlation"`). This should give similar results to the Python UMAP
+(and sklearn) implementation of the `correlation` metric.
+
 *March 16 2020* A new version (0.1.8) is on CRAN. This is a minor release in terms of
 features, but you can now export the UMAP graph (<https://github.com/jlmelville/uwot/issues/47>),
 and there are some bug fixes for: loading Annoy indexes
@@ -227,8 +231,16 @@ distance metrics (set by the `metric` parameter) are:
 
 * Euclidean
 * Cosine
+* Pearson Correlation (`correlation`)
 * Manhattan
 * Hamming
+
+Exactly what constitutes the cosine distance can differ between packages. `uwot`
+tries to follow how the Python version of UMAP defines it, which is 
+1 minus the cosine similarity. This differs slightly from how Annoy defines its
+angular distance, so be aware that `uwot` internally converts the Annoy version 
+of the distance. Also be aware that the Pearson correlation distance is the
+cosine distance applied to row-centered vectors.
 
 If you need other metrics, and can generate the nearest neighbor info
 externally, you can pass the data directly to `uwot` via the `nn_method`
@@ -361,9 +373,9 @@ issue.
 
 * As noted in the
 [Implementation Details](https://github.com/jlmelville/uwot#implementation-details),
-only Euclidean, Cosine, Hamming, and Manhattan distances are supported for finding
-nearest neighbors from data frame and dense matrix input. For other metrics,
-you can pass nearest neighbor data directly: see the
+only Euclidean, Cosine, Hamming, Pearson Correlation, and Manhattan distances
+are supported for finding nearest neighbors from data frame and dense matrix
+input. For other metrics, you can pass nearest neighbor data directly: see the
 [Nearest Neighbor Data Format](https://github.com/jlmelville/uwot#nearest-neighbor-data-format)
 section. Or if you can calculate a distance matrix for your data, you can pass
 it in as `dist` object. For larger distance matrices, you can pass in a

@@ -37,6 +37,16 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
   res
 }
 
+# TRUE if you pass in an untagged list
+nn_is_precomputed <- function(nn) {
+  is.list(nn) && is.null(nn$type)
+}
+
+# TRUE if we are using an annoy index
+nn_is_annoy <- function(ann) {
+  is.list(ann) && !is.null(ann$type) && startsWith(ann$type, "annoy")
+}
+
 # n_trees - number of trees to build when constructing the index. The more trees
 # specified, the larger the index, but the better the results. largeVis uses 10
 # trees for datasets with N = 10,000 observations, 20 trees for datasets up to N
@@ -65,6 +75,7 @@ annoy_nn <- function(X, k = 10,
     k = k, ann = ann, search_k = search_k,
     tmpdir = tmpdir,
     n_threads = n_threads,
+    prep_data = TRUE,
     grain_size = grain_size, verbose = verbose
   )
 
@@ -78,12 +89,34 @@ annoy_nn <- function(X, k = 10,
   res
 }
 
+annoy_create <- function(metric, ndim) {
+  if (metric == "correlation") {
+    name <- "cosine"
+  }
+  else {
+    name <- metric
+  }
+  
+  rcppannoy <- create_ann(name, ndim)
+  
+  list(
+    ann = rcppannoy,
+    type = "annoyv1",
+    metric = metric
+  )
+}
+
 annoy_build <- function(X, metric = "euclidean", n_trees = 50,
                         verbose = FALSE) {
   nr <- nrow(X)
   nc <- ncol(X)
 
-  ann <- create_ann(metric, nc)
+  annoy <- annoy_create(metric, nc)
+  
+  if (metric == "correlation") {
+    tsmessage("Annoy build: subtracting row means for correlation")
+    X <- sweep(X, 1, rowMeans(X))
+  }
 
   tsmessage(
     "Building Annoy index with metric = ", metric,
@@ -92,6 +125,7 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
   progress <- Progress$new(max = nr, display = verbose)
 
   # Add items
+  ann <- annoy$ann
   for (i in 1:nr) {
     ann$addItem(i - 1, X[i, ])
     progress$increment()
@@ -100,7 +134,7 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
   # Build index
   ann$build(n_trees)
 
-  ann
+  annoy
 }
 
 # create RcppAnnoy class from metric name with ndim dimensions
@@ -112,16 +146,41 @@ create_ann <- function(name, ndim) {
     hamming = methods::new(RcppAnnoy::AnnoyHamming, ndim),
     stop("BUG: unknown Annoy metric '", name, "'")
   )
-  ann
+}
+
+# fetch the underlying RcppAnnoy class from inside an index
+get_rcppannoy <- function(nni) {
+  if (startsWith(class(nni), "Rcpp_Annoy")) {
+    rcppannoy <- nni
+  }
+  else if (nn_is_annoy(nni)) {
+    rcppannoy <- nni$ann
+  }
+  else {
+    stop("BUG: Found an unknown ann implementation of class: '", 
+         class(nni), "'")
+  }
+  rcppannoy
 }
 
 # Search a pre-built Annoy index for neighbors of X
 annoy_search <- function(X, k, ann,
                          search_k = 100 * k,
+                         prep_data = FALSE,
                          tmpdir = tempdir(),
                          n_threads = NULL,
                          grain_size = 1,
                          verbose = FALSE) {
+  # newer NN structures hide impl in a tagged list
+  if (nn_is_annoy(ann)) {
+    lann <- ann
+    ann <- lann$ann
+    if (prep_data && lann$metric == "correlation") {
+      tsmessage("Annoy search: subtracting row means for correlation")
+      X <- sweep(X, 1, rowMeans(X))
+    }
+  }
+  
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -143,9 +202,16 @@ annoy_search <- function(X, k, ann,
       verbose = verbose
     )
   }
-  # Convert from Angular to Cosine distance
+  # Convert from angular distance to the UMAP/sklearn definition of cosine
+  # distance
+  # Current Annoy README defines cosine distance as sqrt(2 - 2 cos(u,v))
+  # where cos(u, v) is the cosine of the angle between two unit-scaled vectors
+  # u and v (i.e. the cosine similarity). That expression is known to be
+  # equivalent to the euclidean distance between u and v.
+  # We shall convert back to 1 - cos(u, v) which is the definition of cosine
+  # distance used by UMAP.
   if (methods::is(ann, "Rcpp_AnnoyAngular")) {
-    res$dist <- 0.5 * (res$dist * res$dist)
+    res$dist <- 0.5 * res$dist * res$dist
   }
 
   res
