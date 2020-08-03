@@ -9,15 +9,19 @@
 #' present to avoid break backwards compatibility only.
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
-#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
-#'   sparse matrix is interpreted as a distance matrix and both implicit and
-#'   explicit zero entries are ignored. Set zero distances you want to keep to
-#'   an arbitrarily small non-zero value (e.g. \code{1e-10}). Matrix and data
-#'   frames should contain one observation per row. Data frames will have any
-#'   non-numeric columns removed, although factor columns will be used if
-#'   explicitly included via \code{metric} (see the help for \code{metric} for
-#'   details). Can be \code{NULL} if precomputed nearest neighbor data is passed
-#'   to \code{nn_method}, and \code{init} is not \code{"spca"} or \code{"pca"}.
+#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
+#'   Matrix and data frames should contain one observation per row. Data frames
+#'   will have any non-numeric columns removed, although factor columns will be
+#'   used if explicitly included via \code{metric} (see the help for
+#'   \code{metric} for details). A sparse matrix is interpreted as a distance
+#'   matrix, and is assumed to be symmetric, so you can also pass in an
+#'   explicitly upper or lower triangular sparse matrix to save storage. There
+#'   must be at least \code{n_neighbors} non-zero distances for each row. Both
+#'   implicit and explicit zero entries are ignored. Set zero distances you want
+#'   to keep to an arbitrarily small non-zero value (e.g. \code{1e-10}).
+#'   \code{X} can also be \code{NULL} if pre-computed nearest neighbor data is
+#'   passed to \code{nn_method}, and \code{init} is not \code{"spca"} or
+#'   \code{"pca"}.
 #' @param n_neighbors The size of local neighborhood (in terms of number of
 #'   neighboring sample points) used for manifold approximation. Larger values
 #'   result in more global views of the manifold, while smaller values result in
@@ -464,15 +468,19 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' present to avoid break backwards compatibility only.
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
-#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
-#'   sparse matrix is interpreted as a distance matrix and both implicit and
-#'   explicit zero entries are ignored. Set zero distances you want to keep to
-#'   an arbitrarily small non-zero value (e.g. \code{1e-10}). Matrix and data
-#'   frames should contain one observation per row. Data frames will have any
-#'   non-numeric columns removed, although factor columns will be used if
-#'   explicitly included via \code{metric} (see the help for \code{metric} for
-#'   details). Can be \code{NULL} if precomputed nearest neighbor data is passed
-#'   to \code{nn_method}, and \code{init} is not \code{"spca"} or \code{"pca"}.
+#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
+#'   Matrix and data frames should contain one observation per row. Data frames
+#'   will have any non-numeric columns removed, although factor columns will be
+#'   used if explicitly included via \code{metric} (see the help for
+#'   \code{metric} for details). A sparse matrix is interpreted as a distance
+#'   matrix, and is assumed to be symmetric, so you can also pass in an
+#'   explicitly upper or lower triangular sparse matrix to save storage. There
+#'   must be at least \code{n_neighbors} non-zero distances for each row. Both
+#'   implicit and explicit zero entries are ignored. Set zero distances you want
+#'   to keep to an arbitrarily small non-zero value (e.g. \code{1e-10}).
+#'   \code{X} can also be \code{NULL} if pre-computed nearest neighbor data is
+#'   passed to \code{nn_method}, and \code{init} is not \code{"spca"} or
+#'   \code{"pca"}.
 #' @param n_neighbors The size of local neighborhood (in terms of number of
 #'   neighboring sample points) used for manifold approximation. Larger values
 #'   result in more global views of the manifold, while smaller values result in
@@ -862,15 +870,19 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' present to avoid break backwards compatibility only.
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
-#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}. A
-#'   sparse matrix is interpreted as a distance matrix and both implicit and
-#'   explicit zero entries are ignored. Set zero distances you want to keep to
-#'   an arbitrarily small non-zero value (e.g. \code{1e-10}). Matrix and data
-#'   frames should contain one observation per row. Data frames will have any
-#'   non-numeric columns removed, although factor columns will be used if
-#'   explicitly included via \code{metric} (see the help for \code{metric} for
-#'   details). Can be \code{NULL} if precomputed nearest neighbor data is passed
-#'   to \code{nn_method}, and \code{init} is not \code{"spca"} or \code{"pca"}.
+#'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
+#'   Matrix and data frames should contain one observation per row. Data frames
+#'   will have any non-numeric columns removed, although factor columns will be
+#'   used if explicitly included via \code{metric} (see the help for
+#'   \code{metric} for details). A sparse matrix is interpreted as a distance
+#'   matrix, and is assumed to be symmetric, so you can also pass in an
+#'   explicitly upper or lower triangular sparse matrix to save storage. There
+#'   must be at least \code{n_neighbors} non-zero distances for each row. Both
+#'   implicit and explicit zero entries are ignored. Set zero distances you want
+#'   to keep to an arbitrarily small non-zero value (e.g. \code{1e-10}).
+#'   \code{X} can also be \code{NULL} if pre-computed nearest neighbor data is
+#'   passed to \code{nn_method}, and \code{init} is not \code{"spca"} or
+#'   \code{"pca"}.
 #' @param perplexity Controls the size of the local neighborhood used for
 #'   manifold approximation. This is the analogous to \code{n_neighbors} in
 #'   \code{\link{umap}}. Change this, rather than \code{n_neighbors}.

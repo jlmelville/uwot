@@ -14,7 +14,12 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
   }
   else if (methods::is(X, "sparseMatrix")) {
     # sparse distance matrix
-    res <- sparse_nn(X, k, include_self = include_self)
+    if (Matrix::isTriangular(X)) {
+      res <- sparse_tri_nn(X, k, include_self = include_self)
+    }
+    else {
+      res <- sparse_nn(X, k, include_self = include_self)
+    }
   }
   else {
     # normal matrix
@@ -395,5 +400,58 @@ sparse_nn <- function(X, k, include_self = TRUE) {
     nn_dist <- cbind(rep(0, n), nn_dist)
   }
 
+  list(idx = nn_idx, dist = nn_dist)
+}
+
+# Extract knn data from sparse lower/upper triangular matrix
+sparse_tri_nn <- function(X, k, include_self = TRUE) {
+  if (include_self) {
+    k <- k - 1
+  }
+  
+  n <- nrow(X)
+  nn_idx <- matrix(0, nrow = n, ncol = k)
+  nn_dist <- matrix(0, nrow = n, ncol = k)
+
+  # this will get the i,j,x values no matter the internal representation  
+  Xsumm <- summary(X)
+  
+  for (i in 1:n) {
+    # get indices where $i/j == i
+    idxji <- Xsumm$j == i
+    idxii <- Xsumm$i == i
+    
+    idxi <- idxji | idxii
+    
+    # find non-zero distances
+    dists <- Xsumm$x[idxi]
+    is_nonzero <- dists != 0
+    dist_nonzero <- dists[is_nonzero]
+    if (length(dist_nonzero) < k) {
+      stop(
+        "Row ", i, " of distance matrix has only ", length(dist_nonzero),
+        " defined distances"
+      )
+    }
+    
+    # find indices of k-smallest distances
+    k_order <- order(dist_nonzero)[1:k]
+    nn_dist[i, ] <- dist_nonzero[k_order]
+    
+    # get indices into original vector
+    isk <- which(idxi)[k_order]
+    Xis <- Xsumm$i[isk]
+    Xjs <- Xsumm$j[isk]
+    # We don't know if the non-i index is in the i or j column 
+    # so do this slightly horrible logical * integer arithmetic
+    # which will add the correct index to 0
+    nn_idx[i, ] <- ((Xis != i) * Xis) + ((Xjs != i) * Xjs)
+  }
+  
+  if (include_self) {
+    nn_idx <- cbind(1:n, nn_idx)
+    nn_dist <- cbind(rep(0, n), nn_dist)
+  }
+  
   list(idx = nn_idx, dist = nn_dist)
 }

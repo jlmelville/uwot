@@ -34,6 +34,9 @@ optimization.
 `verbose = TRUE`: the progress bar calculations were taking up a detectable
 amount of time and has now been fixed. With very small datasets (< 50 items) the
 progress bar will no longer appear when building the index.
+* Passing a sparse distance matrix as input now supports upper/lower triangular
+matrix storage rather than wasting storage using an explicitly symmetric 
+sparse matrix.
 
 # uwot 0.1.8
 

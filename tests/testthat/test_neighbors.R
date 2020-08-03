@@ -40,6 +40,30 @@ res <- sparse_nn(dmiris10z, k = 4, include_self = TRUE)
 expect_equal(res$dist, i10nn4dist, tol = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
+
+sparse_to_tri <- function(m, lower = TRUE) {
+  sm <- summary(m)
+  if (lower) {
+    subtri <- subset(sm, i >= j)
+  }
+  else {
+    subtri <- subset(sm, i <= j)
+  }
+  
+  Matrix::sparseMatrix(i = subtri$i, j = subtri$j, x = subtri$x, dims = dim(m))
+}
+
+dmiris10zu <- sparse_to_tri(dmiris10z, lower = FALSE)
+res <- sparse_tri_nn(dmiris10zu, k = 4, include_self = TRUE)
+expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
+
+dmiris10zl <- sparse_to_tri(dmiris10z, lower = TRUE)
+res <- sparse_tri_nn(dmiris10zl, k = 4, include_self = TRUE)
+expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
+
+
 # Test overall function
 res <- find_nn(iris10, k = 4, include_self = TRUE)
 expect_equal(res$dist, i10nn4dist, tol = 1e-6)
@@ -52,6 +76,19 @@ expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 res <- find_nn(dmiris10z, k = 4, include_self = TRUE)
 expect_equal(res$dist, i10nn4dist, tol = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
+
+res <- find_nn(dmiris10z, k = 4, include_self = TRUE)
+expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
+
+res <- find_nn(dmiris10zu, k = 4, include_self = TRUE)
+expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
+
+res <- find_nn(dmiris10zl, k = 4, include_self = TRUE)
+expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
+
 
 # Test Annoy
 # ten iris entries where the 4 nearest neighbors are distinct
