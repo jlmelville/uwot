@@ -1250,7 +1250,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       stop("'pca' must be >= n_components")
     }
     if (pca > nrow(X)) {
-      stop("'pca' must be <= ncol(X)")
+      stop("'pca' must be <= nrow(X)")
     }
   }
 
