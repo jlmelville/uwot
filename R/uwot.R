@@ -1249,8 +1249,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (pca < n_components) {
       stop("'pca' must be >= n_components")
     }
-    if (pca > nrow(X)) {
-      stop("'pca' must be <= nrow(X)")
+    if (pca > min(nrow(X), ncol(X))) {
+      stop("'pca' must be <= min(nrow(X), ncol(X))")
     }
   }
 
