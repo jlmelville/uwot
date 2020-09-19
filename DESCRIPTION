@@ -1,6 +1,6 @@
 Package: uwot
 Title: The Uniform Manifold Approximation and Projection (UMAP) Method for Dimensionality Reduction
-Version: 0.1.8.9000
+Version: 0.1.8.9001
 Authors@R: 
     c(person("James", "Melville", email = "jlmelville@gmail.com", role = c("aut", "cre")),
     person("Aaron", "Lun", role="ctb"),person("Mohamed Nadhir", "Djekidel", role="ctb"),
@@ -13,7 +13,7 @@ Description: An implementation of the Uniform Manifold Approximation and
     provided. This is a complete re-implementation in R (and C++, via the 'Rcpp'
     package): no Python installation is required. See the uwot website 
     (<https://github.com/jlmelville/uwot>) for more documentation and examples.
-License: GPL-3
+License: GPL (>= 3)
 URL: https://github.com/jlmelville/uwot
 BugReports: https://github.com/jlmelville/uwot/issues
 Encoding: UTF-8
