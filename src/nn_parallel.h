@@ -31,6 +31,14 @@
 
 #include "uwot/matrix.h"
 
+#if defined __RcppAnnoy_0_16_2__
+#ifdef ANNOYLIB_MULTITHREADED_BUILD
+  typedef AnnoyIndexMultiThreadedBuildPolicy AnnoyIndexThreadedBuildPolicy;
+#else
+  typedef AnnoyIndexSingleThreadedBuildPolicy AnnoyIndexThreadedBuildPolicy;
+#endif
+#endif
+
 struct UwotAnnoyEuclidean {
   using Distance = Euclidean;
   using S = int32_t;
@@ -66,7 +74,11 @@ template <typename UwotAnnoyDistance> struct NNWorker {
   std::vector<typename UwotAnnoyDistance::T> dists;
 
   AnnoyIndex<typename UwotAnnoyDistance::S, typename UwotAnnoyDistance::T,
+#if defined __RcppAnnoy_0_16_2__
+             typename UwotAnnoyDistance::Distance, Kiss64Random, AnnoyIndexThreadedBuildPolicy>
+#else
              typename UwotAnnoyDistance::Distance, Kiss64Random>
+#endif
       index;
 
   NNWorker(const std::string &index_name, const std::vector<double> &mat,

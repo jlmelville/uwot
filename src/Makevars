@@ -1,5 +1,7 @@
 # Turn on C++11 support to get access to long long (guaranteed 64-bit ints)
 CXX_STD = CXX11
 
+# Add this define with Rcpp 0.16.2 or later:  -D__RcppAnnoy_0_16_2__
+# Once that release is standard just remove the define here and its test (twice) in nn_parallel.h
 PKG_CXXFLAGS = -DSTRICT_R_HEADERS -DRCPP_NO_RTTI
 PKG_CPPFLAGS = -I../inst/include/
