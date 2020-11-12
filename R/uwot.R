@@ -404,7 +404,7 @@
 #' Van der Maaten, L., & Hinton, G. (2008).
 #' Visualizing data using t-SNE.
 #' \emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
-#' \url{http://www.jmlr.org/papers/v9/vandermaaten08a.html}
+#' \url{https://www.jmlr.org/papers/v9/vandermaaten08a.html}
 #' @export
 umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_epochs = NULL, learning_rate = 1, scale = FALSE,

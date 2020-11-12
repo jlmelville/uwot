@@ -493,5 +493,5 @@ International World Wide Web Conferences Steering Committee.
 Van der Maaten, L., & Hinton, G. (2008).
 Visualizing data using t-SNE.
 \emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
-\url{http://www.jmlr.org/papers/v9/vandermaaten08a.html}
+\url{https://www.jmlr.org/papers/v9/vandermaaten08a.html}
 }
