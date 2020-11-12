@@ -1,4 +1,4 @@
-# uwot 0.1.8.9000
+# uwot 0.1.9
 
 ## New features
 
