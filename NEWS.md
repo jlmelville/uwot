@@ -32,11 +32,13 @@ respected, and will return the initialized coordinates without any further
 optimization.
 * Minor performance improvement for single-threaded nearest neighbor search when
 `verbose = TRUE`: the progress bar calculations were taking up a detectable
-amount of time and has now been fixed. With very small datasets (< 50 items) the
+amount of time and has now been fixed. With very small data sets (< 50 items) the
 progress bar will no longer appear when building the index.
 * Passing a sparse distance matrix as input now supports upper/lower triangular
 matrix storage rather than wasting storage using an explicitly symmetric 
 sparse matrix.
+* Minor license change: uwot used to be licensed under GPL-3 only; now it is 
+GPL-3 or later.
 
 # uwot 0.1.8
 
