@@ -206,7 +206,7 @@ numeric underflow if beta becomes large.
 ## New features
 
 * New parameter: `pcg_rand`. If `TRUE` (the default), then a random number
-generator from [the PCG family](http://www.pcg-random.org/) is used during the
+generator from [the PCG family](https://www.pcg-random.org/) is used during the
 stochastic optimization phase. The old PRNG, a direct translation of
 an implementation of the Tausworthe "taus88" PRNG used in the Python
 version of UMAP, can be obtained by setting `pcg_rand = FALSE`. The new PRNG is
