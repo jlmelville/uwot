@@ -16,6 +16,10 @@ the basic method. Translated from the
 
 ## News
 
+*November 15 2020* Version 0.1.9 has been released to CRAN. The main addition is
+support for the Pearson correlation. Also, a slight license change from GPL-3
+to GPL-3 or later.
+
 *August 1 2020* New metric supported: Pearson correlation (with 
 `metric = "correlation"`). This should give similar results to the Python UMAP
 (and sklearn) implementation of the `correlation` metric.
