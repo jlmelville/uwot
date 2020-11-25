@@ -5,6 +5,11 @@
 * Passing in data with missing values will now raise an error early. Missing
 data in factor columns intended for supervised UMAP is still ok. Thank you David
 McGaughey for tweeting about this issue.
+* The documentation for the return value of `umap` and `tumap` now note that the
+contents of the `model` list are subject to change and not intended to be part
+of the uwot public API. I recommend not relying on the structure of the `model`,
+especially if your package is intended to appear on CRAN or Bioconductor, as any
+breakages will delay future releases of uwot to CRAN.
 
 # uwot 0.1.9
 

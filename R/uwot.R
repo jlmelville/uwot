@@ -338,7 +338,9 @@
 #'     \code{"model"}), returns a list containing extra information that can be
 #'     used to add new data to an existing embedding via
 #'     \code{\link{umap_transform}}. In this case, the coordinates are available
-#'     in the list item \code{embedding}.
+#'     in the list item \code{embedding}. \bold{NOTE}: The contents of 
+#'     the \code{model} list should \emph{not} be considered stable or part of
+#'     the public API, and are purposely left undocumented.
 #'     \item if \code{ret_nn = TRUE} (or \code{ret_extra} contains \code{"nn"}),
 #'     returns the nearest neighbor data as a list called \code{nn}. This
 #'     contains one list for each \code{metric} calculated, itself containing a
@@ -778,7 +780,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \code{"model"}), returns a list containing extra information that can be
 #'     used to add new data to an existing embedding via
 #'     \code{\link{umap_transform}}. In this case, the coordinates are available
-#'     in the list item \code{embedding}.
+#'     in the list item \code{embedding}. \bold{NOTE}: The contents of 
+#'     the \code{model} list should \emph{not} be considered stable or part of
+#'     the public API, and are purposely left undocumented.
 #'     \item if \code{ret_nn = TRUE} (or \code{ret_extra} contains \code{"nn"}),
 #'     returns the nearest neighbor data as a list called \code{nn}. This
 #'     contains one list for each \code{metric} calculated, itself containing a
