@@ -124,3 +124,8 @@ progress_for <- function(n, nchunks, fun) {
   message("|")
 }
 
+checkna <- function(X) {
+  if (!is.null(X) && any(is.na(X))) {
+    stop("Missing values found in 'X'")
+  }
+}

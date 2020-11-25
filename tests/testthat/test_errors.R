@@ -47,3 +47,18 @@ expect_error(umap_transform(iris10[, 1:2], model), "Incorrect dimensions")
 # #42: check init is a matrix or a string; complain otherwise
 expect_error(umap(iris10, n_neighbors = 4, init = as.matrix(iris[, 1:3])), "(10, 2)")
 expect_error(umap(iris10, n_neighbors = 4, init = iris), "matrix or string")
+
+# Don't use data with NA in it
+test_that("Detect data with NA in", {
+diris10na <- diris10
+diris10na[1] <- NA
+expect_error(umap(diris10na), "missing", ignore.case = TRUE)
+
+dmiris10zna <- dmiris10z
+dmiris10zna[2, 1] <- NA
+expect_error(umap(dmiris10zna, n_neighbors = 4), "missing", ignore.case = TRUE)
+
+iris10na <- iris10
+iris10na[1, 1] <- NA
+expect_error(umap(iris10na, n_neighbors = 4), "missing", ignore.case = TRUE)
+})
