@@ -19,25 +19,11 @@
 
 #include <vector>
 
-#if defined(__MINGW32__)
-#undef Realloc
-#undef Free
-#endif
-
-#define __ERROR_PRINTER_OVERRIDE__ REprintf
-
-#include <annoylib.h>
-#include <kissrandom.h>
+#include "RcppAnnoy.h"
 
 #include "uwot/matrix.h"
 
-#if defined __RcppAnnoy_0_16_2__
-#ifdef ANNOYLIB_MULTITHREADED_BUILD
-  typedef AnnoyIndexMultiThreadedBuildPolicy AnnoyIndexThreadedBuildPolicy;
-#else
-  typedef AnnoyIndexSingleThreadedBuildPolicy AnnoyIndexThreadedBuildPolicy;
-#endif
-#endif
+typedef AnnoyIndexSingleThreadedBuildPolicy AnnoyIndexThreadedBuildPolicy;
 
 struct UwotAnnoyEuclidean {
   using Distance = Euclidean;
@@ -74,11 +60,7 @@ template <typename UwotAnnoyDistance> struct NNWorker {
   std::vector<typename UwotAnnoyDistance::T> dists;
 
   AnnoyIndex<typename UwotAnnoyDistance::S, typename UwotAnnoyDistance::T,
-#if defined __RcppAnnoy_0_16_2__
              typename UwotAnnoyDistance::Distance, Kiss64Random, AnnoyIndexThreadedBuildPolicy>
-#else
-             typename UwotAnnoyDistance::Distance, Kiss64Random>
-#endif
       index;
 
   NNWorker(const std::string &index_name, const std::vector<double> &mat,

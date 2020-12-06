@@ -27,5 +27,5 @@ Imports: Rcpp,
     methods,
     FNN,
     RSpectra,
-    RcppAnnoy (>= 0.0.11),
+    RcppAnnoy (>= 0.0.17),
     irlba
