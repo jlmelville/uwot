@@ -1,4 +1,7 @@
-# uwot 0.1.9.9000
+# uwot 0.1.10
+
+This release is mainly to allow for some internal changes to keep compatibility
+with RcppAnnoy, used for the nearest neighbor calculations.
 
 ## Bug fixes and minor improvements
 
