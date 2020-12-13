@@ -1,12 +1,8 @@
 ## New Release
 
-This is a new release to:
-
-* Make internal changes to maintain compatibility with a forthcoming release of
-a dependency (RcppAnnoy).
-* Make a minor license change: previous versions of uwot were licensed under
-GPL-3. This submission changes the license to GPL-3 or later.
-* Offer some minor new functionality.
+This minor release is the second part of a two-step procedure to maintain 
+compatibility with RcppAnnoy and is being coordinated with the maintainer of
+that package.
 
 ## Test environments
 
