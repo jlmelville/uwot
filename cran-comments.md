@@ -1,8 +1,9 @@
 ## New Release
 
-This minor release is the second part of a two-step procedure to maintain 
-compatibility with RcppAnnoy and is being coordinated with the maintainer of
-that package.
+With apologies for the quick submission of this release so soon after the
+previous version, this minor release is the second part of a two-step procedure
+to maintain compatibility with the packakge 'RcppAnnoy' and is being coordinated
+with the maintainer of that package.
 
 ## Test environments
 
@@ -24,7 +25,7 @@ There were no ERRORs or WARNINGs.
 * checking installed package size ... NOTE
   installed size is  6.9Mb
   sub-directories of 1Mb or more:
-    libs   6.5Mb
+    libs   6.6Mb
 ``` 
 
 * For r-hub with Fedora Linux, R-devel, clang, gfortran there was a similar NOTE:
