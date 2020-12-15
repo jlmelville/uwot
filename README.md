@@ -16,6 +16,12 @@ the basic method. Translated from the
 
 ## News
 
+*December 15 2020* Version 0.1.10 has been released to CRAN. This is mainly
+to maintain compatibility with RcppAnnoy, but also a small change was made to
+avoid it grinding away pointlessly in the presence of `NA` values, based on
+an observation by
+[David McGaughey on Twitter](https://twitter.com/David_McGaughey/status/1328389091239501824).
+
 *November 15 2020* Version 0.1.9 has been released to CRAN. The main addition is
 support for the Pearson correlation. Also, a slight license change from GPL-3
 to GPL-3 or later.
@@ -56,15 +62,6 @@ with RcppAnnoy 0.0.13 when using `load_uwot`.
 *April 6 2019*. uwot is now on [CRAN](https://cran.r-project.org/package=uwot).
 Also, some minor-to-horrible bugs in the `lvish` perplexity routine have been
 fixed.
-
-*March 27 2019*. Default behavior of the stochastic gradient descent
-optimization has changed again: the random number generator is now from the
-[PCG family](http://www.pcg-random.org/), linked via the
-[dqrng](https://cran.r-project.org/package=dqrng) package. This replaces the old
-routine, based on my translation of the Python UMAP implementation of the
-Tausworthe "taus88" PRNG into C++. If you have any concern about the quality of
-the random numbers used to optimize UMAP, stick with this new default PRNG.
-However it is slower, so to get the old behavior back set `pcg_rand = FALSE`.
 
 For visualization purposes, it seems reasonable to use the old PRNG
 (`pcg_rand = FALSE`), along with multiple threads during SGD
