@@ -154,7 +154,7 @@ mnist_nn <- umap(mnist, ret_nn = TRUE)
 # coordinates are now in mnist_nn$embedding
 
 # Re-use the nearest neighor data and save a lot of time
-mnist_nn_spca <- umap(mnist, nn_method = mnist_nn$nn, init = spca)
+mnist_nn_spca <- umap(mnist, nn_method = mnist_nn$nn, init = "spca")
 
 # No problem to have ret_nn = TRUE and ret_model = TRUE at the same time
 # Or just use the ret_extra parameter:
