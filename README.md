@@ -633,12 +633,18 @@ Some global parameters can be overridden for a specific data block by providing
 a list as the value for the metric, containing the vector of columns as the
 only unnamed element, and then the over-riding keyword arguments. An example:
 
-umap(X, pca = 40, pca_center = TRUE,
-     metric = list(
-       euclidean = 1:200,
-       euclidean = list(201:300, pca = NULL),
-       manhattan = list(300:500, pca_center = FALSE)
-     ))
+```R
+  umap(
+    X,
+    pca = 40,
+    pca_center = TRUE,
+    metric = list(
+      euclidean = 1:200,
+      euclidean = list(201:300, pca = NULL),
+      manhattan = list(300:500, pca_center = FALSE)
+    )
+  )
+```
 
 In this case, the first `euclidean` block with be reduced to 40 dimensions by
 PCA with centering applied. The second `euclidean` block will not have PCA
