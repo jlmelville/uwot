@@ -43,6 +43,8 @@ nn <- find_nn(iris10,
   k = 4, method = "fnn", metric = "euclidean",
   n_threads = 0, verbose = FALSE
 )
+row.names(nn$idx) <- row.names(iris10)
+row.names(nn$dist) <- row.names(iris10)
 
 # Just test that res is a matrix with valid numbers
 expect_ok_matrix <- function(res, nr = nrow(iris10), nc = 2) {

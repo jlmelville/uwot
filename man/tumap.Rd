@@ -411,9 +411,6 @@ By setting the UMAP curve parameters \code{a} and \code{b} to \code{1}, you
 get back the Cauchy distribution as used in t-SNE and LargeVis. It also
 results in a substantially simplified gradient expression. This can give
 a speed improvement of around 50\%.
-
-Note that the \code{grain_size} parameter no longer does anything and is
-present to avoid break backwards compatibility only.
 }
 \examples{
 iris_tumap <- tumap(iris, n_neighbors = 50, learning_rate = 0.5)

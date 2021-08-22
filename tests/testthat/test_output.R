@@ -481,3 +481,20 @@ res_trans_cor2 <- umap_transform(x2m(iris[11:20, ]), res_cor, n_threads = 0, ver
 expect_ok_matrix(res_trans_cor2)
 expect_gt(sum((res_trans_cor - res_trans_cor2) ^ 2), 1e-3)
 
+
+# 81: Preserve row names
+set.seed(42)
+xnames <-
+  data.frame(matrix(rnorm(10 * 4), nrow = 10), row.names = letters[1:10])
+xumap <-
+  umap(
+    xnames,
+    n_neighbors = 4,
+    verbose = FALSE,
+    n_threads = 0,
+    ret_model = TRUE,
+    ret_nn = TRUE
+  )
+expect_equal(row.names(xumap$embedding), row.names(xnames))
+expect_equal(row.names(xumap$nn$euclidean$idx), row.names(xnames))
+expect_equal(row.names(xumap$nn$euclidean$dist), row.names(xnames))

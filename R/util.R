@@ -115,7 +115,6 @@ progress_for <- function(n, nchunks, fun) {
     chunk_start <- chunk_end + 1
     chunk_end <- chunk_start + round(remaining / (nchunks - i + 1)) - 1
     remaining <- remaining - (chunk_end - chunk_start + 1)
-    
     fun(chunk_start, chunk_end)
     
     message("*", appendLF = FALSE)
@@ -128,4 +127,47 @@ checkna <- function(X) {
   if (!is.null(X) && any(is.na(X))) {
     stop("Missing values found in 'X'")
   }
+}
+
+check_graph <- function(graph, expected_rows, expected_cols) {
+  idx <- graph$idx
+  dist <- graph$dist
+  stopifnot(methods::is(idx, "matrix"))
+  stopifnot(methods::is(dist, "matrix"))
+  stopifnot(dim(idx) == dim(dist))
+  stopifnot(nrow(idx) == expected_rows)
+  stopifnot(ncol(idx) == expected_cols)
+}
+
+check_graph_list <- function(graph, expected_rows, expected_cols) {
+  if (!is.null(graph$idx)) {
+    return(check_graph(graph, expected_rows, expected_cols))
+  }
+  ngraphs <- length(graph)
+  for (i in 1:ngraphs) {
+    check_graph(graph[[i]], expected_rows, expected_cols)
+  }
+}
+
+# from a nn graph (or list) get the first non-NULL row names
+nn_graph_row_names <- function(graph) {
+  if (is.null(graph$idx)) {
+    graph <- graph[[1]]
+  }
+  xnames <- NULL
+  if (!is.null(row.names(graph$idx))) {
+    xnames <- row.names(graph$idx)
+  }
+  if (is.null(xnames) && !is.null(row.names(graph$dist))) {
+    xnames <- row.names(graph$dist)
+  }
+  xnames
+}
+
+# from a nn graph (or list) get the number of neighbors
+nn_graph_nbrs <- function(graph) {
+  if (is.null(graph$idx)) {
+    graph <- graph[[1]]
+  }
+  ncol(graph$idx)
 }

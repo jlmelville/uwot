@@ -15,13 +15,14 @@
 #'   have the same columns in the same order as the input data used to generate
 #'   the \code{model}.
 #' @param model Data associated with an existing embedding.
-#' @param nn_method Optional pre-calculated nearest neighbor data. It must be a 
-#' list consisting of two elements:
+#' @param nn_method Optional pre-calculated nearest neighbor data. The format is 
+#'   a list consisting of two elements:
 #'   \itemize{
-#'     \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
-#'     containing the integer indexes of the nearest neighbors in \code{X}. Each
-#'     vertex is considered to be its own nearest neighbor, i.e.
-#'     \code{idx[, 1] == 1:n_vertices}.
+#'     \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix where 
+#'     \code{n_vertices} is the number of items to be transformed. The contents 
+#'     of the matrix should be the integer indexes of the data used to generate
+#'     the \code{model}, which are the \code{n_neighbors}-nearest neighbors of
+#'     the data to be transformed.
 #'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
 #'     containing the distances of the nearest neighbors.
 #'   }
@@ -143,6 +144,7 @@ umap_transform <- function(X = NULL, model = NULL,
   method <- model$method
   scale_info <- model$scale_info
   metric <- model$metric
+  nblocks <- length(metric)
   pca_models <- model$pca_models
 
   a <- model$a
@@ -158,7 +160,9 @@ umap_transform <- function(X = NULL, model = NULL,
     pcg_rand <- TRUE
   }
 
-  if(!is.null(X)){
+  n_vertices <- NULL
+  Xnames <- NULL
+  if (!is.null(X)){
     if (ncol(X) != norig_col) {
       stop("Incorrect dimensions: X must have ", norig_col, " columns")
     }
@@ -170,8 +174,36 @@ umap_transform <- function(X = NULL, model = NULL,
       X <- as.matrix(X[, indexes])
     }
     n_vertices <- nrow(X)
-  } else if (nn_is_precomputed(nn_method)){
-    n_vertices <- nrow(nn_method$idx)
+    if (!is.null(row.names(X))) {
+      Xnames <- row.names(X)
+    }
+  } else if (nn_is_precomputed(nn_method)) {
+    if (nblocks == 1) {
+      if (length(nn_method) == 1) {
+        graph <- nn_method[[1]]
+      }
+      else {
+        graph <- nn_method
+      }
+      n_vertices <- nrow(graph$idx)
+      check_graph(graph, n_vertices, n_neighbors)
+      if (is.null(Xnames)) {
+        Xnames <- nn_graph_row_names(graph)
+      }
+    }
+    else {
+      stopifnot(length(nn_method) == nblocks)
+      for (i in 1:nblocks) {
+        graph <- nn_method[[i]]
+        if (is.null(n_vertices)) {
+          n_vertices <- nrow(graph$idx)
+        }
+        check_graph(graph, n_vertices, n_neighbors)
+        if (is.null(Xnames)) {
+          Xnames <- nn_graph_row_names(graph)
+        }
+      }
+    }
   }
   
   if (!is.null(init)) {
@@ -198,6 +230,9 @@ umap_transform <- function(X = NULL, model = NULL,
              xdim[1], ", ", xdim[2], "), but was (",
              indim[1], ", ", indim[2], ")")
       }
+      if (is.null(Xnames) && !is.null(row.names(init))) {
+        Xnames <- row.names(init)
+      }
       init_weighted <- NULL
     }
     else {
@@ -215,7 +250,6 @@ umap_transform <- function(X = NULL, model = NULL,
 
   adjusted_local_connectivity <- max(0, local_connectivity - 1.0)
 
-  nblocks <- length(metric)
   graph <- NULL
   embedding <- NULL
   for (i in 1:nblocks) {
@@ -239,7 +273,7 @@ umap_transform <- function(X = NULL, model = NULL,
         verbose = verbose
       )
     }
-    if(!is.null(X)){
+    if (!is.null(X)) {
       nn <- annoy_search(Xsub,
                          k = n_neighbors, ann = ann, search_k = search_k,
                          prep_data = TRUE,
@@ -247,10 +281,16 @@ umap_transform <- function(X = NULL, model = NULL,
                          n_threads = n_threads, grain_size = grain_size,
                          verbose = verbose
       )
-    } else if (nn_is_precomputed(nn_method)){
-      nn <- nn_method
+    } else if (nn_is_precomputed(nn_method)) {
+      if (nblocks == 1 && !is.null(nn_method$idx)) {
+        # When there's only one block, the NN graph can be passed directly
+        nn <- nn_method
+      }
+      else {
+        # otherwise we expect a list of NN graphs
+        nn <- nn_method[[i]]
+      }
     }
-
     graph_block <- smooth_knn(nn,
       local_connectivity = adjusted_local_connectivity,
       n_threads = n_threads,
@@ -309,6 +349,7 @@ umap_transform <- function(X = NULL, model = NULL,
     )
 
     embedding <- t(embedding)
+    row.names(train_embedding) <- NULL
     train_embedding <- t(train_embedding)
     if (tolower(method) == "umap") {
       embedding <- optimize_layout_umap(
@@ -349,6 +390,9 @@ umap_transform <- function(X = NULL, model = NULL,
     embedding <- t(embedding)
   }
   tsmessage("Finished")
+  if (!is.null(Xnames)) {
+    row.names(embedding) <- Xnames
+  }
   embedding
 }
 

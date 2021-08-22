@@ -109,26 +109,39 @@ iris10pca <- pca_scores(iris10, ncol = 2, ret_extra = TRUE)
 iris10pcat <- apply_pca(iris10, iris10pca)
 expect_equal(iris10pca$scores, iris10pcat, check.attributes = FALSE)
 
-# #64
+# #64 (and some #81)
 test_that("can use pre-calculated neighbors in transform", {
-  
   set.seed(1337)
-  X_train <-  as.matrix(iris[c(1:10,51:60), -5])
+  X_train <-as.matrix(iris[c(1:10,51:60), -5])
+  X_test <- as.matrix(iris[101:110, -5])
   iris_train_nn <- annoy_nn(X = X_train, k = 4, 
                             metric = "euclidean", n_threads = 0,
                             ret_index = TRUE)
-  iris_umap_train <- umap(X = NULL, nn_method = iris_train_nn, ret_model = TRUE)
-  query_ref_nn <- annoy_search(X = as.matrix(iris[101:110, -5]), 
-                               k = 4, 
+  # (81) test row names are found if it's just the dist matrix of the NN graph
+  row.names(iris_train_nn$dist) <- row.names(X_train)
+  iris_umap_train <- umap(X = NULL, nn_method = iris_train_nn, ret_model = TRUE, 
+                          n_neighbors = 4)
+  expect_equal(row.names(iris_umap_train$embedding), row.names(X_train))
+
+  query_ref_nn <- annoy_search(X = X_test, k = 4, 
                                ann = iris_train_nn$index, n_threads = 0)
-  iris_umap_test <- umap_transform(X = NULL,  model = iris_umap_train, 
+  # (81) test row names are found if it's just the index matrix of the NN graph
+  row.names(query_ref_nn$dist) <- row.names(X_test)
+  
+  iris_umap_test <- umap_transform(X = NULL, model = iris_umap_train, 
                                    nn_method = query_ref_nn)
   expect_ok_matrix(iris_umap_test)
+  expect_equal(row.names(iris_umap_test), row.names(X_test))
   
   # also test that we can provide our own input and it's unchanged with 0 epochs
   nr <- nrow(query_ref_nn$idx)
   nc <- ncol(iris_umap_train$embedding)
   test_init <- matrix(rnorm(nr * nc), nrow = nr, ncol = nc)
+  # set init row name and then set the NN dist names back to NULL to test
+  # we can get row names from init matrix if needed
+  row.names(test_init) <- row.names(X_test)
+  row.names(query_ref_nn$dist) <- NULL
+  
   iris_umap_test_rand0 <- umap_transform(X = NULL,  model = iris_umap_train, 
                                    nn_method = query_ref_nn, 
                                    init = test_init, n_epochs = 0)

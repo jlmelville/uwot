@@ -5,9 +5,6 @@
 #' the following help text is lifted verbatim from the Python reference
 #' implementation at \url{https://github.com/lmcinnes/umap}.
 #'
-#' Note that the \code{grain_size} parameter no longer does anything and is
-#' present to avoid break backwards compatibility only.
-#'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
 #'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
 #'   Matrix and data frames should contain one observation per row. Data frames
@@ -179,7 +176,7 @@
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
-#'   You may also pass precalculated nearest neighbor data to this argument. It
+#'   You may also pass pre-calculated nearest neighbor data to this argument. It
 #'   must be a list consisting of two elements:
 #'   \itemize{
 #'     \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
@@ -465,9 +462,6 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' get back the Cauchy distribution as used in t-SNE and LargeVis. It also
 #' results in a substantially simplified gradient expression. This can give
 #' a speed improvement of around 50\%.
-#' 
-#' Note that the \code{grain_size} parameter no longer does anything and is
-#' present to avoid break backwards compatibility only.
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
 #'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
@@ -869,9 +863,6 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \code{\link{umap}}, but may need to be increased further depending on your
 #'   dataset. Using \code{init = "spectral"} can help.
 #' }
-#'
-#' Note that the \code{grain_size} parameter no longer does anything and is
-#' present to avoid break backwards compatibility only.
 #'
 #' @param X Input data. Can be a \code{\link{data.frame}}, \code{\link{matrix}},
 #'   \code{\link[stats]{dist}} object or \code{\link[Matrix]{sparseMatrix}}.
@@ -1287,6 +1278,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   # number of original columns in data frame (or matrix)
   # will be used only if using df or matrix and ret_model = TRUE
   norig_col <- NULL
+  # row names for the input data, which we will apply to the embedding if
+  # needed
+  Xnames <- NULL
   if (is.null(X)) {
     if (!is.list(nn_method)) {
       stop("If X is NULL, must provide NN data in nn_method")
@@ -1295,6 +1289,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       stop("init = 'pca' and 'spca' can't be used with X = NULL")
     }
     n_vertices <- x2nv(nn_method)
+    stopifnot(n_vertices > 0)
+    n_neighbors <- nn_graph_nbrs(nn_method)
+    stopifnot(n_neighbors > 1 && n_neighbors <= n_vertices)
+    check_graph_list(nn_method, n_vertices, n_neighbors)
+    Xnames <- nn_graph_row_names(nn_method)
   }
   else if (methods::is(X, "dist")) {
     if (ret_model) {
@@ -1303,6 +1302,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     checkna(X)
     n_vertices <- attr(X, "Size")
     tsmessage("Read ", n_vertices, " rows")
+    Xnames <- labels(X)
   }
   else if (methods::is(X, "sparseMatrix")) {
     if (ret_model) {
@@ -1314,6 +1314,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       stop("Sparse matrices are only supported as distance matrices")
     }
     tsmessage("Read ", n_vertices, " rows of sparse distance matrix")
+    Xnames <- row.names(X)
   }
   else {
     cat_ids <- NULL
@@ -1349,6 +1350,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         time_stamp = FALSE
       )
     }
+    Xnames <- row.names(X)
     X <- scale_input(X,
       scale_type = scale, ret_model = ret_model,
       verbose = verbose
@@ -1360,11 +1362,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
 
   if (n_neighbors > n_vertices) {
-    # If nn_method is a list, we will determine n_neighbors later
+    # pre-calculated nearest neighbors ignores the user-supplied n_neighbors
+    # which is handled later
     if (!is.list(nn_method)) {
-      # Otherwise,for LargeVis, n_neighbors normally determined from perplexity
-      # not an error to be too large
       if (method == "largevis") {
+        # for LargeVis, n_neighbors normally determined from perplexity not an 
+        # error to be too large
         tsmessage("Setting n_neighbors to ", n_vertices)
         n_neighbors <- n_vertices
       }
@@ -1675,6 +1678,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     gc()
     # Center the points before returning
     embedding <- scale(embedding, center = TRUE, scale = FALSE)
+    
+    if (is.null(row.names(embedding)) &&
+        !is.null(Xnames) && length(Xnames) == nrow(embedding)) {
+      row.names(embedding) <- Xnames
+    }
     tsmessage("Optimization finished")
   }
 
@@ -1730,6 +1738,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       res$nn <- list()
       for (i in 1:nblocks) {
         res$nn[[i]] <- list(idx = nns[[i]]$idx, dist = nns[[i]]$dist)
+        if (!is.null(Xnames) && nrow(res$nn[[i]]$idx) == length(Xnames)) {
+          row.names(res$nn[[i]]$idx) <- Xnames
+          row.names(res$nn[[i]]$dist) <- Xnames
+        }
       }
       names(res$nn) <- names(nns)
     }

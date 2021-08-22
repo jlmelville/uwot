@@ -1,3 +1,26 @@
+# uwot 0.1.11
+
+## Bug fixes and minor improvements
+
+* If row names are provided in the input data (or nearest neighbor data, or
+initialization data if it's a matrix), this will be used to name the rows of the
+output embedding (<https://github.com/jlmelville/uwot/issues/81>), and also the
+nearest neighbor data if you set `ret_nn = TRUE`. If the names exist in more
+than one of the input data parameters listed above, but are inconsistent, no
+guarantees are made about which names will be used. Thank you 
+[jwijffels](https://github.com/jwijffels) for reporting this.
+* Setting `nn_method = "annoy"` and `verbose = TRUE` would lead to an error with 
+datasets with fewer than 50 items in them.
+* Using multiple pre-computed nearest neighbors blocks is now supported with
+`umap_transform` (this was incorrectly documented to work).
+* Documentation around pre-calculated nearest neighbor data for `umap_transform`
+was wrong in other ways: it has now been corrected to indicate that there should
+be neighbor data for each item in the test data, but the neighbors and distances
+should refer to items in training data (i.e. the data used to build the model).
+* `n_neighbors` parameter is now correctly ignored in model generation if
+pre-calculated nearest neighbor data is provided.
+* Documentation incorrectly said `grain_size` didn't do anything.
+
 # uwot 0.1.10
 
 This release is mainly to allow for some internal changes to keep compatibility

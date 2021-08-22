@@ -128,8 +128,8 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
     ", n_trees = ", n_trees
   )
   ann <- annoy$ann
-  if (verbose) {
-    nstars <- 50
+  nstars <- 50
+  if (verbose && nr > nstars) {
     progress_for(
       nr, nstars,
       function(chunk_start, chunk_end) {
@@ -238,8 +238,8 @@ annoy_search_serial <- function(X, k, ann,
   nr <- nrow(X)
   idx <- matrix(nrow = nr, ncol = k)
   dist <- matrix(nrow = nr, ncol = k)
-  if (verbose) {
-    nstars <- 50
+  nstars <- 50
+  if (verbose && nr > nstars) {
     progress_for(
       nr, nstars,
       function(chunk_start, chunk_end) {

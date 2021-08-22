@@ -235,7 +235,7 @@ these values are set automatically as determined by \code{min_dist} and
  }
 By default, if \code{X} has less than 4,096 vertices, the exact nearest
 neighbors are found. Otherwise, approximate nearest neighbors are used.
-You may also pass precalculated nearest neighbor data to this argument. It
+You may also pass pre-calculated nearest neighbor data to this argument. It
 must be a list consisting of two elements:
 \itemize{
   \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
@@ -436,10 +436,6 @@ Carry out dimensionality reduction of a dataset using the Uniform Manifold
 Approximation and Projection (UMAP) method (McInnes & Healy, 2018). Some of
 the following help text is lifted verbatim from the Python reference
 implementation at \url{https://github.com/lmcinnes/umap}.
-}
-\details{
-Note that the \code{grain_size} parameter no longer does anything and is
-present to avoid break backwards compatibility only.
 }
 \examples{
 

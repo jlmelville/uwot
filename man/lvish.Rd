@@ -347,9 +347,6 @@ following:
   \code{\link{umap}}, but may need to be increased further depending on your
   dataset. Using \code{init = "spectral"} can help.
 }
-
-Note that the \code{grain_size} parameter no longer does anything and is
-present to avoid break backwards compatibility only.
 }
 \examples{
 # Default number of epochs is much larger than for UMAP, assumes random
