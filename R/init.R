@@ -27,17 +27,6 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   # This effectively row-normalizes A: colSums is normally faster than rowSums
   # and because A is symmetric, they're equivalent
   M <- A / colSums(A)
-  connected <- connected_components(M)
-  if (connected$n_components > 1) {
-    tsmessage(
-      "Found ", connected$n_components, " connected components, ",
-      "initializing each component separately"
-    )
-    return(subgraph_init(laplacian_eigenmap, connected,
-      A = A, ndim = ndim,
-      verbose = verbose
-    ))
-  }
 
   res <- NULL
   k <- ndim + 1
@@ -72,17 +61,6 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     return(rand_init(nrow(A), ndim))
   }
   tsmessage("Initializing from normalized Laplacian")
-  connected <- connected_components(A)
-  if (connected$n_components > 1) {
-    tsmessage(
-      "Found ", connected$n_components, " connected components, ",
-      "initializing each component separately"
-    )
-    return(subgraph_init(normalized_laplacian_init, connected,
-      A = A, ndim = ndim,
-      verbose = verbose
-    ))
-  }
 
   n <- nrow(A)
   # Normalized Laplacian: clear and close to UMAP code, but very slow in R
@@ -173,17 +151,7 @@ spectral_init <- function(A, ndim = 2, verbose = FALSE) {
     return(rand_init(nrow(A), ndim))
   }
   tsmessage("Initializing from normalized Laplacian + noise")
-  connected <- connected_components(A)
-  if (connected$n_components > 1) {
-    tsmessage(
-      "Found ", connected$n_components, " connected components, ",
-      "initializing each component separately"
-    )
-    return(subgraph_init(spectral_init, connected,
-      A = A, ndim = ndim,
-      verbose = verbose
-    ))
-  }
+
   coords <- normalized_laplacian_init(A, ndim, verbose = FALSE)
   expansion <- 10.0 / max(abs(coords))
   (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.0001),
@@ -205,29 +173,7 @@ irlba_spectral_init <- function(A, ndim = 2, verbose = FALSE) {
   )
 }
 
-# Recursively calls the spectral initialization function named fn_name
-# for each subgraph specified by connected
-subgraph_init <- function(fn_name, connected, A, ndim = 2, verbose = FALSE) {
-  init <- NULL
-  for (i in 1:connected$n_components) {
-    subg_idx <- connected$labels == i - 1
-    subg <- A[subg_idx, subg_idx]
-    tsmessage("Initializing subcomponent of size ", nrow(subg))
-    init_conn <- do.call(fn_name, list(
-      A = subg, ndim = ndim,
-      verbose = verbose
-    ))
-    if (is.null(init)) {
-      init <- init_conn
-    }
-    else {
-      init <- rbind(init, init_conn)
-    }
-  }
-  init
-}
-
-# Return the number of connected components in a graph (respresented as a
+# Return the number of connected components in a graph (represented as a
 # sparse matrix).
 connected_components <- function(X) {
   Xt <- Matrix::t(X)
