@@ -15,7 +15,9 @@
 #'   have the same columns in the same order as the input data used to generate
 #'   the \code{model}.
 #' @param model Data associated with an existing embedding.
-#' @param nn_method Optional pre-calculated nearest neighbor data. The format is 
+#' @param nn_method Optional pre-calculated nearest neighbor data. 
+#' 
+#' The format is 
 #'   a list consisting of two elements:
 #'   \itemize{
 #'     \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix where 
@@ -177,6 +179,7 @@ umap_transform <- function(X = NULL, model = NULL,
     if (!is.null(row.names(X))) {
       Xnames <- row.names(X)
     }
+    checkna(X)
   } else if (nn_is_precomputed(nn_method)) {
     if (nblocks == 1) {
       if (length(nn_method) == 1) {
@@ -239,10 +242,13 @@ umap_transform <- function(X = NULL, model = NULL,
       stop("Invalid input format for 'init'")
     }
   }
-  tsmessage(
-    "Read ", n_vertices, " rows and found ", ncol(X),
-    " numeric columns"
-  )
+  if (verbose) {
+    x_is_matrix <- methods::is(X, "matrix")
+    tsmessage("Read ", n_vertices, " rows", appendLF = !x_is_matrix)
+    if (x_is_matrix) {
+      tsmessage(" and found ", ncol(X), " numeric columns", time_stamp = FALSE)
+    }
+  }
 
   if (!is.null(scale_info)) {
     X <- apply_scaling(X, scale_info = scale_info, verbose = verbose)

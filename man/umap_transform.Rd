@@ -26,22 +26,24 @@ the \code{model}.}
 
 \item{model}{Data associated with an existing embedding.}
 
-\item{nn_method}{Optional pre-calculated nearest neighbor data. The format is 
-a list consisting of two elements:
-\itemize{
-  \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix where 
-  \code{n_vertices} is the number of items to be transformed. The contents 
-  of the matrix should be the integer indexes of the data used to generate
-  the \code{model}, which are the \code{n_neighbors}-nearest neighbors of
-  the data to be transformed.
-  \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
-  containing the distances of the nearest neighbors.
-}
-Multiple nearest neighbor data (e.g. from two different pre-calculated
-metrics) can be passed by passing a list containing the nearest neighbor
-data lists as items.
-The \code{X} parameter is ignored when using pre-calculated nearest 
-neighbor data.}
+\item{nn_method}{Optional pre-calculated nearest neighbor data. 
+
+The format is 
+  a list consisting of two elements:
+  \itemize{
+    \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix where 
+    \code{n_vertices} is the number of items to be transformed. The contents 
+    of the matrix should be the integer indexes of the data used to generate
+    the \code{model}, which are the \code{n_neighbors}-nearest neighbors of
+    the data to be transformed.
+    \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
+    containing the distances of the nearest neighbors.
+  }
+  Multiple nearest neighbor data (e.g. from two different pre-calculated
+  metrics) can be passed by passing a list containing the nearest neighbor
+  data lists as items.
+  The \code{X} parameter is ignored when using pre-calculated nearest 
+  neighbor data.}
 
 \item{init_weighted}{If \code{TRUE}, then initialize the embedded coordinates
 of \code{X} using a weighted average of the coordinates of the nearest
