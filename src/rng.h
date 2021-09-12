@@ -42,7 +42,10 @@ static uint32_t random32() {
 struct tau_factory {
   uint64_t seed1;
   uint64_t seed2;
-  tau_factory() : seed1(random64()), seed2(random64()) {}
+  tau_factory() : seed1(0), seed2(0) {
+    seed1 = random64();
+    seed2 = random64();
+  }
 
   void reseed() {
     seed1 = random64();
