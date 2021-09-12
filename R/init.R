@@ -33,8 +33,7 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
       "Found ", connected$n_components, " connected components, ",
       "initializing each component separately"
     )
-    fn_name <- as.character(match.call()[[1]])
-    return(subgraph_init(fn_name, connected,
+    return(subgraph_init(laplacian_eigenmap, connected,
       A = A, ndim = ndim,
       verbose = verbose
     ))
@@ -79,8 +78,7 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
       "Found ", connected$n_components, " connected components, ",
       "initializing each component separately"
     )
-    fn_name <- as.character(match.call()[[1]])
-    return(subgraph_init(fn_name, connected,
+    return(subgraph_init(normalized_laplacian_init, connected,
       A = A, ndim = ndim,
       verbose = verbose
     ))
@@ -181,8 +179,7 @@ spectral_init <- function(A, ndim = 2, verbose = FALSE) {
       "Found ", connected$n_components, " connected components, ",
       "initializing each component separately"
     )
-    fn_name <- as.character(match.call()[[1]])
-    return(subgraph_init(fn_name, connected,
+    return(subgraph_init(spectral_init, connected,
       A = A, ndim = ndim,
       verbose = verbose
     ))
