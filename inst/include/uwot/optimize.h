@@ -53,6 +53,24 @@ inline auto clamp(float v, float lo, float hi) -> float {
   return t > hi ? hi : t;
 }
 
+// return the squared euclidean distance between two points x[px] and y[py]
+// also store the displacement between x[px] and y[py] in diffxy
+// there is a small but noticeable performance improvement by doing so
+// rather than recalculating it in the gradient step
+inline auto d2diff(const std::vector<float> &x, std::size_t px,
+                   const std::vector<float> &y, std::size_t py,
+                   std::size_t ndim, float dist_eps, 
+                   std::vector<float> &diffxy)
+    -> float {
+  float dist_squared = 0.0;
+  for (std::size_t d = 0; d < ndim; d++) {
+    float diff = x[px + d] - y[py + d];
+    diffxy[d] = diff;
+    dist_squared += diff * diff;
+  }
+  return (std::max)(dist_eps, dist_squared);
+}
+
 // Gradient: the type of gradient used in the optimization
 // DoMoveVertex: true if both ends of a positive edge should be updated
 template <typename Gradient, bool DoMoveVertex, typename RngFactory>
@@ -94,47 +112,43 @@ struct SgdWorker {
     // Each window gets its own PRNG state, to prevent locking inside the loop.
     auto prng = rng_factory.create(end);
 
-    std::vector<float> dys(ndim);
+    // the displacement between two points 
+    std::vector<float> disp(ndim);
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
       std::size_t dj = ndim * positive_head[i];
+      
+      // j and k are joined by an edge: push them together
       std::size_t dk = ndim * positive_tail[i];
-
-      float dist_squared = 0.0;
-      for (std::size_t d = 0; d < ndim; d++) {
-        float diff = head_embedding[dj + d] - tail_embedding[dk + d];
-        dys[d] = diff;
-        dist_squared += diff * diff;
-      }
-      dist_squared = (std::max)(dist_eps, dist_squared);
+      float dist_squared =
+          d2diff(head_embedding, dj, tail_embedding, dk, ndim, dist_eps, disp);
       float grad_coeff = gradient.grad_attr(dist_squared);
 
       for (std::size_t d = 0; d < ndim; d++) {
-        float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+        float grad_d = alpha * clamp(grad_coeff * disp[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
         head_embedding[dj + d] += grad_d;
+        // we don't only always want points in the tail to move
+        // e.g. if adding new points to an existing embedding
         move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
       }
 
+      // Negative sampling step: assume any other point is a negative example
+      // Push them apart
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (std::size_t p = 0; p < n_neg_samples; p++) {
         std::size_t dkn = prng(tail_nvert) * ndim;
         if (dj == dkn) {
           continue;
         }
-        float dist_squared = 0.0;
-        for (std::size_t d = 0; d < ndim; d++) {
-          float diff = head_embedding[dj + d] - tail_embedding[dkn + d];
-          dys[d] = diff;
-          dist_squared += diff * diff;
-        }
-        dist_squared = (std::max)(dist_eps, dist_squared);
+        dist_squared = d2diff(head_embedding, dj, tail_embedding, dkn, ndim,
+                              dist_eps, disp);
         float grad_coeff = gradient.grad_rep(dist_squared);
 
         for (std::size_t d = 0; d < ndim; d++) {
-          float grad_d = alpha * clamp(grad_coeff * dys[d], Gradient::clamp_lo,
+          float grad_d = alpha * clamp(grad_coeff * disp[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
           head_embedding[dj + d] += grad_d;
         }
