@@ -348,8 +348,12 @@ for all edges. So for SGD purposes, the attractive gradient for UMAP is:
 
 $$
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
-\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}\left(\mathbf{y_i - y_j}\right)
+\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}\left(\mathbf{y_i - y_j}\right) =
+\frac{-2abd_{ij}^{2b}}{d_{ij}^2 \left(1 + ad_{ij}^{2b}\right)}\left(\mathbf{y_i - y_j}\right)
 $$
+
+The final expression might be more computationally convenient because it saves
+on an extra power calculation.
 
 The repulsive part of the gradient contains a $1 - v_{ij}$ term, but because
 $v_{ij} = 0$ for most pairs of edges, that term effectively disappears, leaving:

@@ -62,6 +62,8 @@ template <float (*powfun)(float, float)> class base_umap_gradient {
 public:
   base_umap_gradient(float a, float b, float gamma)
       : a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b){};
+  // Compared to the UMAP Python implementation, instead of doing d2^(b-1)
+  // we can save a power calculation by using d2^b / d2
   auto grad_attr(float dist_squared) const -> float {
     float pd2b = powfun(dist_squared, b);
     return (a_b_m2 * pd2b) / (dist_squared * (a * pd2b + 1.0));
