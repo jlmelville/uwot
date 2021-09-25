@@ -59,8 +59,7 @@ inline auto clamp(float v, float lo, float hi) -> float {
 // rather than recalculating it in the gradient step
 inline auto d2diff(const std::vector<float> &x, std::size_t px,
                    const std::vector<float> &y, std::size_t py,
-                   std::size_t ndim, float dist_eps, 
-                   std::vector<float> &diffxy)
+                   std::size_t ndim, float dist_eps, std::vector<float> &diffxy)
     -> float {
   float dist_squared = 0.0;
   for (std::size_t d = 0; d < ndim; d++) {
@@ -112,14 +111,14 @@ struct SgdWorker {
     // Each window gets its own PRNG state, to prevent locking inside the loop.
     auto prng = rng_factory.create(end);
 
-    // the displacement between two points 
+    // the displacement between two points
     std::vector<float> disp(ndim);
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
       std::size_t dj = ndim * positive_head[i];
-      
+
       // j and k are joined by an edge: push them together
       std::size_t dk = ndim * positive_tail[i];
       float dist_squared =
