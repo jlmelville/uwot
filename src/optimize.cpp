@@ -74,6 +74,53 @@ auto optimize_layout(const T &gradient, std::vector<float> &head_embedding,
   return head_embedding;
 }
 
+struct UmapFactory {
+  bool move_other;
+  bool pcg_rand;
+  UmapFactory(bool move_other, bool pcg_rand)
+      : move_other(move_other), pcg_rand(pcg_rand) {}
+
+  template <typename T>
+  void
+  create(const T &gradient, std::vector<float> &head_embedding,
+         std::vector<float> &tail_embedding,
+         const std::vector<unsigned int> &positive_head,
+         const std::vector<unsigned int> &positive_tail, unsigned int n_epochs,
+         unsigned int n_vertices, const std::vector<float> &epochs_per_sample,
+         float initial_alpha, float negative_sample_rate, std::size_t n_threads,
+         std::size_t grain_size, bool verbose, std::vector<float> &result) {
+    if (move_other) {
+      if (pcg_rand) {
+        result = optimize_layout<T, true, pcg_factory>(
+            gradient, head_embedding, tail_embedding, positive_head,
+            positive_tail, n_epochs, n_vertices, epochs_per_sample,
+            initial_alpha, negative_sample_rate, n_threads, grain_size,
+            verbose);
+      } else {
+        result = optimize_layout<T, true, tau_factory>(
+            gradient, head_embedding, tail_embedding, positive_head,
+            positive_tail, n_epochs, n_vertices, epochs_per_sample,
+            initial_alpha, negative_sample_rate, n_threads, grain_size,
+            verbose);
+      }
+    } else {
+      if (pcg_rand) {
+        result = optimize_layout<T, false, pcg_factory>(
+            gradient, head_embedding, tail_embedding, positive_head,
+            positive_tail, n_epochs, n_vertices, epochs_per_sample,
+            initial_alpha, negative_sample_rate, n_threads, grain_size,
+            verbose);
+      } else {
+        result = optimize_layout<T, false, tau_factory>(
+            gradient, head_embedding, tail_embedding, positive_head,
+            positive_tail, n_epochs, n_vertices, epochs_per_sample,
+            initial_alpha, negative_sample_rate, n_threads, grain_size,
+            verbose);
+      }
+    }
+  }
+};
+
 // [[Rcpp::export]]
 NumericMatrix optimize_layout_umap(
     NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding,
@@ -100,60 +147,20 @@ NumericMatrix optimize_layout_umap(
   }
 
   std::vector<float> result;
+  UmapFactory umap_factory(move_other, pcg_rand);
+
   if (approx_pow) {
     const uwot::apumap_gradient gradient(a, b, gamma);
-    if (move_other) {
-      if (pcg_rand) {
-        result = optimize_layout<decltype(gradient), true, pcg_factory>(
-            gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-            n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, n_threads, grain_size, verbose);
-      } else {
-        result = optimize_layout<decltype(gradient), true, tau_factory>(
-            gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-            n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, n_threads, grain_size, verbose);
-      }
-    } else {
-      if (pcg_rand) {
-        result = optimize_layout<decltype(gradient), false, pcg_factory>(
-            gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-            n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, n_threads, grain_size, verbose);
-      } else {
-        result = optimize_layout<decltype(gradient), false, tau_factory>(
-            gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-            n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, n_threads, grain_size, verbose);
-      }
-    }
+    umap_factory.create(gradient, head_vec, *tail_vec_ptr, positive_head,
+                        positive_tail, n_epochs, n_vertices, epochs_per_sample,
+                        initial_alpha, negative_sample_rate, n_threads,
+                        grain_size, verbose, result);
   } else {
     const uwot::umap_gradient gradient(a, b, gamma);
-    if (move_other) {
-      if (pcg_rand) {
-        result = optimize_layout<decltype(gradient), true, pcg_factory>(
-            gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-            n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, n_threads, grain_size, verbose);
-      } else {
-        result = optimize_layout<decltype(gradient), true, tau_factory>(
-            gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-            n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, n_threads, grain_size, verbose);
-      }
-    } else {
-      if (pcg_rand) {
-        result = optimize_layout<decltype(gradient), false, pcg_factory>(
-            gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-            n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, n_threads, grain_size, verbose);
-      } else {
-        result = optimize_layout<decltype(gradient), false, tau_factory>(
-            gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-            n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-            negative_sample_rate, n_threads, grain_size, verbose);
-      }
-    }
+    umap_factory.create(gradient, head_vec, *tail_vec_ptr, positive_head,
+                        positive_tail, n_epochs, n_vertices, epochs_per_sample,
+                        initial_alpha, negative_sample_rate, n_threads,
+                        grain_size, verbose, result);
   }
 
   if (delete_tail_ptr) {
@@ -186,32 +193,11 @@ NumericMatrix optimize_layout_tumap(
   }
 
   std::vector<float> result;
-
-  if (move_other) {
-    if (pcg_rand) {
-      result = optimize_layout<decltype(gradient), true, pcg_factory>(
-          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-          negative_sample_rate, n_threads, grain_size, verbose);
-    } else {
-      result = optimize_layout<decltype(gradient), true, tau_factory>(
-          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-          negative_sample_rate, n_threads, grain_size, verbose);
-    }
-  } else {
-    if (pcg_rand) {
-      result = optimize_layout<decltype(gradient), false, pcg_factory>(
-          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-          negative_sample_rate, n_threads, grain_size, verbose);
-    } else {
-      result = optimize_layout<decltype(gradient), false, tau_factory>(
-          gradient, head_vec, *tail_vec_ptr, positive_head, positive_tail,
-          n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-          negative_sample_rate, n_threads, grain_size, verbose);
-    }
-  }
+  UmapFactory umap_factory(move_other, pcg_rand);
+  umap_factory.create(gradient, head_vec, *tail_vec_ptr, positive_head,
+                      positive_tail, n_epochs, n_vertices, epochs_per_sample,
+                      initial_alpha, negative_sample_rate, n_threads,
+                      grain_size, verbose, result);
 
   if (delete_tail_ptr) {
     delete (tail_vec_ptr);
@@ -235,18 +221,11 @@ NumericMatrix optimize_layout_largevis(
   auto head_vec = as<std::vector<float>>(head_embedding);
 
   std::vector<float> result;
-
-  if (pcg_rand) {
-    result = optimize_layout<decltype(gradient), true, pcg_factory>(
-        gradient, head_vec, head_vec, positive_head, positive_tail, n_epochs,
-        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
-        n_threads, grain_size, verbose);
-  } else {
-    result = optimize_layout<decltype(gradient), true, tau_factory>(
-        gradient, head_vec, head_vec, positive_head, positive_tail, n_epochs,
-        n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
-        n_threads, grain_size, verbose);
-  }
+  UmapFactory umap_factory(true, pcg_rand);
+  umap_factory.create(gradient, head_vec, head_vec, positive_head,
+                      positive_tail, n_epochs, n_vertices, epochs_per_sample,
+                      initial_alpha, negative_sample_rate, n_threads,
+                      grain_size, verbose, result);
 
   return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
                        result.begin());
