@@ -167,7 +167,7 @@ struct SgdWorker {
         for (std::size_t d = 0; d < ndim; d++) {
           float grad_d = alpha * clamp(grad_coeff * disp[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
-          update.repel(dj, dk, d, grad_d);
+          update.repel(dj, dkn, d, grad_d);
         }
       }
       sampler.next_sample(i, n_neg_samples);
