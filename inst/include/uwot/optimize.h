@@ -48,6 +48,25 @@ void move_other_vertex<true>(std::vector<float> &embedding, float grad_d,
   embedding[nrj + i] -= grad_d;
 }
 
+// DoMoveVertex: true if both ends of a positive edge should be updated
+template <bool DoMoveVertex> struct InPlaceUpdate {
+  std::vector<float> &head_embedding;
+  std::vector<float> &tail_embedding;
+
+  InPlaceUpdate(std::vector<float> &head_embedding,
+                std::vector<float> &tail_embedding)
+      : head_embedding(head_embedding), tail_embedding(tail_embedding) {}
+  void attract(std::size_t dj, std::size_t dk, std::size_t d, float grad_d) {
+    head_embedding[dj + d] += grad_d;
+    // we don't only always want points in the tail to move
+    // e.g. if adding new points to an existing embedding
+    move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
+  }
+  void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d) {
+    head_embedding[dj + d] += grad_d;
+  }
+};
+
 inline auto clamp(float v, float lo, float hi) -> float {
   float t = v < lo ? lo : v;
   return t > hi ? hi : t;
@@ -71,30 +90,32 @@ inline auto d2diff(const std::vector<float> &x, std::size_t px,
 }
 
 // Gradient: the type of gradient used in the optimization
-// DoMoveVertex: true if both ends of a positive edge should be updated
-template <typename Gradient, bool DoMoveVertex, typename RngFactory>
+// Update: type of update to the embedding coordinates
+template <typename Gradient, typename Update, typename RngFactory>
 struct SgdWorker {
   int n; // epoch counter
   float alpha;
   const Gradient gradient;
+  Update update;
   const std::vector<unsigned int> positive_head;
   const std::vector<unsigned int> positive_tail;
   uwot::Sampler sampler;
-  std::vector<float> &head_embedding;
-  std::vector<float> &tail_embedding;
+  const std::vector<float> &head_embedding;
+  const std::vector<float> &tail_embedding;
   std::size_t ndim;
   std::size_t head_nvert;
   std::size_t tail_nvert;
   float dist_eps;
   RngFactory rng_factory;
 
-  SgdWorker(const Gradient &gradient, std::vector<unsigned int> positive_head,
+  SgdWorker(const Gradient &gradient, Update &update,
+            std::vector<unsigned int> positive_head,
             std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
-            std::vector<float> &head_embedding,
-            std::vector<float> &tail_embedding, std::size_t ndim)
+            const std::vector<float> &head_embedding,
+            const std::vector<float> &tail_embedding, std::size_t ndim)
       :
 
-        n(0), alpha(0.0), gradient(gradient),
+        n(0), alpha(0.0), gradient(gradient), update(update),
         positive_head(std::move(positive_head)),
         positive_tail(std::move(positive_tail)),
 
@@ -128,10 +149,7 @@ struct SgdWorker {
       for (std::size_t d = 0; d < ndim; d++) {
         float grad_d = alpha * clamp(grad_coeff * disp[d], Gradient::clamp_lo,
                                      Gradient::clamp_hi);
-        head_embedding[dj + d] += grad_d;
-        // we don't only always want points in the tail to move
-        // e.g. if adding new points to an existing embedding
-        move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
+        update.attract(dj, dk, d, grad_d);
       }
 
       // Negative sampling step: assume any other point is a negative example
@@ -149,7 +167,7 @@ struct SgdWorker {
         for (std::size_t d = 0; d < ndim; d++) {
           float grad_d = alpha * clamp(grad_coeff * disp[d], Gradient::clamp_lo,
                                        Gradient::clamp_hi);
-          head_embedding[dj + d] += grad_d;
+          update.repel(dj, dk, d, grad_d);
         }
       }
       sampler.next_sample(i, n_neg_samples);

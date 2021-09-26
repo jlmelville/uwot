@@ -42,9 +42,9 @@ auto optimize_layout(const T &gradient, std::vector<float> &head_embedding,
                      std::size_t n_threads = 0, std::size_t grain_size = 1,
                      bool verbose = false) -> std::vector<float> {
   uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
-
-  uwot::SgdWorker<T, DoMove, RandFactory> worker(
-      gradient, positive_head, positive_tail, sampler, head_embedding,
+  uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding);
+  uwot::SgdWorker<T, decltype(update), RandFactory> worker(
+      gradient, update, positive_head, positive_tail, sampler, head_embedding,
       tail_embedding, head_embedding.size() / n_vertices);
 
   Progress progress(n_epochs, verbose);
@@ -65,7 +65,7 @@ auto optimize_layout(const T &gradient, std::vector<float> &head_embedding,
 
     if (Progress::check_abort()) {
       progress.cleanup();
-      return head_embedding;
+      break;
     }
     if (verbose) {
       progress.increment();
