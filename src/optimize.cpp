@@ -44,17 +44,16 @@ void optimize_layout(const T &gradient, std::vector<float> &head_embedding,
   const std::size_t ndim = head_embedding.size() / n_vertices;
 
   uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
-  uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding);
+  uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
+                                     initial_alpha);
   uwot::SgdWorker<T, decltype(update), RandFactory> worker(
       gradient, update, positive_head, positive_tail, sampler, ndim,
       tail_embedding.size() / ndim);
 
   Progress progress(n_epochs, verbose);
   const auto n_epochs_per_sample = epochs_per_sample.size();
-  float alpha = initial_alpha;
 
   for (auto n = 0U; n < n_epochs; n++) {
-    worker.alpha = alpha;
     worker.n = n;
     worker.reseed();
     if (n_threads > 0) {
@@ -63,7 +62,7 @@ void optimize_layout(const T &gradient, std::vector<float> &head_embedding,
     } else {
       worker(0, n_epochs_per_sample);
     }
-    alpha = initial_alpha * (1.0 - (float(n) / float(n_epochs)));
+    update.alpha = initial_alpha * (1.0 - (float(n) / float(n_epochs)));
 
     if (Progress::check_abort()) {
       progress.cleanup();

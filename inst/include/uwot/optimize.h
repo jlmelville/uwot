@@ -79,10 +79,12 @@ void move_other_vertex<true>(std::vector<float> &embedding, float update_d,
 template <bool DoMoveVertex> struct InPlaceUpdate {
   std::vector<float> &head_embedding;
   std::vector<float> &tail_embedding;
+  float alpha; // learning rate
 
   InPlaceUpdate(std::vector<float> &head_embedding,
-                std::vector<float> &tail_embedding)
-      : head_embedding(head_embedding), tail_embedding(tail_embedding) {}
+                std::vector<float> &tail_embedding, float alpha)
+      : head_embedding(head_embedding), tail_embedding(tail_embedding),
+        alpha(alpha) {}
   void attract(std::size_t dj, std::size_t dk, std::size_t d, float update_d) {
     head_embedding[dj + d] += update_d;
     // we don't only always want points in the tail to move
@@ -96,24 +98,23 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
 
 template <typename Update, typename Gradient>
 void update_attract(Update &update, const Gradient &gradient, std::size_t dj,
-                    std::size_t dk, std::size_t ndim, float alpha,
+                    std::size_t dk, std::size_t ndim,
                     std::vector<float> &disp) {
   float grad_coeff = grad_attr(gradient, update.head_embedding, dj,
                                update.tail_embedding, dk, ndim, disp);
   for (std::size_t d = 0; d < ndim; d++) {
-    float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
+    float update_d = update.alpha * grad_d<Gradient>(disp, d, grad_coeff);
     update.attract(dj, dk, d, update_d);
   }
 }
 
 template <typename Update, typename Gradient>
 void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
-                  std::size_t dk, std::size_t ndim, float alpha,
-                  std::vector<float> &disp) {
+                  std::size_t dk, std::size_t ndim, std::vector<float> &disp) {
   float grad_coeff = grad_rep(gradient, update.head_embedding, dj,
                               update.tail_embedding, dk, ndim, disp);
   for (std::size_t d = 0; d < ndim; d++) {
-    float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
+    float update_d = update.alpha * grad_d<Gradient>(disp, d, grad_coeff);
     update.repel(dj, dk, d, update_d);
   }
 }
@@ -123,7 +124,6 @@ void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
 template <typename Gradient, typename Update, typename RngFactory>
 struct SgdWorker {
   int n; // epoch counter
-  float alpha;
   const Gradient gradient;
   Update &update;
   const std::vector<unsigned int> positive_head;
@@ -137,15 +137,10 @@ struct SgdWorker {
             std::vector<unsigned int> positive_head,
             std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
             std::size_t ndim, std::size_t tail_nvert)
-      :
-
-        n(0), alpha(0.0), gradient(gradient), update(update),
+      : n(0), gradient(gradient), update(update),
         positive_head(std::move(positive_head)),
-        positive_tail(std::move(positive_tail)),
-
-        sampler(sampler),
-
-        ndim(ndim), tail_nvert(tail_nvert), rng_factory() {}
+        positive_tail(std::move(positive_tail)), sampler(sampler), ndim(ndim),
+        tail_nvert(tail_nvert), rng_factory() {}
 
   void operator()(std::size_t begin, std::size_t end) {
     // Each window gets its own PRNG state, to prevent locking inside the loop.
@@ -161,7 +156,7 @@ struct SgdWorker {
       const std::size_t dj = ndim * positive_head[i];
       const std::size_t dk = ndim * positive_tail[i];
       // j and k are joined by an edge: push them together
-      update_attract(update, gradient, dj, dk, ndim, alpha, disp);
+      update_attract(update, gradient, dj, dk, ndim, disp);
 
       // Negative sampling step: assume any other point (dkn) is a -ve example
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
@@ -171,7 +166,7 @@ struct SgdWorker {
           continue;
         }
         // push them apart
-        update_repel(update, gradient, dj, dkn, ndim, alpha, disp);
+        update_repel(update, gradient, dj, dkn, ndim, disp);
       }
       sampler.next_sample(i, n_neg_samples);
     }
