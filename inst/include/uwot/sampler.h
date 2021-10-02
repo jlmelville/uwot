@@ -36,10 +36,7 @@ class Sampler {
 public:
   Sampler(const std::vector<float> &epochs_per_sample,
           float negative_sample_rate)
-
-      :
-
-        epochs_per_sample(epochs_per_sample),
+      : epochs_per_sample(epochs_per_sample),
         epoch_of_next_sample(epochs_per_sample),
         epochs_per_negative_sample(epochs_per_sample.size()),
         epoch_of_next_negative_sample(epochs_per_sample.size()) {
