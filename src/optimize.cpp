@@ -51,16 +51,16 @@ void optimize_layout(const T &gradient, std::vector<float> &head_embedding,
       tail_embedding.size() / ndim);
 
   Progress progress(n_epochs, verbose);
-  const auto n_epochs_per_sample = epochs_per_sample.size();
+  const auto n_edges = epochs_per_sample.size();
 
   for (auto n = 0U; n < n_epochs; n++) {
     worker.n = n;
     worker.reseed();
     if (n_threads > 0) {
-      RcppPerpendicular::parallel_for(0, n_epochs_per_sample, worker, n_threads,
+      RcppPerpendicular::parallel_for(0, n_edges, worker, n_threads,
                                       grain_size);
     } else {
-      worker(0, n_epochs_per_sample);
+      worker(0, n_edges);
     }
     update.alpha = initial_alpha * (1.0 - (float(n) / float(n_epochs)));
 
