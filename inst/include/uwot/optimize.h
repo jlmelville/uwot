@@ -130,7 +130,6 @@ struct SgdWorker {
   const std::vector<float> &head_embedding;
   const std::vector<float> &tail_embedding;
   std::size_t ndim;
-  std::size_t head_nvert;
   std::size_t tail_nvert;
   float dist_eps;
   RngFactory rng_factory;
@@ -149,8 +148,7 @@ struct SgdWorker {
         sampler(sampler),
 
         head_embedding(head_embedding), tail_embedding(tail_embedding),
-        ndim(ndim), head_nvert(head_embedding.size() / ndim),
-        tail_nvert(tail_embedding.size() / ndim),
+        ndim(ndim), tail_nvert(tail_embedding.size() / ndim),
         dist_eps(std::numeric_limits<float>::epsilon()),
 
         rng_factory() {}
@@ -165,10 +163,10 @@ struct SgdWorker {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
-      std::size_t dj = ndim * positive_head[i];
+      const std::size_t dj = ndim * positive_head[i];
 
       // j and k are joined by an edge: push them together
-      std::size_t dk = ndim * positive_tail[i];
+      const std::size_t dk = ndim * positive_tail[i];
       float dist_squared =
           d2diff(head_embedding, dj, tail_embedding, dk, ndim, dist_eps, disp);
       float grad_coeff = gradient.grad_attr(dist_squared);
@@ -183,7 +181,7 @@ struct SgdWorker {
       // Push them apart
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (std::size_t p = 0; p < n_neg_samples; p++) {
-        std::size_t dkn = prng(tail_nvert) * ndim;
+        const std::size_t dkn = prng(tail_nvert) * ndim;
         if (dj == dkn) {
           continue;
         }
