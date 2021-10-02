@@ -126,20 +126,19 @@ struct SgdWorker {
   int n; // epoch counter
   const Gradient gradient;
   Update &update;
-  const std::vector<unsigned int> positive_head;
-  const std::vector<unsigned int> positive_tail;
+  const std::vector<unsigned int> &positive_head;
+  const std::vector<unsigned int> &positive_tail;
   uwot::Sampler sampler;
   std::size_t ndim;
   std::size_t tail_nvert;
   RngFactory rng_factory;
 
   SgdWorker(const Gradient &gradient, Update &update,
-            std::vector<unsigned int> positive_head,
-            std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
-            std::size_t ndim, std::size_t tail_nvert)
-      : n(0), gradient(gradient), update(update),
-        positive_head(std::move(positive_head)),
-        positive_tail(std::move(positive_tail)), sampler(sampler), ndim(ndim),
+            const std::vector<unsigned int> &positive_head,
+            const std::vector<unsigned int> &positive_tail,
+            uwot::Sampler &sampler, std::size_t ndim, std::size_t tail_nvert)
+      : n(0), gradient(gradient), update(update), positive_head(positive_head),
+        positive_tail(positive_tail), sampler(sampler), ndim(ndim),
         tail_nvert(tail_nvert), rng_factory() {}
 
   void operator()(std::size_t begin, std::size_t end) {
