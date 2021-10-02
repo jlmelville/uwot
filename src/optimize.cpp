@@ -52,8 +52,8 @@ void optimize_layout(const T &gradient, std::vector<float> &head_embedding,
   float alpha = initial_alpha;
 
   for (auto n = 0U; n < n_epochs; n++) {
-    worker.set_alpha(alpha);
-    worker.set_n(n);
+    worker.alpha = alpha;
+    worker.n = n;
     worker.reseed();
     if (n_threads > 0) {
       RcppPerpendicular::parallel_for(0, n_epochs_per_sample, worker, n_threads,

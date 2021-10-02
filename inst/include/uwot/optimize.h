@@ -42,14 +42,14 @@ namespace uwot {
 struct Coords {
   std::vector<float> head_embedding;
   std::unique_ptr<std::vector<float>> tail_vec_ptr;
-  
+
   Coords(std::vector<float> &head_embedding)
-    : head_embedding(head_embedding), tail_vec_ptr(nullptr) {}
-  
+      : head_embedding(head_embedding), tail_vec_ptr(nullptr) {}
+
   Coords(std::vector<float> &head_embedding, std::vector<float> &tail_embedding)
-    : head_embedding(head_embedding),
-      tail_vec_ptr(new std::vector<float>(tail_embedding)) {}
-  
+      : head_embedding(head_embedding),
+        tail_vec_ptr(new std::vector<float>(tail_embedding)) {}
+
   auto get_tail_embedding() -> std::vector<float> & {
     if (tail_vec_ptr) {
       return *tail_vec_ptr;
@@ -57,7 +57,7 @@ struct Coords {
       return head_embedding;
     }
   }
-  
+
   auto get_head_embedding() -> std::vector<float> & { return head_embedding; }
 };
 
@@ -200,10 +200,6 @@ struct SgdWorker {
       sampler.next_sample(i, n_neg_samples);
     }
   }
-
-  void set_n(int n) { this->n = n; }
-
-  void set_alpha(float alpha) { this->alpha = alpha; }
 
   void reseed() { this->rng_factory.reseed(); }
 };
