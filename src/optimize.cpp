@@ -17,7 +17,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <memory>
 #include <vector>
 
 // [[Rcpp::depends(RcppProgress)]]
@@ -140,46 +139,20 @@ struct UmapFactory {
   }
 };
 
-// For normal UMAP, tail_embedding is NULL and we want to pass
-// a shallow copy of head_embedding as tail_embedding.
-// When updating new values, tail_embedding is the new coordinate to optimize
-// and gets passed as normal.
-struct Coords {
-  std::vector<float> head_embedding;
-  std::unique_ptr<std::vector<float>> tail_vec_ptr;
-
-  Coords(std::vector<float> &head_embedding)
-      : head_embedding(head_embedding), tail_vec_ptr(nullptr) {}
-
-  Coords(std::vector<float> &head_embedding, std::vector<float> &tail_embedding)
-      : head_embedding(head_embedding),
-        tail_vec_ptr(new std::vector<float>(tail_embedding)) {}
-
-  auto get_tail_embedding() -> std::vector<float> & {
-    if (tail_vec_ptr) {
-      return *tail_vec_ptr;
-    } else {
-      return head_embedding;
-    }
-  }
-
-  auto get_head_embedding() -> std::vector<float> & { return head_embedding; }
-};
-
 auto r_to_coords(NumericMatrix head_embedding,
-                 Nullable<NumericMatrix> tail_embedding) -> Coords {
+                 Nullable<NumericMatrix> tail_embedding) -> uwot::Coords {
   auto head_vec = as<std::vector<float>>(head_embedding);
   if (tail_embedding.isNull()) {
-    return Coords(head_vec);
+    return uwot::Coords(head_vec);
   } else {
     auto tail_vec = as<std::vector<float>>(tail_embedding);
-    return Coords(head_vec, tail_vec);
+    return uwot::Coords(head_vec, tail_vec);
   }
 }
 
-auto r_to_coords(NumericMatrix head_embedding) -> Coords {
+auto r_to_coords(NumericMatrix head_embedding) -> uwot::Coords {
   auto head_vec = as<std::vector<float>>(head_embedding);
-  return Coords(head_vec);
+  return uwot::Coords(head_vec);
 }
 
 // [[Rcpp::export]]
@@ -193,7 +166,7 @@ NumericMatrix optimize_layout_umap(
     std::size_t n_threads = 0, std::size_t grain_size = 1,
     bool move_other = true, bool verbose = false) {
 
-  Coords coords = r_to_coords(head_embedding, tail_embedding);
+  auto coords = r_to_coords(head_embedding, tail_embedding);
 
   UmapFactory umap_factory(
       move_other, pcg_rand, coords.get_head_embedding(),
@@ -222,7 +195,7 @@ NumericMatrix optimize_layout_tumap(
     std::size_t n_threads = 0, std::size_t grain_size = 1,
     bool move_other = true, bool verbose = false) {
 
-  Coords coords = r_to_coords(head_embedding, tail_embedding);
+  auto coords = r_to_coords(head_embedding, tail_embedding);
 
   const uwot::tumap_gradient gradient;
   UmapFactory umap_factory(
@@ -245,7 +218,7 @@ NumericMatrix optimize_layout_largevis(
     bool pcg_rand = true, std::size_t n_threads = 0, std::size_t grain_size = 1,
     bool verbose = false) {
 
-  Coords coords = r_to_coords(head_embedding);
+  auto coords = r_to_coords(head_embedding);
 
   UmapFactory umap_factory(
       true, pcg_rand, coords.get_head_embedding(), coords.get_tail_embedding(),

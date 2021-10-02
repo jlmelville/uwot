@@ -28,11 +28,38 @@
 #define UWOT_OPTIMIZE_H
 
 #include <limits>
+#include <memory>
 #include <utility>
 
 #include "sampler.h"
 
 namespace uwot {
+
+// For normal UMAP, tail_embedding is NULL and we want to pass
+// a shallow copy of head_embedding as tail_embedding.
+// When updating new values, tail_embedding is the new coordinate to optimize
+// and gets passed as normal.
+struct Coords {
+  std::vector<float> head_embedding;
+  std::unique_ptr<std::vector<float>> tail_vec_ptr;
+  
+  Coords(std::vector<float> &head_embedding)
+    : head_embedding(head_embedding), tail_vec_ptr(nullptr) {}
+  
+  Coords(std::vector<float> &head_embedding, std::vector<float> &tail_embedding)
+    : head_embedding(head_embedding),
+      tail_vec_ptr(new std::vector<float>(tail_embedding)) {}
+  
+  auto get_tail_embedding() -> std::vector<float> & {
+    if (tail_vec_ptr) {
+      return *tail_vec_ptr;
+    } else {
+      return head_embedding;
+    }
+  }
+  
+  auto get_head_embedding() -> std::vector<float> & { return head_embedding; }
+};
 
 // Function to decide whether to move both vertices in an edge
 // Default empty version does nothing: used in umap_transform when
