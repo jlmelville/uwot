@@ -94,6 +94,32 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
   }
 };
 
+template <typename Update, typename Gradient>
+void update_repel(Update &update, const Gradient &gradient,
+                  const std::vector<float> &head_embedding, std::size_t dj,
+                  const std::vector<float> &tail_embedding, std::size_t dk,
+                  std::size_t ndim, float alpha, std::vector<float> &disp) {
+  float grad_coeff =
+      grad_rep(gradient, head_embedding, dj, tail_embedding, dk, ndim, disp);
+  for (std::size_t d = 0; d < ndim; d++) {
+    float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
+    update.repel(dj, dk, d, update_d);
+  }
+}
+
+template <typename Update, typename Gradient>
+void update_attract(Update &update, const Gradient &gradient,
+                    const std::vector<float> &head_embedding, std::size_t dj,
+                    const std::vector<float> &tail_embedding, std::size_t dk,
+                    std::size_t ndim, float alpha, std::vector<float> &disp) {
+  float grad_coeff =
+      grad_attr(gradient, head_embedding, dj, tail_embedding, dk, ndim, disp);
+  for (std::size_t d = 0; d < ndim; d++) {
+    float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
+    update.attract(dj, dk, d, update_d);
+  }
+}
+
 // Gradient: the type of gradient used in the optimization
 // Update: type of update to the embedding coordinates
 template <typename Gradient, typename Update, typename RngFactory>
@@ -133,37 +159,29 @@ struct SgdWorker {
     // Each window gets its own PRNG state, to prevent locking inside the loop.
     auto prng = rng_factory.create(end);
 
-    // the displacement between two points
+    // displacement between two points, cost of reallocating inside the loop
+    // is noticeable, also cheaper to calculate it once in the d2 calc
     std::vector<float> disp(ndim);
     for (auto i = begin; i < end; i++) {
       if (!sampler.is_sample_edge(i, n)) {
         continue;
       }
       const std::size_t dj = ndim * positive_head[i];
-
-      // j and k are joined by an edge: push them together
       const std::size_t dk = ndim * positive_tail[i];
-      float grad_coeff = grad_attr(gradient, head_embedding, dj, tail_embedding,
-                                   dk, ndim, disp);
-      for (std::size_t d = 0; d < ndim; d++) {
-        float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
-        update.attract(dj, dk, d, update_d);
-      }
+      // j and k are joined by an edge: push them together
+      update_attract(update, gradient, head_embedding, dj, tail_embedding, dk,
+                     ndim, alpha, disp);
 
-      // Negative sampling step: assume any other point is a negative example
-      // Push them apart
+      // Negative sampling step: assume any other point (dkn) is a -ve example
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
       for (std::size_t p = 0; p < n_neg_samples; p++) {
         const std::size_t dkn = prng(tail_nvert) * ndim;
         if (dj == dkn) {
           continue;
         }
-        float grad_coeff = grad_rep(gradient, head_embedding, dj,
-                                    tail_embedding, dkn, ndim, disp);
-        for (std::size_t d = 0; d < ndim; d++) {
-          float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
-          update.repel(dj, dkn, d, update_d);
-        }
+        // push them apart
+        update_repel(update, gradient, head_embedding, dj, tail_embedding, dkn,
+                     ndim, alpha, disp);
       }
       sampler.next_sample(i, n_neg_samples);
     }
