@@ -109,7 +109,6 @@ struct SgdWorker {
   const std::vector<float> &tail_embedding;
   std::size_t ndim;
   std::size_t tail_nvert;
-  float dist_eps;
   RngFactory rng_factory;
 
   SgdWorker(const Gradient &gradient, Update &update,
@@ -127,7 +126,6 @@ struct SgdWorker {
 
         head_embedding(head_embedding), tail_embedding(tail_embedding),
         ndim(ndim), tail_nvert(tail_embedding.size() / ndim),
-        dist_eps(std::numeric_limits<float>::epsilon()),
 
         rng_factory() {}
 
@@ -145,10 +143,8 @@ struct SgdWorker {
 
       // j and k are joined by an edge: push them together
       const std::size_t dk = ndim * positive_tail[i];
-      float dist_squared =
-          d2diff(head_embedding, dj, tail_embedding, dk, ndim, dist_eps, disp);
-      float grad_coeff = gradient.grad_attr(dist_squared);
-
+      float grad_coeff = grad_attr(gradient, head_embedding, dj, tail_embedding,
+                                   dk, ndim, disp);
       for (std::size_t d = 0; d < ndim; d++) {
         float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
         update.attract(dj, dk, d, update_d);
@@ -162,10 +158,8 @@ struct SgdWorker {
         if (dj == dkn) {
           continue;
         }
-        dist_squared = d2diff(head_embedding, dj, tail_embedding, dkn, ndim,
-                              dist_eps, disp);
-        float grad_coeff = gradient.grad_rep(dist_squared);
-
+        float grad_coeff = grad_rep(gradient, head_embedding, dj,
+                                    tail_embedding, dkn, ndim, disp);
         for (std::size_t d = 0; d < ndim; d++) {
           float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
           update.repel(dj, dkn, d, update_d);

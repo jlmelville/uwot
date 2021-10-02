@@ -56,11 +56,33 @@ inline auto d2diff(const std::vector<float> &x, std::size_t px,
 
 // The gradient for the dth component of the displacement between two point,
 // which for Euclidean distance in the output is invariably grad_coeff * (X - Y)
-// Various methods clamp the magnitude of the gradient to different values
+// Different methods clamp the magnitude of the gradient to different values
 template <typename Gradient>
 auto grad_d(const std::vector<float> &disp, std::size_t d, float grad_coeff)
     -> float {
   return clamp(grad_coeff * disp[d], Gradient::clamp_lo, Gradient::clamp_hi);
+}
+
+template <typename Gradient>
+auto grad_attr(const Gradient &gradient,
+               const std::vector<float> &head_embedding, std::size_t dj,
+               const std::vector<float> &tail_embedding, std::size_t dk,
+               std::size_t ndim, std::vector<float> &disp) -> float {
+  static const float dist_eps = std::numeric_limits<float>::epsilon();
+  float d2 =
+      d2diff(head_embedding, dj, tail_embedding, dk, ndim, dist_eps, disp);
+  return gradient.grad_attr(d2);
+}
+
+template <typename Gradient>
+auto grad_rep(const Gradient &gradient,
+              const std::vector<float> &head_embedding, std::size_t dj,
+              const std::vector<float> &tail_embedding, std::size_t dk,
+              std::size_t ndim, std::vector<float> &disp) -> float {
+  static const float dist_eps = std::numeric_limits<float>::epsilon();
+  float d2 =
+      d2diff(head_embedding, dj, tail_embedding, dk, ndim, dist_eps, disp);
+  return gradient.grad_rep(d2);
 }
 
 // https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
