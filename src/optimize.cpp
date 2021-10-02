@@ -41,11 +41,13 @@ void optimize_layout(const T &gradient, std::vector<float> &head_embedding,
                      float initial_alpha, float negative_sample_rate,
                      std::size_t n_threads = 0, std::size_t grain_size = 1,
                      bool verbose = false) {
+  const std::size_t ndim = head_embedding.size() / n_vertices;
+
   uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
   uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding);
   uwot::SgdWorker<T, decltype(update), RandFactory> worker(
-      gradient, update, positive_head, positive_tail, sampler, head_embedding,
-      tail_embedding, head_embedding.size() / n_vertices);
+      gradient, update, positive_head, positive_tail, sampler, ndim,
+      tail_embedding.size() / ndim);
 
   Progress progress(n_epochs, verbose);
   const auto n_epochs_per_sample = epochs_per_sample.size();

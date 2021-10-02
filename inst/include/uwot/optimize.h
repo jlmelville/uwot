@@ -95,28 +95,26 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
 };
 
 template <typename Update, typename Gradient>
-void update_repel(Update &update, const Gradient &gradient,
-                  const std::vector<float> &head_embedding, std::size_t dj,
-                  const std::vector<float> &tail_embedding, std::size_t dk,
-                  std::size_t ndim, float alpha, std::vector<float> &disp) {
-  float grad_coeff =
-      grad_rep(gradient, head_embedding, dj, tail_embedding, dk, ndim, disp);
+void update_attract(Update &update, const Gradient &gradient, std::size_t dj,
+                    std::size_t dk, std::size_t ndim, float alpha,
+                    std::vector<float> &disp) {
+  float grad_coeff = grad_attr(gradient, update.head_embedding, dj,
+                               update.tail_embedding, dk, ndim, disp);
   for (std::size_t d = 0; d < ndim; d++) {
     float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
-    update.repel(dj, dk, d, update_d);
+    update.attract(dj, dk, d, update_d);
   }
 }
 
 template <typename Update, typename Gradient>
-void update_attract(Update &update, const Gradient &gradient,
-                    const std::vector<float> &head_embedding, std::size_t dj,
-                    const std::vector<float> &tail_embedding, std::size_t dk,
-                    std::size_t ndim, float alpha, std::vector<float> &disp) {
-  float grad_coeff =
-      grad_attr(gradient, head_embedding, dj, tail_embedding, dk, ndim, disp);
+void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
+                  std::size_t dk, std::size_t ndim, float alpha,
+                  std::vector<float> &disp) {
+  float grad_coeff = grad_rep(gradient, update.head_embedding, dj,
+                              update.tail_embedding, dk, ndim, disp);
   for (std::size_t d = 0; d < ndim; d++) {
     float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
-    update.attract(dj, dk, d, update_d);
+    update.repel(dj, dk, d, update_d);
   }
 }
 
@@ -127,12 +125,10 @@ struct SgdWorker {
   int n; // epoch counter
   float alpha;
   const Gradient gradient;
-  Update update;
+  Update &update;
   const std::vector<unsigned int> positive_head;
   const std::vector<unsigned int> positive_tail;
   uwot::Sampler sampler;
-  const std::vector<float> &head_embedding;
-  const std::vector<float> &tail_embedding;
   std::size_t ndim;
   std::size_t tail_nvert;
   RngFactory rng_factory;
@@ -140,8 +136,7 @@ struct SgdWorker {
   SgdWorker(const Gradient &gradient, Update &update,
             std::vector<unsigned int> positive_head,
             std::vector<unsigned int> positive_tail, uwot::Sampler &sampler,
-            const std::vector<float> &head_embedding,
-            const std::vector<float> &tail_embedding, std::size_t ndim)
+            std::size_t ndim, std::size_t tail_nvert)
       :
 
         n(0), alpha(0.0), gradient(gradient), update(update),
@@ -150,10 +145,7 @@ struct SgdWorker {
 
         sampler(sampler),
 
-        head_embedding(head_embedding), tail_embedding(tail_embedding),
-        ndim(ndim), tail_nvert(tail_embedding.size() / ndim),
-
-        rng_factory() {}
+        ndim(ndim), tail_nvert(tail_nvert), rng_factory() {}
 
   void operator()(std::size_t begin, std::size_t end) {
     // Each window gets its own PRNG state, to prevent locking inside the loop.
@@ -169,8 +161,7 @@ struct SgdWorker {
       const std::size_t dj = ndim * positive_head[i];
       const std::size_t dk = ndim * positive_tail[i];
       // j and k are joined by an edge: push them together
-      update_attract(update, gradient, head_embedding, dj, tail_embedding, dk,
-                     ndim, alpha, disp);
+      update_attract(update, gradient, dj, dk, ndim, alpha, disp);
 
       // Negative sampling step: assume any other point (dkn) is a -ve example
       std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
@@ -180,8 +171,7 @@ struct SgdWorker {
           continue;
         }
         // push them apart
-        update_repel(update, gradient, head_embedding, dj, tail_embedding, dkn,
-                     ndim, alpha, disp);
+        update_repel(update, gradient, dj, dkn, ndim, alpha, disp);
       }
       sampler.next_sample(i, n_neg_samples);
     }
