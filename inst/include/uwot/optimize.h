@@ -94,28 +94,6 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
   }
 };
 
-inline auto clamp(float v, float lo, float hi) -> float {
-  float t = v < lo ? lo : v;
-  return t > hi ? hi : t;
-}
-
-// return the squared euclidean distance between two points x[px] and y[py]
-// also store the displacement between x[px] and y[py] in diffxy
-// there is a small but noticeable performance improvement by doing so
-// rather than recalculating it in the gradient step
-inline auto d2diff(const std::vector<float> &x, std::size_t px,
-                   const std::vector<float> &y, std::size_t py,
-                   std::size_t ndim, float dist_eps, std::vector<float> &diffxy)
-    -> float {
-  float dist_squared = 0.0;
-  for (std::size_t d = 0; d < ndim; d++) {
-    float diff = x[px + d] - y[py + d];
-    diffxy[d] = diff;
-    dist_squared += diff * diff;
-  }
-  return (std::max)(dist_eps, dist_squared);
-}
-
 // Gradient: the type of gradient used in the optimization
 // Update: type of update to the embedding coordinates
 template <typename Gradient, typename Update, typename RngFactory>

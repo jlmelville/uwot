@@ -28,8 +28,32 @@
 #define UWOT_GRADIENT_H
 
 #include <cmath>
+#include <vector>
 
 namespace uwot {
+
+inline auto clamp(float v, float lo, float hi) -> float {
+  float t = v < lo ? lo : v;
+  return t > hi ? hi : t;
+}
+
+// return the squared euclidean distance between two points x[px] and y[py]
+// also store the displacement between x[px] and y[py] in diffxy
+// there is a small but noticeable performance improvement by doing so
+// rather than recalculating it in the gradient step
+inline auto d2diff(const std::vector<float> &x, std::size_t px,
+                   const std::vector<float> &y, std::size_t py,
+                   std::size_t ndim, float dist_eps, std::vector<float> &diffxy)
+-> float {
+  float d2 = 0.0;
+  for (std::size_t d = 0; d < ndim; d++) {
+    float diff = x[px + d] - y[py + d];
+    diffxy[d] = diff;
+    d2 += diff * diff;
+  }
+  return (std::max)(dist_eps, d2);
+}
+
 
 // https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
 // an approximation to pow
