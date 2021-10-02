@@ -44,7 +44,7 @@ inline auto clamp(float v, float lo, float hi) -> float {
 inline auto d2diff(const std::vector<float> &x, std::size_t px,
                    const std::vector<float> &y, std::size_t py,
                    std::size_t ndim, float dist_eps, std::vector<float> &diffxy)
--> float {
+    -> float {
   float d2 = 0.0;
   for (std::size_t d = 0; d < ndim; d++) {
     float diff = x[px + d] - y[py + d];
@@ -54,6 +54,14 @@ inline auto d2diff(const std::vector<float> &x, std::size_t px,
   return (std::max)(dist_eps, d2);
 }
 
+// The gradient for the dth component of the displacement between two point,
+// which for Euclidean distance in the output is invariably grad_coeff * (X - Y)
+// Various methods clamp the magnitude of the gradient to different values
+template <typename Gradient>
+auto grad_d(const std::vector<float> &disp, std::size_t d, float grad_coeff)
+    -> float {
+  return clamp(grad_coeff * disp[d], Gradient::clamp_lo, Gradient::clamp_hi);
+}
 
 // https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
 // an approximation to pow

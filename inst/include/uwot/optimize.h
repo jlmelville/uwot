@@ -70,9 +70,9 @@ void move_other_vertex(std::vector<float> &, float, std::size_t, std::size_t) {}
 // Specialization to move the vertex: used in umap when both
 // vertices in an edge should be moved
 template <>
-void move_other_vertex<true>(std::vector<float> &embedding, float grad_d,
+void move_other_vertex<true>(std::vector<float> &embedding, float update_d,
                              std::size_t i, std::size_t nrj) {
-  embedding[nrj + i] -= grad_d;
+  embedding[nrj + i] -= update_d;
 }
 
 // DoMoveVertex: true if both ends of a positive edge should be updated
@@ -83,14 +83,14 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
   InPlaceUpdate(std::vector<float> &head_embedding,
                 std::vector<float> &tail_embedding)
       : head_embedding(head_embedding), tail_embedding(tail_embedding) {}
-  void attract(std::size_t dj, std::size_t dk, std::size_t d, float grad_d) {
-    head_embedding[dj + d] += grad_d;
+  void attract(std::size_t dj, std::size_t dk, std::size_t d, float update_d) {
+    head_embedding[dj + d] += update_d;
     // we don't only always want points in the tail to move
     // e.g. if adding new points to an existing embedding
-    move_other_vertex<DoMoveVertex>(tail_embedding, grad_d, d, dk);
+    move_other_vertex<DoMoveVertex>(tail_embedding, update_d, d, dk);
   }
-  void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d) {
-    head_embedding[dj + d] += grad_d;
+  void repel(std::size_t dj, std::size_t dk, std::size_t d, float update_d) {
+    head_embedding[dj + d] += update_d;
   }
 };
 
@@ -150,9 +150,8 @@ struct SgdWorker {
       float grad_coeff = gradient.grad_attr(dist_squared);
 
       for (std::size_t d = 0; d < ndim; d++) {
-        float grad_d = alpha * clamp(grad_coeff * disp[d], Gradient::clamp_lo,
-                                     Gradient::clamp_hi);
-        update.attract(dj, dk, d, grad_d);
+        float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
+        update.attract(dj, dk, d, update_d);
       }
 
       // Negative sampling step: assume any other point is a negative example
@@ -168,9 +167,8 @@ struct SgdWorker {
         float grad_coeff = gradient.grad_rep(dist_squared);
 
         for (std::size_t d = 0; d < ndim; d++) {
-          float grad_d = alpha * clamp(grad_coeff * disp[d], Gradient::clamp_lo,
-                                       Gradient::clamp_hi);
-          update.repel(dj, dkn, d, grad_d);
+          float update_d = alpha * grad_d<Gradient>(disp, d, grad_coeff);
+          update.repel(dj, dkn, d, update_d);
         }
       }
       sampler.next_sample(i, n_neg_samples);
