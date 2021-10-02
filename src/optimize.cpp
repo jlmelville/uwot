@@ -17,6 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <memory>
 #include <vector>
 
 // [[Rcpp::depends(RcppProgress)]]
@@ -139,6 +140,48 @@ struct UmapFactory {
   }
 };
 
+// For normal UMAP, tail_embedding is NULL and we want to pass
+// a shallow copy of head_embedding as tail_embedding.
+// When updating new values, tail_embedding is the new coordinate to optimize
+// and gets passed as normal.
+struct Coords {
+  std::vector<float> head_embedding;
+  std::unique_ptr<std::vector<float>> tail_vec_ptr;
+
+  Coords(std::vector<float> &head_embedding)
+      : head_embedding(head_embedding), tail_vec_ptr(nullptr) {}
+
+  Coords(std::vector<float> &head_embedding, std::vector<float> &tail_embedding)
+      : head_embedding(head_embedding),
+        tail_vec_ptr(new std::vector<float>(tail_embedding)) {}
+
+  auto get_tail_embedding() -> std::vector<float> & {
+    if (tail_vec_ptr) {
+      return *tail_vec_ptr;
+    } else {
+      return head_embedding;
+    }
+  }
+
+  auto get_head_embedding() -> std::vector<float> & { return head_embedding; }
+};
+
+auto r_to_coords(NumericMatrix head_embedding,
+                 Nullable<NumericMatrix> tail_embedding) -> Coords {
+  auto head_vec = as<std::vector<float>>(head_embedding);
+  if (tail_embedding.isNull()) {
+    return Coords(head_vec);
+  } else {
+    auto tail_vec = as<std::vector<float>>(tail_embedding);
+    return Coords(head_vec, tail_vec);
+  }
+}
+
+auto r_to_coords(NumericMatrix head_embedding) -> Coords {
+  auto head_vec = as<std::vector<float>>(head_embedding);
+  return Coords(head_vec);
+}
+
 // [[Rcpp::export]]
 NumericMatrix optimize_layout_umap(
     NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding,
@@ -149,24 +192,14 @@ NumericMatrix optimize_layout_umap(
     float negative_sample_rate, bool approx_pow, bool pcg_rand = true,
     std::size_t n_threads = 0, std::size_t grain_size = 1,
     bool move_other = true, bool verbose = false) {
-  // For normal UMAP, tail_embedding is NULL and we want to pass
-  // a shallow copy of head_embedding as tail_embedding.
-  // When updating new values, tail_embedding is the new coordinate to optimize
-  // and gets passed as normal.
-  auto head_vec = as<std::vector<float>>(head_embedding);
-  std::vector<float> *tail_vec_ptr = nullptr;
-  bool delete_tail_ptr = false;
-  if (tail_embedding.isNull()) {
-    tail_vec_ptr = &head_vec;
-  } else {
-    tail_vec_ptr =
-        new std::vector<float>(as<std::vector<float>>(tail_embedding));
-    delete_tail_ptr = true;
-  }
+
+  Coords coords = r_to_coords(head_embedding, tail_embedding);
+
   UmapFactory umap_factory(
-      move_other, pcg_rand, head_vec, *tail_vec_ptr, positive_head,
-      positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-      negative_sample_rate, n_threads, grain_size, verbose);
+      move_other, pcg_rand, coords.get_head_embedding(),
+      coords.get_tail_embedding(), positive_head, positive_tail, n_epochs,
+      n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
+      n_threads, grain_size, verbose);
   if (approx_pow) {
     const uwot::apumap_gradient gradient(a, b, gamma);
     umap_factory.create(gradient);
@@ -175,12 +208,8 @@ NumericMatrix optimize_layout_umap(
     umap_factory.create(gradient);
   }
 
-  if (delete_tail_ptr) {
-    delete (tail_vec_ptr);
-  }
-
   return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
-                       head_vec.begin());
+                       coords.get_head_embedding().begin());
 }
 
 // [[Rcpp::export]]
@@ -193,29 +222,18 @@ NumericMatrix optimize_layout_tumap(
     std::size_t n_threads = 0, std::size_t grain_size = 1,
     bool move_other = true, bool verbose = false) {
 
-  auto head_vec = as<std::vector<float>>(head_embedding);
-  std::vector<float> *tail_vec_ptr = nullptr;
-  bool delete_tail_ptr = false;
-  if (tail_embedding.isNull()) {
-    tail_vec_ptr = &head_vec;
-  } else {
-    tail_vec_ptr =
-        new std::vector<float>(as<std::vector<float>>(tail_embedding));
-    delete_tail_ptr = true;
-  }
+  Coords coords = r_to_coords(head_embedding, tail_embedding);
+
   const uwot::tumap_gradient gradient;
   UmapFactory umap_factory(
-      move_other, pcg_rand, head_vec, *tail_vec_ptr, positive_head,
-      positive_tail, n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-      negative_sample_rate, n_threads, grain_size, verbose);
+      move_other, pcg_rand, coords.get_head_embedding(),
+      coords.get_tail_embedding(), positive_head, positive_tail, n_epochs,
+      n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
+      n_threads, grain_size, verbose);
   umap_factory.create(gradient);
 
-  if (delete_tail_ptr) {
-    delete (tail_vec_ptr);
-  }
-
   return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
-                       head_vec.begin());
+                       coords.get_head_embedding().begin());
 }
 
 // [[Rcpp::export]]
@@ -226,16 +244,16 @@ NumericMatrix optimize_layout_largevis(
     float gamma, float initial_alpha, float negative_sample_rate,
     bool pcg_rand = true, std::size_t n_threads = 0, std::size_t grain_size = 1,
     bool verbose = false) {
-  // We don't support adding extra points for LargeVis, so this is much simpler
-  // than the UMAP case
-  auto head_vec = as<std::vector<float>>(head_embedding);
+
+  Coords coords = r_to_coords(head_embedding);
+
   UmapFactory umap_factory(
-      true, pcg_rand, head_vec, head_vec, positive_head, positive_tail,
-      n_epochs, n_vertices, epochs_per_sample, initial_alpha,
-      negative_sample_rate, n_threads, grain_size, verbose);
+      true, pcg_rand, coords.get_head_embedding(), coords.get_tail_embedding(),
+      positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample,
+      initial_alpha, negative_sample_rate, n_threads, grain_size, verbose);
   const uwot::largevis_gradient gradient(gamma);
   umap_factory.create(gradient);
 
   return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
-                       head_vec.begin());
+                       coords.get_head_embedding().begin());
 }
