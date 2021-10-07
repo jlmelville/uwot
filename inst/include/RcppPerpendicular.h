@@ -103,6 +103,12 @@ inline void parallel_for(std::size_t begin, std::size_t end, Worker &worker,
 }
 
 template <typename Worker>
+inline void parallel_for(std::size_t end, Worker &worker,
+                         std::size_t n_threads, std::size_t grain_size = 1) {
+  parallel_for(0, end, worker, n_threads, grain_size = 1);
+}
+
+template <typename Worker>
 inline void pfor(std::size_t begin, std::size_t end, Worker &worker,
                  std::size_t n_threads, std::size_t grain_size = 1) {
   if (n_threads > 0) {
