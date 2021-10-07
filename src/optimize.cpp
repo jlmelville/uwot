@@ -46,6 +46,8 @@ void optimize_layout(const T &gradient, std::vector<float> &head_embedding,
   uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
   uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
                                      initial_alpha);
+  // uwot::BatchUpdate<DoMove> update(head_embedding, tail_embedding,
+  //                                  initial_alpha, n_threads);
   uwot::SgdWorker<T, decltype(update), RandFactory> worker(
       gradient, update, positive_head, positive_tail, sampler, ndim,
       tail_embedding.size() / ndim);
@@ -54,15 +56,11 @@ void optimize_layout(const T &gradient, std::vector<float> &head_embedding,
   const auto n_edges = epochs_per_sample.size();
 
   for (auto n = 0U; n < n_epochs; n++) {
-    worker.n = n;
-    worker.reseed();
-    if (n_threads > 0) {
-      RcppPerpendicular::parallel_for(0, n_edges, worker, n_threads,
-                                      grain_size);
-    } else {
-      worker(0, n_edges);
-    }
-    update.alpha = initial_alpha * (1.0 - (float(n) / float(n_epochs)));
+    worker.epoch_begin(n, n_epochs);
+
+    RcppPerpendicular::pfor(0, n_edges, worker, n_threads, grain_size);
+
+    worker.epoch_end(n, n_epochs);
 
     if (Progress::check_abort()) {
       progress.cleanup();
