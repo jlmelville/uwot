@@ -77,14 +77,33 @@ struct Sgd {
 // Default empty version does nothing: used in umap_transform when
 // some of the vertices should be held fixed
 template <bool DoMoveVertex = false>
-void move_other_vertex(std::vector<float> &, float, std::size_t, std::size_t) {}
+void update_vec(std::vector<float> &, float, std::size_t, std::size_t) {}
 
-// Specialization to move the vertex: used in umap when both
+// Specialization to move vertex/update gradient: used in umap when both
 // vertices in an edge should be moved
 template <>
-void move_other_vertex<true>(std::vector<float> &embedding, float update_d,
-                             std::size_t i, std::size_t nrj) {
-  embedding[nrj + i] -= update_d;
+void update_vec<true>(std::vector<float> &vec, float val, std::size_t i,
+                      std::size_t j) {
+  vec[i + j] += val;
+}
+
+// If DoMoveTailVertex = true, graph is symmetric and head and tail point to the
+// same data. So we can just update the head coord i with double the gradient
+// now and not worry about updating it when it shows up in the edge list as tail
+// point j
+template <bool DoMoveTailVertex = true>
+void update_head_grad_vec(std::vector<float> &head_grad_vec, float val,
+                          std::size_t i) {
+  head_grad_vec[i] += 2.0 * val;
+}
+
+// Specialization for DoMoveTailVertex = true. In this case the edges are not
+// symmetric and the tail embedding should be held fixed, so the head node only
+// get one lot of gradient updating
+template <>
+void update_head_grad_vec<false>(std::vector<float> &head_grad_vec, float val,
+                                 std::size_t i) {
+  head_grad_vec[i] += val;
 }
 
 // DoMoveVertex: true if both ends of a positive edge should be updated
@@ -105,7 +124,7 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
     head_embedding[dj + d] += update_d;
     // we don't only always want points in the tail to move
     // e.g. if adding new points to an existing embedding
-    move_other_vertex<DoMoveVertex>(tail_embedding, update_d, d, dk);
+    update_vec<DoMoveVertex>(tail_embedding, -update_d, d, dk);
   }
   void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
              std::size_t) {
@@ -113,6 +132,7 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
     // Python implementation doesn't move the negative sample but as Damrich
     // and Hamprecht (2021) note, it ought to. However they also note it has
     // no qualitative effect on the results.
+    // move_other_vertex<DoMoveVertex>(tail_embedding, update_d, d, dk);
   }
 
   void epoch_begin(std::size_t, std::size_t) {}
@@ -121,67 +141,15 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
   }
 };
 
-template <bool DoMoveVertex = true> struct BatchUpdate {
-  std::vector<float> &head_embedding;
-  std::vector<float> &tail_embedding;
-  Sgd opt;
-
-  std::size_t n_keys;
-
-  const std::size_t head_1d_length;
-  const std::size_t tail_1d_length;
-
-  std::vector<float> head_gupd;
-  std::vector<float> tail_gupd;
-
-  BatchUpdate(std::vector<float> &head_embedding,
-              std::vector<float> &tail_embedding, float alpha,
-              std::size_t n_keys)
-      : head_embedding(head_embedding), tail_embedding(tail_embedding),
-        opt(alpha), n_keys(std::max(std::size_t{1}, n_keys)),
-        head_1d_length(head_embedding.size()),
-        tail_1d_length(tail_embedding.size()),
-        head_gupd(this->n_keys * head_1d_length),
-        tail_gupd(this->n_keys * tail_1d_length) {}
-
-  void attract(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
-               std::size_t key) {
-    head_gupd[key * head_1d_length + dj + d] += grad_d;
-    tail_gupd[key * tail_1d_length + dk + d] -= grad_d;
-  }
-  void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
-             std::size_t key) {
-    head_gupd[key * head_1d_length + dj + d] += grad_d;
-  }
-
-  void epoch_begin(std::size_t, std::size_t) {
-    std::fill(head_gupd.begin(), head_gupd.end(), 0.0);
-    std::fill(tail_gupd.begin(), tail_gupd.end(), 0.0);
-  }
-
-  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
-    auto worker = [&](std::size_t begin, std::size_t end) {
-      for (std::size_t i = begin; i < end; i++) {
-        // use first gradient vector to accumulate total gradient
-        // therefore only iterate from 1
-        for (std::size_t key = 1; key < n_keys; key++) {
-          head_gupd[i] += head_gupd[key * head_1d_length + i];
-          tail_gupd[i] += tail_gupd[key * tail_1d_length + i];
-        }
-        head_embedding[i] += opt.alpha * head_gupd[i];
-        tail_embedding[i] += opt.alpha * tail_gupd[i];
-      }
-    };
-    // Use n_keys threads for convenience
-    RcppPerpendicular::parallel_for(0, head_1d_length, worker, n_keys, 1);
-
-    opt.epoch_end(epoch, n_epochs);
-  }
-};
-
-// tail embedding is not updated here: used when there are fixed points in tail
-// and head contains new points to be optimized
-template <> struct BatchUpdate<false> {
+// 1. When DoMoveVertex is true then we want to update the head and tail nodes
+// of an edge. In this case the head and tail coordinates point to the same data
+// so it doesn't matter whether we calculate the gradient for or update the
+// coordinates in head or tail.
+// 2. When DoMoveVertex is false then the head and tail coordinates point to
+// different data. The tail coordinates are fixed in this case, so again they
+// do not move. Hence both so in both cases we only ever need to update the head
+// coordinates.
+template <bool DoMoveVertex> struct BatchUpdate {
   std::vector<float> &head_embedding;
   std::vector<float> &tail_embedding;
 
@@ -200,7 +168,8 @@ template <> struct BatchUpdate<false> {
 
   void attract(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
                std::size_t key) {
-    head_gupd[key * head_1d_length + dj + d] += grad_d;
+    update_head_grad_vec<DoMoveVertex>(head_gupd, grad_d,
+                                       key * head_1d_length + dj + d);
   }
   void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
              std::size_t key) {
@@ -220,7 +189,7 @@ template <> struct BatchUpdate<false> {
         head_embedding[i] += opt.alpha * head_gupd[i];
       }
     };
-    RcppPerpendicular::parallel_for(0, head_1d_length, worker, n_keys, 1);
+    RcppPerpendicular::parallel_for(head_1d_length, worker, n_keys, 1);
 
     opt.epoch_end(epoch, n_epochs);
   }
