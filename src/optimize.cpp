@@ -154,24 +154,23 @@ auto r_to_coords(NumericMatrix head_embedding) -> uwot::Coords {
   return uwot::Coords(head_vec);
 }
 
-// [[Rcpp::export]]
-NumericMatrix optimize_layout_umap(
-    NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding,
-    const std::vector<unsigned int> positive_head,
-    const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
-    unsigned int n_vertices, const std::vector<float> epochs_per_sample,
-    float a, float b, float gamma, float initial_alpha,
-    float negative_sample_rate, bool approx_pow, bool pcg_rand = true,
-    std::size_t n_threads = 0, std::size_t grain_size = 1,
-    bool move_other = true, bool verbose = false) {
+void validate_args(List method_args,
+                   const std::vector<std::string> &arg_names) {
+  for (auto &arg_name : arg_names) {
+    if (!method_args.containsElementNamed(arg_name.c_str())) {
+      stop("Missing embedding method argument: " + arg_name);
+    }
+  }
+}
 
-  auto coords = r_to_coords(head_embedding, tail_embedding);
+void create_umap(UmapFactory &umap_factory, List method_args) {
+  std::vector<std::string> arg_names = {"a", "b", "gamma", "approx_pow"};
+  validate_args(method_args, arg_names);
 
-  UmapFactory umap_factory(
-      move_other, pcg_rand, coords.get_head_embedding(),
-      coords.get_tail_embedding(), positive_head, positive_tail, n_epochs,
-      n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
-      n_threads, grain_size, verbose);
+  float a = method_args["a"];
+  float b = method_args["b"];
+  float gamma = method_args["gamma"];
+  bool approx_pow = method_args["approx_pow"];
   if (approx_pow) {
     const uwot::apumap_gradient gradient(a, b, gamma);
     umap_factory.create(gradient);
@@ -179,52 +178,49 @@ NumericMatrix optimize_layout_umap(
     const uwot::umap_gradient gradient(a, b, gamma);
     umap_factory.create(gradient);
   }
+}
 
-  return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
-                       coords.get_head_embedding().begin());
+void create_tumap(UmapFactory &umap_factory, List) {
+  const uwot::tumap_gradient gradient;
+  umap_factory.create(gradient);
+}
+
+void create_largevis(UmapFactory &umap_factory, List method_args) {
+  std::vector<std::string> arg_names = {"gamma"};
+  validate_args(method_args, arg_names);
+
+  float gamma = method_args["gamma"];
+  const uwot::largevis_gradient gradient(gamma);
+  umap_factory.create(gradient);
 }
 
 // [[Rcpp::export]]
-NumericMatrix optimize_layout_tumap(
+NumericMatrix optimize_layout_r(
     NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding,
     const std::vector<unsigned int> positive_head,
     const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
     unsigned int n_vertices, const std::vector<float> epochs_per_sample,
-    float initial_alpha, float negative_sample_rate, bool pcg_rand = true,
-    std::size_t n_threads = 0, std::size_t grain_size = 1,
-    bool move_other = true, bool verbose = false) {
+    const std::string &method, List method_args, float initial_alpha,
+    float negative_sample_rate, bool pcg_rand = true, std::size_t n_threads = 0,
+    std::size_t grain_size = 1, bool move_other = true, bool verbose = false) {
 
   auto coords = r_to_coords(head_embedding, tail_embedding);
 
-  const uwot::tumap_gradient gradient;
   UmapFactory umap_factory(
       move_other, pcg_rand, coords.get_head_embedding(),
       coords.get_tail_embedding(), positive_head, positive_tail, n_epochs,
       n_vertices, epochs_per_sample, initial_alpha, negative_sample_rate,
       n_threads, grain_size, verbose);
-  umap_factory.create(gradient);
 
-  return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
-                       coords.get_head_embedding().begin());
-}
-
-// [[Rcpp::export]]
-NumericMatrix optimize_layout_largevis(
-    NumericMatrix head_embedding, const std::vector<unsigned int> positive_head,
-    const std::vector<unsigned int> positive_tail, unsigned int n_epochs,
-    unsigned int n_vertices, const std::vector<float> epochs_per_sample,
-    float gamma, float initial_alpha, float negative_sample_rate,
-    bool pcg_rand = true, std::size_t n_threads = 0, std::size_t grain_size = 1,
-    bool verbose = false) {
-
-  auto coords = r_to_coords(head_embedding);
-
-  UmapFactory umap_factory(
-      true, pcg_rand, coords.get_head_embedding(), coords.get_tail_embedding(),
-      positive_head, positive_tail, n_epochs, n_vertices, epochs_per_sample,
-      initial_alpha, negative_sample_rate, n_threads, grain_size, verbose);
-  const uwot::largevis_gradient gradient(gamma);
-  umap_factory.create(gradient);
+  if (method == "umap") {
+    create_umap(umap_factory, method_args);
+  } else if (method == "tumap") {
+    create_tumap(umap_factory, method_args);
+  } else if (method == "largevis") {
+    create_largevis(umap_factory, method_args);
+  } else {
+    stop("Unknown method: '" + method + "'");
+  }
 
   return NumericMatrix(head_embedding.nrow(), head_embedding.ncol(),
                        coords.get_head_embedding().begin());

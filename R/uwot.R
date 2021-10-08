@@ -1622,62 +1622,38 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       pluralize("thread", n_sgd_threads, " using")
     )
 
-    embedding <- t(embedding)
-    if (tolower(method) == "umap") {
-      embedding <- optimize_layout_umap(
-        head_embedding = embedding,
-        tail_embedding = NULL,
-        positive_head = positive_head,
-        positive_tail = positive_tail,
-        n_epochs = n_epochs,
-        n_vertices = n_vertices,
-        epochs_per_sample = epochs_per_sample,
-        a = a, b = b, gamma = gamma,
-        initial_alpha = alpha, negative_sample_rate,
-        approx_pow = approx_pow,
-        pcg_rand = pcg_rand,
-        n_threads = n_sgd_threads,
-        grain_size = grain_size,
-        move_other = TRUE,
-        verbose = verbose
-      )
+    method <- tolower(method)
+    if (method == "umap") {
+      method_args <- list(a = a, b = b, gamma = gamma, approx_pow = approx_pow)
     }
     else if (method == "tumap") {
-      embedding <- optimize_layout_tumap(
-        head_embedding = embedding,
-        tail_embedding = NULL,
-        positive_head = positive_head,
-        positive_tail = positive_tail,
-        n_epochs = n_epochs,
-        n_vertices = n_vertices,
-        epochs_per_sample = epochs_per_sample,
-        initial_alpha = alpha,
-        negative_sample_rate = negative_sample_rate,
-        pcg_rand = pcg_rand,
-        n_threads = n_sgd_threads,
-        grain_size = grain_size,
-        move_other = TRUE,
-        verbose = verbose
-      )
+      method_args <- list()
     }
     else {
-      embedding <- optimize_layout_largevis(
-        head_embedding = embedding,
-        positive_head = positive_head,
-        positive_tail = positive_tail,
-        n_epochs = n_epochs,
-        n_vertices = n_vertices,
-        epochs_per_sample = epochs_per_sample,
-        gamma = gamma,
-        initial_alpha = alpha,
-        negative_sample_rate = negative_sample_rate,
-        pcg_rand = pcg_rand,
-        n_threads = n_sgd_threads,
-        grain_size = grain_size,
-        verbose = verbose
-      )
+      method_args <- list(gamma = gamma)
     }
+    
     embedding <- t(embedding)
+    embedding <- optimize_layout_r(
+      head_embedding = embedding,
+      tail_embedding = NULL,
+      positive_head = positive_head,
+      positive_tail = positive_tail,
+      n_epochs = n_epochs,
+      n_vertices = n_vertices,
+      epochs_per_sample = epochs_per_sample,
+      method = method,
+      method_args = method_args,
+      initial_alpha = alpha, 
+      negative_sample_rate = negative_sample_rate,
+      pcg_rand = pcg_rand,
+      n_threads = n_sgd_threads,
+      grain_size = grain_size,
+      move_other = TRUE,
+      verbose = verbose
+    )
+    embedding <- t(embedding)
+    
     gc()
     # Center the points before returning
     embedding <- scale(embedding, center = TRUE, scale = FALSE)
