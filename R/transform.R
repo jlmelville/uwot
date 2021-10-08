@@ -162,6 +162,7 @@ umap_transform <- function(X = NULL, model = NULL,
     pcg_rand <- TRUE
   }
 
+  # the number of model vertices
   n_vertices <- NULL
   Xnames <- NULL
   if (!is.null(X)){
@@ -345,7 +346,17 @@ umap_transform <- function(X = NULL, model = NULL,
     graph <- Matrix::drop0(graph)
     epochs_per_sample <- make_epochs_per_sample(graph@x, n_epochs)
 
+    # Edges are (i->j) where i (head) is from the new data and j (tail) is
+    # in the model data
+    # Unlike embedding of initial data, the edge list is therefore NOT symmetric
+    # i.e. the presence of (i->j) does NOT mean (j->i) is also present because
+    # i and j now come from different data
+    
+    # unordered indices of the new data nodes. Coordinates are updated 
+    # during optimization
     positive_head <- graph@i
+    # ordered indices of the model nodes (some may not have any incoming edges)
+    # these coordinates will NOT update during the optimization
     positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
 
     tsmessage(

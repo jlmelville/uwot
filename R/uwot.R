@@ -1611,8 +1611,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     epochs_per_sample <- make_epochs_per_sample(V@x, n_epochs)
 
     # The (0-indexed) indices of the head and tail of each directed edge in V
-    # Graph is symmetric, so both (i, j) and (j, i) are present
+    # Graph is symmetric, so both (i->j) and (j->i) are present
     positive_head <- V@i
+    # These are in non-decreasing order of node index
     positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
 
     tsmessage(

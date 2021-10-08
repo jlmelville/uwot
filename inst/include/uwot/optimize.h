@@ -131,8 +131,10 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
     head_embedding[dj + d] += opt.alpha * grad_d;
     // Python implementation doesn't move the negative sample but as Damrich
     // and Hamprecht (2021) note, it ought to. However they also note it has
-    // no qualitative effect on the results.
-    // move_other_vertex<DoMoveVertex>(tail_embedding, update_d, d, dk);
+    // no qualitative effect on the results. This is presumably because
+    // including this repulsion is the same as doubling the negative sample rate
+    // which doesn't have a huge effect on going from the default of 5 to 10
+    // update_vec<DoMoveVertex>(tail_embedding, opt.alpha * -grad_d, d, dk);
   }
 
   void epoch_begin(std::size_t, std::size_t) {}
