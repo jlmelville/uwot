@@ -425,6 +425,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_threads = NULL,
                  n_sgd_threads = 0,
                  grain_size = 1,
+                 batch = FALSE,
                  tmpdir = tempdir(),
                  verbose = getOption("verbose", TRUE)) {
   uwot(
@@ -448,6 +449,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     ret_model = ret_model || "model" %in% ret_extra,
     ret_nn = ret_nn || "nn" %in% ret_extra,
     ret_fgraph = "fgraph" %in% ret_extra,
+    batch = batch,
     tmpdir = tempdir(),
     verbose = verbose
   )
@@ -811,6 +813,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   pcg_rand = TRUE,
                   fast_sgd = FALSE,
                   ret_model = FALSE, ret_nn = FALSE, ret_extra = c(),
+                  batch = FALSE,
                   tmpdir = tempdir(),
                   verbose = getOption("verbose", TRUE)) {
   uwot(
@@ -834,6 +837,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     ret_model = ret_model || "model" %in% ret_extra,
     ret_nn = ret_nn || "nn" %in% ret_extra,
     ret_fgraph = "fgraph" %in% ret_extra,
+    batch = batch,
     tmpdir = tmpdir,
     verbose = verbose
   )
@@ -1157,6 +1161,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   pcg_rand = TRUE,
                   fast_sgd = FALSE,
                   ret_nn = FALSE, ret_extra = c(),
+                  batch = FALSE,
                   tmpdir = tempdir(),
                   verbose = getOption("verbose", TRUE)) {
   uwot(X,
@@ -1176,6 +1181,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     ret_fgraph = "P" %in% ret_extra,
     pcg_rand = pcg_rand,
     fast_sgd = fast_sgd,
+    batch = batch,
     tmpdir = tmpdir,
     verbose = verbose
   )
@@ -1205,6 +1211,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  pca = NULL, pca_center = TRUE,
                  pcg_rand = TRUE,
                  fast_sgd = FALSE,
+                 batch = FALSE,
                  tmpdir = tempdir(),
                  verbose = getOption("verbose", TRUE)) {
   if (is.null(n_threads)) {
@@ -1607,15 +1614,26 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (n_epochs > 0) {
     V@x[V@x < max(V@x) / n_epochs] <- 0
     V <- Matrix::drop0(V)
-
+    # Create the (0-indexed) indices of the head and tail of each directed edge
+    # in V. Graph is symmetric, so both (i->j) and (j->i) are present
+    if (batch) {
+      V <- Matrix::t(V)
+      # head is ordered in non-decreasing order of node index
+      positive_head <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
+      # tail is unordered
+      positive_tail <- V@i
+    }
+    else {
+      # Use the Python UMAP ordering
+      # head is unordered
+      positive_head <- V@i
+      # tail is ordered in non-decreasing order of node index
+      positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
+    }
+    # start/end pointers into the ordered vector
+    positive_ptr <- V@p
     epochs_per_sample <- make_epochs_per_sample(V@x, n_epochs)
-
-    # The (0-indexed) indices of the head and tail of each directed edge in V
-    # Graph is symmetric, so both (i->j) and (j->i) are present
-    positive_head <- V@i
-    # These are in non-decreasing order of node index
-    positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
-
+    
     tsmessage(
       "Commencing optimization for ", n_epochs, " epochs, with ",
       length(positive_head), " positive edges",
@@ -1639,14 +1657,17 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       tail_embedding = NULL,
       positive_head = positive_head,
       positive_tail = positive_tail,
+      positive_ptr = positive_ptr,
       n_epochs = n_epochs,
-      n_vertices = n_vertices,
+      n_head_vertices = n_vertices,
+      n_tail_vertices = n_vertices,
       epochs_per_sample = epochs_per_sample,
       method = method,
       method_args = method_args,
       initial_alpha = alpha, 
       negative_sample_rate = negative_sample_rate,
       pcg_rand = pcg_rand,
+      batch = batch,
       n_threads = n_sgd_threads,
       grain_size = grain_size,
       move_other = TRUE,

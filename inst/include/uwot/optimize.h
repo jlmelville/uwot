@@ -156,26 +156,22 @@ template <bool DoMoveVertex> struct BatchUpdate {
   std::vector<float> &tail_embedding;
 
   Sgd opt;
-  std::size_t n_keys;
   const std::size_t head_1d_length;
   std::vector<float> head_gupd;
 
   BatchUpdate(std::vector<float> &head_embedding,
-              std::vector<float> &tail_embedding, float alpha,
-              std::size_t n_keys)
+              std::vector<float> &tail_embedding, float alpha)
       : head_embedding(head_embedding), tail_embedding(tail_embedding),
-        opt(alpha), n_keys(std::max(std::size_t{1}, n_keys)),
-        head_1d_length(head_embedding.size()),
-        head_gupd(this->n_keys * head_1d_length) {}
+        opt(alpha), head_1d_length(head_embedding.size()),
+        head_gupd(head_1d_length) {}
 
   void attract(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
-               std::size_t key) {
-    update_head_grad_vec<DoMoveVertex>(head_gupd, grad_d,
-                                       key * head_1d_length + dj + d);
+               std::size_t) {
+    update_head_grad_vec<DoMoveVertex>(head_gupd, grad_d, dj + d);
   }
   void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
              std::size_t key) {
-    head_gupd[key * head_1d_length + dj + d] += grad_d;
+    head_gupd[dj + d] += grad_d;
   }
 
   void epoch_begin(std::size_t, std::size_t) {
@@ -185,13 +181,10 @@ template <bool DoMoveVertex> struct BatchUpdate {
   void epoch_end(std::size_t epoch, std::size_t n_epochs) {
     auto worker = [&](std::size_t begin, std::size_t end) {
       for (std::size_t i = begin; i < end; i++) {
-        for (std::size_t key = 1; key < n_keys; key++) {
-          head_gupd[i] += head_gupd[key * head_1d_length + i];
-        }
         head_embedding[i] += opt.alpha * head_gupd[i];
       }
     };
-    RcppPerpendicular::parallel_for(head_1d_length, worker, n_keys, 1);
+    RcppPerpendicular::parallel_for(head_1d_length, worker, 1, 1);
 
     opt.epoch_end(epoch, n_epochs);
   }
@@ -222,7 +215,7 @@ void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
 // Gradient: the type of gradient used in the optimization
 // Update: type of update to the embedding coordinates
 template <typename Gradient, typename Update, typename RngFactory>
-struct SgdWorker {
+struct EdgeWorker {
   int n; // epoch counter
   const Gradient gradient;
   Update &update;
@@ -232,14 +225,15 @@ struct SgdWorker {
   std::size_t ndim;
   std::size_t tail_nvert;
   RngFactory rng_factory;
+  std::size_t n_items;
 
-  SgdWorker(const Gradient &gradient, Update &update,
-            const std::vector<unsigned int> &positive_head,
-            const std::vector<unsigned int> &positive_tail,
-            uwot::Sampler &sampler, std::size_t ndim, std::size_t tail_nvert)
+  EdgeWorker(const Gradient &gradient, Update &update,
+             const std::vector<unsigned int> &positive_head,
+             const std::vector<unsigned int> &positive_tail,
+             uwot::Sampler &sampler, std::size_t ndim, std::size_t tail_nvert)
       : n(0), gradient(gradient), update(update), positive_head(positive_head),
         positive_tail(positive_tail), sampler(sampler), ndim(ndim),
-        tail_nvert(tail_nvert), rng_factory() {}
+        tail_nvert(tail_nvert), rng_factory(), n_items(positive_head.size()) {}
 
   void epoch_begin(std::size_t epoch, std::size_t n_epochs) {
     n = epoch;
@@ -284,6 +278,79 @@ struct SgdWorker {
 
   void reseed() { rng_factory.reseed(); }
 };
+
+template <typename Gradient, typename Update, typename RngFactory>
+struct NodeWorker {
+  int n; // epoch counter
+  const Gradient gradient;
+  Update &update;
+  const std::vector<unsigned int> &positive_head;
+  const std::vector<unsigned int> &positive_tail;
+  const std::vector<unsigned int> &positive_ptr;
+  uwot::Sampler sampler;
+  std::size_t ndim;
+  std::size_t tail_nvert;
+  RngFactory rng_factory;
+  std::size_t n_items;
+
+  NodeWorker(const Gradient &gradient, Update &update,
+             const std::vector<unsigned int> &positive_head,
+             const std::vector<unsigned int> &positive_tail,
+             const std::vector<unsigned int> &positive_ptr,
+             uwot::Sampler &sampler, std::size_t ndim, std::size_t tail_nvert)
+      : n(0), gradient(gradient), update(update), positive_head(positive_head),
+        positive_tail(positive_tail), positive_ptr(positive_ptr),
+        sampler(sampler), ndim(ndim), tail_nvert(tail_nvert), rng_factory(),
+        n_items(positive_ptr.size() - 1) {}
+
+  void epoch_begin(std::size_t epoch, std::size_t n_epochs) {
+    n = epoch;
+    reseed();
+
+    update.epoch_begin(epoch, n_epochs);
+  }
+
+  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
+    update.epoch_end(epoch, n_epochs);
+  }
+
+  void operator()(std::size_t begin, std::size_t end, std::size_t thread_id) {
+    // Each window gets its own PRNG state, to prevent locking inside the loop.
+    auto prng = rng_factory.create(end);
+
+    // displacement between two points, cost of reallocating inside the loop
+    // is noticeable, also cheaper to calculate it once in the d2 calc
+    std::vector<float> disp(ndim);
+
+    for (auto p = begin; p < end; p++) {
+      for (auto i = positive_ptr[p]; i < positive_ptr[p + 1]; i++) {
+        if (!sampler.is_sample_edge(i, n)) {
+          continue;
+        }
+        const std::size_t dj = ndim * positive_head[i];
+        const std::size_t dk = ndim * positive_tail[i];
+
+        // j and k are joined by an edge: push them together
+        update_attract(update, gradient, dj, dk, ndim, disp, thread_id);
+
+        // Negative sampling step: assume any other point (dkn) is a -ve example
+        std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
+        for (std::size_t p = 0; p < n_neg_samples; p++) {
+          const std::size_t dkn = prng(tail_nvert) * ndim;
+          if (dj == dkn) {
+            continue;
+          }
+          // push them apart
+          update_repel(update, gradient, dj, dkn, ndim, disp, thread_id);
+        }
+        sampler.next_sample(i, n_neg_samples);
+      }
+    }
+  }
+
+  void reseed() { rng_factory.reseed(); }
+};
+
 } // namespace uwot
 
 #endif // UWOT_OPTIMIZE_H

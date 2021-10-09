@@ -98,7 +98,8 @@ umap_transform <- function(X = NULL, model = NULL,
                            n_sgd_threads = 0,
                            grain_size = 1,
                            verbose = FALSE,
-                           init = "weighted") {
+                           init = "weighted",
+                           batch = FALSE) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -344,21 +345,40 @@ umap_transform <- function(X = NULL, model = NULL,
   if (n_epochs > 0) {
     graph@x[graph@x < max(graph@x) / n_epochs] <- 0
     graph <- Matrix::drop0(graph)
-    epochs_per_sample <- make_epochs_per_sample(graph@x, n_epochs)
 
     # Edges are (i->j) where i (head) is from the new data and j (tail) is
     # in the model data
     # Unlike embedding of initial data, the edge list is therefore NOT symmetric
     # i.e. the presence of (i->j) does NOT mean (j->i) is also present because
     # i and j now come from different data
+    if (batch) {
+      # This is the same arrangement as Python UMAP
+      graph <- Matrix::t(graph)
+      # ordered indices of the new data nodes. Coordinates are updated 
+      # during optimization
+      positive_head <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
+      # unordered indices of the model nodes (some may not have any incoming
+      # edges), these coordinates will NOT update during the optimization
+      positive_tail <- graph@i
+    }
+    else {
+      # unordered indices of the new data nodes. Coordinates are updated 
+      # during optimization
+      positive_head <- graph@i
+      # ordered indices of the model nodes (some may not have any incoming edges)
+      # these coordinates will NOT update during the optimization
+      positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
+    }
     
-    # unordered indices of the new data nodes. Coordinates are updated 
-    # during optimization
-    positive_head <- graph@i
-    # ordered indices of the model nodes (some may not have any incoming edges)
-    # these coordinates will NOT update during the optimization
-    positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
+    n_head_vertices <- nrow(embedding)
+    n_tail_vertices <- nrow(train_embedding)
+    
+    # if batch = TRUE points into the head (length == n_tail_vertices)
+    # if batch = FALSE, points into the tail (length == n_head_vertices)
+    positive_ptr <- graph@p
 
+    epochs_per_sample <- make_epochs_per_sample(graph@x, n_epochs)
+    
     tsmessage(
       "Commencing optimization for ", n_epochs, " epochs, with ",
       length(positive_head), " positive edges",
@@ -381,14 +401,17 @@ umap_transform <- function(X = NULL, model = NULL,
       tail_embedding = train_embedding,
       positive_head = positive_head,
       positive_tail = positive_tail,
+      positive_ptr = positive_ptr,
       n_epochs = n_epochs,
-      n_vertices = n_vertices,
+      n_head_vertices = n_head_vertices,
+      n_tail_vertices = n_tail_vertices,
       epochs_per_sample = epochs_per_sample,
       method = tolower(method),
       method_args = method_args,
       initial_alpha = alpha, 
       negative_sample_rate = negative_sample_rate,
       pcg_rand = pcg_rand,
+      batch = batch,
       n_threads = n_sgd_threads,
       grain_size = grain_size,
       move_other = FALSE,
