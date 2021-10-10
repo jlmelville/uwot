@@ -225,6 +225,34 @@ void epoch(Worker &worker, std::size_t n, std::size_t n_epochs,
   worker.epoch_end(n, n_epochs, n_threads, grain_size);
 }
 
+template <typename Update, typename Gradient, typename Prng>
+void process_edge(Update &update, Gradient &gradient, Sampler &sampler,
+                  Prng &prng, const std::vector<unsigned int> &positive_head,
+                  const std::vector<unsigned int> &positive_tail,
+                  std::size_t ndim, std::size_t tail_nvert, std::size_t epoch,
+                  std::size_t edge, std::size_t thread_id,
+                  std::vector<float> &disp) {
+  if (!sampler.is_sample_edge(edge, epoch)) {
+    return;
+  }
+  const std::size_t dj = ndim * positive_head[edge];
+  const std::size_t dk = ndim * positive_tail[edge];
+  // j and k are joined by an edge: push them together
+  update_attract(update, gradient, dj, dk, ndim, disp, thread_id);
+
+  // Negative sampling step: assume any other point (dkn) is a -ve example
+  std::size_t n_neg_samples = sampler.get_num_neg_samples(edge, epoch);
+  for (std::size_t p = 0; p < n_neg_samples; p++) {
+    const std::size_t dkn = prng(tail_nvert) * ndim;
+    if (dj == dkn) {
+      continue;
+    }
+    // push them apart
+    update_repel(update, gradient, dj, dkn, ndim, disp, thread_id);
+  }
+  sampler.next_sample(edge, n_neg_samples);
+}
+
 // Gradient: the type of gradient used in the optimization
 // Update: type of update to the embedding coordinates
 template <typename Gradient, typename Update, typename RngFactory>
@@ -268,25 +296,8 @@ struct EdgeWorker {
     // is noticeable, also cheaper to calculate it once in the d2 calc
     std::vector<float> disp(ndim);
     for (auto i = begin; i < end; i++) {
-      if (!sampler.is_sample_edge(i, n)) {
-        continue;
-      }
-      const std::size_t dj = ndim * positive_head[i];
-      const std::size_t dk = ndim * positive_tail[i];
-      // j and k are joined by an edge: push them together
-      update_attract(update, gradient, dj, dk, ndim, disp, thread_id);
-
-      // Negative sampling step: assume any other point (dkn) is a -ve example
-      std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
-      for (std::size_t p = 0; p < n_neg_samples; p++) {
-        const std::size_t dkn = prng(tail_nvert) * ndim;
-        if (dj == dkn) {
-          continue;
-        }
-        // push them apart
-        update_repel(update, gradient, dj, dkn, ndim, disp, thread_id);
-      }
-      sampler.next_sample(i, n_neg_samples);
+      process_edge(update, gradient, sampler, prng, positive_head,
+                   positive_tail, ndim, tail_nvert, n, i, thread_id, disp);
     }
   }
 
@@ -330,35 +341,12 @@ struct NodeWorker {
   }
 
   void operator()(std::size_t begin, std::size_t end, std::size_t thread_id) {
-    // Each window gets its own PRNG state, to prevent locking inside the loop.
     auto prng = rng_factory.create(end);
-
-    // displacement between two points, cost of reallocating inside the loop
-    // is noticeable, also cheaper to calculate it once in the d2 calc
     std::vector<float> disp(ndim);
-
     for (auto p = begin; p < end; p++) {
       for (auto i = positive_ptr[p]; i < positive_ptr[p + 1]; i++) {
-        if (!sampler.is_sample_edge(i, n)) {
-          continue;
-        }
-        const std::size_t dj = ndim * positive_head[i];
-        const std::size_t dk = ndim * positive_tail[i];
-
-        // j and k are joined by an edge: push them together
-        update_attract(update, gradient, dj, dk, ndim, disp, thread_id);
-
-        // Negative sampling step: assume any other point (dkn) is a -ve example
-        std::size_t n_neg_samples = sampler.get_num_neg_samples(i, n);
-        for (std::size_t p = 0; p < n_neg_samples; p++) {
-          const std::size_t dkn = prng(tail_nvert) * ndim;
-          if (dj == dkn) {
-            continue;
-          }
-          // push them apart
-          update_repel(update, gradient, dj, dkn, ndim, disp, thread_id);
-        }
-        sampler.next_sample(i, n_neg_samples);
+        process_edge(update, gradient, sampler, prng, positive_head,
+                     positive_tail, ndim, tail_nvert, n, i, thread_id, disp);
       }
     }
   }
