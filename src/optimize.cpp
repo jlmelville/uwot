@@ -50,6 +50,16 @@ void optimize_layout(Worker &worker, unsigned int n_epochs,
   }
 }
 
+// Template class specialization to handle different rng/batch combinations
+template <bool DoBatch = true> struct BatchRngFactory {
+  using PcgFactoryType = batch_pcg_factory;
+  using TauFactoryType = batch_tau_factory;
+};
+template <> struct BatchRngFactory<false> {
+  using PcgFactoryType = pcg_factory;
+  using TauFactoryType = tau_factory;
+};
+
 struct UmapFactory {
   bool move_other;
   bool pcg_rand;
@@ -102,10 +112,24 @@ struct UmapFactory {
   template <bool DoMove, typename Gradient>
   void create_impl(const Gradient &gradient, uwot::Sampler &sampler,
                    bool pcg_rand, bool batch) {
-    if (pcg_rand) {
-      create_impl<pcg_factory, DoMove>(gradient, sampler, batch);
+    if (batch) {
+      create_impl<BatchRngFactory<true>, DoMove>(gradient, sampler, pcg_rand,
+                                                 batch);
     } else {
-      create_impl<tau_factory, DoMove>(gradient, sampler, batch);
+      create_impl<BatchRngFactory<false>, DoMove>(gradient, sampler, pcg_rand,
+                                                  batch);
+    }
+  }
+
+  template <typename BatchRngFactory, bool DoMove, typename Gradient>
+  void create_impl(const Gradient &gradient, uwot::Sampler &sampler,
+                   bool pcg_rand, bool batch) {
+    if (pcg_rand) {
+      create_impl<typename BatchRngFactory::PcgFactoryType, DoMove>(
+          gradient, sampler, batch);
+    } else {
+      create_impl<typename BatchRngFactory::TauFactoryType, DoMove>(
+          gradient, sampler, batch);
     }
   }
 
@@ -120,15 +144,21 @@ struct UmapFactory {
       uwot::NodeWorker<Gradient, decltype(update), RandFactory> worker(
           gradient, update, positive_head, positive_tail, positive_ptr, sampler,
           ndim, n_tail_vertices);
-      optimize_layout(worker, n_epochs, n_threads, grain_size, verbose);
+      create_impl(worker, gradient, sampler);
     } else {
       uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
                                          initial_alpha);
       uwot::EdgeWorker<Gradient, decltype(update), RandFactory> worker(
           gradient, update, positive_head, positive_tail, sampler, ndim,
-          n_tail_vertices);
-      optimize_layout(worker, n_epochs, n_threads, grain_size, verbose);
+          n_tail_vertices, n_threads);
+      create_impl(worker, gradient, sampler);
     }
+  }
+
+  template <typename Worker, typename Gradient>
+  void create_impl(Worker &worker, const Gradient &gradient,
+                   uwot::Sampler &sampler) {
+    optimize_layout(worker, n_epochs, n_threads, grain_size, verbose);
   }
 };
 

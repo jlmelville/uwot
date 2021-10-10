@@ -247,9 +247,10 @@ will be temporarily written to disk in the location determined by
 \code{\link[base]{tempfile}}.}
 
 \item{n_sgd_threads}{Number of threads to use during stochastic gradient
-descent. If set to > 1, then results will not be reproducible, even if
-`set.seed` is called with a fixed seed before running. Set to
-\code{"auto"} go use the same value as \code{n_threads}.}
+descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
+will \emph{not} be reproducible, even if \code{set.seed} is called with a
+fixed seed before running. Set to \code{"auto"} to use the same value as
+\code{n_threads}.}
 
 \item{grain_size}{The minimum amount of work to do on each thread. If this
 value is set high enough, then less than \code{n_threads} or
@@ -356,8 +357,8 @@ conjunction with \code{ret_model} and \code{ret_extra}.}
 \item{ret_extra}{A vector indicating what extra data to return. May contain
 any combination of the following strings:
 \itemize{
-  \item \code{"model"} Same as setting `ret_model = TRUE`.
-  \item \code{"nn"} Same as setting `ret_nn = TRUE`.
+  \item \code{"model"} Same as setting \code{ret_model = TRUE}.
+  \item \code{"nn"} Same as setting \code{ret_nn = TRUE}.
   \item \code{"fgraph"} the high dimensional fuzzy graph (i.e. the fuzzy
     simplicial set of the merged local views of the input data). The graph
     is returned as a sparse symmetric N x N matrix of class
@@ -370,7 +371,7 @@ any combination of the following strings:
     employed for optimization and therefore the number of non-zero elements
     in the matrix is dependent on \code{n_epochs}. If you are only
     interested in the fuzzy input graph (e.g. for clustering), setting
-    `n_epochs = 0` will avoid any further sparsifying.
+    \code{n_epochs = 0} will avoid any further sparsifying.
 }}
 
 \item{tmpdir}{Temporary directory to store nearest neighbor indexes during
@@ -382,12 +383,11 @@ only written to disk if \code{n_threads > 1} and
 
 \item{batch}{If \code{TRUE}, then embedding coordinates are updated at the
 end of each epoch rather than during the epoch. In batch mode, results are
-reproducible with a fixed random seed with multiple threads (for a given 
-value of \code{n_sgd_threads}), at the cost of a slightly higher memory
-use. You may also have to modify \code{learning_rate} and increase 
-\code{n_epochs}, so whether this provides a speed increase over the
-single-threaded optimization is likely to be dataset and
-hardware-dependent.}
+reproducible with a fixed random seed even with \code{n_sgd_threads > 1},
+at the cost of a slightly higher memory use. You may also have to modify
+\code{learning_rate} and increase \code{n_epochs}, so whether this provides
+a speed increase over the single-threaded optimization is likely to be
+dataset and hardware-dependent.}
 }
 \value{
 A matrix of optimized coordinates, or:

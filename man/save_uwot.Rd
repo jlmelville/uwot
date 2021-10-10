@@ -12,24 +12,24 @@ save_uwot(model, file, unload = FALSE, verbose = FALSE)
 \item{file}{name of the file where the model is to be saved or read from.}
 
 \item{unload}{if \code{TRUE}, unload all nearest neighbor indexes for the
-model. The \code{model} will no longer be valid for use in 
-\code{\link{umap_transform}} and the temporary working directory used 
-during model saving will be deleted. You will need to reload the model
-with `load_uwot` to use the model. If \code{FALSE}, then the model can
-be re-used without reloading, but you must manually unload the NN index 
-when you are finished using it if you want to delete the temporary working
-directory. To unload manually, use \code{\link{unload_uwot}}. The 
-absolute path of the working directory is found in the `mod_dir` item of 
-the return value.}
+model. The \code{model} will no longer be valid for use in
+\code{\link{umap_transform}} and the temporary working directory used
+during model saving will be deleted. You will need to reload the model with
+\code{load_uwot} to use the model. If \code{FALSE}, then the model can be
+re-used without reloading, but you must manually unload the NN index when
+you are finished using it if you want to delete the temporary working
+directory. To unload manually, use \code{\link{unload_uwot}}. The absolute
+path of the working directory is found in the \code{mod_dir} item of the
+return value.}
 
 \item{verbose}{if \code{TRUE}, log information to the console.}
 }
 \value{
-\code{model} with one extra item: `mod_dir`, which contains the path
-to the working directory. If \code{unload = FALSE} then this directory still
-exists after this function returns, and can be cleaned up with 
-\code{\link{unload_uwot}}. If you don't care about cleaning up this 
-directory, or \code{unload = TRUE}, then you can ignore the return value.
+\code{model} with one extra item: \code{mod_dir}, which contains the
+  path to the working directory. If \code{unload = FALSE} then this directory
+  still exists after this function returns, and can be cleaned up with
+  \code{\link{unload_uwot}}. If you don't care about cleaning up this
+  directory, or \code{unload = TRUE}, then you can ignore the return value.
 }
 \description{
 Functions to write a UMAP model to a file, and to restore.

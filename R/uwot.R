@@ -271,12 +271,11 @@
 #'   and \code{approx_pow} are ignored.
 #' @param batch If \code{TRUE}, then embedding coordinates are updated at the
 #'   end of each epoch rather than during the epoch. In batch mode, results are
-#'   reproducible with a fixed random seed with multiple threads (for a given 
-#'   value of \code{n_sgd_threads}), at the cost of a slightly higher memory
-#'   use. You may also have to modify \code{learning_rate} and increase 
-#'   \code{n_epochs}, so whether this provides a speed increase over the
-#'   single-threaded optimization is likely to be dataset and
-#'   hardware-dependent.
+#'   reproducible with a fixed random seed even with \code{n_sgd_threads > 1},
+#'   at the cost of a slightly higher memory use. You may also have to modify
+#'   \code{learning_rate} and increase \code{n_epochs}, so whether this provides
+#'   a speed increase over the single-threaded optimization is likely to be
+#'   dataset and hardware-dependent.
 #' @param ret_model If \code{TRUE}, then return extra data that can be used to
 #'   add new data to an existing embedding via \code{\link{umap_transform}}. The
 #'   embedded coordinates are returned as the list item \code{embedding}. If
@@ -299,8 +298,8 @@
 #' @param ret_extra A vector indicating what extra data to return. May contain
 #'   any combination of the following strings:
 #'   \itemize{
-#'     \item \code{"model"} Same as setting `ret_model = TRUE`.
-#'     \item \code{"nn"} Same as setting `ret_nn = TRUE`.
+#'     \item \code{"model"} Same as setting \code{ret_model = TRUE}.
+#'     \item \code{"nn"} Same as setting \code{ret_nn = TRUE}.
 #'     \item \code{"fgraph"} the high dimensional fuzzy graph (i.e. the fuzzy
 #'       simplicial set of the merged local views of the input data). The graph
 #'       is returned as a sparse symmetric N x N matrix of class
@@ -313,7 +312,7 @@
 #'       employed for optimization and therefore the number of non-zero elements
 #'       in the matrix is dependent on \code{n_epochs}. If you are only
 #'       interested in the fuzzy input graph (e.g. for clustering), setting
-#'       `n_epochs = 0` will avoid any further sparsifying.
+#'       \code{n_epochs = 0} will avoid any further sparsifying.
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
@@ -322,9 +321,10 @@
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
-#'   descent. If set to > 1, then results will not be reproducible, even if
-#'   `set.seed` is called with a fixed seed before running. Set to
-#'   \code{"auto"} go use the same value as \code{n_threads}.
+#'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
+#'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
+#'   fixed seed before running. Set to \code{"auto"} to use the same value as
+#'   \code{n_threads}.
 #' @param grain_size The minimum amount of work to do on each thread. If this
 #'   value is set high enough, then less than \code{n_threads} or
 #'   \code{n_sgd_threads} will be used for processing, which might give a
@@ -718,6 +718,13 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   results. For more generic dimensionality reduction, it's safer to leave
 #'   \code{fast_sgd = FALSE}. If \code{fast_sgd = TRUE}, then user-supplied
 #'   values of \code{pcg_rand} and \code{n_sgd_threads}, are ignored.
+#' @param batch If \code{TRUE}, then embedding coordinates are updated at the
+#'   end of each epoch rather than during the epoch. In batch mode, results are
+#'   reproducible with a fixed random seed even with \code{n_sgd_threads > 1},
+#'   at the cost of a slightly higher memory use. You may also have to modify
+#'   \code{learning_rate} and increase \code{n_epochs}, so whether this provides
+#'   a speed increase over the single-threaded optimization is likely to be
+#'   dataset and hardware-dependent.
 #' @param ret_model If \code{TRUE}, then return extra data that can be used to
 #'   add new data to an existing embedding via \code{\link{umap_transform}}. The
 #'   embedded coordinates are returned as the list item \code{embedding}. If
@@ -740,8 +747,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param ret_extra A vector indicating what extra data to return. May contain
 #'   any combination of the following strings:
 #'   \itemize{
-#'     \item \code{"model"} Same as setting `ret_model = TRUE`.
-#'     \item \code{"nn"} Same as setting `ret_nn = TRUE`.
+#'     \item \code{"model"} Same as setting \code{ret_model = TRUE}.
+#'     \item \code{"nn"} Same as setting \code{ret_nn = TRUE}.
 #'     \item \code{"fgraph"} the high dimensional fuzzy graph (i.e. the fuzzy
 #'       simplicial set of the merged local views of the input data). The graph
 #'       is returned as a sparse symmetric N x N matrix of class
@@ -754,7 +761,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       employed for optimization and therefore the number of non-zero elements
 #'       in the matrix is dependent on \code{n_epochs}. If you are only
 #'       interested in the fuzzy input graph (e.g. for clustering), setting
-#'       `n_epochs = 0` will avoid any further sparsifying.
+#'       \code{n_epochs = 0} will avoid any further sparsifying.
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
@@ -763,17 +770,10 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
-#'   descent. If set to > 1, then results will not be reproducible, even if
-#'   `set.seed` is called with a fixed seed before running. Set to
-#'   \code{"auto"} go use the same value as \code{n_threads}.
-#' @param batch If \code{TRUE}, then embedding coordinates are updated at the
-#'   end of each epoch rather than during the epoch. In batch mode, results are
-#'   reproducible with a fixed random seed with multiple threads (for a given 
-#'   value of \code{n_sgd_threads}), at the cost of a slightly higher memory
-#'   use. You may also have to modify \code{learning_rate} and increase 
-#'   \code{n_epochs}, so whether this provides a speed increase over the
-#'   single-threaded optimization is likely to be dataset and
-#'   hardware-dependent.
+#'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
+#'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
+#'   fixed seed before running. Set to \code{"auto"} to use the same value as
+#'   \code{n_threads}.
 #' @param grain_size The minimum amount of work to do on each thread. If this
 #'   value is set high enough, then less than \code{n_threads} or
 #'   \code{n_sgd_threads} will be used for processing, which might give a
@@ -1058,9 +1058,10 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
-#'   descent. If set to > 1, then results will not be reproducible, even if
-#'   `set.seed` is called with a fixed seed before running. Set to
-#'   \code{"auto"} go use the same value as \code{n_threads}.
+#'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
+#'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
+#'   fixed seed before running. Set to \code{"auto"} to use the same value as
+#'   \code{n_threads}.
 #' @param grain_size The minimum amount of work to do on each thread. If this
 #'   value is set high enough, then less than \code{n_threads} or
 #'   \code{n_sgd_threads} will be used for processing, which might give a
@@ -1102,12 +1103,11 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   values of \code{pcg_rand} and \code{n_sgd_threads}, are ignored.
 #' @param batch If \code{TRUE}, then embedding coordinates are updated at the
 #'   end of each epoch rather than during the epoch. In batch mode, results are
-#'   reproducible with a fixed random seed with multiple threads (for a given 
-#'   value of \code{n_sgd_threads}), at the cost of a slightly higher memory
-#'   use. You may also have to modify \code{learning_rate} and increase 
-#'   \code{n_epochs}, so whether this provides a speed increase over the
-#'   single-threaded optimization is likely to be dataset and
-#'   hardware-dependent.
+#'   reproducible with a fixed random seed even with \code{n_sgd_threads > 1},
+#'   at the cost of a slightly higher memory use. You may also have to modify
+#'   \code{learning_rate} and increase \code{n_epochs}, so whether this provides
+#'   a speed increase over the single-threaded optimization is likely to be
+#'   dataset and hardware-dependent.
 #' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
 #'   nearest neighbor data that can be used as input to \code{nn_method} to
 #'   avoid the overhead of repeatedly calculating the nearest neighbors when
@@ -1119,7 +1119,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param ret_extra A vector indicating what extra data to return. May contain
 #'   any combination of the following strings:
 #'   \itemize{
-#'     \item \code{"nn"} same as setting `ret_nn = TRUE`.
+#'     \item \code{"nn"} same as setting \code{ret_nn = TRUE}.
 #'     \item \code{"P"} the high dimensional probability matrix. The graph
 #'     is returned as a sparse symmetric N x N matrix of class
 #'     \link[Matrix]{dgCMatrix-class}, where a non-zero entry (i, j) gives the
@@ -1129,8 +1129,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     not be sampled by the probabilistic edge sampling employed for
 #'     optimization and therefore the number of non-zero elements in the matrix
 #'     is dependent on \code{n_epochs}. If you are only interested in the fuzzy
-#'     input graph (e.g. for clustering), setting `n_epochs = 0` will avoid any
-#'     further sparsifying.
+#'     input graph (e.g. for clustering), setting \code{n_epochs = 0} will avoid
+#'     any further sparsifying.
 #'   }
 #' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
@@ -1792,21 +1792,21 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param model a UMAP model create by \code{\link{umap}}.
 #' @param file name of the file where the model is to be saved or read from.
 #' @param unload if \code{TRUE}, unload all nearest neighbor indexes for the
-#'   model. The \code{model} will no longer be valid for use in 
-#'   \code{\link{umap_transform}} and the temporary working directory used 
-#'   during model saving will be deleted. You will need to reload the model
-#'   with `load_uwot` to use the model. If \code{FALSE}, then the model can
-#'   be re-used without reloading, but you must manually unload the NN index 
-#'   when you are finished using it if you want to delete the temporary working
-#'   directory. To unload manually, use \code{\link{unload_uwot}}. The 
-#'   absolute path of the working directory is found in the `mod_dir` item of 
-#'   the return value. 
+#'   model. The \code{model} will no longer be valid for use in
+#'   \code{\link{umap_transform}} and the temporary working directory used
+#'   during model saving will be deleted. You will need to reload the model with
+#'   \code{load_uwot} to use the model. If \code{FALSE}, then the model can be
+#'   re-used without reloading, but you must manually unload the NN index when
+#'   you are finished using it if you want to delete the temporary working
+#'   directory. To unload manually, use \code{\link{unload_uwot}}. The absolute
+#'   path of the working directory is found in the \code{mod_dir} item of the
+#'   return value.
 #' @param verbose if \code{TRUE}, log information to the console.
-#' @return \code{model} with one extra item: `mod_dir`, which contains the path
-#' to the working directory. If \code{unload = FALSE} then this directory still
-#' exists after this function returns, and can be cleaned up with 
-#' \code{\link{unload_uwot}}. If you don't care about cleaning up this 
-#' directory, or \code{unload = TRUE}, then you can ignore the return value.
+#' @return \code{model} with one extra item: \code{mod_dir}, which contains the
+#'   path to the working directory. If \code{unload = FALSE} then this directory
+#'   still exists after this function returns, and can be cleaned up with
+#'   \code{\link{unload_uwot}}. If you don't care about cleaning up this
+#'   directory, or \code{unload = TRUE}, then you can ignore the return value.
 #' @examples
 #' iris_train <- iris[c(1:10, 51:60), ]
 #' iris_test <- iris[100:110, ]
@@ -1915,11 +1915,11 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
 #'
 #' @param file name of the file where the model is to be saved or read from.
 #' @param verbose if \code{TRUE}, log information to the console.
-#' @return The model saved at \code{file}, for use with 
-#' \code{\link{umap_transform}}. Additionally, it contains an extra item: 
-#' `mod_dir`, which contains the path to the temporary working directory used 
-#' during loading of the model. This directory cannot be removed until this
-#' model has been unloaded by using \code{\link{unload_uwot}}.
+#' @return The model saved at \code{file}, for use with
+#'   \code{\link{umap_transform}}. Additionally, it contains an extra item:
+#'   \code{mod_dir}, which contains the path to the temporary working directory
+#'   used during loading of the model. This directory cannot be removed until
+#'   this model has been unloaded by using \code{\link{unload_uwot}}.
 #' @examples
 #' iris_train <- iris[c(1:10, 51:60), ]
 #' iris_test <- iris[100:110, ]
