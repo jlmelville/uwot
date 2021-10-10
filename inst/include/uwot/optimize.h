@@ -30,7 +30,6 @@
 #include <memory>
 #include <utility>
 
-#include "../RcppPerpendicular.h"
 #include "sampler.h"
 
 namespace uwot {
@@ -137,8 +136,9 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
   }
 
   void epoch_begin(std::size_t, std::size_t) {}
-  void epoch_end(std::size_t epoch, std::size_t n_epochs, std::size_t,
-                 std::size_t) {
+  template <typename Parallel>
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &,
+                 std::size_t, std::size_t) {
     opt.epoch_end(epoch, n_epochs);
   }
 };
@@ -178,15 +178,15 @@ template <bool DoMoveVertex> struct BatchUpdate {
     std::fill(head_gupd.begin(), head_gupd.end(), 0.0);
   }
 
-  void epoch_end(std::size_t epoch, std::size_t n_epochs, std::size_t n_threads,
-                 std::size_t grain_size) {
-    auto worker = [&](std::size_t begin, std::size_t end) {
+  template <typename Parallel>
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel,
+                 std::size_t n_threads, std::size_t grain_size) {
+    auto worker = [&](std::size_t begin, std::size_t end, std::size_t) {
       for (std::size_t i = begin; i < end; i++) {
         head_embedding[i] += opt.alpha * head_gupd[i];
       }
     };
-    RcppPerpendicular::parallel_for(head_1d_length, worker, n_threads,
-                                    grain_size);
+    parallel.pfor(head_1d_length, worker, n_threads, grain_size);
 
     opt.epoch_end(epoch, n_epochs);
   }
@@ -214,12 +214,12 @@ void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
   }
 }
 
-template <typename Worker, typename Progress>
+template <typename Worker, typename Progress, typename Parallel>
 void optimize_layout(Worker &worker, Progress &progress, unsigned int n_epochs,
-                     std::size_t n_threads = 0, std::size_t grain_size = 1,
-                     bool verbose = false) {
+                     Parallel &parallel, std::size_t n_threads = 0,
+                     std::size_t grain_size = 1) {
   for (auto n = 0U; n < n_epochs; n++) {
-    epoch(worker, n, n_epochs, n_threads, grain_size);
+    epoch(worker, n, n_epochs, parallel, n_threads, grain_size);
 
     if (progress.is_aborted()) {
       break;
@@ -228,14 +228,14 @@ void optimize_layout(Worker &worker, Progress &progress, unsigned int n_epochs,
   }
 }
 
-template <typename Worker>
+template <typename Worker, typename Parallel>
 void epoch(Worker &worker, std::size_t n, std::size_t n_epochs,
-           std::size_t n_threads, std::size_t grain_size) {
+           Parallel &parallel, std::size_t n_threads, std::size_t grain_size) {
   worker.epoch_begin(n, n_epochs);
 
-  RcppPerpendicular::pfor(worker.n_items, worker, n_threads, grain_size);
+  parallel.pfor(worker.n_items, worker, n_threads, grain_size);
 
-  worker.epoch_end(n, n_epochs, n_threads, grain_size);
+  worker.epoch_end(n, n_epochs, parallel, n_threads, grain_size);
 }
 
 template <typename Update, typename Gradient, typename Prng>
@@ -300,9 +300,10 @@ struct EdgeWorker {
     update.epoch_begin(epoch, n_epochs);
   }
 
-  void epoch_end(std::size_t epoch, std::size_t n_epochs, std::size_t n_threads,
-                 std::size_t grain_size) {
-    update.epoch_end(epoch, n_epochs, n_threads, grain_size);
+  template <typename Parallel>
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel,
+                 std::size_t n_threads, std::size_t grain_size) {
+    update.epoch_end(epoch, n_epochs, parallel, n_threads, grain_size);
   }
 
   void operator()(std::size_t begin, std::size_t end, std::size_t thread_id) {
@@ -350,9 +351,10 @@ struct NodeWorker {
     update.epoch_begin(epoch, n_epochs);
   }
 
-  void epoch_end(std::size_t epoch, std::size_t n_epochs, std::size_t n_threads,
-                 std::size_t grain_size) {
-    update.epoch_end(epoch, n_epochs, n_threads, grain_size);
+  template <typename Parallel>
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel,
+                 std::size_t n_threads, std::size_t grain_size) {
+    update.epoch_end(epoch, n_epochs, parallel, n_threads, grain_size);
   }
 
   void operator()(std::size_t begin, std::size_t end, std::size_t thread_id) {

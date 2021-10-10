@@ -23,8 +23,9 @@
 #include "uwot/optimize.h"
 #include "uwot/sampler.h"
 
-#include "rprogress.h"
 #include "rng.h"
+#include "rparallel.h"
+#include "rprogress.h"
 
 using namespace Rcpp;
 
@@ -137,7 +138,9 @@ struct UmapFactory {
   void create_impl(Worker &worker, const Gradient &gradient,
                    uwot::Sampler &sampler) {
     RProgress progress(n_epochs, verbose);
-    uwot::optimize_layout(worker, progress, n_epochs, n_threads, grain_size, verbose);
+    RParallel parallel;
+    uwot::optimize_layout(worker, progress, n_epochs, parallel, n_threads,
+                          grain_size);
   }
 };
 
