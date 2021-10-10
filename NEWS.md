@@ -9,6 +9,8 @@ nearest neighbor data if you set `ret_nn = TRUE`. If the names exist in more
 than one of the input data parameters listed above, but are inconsistent, no
 guarantees are made about which names will be used. Thank you 
 [jwijffels](https://github.com/jwijffels) for reporting this.
+* In `umap_transform`, the learning rate is now down-scaled by a factor of 4,
+consistent with the Python implementation of UMAP.
 * Setting `nn_method = "annoy"` and `verbose = TRUE` would lead to an error with 
 datasets with fewer than 50 items in them.
 * Using multiple pre-computed nearest neighbors blocks is now supported with
