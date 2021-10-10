@@ -1,6 +1,6 @@
 // BSD 2-Clause License
 //
-// Copyright 2020 James Melville
+// Copyright 2021 James Melville
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -24,22 +24,40 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // OF SUCH DAMAGE.
 
-#ifndef UWOT_OPTIMIZE_H
-#define UWOT_OPTIMIZE_H
+#ifndef UWOT_COORDS_H
+#define UWOT_COORDS_H
+
+#include <memory>
+#include <utility>
 
 namespace uwot {
 
-struct Sgd {
-  float initial_alpha;
-  float alpha;
+// For normal UMAP, tail_embedding is NULL and we want to pass
+// a shallow copy of head_embedding as tail_embedding.
+// When updating new values, tail_embedding is the new coordinate to optimize
+// and gets passed as normal.
+struct Coords {
+  std::vector<float> head_embedding;
+  std::unique_ptr<std::vector<float>> tail_vec_ptr;
 
-  Sgd(float alpha) : initial_alpha(alpha), alpha(alpha){};
+  Coords(std::vector<float> &head_embedding)
+      : head_embedding(head_embedding), tail_vec_ptr(nullptr) {}
 
-  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
-    alpha = initial_alpha * (1.0 - (float(epoch) / float(n_epochs)));
+  Coords(std::vector<float> &head_embedding, std::vector<float> &tail_embedding)
+      : head_embedding(head_embedding),
+        tail_vec_ptr(new std::vector<float>(tail_embedding)) {}
+
+  auto get_tail_embedding() -> std::vector<float> & {
+    if (tail_vec_ptr) {
+      return *tail_vec_ptr;
+    } else {
+      return head_embedding;
+    }
   }
+
+  auto get_head_embedding() -> std::vector<float> & { return head_embedding; }
 };
 
 } // namespace uwot
 
-#endif // UWOT_OPTIMIZE_H
+#endif

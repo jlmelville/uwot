@@ -19,8 +19,9 @@
 
 #include <vector>
 
+#include "uwot/coords.h"
+#include "uwot/epoch.h"
 #include "uwot/gradient.h"
-#include "uwot/optimize.h"
 #include "uwot/sampler.h"
 
 #include "rng.h"
