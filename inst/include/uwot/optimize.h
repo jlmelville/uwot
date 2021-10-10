@@ -138,7 +138,8 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
   }
 
   void epoch_begin(std::size_t, std::size_t) {}
-  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, std::size_t,
+                 std::size_t) {
     opt.epoch_end(epoch, n_epochs);
   }
 };
@@ -178,13 +179,15 @@ template <bool DoMoveVertex> struct BatchUpdate {
     std::fill(head_gupd.begin(), head_gupd.end(), 0.0);
   }
 
-  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, std::size_t n_threads,
+                 std::size_t grain_size) {
     auto worker = [&](std::size_t begin, std::size_t end) {
       for (std::size_t i = begin; i < end; i++) {
         head_embedding[i] += opt.alpha * head_gupd[i];
       }
     };
-    RcppPerpendicular::parallel_for(head_1d_length, worker, 1, 1);
+    RcppPerpendicular::parallel_for(head_1d_length, worker, n_threads,
+                                    grain_size);
 
     opt.epoch_end(epoch, n_epochs);
   }
@@ -210,6 +213,16 @@ void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
   for (std::size_t d = 0; d < ndim; d++) {
     update.repel(dj, dk, d, grad_d<Gradient>(disp, d, grad_coeff), key);
   }
+}
+
+template <typename Worker>
+void epoch(Worker &worker, std::size_t n, std::size_t n_epochs,
+           std::size_t n_threads, std::size_t grain_size) {
+  worker.epoch_begin(n, n_epochs);
+
+  RcppPerpendicular::pfor(worker.n_items, worker, n_threads, grain_size);
+
+  worker.epoch_end(n, n_epochs, n_threads, grain_size);
 }
 
 // Gradient: the type of gradient used in the optimization
@@ -242,8 +255,9 @@ struct EdgeWorker {
     update.epoch_begin(epoch, n_epochs);
   }
 
-  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
-    update.epoch_end(epoch, n_epochs);
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, std::size_t n_threads,
+                 std::size_t grain_size) {
+    update.epoch_end(epoch, n_epochs, n_threads, grain_size);
   }
 
   void operator()(std::size_t begin, std::size_t end, std::size_t thread_id) {
@@ -310,8 +324,9 @@ struct NodeWorker {
     update.epoch_begin(epoch, n_epochs);
   }
 
-  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
-    update.epoch_end(epoch, n_epochs);
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, std::size_t n_threads,
+                 std::size_t grain_size) {
+    update.epoch_end(epoch, n_epochs, n_threads, grain_size);
   }
 
   void operator()(std::size_t begin, std::size_t end, std::size_t thread_id) {

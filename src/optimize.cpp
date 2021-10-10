@@ -38,11 +38,7 @@ void optimize_layout(Worker &worker, unsigned int n_epochs,
   Progress progress(n_epochs, verbose);
 
   for (auto n = 0U; n < n_epochs; n++) {
-    worker.epoch_begin(n, n_epochs);
-
-    RcppPerpendicular::pfor(worker.n_items, worker, n_threads, grain_size);
-
-    worker.epoch_end(n, n_epochs);
+    uwot::epoch(worker, n, n_epochs, n_threads, grain_size);
 
     if (Progress::check_abort()) {
       progress.cleanup();
@@ -53,6 +49,7 @@ void optimize_layout(Worker &worker, unsigned int n_epochs,
     }
   }
 }
+
 struct UmapFactory {
   bool move_other;
   bool pcg_rand;
