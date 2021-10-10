@@ -137,8 +137,20 @@ struct UmapFactory {
   template <typename Worker, typename Gradient>
   void create_impl(Worker &worker, const Gradient &gradient,
                    uwot::Sampler &sampler) {
+
     RProgress progress(n_epochs, verbose);
-    RParallel parallel;
+    if (n_threads > 0) {
+      create_impl<RParallel>(worker, gradient, sampler, progress);
+    } else {
+      create_impl<RSerial>(worker, gradient, sampler, progress);
+    }
+  }
+
+  template <typename Parallel, typename Worker, typename Gradient,
+            typename Progress>
+  void create_impl(Worker &worker, const Gradient &gradient,
+                   uwot::Sampler &sampler, Progress &progress) {
+    Parallel parallel;
     uwot::optimize_layout(worker, progress, n_epochs, parallel, n_threads,
                           grain_size);
   }

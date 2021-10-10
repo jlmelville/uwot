@@ -23,9 +23,17 @@
 #include "RcppPerpendicular.h"
 
 struct RParallel {
-  template <typename Worker> 
-  void pfor(std::size_t n_items, Worker &worker, std::size_t n_threads, std::size_t grain_size) {
+  template <typename Worker>
+  void pfor(std::size_t n_items, Worker &worker, std::size_t n_threads,
+            std::size_t grain_size) {
     RcppPerpendicular::pfor(n_items, worker, n_threads, grain_size);
+  }
+};
+
+struct RSerial {
+  template <typename Worker>
+  void pfor(std::size_t n_items, Worker &worker, std::size_t, std::size_t) {
+    worker(0, n_items, 0);
   }
 };
 
