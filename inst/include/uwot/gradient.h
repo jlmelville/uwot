@@ -28,6 +28,7 @@
 #define UWOT_GRADIENT_H
 
 #include <cmath>
+#include <limits>
 #include <vector>
 
 namespace uwot {

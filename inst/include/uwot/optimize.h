@@ -27,7 +27,6 @@
 #ifndef UWOT_OPTIMIZE_H
 #define UWOT_OPTIMIZE_H
 
-#include <limits>
 #include <memory>
 #include <utility>
 
@@ -212,6 +211,20 @@ void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
                               update.tail_embedding, dk, ndim, disp);
   for (std::size_t d = 0; d < ndim; d++) {
     update.repel(dj, dk, d, grad_d<Gradient>(disp, d, grad_coeff), key);
+  }
+}
+
+template <typename Worker, typename Progress>
+void optimize_layout(Worker &worker, Progress &progress, unsigned int n_epochs,
+                     std::size_t n_threads = 0, std::size_t grain_size = 1,
+                     bool verbose = false) {
+  for (auto n = 0U; n < n_epochs; n++) {
+    epoch(worker, n, n_epochs, n_threads, grain_size);
+
+    if (progress.is_aborted()) {
+      break;
+    }
+    progress.report();
   }
 }
 

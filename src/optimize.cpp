@@ -19,36 +19,14 @@
 
 #include <vector>
 
-// [[Rcpp::depends(RcppProgress)]]
-#include <progress.hpp>
-
-#include "RcppPerpendicular.h"
 #include "uwot/gradient.h"
 #include "uwot/optimize.h"
 #include "uwot/sampler.h"
 
+#include "rprogress.h"
 #include "rng.h"
 
 using namespace Rcpp;
-
-template <typename Worker>
-void optimize_layout(Worker &worker, unsigned int n_epochs,
-                     std::size_t n_threads = 0, std::size_t grain_size = 1,
-                     bool verbose = false) {
-  Progress progress(n_epochs, verbose);
-
-  for (auto n = 0U; n < n_epochs; n++) {
-    uwot::epoch(worker, n, n_epochs, n_threads, grain_size);
-
-    if (Progress::check_abort()) {
-      progress.cleanup();
-      break;
-    }
-    if (verbose) {
-      progress.increment();
-    }
-  }
-}
 
 // Template class specialization to handle different rng/batch combinations
 template <bool DoBatch = true> struct BatchRngFactory {
@@ -158,7 +136,8 @@ struct UmapFactory {
   template <typename Worker, typename Gradient>
   void create_impl(Worker &worker, const Gradient &gradient,
                    uwot::Sampler &sampler) {
-    optimize_layout(worker, n_epochs, n_threads, grain_size, verbose);
+    RProgress progress(n_epochs, verbose);
+    uwot::optimize_layout(worker, progress, n_epochs, n_threads, grain_size, verbose);
   }
 };
 
