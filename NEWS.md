@@ -10,7 +10,10 @@ than one of the input data parameters listed above, but are inconsistent, no
 guarantees are made about which names will be used. Thank you 
 [jwijffels](https://github.com/jwijffels) for reporting this.
 * In `umap_transform`, the learning rate is now down-scaled by a factor of 4,
-consistent with the Python implementation of UMAP.
+consistent with the Python implementation of UMAP. If you need the old behavior
+back, use the (newly added) `learning_rate` parameter in `umap_transform` to set
+it explicitly. If you used the default value in `umap` when creating the model,
+the correct setting in `umap_transform` is `learning_rate = 1.0`.
 * Setting `nn_method = "annoy"` and `verbose = TRUE` would lead to an error with 
 datasets with fewer than 50 items in them.
 * Using multiple pre-computed nearest neighbors blocks is now supported with

@@ -84,6 +84,9 @@
 #'   use. You may also have to increase \code{n_epochs}, so whether this
 #'   provides a speed increase over the single-threaded optimization is likely
 #'   to be dataset and hardware-dependent.
+#' @param learning_rate Initial learning rate used in optimization of the
+#'   coordinates. This overrides the value associated with the \code{model}.
+#'   This should be left unspecified under most circumstances.
 #' @return A matrix of coordinates for \code{X} transformed into the space
 #'   of the \code{model}.
 #' @examples
@@ -106,7 +109,8 @@ umap_transform <- function(X = NULL, model = NULL,
                            grain_size = 1,
                            verbose = FALSE,
                            init = "weighted",
-                           batch = FALSE) {
+                           batch = FALSE,
+                           learning_rate = NULL) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -160,7 +164,15 @@ umap_transform <- function(X = NULL, model = NULL,
   a <- model$a
   b <- model$b
   gamma <- model$gamma
-  alpha <- model$alpha
+  if (is.null(learning_rate)) {
+    alpha <- model$alpha
+  }
+  else {
+    alpha <- learning_rate
+  }
+  if (! is.numeric(alpha) || length(alpha) > 1 || alpha < 0) {
+    stop("learning rate should be a positive number, not ", alpha)
+  }
   negative_sample_rate <- model$negative_sample_rate
   approx_pow <- model$approx_pow
   norig_col <- model$norig_col

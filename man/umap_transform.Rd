@@ -17,7 +17,8 @@ umap_transform(
   grain_size = 1,
   verbose = FALSE,
   init = "weighted",
-  batch = FALSE
+  batch = FALSE,
+  learning_rate = NULL
 )
 }
 \arguments{
@@ -106,6 +107,10 @@ value of \code{n_sgd_threads}), at the cost of a slightly higher memory
 use. You may also have to increase \code{n_epochs}, so whether this
 provides a speed increase over the single-threaded optimization is likely
 to be dataset and hardware-dependent.}
+
+\item{learning_rate}{Initial learning rate used in optimization of the
+coordinates. This overrides the value associated with the \code{model}.
+This should be left unspecified under most circumstances.}
 }
 \value{
 A matrix of coordinates for \code{X} transformed into the space
