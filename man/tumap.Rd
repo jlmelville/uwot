@@ -37,7 +37,8 @@ tumap(
   ret_nn = FALSE,
   ret_extra = c(),
   tmpdir = tempdir(),
-  verbose = getOption("verbose", TRUE)
+  verbose = getOption("verbose", TRUE),
+  batch = FALSE
 )
 }
 \arguments{
@@ -378,6 +379,15 @@ only written to disk if \code{n_threads > 1} and
 \code{nn_method = "annoy"}; otherwise, this parameter is ignored.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
+
+\item{batch}{If \code{TRUE}, then embedding coordinates are updated at the
+end of each epoch rather than during the epoch. In batch mode, results are
+reproducible with a fixed random seed with multiple threads (for a given 
+value of \code{n_sgd_threads}), at the cost of a slightly higher memory
+use. You may also have to modify \code{learning_rate} and increase 
+\code{n_epochs}, so whether this provides a speed increase over the
+single-threaded optimization is likely to be dataset and
+hardware-dependent.}
 }
 \value{
 A matrix of optimized coordinates, or:

@@ -77,6 +77,13 @@
 #'     dimensions the same as \code{(nrow(X), ncol(model$embedding))}.
 #'   }
 #' This parameter should be used in preference to \code{init_weighted}.
+#' @param batch If \code{TRUE}, then embedding coordinates are updated at the
+#'   end of each epoch rather than during the epoch. In batch mode, results are
+#'   reproducible with a fixed random seed with multiple threads (for a given
+#'   value of \code{n_sgd_threads}), at the cost of a slightly higher memory
+#'   use. You may also have to increase \code{n_epochs}, so whether this
+#'   provides a speed increase over the single-threaded optimization is likely
+#'   to be dataset and hardware-dependent.
 #' @return A matrix of coordinates for \code{X} transformed into the space
 #'   of the \code{model}.
 #' @examples

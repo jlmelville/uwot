@@ -269,6 +269,14 @@
 #'   reduction, it's safer to leave \code{fast_sgd = FALSE}. If \code{fast_sgd =
 #'   TRUE}, then user-supplied values of \code{pcg_rand}, \code{n_sgd_threads},
 #'   and \code{approx_pow} are ignored.
+#' @param batch If \code{TRUE}, then embedding coordinates are updated at the
+#'   end of each epoch rather than during the epoch. In batch mode, results are
+#'   reproducible with a fixed random seed with multiple threads (for a given 
+#'   value of \code{n_sgd_threads}), at the cost of a slightly higher memory
+#'   use. You may also have to modify \code{learning_rate} and increase 
+#'   \code{n_epochs}, so whether this provides a speed increase over the
+#'   single-threaded optimization is likely to be dataset and
+#'   hardware-dependent.
 #' @param ret_model If \code{TRUE}, then return extra data that can be used to
 #'   add new data to an existing embedding via \code{\link{umap_transform}}. The
 #'   embedded coordinates are returned as the list item \code{embedding}. If
@@ -425,9 +433,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_threads = NULL,
                  n_sgd_threads = 0,
                  grain_size = 1,
-                 batch = FALSE,
                  tmpdir = tempdir(),
-                 verbose = getOption("verbose", TRUE)) {
+                 verbose = getOption("verbose", TRUE),
+                 batch = FALSE) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
@@ -758,6 +766,14 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   descent. If set to > 1, then results will not be reproducible, even if
 #'   `set.seed` is called with a fixed seed before running. Set to
 #'   \code{"auto"} go use the same value as \code{n_threads}.
+#' @param batch If \code{TRUE}, then embedding coordinates are updated at the
+#'   end of each epoch rather than during the epoch. In batch mode, results are
+#'   reproducible with a fixed random seed with multiple threads (for a given 
+#'   value of \code{n_sgd_threads}), at the cost of a slightly higher memory
+#'   use. You may also have to modify \code{learning_rate} and increase 
+#'   \code{n_epochs}, so whether this provides a speed increase over the
+#'   single-threaded optimization is likely to be dataset and
+#'   hardware-dependent.
 #' @param grain_size The minimum amount of work to do on each thread. If this
 #'   value is set high enough, then less than \code{n_threads} or
 #'   \code{n_sgd_threads} will be used for processing, which might give a
@@ -813,9 +829,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   pcg_rand = TRUE,
                   fast_sgd = FALSE,
                   ret_model = FALSE, ret_nn = FALSE, ret_extra = c(),
-                  batch = FALSE,
                   tmpdir = tempdir(),
-                  verbose = getOption("verbose", TRUE)) {
+                  verbose = getOption("verbose", TRUE),
+                  batch = FALSE) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -1084,6 +1100,14 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   results. For more generic dimensionality reduction, it's safer to leave
 #'   \code{fast_sgd = FALSE}. If \code{fast_sgd = TRUE}, then user-supplied
 #'   values of \code{pcg_rand} and \code{n_sgd_threads}, are ignored.
+#' @param batch If \code{TRUE}, then embedding coordinates are updated at the
+#'   end of each epoch rather than during the epoch. In batch mode, results are
+#'   reproducible with a fixed random seed with multiple threads (for a given 
+#'   value of \code{n_sgd_threads}), at the cost of a slightly higher memory
+#'   use. You may also have to modify \code{learning_rate} and increase 
+#'   \code{n_epochs}, so whether this provides a speed increase over the
+#'   single-threaded optimization is likely to be dataset and
+#'   hardware-dependent.
 #' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
 #'   nearest neighbor data that can be used as input to \code{nn_method} to
 #'   avoid the overhead of repeatedly calculating the nearest neighbors when
@@ -1161,9 +1185,9 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   pcg_rand = TRUE,
                   fast_sgd = FALSE,
                   ret_nn = FALSE, ret_extra = c(),
-                  batch = FALSE,
                   tmpdir = tempdir(),
-                  verbose = getOption("verbose", TRUE)) {
+                  verbose = getOption("verbose", TRUE),
+                  batch = FALSE) {
   uwot(X,
     n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
