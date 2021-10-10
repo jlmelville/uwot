@@ -137,8 +137,7 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
 
   void epoch_begin(std::size_t, std::size_t) {}
   template <typename Parallel>
-  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &,
-                 std::size_t, std::size_t) {
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &) {
     opt.epoch_end(epoch, n_epochs);
   }
 };
@@ -179,14 +178,13 @@ template <bool DoMoveVertex> struct BatchUpdate {
   }
 
   template <typename Parallel>
-  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel,
-                 std::size_t n_threads, std::size_t grain_size) {
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel) {
     auto worker = [&](std::size_t begin, std::size_t end, std::size_t) {
       for (std::size_t i = begin; i < end; i++) {
         head_embedding[i] += opt.alpha * head_gupd[i];
       }
     };
-    parallel.pfor(head_1d_length, worker, n_threads, grain_size);
+    parallel.pfor(head_1d_length, worker);
 
     opt.epoch_end(epoch, n_epochs);
   }
@@ -216,10 +214,9 @@ void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
 
 template <typename Worker, typename Progress, typename Parallel>
 void optimize_layout(Worker &worker, Progress &progress, unsigned int n_epochs,
-                     Parallel &parallel, std::size_t n_threads = 0,
-                     std::size_t grain_size = 1) {
+                     Parallel &parallel) {
   for (auto n = 0U; n < n_epochs; n++) {
-    epoch(worker, n, n_epochs, parallel, n_threads, grain_size);
+    epoch(worker, n, n_epochs, parallel);
 
     if (progress.is_aborted()) {
       break;
@@ -230,12 +227,12 @@ void optimize_layout(Worker &worker, Progress &progress, unsigned int n_epochs,
 
 template <typename Worker, typename Parallel>
 void epoch(Worker &worker, std::size_t n, std::size_t n_epochs,
-           Parallel &parallel, std::size_t n_threads, std::size_t grain_size) {
+           Parallel &parallel) {
   worker.epoch_begin(n, n_epochs);
 
-  parallel.pfor(worker.n_items, worker, n_threads, grain_size);
+  parallel.pfor(worker.n_items, worker);
 
-  worker.epoch_end(n, n_epochs, parallel, n_threads, grain_size);
+  worker.epoch_end(n, n_epochs, parallel);
 }
 
 template <typename Update, typename Gradient, typename Prng>
@@ -301,9 +298,8 @@ struct EdgeWorker {
   }
 
   template <typename Parallel>
-  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel,
-                 std::size_t n_threads, std::size_t grain_size) {
-    update.epoch_end(epoch, n_epochs, parallel, n_threads, grain_size);
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel) {
+    update.epoch_end(epoch, n_epochs, parallel);
   }
 
   void operator()(std::size_t begin, std::size_t end, std::size_t thread_id) {
@@ -352,9 +348,8 @@ struct NodeWorker {
   }
 
   template <typename Parallel>
-  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel,
-                 std::size_t n_threads, std::size_t grain_size) {
-    update.epoch_end(epoch, n_epochs, parallel, n_threads, grain_size);
+  void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel) {
+    update.epoch_end(epoch, n_epochs, parallel);
   }
 
   void operator()(std::size_t begin, std::size_t end, std::size_t thread_id) {
