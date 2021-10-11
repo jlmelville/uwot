@@ -58,14 +58,13 @@ void run_epoch(Worker &worker, std::size_t epoch, std::size_t n_epochs,
 // Update: type of update to the embedding coordinates
 template <typename Gradient, typename Update, typename RngFactory>
 struct EdgeWorker {
-  int epoch; // epoch counter
   const Gradient gradient;
   Update &update;
   const std::vector<unsigned int> &positive_head;
   const std::vector<unsigned int> &positive_tail;
   uwot::Sampler sampler;
   std::size_t ndim;
-  std::size_t tail_nvert;
+  std::size_t n_tail_vertices;
   std::size_t n_items;
   std::size_t n_threads;
   RngFactory rng_factory;
@@ -73,17 +72,15 @@ struct EdgeWorker {
   EdgeWorker(const Gradient &gradient, Update &update,
              const std::vector<unsigned int> &positive_head,
              const std::vector<unsigned int> &positive_tail,
-             uwot::Sampler &sampler, std::size_t ndim, std::size_t tail_nvert,
-             std::size_t n_threads)
-      : epoch(0), gradient(gradient), update(update),
-        positive_head(positive_head), positive_tail(positive_tail),
-        sampler(sampler), ndim(ndim), tail_nvert(tail_nvert),
-        n_items(positive_head.size()),
+             uwot::Sampler &sampler, std::size_t ndim,
+             std::size_t n_tail_vertices, std::size_t n_threads)
+      : gradient(gradient), update(update), positive_head(positive_head),
+        positive_tail(positive_tail), sampler(sampler), ndim(ndim),
+        n_tail_vertices(n_tail_vertices), n_items(positive_head.size()),
         n_threads(std::max(n_threads, std::size_t{1})),
         rng_factory(this->n_threads) {}
 
   void epoch_begin(std::size_t epoch, std::size_t n_epochs) {
-    this->epoch = epoch;
     rng_factory.reseed();
     sampler.epoch = epoch;
     update.epoch_begin(epoch, n_epochs);
@@ -103,14 +100,13 @@ struct EdgeWorker {
     std::vector<float> disp(ndim);
     for (auto edge = begin; edge < end; edge++) {
       process_edge(update, gradient, sampler, prng, positive_head,
-                   positive_tail, ndim, tail_nvert, edge, thread_id, disp);
+                   positive_tail, ndim, n_tail_vertices, edge, thread_id, disp);
     }
   }
 };
 
 template <typename Gradient, typename Update, typename RngFactory>
 struct NodeWorker {
-  int n; // epoch counter
   const Gradient gradient;
   Update &update;
   const std::vector<unsigned int> &positive_head;
@@ -118,7 +114,7 @@ struct NodeWorker {
   const std::vector<unsigned int> &positive_ptr;
   uwot::Sampler sampler;
   std::size_t ndim;
-  std::size_t tail_nvert;
+  std::size_t n_tail_vertices;
   std::size_t n_items;
   RngFactory rng_factory;
 
@@ -126,14 +122,14 @@ struct NodeWorker {
              const std::vector<unsigned int> &positive_head,
              const std::vector<unsigned int> &positive_tail,
              const std::vector<unsigned int> &positive_ptr,
-             uwot::Sampler &sampler, std::size_t ndim, std::size_t tail_nvert)
-      : n(0), gradient(gradient), update(update), positive_head(positive_head),
+             uwot::Sampler &sampler, std::size_t ndim,
+             std::size_t n_tail_vertices)
+      : gradient(gradient), update(update), positive_head(positive_head),
         positive_tail(positive_tail), positive_ptr(positive_ptr),
-        sampler(sampler), ndim(ndim), tail_nvert(tail_nvert),
+        sampler(sampler), ndim(ndim), n_tail_vertices(n_tail_vertices),
         n_items(positive_ptr.size() - 1), rng_factory(n_items) {}
 
   void epoch_begin(std::size_t epoch, std::size_t n_epochs) {
-    n = epoch;
     rng_factory.reseed();
     sampler.epoch = epoch;
     update.epoch_begin(epoch, n_epochs);
@@ -150,7 +146,8 @@ struct NodeWorker {
       auto prng = rng_factory.create(p);
       for (auto edge = positive_ptr[p]; edge < positive_ptr[p + 1]; edge++) {
         process_edge(update, gradient, sampler, prng, positive_head,
-                     positive_tail, ndim, tail_nvert, edge, thread_id, disp);
+                     positive_tail, ndim, n_tail_vertices, edge, thread_id,
+                     disp);
       }
     }
   }
