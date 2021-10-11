@@ -34,7 +34,7 @@
 namespace uwot {
 
 template <typename Update, typename Gradient, typename Prng>
-void process_edge(Update &update, Gradient &gradient, Sampler &sampler,
+inline void process_edge(Update &update, Gradient &gradient, Sampler &sampler,
                   Prng &prng, const std::vector<unsigned int> &positive_head,
                   const std::vector<unsigned int> &positive_tail,
                   std::size_t ndim, std::size_t n_tail_vertices,
@@ -62,7 +62,7 @@ void process_edge(Update &update, Gradient &gradient, Sampler &sampler,
 }
 
 template <typename Update, typename Gradient>
-void update_attract(Update &update, const Gradient &gradient, std::size_t dj,
+inline void update_attract(Update &update, const Gradient &gradient, std::size_t dj,
                     std::size_t dk, std::size_t ndim, std::vector<float> &disp,
                     std::size_t key) {
   float grad_coeff = grad_attr(gradient, update.head_embedding, dj,
@@ -73,7 +73,7 @@ void update_attract(Update &update, const Gradient &gradient, std::size_t dj,
 }
 
 template <typename Update, typename Gradient>
-void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
+inline void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
                   std::size_t dk, std::size_t ndim, std::vector<float> &disp,
                   std::size_t key) {
   float grad_coeff = grad_rep(gradient, update.head_embedding, dj,
@@ -87,12 +87,12 @@ void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
 // Default empty version does nothing: used in umap_transform when
 // some of the vertices should be held fixed
 template <bool DoMoveVertex = false>
-void update_vec(std::vector<float> &, float, std::size_t, std::size_t) {}
+inline void update_vec(std::vector<float> &, float, std::size_t, std::size_t) {}
 
 // Specialization to move vertex/update gradient: used in umap when both
 // vertices in an edge should be moved
 template <>
-void update_vec<true>(std::vector<float> &vec, float val, std::size_t i,
+inline void update_vec<true>(std::vector<float> &vec, float val, std::size_t i,
                       std::size_t j) {
   vec[i + j] += val;
 }
@@ -102,7 +102,7 @@ void update_vec<true>(std::vector<float> &vec, float val, std::size_t i,
 // now and not worry about updating it when it shows up in the edge list as tail
 // point j
 template <bool DoMoveTailVertex = true>
-void update_head_grad_vec(std::vector<float> &vec, std::size_t i, float val) {
+inline void update_head_grad_vec(std::vector<float> &vec, std::size_t i, float val) {
   vec[i] += 2.0 * val;
 }
 
@@ -110,7 +110,7 @@ void update_head_grad_vec(std::vector<float> &vec, std::size_t i, float val) {
 // symmetric and the tail embedding should be held fixed, so the head node only
 // get one lot of gradient updating
 template <>
-void update_head_grad_vec<false>(std::vector<float> &vec, std::size_t i,
+inline void update_head_grad_vec<false>(std::vector<float> &vec, std::size_t i,
                                  float val) {
   vec[i] += val;
 }
@@ -126,7 +126,7 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
                 std::vector<float> &tail_embedding, float alpha)
       : head_embedding(head_embedding), tail_embedding(tail_embedding),
         opt(alpha) {}
-  void attract(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
+  inline void attract(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
                std::size_t) {
     float update_d = opt.alpha * grad_d;
     head_embedding[dj + d] += update_d;
@@ -134,7 +134,7 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
     // e.g. if adding new points to an existing embedding
     update_vec<DoMoveVertex>(tail_embedding, -update_d, d, dk);
   }
-  void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
+  inline void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
              std::size_t) {
     head_embedding[dj + d] += opt.alpha * grad_d;
     // Python implementation doesn't move the negative sample but as Damrich
@@ -173,11 +173,12 @@ template <bool DoMoveVertex> struct BatchUpdate {
         n_head_vertices(head_embedding.size()), opt(alpha),
         head_gupd(n_head_vertices) {}
 
-  void attract(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
+  inline void attract(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
                std::size_t) {
     update_head_grad_vec<DoMoveVertex>(head_gupd, dj + d, grad_d);
   }
-  void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
+  
+  inline void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
              std::size_t key) {
     head_gupd[dj + d] += grad_d;
   }

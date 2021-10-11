@@ -66,7 +66,7 @@ struct pcg_prng {
   pcg_prng(uint64_t seed) { gen.seed(seed); }
 
   // return a value in (0, n]
-  std::size_t operator()(std::size_t n) {
+  inline std::size_t operator()(std::size_t n) {
     std::size_t result = gen(n);
     return result;
   }
