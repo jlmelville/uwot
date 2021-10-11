@@ -35,7 +35,7 @@ template <typename Worker, typename Progress, typename Parallel>
 void optimize_layout(Worker &worker, Progress &progress, unsigned int n_epochs,
                      Parallel &parallel) {
   for (auto n = 0U; n < n_epochs; n++) {
-    epoch(worker, n, n_epochs, parallel);
+    run_epoch(worker, n, n_epochs, parallel);
 
     if (progress.is_aborted()) {
       break;
@@ -45,20 +45,20 @@ void optimize_layout(Worker &worker, Progress &progress, unsigned int n_epochs,
 }
 
 template <typename Worker, typename Parallel>
-void epoch(Worker &worker, std::size_t n, std::size_t n_epochs,
-           Parallel &parallel) {
-  worker.epoch_begin(n, n_epochs);
+void run_epoch(Worker &worker, std::size_t epoch, std::size_t n_epochs,
+               Parallel &parallel) {
+  worker.epoch_begin(epoch, n_epochs);
 
   parallel.pfor(worker.n_items, worker);
 
-  worker.epoch_end(n, n_epochs, parallel);
+  worker.epoch_end(epoch, n_epochs, parallel);
 }
 
 // Gradient: the type of gradient used in the optimization
 // Update: type of update to the embedding coordinates
 template <typename Gradient, typename Update, typename RngFactory>
 struct EdgeWorker {
-  int n; // epoch counter
+  int epoch; // epoch counter
   const Gradient gradient;
   Update &update;
   const std::vector<unsigned int> &positive_head;
@@ -75,16 +75,17 @@ struct EdgeWorker {
              const std::vector<unsigned int> &positive_tail,
              uwot::Sampler &sampler, std::size_t ndim, std::size_t tail_nvert,
              std::size_t n_threads)
-      : n(0), gradient(gradient), update(update), positive_head(positive_head),
-        positive_tail(positive_tail), sampler(sampler), ndim(ndim),
-        tail_nvert(tail_nvert), n_items(positive_head.size()),
+      : epoch(0), gradient(gradient), update(update),
+        positive_head(positive_head), positive_tail(positive_tail),
+        sampler(sampler), ndim(ndim), tail_nvert(tail_nvert),
+        n_items(positive_head.size()),
         n_threads(std::max(n_threads, std::size_t{1})),
         rng_factory(this->n_threads) {}
 
   void epoch_begin(std::size_t epoch, std::size_t n_epochs) {
-    n = epoch;
+    this->epoch = epoch;
     rng_factory.reseed();
-
+    sampler.epoch = epoch;
     update.epoch_begin(epoch, n_epochs);
   }
 
@@ -100,9 +101,9 @@ struct EdgeWorker {
     // displacement between two points, cost of reallocating inside the loop
     // is noticeable, also cheaper to calculate it once in the d2 calc
     std::vector<float> disp(ndim);
-    for (auto i = begin; i < end; i++) {
+    for (auto edge = begin; edge < end; edge++) {
       process_edge(update, gradient, sampler, prng, positive_head,
-                   positive_tail, ndim, tail_nvert, n, i, thread_id, disp);
+                   positive_tail, ndim, tail_nvert, edge, thread_id, disp);
     }
   }
 };
@@ -134,7 +135,7 @@ struct NodeWorker {
   void epoch_begin(std::size_t epoch, std::size_t n_epochs) {
     n = epoch;
     rng_factory.reseed();
-
+    sampler.epoch = epoch;
     update.epoch_begin(epoch, n_epochs);
   }
 
@@ -147,9 +148,9 @@ struct NodeWorker {
     std::vector<float> disp(ndim);
     for (auto p = begin; p < end; p++) {
       auto prng = rng_factory.create(p);
-      for (auto i = positive_ptr[p]; i < positive_ptr[p + 1]; i++) {
+      for (auto edge = positive_ptr[p]; edge < positive_ptr[p + 1]; edge++) {
         process_edge(update, gradient, sampler, prng, positive_head,
-                     positive_tail, ndim, tail_nvert, n, i, thread_id, disp);
+                     positive_tail, ndim, tail_nvert, edge, thread_id, disp);
       }
     }
   }

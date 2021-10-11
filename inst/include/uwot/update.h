@@ -37,10 +37,9 @@ template <typename Update, typename Gradient, typename Prng>
 void process_edge(Update &update, Gradient &gradient, Sampler &sampler,
                   Prng &prng, const std::vector<unsigned int> &positive_head,
                   const std::vector<unsigned int> &positive_tail,
-                  std::size_t ndim, std::size_t tail_nvert, std::size_t epoch,
-                  std::size_t edge, std::size_t thread_id,
-                  std::vector<float> &disp) {
-  if (!sampler.is_sample_edge(edge, epoch)) {
+                  std::size_t ndim, std::size_t tail_nvert, std::size_t edge,
+                  std::size_t thread_id, std::vector<float> &disp) {
+  if (!sampler.is_sample_edge(edge)) {
     return;
   }
   const std::size_t dj = ndim * positive_head[edge];
@@ -49,7 +48,7 @@ void process_edge(Update &update, Gradient &gradient, Sampler &sampler,
   update_attract(update, gradient, dj, dk, ndim, disp, thread_id);
 
   // Negative sampling step: assume any other point (dkn) is a -ve example
-  std::size_t n_neg_samples = sampler.get_num_neg_samples(edge, epoch);
+  std::size_t n_neg_samples = sampler.get_num_neg_samples(edge);
   for (std::size_t p = 0; p < n_neg_samples; p++) {
     const std::size_t dkn = prng(tail_nvert) * ndim;
     if (dj == dkn) {
