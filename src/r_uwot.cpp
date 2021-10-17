@@ -150,10 +150,14 @@ struct UmapFactory {
   }
 
   auto create_param_update(List opt_args, const std::string &prefix,
-                           const std::string &default_update)
-      -> uwot::ParamUpdate * {
+                           const std::string &default_update,
+                           float initial_value) -> uwot::ParamUpdate * {
     std::string update = lget(opt_args, prefix + "_update", default_update);
-    Rcerr << " " << prefix << " " << update;
+    if (update == "demon" && initial_value >= 1.0) {
+      stop("Demon update requires initial value to be between 0-1");
+    }
+
+    Rcerr << " (" << update << ")";
 
     uwot::ParamUpdate *param_update = create_param_update(update);
 
@@ -168,38 +172,42 @@ struct UmapFactory {
     return param_update;
   }
 
+  auto create_param(List args, const std::string &param_name,
+                    float initial_default, const std::string &update_default)
+      -> uwot::Param {
+    float initial_value = lget(opt_args, param_name, initial_default);
+    Rcerr << " " << param_name << " = " << initial_value;
+    uwot::ParamUpdate *update = create_param_update(
+        opt_args, param_name, update_default, initial_value);
+
+    return uwot::Param(initial_value, update);
+  }
+
   auto create_adam(List opt_args) -> uwot::Adam {
-    float alpha = lget(opt_args, "alpha", 1.0);
-    float beta1 = lget(opt_args, "beta1", 0.9);
-    float beta2 = lget(opt_args, "beta2", 0.999);
+    Rcerr << "Optimizing with Adam";
+    uwot::Param alpha_param =
+        create_param(opt_args, "alpha", 1.0, "linear_decay");
+    uwot::Param beta1_param = create_param(opt_args, "beta1", 0.9, "constant");
+    uwot::Param beta2_param =
+        create_param(opt_args, "beta2", 0.999, "constant");
+
     float eps = lget(opt_args, "eps", 1e-8);
-
-    Rcerr << "Optimizing with Adam alpha = " << alpha << " beta1 = " << beta1
-          << " beta2 = " << beta2 << " eps = " << eps;
-
-    uwot::ParamUpdate *alpha_update =
-        create_param_update(opt_args, "alpha", "linear_decay");
-    uwot::ParamUpdate *beta_update =
-        create_param_update(opt_args, "beta1", "constant");
+    Rcerr << " eps = " << eps;
     Rcerr << std::endl;
 
-    return uwot::Adam(alpha, beta1, beta2, eps, head_embedding.size(),
-                      alpha_update, beta_update);
+    return uwot::Adam(alpha_param, beta1_param, beta2_param, eps,
+                      head_embedding.size());
   }
 
   auto create_msgd(List opt_args) -> uwot::MomentumSgd {
-    float alpha = lget(opt_args, "alpha", 1.0);
-    float beta = lget(opt_args, "beta", 0.0);
-    Rcerr << "Optimizing with momentum sgd alpha = " << alpha
-          << " beta = " << beta;
-    uwot::ParamUpdate *alpha_update =
-        create_param_update(opt_args, "alpha", "linear_decay");
-    uwot::ParamUpdate *beta_update =
-        create_param_update(opt_args, "beta", "constant");
+    Rcerr << "Optimizing with Momentum SGD";
+    uwot::Param alpha_param =
+        create_param(opt_args, "alpha", 1.0, "linear_decay");
+    uwot::Param beta_param = create_param(opt_args, "beta", 0, "constant");
+
     Rcerr << std::endl;
 
-    return uwot::MomentumSgd(alpha, beta, head_embedding.size(), alpha_update,
-                             beta_update);
+    return uwot::MomentumSgd(alpha_param, beta_param, head_embedding.size());
   }
 
   template <typename RandFactory, bool DoMove, typename Gradient>

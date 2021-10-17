@@ -83,9 +83,9 @@ struct ParamLinearDecay : ParamUpdate {
 
 struct ParamDemon : ParamUpdate {
   virtual float update(float val, std::size_t epoch, std::size_t n_epochs) {
-    const float tau =
-        (1.0 - (static_cast<float>(epoch)) / static_cast<float>(n_epochs));
-    return val * (1.0 - tau) / (1.0 - val * tau);
+    const float btau1 = val * (1.0 - (static_cast<float>(epoch)) /
+                                         static_cast<float>(n_epochs));
+    return btau1 / (1.0 - val + btau1);
   }
 };
 
@@ -105,48 +105,60 @@ struct ParamSlowStart : ParamUpdate {
   }
 };
 
-struct MomentumSgd {
-  float initial_alpha;
-  float alpha;
-  float initial_mu;
-  float mu;
-  float mu1;
+struct Param {
+  float initial_value;
+  float value;
+  std::unique_ptr<ParamUpdate> param_update;
 
-  std::unique_ptr<uwot::ParamUpdate> alpha_param;
-  std::unique_ptr<uwot::ParamUpdate> mu_param;
+  Param(float initial_value, ParamUpdate *param_update)
+      : initial_value(initial_value), value(initial_value),
+        param_update(std::move(param_update)) {}
+  Param(Param &&other)
+      : initial_value(other.initial_value), value(other.value),
+        param_update(std::move(other.param_update)) {}
+
+  void update(std::size_t epoch, std::size_t n_epochs) {
+    value = param_update->update(initial_value, epoch, n_epochs);
+  }
+};
+
+struct MomentumSgd {
+  uwot::Param alpha_param;
+  uwot::Param mu_param;
+
+  float mu1;
 
   std::vector<float> up_old;
 
-  MomentumSgd(float alpha, float mu, std::size_t vec_len,
-              uwot::ParamUpdate *alpha_update, uwot::ParamUpdate *mu_update)
-      : initial_alpha(alpha), alpha(alpha), initial_mu(mu), mu(mu),
-        mu1(1.0 - mu), alpha_param(std::move(alpha_update)),
-        mu_param(std::move(mu_update)), up_old(vec_len) {}
+  MomentumSgd(uwot::Param &alpha_param, uwot::Param &mu_param,
+              std::size_t vec_len)
+      : alpha_param(std::move(alpha_param)), mu_param(std::move(mu_param)),
+        mu1(1.0 - this->mu_param.value), up_old(vec_len) {}
 
   void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
-    float up = mu1 * grad[i] + mu * up_old[i];
-    v[i] += alpha * up;
+    float up = mu1 * grad[i] + mu_param.value * up_old[i];
+    v[i] += alpha_param.value * up;
     up_old[i] = up;
   }
 
   void epoch_end(std::size_t epoch, std::size_t n_epochs) {
-    alpha = alpha_param->update(initial_alpha, epoch, n_epochs);
-    mu = mu_param->update(initial_mu, epoch, n_epochs);
-    mu1 = 1.0 - mu;
+    alpha_param.update(epoch, n_epochs);
+    mu_param.update(epoch, n_epochs);
+    mu1 = 1.0 - mu_param.value;
+    // std::cout << epoch << ": alpha = " << alpha_param.value
+    //           << " beta = " << mu_param.value << std::endl;
   }
 };
 
 struct Adam {
-  float initial_alpha;
-  float alpha;
+  uwot::Param alpha_param;
+  uwot::Param beta1_param;
+  uwot::Param beta2_param;
 
-  float initial_beta1;
-  float beta1;
   float beta11;
   float beta1t;
   float beta1t1;
 
-  float beta2;
   float beta21;
   float beta2t;
   float beta2t1;
@@ -156,38 +168,41 @@ struct Adam {
   std::vector<float> mt;
   std::vector<float> vt;
 
-  std::unique_ptr<uwot::ParamUpdate> alpha_param;
-  std::unique_ptr<uwot::ParamUpdate> beta1_param;
-
-  Adam(float alpha, float beta1, float beta2, float eps, std::size_t vec_size,
-       uwot::ParamUpdate *alpha_update, uwot::ParamUpdate *beta_update)
-      : initial_alpha(alpha), alpha(alpha), initial_beta1(beta1), beta1(beta1),
-        beta11(1.0 - beta1), beta1t(beta1), beta1t1(1.0 - beta1t), beta2(beta2),
-        beta21(1.0 - beta2), beta2t(beta2), beta2t1(1.0 - beta2t), eps(eps),
-        mt(vec_size), vt(vec_size), alpha_param(std::move(alpha_update)),
-        beta1_param(std::move(beta_update)) {}
+  Adam(uwot::Param &alpha_param, uwot::Param &beta1_param,
+       uwot::Param &beta2_param, float eps, std::size_t vec_size)
+      : alpha_param(std::move(alpha_param)),
+        beta1_param(std::move(beta1_param)),
+        beta2_param(std::move(beta2_param)),
+        beta11(1.0 - this->beta1_param.value), beta1t(this->beta1_param.value),
+        beta1t1(1.0 - beta1t), beta21(1.0 - this->beta2_param.value),
+        beta2t(this->beta2_param.value), beta2t1(1.0 - beta2t), eps(eps),
+        mt(vec_size), vt(vec_size) {}
 
   void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
-    float mb = beta1 * mt[i] + beta11 * grad[i];
-    float vb = beta2 * vt[i] + beta21 * grad[i] * grad[i];
+    float mb = beta1_param.value * mt[i] + beta11 * grad[i];
+    float vb = beta2_param.value * vt[i] + beta21 * grad[i] * grad[i];
 
     float mc = mb / beta1t1;
     float vc = vb / beta2t1;
 
     float up = mc / (sqrt(vc) + eps);
-    v[i] += alpha * up;
+    v[i] += alpha_param.value * up;
     mt[i] = mb;
     vt[i] = vb;
   }
 
   void epoch_end(std::size_t epoch, std::size_t n_epochs) {
-    alpha = alpha_param->update(initial_alpha, epoch, n_epochs);
-    beta1 = beta1_param->update(initial_beta1, epoch, n_epochs);
+    alpha_param.update(epoch, n_epochs);
+    beta1_param.update(epoch, n_epochs);
 
-    beta1t *= beta1;
+    beta1t *= beta1_param.value;
     beta1t1 = 1.0 - beta1t;
-    beta2t *= beta2;
+    beta2t *= beta2_param.value;
     beta2t1 = 1.0 - beta2t;
+
+    // std::cout << epoch << ": alpha = " << alpha_param.value
+    //           << " beta1 = " << beta1_param.value
+    //           << " beta2 = " << beta2_param.value << std::endl;
   }
 };
 
