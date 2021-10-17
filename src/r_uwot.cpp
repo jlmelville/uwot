@@ -93,36 +93,30 @@ struct UmapFactory {
         verbose(verbose) {}
 
   template <typename Gradient> void create(const Gradient &gradient) {
-    uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
-
     if (move_other) {
-      create_impl<true>(gradient, sampler, pcg_rand, batch);
+      create_impl<true>(gradient, pcg_rand, batch);
     } else {
-      create_impl<false>(gradient, sampler, pcg_rand, batch);
+      create_impl<false>(gradient, pcg_rand, batch);
     }
   }
 
   template <bool DoMove, typename Gradient>
-  void create_impl(const Gradient &gradient, uwot::Sampler &sampler,
-                   bool pcg_rand, bool batch) {
+  void create_impl(const Gradient &gradient, bool pcg_rand, bool batch) {
     if (batch) {
-      create_impl<BatchRngFactory<true>, DoMove>(gradient, sampler, pcg_rand,
-                                                 batch);
+      create_impl<BatchRngFactory<true>, DoMove>(gradient, pcg_rand, batch);
     } else {
-      create_impl<BatchRngFactory<false>, DoMove>(gradient, sampler, pcg_rand,
-                                                  batch);
+      create_impl<BatchRngFactory<false>, DoMove>(gradient, pcg_rand, batch);
     }
   }
 
   template <typename BatchRngFactory, bool DoMove, typename Gradient>
-  void create_impl(const Gradient &gradient, uwot::Sampler &sampler,
-                   bool pcg_rand, bool batch) {
+  void create_impl(const Gradient &gradient, bool pcg_rand, bool batch) {
     if (pcg_rand) {
-      create_impl<typename BatchRngFactory::PcgFactoryType, DoMove>(
-          gradient, sampler, batch);
+      create_impl<typename BatchRngFactory::PcgFactoryType, DoMove>(gradient,
+                                                                    batch);
     } else {
-      create_impl<typename BatchRngFactory::TauFactoryType, DoMove>(
-          gradient, sampler, batch);
+      create_impl<typename BatchRngFactory::TauFactoryType, DoMove>(gradient,
+                                                                    batch);
     }
   }
 
@@ -145,7 +139,9 @@ struct UmapFactory {
                                float slow_start_frac) -> uwot::ParamUpdate * {
     std::size_t start_epochs =
         std::ceil(slow_start_frac * static_cast<float>(n_epochs));
-    Rcerr << " slow start for " << start_epochs << " epochs";
+    if (verbose) {
+      Rcerr << " slow start for " << start_epochs << " epochs";
+    }
     return new uwot::ParamSlowStart(start_epochs, param_update);
   }
 
@@ -157,7 +153,9 @@ struct UmapFactory {
       stop("Demon update requires initial value to be between 0-1");
     }
 
-    Rcerr << " (" << update << ")";
+    if (verbose) {
+      Rcerr << " (" << update << ")";
+    }
 
     uwot::ParamUpdate *param_update = create_param_update(update);
 
@@ -176,7 +174,10 @@ struct UmapFactory {
                     float initial_default, const std::string &update_default)
       -> uwot::Param {
     float initial_value = lget(opt_args, param_name, initial_default);
-    Rcerr << " " << param_name << " = " << initial_value;
+
+    if (verbose) {
+      Rcerr << " " << param_name << " = " << initial_value;
+    }
     uwot::ParamUpdate *update = create_param_update(
         opt_args, param_name, update_default, initial_value);
 
@@ -184,7 +185,9 @@ struct UmapFactory {
   }
 
   auto create_adam(List opt_args) -> uwot::Adam {
-    Rcerr << "Optimizing with Adam";
+    if (verbose) {
+      Rcerr << "Optimizing with Adam";
+    }
     uwot::Param alpha_param =
         create_param(opt_args, "alpha", 1.0, "linear_decay");
     uwot::Param beta1_param = create_param(opt_args, "beta1", 0.9, "constant");
@@ -192,28 +195,33 @@ struct UmapFactory {
         create_param(opt_args, "beta2", 0.999, "constant");
 
     float eps = lget(opt_args, "eps", 1e-8);
-    Rcerr << " eps = " << eps;
-    Rcerr << std::endl;
+    if (verbose) {
+      Rcerr << " eps = " << eps;
+      Rcerr << std::endl;
+    }
 
     return uwot::Adam(alpha_param, beta1_param, beta2_param, eps,
                       head_embedding.size());
   }
 
   auto create_msgd(List opt_args) -> uwot::MomentumSgd {
-    Rcerr << "Optimizing with Momentum SGD";
+    if (verbose) {
+      Rcerr << "Optimizing with Momentum SGD";
+    }
     uwot::Param alpha_param =
         create_param(opt_args, "alpha", 1.0, "linear_decay");
     uwot::Param beta_param = create_param(opt_args, "beta", 0, "constant");
 
-    Rcerr << std::endl;
-
+    if (verbose) {
+      Rcerr << std::endl;
+    }
     return uwot::MomentumSgd(alpha_param, beta_param, head_embedding.size());
   }
 
   template <typename RandFactory, bool DoMove, typename Gradient>
-  void create_impl(const Gradient &gradient, uwot::Sampler &sampler,
-                   bool batch) {
+  void create_impl(const Gradient &gradient, bool batch) {
     const std::size_t ndim = head_embedding.size() / n_head_vertices;
+    uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
 
     if (batch) {
       std::string opt_name = opt_args[0];
@@ -234,7 +242,7 @@ struct UmapFactory {
       uwot::EdgeWorker<Gradient, decltype(update), RandFactory> worker(
           gradient, update, positive_head, positive_tail, sampler, ndim,
           n_tail_vertices, n_threads);
-      create_impl(worker, gradient, sampler);
+      create_impl(worker, gradient);
     }
   }
 
@@ -247,27 +255,25 @@ struct UmapFactory {
     uwot::NodeWorker<Gradient, decltype(update), RandFactory> worker(
         gradient, update, positive_head, positive_tail, positive_ptr, sampler,
         ndim, n_tail_vertices);
-    create_impl(worker, gradient, sampler);
+    create_impl(worker, gradient);
   }
 
   template <typename Worker, typename Gradient>
-  void create_impl(Worker &worker, const Gradient &gradient,
-                   uwot::Sampler &sampler) {
+  void create_impl(Worker &worker, const Gradient &gradient) {
 
     RProgress progress(n_epochs, verbose);
     if (n_threads > 0) {
       RParallel parallel(n_threads, grain_size);
-      create_impl(worker, gradient, sampler, progress, parallel);
+      create_impl(worker, gradient, progress, parallel);
     } else {
       RSerial serial;
-      create_impl(worker, gradient, sampler, progress, serial);
+      create_impl(worker, gradient, progress, serial);
     }
   }
 
   template <typename Worker, typename Gradient, typename Progress,
             typename Parallel>
-  void create_impl(Worker &worker, const Gradient &gradient,
-                   uwot::Sampler &sampler, Progress &progress,
+  void create_impl(Worker &worker, const Gradient &gradient, Progress &progress,
                    Parallel &parallel) {
     uwot::optimize_layout(worker, progress, n_epochs, parallel);
   }
