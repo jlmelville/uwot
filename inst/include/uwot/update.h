@@ -34,12 +34,12 @@
 namespace uwot {
 
 template <typename Update, typename Gradient, typename Prng>
-inline void process_edge(Update &update, Gradient &gradient, Sampler &sampler,
-                  Prng &prng, const std::vector<unsigned int> &positive_head,
-                  const std::vector<unsigned int> &positive_tail,
-                  std::size_t ndim, std::size_t n_tail_vertices,
-                  std::size_t edge, std::size_t thread_id,
-                  std::vector<float> &disp) {
+inline void
+process_edge(Update &update, Gradient &gradient, Sampler &sampler, Prng &prng,
+             const std::vector<unsigned int> &positive_head,
+             const std::vector<unsigned int> &positive_tail, std::size_t ndim,
+             std::size_t n_tail_vertices, std::size_t edge,
+             std::size_t thread_id, std::vector<float> &disp) {
   if (!sampler.is_sample_edge(edge)) {
     return;
   }
@@ -62,9 +62,9 @@ inline void process_edge(Update &update, Gradient &gradient, Sampler &sampler,
 }
 
 template <typename Update, typename Gradient>
-inline void update_attract(Update &update, const Gradient &gradient, std::size_t dj,
-                    std::size_t dk, std::size_t ndim, std::vector<float> &disp,
-                    std::size_t key) {
+inline void update_attract(Update &update, const Gradient &gradient,
+                           std::size_t dj, std::size_t dk, std::size_t ndim,
+                           std::vector<float> &disp, std::size_t key) {
   float grad_coeff = grad_attr(gradient, update.head_embedding, dj,
                                update.tail_embedding, dk, ndim, disp);
   for (std::size_t d = 0; d < ndim; d++) {
@@ -73,9 +73,9 @@ inline void update_attract(Update &update, const Gradient &gradient, std::size_t
 }
 
 template <typename Update, typename Gradient>
-inline void update_repel(Update &update, const Gradient &gradient, std::size_t dj,
-                  std::size_t dk, std::size_t ndim, std::vector<float> &disp,
-                  std::size_t key) {
+inline void update_repel(Update &update, const Gradient &gradient,
+                         std::size_t dj, std::size_t dk, std::size_t ndim,
+                         std::vector<float> &disp, std::size_t key) {
   float grad_coeff = grad_rep(gradient, update.head_embedding, dj,
                               update.tail_embedding, dk, ndim, disp);
   for (std::size_t d = 0; d < ndim; d++) {
@@ -93,7 +93,7 @@ inline void update_vec(std::vector<float> &, float, std::size_t, std::size_t) {}
 // vertices in an edge should be moved
 template <>
 inline void update_vec<true>(std::vector<float> &vec, float val, std::size_t i,
-                      std::size_t j) {
+                             std::size_t j) {
   vec[i + j] += val;
 }
 
@@ -102,7 +102,8 @@ inline void update_vec<true>(std::vector<float> &vec, float val, std::size_t i,
 // now and not worry about updating it when it shows up in the edge list as tail
 // point j
 template <bool DoMoveTailVertex = true>
-inline void update_head_grad_vec(std::vector<float> &vec, std::size_t i, float val) {
+inline void update_head_grad_vec(std::vector<float> &vec, std::size_t i,
+                                 float val) {
   vec[i] += 2.0 * val;
 }
 
@@ -111,7 +112,7 @@ inline void update_head_grad_vec(std::vector<float> &vec, std::size_t i, float v
 // get one lot of gradient updating
 template <>
 inline void update_head_grad_vec<false>(std::vector<float> &vec, std::size_t i,
-                                 float val) {
+                                        float val) {
   vec[i] += val;
 }
 
@@ -126,8 +127,8 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
                 std::vector<float> &tail_embedding, float alpha)
       : head_embedding(head_embedding), tail_embedding(tail_embedding),
         opt(alpha) {}
-  inline void attract(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
-               std::size_t) {
+  inline void attract(std::size_t dj, std::size_t dk, std::size_t d,
+                      float grad_d, std::size_t) {
     float update_d = opt.alpha * grad_d;
     head_embedding[dj + d] += update_d;
     // we don't only always want points in the tail to move
@@ -135,7 +136,7 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
     update_vec<DoMoveVertex>(tail_embedding, -update_d, d, dk);
   }
   inline void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
-             std::size_t) {
+                    std::size_t) {
     head_embedding[dj + d] += opt.alpha * grad_d;
     // Python implementation doesn't move the negative sample but as Damrich
     // and Hamprecht (2021) note, it ought to. However they also note it has
@@ -160,38 +161,39 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
 // different data. The tail coordinates are fixed in this case, so again they
 // do not move. Hence both so in both cases we only ever need to update the head
 // coordinates.
-template <bool DoMoveVertex> struct BatchUpdate {
+template <bool DoMoveVertex, typename Opt> struct BatchUpdate {
   std::vector<float> &head_embedding;
   std::vector<float> &tail_embedding;
   std::size_t n_head_vertices;
-  Sgd opt;
-  std::vector<float> head_gupd;
+  Opt &opt;
+  std::vector<float> gradient;
 
   BatchUpdate(std::vector<float> &head_embedding,
-              std::vector<float> &tail_embedding, float alpha)
+              std::vector<float> &tail_embedding, Opt &opt)
       : head_embedding(head_embedding), tail_embedding(tail_embedding),
-        n_head_vertices(head_embedding.size()), opt(alpha),
-        head_gupd(n_head_vertices) {}
+        n_head_vertices(head_embedding.size()), opt(opt),
+        gradient(n_head_vertices) {}
 
-  inline void attract(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
-               std::size_t) {
-    update_head_grad_vec<DoMoveVertex>(head_gupd, dj + d, grad_d);
+  inline void attract(std::size_t dj, std::size_t dk, std::size_t d,
+                      float grad_d, std::size_t) {
+    update_head_grad_vec<DoMoveVertex>(gradient, dj + d, grad_d);
   }
-  
+
   inline void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
-             std::size_t key) {
-    head_gupd[dj + d] += grad_d;
+                    std::size_t key) {
+    gradient[dj + d] += grad_d;
   }
 
   void epoch_begin(std::size_t, std::size_t) {
-    std::fill(head_gupd.begin(), head_gupd.end(), 0.0);
+    std::fill(gradient.begin(), gradient.end(), 0.0);
   }
 
   template <typename Parallel>
   void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel) {
     auto worker = [&](std::size_t begin, std::size_t end, std::size_t) {
       for (std::size_t i = begin; i < end; i++) {
-        head_embedding[i] += opt.alpha * head_gupd[i];
+        // head_embedding[i] += opt.alpha * gradient[i];
+        opt.update(head_embedding, gradient, i);
       }
     };
     parallel.pfor(n_head_vertices, worker);
