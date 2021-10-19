@@ -206,6 +206,140 @@ struct Adam {
   }
 };
 
+// Quasi-Hyperbolic Momentum (Ma & Yarats 2019)
+// nu = 0: SGD
+// nu = beta: NAG
+// nu = 1: CM
+// m_t = beta * m_t-1 + (1 - beta) * s_t-1 (CM)
+// q_t = nu * m_t + (1 - nu) * s_t-1
+// q_t = nu * beta * m_t-1 + (1 - nu * beta) * s_t-1 (expanded version)
+struct Qhm {
+  uwot::Param alpha_param;
+  uwot::Param beta_param;
+  uwot::Param nu_param;
+
+  float beta1;
+  float nu1;
+
+  float bt; // beta products
+  float nbt1; // (1 - nu * bt...b3b2b1)
+
+  std::vector<float> mt;
+
+  Qhm(uwot::Param &alpha_param, uwot::Param &beta_param, uwot::Param &nu_param,
+      std::size_t vec_size)
+      : alpha_param(std::move(alpha_param)), beta_param(std::move(beta_param)),
+        nu_param(std::move(nu_param)), beta1(1.0 - this->beta_param.value),
+        nu1(1.0 - this->nu_param.value),
+        bt(this->beta_param.value),
+        nbt1(1.0 - (this->nu_param.value * this->bt)), mt(vec_size) {}
+
+  void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
+    // float mold = mt[0];
+    mt[i] = beta_param.value * mt[i] + beta1 * grad[i];
+    float qb = nu_param.value * mt[i] + nu1 * grad[i];
+
+    float up = qb / nbt1;
+    v[i] += alpha_param.value * up;
+
+    // if (i == 0) {
+    //   std::cout << mold << " " << mt[0] << " " << qb << " " << up << " " << v[0] << std::endl;
+    // }
+  }
+
+  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
+    // float nu_old = nu_param.value;
+    
+    alpha_param.update(epoch, n_epochs);
+    beta_param.update(epoch, n_epochs);
+    nu_param.update(epoch, n_epochs);
+
+    beta1 = 1.0 - beta_param.value;
+    nu1 = 1.0 - nu_param.value;
+
+    bt *= beta_param.value;
+    nbt1 = 1.0 - nu_param.value * bt;
+
+    // std::cout << epoch << ": alpha = " << alpha_param.value
+    //           << " beta = " << beta_param.value
+    //           << " nu = " << nu_param.value << std::endl;
+  }
+};
+
+// Quasi-Quasi-Hyperbolic Momentum
+// like QHM but nu is scaled differently so its meaning is independent of beta
+// nu = 1: CM
+// nu = 2: NAG
+// nu -> Inf: SGD (but just set nu=1, beta=0)
+// nu < 1: places lower weight on most recent gradient
+// nu is the number of averaging steps: e.g. once for CM, twice for NAG etc.
+// qq_t = beta ^ nu m_t-1 + (1 - beta ^ nu) * s_t-1
+// (easier to write in terms of the expanded CM step than the two-step QHM form)
+struct Qqhm {
+  uwot::Param alpha_param;
+  uwot::Param beta_param;
+  uwot::Param nu_param;
+
+  // momentum weighting
+  float beta1; // 1 - beta
+
+  // iterative averaging
+  float bn;  // beta ^ nu
+  float bn1; // 1 - beta ^ nu
+
+  // debiasing denominator
+  float bt;  // bt...b3b2b1
+  float bnt1; // 1.0 - bt^nu...b3b2b1
+  std::vector<float> mt;
+
+  Qqhm(uwot::Param &alpha_param, uwot::Param &beta_param, uwot::Param &nu_param,
+       std::size_t vec_size)
+      : alpha_param(std::move(alpha_param)), beta_param(std::move(beta_param)),
+        nu_param(std::move(nu_param)), beta1(1.0 - this->beta_param.value),
+        bn(std::pow(this->beta_param.value, this->nu_param.value)),
+        bn1(1.0 - this->bn), 
+        bt(this->beta_param.value), 
+        bnt1(1.0 - this->bn),
+        mt(vec_size) {}
+
+  void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
+    // float mold = mt[0];
+    float qqb = bn * mt[i] + bn1 * grad[i];
+  
+    // debias
+    float up = qqb / bnt1;
+    
+    // do the update
+    v[i] += alpha_param.value * up;
+
+    // momentum update for next step
+    mt[i] = beta_param.value * mt[i] + beta1 * grad[i];
+    
+    // if (i == 0) {
+    //   std::cout << mold << " " << mt[0] << " " << qqb << " " << up << " " << v[0] << std::endl;
+    // }
+  }
+
+  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
+    alpha_param.update(epoch, n_epochs);
+    beta_param.update(epoch, n_epochs);
+    nu_param.update(epoch, n_epochs);
+
+    beta1 = 1.0 - beta_param.value;
+    bn = std::pow(beta_param.value, nu_param.value);
+    bn1 = 1.0 - bn;
+
+    bt *= beta_param.value; // ...b3b2b1
+    // 1 - (bt...b3b2b1 x bt^(nu - 1)) = 1 - (bt^nu...b3b2b1)
+    bnt1 = 1.0 - bt * std::pow(beta_param.value, nu_param.value - 1);
+    
+
+    // std::cout << epoch << ": alpha = " << alpha_param.value
+    //           << " beta = " << beta_param.value
+    //           << " nu = " << nu_param.value << std::endl;
+  }
+};
+
 } // namespace uwot
 
 #endif // UWOT_OPTIMIZE_H

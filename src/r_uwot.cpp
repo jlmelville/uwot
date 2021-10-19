@@ -218,6 +218,36 @@ struct UmapFactory {
     return uwot::MomentumSgd(alpha_param, beta_param, head_embedding.size());
   }
 
+  auto create_qhm(List opt_args) -> uwot::Qhm {
+    if (verbose) {
+      Rcerr << "Optimizing with QHM";
+    }
+    uwot::Param alpha_param =
+        create_param(opt_args, "alpha", 1.0, "linear_decay");
+    uwot::Param beta_param = create_param(opt_args, "beta", 0.999, "constant");
+    uwot::Param nu_param = create_param(opt_args, "nu", 0.7, "constant");
+
+    if (verbose) {
+      Rcerr << std::endl;
+    }
+    return uwot::Qhm(alpha_param, beta_param, nu_param, head_embedding.size());
+  }
+
+  auto create_qqhm(List opt_args) -> uwot::Qqhm {
+    if (verbose) {
+      Rcerr << "Optimizing with QQHM";
+    }
+    uwot::Param alpha_param =
+        create_param(opt_args, "alpha", 1.0, "linear_decay");
+    uwot::Param beta_param = create_param(opt_args, "beta", 0.999, "constant");
+    uwot::Param nu_param = create_param(opt_args, "nu", 0.7, "constant");
+
+    if (verbose) {
+      Rcerr << std::endl;
+    }
+    return uwot::Qqhm(alpha_param, beta_param, nu_param, head_embedding.size());
+  }
+
   template <typename RandFactory, bool DoMove, typename Gradient>
   void create_impl(const Gradient &gradient, bool batch) {
     const std::size_t ndim = head_embedding.size() / n_head_vertices;
@@ -231,6 +261,14 @@ struct UmapFactory {
             gradient, sampler, opt, batch);
       } else if (opt_name == "msgd") {
         auto opt = create_msgd(opt_args);
+        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
+            gradient, sampler, opt, batch);
+      } else if (opt_name == "qhm") {
+        auto opt = create_qhm(opt_args);
+        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
+            gradient, sampler, opt, batch);
+      } else if (opt_name == "qqhm") {
+        auto opt = create_qqhm(opt_args);
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
             gradient, sampler, opt, batch);
       } else {
