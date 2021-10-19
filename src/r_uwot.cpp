@@ -247,58 +247,58 @@ struct UmapFactory {
     }
     return uwot::Qqhm(alpha_param, beta_param, nu_param, head_embedding.size());
   }
-  
+
   auto create_qhadam(List opt_args) -> uwot::Qhadam {
     if (verbose) {
       Rcerr << "Optimizing with QHAdam";
     }
     uwot::Param alpha_param =
-      create_param(opt_args, "alpha", 1.0, "linear_decay");
-    uwot::Param beta1_param = create_param(opt_args, "beta1", 0.999, "constant");
+        create_param(opt_args, "alpha", 1.0, "linear_decay");
+    uwot::Param beta1_param =
+        create_param(opt_args, "beta1", 0.999, "constant");
     uwot::Param nu1_param = create_param(opt_args, "nu1", 0.7, "constant");
-    uwot::Param beta2_param = create_param(opt_args, "beta2", 0.999, "constant");
+    uwot::Param beta2_param =
+        create_param(opt_args, "beta2", 0.999, "constant");
     uwot::Param nu2_param = create_param(opt_args, "nu2", 1, "constant");
     float eps = lget(opt_args, "eps", 1e-8);
     if (verbose) {
       Rcerr << " eps = " << eps;
       Rcerr << std::endl;
     }
-    return uwot::Qhadam(alpha_param, beta1_param, nu1_param, 
-                        beta2_param, nu2_param, eps,
-                        head_embedding.size());
+    return uwot::Qhadam(alpha_param, beta1_param, nu1_param, beta2_param,
+                        nu2_param, eps, head_embedding.size());
   }
 
   template <typename RandFactory, bool DoMove, typename Gradient>
   void create_impl(const Gradient &gradient, bool batch) {
-    const std::size_t ndim = head_embedding.size() / n_head_vertices;
-    uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
-
     if (batch) {
       std::string opt_name = opt_args[0];
       if (opt_name == "adam") {
         auto opt = create_adam(opt_args);
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, sampler, opt, batch);
+            gradient, opt, batch);
       } else if (opt_name == "msgd") {
         auto opt = create_msgd(opt_args);
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, sampler, opt, batch);
+            gradient, opt, batch);
       } else if (opt_name == "qhm") {
         auto opt = create_qhm(opt_args);
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, sampler, opt, batch);
+            gradient, opt, batch);
       } else if (opt_name == "qqhm") {
         auto opt = create_qqhm(opt_args);
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, sampler, opt, batch);
+            gradient, opt, batch);
       } else if (opt_name == "qhadam") {
         auto opt = create_qhadam(opt_args);
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, sampler, opt, batch);
+            gradient, opt, batch);
       } else {
         stop("Unknown optimization method");
       }
     } else {
+      const std::size_t ndim = head_embedding.size() / n_head_vertices;
+      uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
       uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
                                          initial_alpha);
       uwot::EdgeWorker<Gradient, decltype(update), RandFactory> worker(
@@ -309,8 +309,8 @@ struct UmapFactory {
   }
 
   template <typename Opt, typename RandFactory, bool DoMove, typename Gradient>
-  void create_impl_batch_opt(const Gradient &gradient, uwot::Sampler &sampler,
-                             Opt &opt, bool batch) {
+  void create_impl_batch_opt(const Gradient &gradient, Opt &opt, bool batch) {
+    uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
     uwot::BatchUpdate<DoMove, decltype(opt)> update(head_embedding,
                                                     tail_embedding, opt);
     const std::size_t ndim = head_embedding.size() / n_head_vertices;

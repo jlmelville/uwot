@@ -235,7 +235,7 @@ struct Qhm {
         bt1(1.0 - (this->beta1)), mt(vec_size) {}
 
   void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
-    float mold = mt[0];
+    // float mold = mt[0];
     mt[i] = beta_param.value * mt[i] + beta1 * grad[i];
     float mhat = mt[i] / bt1;
     float qt = nu_param.value * mhat + nu1 * grad[i];
@@ -243,10 +243,10 @@ struct Qhm {
     // float up = qb / nbt1;
     v[i] += alpha_param.value * qt;
 
-    if (i == 0) {
-      std::cout << mold << " " << mt[0] << " " << mhat << " " << qt << " "
-                << v[0] << std::endl;
-    }
+    // if (i == 0) {
+    //   std::cout << mold << " " << mt[0] << " " << mhat << " " << qt << " "
+    //             << v[0] << std::endl;
+    // }
   }
 
   void epoch_end(std::size_t epoch, std::size_t n_epochs) {
