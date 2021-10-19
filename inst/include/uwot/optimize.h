@@ -208,11 +208,12 @@ struct Adam {
 
 // Quasi-Hyperbolic Momentum (Ma & Yarats 2019)
 // nu = 0: SGD
-// nu = beta: NAG
-// nu = 1: CM
-// m_t = beta * m_t-1 + (1 - beta) * s_t-1 (CM)
-// q_t = nu * m_t + (1 - nu) * s_t-1
-// q_t = nu * beta * m_t-1 + (1 - nu * beta) * s_t-1 (expanded version)
+// nu = beta: (damped) NAG
+// nu = 1: (damped) CM
+// m_t = beta * m_{t-1} + (1 - beta) * s_{t-1} (CM)
+// q_t = nu * mhat_t + (1 - nu) * s_{t-1}
+// q_t = nu * beta * mhat_{t-1} + (1 - nu * beta) * s_{t-1} (expanded version)
+// mhat is the debiased momentum update (as done with QHAdam)
 struct Qhm {
   uwot::Param alpha_param;
   uwot::Param beta_param;
@@ -221,8 +222,8 @@ struct Qhm {
   float beta1;
   float nu1;
 
-  float bt; // beta products
-  float nbt1; // (1 - nu * bt...b3b2b1)
+  float bt; // bt...b3b2b1
+  float bt1; // (1 - bt...b3b2b1)
 
   std::vector<float> mt;
 
@@ -232,19 +233,20 @@ struct Qhm {
         nu_param(std::move(nu_param)), beta1(1.0 - this->beta_param.value),
         nu1(1.0 - this->nu_param.value),
         bt(this->beta_param.value),
-        nbt1(1.0 - (this->nu_param.value * this->bt)), mt(vec_size) {}
+        bt1(1.0 - (this->beta1)), mt(vec_size) {}
 
   void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
-    // float mold = mt[0];
+    float mold = mt[0];
     mt[i] = beta_param.value * mt[i] + beta1 * grad[i];
-    float qb = nu_param.value * mt[i] + nu1 * grad[i];
+    float mhat = mt[i] / bt1;
+    float qt = nu_param.value * mhat + nu1 * grad[i];
 
-    float up = qb / nbt1;
-    v[i] += alpha_param.value * up;
+    // float up = qb / nbt1;
+    v[i] += alpha_param.value * qt;
 
-    // if (i == 0) {
-    //   std::cout << mold << " " << mt[0] << " " << qb << " " << up << " " << v[0] << std::endl;
-    // }
+    if (i == 0) {
+      std::cout << mold << " " << mt[0] << " " << mhat << " " << qt << " " << v[0] << std::endl;
+    }
   }
 
   void epoch_end(std::size_t epoch, std::size_t n_epochs) {
@@ -258,7 +260,7 @@ struct Qhm {
     nu1 = 1.0 - nu_param.value;
 
     bt *= beta_param.value;
-    nbt1 = 1.0 - nu_param.value * bt;
+    bt1 = 1.0 - bt;
 
     // std::cout << epoch << ": alpha = " << alpha_param.value
     //           << " beta = " << beta_param.value
@@ -266,15 +268,101 @@ struct Qhm {
   }
 };
 
+struct Qhadam {
+  uwot::Param alpha_param;
+  
+  uwot::Param beta1_param;
+  float beta11;
+  float bt1;
+  float bt11;
+  
+  uwot::Param nu1_param;
+  float nu11;
+  
+  uwot::Param beta2_param;
+  float beta21;
+  float bt2;
+  float bt21;
+  
+  uwot::Param nu2_param;
+  float nu21;
+  
+  float eps;
+  
+  std::vector<float> mt;
+  std::vector<float> vt;
+  
+  
+  Qhadam(uwot::Param &alpha_param, 
+         uwot::Param &beta1_param, uwot::Param &nu1_param,
+         uwot::Param &beta2_param, uwot::Param &nu2_param,
+         float eps,
+      std::size_t vec_size)
+    : alpha_param(std::move(alpha_param)), 
+      beta1_param(std::move(beta1_param)),
+      beta11(1.0 - this->beta1_param.value),
+      bt1(this->beta1_param.value),
+      bt11(beta11),       
+      nu1_param(std::move(nu1_param)), 
+      nu11(1.0 - this->nu1_param.value),
+      beta2_param(std::move(beta2_param)),
+      beta21(1.0 - this->beta2_param.value),
+      bt2(this->beta2_param.value),
+      bt21(beta21),       
+      nu2_param(std::move(nu2_param)), 
+      nu21(1.0 - this->nu2_param.value),
+      eps(eps),
+      mt(vec_size), vt(vec_size) {}
+  
+  void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
+    mt[i] = beta1_param.value * mt[i] + beta11 * grad[i];
+    float mhat = mt[i] / bt1;
+    float qmt = nu1_param.value * mhat + nu11 * grad[i];
+    
+    vt[i] = beta2_param.value * vt[i] + beta21 * grad[i] * grad[i];
+    float vhat = vt[i] / bt2;
+    float qvt = nu2_param.value * vhat + nu21 * grad[i] * grad[i];
+    
+    float up = qmt / (sqrt(qvt) + eps);
+    v[i] += alpha_param.value * up;
+    
+    // if (i == 0) {
+    //   std::cout << mold << " " << mt[0] << " " << mhat << " " << qt << " " << v[0] << std::endl;
+    // }
+  }
+  
+  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
+    alpha_param.update(epoch, n_epochs);
+    
+    beta1_param.update(epoch, n_epochs);
+    beta11 = 1.0 - beta1_param.value;
+    bt1 *= beta1_param.value;
+    bt11 = 1.0 - bt1;
+    
+    nu1_param.update(epoch, n_epochs);
+    nu11 = 1.0 - nu1_param.value;
+    
+    beta2_param.update(epoch, n_epochs);
+    beta21 = 1.0 - beta2_param.value;
+    bt2 *= beta2_param.value;
+    bt21 = 1.0 - bt2;
+    
+    nu2_param.update(epoch, n_epochs);
+    nu21 = 1.0 - nu2_param.value;
+  }
+};
+
+
 // Quasi-Quasi-Hyperbolic Momentum
 // like QHM but nu is scaled differently so its meaning is independent of beta
-// nu = 1: CM
-// nu = 2: NAG
-// nu -> Inf: SGD (but just set nu=1, beta=0)
-// nu < 1: places lower weight on most recent gradient
-// nu is the number of averaging steps: e.g. once for CM, twice for NAG etc.
-// qq_t = beta ^ nu m_t-1 + (1 - beta ^ nu) * s_t-1
-// (easier to write in terms of the expanded CM step than the two-step QHM form)
+// nu = 0: (damped) CM
+// nu = 1: (damped) NAG
+// nu -> Inf: SGD (but just set nu=0, beta=0)
+// nu < 0: places lower weight on most recent gradient
+// nu is the number of averaging steps after the momentum step: e.g. zero for CM, once for NAG etc.
+// qq_t = beta ^ nu mhat_t + (1 - beta ^ nu) * s_t-1
+// mhat is the debiased momentum step (like in Adam) -- simpler to debias after
+// momentum step than after the entire qqhm update
 struct Qqhm {
   uwot::Param alpha_param;
   uwot::Param beta_param;
@@ -283,13 +371,14 @@ struct Qqhm {
   // momentum weighting
   float beta1; // 1 - beta
 
-  // iterative averaging
+  // qqhm weighting
   float bn;  // beta ^ nu
   float bn1; // 1 - beta ^ nu
 
-  // debiasing denominator
+  // momentum debiasing denominator
   float bt;  // bt...b3b2b1
-  float bnt1; // 1.0 - bt^nu...b3b2b1
+  float bt1;
+  
   std::vector<float> mt;
 
   Qqhm(uwot::Param &alpha_param, uwot::Param &beta_param, uwot::Param &nu_param,
@@ -299,24 +388,20 @@ struct Qqhm {
         bn(std::pow(this->beta_param.value, this->nu_param.value)),
         bn1(1.0 - this->bn), 
         bt(this->beta_param.value), 
-        bnt1(1.0 - this->bn),
+        bt1(beta1),
         mt(vec_size) {}
 
   void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
     // float mold = mt[0];
-    float qqb = bn * mt[i] + bn1 * grad[i];
-  
-    // debias
-    float up = qqb / bnt1;
-    
-    // do the update
-    v[i] += alpha_param.value * up;
-
-    // momentum update for next step
     mt[i] = beta_param.value * mt[i] + beta1 * grad[i];
+    float mhat = mt[i] / bt1; // debias the momentum step
+    
+    // qqhm step uses the debiased momentum step, no further debiasing required
+    float qqt = bn * mhat + bn1 * grad[i];
+    v[i] += alpha_param.value * qqt;
     
     // if (i == 0) {
-    //   std::cout << mold << " " << mt[0] << " " << qqb << " " << up << " " << v[0] << std::endl;
+    //   std::cout << mold << " " << mt[0] << " " << mhat << " " << qqt << " " << v[0] << std::endl;
     // }
   }
 
@@ -329,14 +414,12 @@ struct Qqhm {
     bn = std::pow(beta_param.value, nu_param.value);
     bn1 = 1.0 - bn;
 
-    bt *= beta_param.value; // ...b3b2b1
-    // 1 - (bt...b3b2b1 x bt^(nu - 1)) = 1 - (bt^nu...b3b2b1)
-    bnt1 = 1.0 - bt * std::pow(beta_param.value, nu_param.value - 1);
-    
-
     // std::cout << epoch << ": alpha = " << alpha_param.value
     //           << " beta = " << beta_param.value
     //           << " nu = " << nu_param.value << std::endl;
+    
+    bt *= beta_param.value; // ...b3b2b1
+    bt1 = 1.0 - bt;
   }
 };
 

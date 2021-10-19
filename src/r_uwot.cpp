@@ -247,6 +247,26 @@ struct UmapFactory {
     }
     return uwot::Qqhm(alpha_param, beta_param, nu_param, head_embedding.size());
   }
+  
+  auto create_qhadam(List opt_args) -> uwot::Qhadam {
+    if (verbose) {
+      Rcerr << "Optimizing with QHAdam";
+    }
+    uwot::Param alpha_param =
+      create_param(opt_args, "alpha", 1.0, "linear_decay");
+    uwot::Param beta1_param = create_param(opt_args, "beta1", 0.999, "constant");
+    uwot::Param nu1_param = create_param(opt_args, "nu1", 0.7, "constant");
+    uwot::Param beta2_param = create_param(opt_args, "beta2", 0.999, "constant");
+    uwot::Param nu2_param = create_param(opt_args, "nu2", 1, "constant");
+    float eps = lget(opt_args, "eps", 1e-8);
+    if (verbose) {
+      Rcerr << " eps = " << eps;
+      Rcerr << std::endl;
+    }
+    return uwot::Qhadam(alpha_param, beta1_param, nu1_param, 
+                        beta2_param, nu2_param, eps,
+                        head_embedding.size());
+  }
 
   template <typename RandFactory, bool DoMove, typename Gradient>
   void create_impl(const Gradient &gradient, bool batch) {
@@ -269,6 +289,10 @@ struct UmapFactory {
             gradient, sampler, opt, batch);
       } else if (opt_name == "qqhm") {
         auto opt = create_qqhm(opt_args);
+        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
+            gradient, sampler, opt, batch);
+      } else if (opt_name == "qhadam") {
+        auto opt = create_qhadam(opt_args);
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
             gradient, sampler, opt, batch);
       } else {
