@@ -203,6 +203,26 @@ struct UmapFactory {
     return uwot::Adam(alpha_param, beta1_param, beta2_param, eps,
                       head_embedding.size());
   }
+  
+  auto create_adasgd(List opt_args) -> uwot::AdaSgd {
+    if (verbose) {
+      Rcerr << "Optimizing with AdaSgd";
+    }
+    uwot::Param alpha_param =
+      create_param(opt_args, "alpha", 1.0, "linear_decay");
+    uwot::Param beta1_param = create_param(opt_args, "beta1", 0.9, "constant");
+    uwot::Param beta2_param =
+      create_param(opt_args, "beta2", 0.999, "constant");
+    
+    float eps = lget(opt_args, "eps", 1e-8);
+    if (verbose) {
+      Rcerr << " eps = " << eps;
+      Rcerr << std::endl;
+    }
+    
+    return uwot::AdaSgd(alpha_param, beta1_param, beta2_param, eps,
+                      head_embedding.size());
+  }
 
   auto create_msgd(List opt_args) -> uwot::MomentumSgd {
     if (verbose) {
@@ -261,12 +281,15 @@ struct UmapFactory {
         create_param(opt_args, "beta2", 0.999, "constant");
     uwot::Param nu2_param = create_param(opt_args, "nu2", 1, "constant");
     float eps = lget(opt_args, "eps", 1e-8);
+    bool adabelief = lget(opt_args, "adabelief", false);
+    std::size_t warm_up = lget(opt_args, "warm_up", static_cast<std::size_t>(0));
     if (verbose) {
-      Rcerr << " eps = " << eps;
+      Rcerr << " warm up = " << warm_up << " eps = " << eps << " adabelief? " << adabelief;
       Rcerr << std::endl;
     }
     return uwot::Qhadam(alpha_param, beta1_param, nu1_param, beta2_param,
-                        nu2_param, eps, head_embedding.size());
+                        nu2_param, eps, adabelief, head_embedding.size(),
+                        warm_up);
   }
 
   template <typename RandFactory, bool DoMove, typename Gradient>
@@ -291,6 +314,10 @@ struct UmapFactory {
             gradient, opt, batch);
       } else if (opt_name == "qhadam") {
         auto opt = create_qhadam(opt_args);
+        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
+            gradient, opt, batch);
+      } else if (opt_name == "adasgd") {
+        auto opt = create_adasgd(opt_args);
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
             gradient, opt, batch);
       } else {

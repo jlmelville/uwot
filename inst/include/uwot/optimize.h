@@ -28,6 +28,7 @@
 #define UWOT_OPTIMIZE_H
 
 #include <iostream>
+#include <numeric>
 #include <vector>
 
 namespace uwot {
@@ -206,6 +207,69 @@ struct Adam {
   }
 };
 
+struct AdaSgd {
+  uwot::Param alpha_param;
+  uwot::Param beta1_param;
+  uwot::Param beta2_param;
+  
+  float beta11;
+  float beta1t;
+  float beta1t1;
+  
+  float beta21;
+  float beta2t;
+  float beta2t1;
+  
+  float eps;
+  
+  std::vector<float> mt;
+  std::vector<float> vt;
+  
+  float v_adapt;
+  
+  AdaSgd(uwot::Param &alpha_param, uwot::Param &beta1_param,
+       uwot::Param &beta2_param, float eps, std::size_t vec_size)
+    : alpha_param(std::move(alpha_param)),
+      beta1_param(std::move(beta1_param)),
+      beta2_param(std::move(beta2_param)),
+      beta11(1.0 - this->beta1_param.value), beta1t(this->beta1_param.value),
+      beta1t1(1.0 - beta1t), beta21(1.0 - this->beta2_param.value),
+      beta2t(this->beta2_param.value), beta2t1(1.0 - beta2t), eps(eps),
+      mt(vec_size), vt(vec_size),
+      v_adapt(1.0) {}
+  
+  void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
+    float mb = beta1_param.value * mt[i] + beta11 * grad[i];
+    float vb = beta2_param.value * vt[i] + beta21 * grad[i] * grad[i];
+    
+    float mc = mb / beta1t1;
+    // float vc = vb / beta2t1;
+    
+    float up = mc / (sqrt(v_adapt) + eps);
+    v[i] += alpha_param.value * up;
+    mt[i] = mb;
+    vt[i] = vb;
+  }
+  
+  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
+    alpha_param.update(epoch, n_epochs);
+    beta1_param.update(epoch, n_epochs);
+    
+    beta1t *= beta1_param.value;
+    beta1t1 = 1.0 - beta1t;
+    beta2t *= beta2_param.value;
+    beta2t1 = 1.0 - beta2t;
+    
+    v_adapt = std::accumulate(vt.begin(), vt.end(), 0.0) / vt.size() / beta2t1;
+    
+    
+    // std::cout << epoch << ": alpha = " << alpha_param.value
+    //           << " beta1 = " << beta1_param.value
+    //           << " beta2 = " << beta2_param.value << std::endl;
+  }
+};
+
+
 // Quasi-Hyperbolic Momentum (Ma & Yarats 2019)
 // nu = 0: SGD
 // nu = beta: (damped) NAG
@@ -291,10 +355,16 @@ struct Qhadam {
 
   std::vector<float> mt;
   std::vector<float> vt;
+  
+  bool belief;
 
+  std::size_t warm_up;
+  bool warmed_up;
+  
   Qhadam(uwot::Param &alpha_param, uwot::Param &beta1_param,
          uwot::Param &nu1_param, uwot::Param &beta2_param,
-         uwot::Param &nu2_param, float eps, std::size_t vec_size)
+         uwot::Param &nu2_param, float eps, bool adabelief, std::size_t vec_size,
+         std::size_t warm_up)
       : alpha_param(std::move(alpha_param)),
         beta1_param(std::move(beta1_param)),
         beta11(1.0 - this->beta1_param.value), bt1(this->beta1_param.value),
@@ -303,18 +373,29 @@ struct Qhadam {
         beta21(1.0 - this->beta2_param.value), bt2(this->beta2_param.value),
         bt21(beta21), nu2_param(std::move(nu2_param)),
         nu21(1.0 - this->nu2_param.value), eps(eps), mt(vec_size),
-        vt(vec_size) {}
+        vt(vec_size), belief(adabelief), warm_up(warm_up), warmed_up(warm_up == 0) {}
 
   void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
     mt[i] = beta1_param.value * mt[i] + beta11 * grad[i];
     float mhat = mt[i] / bt11;
     float qmt = nu1_param.value * mhat + nu11 * grad[i];
 
-    vt[i] = beta2_param.value * vt[i] + beta21 * grad[i] * grad[i];
+    float sd = 0.0;
+    if (belief) {
+      sd = grad[i] - mt[i];
+    }
+    else {
+      sd = grad[i];
+    }
+    vt[i] = beta2_param.value * vt[i] + beta21 * sd * sd + eps;
     float vhat = vt[i] / bt21;
-    float qvt = nu2_param.value * vhat + nu21 * grad[i] * grad[i];
-
-    float up = qmt / (sqrt(qvt) + eps);
+    
+    float qvt = nu2_param.value * vhat + nu21 * sd * sd + eps;
+    
+    float up = qmt;
+    if (warmed_up) {
+      up /= (sqrt(qvt) + eps);
+    }
     v[i] += alpha_param.value * up;
 
     // if (i == 0) {
@@ -341,6 +422,8 @@ struct Qhadam {
 
     nu2_param.update(epoch, n_epochs);
     nu21 = 1.0 - nu2_param.value;
+    
+    warmed_up = epoch > warm_up;
   }
 };
 
