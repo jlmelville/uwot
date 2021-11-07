@@ -69,6 +69,7 @@ struct UmapFactory {
   bool batch;
   std::size_t n_threads;
   std::size_t grain_size;
+  uwot::EpochCallback *epoch_callback;
   bool verbose;
 
   UmapFactory(bool move_other, bool pcg_rand,
@@ -81,7 +82,8 @@ struct UmapFactory {
               unsigned int n_tail_vertices,
               const std::vector<float> &epochs_per_sample, float initial_alpha,
               List opt_args, float negative_sample_rate, bool batch,
-              std::size_t n_threads, std::size_t grain_size, bool verbose)
+              std::size_t n_threads, std::size_t grain_size,
+              uwot::EpochCallback *epoch_callback, bool verbose)
       : move_other(move_other), pcg_rand(pcg_rand),
         head_embedding(head_embedding), tail_embedding(tail_embedding),
         positive_head(positive_head), positive_tail(positive_tail),
@@ -90,7 +92,7 @@ struct UmapFactory {
         epochs_per_sample(epochs_per_sample), initial_alpha(initial_alpha),
         opt_args(opt_args), negative_sample_rate(negative_sample_rate),
         batch(batch), n_threads(n_threads), grain_size(grain_size),
-        verbose(verbose) {}
+        epoch_callback(epoch_callback), verbose(verbose) {}
 
   template <typename Gradient> void create(const Gradient &gradient) {
     if (move_other) {
@@ -120,176 +122,18 @@ struct UmapFactory {
     }
   }
 
-  auto create_param_update(const std::string &param_update_name)
-      -> uwot::ParamUpdate * {
-    if (param_update_name == "constant") {
-      return new uwot::ParamFixed();
-    } else if (param_update_name == "linear_grow") {
-      return new uwot::ParamLinearGrow();
-    } else if (param_update_name == "demon") {
-      return new uwot::ParamDemon();
-    } else if (param_update_name == "linear_decay") {
-      return new uwot::ParamLinearDecay();
-    } else {
-      stop("Unknown param update");
-    }
-  }
-
-  auto create_param_slow_start(uwot::ParamUpdate *param_update,
-                               float slow_start_frac) -> uwot::ParamUpdate * {
-    std::size_t start_epochs =
-        std::ceil(slow_start_frac * static_cast<float>(n_epochs));
-    if (verbose) {
-      Rcerr << " slow start for " << start_epochs << " epochs";
-    }
-    return new uwot::ParamSlowStart(start_epochs, param_update);
-  }
-
-  auto create_param_update(List opt_args, const std::string &prefix,
-                           const std::string &default_update,
-                           float initial_value) -> uwot::ParamUpdate * {
-    std::string update = lget(opt_args, prefix + "_update", default_update);
-    if (update == "demon" && initial_value >= 1.0) {
-      stop("Demon update requires initial value to be between 0-1");
-    }
-
-    if (verbose) {
-      Rcerr << " (" << update << ")";
-    }
-
-    uwot::ParamUpdate *param_update = create_param_update(update);
-
-    float slow_start = lget(opt_args, prefix + "_slow_start", 0.0);
-    if (slow_start < 0.0 || slow_start > 1.0) {
-      stop("slow start must be between 0-1");
-    }
-    if (slow_start > 0.0) {
-      param_update = create_param_slow_start(param_update, slow_start);
-    }
-
-    return param_update;
-  }
-
-  auto create_param(List args, const std::string &param_name,
-                    float initial_default, const std::string &update_default)
-      -> uwot::Param {
-    float initial_value = lget(opt_args, param_name, initial_default);
-
-    if (verbose) {
-      Rcerr << " " << param_name << " = " << initial_value;
-    }
-    uwot::ParamUpdate *update = create_param_update(
-        opt_args, param_name, update_default, initial_value);
-
-    return uwot::Param(initial_value, update);
-  }
-
   auto create_adam(List opt_args) -> uwot::Adam {
+    float alpha = lget(opt_args, "alpha", 1.0);
+    float beta1 = lget(opt_args, "beta1", 0.9);
+    float beta2 = lget(opt_args, "beta2", 0.999);
+    float eps = lget(opt_args, "eps", 1e-7);
     if (verbose) {
-      Rcerr << "Optimizing with Adam";
-    }
-    uwot::Param alpha_param =
-        create_param(opt_args, "alpha", 1.0, "linear_decay");
-    uwot::Param beta1_param = create_param(opt_args, "beta1", 0.9, "constant");
-    uwot::Param beta2_param =
-        create_param(opt_args, "beta2", 0.999, "constant");
-
-    float eps = lget(opt_args, "eps", 1e-8);
-    if (verbose) {
-      Rcerr << " eps = " << eps;
-      Rcerr << std::endl;
+      Rcerr << "Optimizing with Adam"
+            << " alpha = " << alpha << " beta1 = " << beta1
+            << " beta2 = " << beta2 << " eps = " << eps << std::endl;
     }
 
-    return uwot::Adam(alpha_param, beta1_param, beta2_param, eps,
-                      head_embedding.size());
-  }
-  
-  auto create_adasgd(List opt_args) -> uwot::AdaSgd {
-    if (verbose) {
-      Rcerr << "Optimizing with AdaSgd";
-    }
-    uwot::Param alpha_param =
-      create_param(opt_args, "alpha", 1.0, "linear_decay");
-    uwot::Param beta1_param = create_param(opt_args, "beta1", 0.9, "constant");
-    uwot::Param beta2_param =
-      create_param(opt_args, "beta2", 0.999, "constant");
-    
-    float eps = lget(opt_args, "eps", 1e-8);
-    if (verbose) {
-      Rcerr << " eps = " << eps;
-      Rcerr << std::endl;
-    }
-    
-    return uwot::AdaSgd(alpha_param, beta1_param, beta2_param, eps,
-                      head_embedding.size());
-  }
-
-  auto create_msgd(List opt_args) -> uwot::MomentumSgd {
-    if (verbose) {
-      Rcerr << "Optimizing with Momentum SGD";
-    }
-    uwot::Param alpha_param =
-        create_param(opt_args, "alpha", 1.0, "linear_decay");
-    uwot::Param beta_param = create_param(opt_args, "beta", 0, "constant");
-
-    if (verbose) {
-      Rcerr << std::endl;
-    }
-    return uwot::MomentumSgd(alpha_param, beta_param, head_embedding.size());
-  }
-
-  auto create_qhm(List opt_args) -> uwot::Qhm {
-    if (verbose) {
-      Rcerr << "Optimizing with QHM";
-    }
-    uwot::Param alpha_param =
-        create_param(opt_args, "alpha", 1.0, "linear_decay");
-    uwot::Param beta_param = create_param(opt_args, "beta", 0.999, "constant");
-    uwot::Param nu_param = create_param(opt_args, "nu", 0.7, "constant");
-
-    if (verbose) {
-      Rcerr << std::endl;
-    }
-    return uwot::Qhm(alpha_param, beta_param, nu_param, head_embedding.size());
-  }
-
-  auto create_qqhm(List opt_args) -> uwot::Qqhm {
-    if (verbose) {
-      Rcerr << "Optimizing with QQHM";
-    }
-    uwot::Param alpha_param =
-        create_param(opt_args, "alpha", 1.0, "linear_decay");
-    uwot::Param beta_param = create_param(opt_args, "beta", 0.999, "constant");
-    uwot::Param nu_param = create_param(opt_args, "nu", 0.7, "constant");
-
-    if (verbose) {
-      Rcerr << std::endl;
-    }
-    return uwot::Qqhm(alpha_param, beta_param, nu_param, head_embedding.size());
-  }
-
-  auto create_qhadam(List opt_args) -> uwot::Qhadam {
-    if (verbose) {
-      Rcerr << "Optimizing with QHAdam";
-    }
-    uwot::Param alpha_param =
-        create_param(opt_args, "alpha", 1.0, "linear_decay");
-    uwot::Param beta1_param =
-        create_param(opt_args, "beta1", 0.999, "constant");
-    uwot::Param nu1_param = create_param(opt_args, "nu1", 0.7, "constant");
-    uwot::Param beta2_param =
-        create_param(opt_args, "beta2", 0.999, "constant");
-    uwot::Param nu2_param = create_param(opt_args, "nu2", 1, "constant");
-    float eps = lget(opt_args, "eps", 1e-8);
-    bool adabelief = lget(opt_args, "adabelief", false);
-    std::size_t warm_up = lget(opt_args, "warm_up", static_cast<std::size_t>(0));
-    if (verbose) {
-      Rcerr << " warm up = " << warm_up << " eps = " << eps << " adabelief? " << adabelief;
-      Rcerr << std::endl;
-    }
-    return uwot::Qhadam(alpha_param, beta1_param, nu1_param, beta2_param,
-                        nu2_param, eps, adabelief, head_embedding.size(),
-                        warm_up);
+    return uwot::Adam(alpha, beta1, beta2, eps, head_embedding.size());
   }
 
   template <typename RandFactory, bool DoMove, typename Gradient>
@@ -300,26 +144,6 @@ struct UmapFactory {
         auto opt = create_adam(opt_args);
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
             gradient, opt, batch);
-      } else if (opt_name == "msgd") {
-        auto opt = create_msgd(opt_args);
-        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, opt, batch);
-      } else if (opt_name == "qhm") {
-        auto opt = create_qhm(opt_args);
-        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, opt, batch);
-      } else if (opt_name == "qqhm") {
-        auto opt = create_qqhm(opt_args);
-        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, opt, batch);
-      } else if (opt_name == "qhadam") {
-        auto opt = create_qhadam(opt_args);
-        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, opt, batch);
-      } else if (opt_name == "adasgd") {
-        auto opt = create_adasgd(opt_args);
-        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, opt, batch);
       } else {
         stop("Unknown optimization method");
       }
@@ -327,7 +151,7 @@ struct UmapFactory {
       const std::size_t ndim = head_embedding.size() / n_head_vertices;
       uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
       uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
-                                         initial_alpha);
+                                         initial_alpha, epoch_callback);
       uwot::EdgeWorker<Gradient, decltype(update), RandFactory> worker(
           gradient, update, positive_head, positive_tail, sampler, ndim,
           n_tail_vertices, n_threads);
@@ -338,9 +162,9 @@ struct UmapFactory {
   template <typename Opt, typename RandFactory, bool DoMove, typename Gradient>
   void create_impl_batch_opt(const Gradient &gradient, Opt &opt, bool batch) {
     uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
-    uwot::BatchUpdate<DoMove, decltype(opt)> update(head_embedding,
-                                                    tail_embedding, opt);
     const std::size_t ndim = head_embedding.size() / n_head_vertices;
+    uwot::BatchUpdate<DoMove, decltype(opt)> update(
+        head_embedding, tail_embedding, opt, epoch_callback);
     uwot::NodeWorker<Gradient, decltype(update), RandFactory> worker(
         gradient, update, positive_head, positive_tail, positive_ptr, sampler,
         ndim, n_tail_vertices);
@@ -424,6 +248,25 @@ void create_largevis(UmapFactory &umap_factory, List method_args) {
   umap_factory.create(gradient);
 }
 
+// Wrap Rcpp Function for use as a callback
+struct REpochCallback : uwot::EpochCallback {
+  Function f;
+  REpochCallback(Function f) : f(f) {}
+  void operator()(std::size_t epoch, std::size_t n_epochs,
+                  const std::vector<float> &head_embedding) override {
+    f(epoch, n_epochs, head_embedding);
+  }
+};
+
+auto create_callback(Nullable<Function> epoch_callback)
+    -> uwot::EpochCallback * {
+  if (epoch_callback.isNull()) {
+    return new uwot::DoNothingCallback();
+  } else {
+    return new REpochCallback(as<Function>(epoch_callback));
+  }
+}
+
 // [[Rcpp::export]]
 NumericMatrix optimize_layout_r(
     NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding,
@@ -433,18 +276,19 @@ NumericMatrix optimize_layout_r(
     unsigned int n_head_vertices, unsigned int n_tail_vertices,
     const std::vector<float> epochs_per_sample, const std::string &method,
     List method_args, float initial_alpha, List opt_args,
-    float negative_sample_rate, bool pcg_rand = true, bool batch = false,
-    std::size_t n_threads = 0, std::size_t grain_size = 1,
-    bool move_other = true, bool verbose = false) {
+    Nullable<Function> epoch_callback, float negative_sample_rate,
+    bool pcg_rand = true, bool batch = false, std::size_t n_threads = 0,
+    std::size_t grain_size = 1, bool move_other = true, bool verbose = false) {
 
   auto coords = r_to_coords(head_embedding, tail_embedding);
+  uwot::EpochCallback *uwot_ecb = create_callback(epoch_callback);
 
   UmapFactory umap_factory(move_other, pcg_rand, coords.get_head_embedding(),
                            coords.get_tail_embedding(), positive_head,
                            positive_tail, positive_ptr, n_epochs,
                            n_head_vertices, n_tail_vertices, epochs_per_sample,
                            initial_alpha, opt_args, negative_sample_rate, batch,
-                           n_threads, grain_size, verbose);
+                           n_threads, grain_size, uwot_ecb, verbose);
 
   if (method == "umap") {
     create_umap(umap_factory, method_args);

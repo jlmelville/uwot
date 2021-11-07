@@ -436,7 +436,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  tmpdir = tempdir(),
                  verbose = getOption("verbose", TRUE),
                  batch = FALSE,
-                 opt_args = NULL) {
+                 opt_args = NULL, epoch_callback = NULL) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
@@ -460,6 +460,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     ret_fgraph = "fgraph" %in% ret_extra,
     batch = batch,
     opt_args = opt_args,
+    epoch_callback = epoch_callback,
     tmpdir = tempdir(),
     verbose = verbose
   )
@@ -834,7 +835,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   tmpdir = tempdir(),
                   verbose = getOption("verbose", TRUE),
                   batch = FALSE,
-                  opt_args = NULL) {
+                  opt_args = NULL, epoch_callback = NULL) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -858,6 +859,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     ret_fgraph = "fgraph" %in% ret_extra,
     batch = batch,
     opt_args = opt_args,
+    epoch_callback = epoch_callback,
     tmpdir = tmpdir,
     verbose = verbose
   )
@@ -1192,7 +1194,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   tmpdir = tempdir(),
                   verbose = getOption("verbose", TRUE),
                   batch = FALSE,
-                  opt_args = NULL) {
+                  opt_args = NULL, epoch_callback = NULL) {
   uwot(X,
     n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -1212,6 +1214,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     fast_sgd = fast_sgd,
     batch = batch,
     opt_args = opt_args,
+    epoch_callback = epoch_callback,
     tmpdir = tmpdir,
     verbose = verbose
   )
@@ -1244,7 +1247,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  batch = FALSE,
                  opt_args = NULL,
                  tmpdir = tempdir(),
-                 verbose = getOption("verbose", TRUE)) {
+                 verbose = getOption("verbose", TRUE),
+                 epoch_callback = NULL) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -1682,17 +1686,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       method_args <- list(gamma = gamma)
     }
     
-    
     if (is.null(opt_args)) {
-      # opt_args <- list("sgd", alpha = alpha, momentum = 0, alpha_update = "linear_decay")
-      # opt_args <- list("sgd", alpha = alpha, momentum = 0.95, 
-      #                  alpha_update = "linear_decay", 
-      #                  momentum_update = "demon")
-      opt_args <- list("adam", alpha = alpha, beta1 = 0.9, beta2 = 0.999, eps = 1e-8,
+      opt_args <- list("adam", alpha = alpha, beta1 = 0.5, beta2 = 0.9, eps = 1e-7,
                        alpha_update = "linear_decay", beta1_update = "constant")
     }
-
-
     embedding <- t(embedding)
     embedding <- optimize_layout_r(
       head_embedding = embedding,
@@ -1714,6 +1711,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       n_threads = n_sgd_threads,
       grain_size = grain_size,
       move_other = TRUE,
+      epoch_callback = epoch_callback,
       verbose = verbose
     )
     embedding <- t(embedding)
