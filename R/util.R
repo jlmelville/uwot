@@ -171,3 +171,12 @@ nn_graph_nbrs <- function(graph) {
   }
   ncol(graph$idx)
 }
+
+# Add the (named) values in l2 to l1.
+# Use to override default values in l1 with user-supplied values in l2
+lmerge <- function(l1, l2) {
+  for (name in names(l2)) {
+    l1[[name]] <- l2[[name]]
+  }
+  l1
+}
