@@ -112,8 +112,7 @@ umap_transform <- function(X = NULL, model = NULL,
                            verbose = FALSE,
                            init = "weighted",
                            batch = FALSE,
-                           learning_rate = NULL,
-                           opt_args = NULL
+                           learning_rate = NULL
                            ) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
@@ -416,9 +415,6 @@ umap_transform <- function(X = NULL, model = NULL,
       method_args <- list()
     }
     
-    if (is.null(opt_args)) {
-      opt_args <- list("sgd", alpha = alpha / 4, momentum = 0, alpha_update = "linear_decay")
-    }
     embedding <- t(embedding)
     row.names(train_embedding) <- NULL
     train_embedding <- t(train_embedding)
@@ -435,14 +431,15 @@ umap_transform <- function(X = NULL, model = NULL,
       method = tolower(method),
       method_args = method_args,
       initial_alpha = alpha / 4.0,
-      opt_args = opt_args,
+      opt_args = list(),
       negative_sample_rate = negative_sample_rate,
       pcg_rand = pcg_rand,
       batch = batch,
       n_threads = n_sgd_threads,
       grain_size = grain_size,
       move_other = FALSE,
-      verbose = verbose
+      verbose = verbose,
+      epoch_callback = NULL
     )
     embedding <- t(embedding)
   }
