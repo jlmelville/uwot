@@ -48,9 +48,7 @@ template <typename Worker, typename Parallel>
 void run_epoch(Worker &worker, std::size_t epoch, std::size_t n_epochs,
                Parallel &parallel) {
   worker.epoch_begin(epoch, n_epochs);
-
   parallel.pfor(worker.n_items, worker);
-
   worker.epoch_end(epoch, n_epochs, parallel);
 }
 

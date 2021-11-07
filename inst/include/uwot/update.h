@@ -33,6 +33,18 @@
 
 namespace uwot {
 
+// (User-supplied) callback to be invoked at the end of each epoch
+// e.g. to plot or save coordinates for diagnostic purposes
+struct EpochCallback {
+  virtual void operator()(std::size_t epoch, std::size_t n_epochs,
+                          const std::vector<float> &head_embedding) = 0;
+};
+
+struct DoNothingCallback : EpochCallback {
+  void operator()(std::size_t, std::size_t,
+                  const std::vector<float> &) override {}
+};
+
 template <typename Update, typename Gradient, typename Prng>
 inline void
 process_edge(Update &update, Gradient &gradient, Sampler &sampler, Prng &prng,
@@ -122,11 +134,14 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
   std::vector<float> &tail_embedding;
 
   Sgd opt;
+  std::unique_ptr<EpochCallback> epoch_callback;
 
   InPlaceUpdate(std::vector<float> &head_embedding,
-                std::vector<float> &tail_embedding, float alpha)
+                std::vector<float> &tail_embedding, float alpha,
+                EpochCallback *epoch_callback)
       : head_embedding(head_embedding), tail_embedding(tail_embedding),
-        opt(alpha) {}
+        opt(alpha), epoch_callback(std::move(epoch_callback)) {}
+
   inline void attract(std::size_t dj, std::size_t dk, std::size_t d,
                       float grad_d, std::size_t) {
     float update_d = opt.alpha * grad_d;
@@ -146,10 +161,11 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
     // update_vec<DoMoveVertex>(tail_embedding, opt.alpha * -grad_d, d, dk);
   }
 
-  void epoch_begin(std::size_t, std::size_t) {}
+  inline void epoch_begin(std::size_t, std::size_t) {}
   template <typename Parallel>
   void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &) {
     opt.epoch_end(epoch, n_epochs);
+    (*epoch_callback)(epoch, n_epochs, head_embedding);
   }
 };
 
@@ -164,15 +180,22 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
 template <bool DoMoveVertex, typename Opt> struct BatchUpdate {
   std::vector<float> &head_embedding;
   std::vector<float> &tail_embedding;
-  std::size_t n_head_vertices;
   Opt &opt;
   std::vector<float> gradient;
+  std::unique_ptr<EpochCallback> epoch_callback;
 
   BatchUpdate(std::vector<float> &head_embedding,
-              std::vector<float> &tail_embedding, Opt &opt)
+              std::vector<float> &tail_embedding, Opt &opt,
+              EpochCallback *epoch_callback)
       : head_embedding(head_embedding), tail_embedding(tail_embedding),
-        n_head_vertices(head_embedding.size()), opt(opt),
-        gradient(n_head_vertices) {}
+        opt(opt), gradient(head_embedding.size()),
+        epoch_callback(std::move(epoch_callback)) {}
+
+  BatchUpdate(BatchUpdate &&other)
+      : head_embedding(other.head_embedding),
+        tail_embedding(other.tail_embedding), opt(other.opt),
+        gradient(other.head_embedding.size()),
+        epoch_callback(std::move(other.epoch_callback)) {}
 
   inline void attract(std::size_t dj, std::size_t dk, std::size_t d,
                       float grad_d, std::size_t) {
@@ -180,12 +203,12 @@ template <bool DoMoveVertex, typename Opt> struct BatchUpdate {
   }
 
   inline void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
-                    std::size_t key) {
+                    std::size_t) {
     gradient[dj + d] += grad_d;
   }
 
   void epoch_begin(std::size_t, std::size_t) {
-    std::fill(gradient.begin(), gradient.end(), 0.0);
+    std::fill(gradient.begin(), gradient.end(), 0.0f);
   }
 
   template <typename Parallel>
@@ -196,9 +219,10 @@ template <bool DoMoveVertex, typename Opt> struct BatchUpdate {
         opt.update(head_embedding, gradient, i);
       }
     };
-    parallel.pfor(n_head_vertices, worker);
+    parallel.pfor(head_embedding.size(), worker);
 
     opt.epoch_end(epoch, n_epochs);
+    (*epoch_callback)(epoch, n_epochs, head_embedding);
   }
 };
 
