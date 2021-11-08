@@ -89,6 +89,32 @@
 #' @param learning_rate Initial learning rate used in optimization of the
 #'   coordinates. This overrides the value associated with the \code{model}.
 #'   This should be left unspecified under most circumstances.
+#' @param opt_args A list of optimizer parameters, used when 
+#'   \code{batch = TRUE}. The default optimization method used is Adam (Kingma
+#'   and Ba, 2014).
+#'   \itemize{
+#'     \item \code{method} The optimization method to use. Either \code{"adam"} 
+#'     or \code{"sgd"} (stochastic gradient descent). Default: \code{"adam"}.
+#'     \item \code{beta1} (Adam only). The weighting parameter for the
+#'     exponential moving average of the first moment estimator. Effectively the
+#'     momentum parameter. Should be a floating point value between 0 and 1.
+#'     Higher values can smooth oscillatory updates in poorly-conditioned
+#'     situations and may allow for a larger \code{learning_rate} to be
+#'     specified, but too high can cause divergence. Default: \code{0.5}.
+#'     \item \code{beta2} (Adam only). The weighting parameter for the
+#'     exponential moving average of the uncentered second moment estimator.
+#'     Should be a floating point value between 0 and 1. Controls the degree of
+#'     adaptivity in the step-size. Higher values put more weight on previous
+#'     time steps. Default: \code{0.9}.
+#'     \item \code{eps} (Adam only). Intended to be a small value to prevent
+#'     division by zero, but in practice can also affect convergence due to its
+#'     interaction with \code{beta2}. Higher values reduce the effect of the
+#'     step-size adaptivity and bring the behavior closer to stochastic gradient
+#'     descent with momentum. Typical values are between 1e-8 and 1e-3. Default:
+#'     \code{1e-7}.
+#'     \item \code{alpha} The initial learning rate. Default: the value of the 
+#'     \code{learning_rate} parameter.
+#'   }
 #' @return A matrix of coordinates for \code{X} transformed into the space
 #'   of the \code{model}.
 #' @examples
@@ -112,7 +138,8 @@ umap_transform <- function(X = NULL, model = NULL,
                            verbose = FALSE,
                            init = "weighted",
                            batch = FALSE,
-                           learning_rate = NULL
+                           learning_rate = NULL,
+                           opt_args = NULL
                            ) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
@@ -415,6 +442,8 @@ umap_transform <- function(X = NULL, model = NULL,
       method_args <- list()
     }
     
+    full_opt_args <- get_opt_args(opt_args, alpha)
+    
     embedding <- t(embedding)
     row.names(train_embedding) <- NULL
     train_embedding <- t(train_embedding)
@@ -431,7 +460,7 @@ umap_transform <- function(X = NULL, model = NULL,
       method = tolower(method),
       method_args = method_args,
       initial_alpha = alpha / 4.0,
-      opt_args = list(),
+      opt_args = full_opt_args,
       negative_sample_rate = negative_sample_rate,
       pcg_rand = pcg_rand,
       batch = batch,
