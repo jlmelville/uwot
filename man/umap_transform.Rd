@@ -16,7 +16,9 @@ umap_transform(
   n_sgd_threads = 0,
   grain_size = 1,
   verbose = FALSE,
-  init = "weighted"
+  init = "weighted",
+  batch = FALSE,
+  learning_rate = NULL
 )
 }
 \arguments{
@@ -74,8 +76,10 @@ descent). Default is half the number of concurrent threads supported by the
 system.}
 
 \item{n_sgd_threads}{Number of threads to use during stochastic gradient
-descent. If set to > 1, then results will not be reproducible, even if
-`set.seed` is called with a fixed seed before running.}
+descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
+will \emph{not} be reproducible, even if \code{set.seed} is called with a
+fixed seed before running. Set to \code{"auto"} to use the same value as
+\code{n_threads}.}
 
 \item{grain_size}{Minimum batch size for multithreading. If the number of
 items to process in a thread falls below this number, then no threads will
@@ -97,6 +101,18 @@ be used. Used in conjunction with \code{n_threads} and
     dimensions the same as \code{(nrow(X), ncol(model$embedding))}.
   }
 This parameter should be used in preference to \code{init_weighted}.}
+
+\item{batch}{If \code{TRUE}, then embedding coordinates are updated at the
+end of each epoch rather than during the epoch. In batch mode, results are
+reproducible with a fixed random seed even with \code{n_sgd_threads > 1},
+at the cost of a slightly higher memory use. You may also have to modify
+\code{learning_rate} and increase \code{n_epochs}, so whether this provides
+a speed increase over the single-threaded optimization is likely to be
+dataset and hardware-dependent.}
+
+\item{learning_rate}{Initial learning rate used in optimization of the
+coordinates. This overrides the value associated with the \code{model}.
+This should be left unspecified under most circumstances.}
 }
 \value{
 A matrix of coordinates for \code{X} transformed into the space

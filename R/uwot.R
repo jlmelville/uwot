@@ -269,6 +269,13 @@
 #'   reduction, it's safer to leave \code{fast_sgd = FALSE}. If \code{fast_sgd =
 #'   TRUE}, then user-supplied values of \code{pcg_rand}, \code{n_sgd_threads},
 #'   and \code{approx_pow} are ignored.
+#' @param batch If \code{TRUE}, then embedding coordinates are updated at the
+#'   end of each epoch rather than during the epoch. In batch mode, results are
+#'   reproducible with a fixed random seed even with \code{n_sgd_threads > 1},
+#'   at the cost of a slightly higher memory use. You may also have to modify
+#'   \code{learning_rate} and increase \code{n_epochs}, so whether this provides
+#'   a speed increase over the single-threaded optimization is likely to be
+#'   dataset and hardware-dependent.
 #' @param ret_model If \code{TRUE}, then return extra data that can be used to
 #'   add new data to an existing embedding via \code{\link{umap_transform}}. The
 #'   embedded coordinates are returned as the list item \code{embedding}. If
@@ -291,8 +298,8 @@
 #' @param ret_extra A vector indicating what extra data to return. May contain
 #'   any combination of the following strings:
 #'   \itemize{
-#'     \item \code{"model"} Same as setting `ret_model = TRUE`.
-#'     \item \code{"nn"} Same as setting `ret_nn = TRUE`.
+#'     \item \code{"model"} Same as setting \code{ret_model = TRUE}.
+#'     \item \code{"nn"} Same as setting \code{ret_nn = TRUE}.
 #'     \item \code{"fgraph"} the high dimensional fuzzy graph (i.e. the fuzzy
 #'       simplicial set of the merged local views of the input data). The graph
 #'       is returned as a sparse symmetric N x N matrix of class
@@ -305,7 +312,7 @@
 #'       employed for optimization and therefore the number of non-zero elements
 #'       in the matrix is dependent on \code{n_epochs}. If you are only
 #'       interested in the fuzzy input graph (e.g. for clustering), setting
-#'       `n_epochs = 0` will avoid any further sparsifying.
+#'       \code{n_epochs = 0} will avoid any further sparsifying.
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
@@ -314,9 +321,10 @@
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
-#'   descent. If set to > 1, then results will not be reproducible, even if
-#'   `set.seed` is called with a fixed seed before running. Set to
-#'   \code{"auto"} go use the same value as \code{n_threads}.
+#'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
+#'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
+#'   fixed seed before running. Set to \code{"auto"} to use the same value as
+#'   \code{n_threads}.
 #' @param grain_size The minimum amount of work to do on each thread. If this
 #'   value is set high enough, then less than \code{n_threads} or
 #'   \code{n_sgd_threads} will be used for processing, which might give a
@@ -329,6 +337,39 @@
 #'   only written to disk if \code{n_threads > 1} and
 #'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
+#' @param opt_args A list of optimizer parameters, used when 
+#'   \code{batch = TRUE}. The optimization method used is Adam (Kingma and Ba,
+#'   2014).
+#'   \itemize{
+#'     \item \code{beta1} The weighting parameter for the exponential moving
+#'     average of the first moment estimator. EffeFctively the momentum
+#'     parameter. Should be a floating point value between 0 and 1. Higher
+#'     values can smooth oscillatory updates in poorly-conditioned situations
+#'     and may allow for a larger \code{learning_rate} to be specified, but too
+#'     high can cause divergence. Default: 0.5.
+#'     \item \code{beta2} The weighting parameter for the exponential moving
+#'     average of the uncentered second moment estimator. Should be a floating
+#'     point value between 0 and 1. Controls the degree of adaptivity in the
+#'     step-size. Higher values put more weight on previous time steps. Default:
+#'     0.9.
+#'     \item \code{eps} Intended to be a small value to prevent division by
+#'     zero, but in practice can also affect convergence due to its interaction
+#'     with \code{beta2}. Higher values reduce the effect of the step-size
+#'     adaptivity and bring the behavior closer to stochastic gradient descent
+#'     with momentum. Typical values are between 1e-8 and 1e-3. Default: 1e-7.
+#'     \item \code{alpha} The initial learning rate. Default: the value of the 
+#'     \code{learning_rate} parameter.
+#'   }
+#' @param epoch_callback A function which will be invoked at the end of every
+#'   epoch. Its signature should be: \code{(epoch, n_epochs, coords)}, where:
+#'   \itemize{
+#'     \item \code{epoch} The current epoch number (between \code{1} and 
+#'     \code{n_epochs}).
+#'     \item \code{n_epochs} Number of epochs to use during the optimization of
+#'     the embedded coordinates.
+#'     \item \code{coords} The embedded coordinates as of the end of the current
+#'     epoch, as a matrix with dimensions (N, \code{n_components}).
+#'   }
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
 #'     \item if \code{ret_model = TRUE} (or \code{ret_extra} contains
@@ -383,6 +424,11 @@
 #' (pp. 585-591).
 #' \url{http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf}
 #'
+#' Kingma, D. P., & Ba, J. (2014). 
+#' Adam: A method for stochastic optimization. 
+#' \emph{arXiv preprint} \emph{arXiv}:1412.6980.
+#' \url{https://arxiv.org/abs/1412.6980}
+#'
 #' McInnes, L., & Healy, J. (2018).
 #' UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
 #' \emph{arXiv preprint} \emph{arXiv}:1802.03426.
@@ -426,7 +472,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_sgd_threads = 0,
                  grain_size = 1,
                  tmpdir = tempdir(),
-                 verbose = getOption("verbose", TRUE)) {
+                 verbose = getOption("verbose", TRUE),
+                 batch = FALSE,
+                 opt_args = NULL, epoch_callback = NULL) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
@@ -448,6 +496,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     ret_model = ret_model || "model" %in% ret_extra,
     ret_nn = ret_nn || "nn" %in% ret_extra,
     ret_fgraph = "fgraph" %in% ret_extra,
+    batch = batch,
+    opt_args = opt_args,
+    epoch_callback = epoch_callback,
     tmpdir = tempdir(),
     verbose = verbose
   )
@@ -708,6 +759,13 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   results. For more generic dimensionality reduction, it's safer to leave
 #'   \code{fast_sgd = FALSE}. If \code{fast_sgd = TRUE}, then user-supplied
 #'   values of \code{pcg_rand} and \code{n_sgd_threads}, are ignored.
+#' @param batch If \code{TRUE}, then embedding coordinates are updated at the
+#'   end of each epoch rather than during the epoch. In batch mode, results are
+#'   reproducible with a fixed random seed even with \code{n_sgd_threads > 1},
+#'   at the cost of a slightly higher memory use. You may also have to modify
+#'   \code{learning_rate} and increase \code{n_epochs}, so whether this provides
+#'   a speed increase over the single-threaded optimization is likely to be
+#'   dataset and hardware-dependent.
 #' @param ret_model If \code{TRUE}, then return extra data that can be used to
 #'   add new data to an existing embedding via \code{\link{umap_transform}}. The
 #'   embedded coordinates are returned as the list item \code{embedding}. If
@@ -730,8 +788,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param ret_extra A vector indicating what extra data to return. May contain
 #'   any combination of the following strings:
 #'   \itemize{
-#'     \item \code{"model"} Same as setting `ret_model = TRUE`.
-#'     \item \code{"nn"} Same as setting `ret_nn = TRUE`.
+#'     \item \code{"model"} Same as setting \code{ret_model = TRUE}.
+#'     \item \code{"nn"} Same as setting \code{ret_nn = TRUE}.
 #'     \item \code{"fgraph"} the high dimensional fuzzy graph (i.e. the fuzzy
 #'       simplicial set of the merged local views of the input data). The graph
 #'       is returned as a sparse symmetric N x N matrix of class
@@ -744,7 +802,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       employed for optimization and therefore the number of non-zero elements
 #'       in the matrix is dependent on \code{n_epochs}. If you are only
 #'       interested in the fuzzy input graph (e.g. for clustering), setting
-#'       `n_epochs = 0` will avoid any further sparsifying.
+#'       \code{n_epochs = 0} will avoid any further sparsifying.
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
@@ -753,9 +811,10 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
-#'   descent. If set to > 1, then results will not be reproducible, even if
-#'   `set.seed` is called with a fixed seed before running. Set to
-#'   \code{"auto"} go use the same value as \code{n_threads}.
+#'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
+#'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
+#'   fixed seed before running. Set to \code{"auto"} to use the same value as
+#'   \code{n_threads}.
 #' @param grain_size The minimum amount of work to do on each thread. If this
 #'   value is set high enough, then less than \code{n_threads} or
 #'   \code{n_sgd_threads} will be used for processing, which might give a
@@ -768,6 +827,39 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   only written to disk if \code{n_threads > 1} and
 #'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
+#' @param opt_args A list of optimizer parameters, used when 
+#'   \code{batch = TRUE}. The optimization method used is Adam (Kingma and Ba,
+#'   2014).
+#'   \itemize{
+#'     \item \code{beta1} The weighting parameter for the exponential moving
+#'     average of the first moment estimator. Effectively the momentum
+#'     parameter. Should be a floating point value between 0 and 1. Higher
+#'     values can smooth oscillatory updates in poorly-conditioned situations
+#'     and may allow for a larger \code{learning_rate} to be specified, but too
+#'     high can cause divergence. Default: 0.5.
+#'     \item \code{beta2} The weighting parameter for the exponential moving
+#'     average of the uncentered second moment estimator. Should be a floating
+#'     point value between 0 and 1. Controls the degree of adaptivity in the
+#'     step-size. Higher values put more weight on previous time steps. Default:
+#'     0.9.
+#'     \item \code{eps} Intended to be a small value to prevent division by
+#'     zero, but in practice can also affect convergence due to its interaction
+#'     with \code{beta2}. Higher values reduce the effect of the step-size
+#'     adaptivity and bring the behavior closer to stochastic gradient descent
+#'     with momentum. Typical values are between 1e-8 and 1e-3. Default: 1e-7.
+#'     \item \code{alpha} The initial learning rate. Default: the value of the 
+#'     \code{learning_rate} parameter.
+#'   }
+#' @param epoch_callback A function which will be invoked at the end of every
+#'   epoch. Its signature should be: \code{(epoch, n_epochs, coords)}, where:
+#'   \itemize{
+#'     \item \code{epoch} The current epoch number (between \code{1} and 
+#'     \code{n_epochs}).
+#'     \item \code{n_epochs} Number of epochs to use during the optimization of
+#'     the embedded coordinates.
+#'     \item \code{coords} The embedded coordinates as of the end of the current
+#'     epoch, as a matrix with dimensions (N, \code{n_components}).
+#'   }
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
 #'     \item if \code{ret_model = TRUE} (or \code{ret_extra} contains
@@ -812,7 +904,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   fast_sgd = FALSE,
                   ret_model = FALSE, ret_nn = FALSE, ret_extra = c(),
                   tmpdir = tempdir(),
-                  verbose = getOption("verbose", TRUE)) {
+                  verbose = getOption("verbose", TRUE),
+                  batch = FALSE,
+                  opt_args = NULL, epoch_callback = NULL) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -834,6 +928,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     ret_model = ret_model || "model" %in% ret_extra,
     ret_nn = ret_nn || "nn" %in% ret_extra,
     ret_fgraph = "fgraph" %in% ret_extra,
+    batch = batch,
+    opt_args = opt_args,
+    epoch_callback = epoch_callback,
     tmpdir = tmpdir,
     verbose = verbose
   )
@@ -1038,9 +1135,10 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
-#'   descent. If set to > 1, then results will not be reproducible, even if
-#'   `set.seed` is called with a fixed seed before running. Set to
-#'   \code{"auto"} go use the same value as \code{n_threads}.
+#'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
+#'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
+#'   fixed seed before running. Set to \code{"auto"} to use the same value as
+#'   \code{n_threads}.
 #' @param grain_size The minimum amount of work to do on each thread. If this
 #'   value is set high enough, then less than \code{n_threads} or
 #'   \code{n_sgd_threads} will be used for processing, which might give a
@@ -1080,6 +1178,13 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   results. For more generic dimensionality reduction, it's safer to leave
 #'   \code{fast_sgd = FALSE}. If \code{fast_sgd = TRUE}, then user-supplied
 #'   values of \code{pcg_rand} and \code{n_sgd_threads}, are ignored.
+#' @param batch If \code{TRUE}, then embedding coordinates are updated at the
+#'   end of each epoch rather than during the epoch. In batch mode, results are
+#'   reproducible with a fixed random seed even with \code{n_sgd_threads > 1},
+#'   at the cost of a slightly higher memory use. You may also have to modify
+#'   \code{learning_rate} and increase \code{n_epochs}, so whether this provides
+#'   a speed increase over the single-threaded optimization is likely to be
+#'   dataset and hardware-dependent.
 #' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
 #'   nearest neighbor data that can be used as input to \code{nn_method} to
 #'   avoid the overhead of repeatedly calculating the nearest neighbors when
@@ -1091,7 +1196,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param ret_extra A vector indicating what extra data to return. May contain
 #'   any combination of the following strings:
 #'   \itemize{
-#'     \item \code{"nn"} same as setting `ret_nn = TRUE`.
+#'     \item \code{"nn"} same as setting \code{ret_nn = TRUE}.
 #'     \item \code{"P"} the high dimensional probability matrix. The graph
 #'     is returned as a sparse symmetric N x N matrix of class
 #'     \link[Matrix]{dgCMatrix-class}, where a non-zero entry (i, j) gives the
@@ -1101,14 +1206,47 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     not be sampled by the probabilistic edge sampling employed for
 #'     optimization and therefore the number of non-zero elements in the matrix
 #'     is dependent on \code{n_epochs}. If you are only interested in the fuzzy
-#'     input graph (e.g. for clustering), setting `n_epochs = 0` will avoid any
-#'     further sparsifying.
+#'     input graph (e.g. for clustering), setting \code{n_epochs = 0} will avoid
+#'     any further sparsifying.
 #'   }
 #' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
 #'   only written to disk if \code{n_threads > 1} and
 #'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
+#' @param opt_args A list of optimizer parameters, used when 
+#'   \code{batch = TRUE}. The optimization method used is Adam (Kingma and Ba,
+#'   2014).
+#'   \itemize{
+#'     \item \code{beta1} The weighting parameter for the exponential moving
+#'     average of the first moment estimator. Effectively the momentum
+#'     parameter. Should be a floating point value between 0 and 1. Higher
+#'     values can smooth oscillatory updates in poorly-conditioned situations
+#'     and may allow for a larger \code{learning_rate} to be specified, but too
+#'     high can cause divergence. Default: 0.5.
+#'     \item \code{beta2} The weighting parameter for the exponential moving
+#'     average of the uncentered second moment estimator. Should be a floating
+#'     point value between 0 and 1. Controls the degree of adaptivity in the
+#'     step-size. Higher values put more weight on previous time steps. Default:
+#'     0.9.
+#'     \item \code{eps} Intended to be a small value to prevent division by
+#'     zero, but in practice can also affect convergence due to its interaction
+#'     with \code{beta2}. Higher values reduce the effect of the step-size
+#'     adaptivity and bring the behavior closer to stochastic gradient descent
+#'     with momentum. Typical values are between 1e-8 and 1e-3. Default: 1e-7.
+#'     \item \code{alpha} The initial learning rate. Default: the value of the 
+#'     \code{learning_rate} parameter.
+#'   }
+#' @param epoch_callback A function which will be invoked at the end of every
+#'   epoch. Its signature should be: \code{(epoch, n_epochs, coords)}, where:
+#'   \itemize{
+#'     \item \code{epoch} The current epoch number (between \code{1} and 
+#'     \code{n_epochs}).
+#'     \item \code{n_epochs} Number of epochs to use during the optimization of
+#'     the embedded coordinates.
+#'     \item \code{coords} The embedded coordinates as of the end of the current
+#'     epoch, as a matrix with dimensions (N, \code{n_components}).
+#'   }
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
 #'     \item if \code{ret_nn = TRUE} (or \code{ret_extra} contains \code{"nn"}),
@@ -1158,7 +1296,9 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   fast_sgd = FALSE,
                   ret_nn = FALSE, ret_extra = c(),
                   tmpdir = tempdir(),
-                  verbose = getOption("verbose", TRUE)) {
+                  verbose = getOption("verbose", TRUE),
+                  batch = FALSE,
+                  opt_args = NULL, epoch_callback = NULL) {
   uwot(X,
     n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -1176,6 +1316,9 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     ret_fgraph = "P" %in% ret_extra,
     pcg_rand = pcg_rand,
     fast_sgd = fast_sgd,
+    batch = batch,
+    opt_args = opt_args,
+    epoch_callback = epoch_callback,
     tmpdir = tmpdir,
     verbose = verbose
   )
@@ -1205,8 +1348,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  pca = NULL, pca_center = TRUE,
                  pcg_rand = TRUE,
                  fast_sgd = FALSE,
+                 batch = FALSE,
+                 opt_args = NULL,
                  tmpdir = tempdir(),
-                 verbose = getOption("verbose", TRUE)) {
+                 verbose = getOption("verbose", TRUE),
+                 epoch_callback = NULL) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -1607,74 +1753,75 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (n_epochs > 0) {
     V@x[V@x < max(V@x) / n_epochs] <- 0
     V <- Matrix::drop0(V)
-
+    # Create the (0-indexed) indices of the head and tail of each directed edge
+    # in V. Graph is symmetric, so both (i->j) and (j->i) are present
+    if (batch) {
+      V <- Matrix::t(V)
+      # head is ordered in non-decreasing order of node index
+      positive_head <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
+      # tail is unordered
+      positive_tail <- V@i
+    }
+    else {
+      # Use the Python UMAP ordering
+      # head is unordered
+      positive_head <- V@i
+      # tail is ordered in non-decreasing order of node index
+      positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
+    }
+    # start/end pointers into the ordered vector
+    positive_ptr <- V@p
     epochs_per_sample <- make_epochs_per_sample(V@x, n_epochs)
-
-    positive_head <- V@i
-    positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
-
+    
     tsmessage(
       "Commencing optimization for ", n_epochs, " epochs, with ",
       length(positive_head), " positive edges",
       pluralize("thread", n_sgd_threads, " using")
     )
 
-    embedding <- t(embedding)
-    if (tolower(method) == "umap") {
-      embedding <- optimize_layout_umap(
-        head_embedding = embedding,
-        tail_embedding = NULL,
-        positive_head = positive_head,
-        positive_tail = positive_tail,
-        n_epochs = n_epochs,
-        n_vertices = n_vertices,
-        epochs_per_sample = epochs_per_sample,
-        a = a, b = b, gamma = gamma,
-        initial_alpha = alpha, negative_sample_rate,
-        approx_pow = approx_pow,
-        pcg_rand = pcg_rand,
-        n_threads = n_sgd_threads,
-        grain_size = grain_size,
-        move_other = TRUE,
-        verbose = verbose
-      )
+    method <- tolower(method)
+    if (method == "umap") {
+      method_args <- list(a = a, b = b, gamma = gamma, approx_pow = approx_pow)
     }
     else if (method == "tumap") {
-      embedding <- optimize_layout_tumap(
-        head_embedding = embedding,
-        tail_embedding = NULL,
-        positive_head = positive_head,
-        positive_tail = positive_tail,
-        n_epochs = n_epochs,
-        n_vertices = n_vertices,
-        epochs_per_sample = epochs_per_sample,
-        initial_alpha = alpha,
-        negative_sample_rate = negative_sample_rate,
-        pcg_rand = pcg_rand,
-        n_threads = n_sgd_threads,
-        grain_size = grain_size,
-        move_other = TRUE,
-        verbose = verbose
-      )
+      method_args <- list()
     }
     else {
-      embedding <- optimize_layout_largevis(
-        head_embedding = embedding,
-        positive_head = positive_head,
-        positive_tail = positive_tail,
-        n_epochs = n_epochs,
-        n_vertices = n_vertices,
-        epochs_per_sample = epochs_per_sample,
-        gamma = gamma,
-        initial_alpha = alpha,
-        negative_sample_rate = negative_sample_rate,
-        pcg_rand = pcg_rand,
-        n_threads = n_sgd_threads,
-        grain_size = grain_size,
-        verbose = verbose
-      )
+      method_args <- list(gamma = gamma)
     }
+    
+    default_opt_args <- list(alpha = alpha, beta1 = 0.5, beta2 = 0.9, eps = 1e-7)
+    if (is.null(opt_args)) {
+      opt_args <- list()
+    }
+    opt_args <- lmerge(default_opt_args, opt_args)
+    
     embedding <- t(embedding)
+    embedding <- optimize_layout_r(
+      head_embedding = embedding,
+      tail_embedding = NULL,
+      positive_head = positive_head,
+      positive_tail = positive_tail,
+      positive_ptr = positive_ptr,
+      n_epochs = n_epochs,
+      n_head_vertices = n_vertices,
+      n_tail_vertices = n_vertices,
+      epochs_per_sample = epochs_per_sample,
+      method = method,
+      method_args = method_args,
+      initial_alpha = alpha, 
+      opt_args = opt_args,
+      negative_sample_rate = negative_sample_rate,
+      pcg_rand = pcg_rand,
+      batch = batch,
+      n_threads = n_sgd_threads,
+      grain_size = grain_size,
+      move_other = TRUE,
+      epoch_callback = epoch_callback,
+      verbose = verbose
+    )
+    embedding <- t(embedding)
+    
     gc()
     # Center the points before returning
     embedding <- scale(embedding, center = TRUE, scale = FALSE)
@@ -1768,21 +1915,21 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param model a UMAP model create by \code{\link{umap}}.
 #' @param file name of the file where the model is to be saved or read from.
 #' @param unload if \code{TRUE}, unload all nearest neighbor indexes for the
-#'   model. The \code{model} will no longer be valid for use in 
-#'   \code{\link{umap_transform}} and the temporary working directory used 
-#'   during model saving will be deleted. You will need to reload the model
-#'   with `load_uwot` to use the model. If \code{FALSE}, then the model can
-#'   be re-used without reloading, but you must manually unload the NN index 
-#'   when you are finished using it if you want to delete the temporary working
-#'   directory. To unload manually, use \code{\link{unload_uwot}}. The 
-#'   absolute path of the working directory is found in the `mod_dir` item of 
-#'   the return value. 
+#'   model. The \code{model} will no longer be valid for use in
+#'   \code{\link{umap_transform}} and the temporary working directory used
+#'   during model saving will be deleted. You will need to reload the model with
+#'   \code{load_uwot} to use the model. If \code{FALSE}, then the model can be
+#'   re-used without reloading, but you must manually unload the NN index when
+#'   you are finished using it if you want to delete the temporary working
+#'   directory. To unload manually, use \code{\link{unload_uwot}}. The absolute
+#'   path of the working directory is found in the \code{mod_dir} item of the
+#'   return value.
 #' @param verbose if \code{TRUE}, log information to the console.
-#' @return \code{model} with one extra item: `mod_dir`, which contains the path
-#' to the working directory. If \code{unload = FALSE} then this directory still
-#' exists after this function returns, and can be cleaned up with 
-#' \code{\link{unload_uwot}}. If you don't care about cleaning up this 
-#' directory, or \code{unload = TRUE}, then you can ignore the return value.
+#' @return \code{model} with one extra item: \code{mod_dir}, which contains the
+#'   path to the working directory. If \code{unload = FALSE} then this directory
+#'   still exists after this function returns, and can be cleaned up with
+#'   \code{\link{unload_uwot}}. If you don't care about cleaning up this
+#'   directory, or \code{unload = TRUE}, then you can ignore the return value.
 #' @examples
 #' iris_train <- iris[c(1:10, 51:60), ]
 #' iris_test <- iris[100:110, ]
@@ -1891,11 +2038,11 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
 #'
 #' @param file name of the file where the model is to be saved or read from.
 #' @param verbose if \code{TRUE}, log information to the console.
-#' @return The model saved at \code{file}, for use with 
-#' \code{\link{umap_transform}}. Additionally, it contains an extra item: 
-#' `mod_dir`, which contains the path to the temporary working directory used 
-#' during loading of the model. This directory cannot be removed until this
-#' model has been unloaded by using \code{\link{unload_uwot}}.
+#' @return The model saved at \code{file}, for use with
+#'   \code{\link{umap_transform}}. Additionally, it contains an extra item:
+#'   \code{mod_dir}, which contains the path to the temporary working directory
+#'   used during loading of the model. This directory cannot be removed until
+#'   this model has been unloaded by using \code{\link{unload_uwot}}.
 #' @examples
 #' iris_train <- iris[c(1:10, 51:60), ]
 #' iris_test <- iris[100:110, ]

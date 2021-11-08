@@ -57,8 +57,10 @@
 #'   descent). Default is half the number of concurrent threads supported by the
 #'   system.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
-#'   descent. If set to > 1, then results will not be reproducible, even if
-#'   `set.seed` is called with a fixed seed before running.
+#'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
+#'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
+#'   fixed seed before running. Set to \code{"auto"} to use the same value as
+#'   \code{n_threads}.
 #' @param grain_size Minimum batch size for multithreading. If the number of
 #'   items to process in a thread falls below this number, then no threads will
 #'   be used. Used in conjunction with \code{n_threads} and
@@ -77,6 +79,16 @@
 #'     dimensions the same as \code{(nrow(X), ncol(model$embedding))}.
 #'   }
 #' This parameter should be used in preference to \code{init_weighted}.
+#' @param batch If \code{TRUE}, then embedding coordinates are updated at the
+#'   end of each epoch rather than during the epoch. In batch mode, results are
+#'   reproducible with a fixed random seed even with \code{n_sgd_threads > 1},
+#'   at the cost of a slightly higher memory use. You may also have to modify
+#'   \code{learning_rate} and increase \code{n_epochs}, so whether this provides
+#'   a speed increase over the single-threaded optimization is likely to be
+#'   dataset and hardware-dependent.
+#' @param learning_rate Initial learning rate used in optimization of the
+#'   coordinates. This overrides the value associated with the \code{model}.
+#'   This should be left unspecified under most circumstances.
 #' @return A matrix of coordinates for \code{X} transformed into the space
 #'   of the \code{model}.
 #' @examples
@@ -98,7 +110,10 @@ umap_transform <- function(X = NULL, model = NULL,
                            n_sgd_threads = 0,
                            grain_size = 1,
                            verbose = FALSE,
-                           init = "weighted") {
+                           init = "weighted",
+                           batch = FALSE,
+                           learning_rate = NULL
+                           ) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -152,7 +167,15 @@ umap_transform <- function(X = NULL, model = NULL,
   a <- model$a
   b <- model$b
   gamma <- model$gamma
-  alpha <- model$alpha
+  if (is.null(learning_rate)) {
+    alpha <- model$alpha
+  }
+  else {
+    alpha <- learning_rate
+  }
+  if (! is.numeric(alpha) || length(alpha) > 1 || alpha < 0) {
+    stop("learning rate should be a positive number, not ", alpha)
+  }
   negative_sample_rate <- model$negative_sample_rate
   approx_pow <- model$approx_pow
   norig_col <- model$norig_col
@@ -162,6 +185,7 @@ umap_transform <- function(X = NULL, model = NULL,
     pcg_rand <- TRUE
   }
 
+  # the number of model vertices
   n_vertices <- NULL
   Xnames <- NULL
   if (!is.null(X)){
@@ -343,56 +367,80 @@ umap_transform <- function(X = NULL, model = NULL,
   if (n_epochs > 0) {
     graph@x[graph@x < max(graph@x) / n_epochs] <- 0
     graph <- Matrix::drop0(graph)
+
+    # Edges are (i->j) where i (head) is from the new data and j (tail) is
+    # in the model data
+    # Unlike embedding of initial data, the edge list is therefore NOT symmetric
+    # i.e. the presence of (i->j) does NOT mean (j->i) is also present because
+    # i and j now come from different data
+    if (batch) {
+      # This is the same arrangement as Python UMAP
+      graph <- Matrix::t(graph)
+      # ordered indices of the new data nodes. Coordinates are updated 
+      # during optimization
+      positive_head <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
+      # unordered indices of the model nodes (some may not have any incoming
+      # edges), these coordinates will NOT update during the optimization
+      positive_tail <- graph@i
+    }
+    else {
+      # unordered indices of the new data nodes. Coordinates are updated 
+      # during optimization
+      positive_head <- graph@i
+      # ordered indices of the model nodes (some may not have any incoming edges)
+      # these coordinates will NOT update during the optimization
+      positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
+    }
+    
+    n_head_vertices <- nrow(embedding)
+    n_tail_vertices <- nrow(train_embedding)
+    
+    # if batch = TRUE points into the head (length == n_tail_vertices)
+    # if batch = FALSE, points into the tail (length == n_head_vertices)
+    positive_ptr <- graph@p
+
     epochs_per_sample <- make_epochs_per_sample(graph@x, n_epochs)
-
-    positive_head <- graph@i
-    positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
-
+    
     tsmessage(
       "Commencing optimization for ", n_epochs, " epochs, with ",
       length(positive_head), " positive edges",
       pluralize("thread", n_sgd_threads, " using")
     )
 
+    method <- tolower(method)
+    if (method == "umap") {
+      method_args <- list(a = a, b = b, gamma = gamma, approx_pow = approx_pow)
+    }
+    else {
+      method_args <- list()
+    }
+    
     embedding <- t(embedding)
     row.names(train_embedding) <- NULL
     train_embedding <- t(train_embedding)
-    if (tolower(method) == "umap") {
-      embedding <- optimize_layout_umap(
-        head_embedding = embedding,
-        tail_embedding = train_embedding,
-        positive_head = positive_head,
-        positive_tail = positive_tail,
-        n_epochs = n_epochs,
-        n_vertices = n_vertices,
-        epochs_per_sample = epochs_per_sample,
-        a = a, b = b, gamma = gamma,
-        initial_alpha = alpha, negative_sample_rate,
-        approx_pow = approx_pow,
-        pcg_rand = pcg_rand,
-        n_threads = n_sgd_threads,
-        grain_size = grain_size,
-        move_other = FALSE,
-        verbose = verbose
-      )
-    }
-    else {
-      embedding <- optimize_layout_tumap(
-        head_embedding = embedding,
-        tail_embedding = train_embedding,
-        positive_head = positive_head,
-        positive_tail = positive_tail,
-        n_epochs = n_epochs,
-        n_vertices, epochs_per_sample,
-        initial_alpha = alpha,
-        negative_sample_rate = negative_sample_rate,
-        pcg_rand = pcg_rand,
-        n_threads = n_sgd_threads,
-        grain_size = grain_size,
-        move_other = FALSE,
-        verbose = verbose
-      )
-    }
+    embedding <- optimize_layout_r(
+      head_embedding = embedding,
+      tail_embedding = train_embedding,
+      positive_head = positive_head,
+      positive_tail = positive_tail,
+      positive_ptr = positive_ptr,
+      n_epochs = n_epochs,
+      n_head_vertices = n_head_vertices,
+      n_tail_vertices = n_tail_vertices,
+      epochs_per_sample = epochs_per_sample,
+      method = tolower(method),
+      method_args = method_args,
+      initial_alpha = alpha / 4.0,
+      opt_args = list(),
+      negative_sample_rate = negative_sample_rate,
+      pcg_rand = pcg_rand,
+      batch = batch,
+      n_threads = n_sgd_threads,
+      grain_size = grain_size,
+      move_other = FALSE,
+      verbose = verbose,
+      epoch_callback = NULL
+    )
     embedding <- t(embedding)
   }
   tsmessage("Finished")

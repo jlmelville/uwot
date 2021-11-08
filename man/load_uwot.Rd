@@ -12,11 +12,11 @@ load_uwot(file, verbose = FALSE)
 \item{verbose}{if \code{TRUE}, log information to the console.}
 }
 \value{
-The model saved at \code{file}, for use with 
-\code{\link{umap_transform}}. Additionally, it contains an extra item: 
-`mod_dir`, which contains the path to the temporary working directory used 
-during loading of the model. This directory cannot be removed until this
-model has been unloaded by using \code{\link{unload_uwot}}.
+The model saved at \code{file}, for use with
+  \code{\link{umap_transform}}. Additionally, it contains an extra item:
+  \code{mod_dir}, which contains the path to the temporary working directory
+  used during loading of the model. This directory cannot be removed until
+  this model has been unloaded by using \code{\link{unload_uwot}}.
 }
 \description{
 Functions to write a UMAP model to a file, and to restore.

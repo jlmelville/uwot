@@ -28,8 +28,63 @@
 #define UWOT_GRADIENT_H
 
 #include <cmath>
+#include <limits>
+#include <vector>
 
 namespace uwot {
+
+inline auto clamp(float v, float lo, float hi) -> float {
+  float t = v < lo ? lo : v;
+  return t > hi ? hi : t;
+}
+
+// return the squared euclidean distance between two points x[px] and y[py]
+// also store the displacement between x[px] and y[py] in diffxy
+// there is a small but noticeable performance improvement by doing so
+// rather than recalculating it in the gradient step
+inline auto d2diff(const std::vector<float> &x, std::size_t px,
+                   const std::vector<float> &y, std::size_t py,
+                   std::size_t ndim, float dist_eps, std::vector<float> &diffxy)
+    -> float {
+  float d2 = 0.0;
+  for (std::size_t d = 0; d < ndim; d++) {
+    float diff = x[px + d] - y[py + d];
+    diffxy[d] = diff;
+    d2 += diff * diff;
+  }
+  return (std::max)(dist_eps, d2);
+}
+
+// The gradient for the dth component of the displacement between two point,
+// which for Euclidean distance in the output is invariably grad_coeff * (X - Y)
+// Different methods clamp the magnitude of the gradient to different values
+template <typename Gradient>
+auto grad_d(const std::vector<float> &disp, std::size_t d, float grad_coeff)
+    -> float {
+  return clamp(grad_coeff * disp[d], Gradient::clamp_lo, Gradient::clamp_hi);
+}
+
+template <typename Gradient>
+auto grad_attr(const Gradient &gradient,
+               const std::vector<float> &head_embedding, std::size_t dj,
+               const std::vector<float> &tail_embedding, std::size_t dk,
+               std::size_t ndim, std::vector<float> &disp) -> float {
+  static const float dist_eps = std::numeric_limits<float>::epsilon();
+  float d2 =
+      d2diff(head_embedding, dj, tail_embedding, dk, ndim, dist_eps, disp);
+  return gradient.grad_attr(d2);
+}
+
+template <typename Gradient>
+auto grad_rep(const Gradient &gradient,
+              const std::vector<float> &head_embedding, std::size_t dj,
+              const std::vector<float> &tail_embedding, std::size_t dk,
+              std::size_t ndim, std::vector<float> &disp) -> float {
+  static const float dist_eps = std::numeric_limits<float>::epsilon();
+  float d2 =
+      d2diff(head_embedding, dj, tail_embedding, dk, ndim, dist_eps, disp);
+  return gradient.grad_rep(d2);
+}
 
 // https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
 // an approximation to pow
