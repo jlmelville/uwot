@@ -136,12 +136,26 @@ struct UmapFactory {
     return uwot::Adam(alpha, beta1, beta2, eps, head_embedding.size());
   }
 
+  auto create_sgd(List opt_args) -> uwot::Sgd {
+    float alpha = lget(opt_args, "alpha", 1.0);
+    if (verbose) {
+      Rcerr << "Optimizing with SGD"
+            << " alpha = " << alpha << std::endl;
+    }
+
+    return uwot::Sgd(alpha);
+  }
+
   template <typename RandFactory, bool DoMove, typename Gradient>
   void create_impl(const Gradient &gradient, bool batch) {
     if (batch) {
-      std::string opt_name = opt_args[0];
+      std::string opt_name = opt_args["method"];
       if (opt_name == "adam") {
         auto opt = create_adam(opt_args);
+        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
+            gradient, opt, batch);
+      } else if (opt_name == "sgd") {
+        auto opt = create_sgd(opt_args);
         create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
             gradient, opt, batch);
       } else {

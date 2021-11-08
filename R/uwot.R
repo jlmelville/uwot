@@ -338,25 +338,28 @@
 #'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @param opt_args A list of optimizer parameters, used when 
-#'   \code{batch = TRUE}. The optimization method used is Adam (Kingma and Ba,
-#'   2014).
+#'   \code{batch = TRUE}. The default optimization method used is Adam (Kingma
+#'   and Ba, 2014).
 #'   \itemize{
-#'     \item \code{beta1} The weighting parameter for the exponential moving
-#'     average of the first moment estimator. EffeFctively the momentum
-#'     parameter. Should be a floating point value between 0 and 1. Higher
-#'     values can smooth oscillatory updates in poorly-conditioned situations
-#'     and may allow for a larger \code{learning_rate} to be specified, but too
-#'     high can cause divergence. Default: 0.5.
-#'     \item \code{beta2} The weighting parameter for the exponential moving
-#'     average of the uncentered second moment estimator. Should be a floating
-#'     point value between 0 and 1. Controls the degree of adaptivity in the
-#'     step-size. Higher values put more weight on previous time steps. Default:
-#'     0.9.
-#'     \item \code{eps} Intended to be a small value to prevent division by
-#'     zero, but in practice can also affect convergence due to its interaction
-#'     with \code{beta2}. Higher values reduce the effect of the step-size
-#'     adaptivity and bring the behavior closer to stochastic gradient descent
-#'     with momentum. Typical values are between 1e-8 and 1e-3. Default: 1e-7.
+#'     \item \code{method} The optimization method to use. Either \code{"adam"} 
+#'     or \code{"sgd"} (stochastic gradient descent). Default: \code{"adam"}.
+#'     \item \code{beta1} (Adam only). The weighting parameter for the
+#'     exponential moving average of the first moment estimator. Effectively the
+#'     momentum parameter. Should be a floating point value between 0 and 1.
+#'     Higher values can smooth oscillatory updates in poorly-conditioned
+#'     situations and may allow for a larger \code{learning_rate} to be
+#'     specified, but too high can cause divergence. Default: \code{0.5}.
+#'     \item \code{beta2} (Adam only). The weighting parameter for the
+#'     exponential moving average of the uncentered second moment estimator.
+#'     Should be a floating point value between 0 and 1. Controls the degree of
+#'     adaptivity in the step-size. Higher values put more weight on previous
+#'     time steps. Default: \code{0.9}.
+#'     \item \code{eps} (Adam only). Intended to be a small value to prevent
+#'     division by zero, but in practice can also affect convergence due to its
+#'     interaction with \code{beta2}. Higher values reduce the effect of the
+#'     step-size adaptivity and bring the behavior closer to stochastic gradient
+#'     descent with momentum. Typical values are between 1e-8 and 1e-3. Default:
+#'     \code{1e-7}.
 #'     \item \code{alpha} The initial learning rate. Default: the value of the 
 #'     \code{learning_rate} parameter.
 #'   }
@@ -828,25 +831,28 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @param opt_args A list of optimizer parameters, used when 
-#'   \code{batch = TRUE}. The optimization method used is Adam (Kingma and Ba,
-#'   2014).
+#'   \code{batch = TRUE}. The default optimization method used is Adam (Kingma
+#'   and Ba, 2014).
 #'   \itemize{
-#'     \item \code{beta1} The weighting parameter for the exponential moving
-#'     average of the first moment estimator. Effectively the momentum
-#'     parameter. Should be a floating point value between 0 and 1. Higher
-#'     values can smooth oscillatory updates in poorly-conditioned situations
-#'     and may allow for a larger \code{learning_rate} to be specified, but too
-#'     high can cause divergence. Default: 0.5.
-#'     \item \code{beta2} The weighting parameter for the exponential moving
-#'     average of the uncentered second moment estimator. Should be a floating
-#'     point value between 0 and 1. Controls the degree of adaptivity in the
-#'     step-size. Higher values put more weight on previous time steps. Default:
-#'     0.9.
-#'     \item \code{eps} Intended to be a small value to prevent division by
-#'     zero, but in practice can also affect convergence due to its interaction
-#'     with \code{beta2}. Higher values reduce the effect of the step-size
-#'     adaptivity and bring the behavior closer to stochastic gradient descent
-#'     with momentum. Typical values are between 1e-8 and 1e-3. Default: 1e-7.
+#'     \item \code{method} The optimization method to use. Either \code{"adam"} 
+#'     or \code{"sgd"} (stochastic gradient descent). Default: \code{"adam"}.
+#'     \item \code{beta1} (Adam only). The weighting parameter for the
+#'     exponential moving average of the first moment estimator. Effectively the
+#'     momentum parameter. Should be a floating point value between 0 and 1.
+#'     Higher values can smooth oscillatory updates in poorly-conditioned
+#'     situations and may allow for a larger \code{learning_rate} to be
+#'     specified, but too high can cause divergence. Default: \code{0.5}.
+#'     \item \code{beta2} (Adam only). The weighting parameter for the
+#'     exponential moving average of the uncentered second moment estimator.
+#'     Should be a floating point value between 0 and 1. Controls the degree of
+#'     adaptivity in the step-size. Higher values put more weight on previous
+#'     time steps. Default: \code{0.9}.
+#'     \item \code{eps} (Adam only). Intended to be a small value to prevent
+#'     division by zero, but in practice can also affect convergence due to its
+#'     interaction with \code{beta2}. Higher values reduce the effect of the
+#'     step-size adaptivity and bring the behavior closer to stochastic gradient
+#'     descent with momentum. Typical values are between 1e-8 and 1e-3. Default:
+#'     \code{1e-7}.
 #'     \item \code{alpha} The initial learning rate. Default: the value of the 
 #'     \code{learning_rate} parameter.
 #'   }
@@ -1215,25 +1221,28 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @param opt_args A list of optimizer parameters, used when 
-#'   \code{batch = TRUE}. The optimization method used is Adam (Kingma and Ba,
-#'   2014).
+#'   \code{batch = TRUE}. The default optimization method used is Adam (Kingma
+#'   and Ba, 2014).
 #'   \itemize{
-#'     \item \code{beta1} The weighting parameter for the exponential moving
-#'     average of the first moment estimator. Effectively the momentum
-#'     parameter. Should be a floating point value between 0 and 1. Higher
-#'     values can smooth oscillatory updates in poorly-conditioned situations
-#'     and may allow for a larger \code{learning_rate} to be specified, but too
-#'     high can cause divergence. Default: 0.5.
-#'     \item \code{beta2} The weighting parameter for the exponential moving
-#'     average of the uncentered second moment estimator. Should be a floating
-#'     point value between 0 and 1. Controls the degree of adaptivity in the
-#'     step-size. Higher values put more weight on previous time steps. Default:
-#'     0.9.
-#'     \item \code{eps} Intended to be a small value to prevent division by
-#'     zero, but in practice can also affect convergence due to its interaction
-#'     with \code{beta2}. Higher values reduce the effect of the step-size
-#'     adaptivity and bring the behavior closer to stochastic gradient descent
-#'     with momentum. Typical values are between 1e-8 and 1e-3. Default: 1e-7.
+#'     \item \code{method} The optimization method to use. Either \code{"adam"} 
+#'     or \code{"sgd"} (stochastic gradient descent). Default: \code{"adam"}.
+#'     \item \code{beta1} (Adam only). The weighting parameter for the
+#'     exponential moving average of the first moment estimator. Effectively the
+#'     momentum parameter. Should be a floating point value between 0 and 1.
+#'     Higher values can smooth oscillatory updates in poorly-conditioned
+#'     situations and may allow for a larger \code{learning_rate} to be
+#'     specified, but too high can cause divergence. Default: \code{0.5}.
+#'     \item \code{beta2} (Adam only). The weighting parameter for the
+#'     exponential moving average of the uncentered second moment estimator.
+#'     Should be a floating point value between 0 and 1. Controls the degree of
+#'     adaptivity in the step-size. Higher values put more weight on previous
+#'     time steps. Default: \code{0.9}.
+#'     \item \code{eps} (Adam only). Intended to be a small value to prevent
+#'     division by zero, but in practice can also affect convergence due to its
+#'     interaction with \code{beta2}. Higher values reduce the effect of the
+#'     step-size adaptivity and bring the behavior closer to stochastic gradient
+#'     descent with momentum. Typical values are between 1e-8 and 1e-3. Default:
+#'     \code{1e-7}.
 #'     \item \code{alpha} The initial learning rate. Default: the value of the 
 #'     \code{learning_rate} parameter.
 #'   }
@@ -1790,11 +1799,21 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       method_args <- list(gamma = gamma)
     }
     
-    default_opt_args <- list(alpha = alpha, beta1 = 0.5, beta2 = 0.9, eps = 1e-7)
+    default_batch_opt = "adam"
+    default_opt_args <- list(
+      sgd = list(alpha = alpha),
+      adam = list(alpha = alpha, beta1 = 0.5, beta2 = 0.9, eps = 1e-7)
+    )
     if (is.null(opt_args)) {
       opt_args <- list()
     }
-    opt_args <- lmerge(default_opt_args, opt_args)
+    if (is.null(opt_args$method)) {
+      opt_args$method <- "adam"
+    }
+    if (!(opt_args$method %in% names(default_opt_args))) {
+      stop("Unknown optimization method '", opt_args$method, "'")
+    }
+    opt_args <- lmerge(default_opt_args[[opt_args$method]], opt_args)
     
     embedding <- t(embedding)
     embedding <- optimize_layout_r(
