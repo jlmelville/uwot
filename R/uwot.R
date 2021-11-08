@@ -1799,21 +1799,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       method_args <- list(gamma = gamma)
     }
     
-    default_batch_opt = "adam"
-    default_opt_args <- list(
-      sgd = list(alpha = alpha),
-      adam = list(alpha = alpha, beta1 = 0.5, beta2 = 0.9, eps = 1e-7)
-    )
-    if (is.null(opt_args)) {
-      opt_args <- list()
-    }
-    if (is.null(opt_args$method)) {
-      opt_args$method <- "adam"
-    }
-    if (!(opt_args$method %in% names(default_opt_args))) {
-      stop("Unknown optimization method '", opt_args$method, "'")
-    }
-    opt_args <- lmerge(default_opt_args[[opt_args$method]], opt_args)
+    full_opt_args <- get_opt_args(opt_args, alpha)
     
     embedding <- t(embedding)
     embedding <- optimize_layout_r(
@@ -1829,7 +1815,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       method = method,
       method_args = method_args,
       initial_alpha = alpha, 
-      opt_args = opt_args,
+      opt_args = full_opt_args,
       negative_sample_rate = negative_sample_rate,
       pcg_rand = pcg_rand,
       batch = batch,
@@ -2814,6 +2800,25 @@ attr_to_scale_info <- function(X) {
   }
   Xattr
 }
+
+get_opt_args <- function(opt_args, alpha) {
+  default_batch_opt = "adam"
+  default_opt_args <- list(
+    sgd = list(alpha = alpha),
+    adam = list(alpha = alpha, beta1 = 0.5, beta2 = 0.9, eps = 1e-7)
+  )
+  if (is.null(opt_args)) {
+    opt_args <- list()
+  }
+  if (is.null(opt_args$method)) {
+    opt_args$method <- "adam"
+  }
+  if (!(opt_args$method %in% names(default_opt_args))) {
+    stop("Unknown optimization method '", opt_args$method, "'")
+  }
+  lmerge(default_opt_args[[opt_args$method]], opt_args)
+}
+
 
 #' @useDynLib uwot, .registration=TRUE
 #' @importFrom Rcpp sourceCpp
