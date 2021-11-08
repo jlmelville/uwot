@@ -805,7 +805,11 @@ which is [GPLv2](https://cran.r-project.org/web/licenses/GPL-2).
 * The [UMAP reference implementation](https://github.com/lmcinnes/umap) and
 [publication](https://arxiv.org/abs/1802.03426).
 * There is now a [UMAP package on CRAN](https://cran.r-project.org/package=umap)
-(see also its [github repo](https://github.com/tkonopka/umap)). Another R
-package is [umapr](https://github.com/ropenscilabs/umapr).
+(see also its [github repo](https://github.com/tkonopka/umap)).
+* Another R package is [umapr](https://github.com/ropenscilabs/umapr), but it is 
+no longer being maintained.
+* [umappp](https://github.com/LTLA/umappp) is a full C++ implementation, and
+[yaumap](https://github.com/LTLA/yaumap) provides an R wrapper. The batch
+implementation in umappp are the basis for uwot's attempt at the same.
 * `uwot` uses the [RcppProgress](https://cran.r-project.org/package=RcppProgress)
 package to show a text-based progress bar when `verbose = TRUE`.
