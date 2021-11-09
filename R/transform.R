@@ -85,7 +85,8 @@
 #'   at the cost of a slightly higher memory use. You may also have to modify
 #'   \code{learning_rate} and increase \code{n_epochs}, so whether this provides
 #'   a speed increase over the single-threaded optimization is likely to be
-#'   dataset and hardware-dependent.
+#'   dataset and hardware-dependent. If \code{NULL}, the transform will use the
+#'   value provided in the \code{model}, if available. Default: \code{FALSE}. 
 #' @param learning_rate Initial learning rate used in optimization of the
 #'   coordinates. This overrides the value associated with the \code{model}.
 #'   This should be left unspecified under most circumstances.
@@ -115,6 +116,8 @@
 #'     \item \code{alpha} The initial learning rate. Default: the value of the 
 #'     \code{learning_rate} parameter.
 #'   }
+#'   If \code{NULL}, the transform will use the value provided in the 
+#'   \code{model}, if available.
 #' @return A matrix of coordinates for \code{X} transformed into the space
 #'   of the \code{model}.
 #' @examples
@@ -137,7 +140,7 @@ umap_transform <- function(X = NULL, model = NULL,
                            grain_size = 1,
                            verbose = FALSE,
                            init = "weighted",
-                           batch = FALSE,
+                           batch = NULL,
                            learning_rate = NULL,
                            opt_args = NULL
                            ) {
@@ -190,6 +193,24 @@ umap_transform <- function(X = NULL, model = NULL,
   metric <- model$metric
   nblocks <- length(metric)
   pca_models <- model$pca_models
+  
+  if (is.null(batch)) {
+    if (!is.null(model$batch)) {
+      batch <- model$batch
+    }
+    else {
+      batch <- FALSE
+    }
+  }
+  
+  if (is.null(opt_args)) {
+    if (!is.null(model$opt_args)) {
+      opt_args <- model$opt_args
+    }
+    else {
+      opt_args <- list()
+    }
+  }
 
   a <- model$a
   b <- model$b

@@ -17,7 +17,7 @@ umap_transform(
   grain_size = 1,
   verbose = FALSE,
   init = "weighted",
-  batch = FALSE,
+  batch = NULL,
   learning_rate = NULL,
   opt_args = NULL
 )
@@ -109,7 +109,8 @@ reproducible with a fixed random seed even with \code{n_sgd_threads > 1},
 at the cost of a slightly higher memory use. You may also have to modify
 \code{learning_rate} and increase \code{n_epochs}, so whether this provides
 a speed increase over the single-threaded optimization is likely to be
-dataset and hardware-dependent.}
+dataset and hardware-dependent. If \code{NULL}, the transform will use the
+value provided in the \code{model}, if available. Default: \code{FALSE}.}
 
 \item{learning_rate}{Initial learning rate used in optimization of the
 coordinates. This overrides the value associated with the \code{model}.
@@ -140,7 +141,9 @@ and Ba, 2014).
   \code{1e-7}.
   \item \code{alpha} The initial learning rate. Default: the value of the 
   \code{learning_rate} parameter.
-}}
+}
+If \code{NULL}, the transform will use the value provided in the 
+\code{model}, if available.}
 }
 \value{
 A matrix of coordinates for \code{X} transformed into the space

@@ -1857,7 +1857,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         approx_pow = approx_pow,
         metric = metrics,
         norig_col = norig_col,
-        pcg_rand = pcg_rand
+        pcg_rand = pcg_rand,
+        batch = batch,
+        opt_args = full_opt_args
       ))
       if (nblocks > 1) {
         res$nn_index <- list()
