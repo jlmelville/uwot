@@ -118,6 +118,21 @@
 #'   }
 #'   If \code{NULL}, the transform will use the value provided in the 
 #'   \code{model}, if available.
+#' @param epoch_callback A function which will be invoked at the end of every
+#'   epoch. Its signature should be:
+#'   \code{(epoch, n_epochs, coords, fixed_coords)}, where:
+#'   \itemize{
+#'     \item \code{epoch} The current epoch number (between \code{1} and 
+#'     \code{n_epochs}).
+#'     \item \code{n_epochs} Number of epochs to use during the optimization of
+#'     the embedded coordinates.
+#'     \item \code{coords} The embedded coordinates as of the end of the current
+#'     epoch, as a matrix with dimensions (N, \code{n_components}).
+#'     \item \code{fixed_coords} The originally embedded coordinates from the
+#'     \code{model}. These are fixed and do not change. A matrix with dimensions 
+#'     (Nmodel, \code{n_components}) where \code{Nmodel} is the number of
+#'     observations in the original data.
+#'   }
 #' @return A matrix of coordinates for \code{X} transformed into the space
 #'   of the \code{model}.
 #' @examples
@@ -142,7 +157,8 @@ umap_transform <- function(X = NULL, model = NULL,
                            init = "weighted",
                            batch = NULL,
                            learning_rate = NULL,
-                           opt_args = NULL
+                           opt_args = NULL,
+                           epoch_callback = NULL
                            ) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
@@ -489,7 +505,7 @@ umap_transform <- function(X = NULL, model = NULL,
       grain_size = grain_size,
       move_other = FALSE,
       verbose = verbose,
-      epoch_callback = NULL
+      epoch_callback = epoch_callback
     )
     embedding <- t(embedding)
   }

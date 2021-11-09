@@ -37,11 +37,12 @@ namespace uwot {
 // e.g. to plot or save coordinates for diagnostic purposes
 struct EpochCallback {
   virtual void operator()(std::size_t epoch, std::size_t n_epochs,
-                          const std::vector<float> &head_embedding) = 0;
+                          const std::vector<float> &head_embedding,
+                          const std::vector<float> &tail_embedding) = 0;
 };
 
 struct DoNothingCallback : EpochCallback {
-  void operator()(std::size_t, std::size_t,
+  void operator()(std::size_t, std::size_t, const std::vector<float> &,
                   const std::vector<float> &) override {}
 };
 
@@ -165,7 +166,7 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
   template <typename Parallel>
   void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &) {
     opt.epoch_end(epoch, n_epochs);
-    (*epoch_callback)(epoch, n_epochs, head_embedding);
+    (*epoch_callback)(epoch, n_epochs, head_embedding, tail_embedding);
   }
 };
 
@@ -222,7 +223,7 @@ template <bool DoMoveVertex, typename Opt> struct BatchUpdate {
     parallel.pfor(head_embedding.size(), worker);
 
     opt.epoch_end(epoch, n_epochs);
-    (*epoch_callback)(epoch, n_epochs, head_embedding);
+    (*epoch_callback)(epoch, n_epochs, head_embedding, tail_embedding);
   }
 };
 

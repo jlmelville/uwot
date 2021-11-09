@@ -263,24 +263,46 @@ void create_largevis(UmapFactory &umap_factory, List method_args) {
 }
 
 // Wrap Rcpp Function for use as a callback
-struct REpochCallback : uwot::EpochCallback {
+template <bool DoMoveVertex> struct REpochCallback : uwot::EpochCallback {
   Function f;
   std::size_t ndim;
   REpochCallback(Function f, std::size_t ndim) : f(f), ndim(ndim) {}
   void operator()(std::size_t epoch, std::size_t n_epochs,
-                  const std::vector<float> &head_embedding) override {
+                  const std::vector<float> &head_embedding,
+                  const std::vector<float> &tail_embedding) override {
+    NumericMatrix head_mat(ndim, head_embedding.size() / ndim,
+                           head_embedding.begin());
+    auto head_matt = transpose(head_mat);
+    NumericMatrix tail_mat(ndim, tail_embedding.size() / ndim,
+                           tail_embedding.begin());
+    auto tail_matt = transpose(tail_mat);
+    f(epoch + 1, n_epochs, head_matt, tail_matt);
+  }
+};
+
+template <> struct REpochCallback<true> : uwot::EpochCallback {
+  Function f;
+  std::size_t ndim;
+  REpochCallback(Function f, std::size_t ndim) : f(f), ndim(ndim) {}
+  void operator()(std::size_t epoch, std::size_t n_epochs,
+                  const std::vector<float> &head_embedding,
+                  const std::vector<float> &) override {
     NumericMatrix m(ndim, head_embedding.size() / ndim, head_embedding.begin());
     auto mt = transpose(m);
     f(epoch + 1, n_epochs, mt);
   }
 };
 
-auto create_callback(Nullable<Function> epoch_callback, std::size_t ndim)
-    -> uwot::EpochCallback * {
+auto create_callback(Nullable<Function> epoch_callback, std::size_t ndim,
+                     bool move_other) -> uwot::EpochCallback * {
   if (epoch_callback.isNull()) {
     return new uwot::DoNothingCallback();
   } else {
-    return new REpochCallback(as<Function>(epoch_callback), ndim);
+    if (move_other) {
+      return new REpochCallback<true>(as<Function>(epoch_callback), ndim);
+    } else {
+      return new REpochCallback<false>(as<Function>(epoch_callback), ndim);
+    }
   }
 }
 
@@ -299,7 +321,8 @@ NumericMatrix optimize_layout_r(
 
   auto coords = r_to_coords(head_embedding, tail_embedding);
   const std::size_t ndim = head_embedding.size() / n_head_vertices;
-  uwot::EpochCallback *uwot_ecb = create_callback(epoch_callback, ndim);
+  uwot::EpochCallback *uwot_ecb =
+      create_callback(epoch_callback, ndim, move_other);
 
   UmapFactory umap_factory(move_other, pcg_rand, coords.get_head_embedding(),
                            coords.get_tail_embedding(), positive_head,
