@@ -498,3 +498,43 @@ xumap <-
 expect_equal(row.names(xumap$embedding), row.names(xnames))
 expect_equal(row.names(xumap$nn$euclidean$idx), row.names(xnames))
 expect_equal(row.names(xumap$nn$euclidean$dist), row.names(xnames))
+
+first_coords <- c()
+test_callback <- function(epochs, n_epochs, coords) {
+  first_coords <<- c(first_coords, coords[1, 1])
+}
+set.seed(42)
+ibatch <- tumap(iris10, n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+                init = "spca", verbose = FALSE, batch = TRUE,
+                n_threads = 0, n_sgd_threads = 0, ret_model = TRUE,
+                epoch_callback = test_callback)
+expect_equal(length(first_coords), 2)
+
+set.seed(42)
+ibatch2 <- tumap(iris10, n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+                init = "spca", verbose = FALSE, batch = TRUE,
+                n_threads = 0, n_sgd_threads = 2, ret_model = TRUE)
+expect_equal(ibatch$embedding, ibatch2$embedding)
+
+itest <- x2m(iris[11:20, ])
+first_coords <- c()
+fixed_first_coords <- c()
+test_transform_callback <- function(epochs, n_epochs, coords, fixed_coords) {
+  first_coords <<- c(first_coords, coords[1, 1])
+  fixed_first_coords <<- c(fixed_first_coords, fixed_coords[1, 1])
+}
+set.seed(42)
+ibatchtest <- umap_transform(itest, ibatch, epoch_callback = test_transform_callback, n_epochs = 5)
+expect_equal(length(first_coords), 5)
+expect_equal(length(fixed_first_coords), 5)
+# coords don't actually change on the first epoch
+expect_equal(length(unique(first_coords)), 4)
+# if coords are fixed they should be the same at each epoch
+expect_equal(length(unique(fixed_first_coords)), 1)
+
+set.seed(42)
+ibatchtest2 <- umap_transform(itest, ibatch, n_sgd_threads = 2, n_epochs = 5)
+expect_equal(ibatchtest, ibatchtest2)
+
+
+
