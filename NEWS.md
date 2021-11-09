@@ -1,5 +1,27 @@
 # uwot 0.1.11
 
+## New features
+
+* New parameter: `batch`. If `TRUE`, then results are reproducible when
+`n_sgd_threads > 1` (as long as you use `set.seed`). The price to be paid is
+that the optimization is slightly less efficient (because coordinates are not
+updated as quickly and hence gradients are staler for longer), so it is highly
+recommended to set `n_epochs = 500` or higher. Thank you to [Aaron
+Lun](https://github.com/LTLA) who not only came up with a way to implement this
+feature, but also wrote an entire 
+[C++ implementation of UMAP](https://github.com/LTLA/umappp) which does it 
+(<https://github.com/jlmelville/uwot/issues/83>).
+* New parameter: `opt_args`. The default optimization method when `batch = TRUE`
+is [Adam](https://arxiv.org/abs/1412.6980). You can control its parameters by
+passing them in the `opt_args` list. As Adam is a momentum-based method it
+requires extra storage of previous gradient data. To avoid the extra memory
+overhead you can also use `opt_args = list(method = "sgd")` to use a stochastic
+gradient descent method like that used when `batch = FALSE`.
+* New parameter: `epoch_callback`. You may now pass a function which will be
+invoked at the end of each epoch. Mainly useful for producing an image of the
+state of the embedding at different points during the optimization. This is
+another feature taken from [umappp](https://github.com/LTLA/umappp).
+
 ## Bug fixes and minor improvements
 
 * If row names are provided in the input data (or nearest neighbor data, or

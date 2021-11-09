@@ -172,6 +172,20 @@ iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Wid
 iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),
                                       "euclidean" = c("Petal.Length", "Petal.Width"),
                                       "categorical" = "Species"))
+
+# Batch mode allows for multiple threads while being reproducible
+# (at the cost of needing more epochs for larger datasets)
+set.seed(42)
+iris_umap_batch <- umap(iris, batch = TRUE, n_sgd_threads = 4)
+# This will give the same results
+set.seed(42)
+iris_umap_batch2 <- umap(iris, batch = TRUE, n_sgd_threads = 2)
+all(iris_umap_batch == iris_umap_batch2)
+# TRUE
+
+# Batch mode uses Adam optimizer by default. Control the parameters with the opt_args list
+iris_umap_batch <- umap(iris, batch = TRUE, opt_args = list(beta1 = 0.9, beta2 = 0.999))
+
 ```
 
 ## Documentation
