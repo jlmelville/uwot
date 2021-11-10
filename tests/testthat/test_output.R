@@ -537,4 +537,22 @@ ibatchtest2 <- umap_transform(itest, ibatch, n_sgd_threads = 2, n_epochs = 5)
 expect_equal(ibatchtest, ibatchtest2)
 
 
+oargs_umap <- tumap(iris10, n_neighbors = 4, n_epochs = 0, learning_rate = 0.5,
+                init = "spca", verbose = FALSE, batch = TRUE,
+                n_threads = 0, n_sgd_threads = 0, ret_model = TRUE,
+                opt_args = list(alpha = 0.4, beta1 = 0.1, beta2 = 0.2, eps = 1e-3))
+expect_equal(length(oargs_umap$opt_args), 5)
+expect_equal(oargs_umap$opt_args$method, "adam")
+expect_equal(oargs_umap$opt_args$alpha, 0.4)
+expect_equal(oargs_umap$opt_args$beta1, 0.1)
+expect_equal(oargs_umap$opt_args$beta2, 0.2)
+expect_equal(oargs_umap$opt_args$eps, 1e-3)
 
+
+oargs_umap <- tumap(iris10, n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+                    init = "spca", verbose = FALSE, batch = TRUE,
+                    n_threads = 0, n_sgd_threads = 0, ret_model = TRUE,
+                    opt_args = list(method = "sgd", alpha = 0.4))
+expect_equal(length(oargs_umap$opt_args), 2)
+expect_equal(oargs_umap$opt_args$method, "sgd")
+expect_equal(oargs_umap$opt_args$alpha, 0.4)
