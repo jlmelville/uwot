@@ -1759,6 +1759,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
 
+  full_opt_args <- get_opt_args(opt_args, alpha)
+
   if (n_epochs > 0) {
     V@x[V@x < max(V@x) / n_epochs] <- 0
     V <- Matrix::drop0(V)
@@ -1798,8 +1800,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     else {
       method_args <- list(gamma = gamma)
     }
-    
-    full_opt_args <- get_opt_args(opt_args, alpha)
     
     embedding <- t(embedding)
     embedding <- optimize_layout_r(
