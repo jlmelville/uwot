@@ -61,46 +61,51 @@ struct Adam {
   float beta1;
   float beta2;
 
-  float beta11;
-  float beta1t;
-  float beta1t1;
+  float beta11; // 1 - beta1
+  float beta1t; // beta1 ^ t
 
-  float beta21;
-  float beta2t;
-  float beta2t1;
+  float beta21; // 1 - beta2
+  float beta2t; // beta2 ^ t
 
   float eps;
+
+  // rather than calculate the debiased values for m and v (mhat and vhat)
+  // directly, fold them into a scaling factor for alpha as described at the
+  // end of the first paragraph of section 2 of the Adam paper
+  // technically you also need to rescale eps (given as eps-hat in the paper)
+  float epsc;     // scaled eps
+  float ad_scale; // scaled alpha
 
   std::vector<float> mt;
   std::vector<float> vt;
 
   Adam(float alpha, float beta1, float beta2, float eps, std::size_t vec_size)
       : initial_alpha(alpha), alpha(alpha), beta1(beta1), beta2(beta2),
-        beta11(1.0 - beta1), beta1t(beta1), beta1t1(1.0 - beta1t),
-        beta21(1.0 - beta2), beta2t(beta2), beta2t1(1.0 - beta2t), eps(eps),
-        mt(vec_size), vt(vec_size) {}
+        beta11(1.0 - beta1), beta1t(beta1), beta21(1.0 - beta2), beta2t(beta2),
+        eps(eps), epsc(eps * sqrt(beta21)),
+        ad_scale(alpha * sqrt(beta21) / beta11), mt(vec_size), vt(vec_size) {}
 
   void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
-    float vb = beta2 * vt[i] + beta21 * grad[i] * grad[i];
-    float mb = beta1 * mt[i] + beta11 * grad[i];
+    // this takes advantage of updating in-place to give a more compact version
+    // of mt[i] = beta1 * mt[i] + beta11 * grad[i] etc.
+    vt[i] += beta21 * (grad[i] * grad[i] - vt[i]);
+    mt[i] += beta11 * (grad[i] - mt[i]);
 
-    float mc = mb / beta1t1;
-    float vc = vb / beta2t1;
-
-    float up = mc / (sqrt(vc) + eps);
-    v[i] += alpha * up;
-
-    mt[i] = mb;
-    vt[i] = vb;
+    // ad_scale and epsc handle the debiasing
+    v[i] += ad_scale * mt[i] / (sqrt(vt[i]) + epsc);
   }
 
   void epoch_end(std::size_t epoch, std::size_t n_epochs) {
     alpha = linear_decay(initial_alpha, epoch, n_epochs);
 
+    // update debiasing factors
     beta1t *= beta1;
-    beta1t1 = 1.0 - beta1t;
     beta2t *= beta2;
-    beta2t1 = 1.0 - beta2t;
+    float sqrt_b2t1 = sqrt(1.0 - beta2t);
+
+    // rescale alpha and eps to take account of debiasing
+    ad_scale = alpha * sqrt_b2t1 / (1.0 - beta1t);
+    epsc = sqrt_b2t1 * eps;
   }
 };
 
