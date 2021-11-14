@@ -19,7 +19,8 @@ BugReports: https://github.com/jlmelville/uwot/issues
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat,
-    covr
+    covr,
+    bigstatsr
 RoxygenNote: 7.1.2
 Depends: Matrix
 LinkingTo: Rcpp, RcppProgress, RcppAnnoy, dqrng

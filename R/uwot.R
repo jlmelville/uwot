@@ -255,6 +255,15 @@
 #' @param pca_center If \code{TRUE}, center the columns of \code{X} before
 #'   carrying out PCA. For binary data, it's recommended to set this to
 #'   \code{FALSE}.
+#' @param pca_method Use the specified package to carry out any PCA
+#'   dimensionality reduction. Allowed values are: \code{"irlba"} (the default,
+#'   using \href{https://cran.r-project.org/package=irlba}{irlba}) and
+#'   \code{"bigstatsr"} (using
+#'   \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}). The SVD
+#'   methods used in \code{"bigstatsr"} may be faster on systems without access
+#'   to efficient linear algebra libraries (e.g. Windows). Note that
+#'   \code{bigstatsr} is \emph{not} a dependency of uwot: if you choose to use
+#'   this package for PCA, you \emph{must} install it yourself.
 #' @param pcg_rand If \code{TRUE}, use the PCG random number generator (O'Neill,
 #'   2014) during optimization. Otherwise, use the faster (but probably less
 #'   statistically good) Tausworthe "taus88" generator. The default is
@@ -477,7 +486,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  tmpdir = tempdir(),
                  verbose = getOption("verbose", TRUE),
                  batch = FALSE,
-                 opt_args = NULL, epoch_callback = NULL) {
+                 opt_args = NULL, epoch_callback = NULL, pca_method = NULL) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
@@ -493,7 +502,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight, target_metric = target_metric,
-    pca = pca, pca_center = pca_center,
+    pca = pca, pca_center = pca_center, pca_method = pca_method,
     pcg_rand = pcg_rand,
     fast_sgd = fast_sgd,
     ret_model = ret_model || "model" %in% ret_extra,
@@ -749,6 +758,15 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param pca_center If \code{TRUE}, center the columns of \code{X} before
 #'   carrying out PCA. For binary data, it's recommended to set this to
 #'   \code{FALSE}.
+#' @param pca_method Use the specified package to carry out any PCA
+#'   dimensionality reduction. Allowed values are: \code{"irlba"} (the default,
+#'   using \href{https://cran.r-project.org/package=irlba}{irlba}) and
+#'   \code{"bigstatsr"} (using
+#'   \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}). The SVD
+#'   methods used in \code{"bigstatsr"} may be faster on systems without access
+#'   to efficient linear algebra libraries (e.g. Windows). Note that
+#'   \code{bigstatsr} is \emph{not} a dependency of uwot: if you choose to use
+#'   this package for PCA, you \emph{must} install it yourself.
 #' @param pcg_rand If \code{TRUE}, use the PCG random number generator (O'Neill,
 #'   2014) during optimization. Otherwise, use the faster (but probably less
 #'   statistically good) Tausworthe "taus88" generator. The default is
@@ -912,7 +930,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   tmpdir = tempdir(),
                   verbose = getOption("verbose", TRUE),
                   batch = FALSE,
-                  opt_args = NULL, epoch_callback = NULL) {
+                  opt_args = NULL, epoch_callback = NULL,
+                  pca_method = NULL) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -928,7 +947,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight, target_metric = target_metric,
-    pca = pca, pca_center = pca_center,
+    pca = pca, pca_center = pca_center, pca_method = pca_method,
     pcg_rand = pcg_rand,
     fast_sgd = fast_sgd,
     ret_model = ret_model || "model" %in% ret_extra,
@@ -1171,6 +1190,15 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param pca_center If \code{TRUE}, center the columns of \code{X} before
 #'   carrying out PCA. For binary data, it's recommended to set this to
 #'   \code{FALSE}.
+#' @param pca_method Use the specified package to carry out any PCA
+#'   dimensionality reduction. Allowed values are: \code{"irlba"} (the default,
+#'   using \href{https://cran.r-project.org/package=irlba}{irlba}) and
+#'   \code{"bigstatsr"} (using
+#'   \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}). The SVD
+#'   methods used in \code{"bigstatsr"} may be faster on systems without access
+#'   to efficient linear algebra libraries (e.g. Windows). Note that
+#'   \code{bigstatsr} is \emph{not} a dependency of uwot: if you choose to use
+#'   this package for PCA, you \emph{must} install it yourself.
 #' @param pcg_rand If \code{TRUE}, use the PCG random number generator (O'Neill,
 #'   2014) during optimization. Otherwise, use the faster (but probably less
 #'   statistically good) Tausworthe "taus88" generator. The default is
@@ -1307,7 +1335,8 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   tmpdir = tempdir(),
                   verbose = getOption("verbose", TRUE),
                   batch = FALSE,
-                  opt_args = NULL, epoch_callback = NULL) {
+                  opt_args = NULL, epoch_callback = NULL,
+                  pca_method = NULL) {
   uwot(X,
     n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -1317,7 +1346,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     nn_method = nn_method,
     n_trees = n_trees, search_k = search_k,
     method = "largevis", perplexity = perplexity,
-    pca = pca, pca_center = pca_center,
+    pca = pca, pca_center = pca_center, pca_method = pca_method,
     n_threads = n_threads, n_sgd_threads = n_sgd_threads,
     grain_size = grain_size,
     kernel = kernel,
@@ -1354,7 +1383,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  grain_size = 1,
                  kernel = "gauss",
                  ret_model = FALSE, ret_nn = FALSE, ret_fgraph = FALSE,
-                 pca = NULL, pca_center = TRUE,
+                 pca = NULL, pca_center = TRUE, pca_method = NULL,
                  pcg_rand = TRUE,
                  fast_sgd = FALSE,
                  batch = FALSE,
@@ -1403,6 +1432,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       stop("'pca' must be <= min(nrow(X), ncol(X))")
     }
   }
+  if (is.null(pca_method)) {
+    pca_method <- "irlba"
+  }
+  pca_method <- match.arg(pca_method, choices = c("irlba", "bigstatsr"))
 
   if (fast_sgd) {
     n_sgd_threads <- "auto"
@@ -1548,7 +1581,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     is.matrix(X) && ncol(X) > pca) {
     tsmessage("Reducing X column dimension to ", pca, " via PCA")
     pca_res <- pca_scores(X,
-      ncol = pca, center = pca_center,
+      ncol = pca, center = pca_center, pca_method = pca_method,
       ret_extra = ret_model, verbose = verbose
     )
     if (ret_model) {
@@ -1569,7 +1602,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     perplexity, kernel,
     n_threads, grain_size,
     ret_model,
-    pca = pca, pca_center = pca_center,
+    pca = pca, pca_center = pca_center, pca_method = pca_method,
     n_vertices = n_vertices,
     tmpdir = tmpdir,
     verbose = verbose
@@ -1639,7 +1672,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         perplexity = perplexity, kernel = kernel,
         n_threads = n_threads, grain_size = grain_size,
         ret_model = FALSE,
-        pca = pca,
+        pca = pca, pca_center = TRUE, pca_method = pca_method,
         n_vertices = n_vertices,
         tmpdir = tmpdir,
         verbose = verbose
@@ -1723,8 +1756,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         ),
         laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
         # we handle scaling pca below
-        spca = pca_init(X, ndim = n_components, verbose = verbose),
-        pca = pca_init(X, ndim = n_components, verbose = verbose),
+        spca = pca_init(X, ndim = n_components, pca_method = pca_method,
+                        verbose = verbose),
+        pca = pca_init(X, ndim = n_components, pca_method = pca_method, 
+                       verbose = verbose),
         ispectral = irlba_spectral_init(V, ndim = n_components, verbose = verbose),
         inormlaplacian = irlba_normalized_laplacian_init(V,
           ndim = n_components,
@@ -2302,7 +2337,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
                      ret_model,
                      n_vertices = x2nv(X),
                      tmpdir = tempdir(),
-                     pca = NULL, pca_center = TRUE,
+                     pca = NULL, pca_center = TRUE, pca_method = "irlba",
                      verbose = FALSE) {
   V <- NULL
   nns <- list()
@@ -2414,6 +2449,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       pca_res <- pca_scores(Xsub, pca_i,
         ret_extra = ret_model,
         center = pca_center_i,
+        pca_method = pca_method,
         verbose = verbose
       )
       if (ret_model) {

@@ -201,9 +201,11 @@ shrink_coords <- function(X, sdev = 1e-4) {
 }
 
 # PCA
-pca_init <- function(X, ndim = 2, center = TRUE, verbose = FALSE) {
+pca_init <- function(X, ndim = 2, center = TRUE, pca_method = "irlba", 
+                     verbose = FALSE) {
   tsmessage("Initializing from PCA")
-  pca_scores(X, ncol = ndim, center = center, verbose = verbose)
+  pca_scores(X, ncol = ndim, center = center, pca_method = pca_method, 
+             verbose = verbose)
 }
 
 
@@ -211,7 +213,7 @@ pca_init <- function(X, ndim = 2, center = TRUE, verbose = FALSE) {
 # Returns the score matrix unless ret_extra is TRUE, in which case a list
 # is returned also containing the eigenvalues
 pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
-                       verbose = FALSE) {
+                       pca_method = "irlba", verbose = FALSE) {
   if (methods::is(X, "dist")) {
     res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ncol)
 
@@ -225,6 +227,19 @@ pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
     }
     scores <- res_mds$points
     return(scores)
+  }
+  
+  if (pca_method == "bigstatsr") {
+    if (!requireNamespace("bigstatsr", quietly = TRUE,
+                          warn.conflicts = FALSE)) {
+      warning("PCA via bigstatsr requires the 'bigstatsr' package. ", 
+              "Please install it. Falling back to 'irlba'")
+    }
+    else {
+      tsmessage("Using 'bigstatsr' for PCA")
+      return(bigstatsr_scores(X, ncol = ncol, center = center, 
+                              ret_extra = ret_extra, verbose = verbose))
+    }
   }
 
   # irlba warns about using too large a percentage of total singular value
@@ -296,6 +311,42 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
   }
   else {
     res$x
+  }
+}
+
+bigstatsr_scores <- function(X,
+                             ncol,
+                             center = TRUE,
+                             ret_extra = FALSE,
+                             ncores = 1,
+                             verbose = FALSE) {
+  res <- bigstatsr::big_randomSVD(
+    X = bigstatsr::as_FBM(X),
+    fun.scaling = bigstatsr::big_scale(center = center, scale = FALSE),
+    k = ncol,
+    ncores = ncores
+  )
+  if (verbose) {
+    totalvar <- sum(apply(X, 2, stats::var))
+    lambda <- sum((res$d^2) / (nrow(X) - 1))
+    varex <- lambda / totalvar
+    tsmessage(
+      "PCA: ",
+      ncol,
+      " components explained ",
+      formatC(varex * 100),
+      "% variance"
+    )
+  }
+  scores <- stats::predict(res)
+  if (ret_extra) {
+    list(
+      scores = scores,
+      rotation = res$v,
+      center = res$center
+    )
+  } else {
+    scores
   }
 }
 

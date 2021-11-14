@@ -21,6 +21,13 @@ gradient descent method like that used when `batch = FALSE`.
 invoked at the end of each epoch. Mainly useful for producing an image of the
 state of the embedding at different points during the optimization. This is
 another feature taken from [umappp](https://github.com/LTLA/umappp).
+* New parameter: `pca_method`. This can be set to `"irlba"` (the default) or
+`"bigstatsr"`, in which case the
+[bigstatsr](https://cran.r-project.org/package=bigstatsr) package will be used
+for PCA, if it is present. Note that this is *not* a dependency of `uwot`. If
+you want to use `bigstatsr`, you must install it yourself. On platforms without
+easy access to fast linear algebra libraries (e.g. Windows), using `bigstatsr`
+may give a speed up to PCA calculations.
 
 ## Bug fixes and minor improvements
 

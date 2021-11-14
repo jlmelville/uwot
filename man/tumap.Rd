@@ -40,7 +40,8 @@ tumap(
   verbose = getOption("verbose", TRUE),
   batch = FALSE,
   opt_args = NULL,
-  epoch_callback = NULL
+  epoch_callback = NULL,
+  pca_method = NULL
 )
 }
 \arguments{
@@ -428,6 +429,16 @@ epoch. Its signature should be: \code{(epoch, n_epochs, coords)}, where:
   \item \code{coords} The embedded coordinates as of the end of the current
   epoch, as a matrix with dimensions (N, \code{n_components}).
 }}
+
+\item{pca_method}{Use the specified package to carry out any PCA
+dimensionality reduction. Allowed values are: \code{"irlba"} (the default,
+using \href{https://cran.r-project.org/package=irlba}{irlba}) and
+\code{"bigstatsr"} (using
+\href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}). The SVD
+methods used in \code{"bigstatsr"} may be faster on systems without access
+to efficient linear algebra libraries (e.g. Windows). Note that
+\code{bigstatsr} is \emph{not} a dependency of uwot: if you choose to use
+this package for PCA, you \emph{must} install it yourself.}
 }
 \value{
 A matrix of optimized coordinates, or:
