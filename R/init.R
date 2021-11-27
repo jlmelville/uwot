@@ -201,11 +201,13 @@ shrink_coords <- function(X, sdev = 1e-4) {
 }
 
 # PCA
-pca_init <- function(X, ndim = 2, center = TRUE, pca_method = "irlba", 
+pca_init <- function(X, ndim = 2, center = TRUE, pca_method = "irlba",
                      verbose = FALSE) {
   tsmessage("Initializing from PCA")
-  pca_scores(X, ncol = ndim, center = center, pca_method = pca_method, 
-             verbose = verbose)
+  pca_scores(X,
+    ncol = ndim, center = center, pca_method = pca_method,
+    verbose = verbose
+  )
 }
 
 
@@ -228,21 +230,22 @@ pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
     scores <- res_mds$points
     return(scores)
   }
-  
+
   # irlba warns about using too large a percentage of total singular value
   # so don't use if dataset is small compared to ncol
   if (pca_method == "auto") {
     if (ncol < 0.5 * min(dim(X))) {
       pca_method <- "irlba"
-    }
-    else {
+    } else {
       pca_method <- "svd"
     }
   }
-  
+
   if (pca_method == "bigstatsr") {
-    if (!requireNamespace("bigstatsr", quietly = TRUE,
-                          warn.conflicts = FALSE)) {
+    if (!requireNamespace("bigstatsr",
+      quietly = TRUE,
+      warn.conflicts = FALSE
+    )) {
       warning(
         "PCA via bigstatsr requires the 'bigstatsr' package. ",
         "Please install it. Falling back to 'irlba'"
@@ -250,17 +253,16 @@ pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
       pca_method <- "irlba"
     }
   }
-  
+
   tsmessage("Using '", pca_method, "' for PCA")
-  pca_fun <- switch(
-    pca_method,
+  pca_fun <- switch(pca_method,
     irlba = irlba_scores,
     svdr = irlba_svdr_scores,
     svd = svd_scores,
     bigstatsr = bigstatsr_scores,
     stop("BUG: unknown svd method '", pca_method, "'")
   )
-  
+
   pca_fun(
     X = X,
     ncol = ncol,
@@ -303,8 +305,7 @@ svd_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
       rotation = rotation,
       center = xcenter
     )
-  }
-  else {
+  } else {
     scores
   }
 }
@@ -318,8 +319,7 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
   report_varex(res, verbose)
   if (ret_extra) {
     list(scores = res$x, rotation = res$rotation, center = res$center)
-  }
-  else {
+  } else {
     res$x
   }
 }
@@ -327,78 +327,98 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
 report_varex <- function(res, verbose = FALSE) {
   if (verbose) {
     ncol <- ncol(res$rotation)
-    varex <- sum(res$sdev[1:ncol] ^ 2) / res$totalvar
-    tsmessage("PCA: ",
-              ncol,
-              " components explained ",
-              formatC(varex * 100),
-              "% variance")
+    varex <- sum(res$sdev[1:ncol]^2) / res$totalvar
+    tsmessage(
+      "PCA: ",
+      ncol,
+      " components explained ",
+      formatC(varex * 100),
+      "% variance"
+    )
   }
 }
 
 # This function taken from irlba and modified to use irlba::svdr rather
 # than irlba::irlba
-prcomp_rsvd <- function (x, n = 3, retx = TRUE, center = TRUE, scale. = FALSE, 
-                         ...) 
-{
+prcomp_rsvd <- function(x, n = 3, retx = TRUE, center = TRUE, scale. = FALSE,
+                        ...) {
   a <- names(as.list(match.call()))
   ans <- list(scale = scale.)
-  if ("tol" %in% a) 
+  if ("tol" %in% a) {
     warning("The `tol` truncation argument from `prcomp` is not supported by\n`prcomp_rsvd`. If specified, `tol` is passed to the `irlba` function to\ncontrol that algorithm's convergence tolerance. See `?prcomp_irlba` for help.")
-  if (is.data.frame(x)) 
+  }
+  if (is.data.frame(x)) {
     x <- as.matrix(x)
+  }
   args <- list(x = x, k = n)
   if (is.logical(center)) {
-    if (center) 
+    if (center) {
       args$center <- colMeans(x)
+    }
+  } else {
+    args$center <- center
   }
-  else args$center <- center
   if (is.logical(scale.)) {
     if (is.numeric(args$center)) {
-      f <- function(i) sqrt(sum((x[, i] - args$center[i])^2)/(nrow(x) - 
-                                                                1L))
+      f <- function(i) {
+        sqrt(sum((x[, i] - args$center[i])^2) / (nrow(x) -
+          1L))
+      }
       scale. <- vapply(seq(ncol(x)), f, pi, USE.NAMES = FALSE)
-      if (ans$scale) 
-        ans$totalvar <- ncol(x)
-      else ans$totalvar <- sum(scale.^2)
-    }
-    else {
       if (ans$scale) {
-        scale. <- apply(x, 2L, function(v) sqrt(sum(v^2)/max(1, 
-                                                             length(v) - 1L)))
-        f <- function(i) sqrt(sum((x[, i]/scale.[i])^2)/(nrow(x) - 
-                                                           1L))
-        ans$totalvar <- sum(vapply(seq(ncol(x)), f, pi, 
-                                   USE.NAMES = FALSE)^2)
+        ans$totalvar <- ncol(x)
+      } else {
+        ans$totalvar <- sum(scale.^2)
       }
-      else {
-        f <- function(i) sum(x[, i]^2)/(nrow(x) - 1L)
-        ans$totalvar <- sum(vapply(seq(ncol(x)), f, pi, 
-                                   USE.NAMES = FALSE))
+    } else {
+      if (ans$scale) {
+        scale. <- apply(x, 2L, function(v) {
+          sqrt(sum(v^2) / max(
+            1,
+            length(v) - 1L
+          ))
+        })
+        f <- function(i) {
+          sqrt(sum((x[, i] / scale.[i])^2) / (nrow(x) -
+            1L))
+        }
+        ans$totalvar <- sum(vapply(seq(ncol(x)), f, pi,
+          USE.NAMES = FALSE
+        )^2)
+      } else {
+        f <- function(i) sum(x[, i]^2) / (nrow(x) - 1L)
+        ans$totalvar <- sum(vapply(seq(ncol(x)), f, pi,
+          USE.NAMES = FALSE
+        ))
       }
     }
-    if (ans$scale) 
+    if (ans$scale) {
       args$scale <- scale.
-  }
-  else {
+    }
+  } else {
     args$scale <- scale.
-    f <- function(i) sqrt(sum((x[, i]/scale.[i])^2)/(nrow(x) - 
-                                                       1L))
+    f <- function(i) {
+      sqrt(sum((x[, i] / scale.[i])^2) / (nrow(x) -
+        1L))
+    }
     ans$totalvar <- sum(vapply(seq(ncol(x)), f, pi, USE.NAMES = FALSE))
   }
-  if (!missing(...)) 
+  if (!missing(...)) {
     args <- c(args, list(...))
-  
+  }
+
   s <- do.call(irlba::svdr, args = args)
-  ans$sdev <- s$d/sqrt(max(1, nrow(x) - 1))
+  ans$sdev <- s$d / sqrt(max(1, nrow(x) - 1))
   ans$rotation <- s$v
-  colnames(ans$rotation) <- paste("PC", seq(1, ncol(ans$rotation)), 
-                                  sep = "")
+  colnames(ans$rotation) <- paste("PC", seq(1, ncol(ans$rotation)),
+    sep = ""
+  )
   ans$center <- args$center
   if (retx) {
     ans <- c(ans, list(x = sweep(s$u, 2, s$d, FUN = `*`)))
-    colnames(ans$x) <- paste("PC", seq(1, ncol(ans$rotation)), 
-                             sep = "")
+    colnames(ans$x) <- paste("PC", seq(1, ncol(ans$rotation)),
+      sep = ""
+    )
   }
   class(ans) <- c("irlba_prcomp", "prcomp")
   ans
@@ -426,8 +446,7 @@ irlba_svdr_scores <-
         rotation = res$rotation,
         center = res$center
       )
-    }
-    else {
+    } else {
       res$x
     }
   }
