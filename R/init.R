@@ -213,7 +213,7 @@ pca_init <- function(X, ndim = 2, center = TRUE, pca_method = "irlba",
 # Returns the score matrix unless ret_extra is TRUE, in which case a list
 # is returned also containing the eigenvalues
 pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
-                       pca_method = "irlba", verbose = FALSE) {
+                       pca_method = "auto", verbose = FALSE) {
   if (methods::is(X, "dist")) {
     res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ncol)
 
@@ -229,29 +229,45 @@ pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
     return(scores)
   }
   
+  # irlba warns about using too large a percentage of total singular value
+  # so don't use if dataset is small compared to ncol
+  if (pca_method == "auto") {
+    if (ncol < 0.5 * min(dim(X))) {
+      pca_method <- "irlba"
+    }
+    else {
+      pca_method <- "svd"
+    }
+  }
+  
   if (pca_method == "bigstatsr") {
     if (!requireNamespace("bigstatsr", quietly = TRUE,
                           warn.conflicts = FALSE)) {
-      warning("PCA via bigstatsr requires the 'bigstatsr' package. ", 
-              "Please install it. Falling back to 'irlba'")
-    }
-    else {
-      tsmessage("Using 'bigstatsr' for PCA")
-      return(bigstatsr_scores(X, ncol = ncol, center = center, 
-                              ret_extra = ret_extra, verbose = verbose))
+      warning(
+        "PCA via bigstatsr requires the 'bigstatsr' package. ",
+        "Please install it. Falling back to 'irlba'"
+      )
+      pca_method <- "irlba"
     }
   }
-
-  # irlba warns about using too large a percentage of total singular value
-  # so don't use if dataset is small compared to ncol
-  if (ncol < 0.5 * min(dim(X))) {
-    return(irlba_scores(X,
-      ncol = ncol, center = center, ret_extra = ret_extra,
-      verbose = verbose
-    ))
-  }
-
-  svd_scores(X = X, ncol = ncol, center = center, ret_extra = ret_extra, verbose = verbose)
+  
+  tsmessage("Using '", pca_method, "' for PCA")
+  pca_fun <- switch(
+    pca_method,
+    irlba = irlba_scores,
+    svdr = irlba_svdr_scores,
+    svd = svd_scores,
+    bigstatsr = bigstatsr_scores,
+    stop("BUG: unknown svd method '", pca_method, "'")
+  )
+  
+  pca_fun(
+    X = X,
+    ncol = ncol,
+    center = center,
+    ret_extra = ret_extra,
+    verbose = verbose
+  )
 }
 
 # Get scores by SVD
@@ -299,13 +315,7 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
     n = ncol, retx = TRUE, center = center,
     scale = FALSE
   )
-  if (verbose) {
-    varex <- sum(res$sdev[1:ncol]^2) / res$totalvar
-    tsmessage(
-      "PCA: ", ncol, " components explained ", formatC(varex * 100),
-      "% variance"
-    )
-  }
+  report_varex(res, verbose)
   if (ret_extra) {
     list(scores = res$x, rotation = res$rotation, center = res$center)
   }
@@ -313,6 +323,114 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
     res$x
   }
 }
+
+report_varex <- function(res, verbose = FALSE) {
+  if (verbose) {
+    ncol <- ncol(res$rotation)
+    varex <- sum(res$sdev[1:ncol] ^ 2) / res$totalvar
+    tsmessage("PCA: ",
+              ncol,
+              " components explained ",
+              formatC(varex * 100),
+              "% variance")
+  }
+}
+
+# This function taken from irlba and modified to use irlba::svdr rather
+# than irlba::irlba
+prcomp_rsvd <- function (x, n = 3, retx = TRUE, center = TRUE, scale. = FALSE, 
+                         ...) 
+{
+  a <- names(as.list(match.call()))
+  ans <- list(scale = scale.)
+  if ("tol" %in% a) 
+    warning("The `tol` truncation argument from `prcomp` is not supported by\n`prcomp_rsvd`. If specified, `tol` is passed to the `irlba` function to\ncontrol that algorithm's convergence tolerance. See `?prcomp_irlba` for help.")
+  if (is.data.frame(x)) 
+    x <- as.matrix(x)
+  args <- list(x = x, k = n)
+  if (is.logical(center)) {
+    if (center) 
+      args$center <- colMeans(x)
+  }
+  else args$center <- center
+  if (is.logical(scale.)) {
+    if (is.numeric(args$center)) {
+      f <- function(i) sqrt(sum((x[, i] - args$center[i])^2)/(nrow(x) - 
+                                                                1L))
+      scale. <- vapply(seq(ncol(x)), f, pi, USE.NAMES = FALSE)
+      if (ans$scale) 
+        ans$totalvar <- ncol(x)
+      else ans$totalvar <- sum(scale.^2)
+    }
+    else {
+      if (ans$scale) {
+        scale. <- apply(x, 2L, function(v) sqrt(sum(v^2)/max(1, 
+                                                             length(v) - 1L)))
+        f <- function(i) sqrt(sum((x[, i]/scale.[i])^2)/(nrow(x) - 
+                                                           1L))
+        ans$totalvar <- sum(vapply(seq(ncol(x)), f, pi, 
+                                   USE.NAMES = FALSE)^2)
+      }
+      else {
+        f <- function(i) sum(x[, i]^2)/(nrow(x) - 1L)
+        ans$totalvar <- sum(vapply(seq(ncol(x)), f, pi, 
+                                   USE.NAMES = FALSE))
+      }
+    }
+    if (ans$scale) 
+      args$scale <- scale.
+  }
+  else {
+    args$scale <- scale.
+    f <- function(i) sqrt(sum((x[, i]/scale.[i])^2)/(nrow(x) - 
+                                                       1L))
+    ans$totalvar <- sum(vapply(seq(ncol(x)), f, pi, USE.NAMES = FALSE))
+  }
+  if (!missing(...)) 
+    args <- c(args, list(...))
+  
+  s <- do.call(irlba::svdr, args = args)
+  ans$sdev <- s$d/sqrt(max(1, nrow(x) - 1))
+  ans$rotation <- s$v
+  colnames(ans$rotation) <- paste("PC", seq(1, ncol(ans$rotation)), 
+                                  sep = "")
+  ans$center <- args$center
+  if (retx) {
+    ans <- c(ans, list(x = sweep(s$u, 2, s$d, FUN = `*`)))
+    colnames(ans$x) <- paste("PC", seq(1, ncol(ans$rotation)), 
+                             sep = "")
+  }
+  class(ans) <- c("irlba_prcomp", "prcomp")
+  ans
+}
+
+irlba_svdr_scores <-
+  function(X,
+           ncol,
+           center = TRUE,
+           ret_extra = FALSE,
+           verbose = FALSE) {
+    # 5 iterations is the default for scikit-learn TruncatedSVD
+    res <- prcomp_rsvd(
+      X,
+      n = ncol,
+      retx = TRUE,
+      center = center,
+      scale. = FALSE,
+      it = 5
+    )
+    report_varex(res, verbose)
+    if (ret_extra) {
+      list(
+        scores = res$x,
+        rotation = res$rotation,
+        center = res$center
+      )
+    }
+    else {
+      res$x
+    }
+  }
 
 bigstatsr_scores <- function(X,
                              ncol,

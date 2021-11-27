@@ -6,8 +6,8 @@
 `n_sgd_threads > 1` (as long as you use `set.seed`). The price to be paid is
 that the optimization is slightly less efficient (because coordinates are not
 updated as quickly and hence gradients are staler for longer), so it is highly
-recommended to set `n_epochs = 500` or higher. Thank you to [Aaron
-Lun](https://github.com/LTLA) who not only came up with a way to implement this
+recommended to set `n_epochs = 500` or higher. Thank you to 
+[Aaron Lun](https://github.com/LTLA) who not only came up with a way to implement this
 feature, but also wrote an entire 
 [C++ implementation of UMAP](https://github.com/LTLA/umappp) which does it 
 (<https://github.com/jlmelville/uwot/issues/83>).
@@ -21,13 +21,30 @@ gradient descent method like that used when `batch = FALSE`.
 invoked at the end of each epoch. Mainly useful for producing an image of the
 state of the embedding at different points during the optimization. This is
 another feature taken from [umappp](https://github.com/LTLA/umappp).
-* New parameter: `pca_method`. This can be set to `"irlba"` (the default) or
-`"bigstatsr"`, in which case the
-[bigstatsr](https://cran.r-project.org/package=bigstatsr) package will be used
-for PCA, if it is present. Note that this is *not* a dependency of `uwot`. If
-you want to use `bigstatsr`, you must install it yourself. On platforms without
-easy access to fast linear algebra libraries (e.g. Windows), using `bigstatsr`
-may give a speed up to PCA calculations.
+* New parameter: `pca_method`, used when the `pca` parameter is supplied to reduce
+the initial dimensionality of the data. This controls which method is used to
+carry out the PCA and can be set to one of:
+    * `"irlba"` which uses `irlba::irlba` to calculate a truncated SVD. If this
+    routine deems that you are trying to extract 50% or more of the singular 
+    vectors, you will see a warning to that effect logged to the console.
+    * `"rsvd"`, which uses `irlba::svdr` for truncated SVD. This method uses a
+    small number of iterations which should give an accuracy/speed up trade-off
+    similar to that of the 
+    [scikit-learn TruncatedSVD](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html#sklearn.decomposition.TruncatedSVD)
+    method. This can be much faster than using `"irlba"` but potentially at a
+    cost in accuracy. However, for the purposes of dimensionality reduction as
+    input to nearest neighbor search, this doesn't seem to matter much.
+    * `"bigstatsr"`, which uses the [bigstatsr](https://cran.r-project.org/package=bigstatsr) 
+    package will be used. **Note**: that this is *not* a dependency of `uwot`.
+    If you want to use `bigstatsr`, you must install it yourself. On platforms
+    without easy access to fast linear algebra libraries (e.g. Windows), using
+    `bigstatsr` may give a speed up to PCA calculations.
+    * `"svd"`, which uses `base::svd`. **Warning**: this is likely to be very
+    slow for most datasets and exists as a fallback for small datasets where
+    the `"irlba"` method would print a warning.
+    * `"auto"` (the default) which uses `"irlba"` to calculate a truncated SVD,
+    unless you are attempting to extract 50% or more of the singular vectors,
+    in which case `"svd"` is used.
 
 ## Bug fixes and minor improvements
 

@@ -255,15 +255,30 @@
 #' @param pca_center If \code{TRUE}, center the columns of \code{X} before
 #'   carrying out PCA. For binary data, it's recommended to set this to
 #'   \code{FALSE}.
-#' @param pca_method Use the specified package to carry out any PCA
-#'   dimensionality reduction. Allowed values are: \code{"irlba"} (the default,
-#'   using \href{https://cran.r-project.org/package=irlba}{irlba}) and
-#'   \code{"bigstatsr"} (using
-#'   \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}). The SVD
-#'   methods used in \code{"bigstatsr"} may be faster on systems without access
-#'   to efficient linear algebra libraries (e.g. Windows). Note that
-#'   \code{bigstatsr} is \emph{not} a dependency of uwot: if you choose to use
-#'   this package for PCA, you \emph{must} install it yourself.
+#' @param pca_method Method to carry out any PCA dimensionality reduction when
+#'   the \code{pca} parameter is specified. Allowed values are: 
+#'   \itemize{
+#'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
+#'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
+#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
+#'     This is likely to give much faster but potentially less accurate results
+#'     than using \code{"irlba"}. For the purposes of nearest neighbor 
+#'     calculation and coordinates initialization, any loss of accuracy doesn't
+#'     seem to matter much.
+#'     \item{\code{"bigstatsr"}}. Uses \code{\link[bigstatsr]{big_randomSVD}}
+#'     from the \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}
+#'     package. The SVD methods used in \code{bigstatsr} may be faster on 
+#'     systems without access to efficient linear algebra libraries (e.g. 
+#'     Windows). \strong{Note}: \code{bigstatsr} is \emph{not} a dependency of
+#'     uwot: if you choose to use this package for PCA, you \emph{must} install
+#'     it yourself.
+#'     \item{\code{"svd"}}. Uses \code{\link[base]{svd}} for the SVD. This is
+#'     likely to be slow for all but the smallest datasets.
+#'     \item{\code{"auto"}} (the default). Uses \code{"irlba"}, unless more than
+#'     50% of the full set of singular vectors would be calculated, in which
+#'     case \code{"svd"} is used.
+#'   }
 #' @param pcg_rand If \code{TRUE}, use the PCG random number generator (O'Neill,
 #'   2014) during optimization. Otherwise, use the faster (but probably less
 #'   statistically good) Tausworthe "taus88" generator. The default is
@@ -758,15 +773,30 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param pca_center If \code{TRUE}, center the columns of \code{X} before
 #'   carrying out PCA. For binary data, it's recommended to set this to
 #'   \code{FALSE}.
-#' @param pca_method Use the specified package to carry out any PCA
-#'   dimensionality reduction. Allowed values are: \code{"irlba"} (the default,
-#'   using \href{https://cran.r-project.org/package=irlba}{irlba}) and
-#'   \code{"bigstatsr"} (using
-#'   \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}). The SVD
-#'   methods used in \code{"bigstatsr"} may be faster on systems without access
-#'   to efficient linear algebra libraries (e.g. Windows). Note that
-#'   \code{bigstatsr} is \emph{not} a dependency of uwot: if you choose to use
-#'   this package for PCA, you \emph{must} install it yourself.
+#' @param pca_method Method to carry out any PCA dimensionality reduction when
+#'   the \code{pca} parameter is specified. Allowed values are: 
+#'   \itemize{
+#'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
+#'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
+#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
+#'     This is likely to give much faster but potentially less accurate results
+#'     than using \code{"irlba"}. For the purposes of nearest neighbor 
+#'     calculation and coordinates initialization, any loss of accuracy doesn't
+#'     seem to matter much.
+#'     \item{\code{"bigstatsr"}}. Uses \code{\link[bigstatsr]{big_randomSVD}}
+#'     from the \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}
+#'     package. The SVD methods used in \code{bigstatsr} may be faster on 
+#'     systems without access to efficient linear algebra libraries (e.g. 
+#'     Windows). \strong{Note}: \code{bigstatsr} is \emph{not} a dependency of
+#'     uwot: if you choose to use this package for PCA, you \emph{must} install
+#'     it yourself.
+#'     \item{\code{"svd"}}. Uses \code{\link[base]{svd}} for the SVD. This is
+#'     likely to be slow for all but the smallest datasets.
+#'     \item{\code{"auto"}} (the default). Uses \code{"irlba"}, unless more than
+#'     50% of the full set of singular vectors would be calculated, in which
+#'     case \code{"svd"} is used.
+#'   }
 #' @param pcg_rand If \code{TRUE}, use the PCG random number generator (O'Neill,
 #'   2014) during optimization. Otherwise, use the faster (but probably less
 #'   statistically good) Tausworthe "taus88" generator. The default is
@@ -1190,15 +1220,30 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param pca_center If \code{TRUE}, center the columns of \code{X} before
 #'   carrying out PCA. For binary data, it's recommended to set this to
 #'   \code{FALSE}.
-#' @param pca_method Use the specified package to carry out any PCA
-#'   dimensionality reduction. Allowed values are: \code{"irlba"} (the default,
-#'   using \href{https://cran.r-project.org/package=irlba}{irlba}) and
-#'   \code{"bigstatsr"} (using
-#'   \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}). The SVD
-#'   methods used in \code{"bigstatsr"} may be faster on systems without access
-#'   to efficient linear algebra libraries (e.g. Windows). Note that
-#'   \code{bigstatsr} is \emph{not} a dependency of uwot: if you choose to use
-#'   this package for PCA, you \emph{must} install it yourself.
+#' @param pca_method Method to carry out any PCA dimensionality reduction when
+#'   the \code{pca} parameter is specified. Allowed values are: 
+#'   \itemize{
+#'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
+#'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
+#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
+#'     This is likely to give much faster but potentially less accurate results
+#'     than using \code{"irlba"}. For the purposes of nearest neighbor 
+#'     calculation and coordinates initialization, any loss of accuracy doesn't
+#'     seem to matter much.
+#'     \item{\code{"bigstatsr"}}. Uses \code{\link[bigstatsr]{big_randomSVD}}
+#'     from the \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}
+#'     package. The SVD methods used in \code{bigstatsr} may be faster on 
+#'     systems without access to efficient linear algebra libraries (e.g. 
+#'     Windows). \strong{Note}: \code{bigstatsr} is \emph{not} a dependency of
+#'     uwot: if you choose to use this package for PCA, you \emph{must} install
+#'     it yourself.
+#'     \item{\code{"svd"}}. Uses \code{\link[base]{svd}} for the SVD. This is
+#'     likely to be slow for all but the smallest datasets.
+#'     \item{\code{"auto"}} (the default). Uses \code{"irlba"}, unless more than
+#'     50% of the full set of singular vectors would be calculated, in which
+#'     case \code{"svd"} is used.
+#'   }
 #' @param pcg_rand If \code{TRUE}, use the PCG random number generator (O'Neill,
 #'   2014) during optimization. Otherwise, use the faster (but probably less
 #'   statistically good) Tausworthe "taus88" generator. The default is
@@ -1433,10 +1478,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
   if (is.null(pca_method)) {
-    pca_method <- "irlba"
+    pca_method <- "auto"
   }
-  pca_method <- match.arg(pca_method, choices = c("irlba", "bigstatsr"))
-
+  pca_method <-
+    match.arg(pca_method,
+              choices = c("irlba", "svdr", "bigstatsr", "svd", "auto"))
+  
   if (fast_sgd) {
     n_sgd_threads <- "auto"
     pcg_rand <- FALSE
