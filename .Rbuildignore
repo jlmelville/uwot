@@ -11,3 +11,4 @@
 ^codecov\.yml$
 ^.*\/*DONTCHECKMEIN.*$
 ^\.github$
+^revdep$
