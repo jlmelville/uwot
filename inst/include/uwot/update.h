@@ -39,6 +39,7 @@ struct EpochCallback {
   virtual void operator()(std::size_t epoch, std::size_t n_epochs,
                           const std::vector<float> &head_embedding,
                           const std::vector<float> &tail_embedding) = 0;
+  virtual ~EpochCallback() {}
 };
 
 struct DoNothingCallback : EpochCallback {
