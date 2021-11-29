@@ -31,12 +31,16 @@
 // NOT THREAD SAFE
 // based on code in the dqsample package
 static uint64_t random64() {
-  return R::runif(0, 1) * (std::numeric_limits<uint64_t>::max)();
+  return static_cast<uint64_t>(
+      R::runif(0, 1) *
+      static_cast<double>((std::numeric_limits<uint64_t>::max)()));
 }
 
 // NOT THREAD SAFE
 static uint32_t random32() {
-  return R::runif(0, 1) * (std::numeric_limits<uint32_t>::max)();
+  return static_cast<uint32_t>(
+      R::runif(0, 1) *
+      static_cast<double>((std::numeric_limits<uint32_t>::max)()));
 }
 
 struct batch_tau_factory {

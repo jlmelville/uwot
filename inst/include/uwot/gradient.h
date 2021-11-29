@@ -95,7 +95,9 @@ inline auto fastPrecisePow(float a, float b) -> float {
     double d;
     int x[2];
   } u = {a};
-  u.x[1] = static_cast<int>((b - e) * (u.x[1] - 1072632447) + 1072632447);
+  u.x[1] = static_cast<int>((b - static_cast<double>(e)) *
+                                static_cast<double>(u.x[1] - 1072632447) +
+                            1072632447.0);
   u.x[0] = 0;
 
   // exponentiation by squaring with the exponent's integer part
