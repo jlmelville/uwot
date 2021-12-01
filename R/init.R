@@ -28,30 +28,38 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   # and because A is symmetric, they're equivalent
   M <- A / colSums(A)
 
-  res <- NULL
-  k <- ndim + 1
-  n <- nrow(M)
-  suppressWarnings(
-    res <- tryCatch(RSpectra::eigs(M,
-      k = k, which = "LM",
-      opt = list(tol = 1e-4)
-    ),
-    error = function(c) {
-      NULL
-    }
-    )
-  )
+  res <- rspectra_eigs_asym(M, ndim)
 
   if (is.null(res) || ncol(res$vectors) < ndim) {
     message(
       "Laplacian Eigenmap failed to converge, ",
       "using random initialization instead"
     )
+    n <- nrow(M)
     return(rand_init(n, ndim))
   }
+  
+  # return the smallest eigenvalues
+  as.matrix(Re(res$vectors[, 2:(ndim + 1)]))
+}
 
-  vecs <- as.matrix(res$vectors[, 2:(ndim + 1)])
-  Re(vecs)
+form_normalized_laplacian <- function(A) {
+  # Normalized Laplacian: clear and close to UMAP code, but very slow in R
+  # I <- diag(1, nrow = n, ncol = n)
+  # D <- diag(1 / sqrt(colSums(A)))
+  # L <- I - D %*% A %*% D
+  
+  # A lot faster (order of magnitude when n = 1000)
+  Dsq <- sqrt(Matrix::colSums(A))
+  L <- -Matrix::t(A / Dsq) / Dsq
+  Matrix::diag(L) <- 1 + Matrix::diag(L)
+  L
+}
+
+# Return the ndim eigenvectors associated with the ndim largest eigenvalues
+sort_eigenvectors <- function(eig_res, ndim) {
+  vec_indices <- rev(order(eig_res$values, decreasing = TRUE)[1:ndim])
+  as.matrix(Re(eig_res$vectors[, vec_indices]))
 }
 
 # Use a normalized Laplacian.
@@ -62,47 +70,54 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   }
   tsmessage("Initializing from normalized Laplacian")
 
-  n <- nrow(A)
-  # Normalized Laplacian: clear and close to UMAP code, but very slow in R
-  # I <- diag(1, nrow = n, ncol = n)
-  # D <- diag(1 / sqrt(colSums(A)))
-  # L <- I - D %*% A %*% D
+  L <- form_normalized_laplacian(A)
+  res <- rspectra_eigs_sym(L, ndim)
 
-  # A lot faster (order of magnitude when n = 1000)
-  Dsq <- sqrt(Matrix::colSums(A))
-  L <- -Matrix::t(A / Dsq) / Dsq
-  Matrix::diag(L) <- 1 + Matrix::diag(L)
-
-  k <- ndim + 1
-  opt <- list(tol = 1e-4)
-  suppressWarnings(
-    res <- tryCatch(RSpectra::eigs_sym(L, k = k, which = "SM", opt = opt),
-      error = function(c) {
-        NULL
-      }
-    )
-  )
   if (is.null(res) || ncol(res$vectors) < ndim) {
-    suppressWarnings(
-      res <- tryCatch(RSpectra::eigs_sym(L,
-        k = k, which = "LM", sigma = 0,
-        opt = opt
-      ),
-      error = function(c) {
-        NULL
-      }
-      )
+    message(
+      "Spectral initialization failed to converge, ",
+      "using random initialization instead"
     )
-    if (is.null(res) || ncol(res$vectors) < ndim) {
-      message(
-        "Spectral initialization failed to converge, ",
-        "using random initialization instead"
-      )
-      return(rand_init(n, ndim))
-    }
+    n <- nrow(A)
+    return(rand_init(n, ndim))
   }
-  vec_indices <- rev(order(res$values, decreasing = TRUE)[1:ndim])
-  as.matrix(Re(res$vectors[, vec_indices]))
+  sort_eigenvectors(res, ndim)
+}
+
+irlba_eigs_asym <- function(L, ndim) {
+  suppressWarnings(res <- tryCatch({
+    res <- irlba::partial_eigen(
+      L,
+      n = ndim + 1,
+      symmetric = FALSE,
+      smallest = TRUE,
+      tol = 1e-3,
+      maxit = 1000,
+      verbose = TRUE
+    )
+    res$values <- sqrt(res$values)
+    res
+  },
+  error = function(c) {
+    NULL
+  }))
+}
+
+irlba_eigs_sym <- function(L, ndim) {
+  suppressWarnings(res <- tryCatch(
+    res <- irlba::partial_eigen(
+      L,
+      n = ndim + 1,
+      symmetric = TRUE,
+      smallest = TRUE,
+      tol = 1e-3,
+      maxit = 1000,
+      verbose = TRUE
+    ),
+    error = function(c) {
+      NULL
+    }
+  ))
 }
 
 # Use irlba's partial_eigen instead of RSpectra
@@ -113,33 +128,18 @@ irlba_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   }
   tsmessage("Initializing from normalized Laplacian (using irlba)")
 
-  n <- nrow(A)
-  Dsq <- sqrt(Matrix::colSums(A))
-  L <- -Matrix::t(A / Dsq) / Dsq
-  Matrix::diag(L) <- 1 + Matrix::diag(L)
+  L <- form_normalized_laplacian(A)
+  res <- irlba_eigs_sym(L, ndim)
 
-  k <- ndim + 1
-
-  suppressWarnings(
-    res <- tryCatch(res <- irlba::partial_eigen(L,
-      n = k, symmetric = TRUE,
-      smallest = TRUE, tol = 1e-3,
-      maxit = 1000, verbose = TRUE
-    ),
-    error = function(c) {
-      NULL
-    }
-    )
-  )
   if (is.null(res) || ncol(res$vectors) < ndim) {
     message(
       "Spectral initialization failed to converge, ",
       "using random initialization instead"
     )
+    n <- nrow(A)
     return(rand_init(n, ndim))
   }
-  vec_indices <- rev(order(res$values, decreasing = TRUE)[1:ndim])
-  as.matrix(Re(res$vectors[, vec_indices]))
+  sort_eigenvectors(res, ndim)
 }
 
 
@@ -242,10 +242,7 @@ pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
   }
 
   if (pca_method == "bigstatsr") {
-    if (!requireNamespace("bigstatsr",
-      quietly = TRUE,
-      warn.conflicts = FALSE
-    )) {
+    if (!bigstatsr_is_installed()) {
       warning(
         "PCA via bigstatsr requires the 'bigstatsr' package. ",
         "Please install it. Falling back to 'irlba'"
@@ -450,42 +447,6 @@ irlba_svdr_scores <-
       res$x
     }
   }
-
-bigstatsr_scores <- function(X,
-                             ncol,
-                             center = TRUE,
-                             ret_extra = FALSE,
-                             ncores = 1,
-                             verbose = FALSE) {
-  res <- bigstatsr::big_randomSVD(
-    X = bigstatsr::as_FBM(X),
-    fun.scaling = bigstatsr::big_scale(center = center, scale = FALSE),
-    k = ncol,
-    ncores = ncores
-  )
-  if (verbose) {
-    totalvar <- sum(apply(X, 2, stats::var))
-    lambda <- sum((res$d^2) / (nrow(X) - 1))
-    varex <- lambda / totalvar
-    tsmessage(
-      "PCA: ",
-      ncol,
-      " components explained ",
-      formatC(varex * 100),
-      "% variance"
-    )
-  }
-  scores <- stats::predict(res)
-  if (ret_extra) {
-    list(
-      scores = scores,
-      rotation = res$v,
-      center = res$center
-    )
-  } else {
-    scores
-  }
-}
 
 init_is_spectral <- function(init) {
   res <- pmatch(tolower(init), c(
