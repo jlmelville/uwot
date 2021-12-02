@@ -20,6 +20,15 @@ the basic method. Translated from the
 
 ## News
 
+*December 12 2021* Version 0.1.11 has been released to CRAN. It is now possible
+to get reproducible results (for a given value of `set.seed`) when running
+the optimization step with multiple threads (`n_sgd_threads` greater than 1).
+You may need to increase `n_epochs` to get similar levels of convergence. To run
+in this mode, set `batch = TRUE`. Thanks to [Aaron Lun](https://github.com/LTLA)
+who came up with the design for this and also implemented it in his 
+[umappp C++ library](https://github.com/LTLA/umappp). See `NEWS.md` for other
+changes.
+
 *December 15 2020* Version 0.1.10 has been released to CRAN. This is mainly
 to maintain compatibility with RcppAnnoy, but also a small change was made to
 avoid it grinding away pointlessly in the presence of `NA` values, based on
