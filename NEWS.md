@@ -7,8 +7,8 @@
 that the optimization is slightly less efficient (because coordinates are not
 updated as quickly and hence gradients are staler for longer), so it is highly
 recommended to set `n_epochs = 500` or higher. Thank you to 
-[Aaron Lun](https://github.com/LTLA) who not only came up with a way to implement this
-feature, but also wrote an entire 
+[Aaron Lun](https://github.com/LTLA) who not only came up with a way to
+implement this feature, but also wrote an entire 
 [C++ implementation of UMAP](https://github.com/LTLA/umappp) which does it 
 (<https://github.com/jlmelville/uwot/issues/83>).
 * New parameter: `opt_args`. The default optimization method when `batch = TRUE`
@@ -21,9 +21,9 @@ gradient descent method like that used when `batch = FALSE`.
 invoked at the end of each epoch. Mainly useful for producing an image of the
 state of the embedding at different points during the optimization. This is
 another feature taken from [umappp](https://github.com/LTLA/umappp).
-* New parameter: `pca_method`, used when the `pca` parameter is supplied to reduce
-the initial dimensionality of the data. This controls which method is used to
-carry out the PCA and can be set to one of:
+* New parameter: `pca_method`, used when the `pca` parameter is supplied to
+reduce the initial dimensionality of the data. This controls which method is
+used to carry out the PCA and can be set to one of:
     * `"irlba"` which uses `irlba::irlba` to calculate a truncated SVD. If this
     routine deems that you are trying to extract 50% or more of the singular 
     vectors, you will see a warning to that effect logged to the console.
