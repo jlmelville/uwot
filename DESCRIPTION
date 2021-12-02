@@ -17,7 +17,6 @@ License: GPL (>= 3)
 URL: https://github.com/jlmelville/uwot
 BugReports: https://github.com/jlmelville/uwot/issues
 Encoding: UTF-8
-LazyData: true
 Suggests: testthat,
     covr,
     bigstatsr
