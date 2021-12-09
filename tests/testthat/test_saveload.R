@@ -113,3 +113,26 @@ test_that("unloading a model on save", {
   unload_uwot(modelload, cleanup = TRUE)
   expect_false(file.exists(modelload$mod_dir))
 }) 
+
+# #88
+test_that("save-load-save", {
+  set.seed(1337)
+  X <- matrix(rnorm(100), 10, 10)
+  
+  model <- uwot::umap(X, n_neighbors = 4, ret_model = TRUE)
+  model_file <- tempfile(tmpdir = tempdir())
+  model <- uwot::save_uwot(model, file = model_file)
+  model2 <- uwot::load_uwot(file = model_file)
+  new_file <- tempfile(tmpdir = tempdir())
+  uwot::save_uwot(model2, file = new_file)
+  expect_true(file.exists(new_file))
+  
+  modelm <- uwot::umap(X, n_neighbors = 4, metric = list("euclidean" = 1:5, "euclidean" = 6:10), ret_model = TRUE)
+  modelm_file <- tempfile(tmpdir = tempdir())
+  modelm <- uwot::save_uwot(modelm, file = modelm_file)
+  modelm2 <- uwot::load_uwot(file = modelm_file)
+  new_filem <- tempfile(tmpdir = tempdir())
+  uwot::save_uwot(modelm2, file = new_filem)
+  expect_true(file.exists(new_filem))
+  
+}) 

@@ -1762,7 +1762,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     init <- match.arg(tolower(init), c(
       "spectral", "random", "lvrandom", "normlaplacian",
       "laplacian", "spca", "pca", "inormlaplacian", "ispectral",
-      "agspectral"
+      "agspectral", "normlaplaciantsvd"
     ))
 
     if (init_is_spectral(init)) {
@@ -1816,6 +1816,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
           n_neg_nbrs = negative_sample_rate,
           ndim = n_components, verbose = verbose
         ),
+        normlaplaciantsvd = normalized_laplacian_init_tsvd(V, ndim = n_components, verbose = verbose), 
         stop("Unknown initialization method: '", init, "'")
       )
     }
@@ -2213,11 +2214,12 @@ load_uwot <- function(file, verbose = FALSE) {
     }
     ann <- create_ann(annoy_metric, ndim = ndim)
     ann$load(nn_fname)
+    
     if (n_metrics == 1) {
-      model$nn_index <- ann
+      model$nn_index <- list(ann = ann, type = "annoyv1", metric = annoy_metric)
     }
     else {
-      model$nn_index[[i]] <- ann
+      model$nn_index[[i]] <- list(ann = ann, type = "annoyv1", metric = annoy_metric)
     }
   }
   model$mod_dir <- mod_dir

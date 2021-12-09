@@ -1,3 +1,11 @@
+# uwot 0.1.11.9000
+
+## Bug fixes and minor improvements
+
+* Models couldn't be re-saved after loading. Thank you to 
+[ilyakorsunsky](https://github.com/ilyakorsunsky) for reporting this 
+(<https://github.com/jlmelville/uwot/issues/88>).
+
 # uwot 0.1.11
 
 ## New features
