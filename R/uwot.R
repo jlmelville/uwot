@@ -2068,7 +2068,8 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
   if (file.exists(model_file)) {
     stop("model file ", model_file, " already exists")    
   }
-  
+
+  tmp_model_file <- NULL
   tryCatch(
     {
       # create directory to store files in
@@ -2108,7 +2109,7 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
     },
     finally = {
       setwd(wd)
-      if (model_file != tmp_model_file) {
+      if (!is.null(tmp_model_file) && model_file != tmp_model_file) {
         tsmessage("Copying ", tmp_model_file, " to ", model_file)
         file.copy(from = tmp_model_file, to = model_file)
       }
