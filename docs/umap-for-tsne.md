@@ -277,11 +277,8 @@ These are arrived at differently to t-SNE and LargeVis. The unsymmetrized UMAP
 input weights are given by:
 
 $$
-v_{j|i} = \exp \left[ -\left( r_{ij} + \rho_{i} \right) / \sigma_{i} \right]
+v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \sigma_{i} \right]
 $$
-
-(*December 9 2021* fixed a typo in this equation, originally reported by github
-user [InfProbSciX](https://github.com/lmcinnes/umap/discussions/813))
 
 where $r_{ij}$ are the input distances, $\rho_{i}$ is the distance to the
 nearest neighbor (ignoring zero distances where neighbors are duplicates) and

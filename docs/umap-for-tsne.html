@@ -365,9 +365,8 @@ C_{UMAP} =
 (1 - v_{ij}) \log \left( \frac{1 - v_{ij}}{1 - w_{ij}} \right) \right]
 \]</span> <span class="math inline">\(v_{ij}\)</span> are symmetrized input affinities, and are not probabilities. The graph interpretation of them as weights of edges in a graph still applies, though. These are arrived at differently to t-SNE and LargeVis. The unsymmetrized UMAP input weights are given by:</p>
 <p><span class="math display">\[
-v_{j|i} = \exp \left[ -\left( r_{ij} + \rho_{i} \right) / \sigma_{i} \right]
+v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \sigma_{i} \right]
 \]</span></p>
-<p>(<em>December 9 2021</em> fixed a typo in this equation, originally reported by github user <a href="https://github.com/lmcinnes/umap/discussions/813">InfProbSciX</a>)</p>
 <p>where <span class="math inline">\(r_{ij}\)</span> are the input distances, <span class="math inline">\(\rho_{i}\)</span> is the distance to the nearest neighbor (ignoring zero distances where neighbors are duplicates) and <span class="math inline">\(\sigma_{i}\)</span> is analogous to <span class="math inline">\(\beta_{i}\)</span> in the perplexity calibration used in SNE. In this case, <span class="math inline">\(\sigma_{i}\)</span> is determined such that <span class="math inline">\(\sum_{j} v_{j|i} = \log_{2} k\)</span> where <span class="math inline">\(k\)</span> is the number of nearest neighbors.</p>
 <p><em>January 1 2020:</em> I assume there is a connection here with the local scaling advocated for <a href="http://papers.nips.cc/paper/2619-self-tuning-spectral-clustering">self-tuning spectral clustering</a>, given that spectral decomposition of the affinity graph is the default initialization method for UMAP.</p>
 <p>These weights are symmetrized by a slightly different method to SNE:</p>
