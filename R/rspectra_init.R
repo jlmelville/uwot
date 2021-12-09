@@ -1,3 +1,9 @@
+rspectra_is_installed <- function() {
+  requireNamespace("RSpectra",
+                   quietly = TRUE,
+                   warn.conflicts = FALSE)
+}
+
 rspectra_eigs_asym <- function(L, ndim) {
   res <- NULL
   suppressWarnings(res <- tryCatch(
@@ -13,14 +19,14 @@ rspectra_eigs_asym <- function(L, ndim) {
   ))
 }
 
-rspectra_eigs_sym <- function(L, ndim) {
+rspectra_eigs_sym <- function(L, ndim, verbose = FALSE) {
   k <- ndim + 1
   opt <- list(tol = 1e-4)
   suppressWarnings(res <-
     tryCatch(
       RSpectra::eigs_sym(L, k = k, which = "SM", opt = opt),
       error = function(c) {
-        NULL
+        tsmessage("RSpectra calculation failed, retrying with shifted")
       }
     ))
   if (is.null(res) || ncol(res$vectors) < ndim) {

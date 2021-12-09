@@ -56,6 +56,18 @@ form_normalized_laplacian <- function(A) {
   L
 }
 
+# The symmetrized graph Laplacian (Lsym) but shifted so that:
+# the bottom eigenvectors of Lsym correspond to the top singular vectors of
+# this matrix (hence can be used with truncated SVD), and the eigenvalues
+# are all positive, so we don't lose sign and hence correct eigenvector ordering
+# when using the singular values (lambda = 2 - d)
+form_modified_laplacian <- function(A) {
+  Dsq <- sqrt(Matrix::colSums(A))
+  L <- Matrix::t(A / Dsq) / Dsq
+  Matrix::diag(L) <- 1 + Matrix::diag(L)
+  L
+}
+
 # Return the ndim eigenvectors associated with the ndim largest eigenvalues
 sort_eigenvectors <- function(eig_res, ndim) {
   vec_indices <- rev(order(eig_res$values, decreasing = TRUE)[1:ndim])
@@ -71,7 +83,7 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   tsmessage("Initializing from normalized Laplacian")
 
   L <- form_normalized_laplacian(A)
-  res <- rspectra_eigs_sym(L, ndim)
+  res <- rspectra_eigs_sym(L, ndim, verbose = verbose)
 
   if (is.null(res) || ncol(res$vectors) < ndim) {
     message(
@@ -82,6 +94,28 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     return(rand_init(n, ndim))
   }
   sort_eigenvectors(res, ndim)
+}
+
+# Use a normalized Laplacian and use truncated SVD
+normalized_laplacian_init_tsvd <- function(A, ndim = 2, verbose = FALSE) {
+  if (nrow(A) < 3) {
+    tsmessage("Graph too small, using random initialization instead")
+    return(rand_init(nrow(A), ndim))
+  }
+  tsmessage("Initializing from normalized Laplacian")
+  
+  L <- form_modified_laplacian(A)
+  irlba_iters <- 1000
+  suppressWarnings(res <- irlba::irlba(L, nv = ndim + 1, nu = 0, maxit = irlba_iters))
+  if (is.null(res) || ncol(res$v) < ndim || res$iter == irlba_iters) {
+    message(
+      "Spectral initialization failed to converge, ",
+      "using random initialization instead"
+    )
+    n <- nrow(A)
+    return(rand_init(n, ndim))
+  }
+  res$v[, 2:(ndim + 1), drop = FALSE]
 }
 
 irlba_eigs_asym <- function(L, ndim) {
@@ -145,14 +179,19 @@ irlba_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
 
 # Default UMAP initialization
 # spectral decomposition of the normalized Laplacian + some noise
-spectral_init <- function(A, ndim = 2, verbose = FALSE) {
+spectral_init <- function(A, ndim = 2, verbose = FALSE, force_irlba = FALSE) {
   if (nrow(A) < 3) {
     tsmessage("Graph too small, using random initialization instead")
     return(rand_init(nrow(A), ndim))
   }
-  tsmessage("Initializing from normalized Laplacian + noise")
-
-  coords <- normalized_laplacian_init(A, ndim, verbose = FALSE)
+  if (rspectra_is_installed() && !force_irlba) {
+    tsmessage("Initializing from normalized Laplacian + noise (using RSpectra)")
+    coords <- normalized_laplacian_init(A, ndim, verbose = FALSE)
+  }
+  else {
+    tsmessage("Initializing from normalized Laplacian + noise (using irlba)")
+    coords <- normalized_laplacian_init_tsvd(A, ndim, verbose = FALSE)
+  }
   expansion <- 10.0 / max(abs(coords))
   (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.0001),
     ncol = ndim

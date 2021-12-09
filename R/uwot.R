@@ -1762,7 +1762,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     init <- match.arg(tolower(init), c(
       "spectral", "random", "lvrandom", "normlaplacian",
       "laplacian", "spca", "pca", "inormlaplacian", "ispectral",
-      "agspectral", "normlaplaciantsvd"
+      "agspectral", "spectraltsvd"
     ))
 
     if (init_is_spectral(init)) {
@@ -1816,7 +1816,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
           n_neg_nbrs = negative_sample_rate,
           ndim = n_components, verbose = verbose
         ),
-        normlaplaciantsvd = normalized_laplacian_init_tsvd(V, ndim = n_components, verbose = verbose), 
+        spectraltsvd = spectral_init(V, ndim = n_components, verbose = verbose, force_irlba = TRUE), 
         stop("Unknown initialization method: '", init, "'")
       )
     }
