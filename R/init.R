@@ -27,9 +27,7 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   # This effectively row-normalizes A: colSums is normally faster than rowSums
   # and because A is symmetric, they're equivalent
   M <- A / colSums(A)
-
   res <- rspectra_eigs_asym(M, ndim)
-
   if (is.null(res) || ncol(res$vectors) < ndim) {
     message(
       "Laplacian Eigenmap failed to converge, ",
@@ -41,6 +39,28 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   
   # return the smallest eigenvalues
   as.matrix(Re(res$vectors[, 2:(ndim + 1)]))
+}
+
+laplacian_eigenmap_irlba <- function(A, ndim = 2, verbose = FALSE) {
+  if (nrow(A) < 3) {
+    tsmessage("Graph too small, using random initialization instead")
+    return(rand_init(nrow(A), ndim))
+  }
+  tsmessage("Initializing from Laplacian Eigenmap")
+
+  lapA <- form_modified_laplacian(A, ret_d = TRUE)
+  res <- irlba_spectral_tsvd(lapA$L, ndim + 1)
+  if (is.null(res) || ncol(res$vectors) < ndim || !res$converged) {
+    message(
+      "Laplacian Eigenmap failed to converge, ",
+      "using random initialization instead"
+    )
+    return(rand_init(nrow(A), ndim))
+  }
+  res <- lapA$Disqrt * res$vectors[, 2:(ndim + 1)]
+  
+  # re-scale the vectors to length 1
+  sweep(res, 2, sqrt(colSums(res * res)), `/`)
 }
 
 form_normalized_laplacian <- function(A) {
@@ -61,11 +81,16 @@ form_normalized_laplacian <- function(A) {
 # this matrix (hence can be used with truncated SVD), and the eigenvalues
 # are all positive, so we don't lose sign and hence correct eigenvector ordering
 # when using the singular values (lambda = 2 - d)
-form_modified_laplacian <- function(A) {
+form_modified_laplacian <- function(A, ret_d = FALSE) {
   Dsq <- sqrt(Matrix::colSums(A))
   L <- Matrix::t(A / Dsq) / Dsq
   Matrix::diag(L) <- 1 + Matrix::diag(L)
-  L
+  if (ret_d) {
+    list(L = L, Disqrt = 1 / Dsq)
+  }
+  else {
+    L
+  }
 }
 
 # Return the ndim eigenvectors associated with the ndim largest eigenvalues
@@ -105,9 +130,8 @@ normalized_laplacian_init_tsvd <- function(A, ndim = 2, verbose = FALSE) {
   tsmessage("Initializing from normalized Laplacian")
   
   L <- form_modified_laplacian(A)
-  irlba_iters <- 1000
-  suppressWarnings(res <- irlba::irlba(L, nv = ndim + 1, nu = 0, maxit = irlba_iters))
-  if (is.null(res) || ncol(res$v) < ndim || res$iter == irlba_iters) {
+  res <- irlba_spectral_tsvd(L, ndim + 1)
+  if (is.null(res) || ncol(res$vectors) < ndim || !res$converged) {
     message(
       "Spectral initialization failed to converge, ",
       "using random initialization instead"
@@ -115,7 +139,12 @@ normalized_laplacian_init_tsvd <- function(A, ndim = 2, verbose = FALSE) {
     n <- nrow(A)
     return(rand_init(n, ndim))
   }
-  res$v[, 2:(ndim + 1), drop = FALSE]
+  res$vectors[, 2:(ndim + 1), drop = FALSE]
+}
+
+irlba_spectral_tsvd <- function(L, n, iters = 1000) {
+  suppressWarnings(res <- irlba::irlba(L, nv = n, nu = 0, maxit = iters))
+  list(vectors = res$v, values = 2.0 - res$d, converged = res$iter != iters)
 }
 
 irlba_eigs_asym <- function(L, ndim) {

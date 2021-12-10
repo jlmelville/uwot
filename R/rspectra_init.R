@@ -10,7 +10,7 @@ rspectra_eigs_asym <- function(L, ndim) {
     RSpectra::eigs(
       L,
       k = ndim + 1,
-      which = "LM",
+      which = "LR",
       opt = list(tol = 1e-4)
     ),
     error = function(c) {

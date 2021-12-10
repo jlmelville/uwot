@@ -5,6 +5,9 @@
 * Models couldn't be re-saved after loading. Thank you to 
 [ilyakorsunsky](https://github.com/ilyakorsunsky) for reporting this 
 (<https://github.com/jlmelville/uwot/issues/88>).
+* `init = "laplacian"` returned the wrong coordinates because of a slightly 
+subtle issue around how to order the eigenvectors when using the random walk
+transition matrix rather than normalized graph laplacians.
 
 # uwot 0.1.11
 
