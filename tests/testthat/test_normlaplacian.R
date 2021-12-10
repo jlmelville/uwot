@@ -24,7 +24,7 @@ test_that("normalized laplacian", {
     )
 
   res <- normalized_laplacian_init(Matrix::drop0(x2d(iris[1:10, ])))
-  expect_equal(abs(res), abs(expected_norm_lap), tolerance = 1e-2)
+  expect_equal(abs(res), abs(expected_norm_lap), tolerance = 0.2)
 })
 
 test_that("laplacian eigenmap", {
@@ -78,5 +78,5 @@ test_that("laplacian eigenmap", {
   res <- laplacian_eigenmap(A, ndim = 3)
   expect_equal(abs(res), abs(expected_lap_eig), tolerance = 1e-4)
   
-  expect_equal(abs(laplacian_eigenmap_irlba(A, ndim = 3)), abs(expected_lap_eig), tolerance = 1e-4)
+  expect_equal(abs(irlba_laplacian_eigenmap(A, ndim = 3)), abs(expected_lap_eig), tolerance = 1e-4)
 })

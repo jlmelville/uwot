@@ -16,13 +16,23 @@
 # A must be symmetric and positive semi definite, but not necessarily
 # normalized in any specific way.
 #' @import Matrix
-laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
+laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE, force_irlba = FALSE) {
+  if (rspectra_is_installed() && !force_irlba) {
+    coords <- rspectra_laplacian_eigenmap(A, ndim, verbose = verbose)
+  }
+  else {
+    coords <- irlba_laplacian_eigenmap(A, ndim, verbose = verbose)
+  }
+  coords
+}
+
+rspectra_laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   if (nrow(A) < 3) {
     tsmessage("Graph too small, using random initialization instead")
     return(rand_init(nrow(A), ndim))
   }
-
-  tsmessage("Initializing from Laplacian Eigenmap")
+  
+  tsmessage("Initializing from Laplacian Eigenmap (via RSpectra)")
   # Equivalent to: D <- diag(colSums(A)); M <- solve(D) %*% A
   # This effectively row-normalizes A: colSums is normally faster than rowSums
   # and because A is symmetric, they're equivalent
@@ -41,12 +51,12 @@ laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   as.matrix(Re(res$vectors[, 2:(ndim + 1)]))
 }
 
-laplacian_eigenmap_irlba <- function(A, ndim = 2, verbose = FALSE) {
+irlba_laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   if (nrow(A) < 3) {
     tsmessage("Graph too small, using random initialization instead")
     return(rand_init(nrow(A), ndim))
   }
-  tsmessage("Initializing from Laplacian Eigenmap")
+  tsmessage("Initializing from Laplacian Eigenmap (via irlba)")
 
   lapA <- form_modified_laplacian(A, ret_d = TRUE)
   res <- irlba_spectral_tsvd(lapA$L, ndim + 1)
@@ -57,8 +67,7 @@ laplacian_eigenmap_irlba <- function(A, ndim = 2, verbose = FALSE) {
     )
     return(rand_init(nrow(A), ndim))
   }
-  res <- lapA$Disqrt * res$vectors[, 2:(ndim + 1)]
-  
+  res <- lapA$Disqrt * res$vectors[, 2:(ndim + 1), drop = FALSE]
   # re-scale the vectors to length 1
   sweep(res, 2, sqrt(colSums(res * res)), `/`)
 }
@@ -99,8 +108,17 @@ sort_eigenvectors <- function(eig_res, ndim) {
   as.matrix(Re(eig_res$vectors[, vec_indices]))
 }
 
-# Use a normalized Laplacian.
-normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
+normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE, force_irlba = FALSE) {
+  if (rspectra_is_installed() && !force_irlba) {
+    coords <- rspectra_normalized_laplacian_init(A, ndim, verbose = verbose)
+  }
+  else {
+    coords <- irlba_normalized_laplacian_init(A, ndim, verbose = verbose)
+  }
+  coords
+}
+
+rspectra_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   if (nrow(A) < 3) {
     tsmessage("Graph too small, using random initialization instead")
     return(rand_init(nrow(A), ndim))
@@ -122,7 +140,7 @@ normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
 }
 
 # Use a normalized Laplacian and use truncated SVD
-normalized_laplacian_init_tsvd <- function(A, ndim = 2, verbose = FALSE) {
+irlba_tsvd_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   if (nrow(A) < 3) {
     tsmessage("Graph too small, using random initialization instead")
     return(rand_init(nrow(A), ndim))
@@ -215,11 +233,11 @@ spectral_init <- function(A, ndim = 2, verbose = FALSE, force_irlba = FALSE) {
   }
   if (rspectra_is_installed() && !force_irlba) {
     tsmessage("Initializing from normalized Laplacian + noise (using RSpectra)")
-    coords <- normalized_laplacian_init(A, ndim, verbose = FALSE)
+    coords <- rspectra_normalized_laplacian_init(A, ndim, verbose = FALSE)
   }
   else {
     tsmessage("Initializing from normalized Laplacian + noise (using irlba)")
-    coords <- normalized_laplacian_init_tsvd(A, ndim, verbose = FALSE)
+    coords <- irlba_tsvd_normalized_laplacian_init(A, ndim, verbose = FALSE)
   }
   expansion <- 10.0 / max(abs(coords))
   (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.0001),

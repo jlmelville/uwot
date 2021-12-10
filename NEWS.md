@@ -5,6 +5,14 @@
 * Models couldn't be re-saved after loading. Thank you to 
 [ilyakorsunsky](https://github.com/ilyakorsunsky) for reporting this 
 (<https://github.com/jlmelville/uwot/issues/88>).
+* [RSpectra](https://cran.r-project.org/package=RSpectra) is now a 'Suggests',
+rather than an 'Imports'. If you have RSpectra installed, it will be used
+automatically where previous versions required it (for spectral initialization).
+Otherwise, [irlba](https://cran.r-project.org/package=irlba) will be used.
+You are unlikely to notice much difference in speed or accuracy with real-world
+data. For highly-structured simulation datasets (e.g. spectral initialization of 
+a 1D line) then RSpectra will give much better, faster initializations, but
+these are not the typical use cases envisaged for this package.
 * `init = "laplacian"` returned the wrong coordinates because of a slightly 
 subtle issue around how to order the eigenvectors when using the random walk
 transition matrix rather than normalized graph laplacians.

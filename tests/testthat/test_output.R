@@ -183,7 +183,7 @@ expect_ok_matrix(res, nc = 1)
 # enforce irlba for spectral initialization even if RSpectra is present
 res <- umap(iris10,
             n_components = 1, n_neighbors = 4, n_epochs = 2,
-            n_threads = 1, verbose = FALSE, init = "spectraltsvd"
+            n_threads = 1, verbose = FALSE, init = "irlba_spectral"
 )
 expect_ok_matrix(res, nc = 1)
 

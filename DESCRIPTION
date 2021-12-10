@@ -19,13 +19,13 @@ BugReports: https://github.com/jlmelville/uwot/issues
 Encoding: UTF-8
 Suggests: testthat,
     covr,
-    bigstatsr
+    bigstatsr,
+    RSpectra
 RoxygenNote: 7.1.2
 Depends: Matrix
 LinkingTo: Rcpp, RcppProgress, RcppAnnoy, dqrng
 Imports: Rcpp,
     methods,
     FNN,
-    RSpectra,
     RcppAnnoy (>= 0.0.17),
     irlba
