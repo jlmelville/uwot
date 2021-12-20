@@ -180,6 +180,24 @@ public:
 private:
   float gamma_2;
 };
+
+class pacmap_gradient {
+public:
+  float a;
+  float b;
+  float ab2m;
+  float b1;
+
+  // near: a 1-3, b = 10; mid: a = 3-1000, b = 10,000
+  pacmap_gradient(float a, float b)
+      : a(1.0), b(10.0), ab2m(-2.0 * a * b), b1(b + 1.0) {}
+  auto grad_attr(float dist_squared) const -> float {
+    return ab2m / ((b1 + dist_squared) * (b1 + dist_squared));
+  }
+  auto grad_rep(float dist_squared) const -> float {
+    return 2.0 / ((2.0 + dist_squared) * (2.0 + dist_squared));
+  }
+};
 } // namespace uwot
 
 #endif // UWOT_GRADIENT_H

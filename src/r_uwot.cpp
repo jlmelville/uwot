@@ -253,6 +253,17 @@ void create_tumap(UmapFactory &umap_factory, List) {
   umap_factory.create(gradient);
 }
 
+void create_pacmap(UmapFactory &umap_factory, List method_args) {
+  std::vector<std::string> arg_names = {"a", "b"};
+  validate_args(method_args, arg_names);
+
+  float a = method_args["a"];
+  float b = method_args["b"];
+  Rcerr << "Using a = " << a << " b = " << b << std::endl;
+  const uwot::pacmap_gradient gradient(a, b);
+  umap_factory.create(gradient);
+}
+
 void create_largevis(UmapFactory &umap_factory, List method_args) {
   std::vector<std::string> arg_names = {"gamma"};
   validate_args(method_args, arg_names);
@@ -330,13 +341,17 @@ NumericMatrix optimize_layout_r(
                            n_head_vertices, n_tail_vertices, epochs_per_sample,
                            initial_alpha, opt_args, negative_sample_rate, batch,
                            n_threads, grain_size, uwot_ecb, verbose);
-
+  if (verbose) {
+    Rcerr << "Using method '" << method << "'" << std::endl;
+  }
   if (method == "umap") {
     create_umap(umap_factory, method_args);
   } else if (method == "tumap") {
     create_tumap(umap_factory, method_args);
   } else if (method == "largevis") {
     create_largevis(umap_factory, method_args);
+  } else if (method == "pacmap") {
+    create_pacmap(umap_factory, method_args);
   } else {
     stop("Unknown method: '" + method + "'");
   }
