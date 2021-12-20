@@ -59,9 +59,9 @@ inline auto d2diff(const std::vector<float> &x, std::size_t px,
 // which for Euclidean distance in the output is invariably grad_coeff * (X - Y)
 // Different methods clamp the magnitude of the gradient to different values
 template <typename Gradient>
-auto grad_d(const std::vector<float> &disp, std::size_t d, float grad_coeff)
-    -> float {
-  return clamp(grad_coeff * disp[d], Gradient::clamp_lo, Gradient::clamp_hi);
+auto grad_d(const Gradient &gradient, const std::vector<float> &disp,
+            std::size_t d, float grad_coeff) -> float {
+  return gradient.clamp_grad(grad_coeff * disp[d]);
 }
 
 template <typename Gradient>
@@ -129,7 +129,9 @@ public:
     return gamma_b_2 /
            ((0.001 + dist_squared) * (a * powfun(dist_squared, b) + 1.0));
   }
-
+  auto clamp_grad(float grad_d) const -> float {
+    return clamp(grad_d, clamp_lo, clamp_hi);
+  }
   static const constexpr float clamp_hi = 4.0;
   static const constexpr float clamp_lo = -4.0;
 
@@ -160,6 +162,9 @@ public:
   auto grad_rep(float dist_squared) const -> float {
     return 2.0 / ((0.001 + dist_squared) * (dist_squared + 1.0));
   }
+  auto clamp_grad(float grad_d) const -> float {
+    return clamp(grad_d, clamp_lo, clamp_hi);
+  }
   static const constexpr float clamp_hi = 4.0;
   static const constexpr float clamp_lo = -4.0;
 };
@@ -173,7 +178,9 @@ public:
   auto grad_rep(float dist_squared) const -> float {
     return gamma_2 / ((0.1 + dist_squared) * (dist_squared + 1.0));
   }
-
+  auto clamp_grad(float grad_d) const -> float {
+    return clamp(grad_d, clamp_lo, clamp_hi);
+  }
   static const constexpr float clamp_hi = 5.0;
   static const constexpr float clamp_lo = -5.0;
 
@@ -197,6 +204,7 @@ public:
   auto grad_rep(float dist_squared) const -> float {
     return 2.0 / ((2.0 + dist_squared) * (2.0 + dist_squared));
   }
+  inline auto clamp_grad(float grad_d) const -> float { return grad_d; }
 };
 } // namespace uwot
 

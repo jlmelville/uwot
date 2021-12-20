@@ -82,7 +82,7 @@ inline void update_attract(Update &update, const Gradient &gradient,
   float grad_coeff = grad_attr(gradient, update.head_embedding, dj,
                                update.tail_embedding, dk, ndim, disp);
   for (std::size_t d = 0; d < ndim; d++) {
-    update.attract(dj, dk, d, grad_d<Gradient>(disp, d, grad_coeff), key);
+    update.attract(dj, dk, d, grad_d(gradient, disp, d, grad_coeff), key);
   }
 }
 
@@ -93,7 +93,7 @@ inline void update_repel(Update &update, const Gradient &gradient,
   float grad_coeff = grad_rep(gradient, update.head_embedding, dj,
                               update.tail_embedding, dk, ndim, disp);
   for (std::size_t d = 0; d < ndim; d++) {
-    update.repel(dj, dk, d, grad_d<Gradient>(disp, d, grad_coeff), key);
+    update.repel(dj, dk, d, grad_d(gradient, disp, d, grad_coeff), key);
   }
 }
 
