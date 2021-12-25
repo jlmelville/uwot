@@ -168,7 +168,7 @@ methods, original in the [sneer](https://github.com/jlmelville/sneer) package.
 
 ## oli
 
-The [ORL database of faces](http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html).
+The [ORL database of faces](https://cam-orl.co.uk/facedatabase.html).
 
 |                             |                           |
 :----------------------------:|:--------------------------:
