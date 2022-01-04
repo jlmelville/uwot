@@ -395,6 +395,18 @@ res <- umap(iris10,
 )
 expect_ok_matrix(res)
 
+# test that init_sdev actually applies to the input matrix
+# store old sd
+res_sd <- apply(res, 2, sd)
+res2 <- umap(iris10,
+            n_neighbors = 4, n_epochs = 0, learning_rate = 0.5,
+            init = res, verbose = FALSE, n_threads = 0,
+            init_sdev = 5
+)
+expect_ok_matrix(res2)
+expect_equal(apply(res2, 2, sd), rep(5, ncol(res2)))
+# make sure input is unchanged
+expect_equal(apply(res, 2, sd), res_sd)
 
 # umap transform when test datset size > train dataset size
 set.seed(1337)

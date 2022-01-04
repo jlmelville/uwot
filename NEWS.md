@@ -16,6 +16,8 @@ these are not the typical use cases envisaged for this package.
 * `init = "laplacian"` returned the wrong coordinates because of a slightly 
 subtle issue around how to order the eigenvectors when using the random walk
 transition matrix rather than normalized graph laplacians.
+* The `init_sdev` parameter was ignored when the `init` parameter was a
+user-supplied matrix. Now the input will be scaled.
 
 # uwot 0.1.11
 

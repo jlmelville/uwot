@@ -281,9 +281,14 @@ rand_init_lv <- function(n, ndim, verbose = FALSE) {
 # Rescale embedding so that the standard deviation is the specified value.
 # Default gives initialization like t-SNE, but not random. Large initial
 # distances lead to small gradients, and hence small updates, so should be
-# avoided
-shrink_coords <- function(X, sdev = 1e-4) {
-  scale(X, scale = apply(X, 2, stats::sd) / sdev)
+# avoided.
+scale_coords <- function(X, sdev = 1e-4, verbose = FALSE) {
+  if (is.null(sdev)) {
+    return(X)
+  }
+  tsmessage("Scaling init to sdev = ", sdev)
+  scale_factor <- apply(X, 2, stats::sd)
+  scale(X, scale = scale_factor / sdev)
 }
 
 # PCA

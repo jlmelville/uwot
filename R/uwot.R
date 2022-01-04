@@ -1752,7 +1752,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
            have dimensions (", n_vertices, ", ", n_components, ")")
     }
     tsmessage("Initializing from user-supplied matrix")
-    embedding <- init
+    embedding <- scale_coords(init, init_sdev, verbose = verbose)
   }
   else if (!(methods::is(init, "character") && length(init) == 1)) {
     stop("init should be either a matrix or string describing the ",
@@ -1825,7 +1825,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       if (is.null(init_sdev)) {
         init_sdev <- 1e-4
       }
-      embedding <- shrink_coords(embedding, init_sdev)
+      embedding <- scale_coords(embedding, init_sdev, verbose = verbose)
     }
   }
 
