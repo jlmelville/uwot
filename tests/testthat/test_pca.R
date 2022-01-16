@@ -4,7 +4,7 @@ context("PCA")
 iris10prcomp <- prcomp(iris10, retx = TRUE, center = TRUE, scale. = FALSE)
 
 test_that("PCA initialization", {
-  iris10_pca_scores <- pca_scores(iris10, ncol = 2)
+  iris10_pca_scores <- pca_init(iris10, ndim = 2)
   suppressWarnings(iris10_irlba_scores <- irlba_scores(iris10, ncol = 2))
 
   expect_equal(abs(iris10prcomp$x[, 1:2]), abs(iris10_pca_scores),
@@ -25,7 +25,7 @@ test_that("1 component initialization works", {
 })
 
 test_that("PCA returns model data", {
-  iris10_pca_scores <- pca_scores(iris10, ncol = 2, ret_extra = TRUE)
+  iris10_pca_scores <- pca_init(iris10, ndim = 2, ret_extra = TRUE)
   expect_equal(abs(iris10prcomp$x[, 1:2]),
     abs(iris10_pca_scores$scores),
     check.attributes = FALSE

@@ -1631,8 +1631,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (!is.null(pca) && length(metric) == 1 && metric != "hamming" &&
     is.matrix(X) && ncol(X) > pca) {
     tsmessage("Reducing X column dimension to ", pca, " via PCA")
-    pca_res <- pca_scores(X,
-      ncol = pca, center = pca_center, pca_method = pca_method,
+    pca_res <- pca_init(X,
+      ndim = pca, center = pca_center, pca_method = pca_method,
       ret_extra = ret_model, verbose = verbose
     )
     if (ret_model) {
@@ -2501,7 +2501,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     if (!is.null(pca_i) && is.matrix(X) && metric != "hamming" &&
       ncol(X) > pca_i && nrow(X) > pca_i) {
       tsmessage("Reducing column dimension to ", pca_i, " via PCA")
-      pca_res <- pca_scores(Xsub, pca_i,
+      pca_res <- pca_init(Xsub, pca_i,
         ret_extra = ret_model,
         center = pca_center_i,
         pca_method = pca_method,

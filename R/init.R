@@ -292,29 +292,19 @@ scale_coords <- function(X, sdev = 1e-4, verbose = FALSE) {
 }
 
 # PCA
-pca_init <- function(X, ndim = 2, center = TRUE, pca_method = "irlba",
-                     verbose = FALSE) {
-  tsmessage("Initializing from PCA")
-  pca_scores(X,
-    ncol = ndim, center = center, pca_method = pca_method,
-    verbose = verbose
-  )
-}
-
-
-# Calculates a matrix containing the first ncol columns of the PCA scores.
+# Calculates a matrix containing the first ndim columns of the PCA scores.
 # Returns the score matrix unless ret_extra is TRUE, in which case a list
 # is returned also containing the eigenvalues
-pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
+pca_init <- function(X, ndim = min(dim(X)), center = TRUE, ret_extra = FALSE,
                        pca_method = "auto", verbose = FALSE) {
   if (methods::is(X, "dist")) {
-    res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ncol)
+    res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ndim)
 
     if (ret_extra || verbose) {
       lambda <- res_mds$eig
-      varex <- sum(lambda[1:ncol]) / sum(lambda)
+      varex <- sum(lambda[1:ndim]) / sum(lambda)
       tsmessage(
-        "PCA (using classical MDS): ", ncol, " components explained ",
+        "PCA (using classical MDS): ", ndim, " components explained ",
         formatC(varex * 100), "% variance"
       )
     }
@@ -323,9 +313,9 @@ pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
   }
 
   # irlba warns about using too large a percentage of total singular value
-  # so don't use if dataset is small compared to ncol
+  # so don't use if dataset is small compared to ndim
   if (pca_method == "auto") {
-    if (ncol < 0.5 * min(dim(X))) {
+    if (ndim < 0.5 * min(dim(X))) {
       pca_method <- "irlba"
     } else {
       pca_method <- "svd"
@@ -351,13 +341,13 @@ pca_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
     stop("BUG: unknown svd method '", pca_method, "'")
   )
 
-  pca_fun(
+  do.call(pca_fun, list(
     X = X,
-    ncol = ncol,
+    ncol = ndim,
     center = center,
     ret_extra = ret_extra,
     verbose = verbose
-  )
+  ))
 }
 
 # Get scores by SVD
