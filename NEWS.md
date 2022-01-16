@@ -18,6 +18,10 @@ subtle issue around how to order the eigenvectors when using the random walk
 transition matrix rather than normalized graph laplacians.
 * The `init_sdev` parameter was ignored when the `init` parameter was a
 user-supplied matrix. Now the input will be scaled.
+* Matrix input was being converted to and from a data frame during
+pre-processing, causing R to allocate memory that it was disinclined to ever
+give up even after the function exited. This unnecessary manipulation is now
+avoided.
 
 # uwot 0.1.11
 

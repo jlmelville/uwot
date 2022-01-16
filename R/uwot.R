@@ -1555,23 +1555,27 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     cat_ids <- NULL
     norig_col <- ncol(X)
     if (methods::is(X, "data.frame") || methods::is(X, "matrix")) {
-      if (methods::is(X, "matrix")) {
-        X <- data.frame(X)
-      }
       cat_res <- find_categoricals(metric)
       metric <- cat_res$metrics
       cat_ids <- cat_res$categoricals
       # Convert categorical columns to factors if they aren't already
       if (!is.null(cat_ids)) {
-        X[, cat_ids] <- lapply(X[, cat_ids, drop = FALSE], factor)
+        X[, cat_ids] <- sapply(X[, cat_ids, drop = FALSE], factor, 
+                               simplify = methods::is(X, "matrix"))
         Xcat <- X[, cat_ids, drop = FALSE]
       }
-
-      indexes <- which(vapply(X, is.numeric, logical(1)))
-      if (length(indexes) == 0) {
-        stop("No numeric columns found")
+      
+      if (methods::is(X, "data.frame")) {
+        indexes <- which(vapply(X, is.numeric, logical(1)))
+        if (length(indexes) == 0) {
+          stop("No numeric columns found")
+        }
+        tsmessage("Converting dataframe to numerical matrix")
+        if (length(indexes) != ncol(X)) {
+         X <- X[, indexes]
+        }
+        X <- as.matrix(X)
       }
-      X <- as.matrix(X[, indexes])
     }
     checkna(X)
     n_vertices <- nrow(X)
