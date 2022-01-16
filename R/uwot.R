@@ -1766,7 +1766,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     init <- match.arg(tolower(init), c(
       "spectral", "random", "lvrandom", "normlaplacian",
       "laplacian", "spca", "pca", "inormlaplacian", "ispectral",
-      "agspectral", "irlba_spectral", "irlba_laplacian"
+      "agspectral", "irlba_spectral", "irlba_laplacian", "pacpca"
     ))
 
     if (init_is_spectral(init)) {
@@ -1787,14 +1787,14 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
 
     # Don't repeat PCA initialization if we've already done it once
-    if (pca_shortcut && init %in% c("spca", "pca") && pca >= n_components) {
+    if (pca_shortcut && init %in% c("spca", "pca", "pacpca") && pca >= n_components) {
       embedding <- X[, 1:n_components]
-      if (init == "spca") {
-        tsmessage("Initializing from scaled PCA")
-      }
-      else {
-        tsmessage("Initializing from PCA")
-      }
+      switch (init,
+        spca = tsmessage("Initializing from scaled PCA"),
+        pca = tsmessage("Initializing from PCA"),
+        pacpca = tsmessage("Initializing from PaCMAP-style PCA"),
+        stop("Unknown init method '", init, "'")
+      )
     }
     else {
       embedding <- switch(init,
@@ -1811,6 +1811,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                         verbose = verbose),
         pca = pca_init(X, ndim = n_components, pca_method = pca_method, 
                        verbose = verbose),
+        pacpca = pca_init(X, ndim = n_components, pca_method = pca_method, 
+                           verbose = verbose),
         ispectral = irlba_spectral_init(V, ndim = n_components, verbose = verbose),
         inormlaplacian = irlba_normalized_laplacian_init(V,
           ndim = n_components,
@@ -1825,6 +1827,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         stop("Unknown initialization method: '", init, "'")
       )
     }
+    if (init == "pacpca") {
+      embedding <- 0.01 * embedding
+    }
+    
     if (!is.null(init_sdev) || init == "spca") {
       if (is.null(init_sdev)) {
         init_sdev <- 1e-4
