@@ -22,7 +22,7 @@ c2y <- function(...) {
 }
 
 iris10 <- x2m(iris[1:10, ])
-iris10_Y <- pca_scores(iris10, ncol = 2)
+iris10_Y <- pca_init(iris10, ndim = 2)
 
 diris10 <- dist(iris10)
 

@@ -1558,23 +1558,27 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     cat_ids <- NULL
     norig_col <- ncol(X)
     if (methods::is(X, "data.frame") || methods::is(X, "matrix")) {
-      if (methods::is(X, "matrix")) {
-        X <- data.frame(X)
-      }
       cat_res <- find_categoricals(metric)
       metric <- cat_res$metrics
       cat_ids <- cat_res$categoricals
       # Convert categorical columns to factors if they aren't already
       if (!is.null(cat_ids)) {
-        X[, cat_ids] <- lapply(X[, cat_ids, drop = FALSE], factor)
+        X[, cat_ids] <- sapply(X[, cat_ids, drop = FALSE], factor, 
+                               simplify = methods::is(X, "matrix"))
         Xcat <- X[, cat_ids, drop = FALSE]
       }
-
-      indexes <- which(vapply(X, is.numeric, logical(1)))
-      if (length(indexes) == 0) {
-        stop("No numeric columns found")
+      
+      if (methods::is(X, "data.frame")) {
+        indexes <- which(vapply(X, is.numeric, logical(1)))
+        if (length(indexes) == 0) {
+          stop("No numeric columns found")
+        }
+        tsmessage("Converting dataframe to numerical matrix")
+        if (length(indexes) != ncol(X)) {
+         X <- X[, indexes]
+        }
+        X <- as.matrix(X)
       }
-      X <- as.matrix(X[, indexes])
     }
     checkna(X)
     n_vertices <- nrow(X)
@@ -1630,8 +1634,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (!is.null(pca) && length(metric) == 1 && metric != "hamming" &&
     is.matrix(X) && ncol(X) > pca) {
     tsmessage("Reducing X column dimension to ", pca, " via PCA")
-    pca_res <- pca_scores(X,
-      ncol = pca, center = pca_center, pca_method = pca_method,
+    pca_res <- pca_init(X,
+      ndim = pca, center = pca_center, pca_method = pca_method,
       ret_extra = ret_model, verbose = verbose
     )
     if (ret_model) {
@@ -1755,7 +1759,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
            have dimensions (", n_vertices, ", ", n_components, ")")
     }
     tsmessage("Initializing from user-supplied matrix")
-    embedding <- init
+    embedding <- scale_coords(init, init_sdev, verbose = verbose)
   }
   else if (!(methods::is(init, "character") && length(init) == 1)) {
     stop("init should be either a matrix or string describing the ",
@@ -1765,7 +1769,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     init <- match.arg(tolower(init), c(
       "spectral", "random", "lvrandom", "normlaplacian",
       "laplacian", "spca", "pca", "inormlaplacian", "ispectral",
-      "agspectral", "irlba_spectral", "irlba_laplacian"
+      "agspectral", "irlba_spectral", "irlba_laplacian", "pacpca"
     ))
 
     if (init_is_spectral(init)) {
@@ -1786,14 +1790,14 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
 
     # Don't repeat PCA initialization if we've already done it once
-    if (pca_shortcut && init %in% c("spca", "pca") && pca >= n_components) {
+    if (pca_shortcut && init %in% c("spca", "pca", "pacpca") && pca >= n_components) {
       embedding <- X[, 1:n_components]
-      if (init == "spca") {
-        tsmessage("Initializing from scaled PCA")
-      }
-      else {
-        tsmessage("Initializing from PCA")
-      }
+      switch (init,
+        spca = tsmessage("Initializing from scaled PCA"),
+        pca = tsmessage("Initializing from PCA"),
+        pacpca = tsmessage("Initializing from PaCMAP-style PCA"),
+        stop("Unknown init method '", init, "'")
+      )
     }
     else {
       embedding <- switch(init,
@@ -1810,6 +1814,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                         verbose = verbose),
         pca = pca_init(X, ndim = n_components, pca_method = pca_method, 
                        verbose = verbose),
+        pacpca = pca_init(X, ndim = n_components, pca_method = pca_method, 
+                           verbose = verbose),
         ispectral = irlba_spectral_init(V, ndim = n_components, verbose = verbose),
         inormlaplacian = irlba_normalized_laplacian_init(V,
           ndim = n_components,
@@ -1824,11 +1830,15 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         stop("Unknown initialization method: '", init, "'")
       )
     }
+    if (init == "pacpca") {
+      embedding <- 0.01 * embedding
+    }
+    
     if (!is.null(init_sdev) || init == "spca") {
       if (is.null(init_sdev)) {
         init_sdev <- 1e-4
       }
-      embedding <- shrink_coords(embedding, init_sdev)
+      embedding <- scale_coords(embedding, init_sdev, verbose = verbose)
     }
   }
 
@@ -2503,7 +2513,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     if (!is.null(pca_i) && is.matrix(X) && metric != "hamming" &&
       ncol(X) > pca_i && nrow(X) > pca_i) {
       tsmessage("Reducing column dimension to ", pca_i, " via PCA")
-      pca_res <- pca_scores(Xsub, pca_i,
+      pca_res <- pca_init(Xsub, pca_i,
         ret_extra = ret_model,
         center = pca_center_i,
         pca_method = pca_method,

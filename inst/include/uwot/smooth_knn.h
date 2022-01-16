@@ -40,9 +40,9 @@
 namespace uwot {
 
 // Welford-style mean calculation
-auto mean_average(std::vector<double> v) -> double {
+auto mean_average(const std::vector<double> &v) -> double {
   long double mean = 0.0;
-  std::size_t n = v.size();
+  const std::size_t n = v.size();
 
   for (std::size_t i = 0; i < n; ++i) {
     mean += (v[i] - mean) / (i + 1);
