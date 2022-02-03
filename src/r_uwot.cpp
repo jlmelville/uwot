@@ -259,7 +259,6 @@ void create_pacmap(UmapFactory &umap_factory, List method_args) {
 
   float a = method_args["a"];
   float b = method_args["b"];
-  Rcerr << "Using a = " << a << " b = " << b << std::endl;
   const uwot::pacmap_gradient gradient(a, b);
   umap_factory.create(gradient);
 }
