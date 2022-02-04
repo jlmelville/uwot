@@ -375,7 +375,14 @@ any combination of the following strings:
     employed for optimization and therefore the number of non-zero elements
     in the matrix is dependent on \code{n_epochs}. If you are only
     interested in the fuzzy input graph (e.g. for clustering), setting
-    \code{n_epochs = 0} will avoid any further sparsifying.
+    \code{n_epochs = 0} will avoid any further sparsifying. Be aware that
+    setting \code{binary_edge_weights = TRUE} will affect this graph (all
+    non-zero edge weights will be 1).
+ \item \code{"sigma"} the normalization value for each observation in the
+    dataset when constructing the smoothed distances to each of its
+    neighbors. This gives some sense of the local density of each
+    observation in the high dimensional space: higher values of
+    \code{sigma} indicate a higher dispersion or lower density.
 }}
 
 \item{tmpdir}{Temporary directory to store nearest neighbor indexes during
@@ -482,6 +489,8 @@ A matrix of optimized coordinates, or:
     \item if \code{ret_extra} contains \code{"fgraph"} returns the high
     dimensional fuzzy graph as a sparse matrix called \code{fgraph}, of type
     \link[Matrix]{dgCMatrix-class}.
+    \item if \code{ret_extra} contains \code{"sigma"} returns a vector of the
+    smooth knn distance normalization terms for each observation.
   }
   The returned list contains the combined data from any combination of
   specifying \code{ret_model}, \code{ret_nn} and \code{ret_extra}.

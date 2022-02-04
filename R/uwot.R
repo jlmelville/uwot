@@ -337,6 +337,13 @@
 #'       in the matrix is dependent on \code{n_epochs}. If you are only
 #'       interested in the fuzzy input graph (e.g. for clustering), setting
 #'       \code{n_epochs = 0} will avoid any further sparsifying.
+#'       Be aware that setting `binary_edge_weights = TRUE` will affect this
+#'       graph (all non-zero edge weights will be 1).
+#'    \item \code{"sigma"} the normalization value for each observation in the
+#'       dataset when constructing the smoothed distances to each of its
+#'       neighbors. This gives some sense of the local density of each
+#'       observation in the high dimensional space: higher values of
+#'       \code{sigma} indicate a higher dispersion or lower density.
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
@@ -421,6 +428,8 @@
 #'     \item if \code{ret_extra} contains \code{"fgraph"} returns the high
 #'     dimensional fuzzy graph as a sparse matrix called \code{fgraph}, of type
 #'     \link[Matrix]{dgCMatrix-class}.
+#'     \item if \code{ret_extra} contains \code{"sigma"} returns a vector of the
+#'     smooth knn distance normalization terms for each observation.
 #'   }
 #'   The returned list contains the combined data from any combination of
 #'   specifying \code{ret_model}, \code{ret_nn} and \code{ret_extra}.
@@ -460,10 +469,12 @@
 #' Böhm, J. N., Berens, P., & Kobak, D. (2020). 
 #' A unifying perspective on neighbor embeddings along the attraction-repulsion spectrum. 
 #' \emph{arXiv preprint} \emph{arXiv:2007.08902}.
+#' \url{https://arxiv.org/abs/2007.08902}
 #' 
 #' Damrich, S., & Hamprecht, F. A. (2021). 
 #' On UMAP's true loss function. 
 #' \emph{Advances in Neural Information Processing Systems}, \emph{34}.
+#' \url{https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html}
 #'
 #' Kingma, D. P., & Ba, J. (2014). 
 #' Adam: A method for stochastic optimization. 
@@ -492,9 +503,10 @@
 #' \emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
 #' \url{https://www.jmlr.org/papers/v9/vandermaaten08a.html}
 #' 
-#' Wang, Y., Huang, H., Rudin, C., & Shaposhnik, Y. (2020). 
-#' Understanding how dimension reduction tools work: an empirical approach to deciphering t-SNE, UMAP, TriMAP, and PaCMAP for data visualization. 
-#' \emph{arXiv preprint} \emph{arXiv:2012.04456}.
+#' Wang, Y., Huang, H., Rudin, C., & Shaposhnik, Y. (2021). 
+#' Understanding How Dimension Reduction Tools Work: An Empirical Approach to Deciphering t-SNE, UMAP, TriMap, and PaCMAP for Data Visualization.
+#' \emph{Journal of Machine Learning Research}, \emph{22}(201), 1-73.
+#' \url{https://www.jmlr.org/papers/v22/20-1061.html}
 #' 
 #' @export
 umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
@@ -543,6 +555,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     ret_model = ret_model || "model" %in% ret_extra,
     ret_nn = ret_nn || "nn" %in% ret_extra,
     ret_fgraph = "fgraph" %in% ret_extra,
+    ret_sigma = "sigma" %in% ret_extra,
     batch = batch,
     opt_args = opt_args,
     epoch_callback = epoch_callback,
@@ -874,7 +887,14 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       employed for optimization and therefore the number of non-zero elements
 #'       in the matrix is dependent on \code{n_epochs}. If you are only
 #'       interested in the fuzzy input graph (e.g. for clustering), setting
-#'       \code{n_epochs = 0} will avoid any further sparsifying.
+#'       \code{n_epochs = 0} will avoid any further sparsifying. Be aware that
+#'       setting \code{binary_edge_weights = TRUE} will affect this graph (all
+#'       non-zero edge weights will be 1).
+#'    \item \code{"sigma"} the normalization value for each observation in the
+#'       dataset when constructing the smoothed distances to each of its
+#'       neighbors. This gives some sense of the local density of each
+#'       observation in the high dimensional space: higher values of
+#'       \code{sigma} indicate a higher dispersion or lower density.
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
@@ -959,6 +979,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item if \code{ret_extra} contains \code{"fgraph"} returns the high
 #'     dimensional fuzzy graph as a sparse matrix called \code{fgraph}, of type
 #'     \link[Matrix]{dgCMatrix-class}.
+#'     \item if \code{ret_extra} contains \code{"sigma"} returns a vector of the
+#'     smooth knn distance normalization terms for each observation.
 #'   }
 #'   The returned list contains the combined data from any combination of
 #'   specifying \code{ret_model}, \code{ret_nn} and \code{ret_extra}.
@@ -1011,6 +1033,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     ret_model = ret_model || "model" %in% ret_extra,
     ret_nn = ret_nn || "nn" %in% ret_extra,
     ret_fgraph = "fgraph" %in% ret_extra,
+    ret_sigma = "sigma" %in% ret_extra,
     batch = batch,
     opt_args = opt_args,
     epoch_callback = epoch_callback,
@@ -1306,16 +1329,18 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \itemize{
 #'     \item \code{"nn"} same as setting \code{ret_nn = TRUE}.
 #'     \item \code{"P"} the high dimensional probability matrix. The graph
-#'     is returned as a sparse symmetric N x N matrix of class
-#'     \link[Matrix]{dgCMatrix-class}, where a non-zero entry (i, j) gives the
-#'     input probability (or similarity or affinity) of the edge connecting
-#'     vertex i and vertex j. Note that the graph is further sparsified by
-#'     removing edges with sufficiently low membership strength that they would
-#'     not be sampled by the probabilistic edge sampling employed for
-#'     optimization and therefore the number of non-zero elements in the matrix
-#'     is dependent on \code{n_epochs}. If you are only interested in the fuzzy
-#'     input graph (e.g. for clustering), setting \code{n_epochs = 0} will avoid
-#'     any further sparsifying.
+#'       is returned as a sparse symmetric N x N matrix of class
+#'       \link[Matrix]{dgCMatrix-class}, where a non-zero entry (i, j) gives the
+#'       input probability (or similarity or affinity) of the edge connecting
+#'       vertex i and vertex j. Note that the graph is further sparsified by
+#'       removing edges with sufficiently low membership strength that they
+#'       would not be sampled by the probabilistic edge sampling employed for
+#'       optimization and therefore the number of non-zero elements in the
+#'       matrix is dependent on \code{n_epochs}. If you are only interested in
+#'       the fuzzy input graph (e.g. for clustering), setting 
+#'       \code{n_epochs = 0} will avoid any further sparsifying. Be aware that 
+#'       setting \code{binary_edge_weights = TRUE} will affect this graph (all 
+#'       non-zero edge weights will be 1).
 #'   }
 #' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
@@ -1433,6 +1458,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     kernel = kernel,
     ret_nn = ret_nn || "nn" %in% ret_extra,
     ret_fgraph = "P" %in% ret_extra,
+    ret_sigma = "sigma" %in% ret_extra,
     pcg_rand = pcg_rand,
     fast_sgd = fast_sgd,
     batch = batch,
@@ -1465,6 +1491,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  grain_size = 1,
                  kernel = "gauss",
                  ret_model = FALSE, ret_nn = FALSE, ret_fgraph = FALSE,
+                 ret_sigma = FALSE,
                  pca = NULL, pca_center = TRUE, pca_method = NULL,
                  pcg_rand = TRUE,
                  fast_sgd = FALSE,
@@ -1691,7 +1718,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_trees, search_k,
     method,
     set_op_mix_ratio, local_connectivity, bandwidth,
-    perplexity, kernel,
+    perplexity, kernel, ret_sigma,
     n_threads, grain_size,
     ret_model,
     pca = pca, pca_center = pca_center, pca_method = pca_method,
@@ -1699,12 +1726,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     tmpdir = tmpdir,
     verbose = verbose
   )
-
   V <- d2sr$V
   nns <- d2sr$nns
   if (is.null(pca_models)) {
     pca_models <- d2sr$pca_models
   }
+  sigmas <- d2sr$sigmas
 
   if (!is.null(y)) {
     tsmessage("Processing y data")
@@ -1762,6 +1789,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         local_connectivity = 1.0,
         bandwidth = 1.0,
         perplexity = perplexity, kernel = kernel,
+        ret_sigma = FALSE,
         n_threads = n_threads, grain_size = grain_size,
         ret_model = FALSE,
         pca = pca, pca_center = TRUE, pca_method = pca_method,
@@ -2049,6 +2077,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       else {
         res$fgraph <- V
       }
+    }
+    if (!is.null(sigmas)) {
+      res$sigmas <- sigmas
     }
   }
   else {
@@ -2442,7 +2473,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
                      n_trees, search_k,
                      method,
                      set_op_mix_ratio, local_connectivity, bandwidth,
-                     perplexity, kernel,
+                     perplexity, kernel, ret_sigma,
                      n_threads, grain_size,
                      ret_model,
                      n_vertices = x2nv(X),
@@ -2452,7 +2483,8 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
   V <- NULL
   nns <- list()
   nblocks <- length(metrics)
-
+  sigmas <- NULL
+  
   # Check for precalculated NN data in nn_method
   if (is.list(nn_method)) {
     if (is.null(nn_method$idx)) {
@@ -2590,6 +2622,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       method,
       set_op_mix_ratio, local_connectivity, bandwidth,
       perplexity, kernel,
+      ret_sigma,
       n_threads, grain_size,
       ret_model,
       n_vertices = n_vertices,
@@ -2607,13 +2640,22 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     else {
       V <- set_intersect(V, Vblock, weight = 0.5, reset = TRUE)
     }
+    if (ret_sigma && is.null(sigmas)) {
+      # No idea how to combine different neighborhood sizes so just return the
+      # first set
+      sigmas <- x2set_res$sigmas
+    }
   }
 
   if (!is.null(Xcat)) {
     V <- categorical_intersection_df(Xcat, V, weight = 0.5, verbose = verbose)
   }
 
-  list(V = V, nns = nns, pca_models = pca_models)
+  res <- list(V = V, nns = nns, pca_models = pca_models)
+  if (!is.null(sigmas)) {
+    res$sigmas <- sigmas
+  }
+  res
 }
 
 x2nn <- function(X, n_neighbors, metric, nn_method,
@@ -2682,14 +2724,18 @@ validate_nn <- function(nn_method, n_vertices, n_neighbors = NULL) {
 nn2set <- function(method, nn,
                    set_op_mix_ratio, local_connectivity, bandwidth,
                    perplexity, kernel,
+                   ret_sigma,
                    n_threads, grain_size,
                    verbose = FALSE) {
+  
+  sigmas <- NULL
+  res <- list()
   if (method == "largevis") {
     n_vertices <- nrow(nn$dist)
     if (perplexity >= n_vertices) {
       stop("perplexity can be no larger than ", n_vertices - 1)
     }
-    V <- perplexity_similarities(
+    res$V <- perplexity_similarities(
       nn = nn, perplexity = perplexity,
       n_threads = n_threads,
       grain_size = grain_size,
@@ -2698,24 +2744,30 @@ nn2set <- function(method, nn,
     )
   }
   else {
-    V <- fuzzy_simplicial_set(
+    Vres <- fuzzy_simplicial_set(
       nn = nn,
       set_op_mix_ratio = set_op_mix_ratio,
       local_connectivity = local_connectivity,
       bandwidth = bandwidth,
+      ret_sigma = ret_sigma,
       n_threads = n_threads,
       grain_size = grain_size,
       verbose = verbose
     )
+    res$V <- Vres$matrix
+    if (ret_sigma) {
+      res$sigmas <- Vres$sigmas
+    }
   }
+  res
 }
-
 
 x2set <- function(X, n_neighbors, metric, nn_method,
                   n_trees, search_k,
                   method,
                   set_op_mix_ratio, local_connectivity, bandwidth,
                   perplexity, kernel,
+                  ret_sigma,
                   n_threads, grain_size,
                   ret_model,
                   n_vertices = x2nv(X),
@@ -2738,22 +2790,27 @@ x2set <- function(X, n_neighbors, metric, nn_method,
   }
   gc()
 
-
-  V <- nn2set(method, nn,
+  nn2set_res <- nn2set(method, nn,
     set_op_mix_ratio, local_connectivity, bandwidth,
-    perplexity, kernel,
+    perplexity, kernel, ret_sigma,
     n_threads, grain_size,
     verbose = verbose
   )
+  V <- nn2set_res$V
+  
   if (any(is.na(V))) {
     stop("Non-finite entries in the input matrix")
   }
   gc()
 
-  list(
+  res <- list(
     nn = nn,
     V = V
   )
+  if (ret_sigma && !is.null(nn2set_res$sigmas)) {
+    res$sigmas <- nn2set_res$sigmas
+  }
+  res
 }
 
 set_intersect <- function(A, B, weight = 0.5, reset = TRUE) {

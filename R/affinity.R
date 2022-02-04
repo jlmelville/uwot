@@ -16,12 +16,12 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
   }
 }
 
-# Abstracts over whether the smooth knn distances uses the multithreaded code
-# or not
+# Calculate the (asymmetric) affinity matrix based on the nearest neighborhoods
 smooth_knn <- function(nn,
                        local_connectivity = 1.0, bandwidth = 1.0,
                        n_threads = NULL,
                        grain_size = 1,
+                       ret_sigma = FALSE,
                        verbose = FALSE) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
@@ -38,12 +38,13 @@ smooth_knn <- function(nn,
     tol = 1e-5,
     min_k_dist_scale = 1e-3,
     n_threads = n_threads,
-    grain_size = grain_size
+    grain_size = grain_size,
+    ret_sigma = ret_sigma
   )
   if (verbose && affinity_matrix_res$n_failures > 0) {
     tsmessage(affinity_matrix_res$n_failures, " smooth knn distance failures")
   }
-  affinity_matrix_res$matrix
+  affinity_matrix_res
 }
 
 # Given nearest neighbor data and a measure of distance compute
@@ -55,25 +56,32 @@ smooth_knn <- function(nn,
 fuzzy_simplicial_set <- function(nn,
                                  set_op_mix_ratio = 1.0,
                                  local_connectivity = 1.0, bandwidth = 1.0,
+                                 ret_sigma = FALSE,
                                  n_threads = NULL,
                                  grain_size = 1,
                                  verbose = FALSE) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  affinity_matrix <- smooth_knn(nn,
+  affinity_matrix_res <- smooth_knn(nn,
     local_connectivity = local_connectivity,
     bandwidth = bandwidth,
+    ret_sigma = ret_sigma,
     n_threads = n_threads,
     grain_size = grain_size,
     verbose = verbose
   )
+  affinity_matrix <- affinity_matrix_res$matrix
 
   affinity_matrix <- nn_to_sparse(nn$idx, as.vector(affinity_matrix),
     self_nbr = TRUE, max_nbr_id = nrow(nn$idx)
   )
 
-  fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio)
+  res <- list(matrix = fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio))
+  if (ret_sigma) {
+    res$sigmas <- affinity_matrix_res$sigmas
+  }
+  res
 }
 
 symmetrize <- function(P) {

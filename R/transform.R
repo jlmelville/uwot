@@ -390,7 +390,7 @@ umap_transform <- function(X = NULL, model = NULL,
       n_threads = n_threads,
       grain_size = grain_size,
       verbose = verbose
-    )
+    )$matrix
 
     if (is.logical(init_weighted)) {
       embedding_block <- init_new_embedding(train_embedding, nn, graph_block,

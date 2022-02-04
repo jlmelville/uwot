@@ -1,5 +1,20 @@
 # uwot 0.1.11.9000
 
+## New features
+
+* New parameter: `binary_edge_weights`. If set to `TRUE`, instead of smoothed
+knn distances, non-zero edge weights all have a value of 1. This is how
+[PaCMAP](https://www.jmlr.org/papers/v22/20-1061.html) works and there is
+[practical](https://arxiv.org/abs/2007.08902) and
+[theoretical](https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html)
+reasons to believe this won't have a big effect on UMAP but you can try it
+yourself.
+* New option for `ret_extra`: if it contains `"sigma"`, then the return value
+will contain a `sigma` entry, a vector of the smooth knn distance scaling
+normalization factors, one for each observation in the input data. A small value
+indicates a high density of points in the local neighborhood of that
+observation. Only applies for `umap` and `tumap`.
+
 ## Bug fixes and minor improvements
 
 * Models couldn't be re-saved after loading. Thank you to 

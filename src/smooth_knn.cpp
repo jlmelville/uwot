@@ -32,6 +32,7 @@ List smooth_knn_distances_parallel(NumericMatrix nn_dist,
                                    double local_connectivity = 1.0,
                                    double bandwidth = 1.0, double tol = 1e-5,
                                    double min_k_dist_scale = 1e-3,
+                                   bool ret_sigma = false,
                                    std::size_t n_threads = 0,
                                    std::size_t grain_size = 1) {
 
@@ -40,7 +41,7 @@ List smooth_knn_distances_parallel(NumericMatrix nn_dist,
 
   auto nn_distv = as<std::vector<double>>(nn_dist);
   uwot::SmoothKnnWorker worker(nn_distv, n_vertices, n_iter, local_connectivity,
-                               bandwidth, tol, min_k_dist_scale);
+                               bandwidth, tol, min_k_dist_scale, ret_sigma);
 
   if (n_threads > 0) {
     RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads,
@@ -49,8 +50,12 @@ List smooth_knn_distances_parallel(NumericMatrix nn_dist,
     worker(0, n_vertices);
   }
 
-  return List::create(
-      _("matrix") =
-          NumericMatrix(n_vertices, n_neighbors, worker.nn_weights.begin()),
+  auto res = List::create(
+    _("matrix") =
+      NumericMatrix(n_vertices, n_neighbors, worker.nn_weights.begin()),
       _("n_failures") = static_cast<std::size_t>(worker.n_search_fails));
+  if (ret_sigma) {
+    res["sigmas"] = worker.sigmas;
+  }
+  return res;
 }

@@ -384,6 +384,13 @@ any combination of the following strings:
     in the matrix is dependent on \code{n_epochs}. If you are only
     interested in the fuzzy input graph (e.g. for clustering), setting
     \code{n_epochs = 0} will avoid any further sparsifying.
+    Be aware that setting `binary_edge_weights = TRUE` will affect this
+    graph (all non-zero edge weights will be 1).
+ \item \code{"sigma"} the normalization value for each observation in the
+    dataset when constructing the smoothed distances to each of its
+    neighbors. This gives some sense of the local density of each
+    observation in the high dimensional space: higher values of
+    \code{sigma} indicate a higher dispersion or lower density.
 }}
 
 \item{n_threads}{Number of threads to use (except during stochastic gradient
@@ -511,6 +518,8 @@ A matrix of optimized coordinates, or:
     \item if \code{ret_extra} contains \code{"fgraph"} returns the high
     dimensional fuzzy graph as a sparse matrix called \code{fgraph}, of type
     \link[Matrix]{dgCMatrix-class}.
+    \item if \code{ret_extra} contains \code{"sigma"} returns a vector of the
+    smooth knn distance normalization terms for each observation.
   }
   The returned list contains the combined data from any combination of
   specifying \code{ret_model}, \code{ret_nn} and \code{ret_extra}.
@@ -558,10 +567,12 @@ In \emph{Advances in neural information processing systems}
 Böhm, J. N., Berens, P., & Kobak, D. (2020). 
 A unifying perspective on neighbor embeddings along the attraction-repulsion spectrum. 
 \emph{arXiv preprint} \emph{arXiv:2007.08902}.
+\url{https://arxiv.org/abs/2007.08902}
 
 Damrich, S., & Hamprecht, F. A. (2021). 
 On UMAP's true loss function. 
 \emph{Advances in Neural Information Processing Systems}, \emph{34}.
+\url{https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html}
 
 Kingma, D. P., & Ba, J. (2014). 
 Adam: A method for stochastic optimization. 
@@ -590,7 +601,8 @@ Visualizing data using t-SNE.
 \emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
 \url{https://www.jmlr.org/papers/v9/vandermaaten08a.html}
 
-Wang, Y., Huang, H., Rudin, C., & Shaposhnik, Y. (2020). 
-Understanding how dimension reduction tools work: an empirical approach to deciphering t-SNE, UMAP, TriMAP, and PaCMAP for data visualization. 
-\emph{arXiv preprint} \emph{arXiv:2012.04456}.
+Wang, Y., Huang, H., Rudin, C., & Shaposhnik, Y. (2021). 
+Understanding How Dimension Reduction Tools Work: An Empirical Approach to Deciphering t-SNE, UMAP, TriMap, and PaCMAP for Data Visualization.
+\emph{Journal of Machine Learning Research}, \emph{22}(201), 1-73.
+\url{https://www.jmlr.org/papers/v22/20-1061.html}
 }

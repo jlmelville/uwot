@@ -294,16 +294,18 @@ any combination of the following strings:
 \itemize{
   \item \code{"nn"} same as setting \code{ret_nn = TRUE}.
   \item \code{"P"} the high dimensional probability matrix. The graph
-  is returned as a sparse symmetric N x N matrix of class
-  \link[Matrix]{dgCMatrix-class}, where a non-zero entry (i, j) gives the
-  input probability (or similarity or affinity) of the edge connecting
-  vertex i and vertex j. Note that the graph is further sparsified by
-  removing edges with sufficiently low membership strength that they would
-  not be sampled by the probabilistic edge sampling employed for
-  optimization and therefore the number of non-zero elements in the matrix
-  is dependent on \code{n_epochs}. If you are only interested in the fuzzy
-  input graph (e.g. for clustering), setting \code{n_epochs = 0} will avoid
-  any further sparsifying.
+    is returned as a sparse symmetric N x N matrix of class
+    \link[Matrix]{dgCMatrix-class}, where a non-zero entry (i, j) gives the
+    input probability (or similarity or affinity) of the edge connecting
+    vertex i and vertex j. Note that the graph is further sparsified by
+    removing edges with sufficiently low membership strength that they
+    would not be sampled by the probabilistic edge sampling employed for
+    optimization and therefore the number of non-zero elements in the
+    matrix is dependent on \code{n_epochs}. If you are only interested in
+    the fuzzy input graph (e.g. for clustering), setting 
+    \code{n_epochs = 0} will avoid any further sparsifying. Be aware that 
+    setting \code{binary_edge_weights = TRUE} will affect this graph (all 
+    non-zero edge weights will be 1).
 }}
 
 \item{tmpdir}{Temporary directory to store nearest neighbor indexes during
