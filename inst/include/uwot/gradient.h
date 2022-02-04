@@ -121,13 +121,13 @@ public:
       : a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b){};
   // Compared to the UMAP Python implementation, instead of doing d2^(b-1)
   // we can save a power calculation by using d2^b / d2
-  auto grad_attr(float dist_squared) const -> float {
-    float pd2b = powfun(dist_squared, b);
-    return (a_b_m2 * pd2b) / (dist_squared * (a * pd2b + 1.0));
+  auto grad_attr(float d2) const -> float {
+    float pd2b = powfun(d2, b);
+    return (a_b_m2 * pd2b) / (d2 * (a * pd2b + 1.0));
   }
-  auto grad_rep(float dist_squared) const -> float {
+  auto grad_rep(float d2) const -> float {
     return gamma_b_2 /
-           ((0.001 + dist_squared) * (a * powfun(dist_squared, b) + 1.0));
+           ((0.001 + d2) * (a * powfun(d2, b) + 1.0));
   }
   auto clamp_grad(float grad_d) const -> float {
     return clamp(grad_d, clamp_lo, clamp_hi);
@@ -156,11 +156,11 @@ using apumap_gradient = base_umap_gradient<fastPrecisePow>;
 class tumap_gradient {
 public:
   tumap_gradient() = default;
-  auto grad_attr(float dist_squared) const -> float {
-    return -2.0 / (dist_squared + 1.0);
+  auto grad_attr(float d2) const -> float {
+    return -2.0 / (d2 + 1.0);
   }
-  auto grad_rep(float dist_squared) const -> float {
-    return 2.0 / ((0.001 + dist_squared) * (dist_squared + 1.0));
+  auto grad_rep(float d2) const -> float {
+    return 2.0 / ((0.001 + d2) * (d2 + 1.0));
   }
   auto clamp_grad(float grad_d) const -> float {
     return clamp(grad_d, clamp_lo, clamp_hi);
@@ -172,11 +172,11 @@ public:
 class largevis_gradient {
 public:
   largevis_gradient(float gamma) : gamma_2(gamma * 2.0) {}
-  auto grad_attr(float dist_squared) const -> float {
-    return -2.0 / (dist_squared + 1.0);
+  auto grad_attr(float d2) const -> float {
+    return -2.0 / (d2 + 1.0);
   }
-  auto grad_rep(float dist_squared) const -> float {
-    return gamma_2 / ((0.1 + dist_squared) * (dist_squared + 1.0));
+  auto grad_rep(float d2) const -> float {
+    return gamma_2 / ((0.1 + d2) * (d2 + 1.0));
   }
   auto clamp_grad(float grad_d) const -> float {
     return clamp(grad_d, clamp_lo, clamp_hi);
@@ -198,11 +198,11 @@ public:
   // near: a 1-3, b = 10; mid: a = 3-1000, b = 10,000
   pacmap_gradient(float a, float b)
       : a(1.0), b(10.0), ab2m(-2.0 * a * b), b1(b + 1.0) {}
-  auto grad_attr(float dist_squared) const -> float {
-    return ab2m / ((b1 + dist_squared) * (b1 + dist_squared));
+  auto grad_attr(float d2) const -> float {
+    return ab2m / ((b1 + d2) * (b1 + d2));
   }
-  auto grad_rep(float dist_squared) const -> float {
-    return 2.0 / ((2.0 + dist_squared) * (2.0 + dist_squared));
+  auto grad_rep(float d2) const -> float {
+    return 2.0 / ((2.0 + d2) * (2.0 + d2));
   }
   inline auto clamp_grad(float grad_d) const -> float { return grad_d; }
 };
