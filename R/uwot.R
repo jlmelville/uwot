@@ -397,6 +397,12 @@
 #'     \item \code{coords} The embedded coordinates as of the end of the current
 #'     epoch, as a matrix with dimensions (N, \code{n_components}).
 #'   }
+#' @param binary_edge_weights If \code{TRUE} then edge weights in the input
+#'   graph are treated as binary (0/1) rather than real valued. This affects the
+#'   sampling frequency of neighbors and is the strategy used by the PaCMAP
+#'   method (Wang and co-workers, 2020). Practical (Böhm and co-workers, 2020)
+#'   and theoretical (Damrich and Hamprecht, 2021) work suggests this has little
+#'   effect on UMAP's performance.
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
 #'     \item if \code{ret_model = TRUE} (or \code{ret_extra} contains
@@ -450,6 +456,14 @@
 #' In \emph{Advances in neural information processing systems}
 #' (pp. 585-591).
 #' \url{http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf}
+#' 
+#' Böhm, J. N., Berens, P., & Kobak, D. (2020). 
+#' A unifying perspective on neighbor embeddings along the attraction-repulsion spectrum. 
+#' \emph{arXiv preprint} \emph{arXiv:2007.08902}.
+#' 
+#' Damrich, S., & Hamprecht, F. A. (2021). 
+#' On UMAP's true loss function. 
+#' \emph{Advances in Neural Information Processing Systems}, \emph{34}.
 #'
 #' Kingma, D. P., & Ba, J. (2014). 
 #' Adam: A method for stochastic optimization. 
@@ -477,6 +491,11 @@
 #' Visualizing data using t-SNE.
 #' \emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
 #' \url{https://www.jmlr.org/papers/v9/vandermaaten08a.html}
+#' 
+#' Wang, Y., Huang, H., Rudin, C., & Shaposhnik, Y. (2020). 
+#' Understanding how dimension reduction tools work: an empirical approach to deciphering t-SNE, UMAP, TriMAP, and PaCMAP for data visualization. 
+#' \emph{arXiv preprint} \emph{arXiv:2012.04456}.
+#' 
 #' @export
 umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_epochs = NULL, learning_rate = 1, scale = FALSE,
@@ -501,7 +520,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  tmpdir = tempdir(),
                  verbose = getOption("verbose", TRUE),
                  batch = FALSE,
-                 opt_args = NULL, epoch_callback = NULL, pca_method = NULL) {
+                 opt_args = NULL, epoch_callback = NULL, pca_method = NULL,
+                 binary_edge_weights = FALSE) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
@@ -526,6 +546,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     batch = batch,
     opt_args = opt_args,
     epoch_callback = epoch_callback,
+    binary_edge_weights = binary_edge_weights,
     tmpdir = tempdir(),
     verbose = verbose
   )
@@ -914,6 +935,12 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item \code{coords} The embedded coordinates as of the end of the current
 #'     epoch, as a matrix with dimensions (N, \code{n_components}).
 #'   }
+#' @param binary_edge_weights If \code{TRUE} then edge weights in the input
+#'   graph are treated as binary (0/1) rather than real valued. This affects the
+#'   sampling frequency of neighbors and is the strategy used by the PaCMAP
+#'   method (Wang and co-workers, 2020). Practical (Böhm and co-workers, 2020)
+#'   and theoretical (Damrich and Hamprecht, 2021) work suggests this has little
+#'   effect on UMAP's performance.
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
 #'     \item if \code{ret_model = TRUE} (or \code{ret_extra} contains
@@ -961,7 +988,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   verbose = getOption("verbose", TRUE),
                   batch = FALSE,
                   opt_args = NULL, epoch_callback = NULL,
-                  pca_method = NULL) {
+                  pca_method = NULL,
+                  binary_edge_weights = FALSE) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -986,6 +1014,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     batch = batch,
     opt_args = opt_args,
     epoch_callback = epoch_callback,
+    binary_edge_weights = binary_edge_weights,
     tmpdir = tmpdir,
     verbose = verbose
   )
@@ -1329,6 +1358,12 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item \code{coords} The embedded coordinates as of the end of the current
 #'     epoch, as a matrix with dimensions (N, \code{n_components}).
 #'   }
+#' @param binary_edge_weights If \code{TRUE} then edge weights in the input
+#'   graph are treated as binary (0/1) rather than real valued. This affects the
+#'   sampling frequency of neighbors and is the strategy used by the PaCMAP
+#'   method (Wang and co-workers, 2020). Practical (Böhm and co-workers, 2020)
+#'   and theoretical (Damrich and Hamprecht, 2021) work suggests this has little
+#'   effect on UMAP's performance.
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
 #'     \item if \code{ret_nn = TRUE} (or \code{ret_extra} contains \code{"nn"}),
@@ -1381,7 +1416,8 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   verbose = getOption("verbose", TRUE),
                   batch = FALSE,
                   opt_args = NULL, epoch_callback = NULL,
-                  pca_method = NULL) {
+                  pca_method = NULL,
+                  binary_edge_weights = FALSE) {
   uwot(X,
     n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -1403,6 +1439,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     opt_args = opt_args,
     epoch_callback = epoch_callback,
     tmpdir = tmpdir,
+    binary_edge_weights = binary_edge_weights,
     verbose = verbose
   )
 }
@@ -1435,7 +1472,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  opt_args = NULL,
                  tmpdir = tempdir(),
                  verbose = getOption("verbose", TRUE),
-                 epoch_callback = NULL) {
+                 epoch_callback = NULL,
+                 binary_edge_weights = FALSE) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -1858,6 +1896,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
   full_opt_args <- get_opt_args(opt_args, alpha)
 
+  if (binary_edge_weights) {
+    V@x <- rep(1, length(V@x))
+  }
+  
   if (n_epochs > 0) {
     V@x[V@x < max(V@x) / n_epochs] <- 0
     V <- Matrix::drop0(V)
@@ -1895,6 +1937,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       method_args <- list()
     }
     else if (method == "pacmap") {
+      # a = 1 b = 10 for final phase of PaCMAP optimization
       method_args <- list(a = a, b = b)
     }
     else {

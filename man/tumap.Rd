@@ -41,7 +41,8 @@ tumap(
   batch = FALSE,
   opt_args = NULL,
   epoch_callback = NULL,
-  pca_method = NULL
+  pca_method = NULL,
+  binary_edge_weights = FALSE
 )
 }
 \arguments{
@@ -454,6 +455,13 @@ the \code{pca} parameter is specified. Allowed values are:
   50% of the full set of singular vectors would be calculated, in which
   case \code{"svd"} is used.
 }}
+
+\item{binary_edge_weights}{If \code{TRUE} then edge weights in the input
+graph are treated as binary (0/1) rather than real valued. This affects the
+sampling frequency of neighbors and is the strategy used by the PaCMAP
+method (Wang and co-workers, 2020). Practical (Böhm and co-workers, 2020)
+and theoretical (Damrich and Hamprecht, 2021) work suggests this has little
+effect on UMAP's performance.}
 }
 \value{
 A matrix of optimized coordinates, or:
