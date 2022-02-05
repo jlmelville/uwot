@@ -39,12 +39,7 @@ List smooth_knn_distances_parallel(
   uwot::SmoothKnnWorker worker(nn_distv, n_vertices, n_iter, local_connectivity,
                                bandwidth, tol, min_k_dist_scale, ret_sigma);
 
-  if (n_threads > 0) {
-    RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads,
-                                    grain_size);
-  } else {
-    worker(0, n_vertices);
-  }
+  RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads, grain_size);
 
   auto res = List::create(
       _("matrix") =

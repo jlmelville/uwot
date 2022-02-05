@@ -43,13 +43,7 @@ List calc_row_probabilities_parallel(NumericMatrix nn_dist,
   NumericMatrix res(n_vertices, n_neighbors);
   uwot::PerplexityWorker worker(nn_distv, nn_idxv, n_vertices, perplexity,
                                 n_iter, tol);
-
-  if (n_threads > 0) {
-    RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads,
-                                    grain_size);
-  } else {
-    worker(0, n_vertices);
-  }
+  RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads, grain_size);
 
   return List::create(
       _("matrix") = NumericMatrix(n_vertices, n_neighbors, worker.res.begin()),

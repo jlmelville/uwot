@@ -45,13 +45,8 @@ NumericMatrix init_transform_av_parallel(NumericMatrix train_embedding,
 
   uwot::AverageWorker worker(train_embeddingv, n_train_vertices, nn_indexv,
                              n_test_vertices);
-
-  if (n_threads > 0) {
-    RcppPerpendicular::parallel_for(0, n_test_vertices, worker, n_threads,
-                                    grain_size);
-  } else {
-    worker(0, n_test_vertices);
-  }
+  RcppPerpendicular::parallel_for(0, n_test_vertices, worker, n_threads,
+                                  grain_size);
 
   return NumericMatrix(n_test_vertices, ndim, worker.embedding.begin());
 }
@@ -83,13 +78,8 @@ NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
 
   uwot::WeightedAverageWorker worker(train_embeddingv, n_train_vertices,
                                      nn_indexv, nn_weightsv, n_test_vertices);
-
-  if (n_threads > 0) {
-    RcppPerpendicular::parallel_for(0, n_test_vertices, worker, n_threads,
-                                    grain_size);
-  } else {
-    worker(0, n_test_vertices);
-  }
+  RcppPerpendicular::parallel_for(0, n_test_vertices, worker, n_threads,
+                                  grain_size);
 
   return NumericMatrix(n_test_vertices, ndim, worker.embedding.begin());
 }
