@@ -21,8 +21,6 @@
 
 #include "RcppAnnoy.h"
 
-#include "uwot/matrix.h"
-
 typedef AnnoyIndexSingleThreadedBuildPolicy AnnoyIndexThreadedBuildPolicy;
 
 struct UwotAnnoyEuclidean {
@@ -77,7 +75,9 @@ template <typename UwotAnnoyDistance> struct NNWorker {
   void operator()(std::size_t begin, std::size_t end) {
     for (auto i = begin; i < end; i++) {
       std::vector<typename UwotAnnoyDistance::T> fv(ncol);
-      uwot::get_row(mat, nrow, ncol, i, fv);
+      for (std::size_t j = 0; j < ncol; j++) {
+        fv[j] = mat[i + j * nrow];
+      }
 
       std::vector<typename UwotAnnoyDistance::S> result;
       std::vector<typename UwotAnnoyDistance::T> distances;
@@ -89,8 +89,8 @@ template <typename UwotAnnoyDistance> struct NNWorker {
       }
 
       for (std::size_t j = 0; j < n_neighbors; j++) {
-        uwot::set_row(dists, nrow, n_neighbors, i, distances);
-        uwot::set_row(idx, nrow, n_neighbors, i, result);
+        dists[i + j * nrow] = distances[j];
+        idx[i + j * nrow] = result[j];
       }
     }
   }

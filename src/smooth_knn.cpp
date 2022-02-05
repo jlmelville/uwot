@@ -19,7 +19,6 @@
 
 #include <vector>
 
-#include "uwot/matrix.h"
 #include "uwot/smooth_knn.h"
 
 #include <Rcpp.h>
@@ -27,14 +26,11 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-List smooth_knn_distances_parallel(NumericMatrix nn_dist,
-                                   std::size_t n_iter = 64,
-                                   double local_connectivity = 1.0,
-                                   double bandwidth = 1.0, double tol = 1e-5,
-                                   double min_k_dist_scale = 1e-3,
-                                   bool ret_sigma = false,
-                                   std::size_t n_threads = 0,
-                                   std::size_t grain_size = 1) {
+List smooth_knn_distances_parallel(
+    NumericMatrix nn_dist, std::size_t n_iter = 64,
+    double local_connectivity = 1.0, double bandwidth = 1.0, double tol = 1e-5,
+    double min_k_dist_scale = 1e-3, bool ret_sigma = false,
+    std::size_t n_threads = 0, std::size_t grain_size = 1) {
 
   std::size_t n_vertices = nn_dist.nrow();
   std::size_t n_neighbors = nn_dist.ncol();
@@ -51,11 +47,11 @@ List smooth_knn_distances_parallel(NumericMatrix nn_dist,
   }
 
   auto res = List::create(
-    _("matrix") =
-      NumericMatrix(n_vertices, n_neighbors, worker.nn_weights.begin()),
+      _("matrix") =
+          NumericMatrix(n_vertices, n_neighbors, worker.nn_weights.begin()),
       _("n_failures") = static_cast<std::size_t>(worker.n_search_fails));
   if (ret_sigma) {
-    res["sigmas"] = worker.sigmas;
+    res["sigma"] = worker.sigmas;
   }
   return res;
 }

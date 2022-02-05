@@ -35,7 +35,6 @@
 #include <vector>
 
 #include "RcppPerpendicular.h"
-#include "uwot/matrix.h"
 
 namespace uwot {
 
@@ -66,7 +65,7 @@ struct SmoothKnnWorker {
   double double_max = (std::numeric_limits<double>::max)();
 
   std::vector<double> nn_weights;
-  
+
   bool save_sigmas;
   std::vector<double> sigmas;
 
@@ -82,9 +81,8 @@ struct SmoothKnnWorker {
         local_connectivity(local_connectivity), bandwidth(bandwidth), tol(tol),
         min_k_dist_scale(min_k_dist_scale),
         mean_distances(mean_average(nn_dist)),
-        nn_weights(n_vertices * n_neighbors), save_sigmas(save_sigmas), 
-        sigmas(save_sigmas ? n_vertices : 0), 
-        n_search_fails(0) {}
+        nn_weights(n_vertices * n_neighbors), save_sigmas(save_sigmas),
+        sigmas(save_sigmas ? n_vertices : 0), n_search_fails(0) {}
 
   void operator()(std::size_t begin, std::size_t end) {
     // number of binary search failures in this window
@@ -104,8 +102,9 @@ struct SmoothKnnWorker {
       double adiff_min = double_max;
 
       std::vector<double> ith_distances(n_neighbors);
-      uwot::get_row(nn_dist, n_vertices, n_neighbors, i, ith_distances);
-      for (double ith_distance : ith_distances) {
+      for (std::size_t j = 0; j < n_neighbors; j++) {
+        auto ith_distance = nn_dist[i + j * n_vertices];
+        ith_distances[j] = ith_distance;
         if (ith_distance > 0.0) {
           non_zero_distances.push_back(ith_distance);
         }
@@ -177,17 +176,12 @@ struct SmoothKnnWorker {
         sigma = (std::max)(min_k_dist_scale * mean_distances, sigma);
       }
 
-      std::vector<double> res(n_neighbors, 0.0);
       for (std::size_t k = 0; k < n_neighbors; k++) {
         double rk = ith_distances[k] - rho;
-        if (rk <= 0) {
-          res[k] = 1.0;
-        } else {
-          res[k] = std::exp(-rk / (sigma * bandwidth));
-        }
+        nn_weights[i + k * n_vertices] =
+            rk <= 0.0 ? 1.0 : std::exp(-rk / (sigma * bandwidth));
       }
 
-      uwot::set_row(nn_weights, n_vertices, n_neighbors, i, res);
       if (save_sigmas) {
         sigmas[i] = sigma;
       }
