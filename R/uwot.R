@@ -1731,7 +1731,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (is.null(pca_models)) {
     pca_models <- d2sr$pca_models
   }
-  sigmas <- d2sr$sigmas
+  sigma <- d2sr$sigma
+  if (is.null(sigma)) {
+    sigma <- c()
+  }
 
   if (!is.null(y)) {
     tsmessage("Processing y data")
@@ -2009,7 +2012,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     tsmessage("Optimization finished")
   }
 
-  if (ret_model || ret_nn || ret_fgraph) {
+  ret_extra <- ret_model || ret_nn || ret_fgraph || ret_sigma
+  if (ret_extra) {
     nblocks <- length(nns)
     res <- list(embedding = embedding)
     if (ret_model) {
@@ -2078,8 +2082,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         res$fgraph <- V
       }
     }
-    if (!is.null(sigmas)) {
-      res$sigmas <- sigmas
+    if (length(sigma) > 0) {
+      res$sigma <- sigma
     }
   }
   else {
@@ -2483,8 +2487,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
   V <- NULL
   nns <- list()
   nblocks <- length(metrics)
-  sigmas <- NULL
-  
+  sigma <- NULL
   # Check for precalculated NN data in nn_method
   if (is.list(nn_method)) {
     if (is.null(nn_method$idx)) {
@@ -2640,10 +2643,10 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     else {
       V <- set_intersect(V, Vblock, weight = 0.5, reset = TRUE)
     }
-    if (ret_sigma && is.null(sigmas)) {
+    if (ret_sigma && is.null(sigma)) {
       # No idea how to combine different neighborhood sizes so just return the
       # first set
-      sigmas <- x2set_res$sigmas
+      sigma <- x2set_res$sigma
     }
   }
 
@@ -2652,8 +2655,8 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
   }
 
   res <- list(V = V, nns = nns, pca_models = pca_models)
-  if (!is.null(sigmas)) {
-    res$sigmas <- sigmas
+  if (!is.null(sigma)) {
+    res$sigma <- sigma
   }
   res
 }
@@ -2728,7 +2731,7 @@ nn2set <- function(method, nn,
                    n_threads, grain_size,
                    verbose = FALSE) {
   
-  sigmas <- NULL
+  sigma <- NULL
   res <- list()
   if (method == "largevis") {
     n_vertices <- nrow(nn$dist)
@@ -2754,9 +2757,10 @@ nn2set <- function(method, nn,
       grain_size = grain_size,
       verbose = verbose
     )
+
     res$V <- Vres$matrix
     if (ret_sigma) {
-      res$sigmas <- Vres$sigmas
+      res$sigma <- Vres$sigma
     }
   }
   res
@@ -2807,8 +2811,8 @@ x2set <- function(X, n_neighbors, metric, nn_method,
     nn = nn,
     V = V
   )
-  if (ret_sigma && !is.null(nn2set_res$sigmas)) {
-    res$sigmas <- nn2set_res$sigmas
+  if (ret_sigma && !is.null(nn2set_res$sigma)) {
+    res$sigma <- nn2set_res$sigma
   }
   res
 }

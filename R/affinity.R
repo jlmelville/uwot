@@ -76,10 +76,9 @@ fuzzy_simplicial_set <- function(nn,
   affinity_matrix <- nn_to_sparse(nn$idx, as.vector(affinity_matrix),
     self_nbr = TRUE, max_nbr_id = nrow(nn$idx)
   )
-
   res <- list(matrix = fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio))
   if (ret_sigma) {
-    res$sigmas <- affinity_matrix_res$sigmas
+    res$sigma <- affinity_matrix_res$sigma
   }
   res
 }
