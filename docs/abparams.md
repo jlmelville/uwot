@@ -148,6 +148,10 @@ and `b = 0.90`). I used the range of values of `a` and `b` that resulted from
 changing `min_dist` and `spread` in the previous section's results to set
 the range of values I look at below.
 
+[Wang and co-workers](https://www.jmlr.org/papers/v22/20-1061.html) recommend
+that `b > 0.5` to be a good loss function for dimensionality reduction (see
+Proposition 1 and 2 in their PaCMAP paper).
+
 ### a
 
 `a` seemed to have a wider range of values than `b`, so I looked at values 
