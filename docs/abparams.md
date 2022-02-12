@@ -33,23 +33,83 @@ w_{ij} = 1 / \left(1 + ad_{ij}^{2b}\right)
 $$
 
 with $d_{ij}$ being the Euclidean distance in the embedding between the two
-points. $a$ and $b$ are two hyper-parameters. Usually they are determined 
-by a non-linear least squares fit based on an exponential decay curve 
-parameterized by `min_dist` and `spread`. `min_dist` is the x-value where the
-decay starts. For smaller values, the y-value is capped at 1. `spread` 
-determines the x-value range over which the y-value decays to zero (the value 
-of `spread` multiplied by 3). Here's a visual example using the current default 
-UMAP values of `spread = 1, min_dist = 0.1`:
+points. Below I drop the $ij$ subscript for clarity's sake. $a$ and $b$ are two
+hyper-parameters. Usually they are determined by a non-linear least squares fit
+based on an exponential decay curve parameterized by `min_dist` and `spread`:
+
+$$
+w = \exp\left[-\max \left(0, d - \rho \right) / \sigma \right]
+$$
+
+where `min_dist` is $\rho$ and `spread` is $\sigma$. I have used those symbols
+to make it more obvious that this equation has the same form as UMAP's weighting
+function for its edge weights in the input space. As a reminder, the presence of
+the `max` operation and shifting the distances by $\rho$ is to enforce the local
+connectivity constraint: there is always an edge weight of 1 between a point and
+its nearest neighbor. `spread` determines the x-value range over which the
+y-value decays to zero, and is set to `spread` multiplied by 3. 
+
+Here's some R code that works through this and then plots the results using
+the Python UMAP defaults of `spread = 1`, `min_dist = 0.1`:
+
+```R
+spread <- 1
+min_dist <- 0.1
+
+# define the exponential
+xv <- seq(
+  from = 0,
+  to = spread * 3,
+  length.out = 300
+)
+yv <- exp(-(pmax(0, xv - min_dist)) / spread)
+
+# Fit the a,b curve to the exponential
+params <- stats::nls(yv ~ 1 / (1 + a * xv^(2.0 * b)),
+  start = list(a = 1, b = 1)
+)$m$getPars()
+a <- params["a"]
+b <- params["b"]
+
+# Plot the results
+title <-
+  paste0(
+    "exp curve spread = ",
+    spread,
+    ", min_dist = ",
+    min_dist
+  )
+sub <-
+  paste0("UMAP fit (green) a = ", formatC(a), " b = ", formatC(b))
+plot(
+  xv,
+  yv,
+  xlab = "d",
+  ylab = "w",
+  type = "l",
+  main = title,
+  lwd = 2
+)
+
+graphics::mtext(sub)
+lines(xv, 1 / (1 + a * xv^(2.0 * b)), col = "#1B9E77FF", lwd = 2)
+```
 
 ![UMAP a,b curve](../img/abparams/umap_ab_curve.png)
 
-As the title indicates, this curve leads to the default parameters
-of $a = 1.577, b = 0.895$. `uwot` uses a slightly different default 
-`min_dist = 0.001`, which leads to $a = 1.93, b = 0.79$. I don't know why I
-used a different default `min_dist` -- probably I made a mistake. This is 
-likely to change in a later version of `uwot`, but it doesn't make much of a
-difference to the results, fortunately. Note also, that setting $a = 1, b = 1$
-gives the Cauchy distribution used in t-SNE.
+As the title indicates, this curve leads to the default parameters of 
+$a = 1.577$, $b = 0.895$. `uwot` uses a slightly different default `min_dist =
+0.001`, which leads to $a = 1.93, b = 0.79$. I don't know why I used a different
+default `min_dist` -- probably I made a mistake. This is likely to change in a
+later version of `uwot`, but it doesn't make much of a difference to the
+results, fortunately. Setting $a = 1, b = 1$ gives the Cauchy distribution used
+in t-SNE (and the `tumap` function in `uwot`), which corresponds roughly to
+`spread = 1.12` and `min_dist = 0.23`: putting those values back into the
+curve-fitting routine will give you back $a = 0.99$, $b = 1.01$. Close enough.
+Here is the `uwot` default results in orange and the Cauchy results in blue
+overlaid with the UMAP defaults (green, same as in the previous plot):
+
+![Other UMAP a,b curve](../img/abparams/umap_ab_curve_other.png)
 
 This still leaves open the question of how changing `spread` and `min_dist`, or
 `a` and `b` affects the output of UMAP. The current version of the 
