@@ -74,12 +74,11 @@ struct SmoothKnnWorker {
   SmoothKnnWorker(const std::vector<double> &nn_dist, std::size_t n_vertices,
                   std::size_t n_iter, double local_connectivity,
                   double bandwidth, double tol, double min_k_dist_scale,
-                  bool save_sigmas)
+                  bool save_sigmas, double target)
       : nn_dist(nn_dist), n_vertices(n_vertices),
-        n_neighbors(nn_dist.size() / n_vertices),
-        target(std::log2(n_neighbors)), n_iter(n_iter),
-        local_connectivity(local_connectivity), bandwidth(bandwidth), tol(tol),
-        min_k_dist_scale(min_k_dist_scale),
+        n_neighbors(nn_dist.size() / n_vertices), target(target),
+        n_iter(n_iter), local_connectivity(local_connectivity),
+        bandwidth(bandwidth), tol(tol), min_k_dist_scale(min_k_dist_scale),
         mean_distances(mean_average(nn_dist)),
         nn_weights(n_vertices * n_neighbors), save_sigmas(save_sigmas),
         sigmas(save_sigmas ? n_vertices : 0), n_search_fails(0) {}

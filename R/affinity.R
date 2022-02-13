@@ -17,8 +17,11 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
 }
 
 # Calculate the (asymmetric) affinity matrix based on the nearest neighborhoods
+# default target for calibration is the sum of affinities = log2(n_nbrs)
 smooth_knn <- function(nn,
-                       local_connectivity = 1.0, bandwidth = 1.0,
+                       target = NULL,
+                       local_connectivity = 1.0,
+                       bandwidth = 1.0,
                        n_threads = NULL,
                        grain_size = 1,
                        ret_sigma = FALSE,
@@ -30,8 +33,12 @@ smooth_knn <- function(nn,
     "Commencing smooth kNN distance calibration",
     pluralize("thread", n_threads, " using")
   )
+  if (is.null(target)) {
+    target <- log2(ncol(nn$idx))
+  }
   affinity_matrix_res <- smooth_knn_distances_parallel(
     nn_dist = nn$dist,
+    target = target,
     n_iter = 64,
     local_connectivity = local_connectivity,
     bandwidth = bandwidth,
