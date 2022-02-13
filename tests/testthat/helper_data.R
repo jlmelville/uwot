@@ -21,33 +21,44 @@ c2y <- function(...) {
   matrix(unlist(list(...)), ncol = 2)
 }
 
-iris10 <- x2m(iris[1:10, ])
-iris10_Y <- pca_init(iris10, ndim = 2)
+iris10 <- NULL
+iris10_Y <- NULL
+diris10 <- NULL
+dmiris10 <- NULL
+dmiris10z <- NULL
+ycat <- NULL
+ycat2 <- NULL
+ynum <- NULL
+ynum2 <- NULL
+nn <- NULL
+create_data <- function() {
+  iris10 <<- x2m(iris[1:10, ])
+  iris10_Y <<- pca_init(iris10, ndim = 2)
+  diris10 <<- dist(iris10)
 
-diris10 <- dist(iris10)
+  # Sparse iris10 dist
+  dmiris10 <<- as.matrix(diris10)
 
-# Sparse iris10 dist
-dmiris10 <- as.matrix(diris10)
-dmiris10z <- dmiris10
-dmiris10z[dmiris10z > 0.71] <- 0
-dmiris10z <- Matrix::drop0(dmiris10z)
+  dmiris10zl <- dmiris10
+  dmiris10zl[dmiris10zl > 0.71] <- 0
+  dmiris10z <<- Matrix::drop0(dmiris10zl)
 
-# some Y data
-ycat <- as.factor(c(levels(iris$Species)[rep(1:3, each = 3)], NA))
-ycat2 <- as.factor(c(NA, levels(iris$Species)[rep(1:3, times = 3)]))
-ynum <- (1:10) / 10
-ynum2 <- seq(from = 10, to = -10, length.out = 10) / 100
-
-
-nn <- find_nn(iris10,
-  k = 4, method = "fnn", metric = "euclidean",
-  n_threads = 0, verbose = FALSE
-)
-row.names(nn$idx) <- row.names(iris10)
-row.names(nn$dist) <- row.names(iris10)
+  # some Y data
+  ycat <<- as.factor(c(levels(iris$Species)[rep(1:3, each = 3)], NA))
+  ycat2 <<- as.factor(c(NA, levels(iris$Species)[rep(1:3, times = 3)]))
+  ynum <<- (1:10) / 10
+  ynum2 <<- seq(from = 10, to = -10, length.out = 10) / 100
+  
+  nnl <- find_nn(iris10,
+                 k = 4, method = "fnn", metric = "euclidean",
+                 n_threads = 0, verbose = FALSE)
+  row.names(nnl$idx) <- row.names(iris10)
+  row.names(nnl$dist) <- row.names(iris10)
+  nn <<- nnl
+}
 
 # Just test that res is a matrix with valid numbers
-expect_ok_matrix <- function(res, nr = nrow(iris10), nc = 2) {
+expect_ok_matrix <- function(res, nr = 10, nc = 2) {
   expect_is(res, "matrix")
   expect_equal(nrow(res), nr)
   expect_equal(ncol(res), nc)
@@ -65,3 +76,5 @@ expect_is_nn_matrix <- function(res, nr = 10, k = 4) {
   expect_equal(nrow(res), nr)
   expect_equal(ncol(res), k)
 }
+
+create_data()
