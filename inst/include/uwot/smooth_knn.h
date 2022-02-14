@@ -49,6 +49,134 @@ auto mean_average(const std::vector<double> &v) -> double {
   return static_cast<double>(mean);
 }
 
+// Find rho, the distance to the local_connectivity-th nearest neighbor
+// (excluding zero distance neighbors)
+auto find_rho(std::size_t i, const std::vector<double> &non_zero_distances,
+              double local_connectivity, double tol) -> double {
+  double rho = 0.0;
+  std::size_t nnzero = non_zero_distances.size();
+  if (nnzero >= local_connectivity) {
+    int index = static_cast<int>(std::floor(local_connectivity));
+    double interpolation = local_connectivity - index;
+    if (index > 0) {
+      rho = non_zero_distances[index - 1];
+      if (interpolation >= tol) {
+        rho += interpolation *
+               (non_zero_distances[index] - non_zero_distances[index - 1]);
+      }
+    } else if (nnzero > 0) {
+      rho = interpolation * non_zero_distances[0];
+    }
+  } else if (nnzero > 0) {
+    rho =
+        *std::max_element(non_zero_distances.begin(), non_zero_distances.end());
+  }
+
+  return rho;
+}
+
+// Find the normalization factor for the smoothed distances
+auto find_sigma(const std::vector<double> &ith_distances,
+                std::size_t n_neighbors, double target, double rho, double tol,
+                std::size_t n_iter, double min_k_dist_scale,
+                double mean_distances, std::size_t &n_window_search_fails)
+    -> double {
+  constexpr auto double_max = (std::numeric_limits<double>::max)();
+
+  // best value seen is used only if binary search fails
+  // NB there is already a safeguard against sigma getting too large
+  // so this is less of a problem than with the perplexity search
+  double sigma = 1.0;
+  double sigma_best = sigma;
+  double adiff_min = double_max;
+
+  double lo = 0.0;
+  double hi = double_max;
+
+  bool converged = false;
+  for (std::size_t iter = 0; iter < n_iter; iter++) {
+    double val = 0.0;
+    // NB we iterate from 1, not 0: don't use the self-distance.
+    for (std::size_t k = 1; k < n_neighbors; k++) {
+      auto rk = ith_distances[k] - rho;
+      val += rk <= 0.0 ? 1.0 : std::exp(-rk / sigma);
+    }
+
+    double adiff = std::abs(val - target);
+    if (adiff < tol) {
+      converged = true;
+      break;
+    }
+
+    // store best sigma in case binary search fails (usually in the presence
+    // of multiple degenerate distances)
+    if (adiff < adiff_min) {
+      adiff_min = adiff;
+      sigma_best = sigma;
+    }
+
+    if (val > target) {
+      hi = sigma;
+      sigma = 0.5 * (lo + hi);
+    } else {
+      lo = sigma;
+      if (hi == double_max) {
+        sigma *= 2;
+      } else {
+        sigma = 0.5 * (lo + hi);
+      }
+    }
+  }
+  if (!converged) {
+    ++n_window_search_fails;
+    sigma = sigma_best;
+  }
+
+  if (rho > 0.0) {
+    sigma = (std::max)(min_k_dist_scale * mean_average(ith_distances), sigma);
+  } else {
+    sigma = (std::max)(min_k_dist_scale * mean_distances, sigma);
+  }
+
+  return sigma;
+}
+
+void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
+                std::size_t n_vertices, std::size_t n_neighbors, double target,
+                double local_connectivity, double tol, std::size_t n_iter,
+                double bandwidth, double min_k_dist_scale,
+                double mean_distances, bool save_sigmas,
+                std::vector<double> &nn_weights,
+                std::vector<double> &non_zero_distances,
+                std::vector<double> &sigmas,
+                std::size_t &n_window_search_fails) {
+  non_zero_distances.clear();
+
+  std::vector<double> ith_distances(n_neighbors);
+  for (std::size_t j = 0; j < n_neighbors; j++) {
+    auto ith_distance = nn_dist[i + j * n_vertices];
+    ith_distances[j] = ith_distance;
+    if (ith_distance > 0.0) {
+      non_zero_distances.push_back(ith_distance);
+    }
+  }
+
+  auto rho = find_rho(i, non_zero_distances, local_connectivity, tol);
+  auto sigma =
+      find_sigma(ith_distances, n_neighbors, target, rho, tol, n_iter,
+                 min_k_dist_scale, mean_distances, n_window_search_fails);
+
+  auto sigma_b = sigma * bandwidth;
+  for (std::size_t k = 0; k < n_neighbors; k++) {
+    auto rk = ith_distances[k] - rho;
+    nn_weights[i + k * n_vertices] = rk <= 0.0 ? 1.0 : std::exp(-rk / sigma_b);
+  }
+
+  if (save_sigmas) {
+    sigmas[i] = sigma;
+  }
+}
+
 struct SmoothKnnWorker {
   const std::vector<double> &nn_dist;
 
@@ -62,7 +190,6 @@ struct SmoothKnnWorker {
   double tol;
   double min_k_dist_scale;
   double mean_distances;
-  double double_max = (std::numeric_limits<double>::max)();
 
   std::vector<double> nn_weights;
 
@@ -90,100 +217,10 @@ struct SmoothKnnWorker {
     non_zero_distances.reserve(n_neighbors);
 
     for (std::size_t i = begin; i < end; i++) {
-      double sigma = 1.0;
-      non_zero_distances.clear();
-      double lo = 0.0;
-      double hi = double_max;
-      // best value seen is used only if binary search fails
-      // NB there is already a safeguard against sigma getting too large
-      // so this is less of a problem than with the perplexity search
-      double sigma_best = sigma;
-      double adiff_min = double_max;
-
-      std::vector<double> ith_distances(n_neighbors);
-      for (std::size_t j = 0; j < n_neighbors; j++) {
-        auto ith_distance = nn_dist[i + j * n_vertices];
-        ith_distances[j] = ith_distance;
-        if (ith_distance > 0.0) {
-          non_zero_distances.push_back(ith_distance);
-        }
-      }
-
-      // Find rho, the distance to the nearest neighbor (excluding zero distance
-      // neighbors)
-      double rho = 0.0;
-      if (non_zero_distances.size() >= local_connectivity) {
-        int index = static_cast<int>(std::floor(local_connectivity));
-        double interpolation = local_connectivity - index;
-        if (index > 0) {
-          rho = non_zero_distances[index - 1];
-          if (interpolation >= tol) {
-            rho += interpolation *
-                   (non_zero_distances[index] - non_zero_distances[index - 1]);
-          }
-        } else if (non_zero_distances.size() > 0) {
-          rho = interpolation * non_zero_distances[0];
-        }
-      } else if (non_zero_distances.size() > 0) {
-        rho = *std::max_element(non_zero_distances.begin(),
-                                non_zero_distances.end());
-      }
-
-      bool converged = false;
-      for (std::size_t iter = 0; iter < n_iter; iter++) {
-        double val = 0.0;
-        // NB we iterate from 1, not 0: don't use the self-distance.
-        for (std::size_t k = 1; k < n_neighbors; k++) {
-          double dist = (std::max)(0.0, ith_distances[k] - rho);
-          val += std::exp(-dist / sigma);
-        }
-
-        double adiff = std::abs(val - target);
-        if (adiff < tol) {
-          converged = true;
-          break;
-        }
-
-        // store best sigma in case binary search fails (usually in the presence
-        // of multiple degenerate distances)
-        if (adiff < adiff_min) {
-          adiff_min = adiff;
-          sigma_best = sigma;
-        }
-
-        if (val > target) {
-          hi = sigma;
-          sigma = 0.5 * (lo + hi);
-        } else {
-          lo = sigma;
-          if (hi == double_max) {
-            sigma *= 2;
-          } else {
-            sigma = 0.5 * (lo + hi);
-          }
-        }
-      }
-      if (!converged) {
-        ++n_window_search_fails;
-        sigma = sigma_best;
-      }
-
-      if (rho > 0.0) {
-        sigma =
-            (std::max)(min_k_dist_scale * mean_average(ith_distances), sigma);
-      } else {
-        sigma = (std::max)(min_k_dist_scale * mean_distances, sigma);
-      }
-
-      for (std::size_t k = 0; k < n_neighbors; k++) {
-        double rk = ith_distances[k] - rho;
-        nn_weights[i + k * n_vertices] =
-            rk <= 0.0 ? 1.0 : std::exp(-rk / (sigma * bandwidth));
-      }
-
-      if (save_sigmas) {
-        sigmas[i] = sigma;
-      }
+      smooth_knn(i, nn_dist, n_vertices, n_neighbors, target,
+                 local_connectivity, tol, n_iter, bandwidth, min_k_dist_scale,
+                 mean_distances, save_sigmas, nn_weights, non_zero_distances,
+                 sigmas, n_window_search_fails);
     }
 
     // Update global count of failures
