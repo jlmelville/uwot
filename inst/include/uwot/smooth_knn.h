@@ -27,7 +27,6 @@
 #ifndef UWOT_SMOOTH_KNN_H
 #define UWOT_SMOOTH_KNN_H
 
-#include <algorithm>
 #include <atomic>
 #include <cmath>
 #include <limits>
@@ -49,27 +48,29 @@ auto mean_average(const std::vector<double> &v) -> double {
   return static_cast<double>(mean);
 }
 
-// Find rho, the distance to the local_connectivity-th nearest neighbor
-// (excluding zero distance neighbors)
-auto find_rho(std::size_t i, const std::vector<double> &non_zero_distances,
-              double local_connectivity, double tol) -> double {
+// ith_distances is sorted non-decreasing nearest neighbor distances
+// nnzero_begin points to the index of the first non-zero distance (usually 1)
+auto find_rho(std::size_t i, const std::vector<double> &ith_distances,
+              std::size_t nnzero_begin, double local_connectivity, double tol)
+    -> double {
   double rho = 0.0;
-  std::size_t nnzero = non_zero_distances.size();
+  std::size_t nnzero = ith_distances.size() - nnzero_begin;
   if (nnzero >= local_connectivity) {
-    int index = static_cast<int>(std::floor(local_connectivity));
+    auto index = static_cast<int>(std::floor(local_connectivity));
     double interpolation = local_connectivity - index;
     if (index > 0) {
-      rho = non_zero_distances[index - 1];
+      rho = ith_distances[nnzero_begin + index - 1];
       if (interpolation >= tol) {
-        rho += interpolation *
-               (non_zero_distances[index] - non_zero_distances[index - 1]);
+        // rho = (1 - interp) * rho + interp * d_{i+1}
+        rho += interpolation * (ith_distances[nnzero_begin + index] - rho);
       }
     } else if (nnzero > 0) {
-      rho = interpolation * non_zero_distances[0];
+      // typical code-path: rho is the smallest non-zero distance
+      rho = interpolation * ith_distances[nnzero_begin];
     }
   } else if (nnzero > 0) {
-    rho =
-        *std::max_element(non_zero_distances.begin(), non_zero_distances.end());
+    // not enough non-zero distances, return the largest non-zero distance
+    rho = ith_distances.back();
   }
 
   return rho;
@@ -147,21 +148,22 @@ void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
                 double bandwidth, double min_k_dist_scale,
                 double mean_distances, bool save_sigmas,
                 std::vector<double> &nn_weights,
-                std::vector<double> &non_zero_distances,
-                std::vector<double> &sigmas,
+                std::vector<double> &ith_distances, std::vector<double> &sigmas,
                 std::size_t &n_window_search_fails) {
-  non_zero_distances.clear();
 
-  std::vector<double> ith_distances(n_neighbors);
+  // Get the n_neighbor distances to i and the non-zero distances
+  // NB nn_dist must be in sorted non-decreasing order
+  std::size_t nnzero_begin = n_neighbors + 1;
   for (std::size_t j = 0; j < n_neighbors; j++) {
+    // FIXME: consider transposing nn_dist would be: n_nbrs * i + j
     auto ith_distance = nn_dist[i + j * n_vertices];
     ith_distances[j] = ith_distance;
-    if (ith_distance > 0.0) {
-      non_zero_distances.push_back(ith_distance);
+    if (nnzero_begin == n_neighbors + 1 && ith_distance > 0.0) {
+      nnzero_begin = j;
     }
   }
 
-  auto rho = find_rho(i, non_zero_distances, local_connectivity, tol);
+  auto rho = find_rho(i, ith_distances, nnzero_begin, local_connectivity, tol);
   auto sigma =
       find_sigma(ith_distances, n_neighbors, target, rho, tol, n_iter,
                  min_k_dist_scale, mean_distances, n_window_search_fails);
@@ -177,56 +179,31 @@ void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
   }
 }
 
-struct SmoothKnnWorker {
-  const std::vector<double> &nn_dist;
+void smooth_knn(std::size_t begin, std::size_t end,
+                const std::vector<double> &nn_dist, std::size_t n_vertices,
+                std::size_t n_neighbors, double target,
+                double local_connectivity, double tol, std::size_t n_iter,
+                double bandwidth, double min_k_dist_scale,
+                double mean_distances, bool save_sigmas,
+                std::vector<double> &nn_weights, std::vector<double> &sigmas,
+                std::atomic_size_t &n_search_fails) {
+  // number of binary search failures in this window
+  std::size_t n_window_search_fails = 0;
 
-  std::size_t n_vertices;
-  std::size_t n_neighbors;
+  // allocate this vector once per window
+  std::vector<double> ith_distances(n_neighbors);
 
-  double target;
-  std::size_t n_iter;
-  double local_connectivity;
-  double bandwidth;
-  double tol;
-  double min_k_dist_scale;
-  double mean_distances;
-
-  std::vector<double> nn_weights;
-
-  bool save_sigmas;
-  std::vector<double> sigmas;
-
-  std::atomic_size_t n_search_fails;
-
-  SmoothKnnWorker(const std::vector<double> &nn_dist, std::size_t n_vertices,
-                  std::size_t n_iter, double local_connectivity,
-                  double bandwidth, double tol, double min_k_dist_scale,
-                  bool save_sigmas, double target)
-      : nn_dist(nn_dist), n_vertices(n_vertices),
-        n_neighbors(nn_dist.size() / n_vertices), target(target),
-        n_iter(n_iter), local_connectivity(local_connectivity),
-        bandwidth(bandwidth), tol(tol), min_k_dist_scale(min_k_dist_scale),
-        mean_distances(mean_average(nn_dist)),
-        nn_weights(n_vertices * n_neighbors), save_sigmas(save_sigmas),
-        sigmas(save_sigmas ? n_vertices : 0), n_search_fails(0) {}
-
-  void operator()(std::size_t begin, std::size_t end) {
-    // number of binary search failures in this window
-    std::size_t n_window_search_fails = 0;
-    std::vector<double> non_zero_distances;
-    non_zero_distances.reserve(n_neighbors);
-
-    for (std::size_t i = begin; i < end; i++) {
-      smooth_knn(i, nn_dist, n_vertices, n_neighbors, target,
-                 local_connectivity, tol, n_iter, bandwidth, min_k_dist_scale,
-                 mean_distances, save_sigmas, nn_weights, non_zero_distances,
-                 sigmas, n_window_search_fails);
-    }
-
-    // Update global count of failures
-    n_search_fails += n_window_search_fails;
+  for (std::size_t i = begin; i < end; i++) {
+    smooth_knn(i, nn_dist, n_vertices, n_neighbors, target, local_connectivity,
+               tol, n_iter, bandwidth, min_k_dist_scale, mean_distances,
+               save_sigmas, nn_weights, ith_distances, sigmas,
+               n_window_search_fails);
   }
-};
+
+  // Update global count of failures
+  n_search_fails += n_window_search_fails;
+}
+
 } // namespace uwot
 
 #endif // UWOT_SMOOTH_KNN_H

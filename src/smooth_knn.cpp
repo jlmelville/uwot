@@ -40,18 +40,26 @@ List smooth_knn_distances_parallel(
   }
 
   auto nn_distv = as<std::vector<double>>(nn_dist);
-  uwot::SmoothKnnWorker worker(nn_distv, n_vertices, n_iter, local_connectivity,
-                               bandwidth, tol, min_k_dist_scale, ret_sigma,
-                               target);
+  double mean_distances = uwot::mean_average(nn_distv);
+
+  std::atomic_size_t n_search_fails{0};
+  std::vector<double> nn_weights(n_vertices * n_neighbors);
+  std::vector<double> sigmas(ret_sigma ? n_vertices : 0);
+
+  auto worker = [&](std::size_t begin, std::size_t end) {
+    uwot::smooth_knn(begin, end, nn_distv, n_vertices, n_neighbors, target,
+                     local_connectivity, tol, n_iter, bandwidth,
+                     min_k_dist_scale, mean_distances, ret_sigma, nn_weights,
+                     sigmas, n_search_fails);
+  };
 
   RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads, grain_size);
 
   auto res = List::create(
-      _("matrix") =
-          NumericMatrix(n_vertices, n_neighbors, worker.nn_weights.begin()),
-      _("n_failures") = static_cast<std::size_t>(worker.n_search_fails));
+      _("matrix") = NumericMatrix(n_vertices, n_neighbors, nn_weights.begin()),
+      _("n_failures") = static_cast<std::size_t>(n_search_fails));
   if (ret_sigma) {
-    res["sigma"] = worker.sigmas;
+    res["sigma"] = sigmas;
   }
   return res;
 }
