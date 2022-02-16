@@ -574,3 +574,18 @@ oargs_umap <- tumap(iris10, n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
 expect_equal(length(oargs_umap$opt_args), 2)
 expect_equal(oargs_umap$opt_args$method, "sgd")
 expect_equal(oargs_umap$opt_args$alpha, 0.4)
+
+# Return sigma and rho
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
+            init = "spca", verbose = FALSE, n_threads = 0,
+            ret_extra = c("sigma")
+)
+expect_is(res, "list")
+sigma <- res$sigma
+expect_length(sigma, nrow(iris10))
+expect_true(all(sigma > 0))
+
+rho <- res$rho
+expect_length(rho, nrow(iris10))
+expect_true(all(rho > 0))

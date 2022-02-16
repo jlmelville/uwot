@@ -515,11 +515,13 @@ A matrix of optimized coordinates, or:
     matrix \code{idx} with the integer ids of the neighbors; and a matrix
     \code{dist} with the distances. The \code{nn} list (or a sub-list) can be
     used as input to the \code{nn_method} parameter.
-    \item if \code{ret_extra} contains \code{"fgraph"} returns the high
+    \item if \code{ret_extra} contains \code{"fgraph"}, returns the high
     dimensional fuzzy graph as a sparse matrix called \code{fgraph}, of type
     \link[Matrix]{dgCMatrix-class}.
-    \item if \code{ret_extra} contains \code{"sigma"} returns a vector of the
-    smooth knn distance normalization terms for each observation.
+    \item if \code{ret_extra} contains \code{"sigma"}, returns a vector of the
+    smooth knn distance normalization terms for each observation as
+    \code{"sigma"} and a vector \code{"rho"} containing the largest 
+    distance to the locally connected neighbors of each observation.
   }
   The returned list contains the combined data from any combination of
   specifying \code{ret_model}, \code{ret_nn} and \code{ret_extra}.
