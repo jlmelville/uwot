@@ -47,7 +47,8 @@ umap(
   opt_args = NULL,
   epoch_callback = NULL,
   pca_method = NULL,
-  binary_edge_weights = FALSE
+  binary_edge_weights = FALSE,
+  dens_scale = NULL
 )
 }
 \arguments{
@@ -498,6 +499,13 @@ sampling frequency of neighbors and is the strategy used by the PaCMAP
 method (Wang and co-workers, 2020). Practical (Böhm and co-workers, 2020)
 and theoretical (Damrich and Hamprecht, 2021) work suggests this has little
 effect on UMAP's performance.}
+
+\item{dens_scale}{A value between 0 and 1. If > 0 then the output attempts
+to preserve relative local density around each observation. This uses an
+approximation to the densMAP method (Narayan and co-workers, 2021). The 
+larger the value of \code{dens_scale}, the greater the range of output
+densities that will be used to map the input densities. This option is
+ignored if using multiple \code{metric} blocks.}
 }
 \value{
 A matrix of optimized coordinates, or:
@@ -585,6 +593,11 @@ McInnes, L., & Healy, J. (2018).
 UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
 \emph{arXiv preprint} \emph{arXiv}:1802.03426.
 \url{https://arxiv.org/abs/1802.03426}
+
+Narayan, A., Berger, B., & Cho, H. (2021).
+Assessing single-cell transcriptomic variability through density-preserving data visualization. 
+\emph{Nature biotechnology}, \emph{39}(6), 765-774.
+\url{https://doi.org/10.1038/s41587-020-00801-7}
 
 O’Neill, M. E. (2014).
 \emph{PCG: A family of simple fast space-efficient statistically good

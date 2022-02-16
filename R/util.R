@@ -180,3 +180,7 @@ lmerge <- function(l1, l2) {
   }
   l1
 }
+
+range_scale <- function(x, min = 0, max = 1) {
+  (x - min(x)) / (max(x) - min(x)) * (max - min) + min
+}

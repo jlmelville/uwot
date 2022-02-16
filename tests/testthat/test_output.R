@@ -582,6 +582,8 @@ res <- umap(iris10,
             ret_extra = c("sigma")
 )
 expect_is(res, "list")
+expect_ok_matrix(res$embedding)
+
 sigma <- res$sigma
 expect_length(sigma, nrow(iris10))
 expect_true(all(sigma > 0))
@@ -589,3 +591,49 @@ expect_true(all(sigma > 0))
 rho <- res$rho
 expect_length(rho, nrow(iris10))
 expect_true(all(rho > 0))
+
+
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
+            init = "normlaplacian", verbose = FALSE, n_threads = 0, dens_scale = 1
+)
+expect_ok_matrix(res)
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
+            init = "normlaplacian", verbose = FALSE, n_threads = 0, dens_scale = 1,
+            ret_extra = c("sigma")
+)
+expect_is(res, "list")
+expect_ok_matrix(res$embedding)
+sigma <- res$sigma
+expect_length(sigma, nrow(iris10))
+expect_true(all(sigma > 0))
+rho <- res$rho
+expect_length(rho, nrow(iris10))
+expect_true(all(rho > 0))
+localr <- res$localr
+expect_length(localr, nrow(iris10))
+expect_true(all(localr > 0))
+
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
+            init = "normlaplacian", verbose = FALSE, n_threads = 0, dens_scale = 1,
+            ret_model = TRUE
+)
+expect_is(res, "list")
+expect_ok_matrix(res$embedding)
+ai <- res$ai
+expect_length(ai, nrow(iris10))
+expect_equal(res$dens_scale, 1.0)
+expect_equal(res$method, "leopold")
+
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
+            init = "normlaplacian", verbose = FALSE, n_threads = 0, dens_scale = 0.5,
+            ret_model = TRUE
+)
+ai05 <- res$ai
+# range of ai for smaller dens_scale should be smaller
+expect_true(min(ai05) > min(ai))
+expect_true(max(ai05) < max(ai))
+expect_equal(res$dens_scale, 0.5)

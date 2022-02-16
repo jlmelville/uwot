@@ -72,7 +72,7 @@ auto grad_attr(const Gradient &gradient,
   static const float dist_eps = std::numeric_limits<float>::epsilon();
   float d2 =
       d2diff(head_embedding, dj, tail_embedding, dk, ndim, dist_eps, disp);
-  return gradient.grad_attr(d2);
+  return gradient.grad_attr(d2, dj, dk);
 }
 
 template <typename Gradient>
@@ -83,7 +83,7 @@ auto grad_rep(const Gradient &gradient,
   static const float dist_eps = std::numeric_limits<float>::epsilon();
   float d2 =
       d2diff(head_embedding, dj, tail_embedding, dk, ndim, dist_eps, disp);
-  return gradient.grad_rep(d2);
+  return gradient.grad_rep(d2, dj, dk);
 }
 
 // https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
@@ -121,11 +121,11 @@ public:
       : a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b){};
   // Compared to the UMAP Python implementation, instead of doing d2^(b-1)
   // we can save a power calculation by using d2^b / d2
-  auto grad_attr(float d2) const -> float {
+  auto grad_attr(float d2, std::size_t, std::size_t) const -> float {
     float pd2b = powfun(d2, b);
     return (a_b_m2 * pd2b) / (d2 * (a * pd2b + 1.0));
   }
-  auto grad_rep(float d2) const -> float {
+  auto grad_rep(float d2, std::size_t, std::size_t) const -> float {
     return gamma_b_2 /
            ((0.001 + d2) * (a * powfun(d2, b) + 1.0));
   }
@@ -156,10 +156,10 @@ using apumap_gradient = base_umap_gradient<fastPrecisePow>;
 class tumap_gradient {
 public:
   tumap_gradient() = default;
-  auto grad_attr(float d2) const -> float {
+  auto grad_attr(float d2, std::size_t, std::size_t) const -> float {
     return -2.0 / (d2 + 1.0);
   }
-  auto grad_rep(float d2) const -> float {
+  auto grad_rep(float d2, std::size_t, std::size_t) const -> float {
     return 2.0 / ((0.001 + d2) * (d2 + 1.0));
   }
   auto clamp_grad(float grad_d) const -> float {
@@ -169,13 +169,44 @@ public:
   static const constexpr float clamp_lo = -4.0;
 };
 
+// UMAP where a varies for each observation
+class umapai_gradient {
+public:
+  umapai_gradient(const std::vector<float> &ai, float b, std::size_t ndim) : 
+  ai(ai), b(b), ndim(ndim),b_m2(-2.0 * b), b_2(2.0 * b) {}
+
+  auto clamp_grad(float grad_d) const -> float {
+    return clamp(grad_d, clamp_lo, clamp_hi);
+  }
+  static const constexpr float clamp_hi = 4.0;
+  static const constexpr float clamp_lo = -4.0;
+  auto grad_attr(float d2, std::size_t i, std::size_t j) const -> float {
+    auto a = ai[i / ndim] * ai[j / ndim];
+    float pd2b = std::pow(d2, b);
+    return (a * b_m2 * pd2b) / (d2 * (a * pd2b + 1.0));
+  }
+
+  auto grad_rep(float d2, std::size_t i, std::size_t j) const -> float {
+    auto a = ai[i / ndim] * ai[j / ndim];
+    return b_2 /
+      ((0.001 + d2) * (a * std::pow(d2, b) + 1.0));
+  }
+
+private:
+  std::vector<float> ai;
+  float b;
+  std::size_t ndim;
+  float b_m2;
+  float b_2;
+};
+
 class largevis_gradient {
 public:
   largevis_gradient(float gamma) : gamma_2(gamma * 2.0) {}
-  auto grad_attr(float d2) const -> float {
+  auto grad_attr(float d2, std::size_t, std::size_t) const -> float {
     return -2.0 / (d2 + 1.0);
   }
-  auto grad_rep(float d2) const -> float {
+  auto grad_rep(float d2, std::size_t, std::size_t) const -> float {
     return gamma_2 / ((0.1 + d2) * (d2 + 1.0));
   }
   auto clamp_grad(float grad_d) const -> float {
@@ -198,10 +229,10 @@ public:
   // near: a 1-3, b = 10; mid: a = 3-1000, b = 10,000
   pacmap_gradient(float a, float b)
       : a(1.0), b(10.0), ab2m(-2.0 * a * b), b1(b + 1.0) {}
-  auto grad_attr(float d2) const -> float {
+  auto grad_attr(float d2, std::size_t, std::size_t) const -> float {
     return ab2m / ((b1 + d2) * (b1 + d2));
   }
-  auto grad_rep(float d2) const -> float {
+  auto grad_rep(float d2, std::size_t, std::size_t) const -> float {
     return 2.0 / ((2.0 + d2) * (2.0 + d2));
   }
   inline auto clamp_grad(float grad_d) const -> float { return grad_d; }

@@ -410,6 +410,12 @@
 #'   method (Wang and co-workers, 2020). Practical (Böhm and co-workers, 2020)
 #'   and theoretical (Damrich and Hamprecht, 2021) work suggests this has little
 #'   effect on UMAP's performance.
+#' @param dens_scale A value between 0 and 1. If > 0 then the output attempts
+#'   to preserve relative local density around each observation. This uses an
+#'   approximation to the densMAP method (Narayan and co-workers, 2021). The 
+#'   larger the value of \code{dens_scale}, the greater the range of output
+#'   densities that will be used to map the input densities. This option is
+#'   ignored if using multiple \code{metric} blocks.
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
 #'     \item if \code{ret_model = TRUE} (or \code{ret_extra} contains
@@ -488,6 +494,11 @@
 #' \emph{arXiv preprint} \emph{arXiv}:1802.03426.
 #' \url{https://arxiv.org/abs/1802.03426}
 #'
+#' Narayan, A., Berger, B., & Cho, H. (2021).
+#' Assessing single-cell transcriptomic variability through density-preserving data visualization. 
+#' \emph{Nature biotechnology}, \emph{39}(6), 765-774.
+#' \url{https://doi.org/10.1038/s41587-020-00801-7}
+#'
 #' O’Neill, M. E. (2014).
 #' \emph{PCG: A family of simple fast space-efficient statistically good
 #' algorithms for random number generation}
@@ -535,7 +546,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  verbose = getOption("verbose", TRUE),
                  batch = FALSE,
                  opt_args = NULL, epoch_callback = NULL, pca_method = NULL,
-                 binary_edge_weights = FALSE) {
+                 binary_edge_weights = FALSE,
+                 dens_scale = NULL) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
@@ -563,7 +575,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     epoch_callback = epoch_callback,
     binary_edge_weights = binary_edge_weights,
     tmpdir = tempdir(),
-    verbose = verbose
+    verbose = verbose,
+    dens_scale = dens_scale
   )
 }
 
@@ -1502,12 +1515,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  tmpdir = tempdir(),
                  verbose = getOption("verbose", TRUE),
                  epoch_callback = NULL,
-                 binary_edge_weights = FALSE) {
+                 binary_edge_weights = FALSE,
+                 dens_scale = NULL) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
   method <- match.arg(tolower(method), c("umap", "tumap", "largevis", "pacmap"))
-  
   
   if (method == "umap" && (is.null(a) || is.null(b))) {
     ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
@@ -1559,7 +1572,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     pcg_rand <- FALSE
     approx_pow <- TRUE
   }
-
+  
   if (n_threads < 0) {
     stop("n_threads cannot be < 0")
   }
@@ -1685,7 +1698,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       }
     }
   }
-
+  
   if (!is.list(metric)) {
     metrics <- list(c())
     names(metrics) <- metric
@@ -1716,11 +1729,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     pca_shortcut <- TRUE
   }
 
+  need_sigma <- ret_sigma || !is.null(dens_scale)
   d2sr <- data2set(X, Xcat, n_neighbors, metrics, nn_method,
     n_trees, search_k,
     method,
     set_op_mix_ratio, local_connectivity, bandwidth,
-    perplexity, kernel, ret_sigma,
+    perplexity, kernel, need_sigma,
     n_threads, grain_size,
     ret_model,
     pca = pca, pca_center = pca_center, pca_method = pca_method,
@@ -1733,9 +1747,17 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (is.null(pca_models)) {
     pca_models <- d2sr$pca_models
   }
-  sigma <- d2sr$sigma
-  if (is.null(sigma)) {
-    sigma <- c()
+
+  # Calculate approximate local radii
+  sigma <- NULL
+  rho <- NULL
+  localr <- NULL
+  if (need_sigma) {
+    sigma <- d2sr$sigma
+    rho <- d2sr$rho
+  }
+  if (!is.null(dens_scale)) {
+    localr <- sigma + rho
   }
 
   if (!is.null(y)) {
@@ -1962,21 +1984,22 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       pluralize("thread", n_sgd_threads, " using")
     )
 
+    ai <- NULL
+    if (!is.null(dens_scale)) {
+      ai <- scale_radii(localr, dens_scale, a)
+      method <- "leopold"
+    }
     method <- tolower(method)
-    if (method == "umap") {
-      method_args <- list(a = a, b = b, gamma = gamma, approx_pow = approx_pow)
-    }
-    else if (method == "tumap") {
-      method_args <- list()
-    }
-    else if (method == "pacmap") {
+    method_args <- switch(method,
+      umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
+      tumap = list(),
       # a = 1 b = 10 for final phase of PaCMAP optimization
-      method_args <- list(a = a, b = b)
-    }
-    else {
-      method_args <- list(gamma = gamma)
-    }
-    
+      pacmap = list(a = a, b = b),
+      largevis = list(gamma = gamma),
+      leopold = list(ai = ai, b = b, ndim = n_components),
+      stop("Unknown dimensionality reduction method '", method, "'")
+    )
+
     embedding <- t(embedding)
     embedding <- optimize_layout_r(
       head_embedding = embedding,
@@ -2038,6 +2061,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         batch = batch,
         opt_args = full_opt_args
       ))
+      if (method == "leopold") {
+        res$dens_scale <- dens_scale
+        res$ai <- ai
+      }
       if (nblocks > 1) {
         res$nn_index <- list()
         for (i in 1:nblocks) {
@@ -2089,6 +2116,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (ret_sigma) {
       res$sigma <- sigma
       res$rho <- rho
+      if (!is.null(localr)) {
+        res$localr <- localr
+      }
     }
   }
   else {
@@ -3037,6 +3067,26 @@ get_opt_args <- function(opt_args, alpha) {
   lmerge(default_opt_args[[opt_args$method]], opt_args)
 }
 
+# Takes local radii from the input dimension and converts to approximate 
+# densities in the output space by mapping them to a vector of a parameters
+# as used in the UMAP output weight: 1/(1 + a + d^2b).
+# Based on testing a rough range of usable a values is 0.01-100. To get that
+# we want each a value to be the product of the local density of i and j, so
+# a = sqrt(a_i * a_j)
+# Also, we want dens_scale to control the spread of a values and for 
+# dens_scale = 0, the vector of a_i give the the user-selected scalar value of
+# a, so we scale the log of the reciprocal of localr to be within [log(a * 1e-(2
+# * dens_scale)) ... log(a * 1e(2 * dens_scale))] We take the sqrt of the a_i in
+# this function to avoid repeatedly calling it inside the optimization loop.
+scale_radii <- function(localr, dens_scale, a) {
+  log_denso <- -log(localr)
+  min_densl <- a * (10 ^ (-2 * dens_scale))
+  log_min_densl <- log(min_densl)
+  max_densl <- a * (10 ^ (2 * dens_scale))
+  log_max_densl <- log(max_densl)
+  log_denso_scale <- range_scale(log_denso, log_min_densl, log_max_densl)
+  sqrt(exp(log_denso_scale))
+}
 
 #' @useDynLib uwot, .registration=TRUE
 #' @importFrom Rcpp sourceCpp

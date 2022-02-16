@@ -253,6 +253,17 @@ void create_tumap(UmapFactory &umap_factory, List) {
   umap_factory.create(gradient);
 }
 
+void create_umapai(UmapFactory &umap_factory, List method_args) {
+  std::vector<std::string> arg_names = {"ai", "b", "ndim"};
+  validate_args(method_args, arg_names);
+  
+  std::vector<float> ai = method_args["ai"];
+  float b = method_args["b"];
+  std::size_t ndim = method_args["ndim"];
+  const uwot::umapai_gradient gradient(ai, b, ndim);
+  umap_factory.create(gradient);
+}
+
 void create_pacmap(UmapFactory &umap_factory, List method_args) {
   std::vector<std::string> arg_names = {"a", "b"};
   validate_args(method_args, arg_names);
@@ -351,6 +362,8 @@ NumericMatrix optimize_layout_r(
     create_largevis(umap_factory, method_args);
   } else if (method == "pacmap") {
     create_pacmap(umap_factory, method_args);
+  } else if (method == "leopold") {
+    create_umapai(umap_factory, method_args);
   } else {
     stop("Unknown method: '" + method + "'");
   }
