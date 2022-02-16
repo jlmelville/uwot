@@ -584,14 +584,17 @@ res <- umap(iris10,
 expect_is(res, "list")
 expect_ok_matrix(res$embedding)
 
+expected_sigma <- c(
+  0.1799, 0.2049, 0.04938, 0.0906, 0.2494, 0.003906, 0.1537, 0.1355, 0.2454, 0.2063
+)
 sigma <- res$sigma
-expect_length(sigma, nrow(iris10))
-expect_true(all(sigma > 0))
+expect_equal(sigma, expected_sigma, tolerance = 1e-4)
 
+expected_rho <- c(
+  0.1414, 0.1732, 0.2449, 0.2449, 0.1414, 0.6164, 0.2646, 0.1732, 0.3, 0.1732
+)
 rho <- res$rho
-expect_length(rho, nrow(iris10))
-expect_true(all(rho > 0))
-
+expect_equal(rho, expected_rho, 1e-4)
 
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
@@ -606,14 +609,11 @@ res <- umap(iris10,
 expect_is(res, "list")
 expect_ok_matrix(res$embedding)
 sigma <- res$sigma
-expect_length(sigma, nrow(iris10))
-expect_true(all(sigma > 0))
+expect_equal(sigma, expected_sigma, tolerance = 1e-4)
 rho <- res$rho
-expect_length(rho, nrow(iris10))
-expect_true(all(rho > 0))
+expect_equal(rho, expected_rho, tolerance = 1e-4)
 localr <- res$localr
-expect_length(localr, nrow(iris10))
-expect_true(all(localr > 0))
+expect_equal(localr, res$localr, tolerance = 1e-4)
 
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
@@ -622,8 +622,11 @@ res <- umap(iris10,
 )
 expect_is(res, "list")
 expect_ok_matrix(res$embedding)
+expected_ai <- c(
+  8.072, 2.957, 13.89, 6.181, 2.41, 0.1389, 1.585, 10.34, 0.3076, 2.888
+)
 ai <- res$ai
-expect_length(ai, nrow(iris10))
+expect_equal(ai, expected_ai, tolerance = 1e-4)
 expect_equal(res$dens_scale, 1.0)
 expect_equal(res$method, "leopold")
 
@@ -632,8 +635,12 @@ res <- umap(iris10,
             init = "normlaplacian", verbose = FALSE, n_threads = 0, dens_scale = 0.5,
             ret_model = TRUE
 )
-ai05 <- res$ai
-# range of ai for smaller dens_scale should be smaller
-expect_true(min(ai05) > min(ai))
-expect_true(max(ai05) < max(ai))
+expected_ai05 <- c(
+  3.348, 2.027, 4.392, 2.93, 1.83, 0.4392, 1.484, 3.79, 0.6536, 2.003
+)
+expect_equal(res$ai, expected_ai05, tolerance = 1e-3)
 expect_equal(res$dens_scale, 0.5)
+
+ret_trans <- umap_transform(iris10, res)
+expect_ok_matrix(res$embedding)
+

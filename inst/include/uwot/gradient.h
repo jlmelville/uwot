@@ -126,8 +126,7 @@ public:
     return (a_b_m2 * pd2b) / (d2 * (a * pd2b + 1.0));
   }
   auto grad_rep(float d2, std::size_t, std::size_t) const -> float {
-    return gamma_b_2 /
-           ((0.001 + d2) * (a * powfun(d2, b) + 1.0));
+    return gamma_b_2 / ((0.001 + d2) * (a * powfun(d2, b) + 1.0));
   }
   auto clamp_grad(float grad_d) const -> float {
     return clamp(grad_d, clamp_lo, clamp_hi);
@@ -172,8 +171,8 @@ public:
 // UMAP where a varies for each observation
 class umapai_gradient {
 public:
-  umapai_gradient(const std::vector<float> &ai, float b, std::size_t ndim) : 
-  ai(ai), b(b), ndim(ndim),b_m2(-2.0 * b), b_2(2.0 * b) {}
+  umapai_gradient(const std::vector<float> &ai, float b, std::size_t ndim)
+      : ai(ai), b(b), ndim(ndim), b_m2(-2.0 * b), b_2(2.0 * b) {}
 
   auto clamp_grad(float grad_d) const -> float {
     return clamp(grad_d, clamp_lo, clamp_hi);
@@ -188,12 +187,42 @@ public:
 
   auto grad_rep(float d2, std::size_t i, std::size_t j) const -> float {
     auto a = ai[i / ndim] * ai[j / ndim];
-    return b_2 /
-      ((0.001 + d2) * (a * std::pow(d2, b) + 1.0));
+    return b_2 / ((0.001 + d2) * (a * std::pow(d2, b) + 1.0));
   }
 
 private:
   std::vector<float> ai;
+  float b;
+  std::size_t ndim;
+  float b_m2;
+  float b_2;
+};
+
+class umapai2_gradient {
+public:
+  umapai2_gradient(const std::vector<float> &ai, const std::vector<float> &aj,
+                   float b, std::size_t ndim)
+      : ai(ai), aj(aj), b(b), ndim(ndim), b_m2(-2.0 * b), b_2(2.0 * b) {}
+
+  auto clamp_grad(float grad_d) const -> float {
+    return clamp(grad_d, clamp_lo, clamp_hi);
+  }
+  static const constexpr float clamp_hi = 4.0;
+  static const constexpr float clamp_lo = -4.0;
+  auto grad_attr(float d2, std::size_t i, std::size_t j) const -> float {
+    auto a = ai[i / ndim] * aj[j / ndim];
+    float pd2b = std::pow(d2, b);
+    return (a * b_m2 * pd2b) / (d2 * (a * pd2b + 1.0));
+  }
+
+  auto grad_rep(float d2, std::size_t i, std::size_t j) const -> float {
+    auto a = ai[i / ndim] * aj[j / ndim];
+    return b_2 / ((0.001 + d2) * (a * std::pow(d2, b) + 1.0));
+  }
+
+private:
+  std::vector<float> ai;
+  std::vector<float> aj;
   float b;
   std::size_t ndim;
   float b_m2;

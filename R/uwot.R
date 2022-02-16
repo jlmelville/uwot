@@ -1988,6 +1988,12 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (!is.null(dens_scale)) {
       ai <- scale_radii(localr, dens_scale, a)
       method <- "leopold"
+      if (ret_model) {
+        # store the linear transform from localr to ai for transforming new data
+        lai2 <- 2 * log(range(ai))
+        llr <- -log(rev(range(localr)))
+        rad_coeff <- stats::lm(lai2 ~ llr)$coefficients
+      }
     }
     method <- tolower(method)
     method_args <- switch(method,
@@ -2064,6 +2070,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       if (method == "leopold") {
         res$dens_scale <- dens_scale
         res$ai <- ai
+        res$rad_coeff <- rad_coeff
       }
       if (nblocks > 1) {
         res$nn_index <- list()

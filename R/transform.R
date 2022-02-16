@@ -210,6 +210,12 @@ umap_transform <- function(X = NULL, model = NULL,
   nblocks <- length(metric)
   pca_models <- model$pca_models
   
+  if (method == "leopold") {
+    dens_scale <- model$dens_scale
+    ai <- model$ai
+    rad_coeff <- model$rad_coeff
+  }
+  
   if (is.null(batch)) {
     if (!is.null(model$batch)) {
       batch <- model$batch
@@ -346,6 +352,8 @@ umap_transform <- function(X = NULL, model = NULL,
 
   graph <- NULL
   embedding <- NULL
+  localr <- NULL
+  need_sigma <- method == "leopold" && nblocks == 1
   for (i in 1:nblocks) {
     tsmessage("Processing block ", i, " of ", nblocks)
     if (nblocks == 1) {
@@ -385,12 +393,21 @@ umap_transform <- function(X = NULL, model = NULL,
         nn <- nn_method[[i]]
       }
     }
-    graph_block <- smooth_knn(nn,
+    sknn_res <- smooth_knn(nn,
       local_connectivity = adjusted_local_connectivity,
       n_threads = n_threads,
       grain_size = grain_size,
-      verbose = verbose
-    )$matrix
+      verbose = verbose,
+      ret_sigma = need_sigma
+    )
+    graph_block <- sknn_res$matrix
+    if (is.null(localr) && need_sigma) {
+      # because of the adjusted local connectivity rho is too small compared
+      # to that used to generate the "training" data but sigma is larger, so
+      # let's just stick with sigma + rho even though it tends to be an 
+      # underestimate 
+      localr <- sknn_res$sigma + sknn_res$rho
+    }
 
     if (is.logical(init_weighted)) {
       embedding_block <- init_new_embedding(train_embedding, nn, graph_block,
@@ -472,13 +489,20 @@ umap_transform <- function(X = NULL, model = NULL,
     )
 
     method <- tolower(method)
-    if (method == "umap") {
-      method_args <- list(a = a, b = b, gamma = gamma, approx_pow = approx_pow)
+    if (method == "leopold") {
+      # Use the linear model 2 log ai = -m log(localr) + c
+      aj <- exp(0.5 * ((-log(localr) * rad_coeff[2]) + rad_coeff[1]))
+      # Prevent too-small aj
+      aj[aj < 0.1] <- 0.1
+      method <- "leopold2"
     }
-    else {
-      method_args <- list()
-    }
-    
+
+    method_args <- switch(method, 
+      umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
+      leopold2 = list(ai = ai, aj = aj, b = b, ndim = ncol(embedding)),
+      list()
+    )
+
     full_opt_args <- get_opt_args(opt_args, alpha)
     
     embedding <- t(embedding)
