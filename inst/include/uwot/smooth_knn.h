@@ -149,7 +149,7 @@ void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
                 double mean_distances, bool save_sigmas,
                 std::vector<double> &nn_weights,
                 std::vector<double> &ith_distances, std::vector<double> &sigmas,
-                std::size_t &n_window_search_fails) {
+                std::vector<double> &rhos, std::size_t &n_window_search_fails) {
 
   // Get the n_neighbor distances to i and the non-zero distances
   // NB nn_dist must be in sorted non-decreasing order
@@ -176,6 +176,7 @@ void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
 
   if (save_sigmas) {
     sigmas[i] = sigma;
+    rhos[i] = rho;
   }
 }
 
@@ -186,7 +187,7 @@ void smooth_knn(std::size_t begin, std::size_t end,
                 double bandwidth, double min_k_dist_scale,
                 double mean_distances, bool save_sigmas,
                 std::vector<double> &nn_weights, std::vector<double> &sigmas,
-                std::atomic_size_t &n_search_fails) {
+                std::vector<double> &rhos, std::atomic_size_t &n_search_fails) {
   // number of binary search failures in this window
   std::size_t n_window_search_fails = 0;
 
@@ -196,7 +197,7 @@ void smooth_knn(std::size_t begin, std::size_t end,
   for (std::size_t i = begin; i < end; i++) {
     smooth_knn(i, nn_dist, n_vertices, n_neighbors, target, local_connectivity,
                tol, n_iter, bandwidth, min_k_dist_scale, mean_distances,
-               save_sigmas, nn_weights, ith_distances, sigmas,
+               save_sigmas, nn_weights, ith_distances, sigmas, rhos,
                n_window_search_fails);
   }
 

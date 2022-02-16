@@ -86,6 +86,7 @@ fuzzy_simplicial_set <- function(nn,
   res <- list(matrix = fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio))
   if (ret_sigma) {
     res$sigma <- affinity_matrix_res$sigma
+    res$rho <- affinity_matrix_res$rho
   }
   res
 }

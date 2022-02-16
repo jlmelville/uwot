@@ -2084,8 +2084,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         res$fgraph <- V
       }
     }
-    if (length(sigma) > 0) {
+    if (ret_sigma) {
       res$sigma <- sigma
+      res$rho <- rho
     }
   }
   else {
@@ -2649,6 +2650,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       # No idea how to combine different neighborhood sizes so just return the
       # first set
       sigma <- x2set_res$sigma
+      rho <- x2set_res$rho
     }
   }
 
@@ -2659,6 +2661,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
   res <- list(V = V, nns = nns, pca_models = pca_models)
   if (!is.null(sigma)) {
     res$sigma <- sigma
+    res$rho <- rho
   }
   res
 }
@@ -2763,6 +2766,7 @@ nn2set <- function(method, nn,
     res$V <- Vres$matrix
     if (ret_sigma) {
       res$sigma <- Vres$sigma
+      res$rho <- Vres$rho
     }
   }
   res
@@ -2815,6 +2819,7 @@ x2set <- function(X, n_neighbors, metric, nn_method,
   )
   if (ret_sigma && !is.null(nn2set_res$sigma)) {
     res$sigma <- nn2set_res$sigma
+    res$rho <- nn2set_res$rho
   }
   res
 }
