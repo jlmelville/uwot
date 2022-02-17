@@ -2051,7 +2051,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     tsmessage("Optimization finished")
   }
 
-  ret_extra <- ret_model || ret_nn || ret_fgraph || ret_sigma
+  ret_extra <- ret_model || ret_nn || ret_fgraph || ret_sigma || ret_localr
   if (ret_extra) {
     nblocks <- length(nns)
     res <- list(embedding = embedding)
