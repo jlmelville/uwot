@@ -2,6 +2,14 @@
 
 ## New features
 
+* New parameter: `dens_weight`. If set to a value between 0 and 1, an attempt
+is made to include the relative local densities of the input data in the output
+coordinates. This is an approximation to the 
+[densMAP](https://doi.org/10.1038/s41587-020-00801-7) method. A large value of
+`dens_weight` will use a larger range of output densities to reflect the input
+data. If the data is too spread out, reduce the value of `dens_weight`. For
+more information see the 
+[documentation at the uwot repo](https://jlmelville.github.io/uwot/leopold.html).
 * New parameter: `binary_edge_weights`. If set to `TRUE`, instead of smoothed
 knn distances, non-zero edge weights all have a value of 1. This is how
 [PaCMAP](https://www.jmlr.org/papers/v22/20-1061.html) works and there is
@@ -9,11 +17,20 @@ knn distances, non-zero edge weights all have a value of 1. This is how
 [theoretical](https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html)
 reasons to believe this won't have a big effect on UMAP but you can try it
 yourself.
-* New option for `ret_extra`: if it contains `"sigma"`, then the return value
-will contain a `sigma` entry, a vector of the smooth knn distance scaling
-normalization factors, one for each observation in the input data. A small value
-indicates a high density of points in the local neighborhood of that
-observation. Only applies for `umap` and `tumap`.
+* New options for `ret_extra`: 
+    * `"sigma"`: the return value
+    will contain a `sigma` entry, a vector of the smooth knn distance scaling
+    normalization factors, one for each observation in the input data. A small 
+    value indicates a high density of points in the local neighborhood of that
+    observation. Only applies for `umap` and `tumap`.
+    * also, a vector `rho` will be exported, which is the distance to the
+    nearest neighbor after the number of neighbors specified by the
+    `local_connectivity`.
+    * `"localr"`: exports a vector of the local radii, the sum of `sigma` and
+    `rho` and used to scale the output coordinates when `dens_weight` is set.
+    Even if not use `dens_weight`, visualizing the output coordinates using a
+    color scale based on the value of `localr` can reveal regions of the input
+    data with different densities.
 
 ## Bug fixes and minor improvements
 
