@@ -604,7 +604,7 @@ expect_ok_matrix(res)
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
             init = "normlaplacian", verbose = FALSE, n_threads = 0, dens_scale = 1,
-            ret_extra = c("sigma")
+            ret_extra = c("sigma", "localr")
 )
 expect_is(res, "list")
 expect_ok_matrix(res$embedding)
@@ -612,8 +612,12 @@ sigma <- res$sigma
 expect_equal(sigma, expected_sigma, tolerance = 1e-4)
 rho <- res$rho
 expect_equal(rho, expected_rho, tolerance = 1e-4)
+
+expected_localr <- c(
+  0.3214, 0.3781, 0.2943, 0.3356, 0.3908, 0.6203, 0.4182, 0.3087, 0.5454, 0.3795
+)
 localr <- res$localr
-expect_equal(localr, res$localr, tolerance = 1e-4)
+expect_equal(localr, expected_localr, tolerance = 1e-4)
 
 res <- umap(iris10,
             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
