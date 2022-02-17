@@ -438,6 +438,8 @@
 #'     smooth knn distance normalization terms for each observation as
 #'     \code{"sigma"} and a vector \code{"rho"} containing the largest 
 #'     distance to the locally connected neighbors of each observation.
+#'     \item if \code{ret_extra} contains \code{"localr"}, returns a vector of 
+#'     the estimated local radii, the sum of \code{"sigma"} and \code{"rho"}.
 #'   }
 #'   The returned list contains the combined data from any combination of
 #'   specifying \code{ret_model}, \code{ret_nn} and \code{ret_extra}.
@@ -994,8 +996,12 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item if \code{ret_extra} contains \code{"fgraph"} returns the high
 #'     dimensional fuzzy graph as a sparse matrix called \code{fgraph}, of type
 #'     \link[Matrix]{dgCMatrix-class}.
-#'     \item if \code{ret_extra} contains \code{"sigma"} returns a vector of the
-#'     smooth knn distance normalization terms for each observation.
+#'     \item if \code{ret_extra} contains \code{"sigma"}, returns a vector of the
+#'     smooth knn distance normalization terms for each observation as
+#'     \code{"sigma"} and a vector \code{"rho"} containing the largest 
+#'     distance to the locally connected neighbors of each observation.
+#'     \item if \code{ret_extra} contains \code{"localr"}, returns a vector of 
+#'     the estimated local radii, the sum of \code{"sigma"} and \code{"rho"}.
 #'   }
 #'   The returned list contains the combined data from any combination of
 #'   specifying \code{ret_model}, \code{ret_nn} and \code{ret_extra}.
@@ -1049,6 +1055,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     ret_nn = ret_nn || "nn" %in% ret_extra,
     ret_fgraph = "fgraph" %in% ret_extra,
     ret_sigma = "sigma" %in% ret_extra,
+    ret_localr = "localr" %in% ret_extra,
     batch = batch,
     opt_args = opt_args,
     epoch_callback = epoch_callback,
@@ -1506,7 +1513,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  grain_size = 1,
                  kernel = "gauss",
                  ret_model = FALSE, ret_nn = FALSE, ret_fgraph = FALSE,
-                 ret_sigma = FALSE,
+                 ret_sigma = FALSE, ret_localr = FALSE,
                  pca = NULL, pca_center = TRUE, pca_method = NULL,
                  pcg_rand = TRUE,
                  fast_sgd = FALSE,
@@ -1729,7 +1736,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     pca_shortcut <- TRUE
   }
 
-  need_sigma <- ret_sigma || !is.null(dens_scale)
+  need_sigma <- ret_sigma || ret_localr || !is.null(dens_scale)
   d2sr <- data2set(X, Xcat, n_neighbors, metrics, nn_method,
     n_trees, search_k,
     method,
@@ -1756,7 +1763,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     sigma <- d2sr$sigma
     rho <- d2sr$rho
   }
-  if (!is.null(dens_scale)) {
+  if (!is.null(dens_scale) || ret_localr) {
     localr <- sigma + rho
   }
 
@@ -2123,9 +2130,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (ret_sigma) {
       res$sigma <- sigma
       res$rho <- rho
-      if (!is.null(localr)) {
-        res$localr <- localr
-      }
+    }
+    if (ret_localr && !is.null(localr)) {
+      res$localr <- localr
     }
   }
   else {
