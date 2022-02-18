@@ -40,12 +40,18 @@ List calc_row_probabilities_parallel(NumericMatrix nn_dist,
   auto nn_distv = as<std::vector<double>>(nn_dist);
   auto nn_idxv = as<std::vector<int>>(nn_idx);
 
-  NumericMatrix res(n_vertices, n_neighbors);
-  uwot::PerplexityWorker worker(nn_distv, nn_idxv, n_vertices, perplexity,
-                                n_iter, tol);
+  double target = std::log(perplexity);
+  std::atomic_size_t n_search_fails{0};
+  std::vector<double> resv(n_vertices * n_neighbors);
+
+  auto worker = [&](std::size_t begin, std::size_t end) {
+    uwot::perplexity_search(begin, end, nn_distv, n_vertices, n_neighbors,
+                            nn_idxv, target, tol, n_iter, resv, n_search_fails);
+  };
+
   RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads, grain_size);
 
   return List::create(
-      _("matrix") = NumericMatrix(n_vertices, n_neighbors, worker.res.begin()),
-      _("n_failures") = static_cast<std::size_t>(worker.n_search_fails));
+      _("matrix") = NumericMatrix(n_vertices, n_neighbors, resv.begin()),
+      _("n_failures") = static_cast<std::size_t>(n_search_fails));
 }

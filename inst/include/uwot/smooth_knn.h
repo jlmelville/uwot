@@ -171,6 +171,7 @@ void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
   auto sigma_b = sigma * bandwidth;
   for (std::size_t k = 0; k < n_neighbors; k++) {
     auto rk = ith_distances[k] - rho;
+    // FIXME: consider transposing nn_dist would be: n_nbrs * i + j
     nn_weights[i + k * n_vertices] = rk <= 0.0 ? 1.0 : std::exp(-rk / sigma_b);
   }
 
