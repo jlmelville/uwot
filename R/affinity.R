@@ -95,7 +95,7 @@ symmetrize <- function(P) {
   0.5 * (P + Matrix::t(P))
 }
 
-perplexity_similarities <- function(nn, perplexity = NULL,
+perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
                                     n_threads = NULL,
                                     grain_size = 1,
                                     kernel = "gauss",
@@ -107,6 +107,7 @@ perplexity_similarities <- function(nn, perplexity = NULL,
     stop("Must provide perplexity")
   }
 
+  sigma <- NULL
   if (kernel == "gauss") {
     tsmessage(
       "Commencing calibration for perplexity = ", formatC(perplexity),
@@ -116,6 +117,7 @@ perplexity_similarities <- function(nn, perplexity = NULL,
       nn_dist = nn$dist,
       nn_idx = nn$idx,
       perplexity = perplexity,
+      ret_sigma = ret_sigma,
       n_threads = n_threads,
       grain_size = grain_size
     )
@@ -126,6 +128,9 @@ perplexity_similarities <- function(nn, perplexity = NULL,
     affinity_matrix <- nn_to_sparse(nn$idx, as.vector(affinity_matrix),
       self_nbr = TRUE, max_nbr_id = nrow(nn$idx)
     )
+    if (!is.null(affinity_matrix_res$sigma)) {
+      sigma <- affinity_matrix_res$sigma
+    }
   }
   else {
     # knn kernel
@@ -136,7 +141,11 @@ perplexity_similarities <- function(nn, perplexity = NULL,
     Matrix::diag(affinity_matrix) <- 0
     affinity_matrix <- Matrix::drop0(affinity_matrix)
   }
-  symmetrize(affinity_matrix)
+  res <- list(matrix = symmetrize(affinity_matrix))
+  if (ret_sigma && !is.null(sigma)) {
+    res$sigma <- sigma
+  }
+  res
 }
 
 # Convert the matrix of NN indices to a sparse asymmetric matrix where each

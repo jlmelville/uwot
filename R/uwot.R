@@ -1364,6 +1364,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       \code{n_epochs = 0} will avoid any further sparsifying. Be aware that 
 #'       setting \code{binary_edge_weights = TRUE} will affect this graph (all 
 #'       non-zero edge weights will be 1).
+#'    \item \code{sigma} a vector of the bandwidths used to calibrate the input
+#'       Gaussians to reproduce the target \code{"perplexity"}.
 #'   }
 #' @param tmpdir Temporary directory to store nearest neighbor indexes during
 #'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
@@ -2790,13 +2792,18 @@ nn2set <- function(method, nn,
     if (perplexity >= n_vertices) {
       stop("perplexity can be no larger than ", n_vertices - 1)
     }
-    res$V <- perplexity_similarities(
+    Vres <- perplexity_similarities(
       nn = nn, perplexity = perplexity,
+      ret_sigma = ret_sigma,
       n_threads = n_threads,
       grain_size = grain_size,
       kernel = kernel,
       verbose = verbose
     )
+    res$V <- Vres$matrix
+    if (ret_sigma && !is.null(Vres$sigma)) {
+      res$sigma <- Vres$sigma
+    }
   }
   else {
     Vres <- fuzzy_simplicial_set(

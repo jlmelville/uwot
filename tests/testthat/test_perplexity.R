@@ -30,7 +30,7 @@ res <- perplexity_similarities(
     metric = "euclidean", n_threads = 0,
     verbose = FALSE
   )
-)
+)$matrix
 expect_true(Matrix::isSymmetric(res))
 expect_equal(as.matrix(res), P_symm, tol = 1e-5, check.attributes = FALSE)
 
@@ -57,7 +57,7 @@ res <- perplexity_similarities(
     metric = "euclidean", n_threads = 0,
     verbose = FALSE
   )
-)
+)$matrix
 expect_true(Matrix::isSymmetric(res))
 expect_equal(as.matrix(res), Psymm9, tol = 1e-4, check.attributes = FALSE)
 
@@ -81,7 +81,7 @@ res <- perplexity_similarities(
     metric = "euclidean", n_threads = 0,
     verbose = FALSE
   )
-)
+)$matrix
 expect_true(Matrix::isSymmetric(res))
 expect_equal(as.matrix(res), P_symm_6nn, tol = 1e-5, check.attributes = FALSE)
 
@@ -171,7 +171,7 @@ res <- perplexity_similarities(
     metric = "euclidean", n_threads = 0,
     verbose = FALSE
   )
-)
+)$matrix
 expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tol = 1e-6)
 
 res <- perplexity_similarities(
@@ -181,5 +181,5 @@ res <- perplexity_similarities(
     metric = "euclidean", n_threads = 1,
     verbose = FALSE
   )
-)
+)$matrix
 expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tol = 1e-6)

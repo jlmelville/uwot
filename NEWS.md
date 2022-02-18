@@ -18,14 +18,14 @@ knn distances, non-zero edge weights all have a value of 1. This is how
 reasons to believe this won't have a big effect on UMAP but you can try it
 yourself.
 * New options for `ret_extra`: 
-    * `"sigma"`: the return value
-    will contain a `sigma` entry, a vector of the smooth knn distance scaling
-    normalization factors, one for each observation in the input data. A small 
-    value indicates a high density of points in the local neighborhood of that
-    observation. Only applies for `umap` and `tumap`.
+    * `"sigma"`: the return value will contain a `sigma` entry, a vector of the
+    smooth knn distance scaling normalization factors, one for each observation
+    in the input data. A small value indicates a high density of points in the
+    local neighborhood of that observation. For `lvish` the equivalent
+    bandwidths calculated for the input perplexity is returned.
     * also, a vector `rho` will be exported, which is the distance to the
     nearest neighbor after the number of neighbors specified by the
-    `local_connectivity`.
+    `local_connectivity`. Only applies for `umap` and `tumap`.
     * `"localr"`: exports a vector of the local radii, the sum of `sigma` and
     `rho` and used to scale the output coordinates when `dens_weight` is set.
     Even if not use `dens_weight`, visualizing the output coordinates using a

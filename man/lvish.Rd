@@ -306,6 +306,8 @@ any combination of the following strings:
     \code{n_epochs = 0} will avoid any further sparsifying. Be aware that 
     setting \code{binary_edge_weights = TRUE} will affect this graph (all 
     non-zero edge weights will be 1).
+ \item \code{sigma} a vector of the bandwidths used to calibrate the input
+    Gaussians to reproduce the target \code{"perplexity"}.
 }}
 
 \item{tmpdir}{Temporary directory to store nearest neighbor indexes during

@@ -26,7 +26,7 @@ expect_equal(nn_to_sparse(nn$idx, matrix(1:40, nrow = 10, byrow = TRUE)),
   check.attributes = FALSE
 )
 
-res <- perplexity_similarities(iris10, 4, kernel = "knn", nn = nn)
+res <- perplexity_similarities(iris10, 4, kernel = "knn", nn = nn)$matrix
 expected_sym_nn_graph <- matrix(0, nrow = 10, ncol = 10)
 o3 <- 1 / 3
 o6 <- 1 / 6

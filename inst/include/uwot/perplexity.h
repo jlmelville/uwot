@@ -114,7 +114,8 @@ void perplexity_search(std::size_t i, const std::vector<double> &nn_dist,
                        std::size_t n_vertices, std::size_t n_neighbors,
                        const std::vector<int> &nn_idx, double target,
                        double tol, std::size_t n_iter, std::vector<double> &d2,
-                       std::vector<double> &res,
+                       std::vector<double> &res, bool save_sigmas,
+                       std::vector<double> &sigmas,
                        std::size_t &n_window_search_fails) {
   double beta = find_beta(i, nn_dist, n_vertices, n_neighbors, target, tol,
                           n_iter, d2, n_window_search_fails);
@@ -137,6 +138,9 @@ void perplexity_search(std::size_t i, const std::vector<double> &nn_dist,
       ++widx;
     }
   }
+  if (save_sigmas) {
+    sigmas[i] = 1 / beta;
+  }
 }
 
 void perplexity_search(std::size_t begin, std::size_t end,
@@ -144,6 +148,7 @@ void perplexity_search(std::size_t begin, std::size_t end,
                        std::size_t n_vertices, std::size_t n_neighbors,
                        const std::vector<int> &nn_idx, double target,
                        double tol, std::size_t n_iter, std::vector<double> &res,
+                       bool save_sigmas, std::vector<double> &sigmas,
                        std::atomic_size_t &n_search_fails) {
   // number of binary search failures in this window
   std::size_t n_window_search_fails = 0;
@@ -151,7 +156,8 @@ void perplexity_search(std::size_t begin, std::size_t end,
 
   for (std::size_t i = begin; i < end; i++) {
     perplexity_search(i, nn_dist, n_vertices, n_neighbors, nn_idx, target, tol,
-                      n_iter, d2, res, n_window_search_fails);
+                      n_iter, d2, res, save_sigmas, sigmas,
+                      n_window_search_fails);
   }
 
   // Update global count of failures

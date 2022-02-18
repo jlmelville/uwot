@@ -129,9 +129,10 @@ expect_equal(names(res_nn2$nn), c("precomputed", "precomputed"))
 # lvish and force use of annoy
 res <- lvish(iris10,
   perplexity = 4, n_epochs = 2, learning_rate = 0.5, nn_method = "annoy",
-  init = "lvrand", verbose = FALSE, n_threads = 1
+  init = "lvrand", verbose = FALSE, n_threads = 1, ret_extra = c("sigma")
 )
-expect_ok_matrix(res)
+expect_ok_matrix(res$embedding)
+expect_equal(res$sigma, c(0.3039, 0.2063, 0.09489, 0.08811, 0.3091, 0.6789, 0.1743, 0.1686, 0.3445, 0.1671), tol = 1e-4)
 
 # lvish with knn
 res <- lvish(iris10,
