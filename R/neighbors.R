@@ -455,3 +455,8 @@ sparse_tri_nn <- function(X, k, include_self = TRUE) {
   
   list(idx = nn_idx, dist = nn_dist)
 }
+
+# transpose the index and distance matrix
+nn_graph_t <- function(nn_graph) {
+  list(idx = t(nn_graph$idx), dist = t(nn_graph$dist))
+}

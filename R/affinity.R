@@ -18,7 +18,8 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
 
 # Calculate the (asymmetric) affinity matrix based on the nearest neighborhoods
 # default target for calibration is the sum of affinities = log2(n_nbrs)
-smooth_knn <- function(nn,
+# nn graph should be stored column-wise
+smooth_knn <- function(nn_graphc,
                        target = NULL,
                        local_connectivity = 1.0,
                        bandwidth = 1.0,
@@ -34,10 +35,11 @@ smooth_knn <- function(nn,
     pluralize("thread", n_threads, " using")
   )
   if (is.null(target)) {
-    target <- log2(ncol(nn$idx))
+    n_nbrs <- nrow(nn_graphc$idx)
+    target <- log2(n_nbrs)
   }
   affinity_matrix_res <- smooth_knn_distances_parallel(
-    nn_dist = nn$dist,
+    nn_dist = nn_graphc$dist,
     target = target,
     n_iter = 64,
     local_connectivity = local_connectivity,
@@ -51,6 +53,8 @@ smooth_knn <- function(nn,
   if (verbose && affinity_matrix_res$n_failures > 0) {
     tsmessage(affinity_matrix_res$n_failures, " smooth knn distance failures")
   }
+  # FIXME
+  affinity_matrix_res$matrix <- t(affinity_matrix_res$matrix)
   affinity_matrix_res
 }
 
@@ -70,7 +74,10 @@ fuzzy_simplicial_set <- function(nn,
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  affinity_matrix_res <- smooth_knn(nn,
+  
+  nnt <- nn_graph_t(nn)
+
+  affinity_matrix_res <- smooth_knn(nnt,
     local_connectivity = local_connectivity,
     bandwidth = bandwidth,
     ret_sigma = ret_sigma,
