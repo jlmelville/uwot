@@ -33,9 +33,8 @@ List calc_row_probabilities_parallel(NumericMatrix nn_dist,
                                      double tol = 1e-5, bool ret_sigma = false,
                                      std::size_t n_threads = 0,
                                      std::size_t grain_size = 1) {
-
-  std::size_t n_vertices = nn_dist.nrow();
-  std::size_t n_neighbors = nn_dist.ncol();
+  std::size_t n_vertices = nn_dist.ncol();
+  std::size_t n_neighbors = nn_dist.nrow();
 
   auto nn_distv = as<std::vector<double>>(nn_dist);
   auto nn_idxv = as<std::vector<int>>(nn_idx);
@@ -54,7 +53,7 @@ List calc_row_probabilities_parallel(NumericMatrix nn_dist,
   RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads, grain_size);
 
   auto res = List::create(
-      _("matrix") = NumericMatrix(n_vertices, n_neighbors, nn_weights.begin()),
+      _("matrix") = NumericMatrix(n_neighbors, n_vertices, nn_weights.begin()),
       _("n_failures") = static_cast<std::size_t>(n_search_fails));
   if (ret_sigma) {
     res["sigma"] = sigmas;

@@ -52,7 +52,7 @@ auto find_beta(std::size_t i, const std::vector<double> &nn_dist,
   double dmin = double_max;
   double dtmp;
   for (std::size_t k = 1; k < n_neighbors; k++) {
-    dtmp = nn_dist[i + k * n_vertices] * nn_dist[i + k * n_vertices];
+    dtmp = nn_dist[n_neighbors * i + k] * nn_dist[n_neighbors * i + k];
     d2[k - 1] = dtmp;
     if (dtmp < dmin) {
       dmin = dtmp;
@@ -131,10 +131,9 @@ void perplexity_search(std::size_t i, const std::vector<double> &nn_dist,
   // This will index over d2, skipping when i == j
   std::size_t widx = 0;
   for (std::size_t k = 0; k < n_neighbors; k++) {
-    // FIXME: consider transposing would be: n_nbrs * i + j
-    std::size_t j = nn_idx[i + k * n_vertices] - 1;
+    std::size_t j = nn_idx[n_neighbors * i + k] - 1;
     if (i != j) {
-      res[i + k * n_vertices] = d2[widx] / Z;
+      res[n_neighbors * i + k] = d2[widx] / Z;
       ++widx;
     }
   }

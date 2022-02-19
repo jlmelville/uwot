@@ -120,18 +120,21 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
       "Commencing calibration for perplexity = ", formatC(perplexity),
       pluralize("thread", n_threads, " using")
     )
+    
+    nnt <- nn_graph_t(nn)
     affinity_matrix_res <- calc_row_probabilities_parallel(
-      nn_dist = nn$dist,
-      nn_idx = nn$idx,
+      nn_dist = nnt$dist,
+      nn_idx = nnt$idx,
       perplexity = perplexity,
       ret_sigma = ret_sigma,
       n_threads = n_threads,
       grain_size = grain_size
     )
-    affinity_matrix <- affinity_matrix_res$matrix
     if (verbose && affinity_matrix_res$n_failures > 0) {
       tsmessage(affinity_matrix_res$n_failures, " perplexity failures")
     }
+    # FIXME
+    affinity_matrix <- t(affinity_matrix_res$matrix)
     affinity_matrix <- nn_to_sparse(nn$idx, as.vector(affinity_matrix),
       self_nbr = TRUE, max_nbr_id = nrow(nn$idx)
     )
