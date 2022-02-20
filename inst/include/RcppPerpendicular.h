@@ -40,7 +40,8 @@ auto worker_thread(Worker &worker, const IndexRange &range) -> void {
 }
 
 template <typename Worker>
-auto worker_thread_id(Worker &worker, const IndexRange &range, std::size_t thread_id) -> void {
+auto worker_thread_id(Worker &worker, const IndexRange &range,
+                      std::size_t thread_id) -> void {
   try {
     worker(range.first, range.second, thread_id);
   } catch (...) {
@@ -103,8 +104,8 @@ inline void parallel_for(std::size_t begin, std::size_t end, Worker &worker,
 }
 
 template <typename Worker>
-inline void parallel_for(std::size_t end, Worker &worker,
-                         std::size_t n_threads, std::size_t grain_size = 1) {
+inline void parallel_for(std::size_t end, Worker &worker, std::size_t n_threads,
+                         std::size_t grain_size = 1) {
   parallel_for(0, end, worker, n_threads, grain_size);
 }
 
@@ -132,8 +133,8 @@ inline void pfor(std::size_t begin, std::size_t end, Worker &worker,
 }
 
 template <typename Worker>
-inline void pfor(std::size_t end, Worker &worker,
-                 std::size_t n_threads, std::size_t grain_size = 1) {
+inline void pfor(std::size_t end, Worker &worker, std::size_t n_threads,
+                 std::size_t grain_size = 1) {
   pfor(0, end, worker, n_threads, grain_size);
 }
 
