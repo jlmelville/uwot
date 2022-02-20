@@ -38,8 +38,11 @@ smooth_knn <- function(nn_distc,
     n_nbrs <- nrow(nn_distc)
     target <- log2(n_nbrs)
   }
+  
+  n_vertices = ncol(nn_distc)
   affinity_matrix_res <- smooth_knn_distances_parallel(
-    nn_dist = nn_distc,
+    nn_dist = as.vector(nn_distc),
+    n_vertices = n_vertices,
     target = target,
     n_iter = 64,
     local_connectivity = local_connectivity,
@@ -119,8 +122,10 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
     )
     
     nnt <- nn_graph_t(nn)
+    n_vertices <- ncol(nnt$dist)
     affinity_matrix_res <- calc_row_probabilities_parallel(
-      nn_dist = nnt$dist,
+      nn_dist = as.vector(nnt$dist),
+      n_vertices = n_vertices,
       perplexity = perplexity,
       ret_sigma = ret_sigma,
       n_threads = n_threads,
