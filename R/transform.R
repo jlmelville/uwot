@@ -394,8 +394,8 @@ umap_transform <- function(X = NULL, model = NULL,
       }
     }
     
-    nnt <- nn_graph_t(nn)
-    sknn_res <- smooth_knn(nnt,
+    nn_distt <- t(nn$dist)
+    sknn_res <- smooth_knn(nn_distt,
       local_connectivity = adjusted_local_connectivity,
       n_threads = n_threads,
       grain_size = grain_size,

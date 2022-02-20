@@ -18,8 +18,8 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
 
 # Calculate the (asymmetric) affinity matrix based on the nearest neighborhoods
 # default target for calibration is the sum of affinities = log2(n_nbrs)
-# nn graph should be stored column-wise
-smooth_knn <- function(nn_graphc,
+# nn distances should be stored column-wise
+smooth_knn <- function(nn_distc,
                        target = NULL,
                        local_connectivity = 1.0,
                        bandwidth = 1.0,
@@ -35,11 +35,11 @@ smooth_knn <- function(nn_graphc,
     pluralize("thread", n_threads, " using")
   )
   if (is.null(target)) {
-    n_nbrs <- nrow(nn_graphc$dist)
+    n_nbrs <- nrow(nn_distc)
     target <- log2(n_nbrs)
   }
   affinity_matrix_res <- smooth_knn_distances_parallel(
-    nn_dist = nn_graphc$dist,
+    nn_dist = nn_distc,
     target = target,
     n_iter = 64,
     local_connectivity = local_connectivity,
@@ -75,9 +75,8 @@ fuzzy_simplicial_set <- function(nn,
     n_threads <- default_num_threads()
   }
   
-  nnt <- nn_graph_t(nn)
-
-  affinity_matrix_res <- smooth_knn(nnt,
+  nn_distt <- t(nn$dist)
+  affinity_matrix_res <- smooth_knn(nn_distt,
     local_connectivity = local_connectivity,
     bandwidth = bandwidth,
     ret_sigma = ret_sigma,
@@ -121,9 +120,9 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
       pluralize("thread", n_threads, " using")
     )
     
-    nnt <- nn_graph_t(nn)
+    nn_distt <- t(nn$dist)
     affinity_matrix_res <- calc_row_probabilities_parallel(
-      nn_dist = nnt$dist,
+      nn_dist = nn_distt,
       perplexity = perplexity,
       ret_sigma = ret_sigma,
       n_threads = n_threads,
