@@ -53,8 +53,6 @@ smooth_knn <- function(nn_distc,
   if (verbose && affinity_matrix_res$n_failures > 0) {
     tsmessage(affinity_matrix_res$n_failures, " smooth knn distance failures")
   }
-  # FIXME
-  affinity_matrix_res$matrix <- t(affinity_matrix_res$matrix)
   affinity_matrix_res
 }
 
@@ -75,8 +73,8 @@ fuzzy_simplicial_set <- function(nn,
     n_threads <- default_num_threads()
   }
   
-  nn_distt <- t(nn$dist)
-  affinity_matrix_res <- smooth_knn(nn_distt,
+  nnt <- nn_graph_t(nn)
+  affinity_matrix_res <- smooth_knn(nnt$dist,
     local_connectivity = local_connectivity,
     bandwidth = bandwidth,
     ret_sigma = ret_sigma,
@@ -86,8 +84,8 @@ fuzzy_simplicial_set <- function(nn,
   )
   affinity_matrix <- affinity_matrix_res$matrix
 
-  affinity_matrix <- nn_to_sparse(nn$idx, as.vector(affinity_matrix),
-    self_nbr = TRUE, max_nbr_id = nrow(nn$idx)
+  affinity_matrix <- nn_to_sparse(nnt$idx, as.vector(affinity_matrix),
+    self_nbr = TRUE, by_row = FALSE
   )
   res <- list(matrix = fuzzy_set_union(affinity_matrix, set_op_mix_ratio = set_op_mix_ratio))
   if (ret_sigma) {
@@ -120,9 +118,9 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
       pluralize("thread", n_threads, " using")
     )
     
-    nn_distt <- t(nn$dist)
+    nnt <- nn_graph_t(nn)
     affinity_matrix_res <- calc_row_probabilities_parallel(
-      nn_dist = nn_distt,
+      nn_dist = nnt$dist,
       perplexity = perplexity,
       ret_sigma = ret_sigma,
       n_threads = n_threads,
@@ -131,10 +129,8 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
     if (verbose && affinity_matrix_res$n_failures > 0) {
       tsmessage(affinity_matrix_res$n_failures, " perplexity failures")
     }
-    # FIXME
-    affinity_matrix <- t(affinity_matrix_res$matrix)
-    affinity_matrix <- nn_to_sparse(nn$idx, as.vector(affinity_matrix),
-      self_nbr = TRUE, max_nbr_id = nrow(nn$idx)
+    affinity_matrix <- nn_to_sparse(nnt$idx, as.vector(affinity_matrix_res$matrix),
+      self_nbr = TRUE, by_row = FALSE
     )
     if (!is.null(affinity_matrix_res$sigma)) {
       sigma <- affinity_matrix_res$sigma
@@ -160,23 +156,37 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
 # edge has a weight of val (scalar or vector)
 # return a sparse matrix with dimensions of nrow(nn_idx) x max_nbr_id
 nn_to_sparse <- function(nn_idx, val = 1, self_nbr = FALSE,
-                         max_nbr_id = ifelse(self_nbr,
-                           nrow(nn_idx), max(nn_idx)
-                         )) {
-  nd <- nrow(nn_idx)
-  k <- ncol(nn_idx)
-
+                         max_nbr_id = NULL, by_row = TRUE) {
+  
+  if (by_row) {
+    n_obs <- nrow(nn_idx)
+    n_nbrs <- ncol(nn_idx)
+  }
+  else {
+    n_obs <- ncol(nn_idx)
+    n_nbrs <- nrow(nn_idx)
+  }
+  
+  if (is.null(max_nbr_id)) {
+    max_nbr_id <- ifelse(self_nbr, n_obs, max(nn_idx))
+  }
+  
   if (length(val) == 1) {
-    xs <- rep(val, nd * k)
+    xs <- rep(val, n_obs * n_nbrs)
   }
   else {
     xs <- val
   }
-  is <- rep(1:nd, times = k)
+  if (by_row) {
+    is <- rep(1:n_obs, times = n_nbrs)
+  }
+  else {
+    is <- rep(1:n_obs, each = n_nbrs)
+  }
   js <- as.vector(nn_idx)
 
-  dims <- c(nrow(nn_idx), max_nbr_id)
-  res <- sparseMatrix(i = is, j = js, x = xs, dims = dims)
+  dims <- c(n_obs, max_nbr_id)
+  res <- Matrix::sparseMatrix(i = is, j = js, x = xs, dims = dims)
   if (self_nbr) {
     Matrix::diag(res) <- 0
     res <- Matrix::drop0(res)

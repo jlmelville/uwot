@@ -394,8 +394,8 @@ umap_transform <- function(X = NULL, model = NULL,
       }
     }
     
-    nn_distt <- t(nn$dist)
-    sknn_res <- smooth_knn(nn_distt,
+    nnt <- nn_graph_t(nn)
+    sknn_res <- smooth_knn(nnt$dist,
       local_connectivity = adjusted_local_connectivity,
       n_threads = n_threads,
       grain_size = grain_size,
@@ -412,7 +412,8 @@ umap_transform <- function(X = NULL, model = NULL,
     }
 
     if (is.logical(init_weighted)) {
-      embedding_block <- init_new_embedding(train_embedding, nn, graph_block,
+      # FIX ME: avoid transposing graph_block
+      embedding_block <- init_new_embedding(train_embedding, nn, t(graph_block),
         weighted = init_weighted,
         n_threads = n_threads,
         grain_size = grain_size, verbose = verbose
@@ -425,9 +426,10 @@ umap_transform <- function(X = NULL, model = NULL,
       }
     }
 
-    graph_block <- nn_to_sparse(nn$idx, as.vector(graph_block),
+    graph_block <- nn_to_sparse(nnt$idx, as.vector(graph_block),
       self_nbr = FALSE,
-      max_nbr_id = nrow(train_embedding)
+      max_nbr_id = nrow(train_embedding),
+      by_row = FALSE
     )
     if (is.null(graph)) {
       graph <- graph_block
