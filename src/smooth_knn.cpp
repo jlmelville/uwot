@@ -27,17 +27,13 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 List smooth_knn_distances_parallel(
-    NumericVector nn_dist, std::size_t n_vertices, double target = -1.0,
+    NumericVector nn_dist, std::size_t n_vertices, double target,
     std::size_t n_iter = 64, double local_connectivity = 1.0,
     double bandwidth = 1.0, double tol = 1e-5, double min_k_dist_scale = 1e-3,
     bool ret_sigma = false, std::size_t n_threads = 0,
     std::size_t grain_size = 1) {
 
   std::size_t n_neighbors = nn_dist.size() / n_vertices;
-
-  if (target < 0.0) {
-    target = std::log2(n_neighbors);
-  }
 
   auto nn_distv = as<std::vector<double>>(nn_dist);
   double mean_distances = uwot::mean_average(nn_distv);

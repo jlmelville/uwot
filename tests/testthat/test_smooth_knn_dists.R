@@ -3,7 +3,14 @@ context("Smooth kNN distances")
 
 ### C++ tests
 nn_8 <- find_nn(iris10, k = 8)
-res <- smooth_knn_distances_parallel(as.vector(t(nn_8$dist)), n_vertices = nrow(nn_8$dist), ret_sigma = TRUE)
+target8 <- log2(8)
+res <-
+  smooth_knn_distances_parallel(
+    as.vector(t(nn_8$dist)),
+    n_vertices = nrow(nn_8$dist),
+    ret_sigma = TRUE,
+    target = target8
+  )
 expect_equal(as.vector(t(res$matrix)), c(
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 0.883551016667945, 0.563402698221087, 0.789087277089996,
@@ -36,7 +43,14 @@ expect_equal(res$rho, c(
 
 nn_4 <- find_nn(iris10, k = 4)
 nn4dist <- as.vector(t(nn_4$dist))
-res <- smooth_knn_distances_parallel(nn4dist, n_vertices = nrow(nn_4$dist), ret_sigma = TRUE)
+target4 <- log2(ncol(nn_4$dist))
+res <-
+  smooth_knn_distances_parallel(
+    nn4dist,
+    n_vertices = nrow(nn_4$dist),
+    ret_sigma = TRUE,
+    target = target4
+  )
 nn4skd <- t(res$matrix)
 expect_equal(as.vector(nn4skd), c(
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -76,43 +90,84 @@ expect_equal(fuzzy_set_union(res, set_op_mix_ratio = 0), V_intersect,
   tol = 1e-4
 )
 
-
-res_cpp_conn1 <- t(smooth_knn_distances_parallel(nn4dist, n_vertices = nrow(nn_4$dist),
-  n_iter = 64, local_connectivity = 1.0,
-  bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
-  n_threads = 0
-)$matrix)
+res_cpp_conn1 <-
+  t(
+    smooth_knn_distances_parallel(
+      nn4dist,
+      n_vertices = nrow(nn_4$dist),
+      target = target4,
+      n_iter = 64,
+      local_connectivity = 1.0,
+      bandwidth = 1.0,
+      tol = 1e-5,
+      min_k_dist_scale = 1e-3,
+      n_threads = 0
+    )$matrix
+  )
 expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1),
-  self_nbr = TRUE
-), V_asymm, tol = 1e-4)
+                          self_nbr = TRUE),
+             V_asymm,
+             tol = 1e-4)
 
-res_cpp_conn1.5 <- t(smooth_knn_distances_parallel(nn4dist, n_vertices = nrow(nn_4$dist),
-  n_iter = 64, local_connectivity = 1.5,
-  bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
-  n_threads = 0
-)$matrix)
+res_cpp_conn1.5 <-
+  t(
+    smooth_knn_distances_parallel(
+      nn4dist,
+      n_vertices = nrow(nn_4$dist),
+      target = target4,
+      n_iter = 64,
+      local_connectivity = 1.5,
+      bandwidth = 1.0,
+      tol = 1e-5,
+      min_k_dist_scale = 1e-3,
+      n_threads = 0
+    )$matrix
+  )
 expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1.5),
-  self_nbr = TRUE
-), V_asymm_local, tol = 1e-4)
+                          self_nbr = TRUE),
+             V_asymm_local,
+             tol = 1e-4)
 
 
-res_cpp_conn1 <- t(smooth_knn_distances_parallel(nn4dist, n_vertices = nrow(nn_4$dist),
-  n_iter = 64, local_connectivity = 1.0,
-  bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
-  n_threads = 1, grain_size = 1
-)$matrix)
+res_cpp_conn1 <-
+  t(
+    smooth_knn_distances_parallel(
+      nn4dist,
+      n_vertices = nrow(nn_4$dist),
+      target = target4,
+      n_iter = 64,
+      local_connectivity = 1.0,
+      bandwidth = 1.0,
+      tol = 1e-5,
+      min_k_dist_scale = 1e-3,
+      n_threads = 1,
+      grain_size = 1
+    )$matrix
+  )
 expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1),
-  self_nbr = TRUE
-), V_asymm, tol = 1e-4)
+                          self_nbr = TRUE),
+             V_asymm,
+             tol = 1e-4)
 
-res_cpp_conn1.5 <- t(smooth_knn_distances_parallel(nn4dist, n_vertices = nrow(nn_4$dist),
-  n_iter = 64, local_connectivity = 1.5,
-  bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
-  n_threads = 1, grain_size = 1
-)$matrix)
+res_cpp_conn1.5 <-
+  t(
+    smooth_knn_distances_parallel(
+      nn4dist,
+      n_vertices = nrow(nn_4$dist),
+      target = target4,
+      n_iter = 64,
+      local_connectivity = 1.5,
+      bandwidth = 1.0,
+      tol = 1e-5,
+      min_k_dist_scale = 1e-3,
+      n_threads = 1,
+      grain_size = 1
+    )$matrix
+  )
 expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1.5),
-  self_nbr = TRUE
-), V_asymm_local, tol = 1e-4)
+                          self_nbr = TRUE),
+             V_asymm_local,
+             tol = 1e-4)
 
 
 # Test cross-distances
@@ -123,28 +178,52 @@ V_asymm_local_cross <- cbind(
   matrix(0, nrow = 10, ncol = 2)
 )
 
-res_cpp_conn1.5_cross <- t(smooth_knn_distances_parallel(nn4dist, n_vertices = nrow(nn_4$dist),
-  n_iter = 64, local_connectivity = 1.5,
-  bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3,
-  n_threads = 0
-)$matrix)
-expect_equal(nn_to_sparse(
-  nn_4$idx, as.vector(res_cpp_conn1.5_cross),
-  self_nbr = FALSE, max_nbr_id = 12
-),
-V_asymm_local_cross,
-tol = 1e-4
+res_cpp_conn1.5_cross <-
+  t(
+    smooth_knn_distances_parallel(
+      nn4dist,
+      n_vertices = nrow(nn_4$dist),
+      target = target4,
+      n_iter = 64,
+      local_connectivity = 1.5,
+      bandwidth = 1.0,
+      tol = 1e-5,
+      min_k_dist_scale = 1e-3,
+      n_threads = 0
+    )$matrix
+  )
+expect_equal(
+  nn_to_sparse(
+    nn_4$idx,
+    as.vector(res_cpp_conn1.5_cross),
+    self_nbr = FALSE,
+    max_nbr_id = 12
+  ),
+  V_asymm_local_cross,
+  tol = 1e-4
 )
 
-res_cpp_conn1.5_cross <- t(smooth_knn_distances_parallel(nn4dist, n_vertices = nrow(nn_4$dist),
-  n_iter = 64, local_connectivity = 1.5,
-  bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, 
-  n_threads = 1
-)$matrix)
-expect_equal(nn_to_sparse(
-  nn_4$idx, as.vector(res_cpp_conn1.5_cross),
-  self_nbr = FALSE, max_nbr_id = 12
-),
-V_asymm_local_cross,
-tol = 1e-4
+res_cpp_conn1.5_cross <-
+  t(
+    smooth_knn_distances_parallel(
+      nn4dist,
+      n_vertices = nrow(nn_4$dist),
+      target = target4,
+      n_iter = 64,
+      local_connectivity = 1.5,
+      bandwidth = 1.0,
+      tol = 1e-5,
+      min_k_dist_scale = 1e-3,
+      n_threads = 1
+    )$matrix
+  )
+expect_equal(
+  nn_to_sparse(
+    nn_4$idx,
+    as.vector(res_cpp_conn1.5_cross),
+    self_nbr = FALSE,
+    max_nbr_id = 12
+  ),
+  V_asymm_local_cross,
+  tol = 1e-4
 )

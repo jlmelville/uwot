@@ -17,7 +17,7 @@ optimize_layout_r <- function(head_embedding, tail_embedding, positive_head, pos
     .Call(`_uwot_optimize_layout_r`, head_embedding, tail_embedding, positive_head, positive_tail, positive_ptr, n_epochs, n_head_vertices, n_tail_vertices, epochs_per_sample, method, method_args, initial_alpha, opt_args, epoch_callback, negative_sample_rate, pcg_rand, batch, n_threads, grain_size, move_other, verbose)
 }
 
-smooth_knn_distances_parallel <- function(nn_dist, n_vertices, target = -1.0, n_iter = 64L, local_connectivity = 1.0, bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, ret_sigma = FALSE, n_threads = 0L, grain_size = 1L) {
+smooth_knn_distances_parallel <- function(nn_dist, n_vertices, target, n_iter = 64L, local_connectivity = 1.0, bandwidth = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, ret_sigma = FALSE, n_threads = 0L, grain_size = 1L) {
     .Call(`_uwot_smooth_knn_distances_parallel`, nn_dist, n_vertices, target, n_iter, local_connectivity, bandwidth, tol, min_k_dist_scale, ret_sigma, n_threads, grain_size)
 }
 
