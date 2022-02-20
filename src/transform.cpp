@@ -42,13 +42,19 @@ NumericMatrix init_transform_av_parallel(NumericMatrix train_embedding,
   for (int &i : nn_indexv) {
     --i;
   }
+  std::size_t n_neighbors = nn_index.ncol();
 
-  uwot::AverageWorker worker(train_embeddingv, n_train_vertices, nn_indexv,
-                             n_test_vertices);
-  RcppPerpendicular::parallel_for(0, n_test_vertices, worker, n_threads,
+  std::vector<float> embedding(n_test_vertices * n_neighbors);
+
+  auto worker = [&](std::size_t begin, std::size_t end) {
+    uwot::initialize_by_mean(begin, end, ndim, n_neighbors, nn_indexv,
+                             n_test_vertices, train_embeddingv,
+                             n_train_vertices, embedding);
+  };
+  RcppPerpendicular::parallel_for(n_test_vertices, worker, n_threads,
                                   grain_size);
 
-  return NumericMatrix(n_test_vertices, ndim, worker.embedding.begin());
+  return NumericMatrix(n_test_vertices, ndim, embedding.begin());
 }
 
 // Initialize embedding as a weighted average of nearest neighbors of each point
@@ -75,11 +81,17 @@ NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
     --i;
   }
   auto nn_weightsv = as<std::vector<float>>(nn_weights);
+  std::size_t n_neighbors = nn_index.ncol();
 
-  uwot::WeightedAverageWorker worker(train_embeddingv, n_train_vertices,
-                                     nn_indexv, nn_weightsv, n_test_vertices);
-  RcppPerpendicular::parallel_for(0, n_test_vertices, worker, n_threads,
+  std::vector<float> embedding(n_test_vertices * n_neighbors);
+
+  auto worker = [&](std::size_t begin, std::size_t end) {
+    uwot::initialize_by_weighted_mean(
+        begin, end, ndim, n_neighbors, nn_indexv, nn_weightsv, n_test_vertices,
+        train_embeddingv, n_train_vertices, embedding);
+  };
+  RcppPerpendicular::parallel_for(n_test_vertices, worker, n_threads,
                                   grain_size);
 
-  return NumericMatrix(n_test_vertices, ndim, worker.embedding.begin());
+  return NumericMatrix(n_test_vertices, ndim, embedding.begin());
 }
