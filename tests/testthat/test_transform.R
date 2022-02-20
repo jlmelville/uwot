@@ -5,16 +5,16 @@ graph <- V_asymm + diag(1, nrow(V_asymm), ncol(V_asymm))
 dV <- as.matrix(graph)
 vdV <- as.vector(t(dV))
 dgraph <- matrix(vdV[vdV > 0], byrow = TRUE, nrow = 10)
-dgraph <- t(apply(dgraph, 1, function(x) {
+dgraph <- apply(dgraph, 1, function(x) {
   sort(x, decreasing = TRUE)
-}))
+})
 
 graph <- Matrix::t(graph)
+nnt <- nn_graph_t(nn)
 
+train_embedding <- t(matrix(1:20, nrow = 10))
 
-train_embedding <- matrix(1:20, nrow = 10)
-
-av <- matrix(c(
+av <- t(matrix(c(
   6.00, 16.00,
   4.75, 14.75,
   4.00, 14.00,
@@ -25,8 +25,8 @@ av <- matrix(c(
   6.00, 16.00,
   4.50, 14.50,
   4.75, 14.75
-), nrow = 10, byrow = TRUE)
-embedding <- init_new_embedding(train_embedding, nn,
+), nrow = 10, byrow = TRUE))
+embedding <- init_new_embedding(train_embedding, nnt,
   graph = NULL,
   weighted = FALSE,
   n_threads = 0,
@@ -34,7 +34,7 @@ embedding <- init_new_embedding(train_embedding, nn,
 )
 expect_equal(embedding, av, check.attributes = FALSE)
 
-wav <- matrix(c(
+wav <- t(matrix(c(
   4.774600, 14.77460,
   5.153800, 15.15380,
   4.120000, 14.12000,
@@ -45,8 +45,8 @@ wav <- matrix(c(
   5.184333, 15.18433,
   5.191600, 15.19160,
   5.166667, 15.16667
-), nrow = 10, byrow = TRUE)
-embedding <- init_new_embedding(train_embedding, nn,
+), nrow = 10, byrow = TRUE))
+embedding <- init_new_embedding(train_embedding, nnt,
   graph = dgraph,
   weighted = TRUE,
   n_threads = 0,
@@ -56,7 +56,7 @@ expect_equal(embedding, wav, check.attributes = FALSE, tol = 1e-5)
 
 
 # Check threaded code
-embedding <- init_new_embedding(train_embedding, nn,
+embedding <- init_new_embedding(train_embedding, nnt,
   graph = NULL,
   weighted = FALSE,
   n_threads = 1,
@@ -64,7 +64,7 @@ embedding <- init_new_embedding(train_embedding, nn,
 )
 expect_equal(embedding, av, check.attributes = FALSE)
 
-embedding <- init_new_embedding(train_embedding, nn,
+embedding <- init_new_embedding(train_embedding, nnt,
   graph = dgraph,
   weighted = TRUE,
   n_threads = 1,

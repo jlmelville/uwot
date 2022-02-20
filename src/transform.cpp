@@ -32,9 +32,10 @@ NumericMatrix init_transform_av_parallel(NumericMatrix train_embedding,
                                          std::size_t n_threads = 0,
                                          std::size_t grain_size = 1) {
 
-  std::size_t n_train_vertices = train_embedding.nrow();
-  std::size_t ndim = train_embedding.ncol();
-  std::size_t n_test_vertices = nn_index.nrow();
+  std::size_t n_train_vertices = train_embedding.ncol();
+  std::size_t ndim = train_embedding.nrow();
+  std::size_t n_test_vertices = nn_index.ncol();
+  std::size_t n_neighbors = nn_index.nrow();
 
   auto train_embeddingv = as<std::vector<float>>(train_embedding);
   auto nn_indexv = as<std::vector<int>>(nn_index);
@@ -42,7 +43,6 @@ NumericMatrix init_transform_av_parallel(NumericMatrix train_embedding,
   for (int &i : nn_indexv) {
     --i;
   }
-  std::size_t n_neighbors = nn_index.ncol();
 
   std::vector<float> embedding(n_test_vertices * n_neighbors);
 
@@ -53,8 +53,7 @@ NumericMatrix init_transform_av_parallel(NumericMatrix train_embedding,
   };
   RcppPerpendicular::parallel_for(n_test_vertices, worker, n_threads,
                                   grain_size);
-
-  return NumericMatrix(n_test_vertices, ndim, embedding.begin());
+  return NumericMatrix(ndim, n_test_vertices, embedding.begin());
 }
 
 // Initialize embedding as a weighted average of nearest neighbors of each point
@@ -70,9 +69,10 @@ NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
                                       std::size_t n_threads = 0,
                                       std::size_t grain_size = 1) {
 
-  std::size_t n_train_vertices = train_embedding.nrow();
-  std::size_t ndim = train_embedding.ncol();
-  std::size_t n_test_vertices = nn_index.nrow();
+  std::size_t n_train_vertices = train_embedding.ncol();
+  std::size_t ndim = train_embedding.nrow();
+  std::size_t n_test_vertices = nn_index.ncol();
+  std::size_t n_neighbors = nn_index.nrow();
 
   auto train_embeddingv = as<std::vector<float>>(train_embedding);
   auto nn_indexv = as<std::vector<int>>(nn_index);
@@ -81,7 +81,6 @@ NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
     --i;
   }
   auto nn_weightsv = as<std::vector<float>>(nn_weights);
-  std::size_t n_neighbors = nn_index.ncol();
 
   std::vector<float> embedding(n_test_vertices * n_neighbors);
 
@@ -93,5 +92,5 @@ NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
   RcppPerpendicular::parallel_for(n_test_vertices, worker, n_threads,
                                   grain_size);
 
-  return NumericMatrix(n_test_vertices, ndim, embedding.begin());
+  return NumericMatrix(ndim, n_test_vertices, embedding.begin());
 }

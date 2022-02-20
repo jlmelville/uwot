@@ -41,14 +41,15 @@ void initialize_by_mean(std::size_t begin, std::size_t end, std::size_t ndim,
     std::fill(sumc.begin(), sumc.end(), 0.0);
 
     for (std::size_t j = 0; j < n_neighbors; j++) {
-      std::size_t nbr = nn_index[i + j * n_test_vertices];
+      std::size_t nbr = nn_index[i * n_neighbors + j];
+
       for (std::size_t k = 0; k < ndim; k++) {
-        sumc[k] += train_embedding[nbr + k * n_train_vertices];
+        sumc[k] += train_embedding[ndim * nbr + k];
       }
     }
 
     for (std::size_t k = 0; k < ndim; k++) {
-      embedding[i + k * n_test_vertices] = sumc[k] / n_neighbors;
+      embedding[ndim * i + k] = sumc[k] / n_neighbors;
     }
   }
 }
@@ -68,16 +69,16 @@ void initialize_by_weighted_mean(std::size_t begin, std::size_t end,
     double sumw = 0.0;
 
     for (std::size_t j = 0; j < n_neighbors; j++) {
-      std::size_t nbr = nn_index[i + j * n_test_vertices];
-      float w = nn_weights[i + j * n_test_vertices];
+      std::size_t nbr = nn_index[i * n_neighbors + j];
+      float w = nn_weights[i * n_neighbors + j];
       sumw += w;
       for (std::size_t k = 0; k < ndim; k++) {
-        sumc[k] += train_embedding[nbr + k * n_train_vertices] * w;
+        sumc[k] += train_embedding[ndim * nbr + k] * w;
       }
     }
 
     for (std::size_t k = 0; k < ndim; k++) {
-      embedding[i + k * n_test_vertices] = sumc[k] / sumw;
+      embedding[ndim * i + k] = sumc[k] / sumw;
     }
   }
 }

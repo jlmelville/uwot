@@ -203,7 +203,14 @@ umap_transform <- function(X = NULL, model = NULL,
   nn_index <- model$nn_index
   n_neighbors <- model$n_neighbors
   local_connectivity <- model$local_connectivity
+  
   train_embedding <- model$embedding
+  n_train_vertices <- nrow(train_embedding)
+  ndim <- ncol(train_embedding)
+  row.names(train_embedding) <- NULL
+  # uwot model format should be changed so train embedding is stored transposed
+  train_embedding <- t(train_embedding)
+
   method <- model$method
   scale_info <- model$scale_info
   metric <- model$metric
@@ -320,8 +327,8 @@ umap_transform <- function(X = NULL, model = NULL,
       }
     }
     else if (is.matrix(init)) {
-      indim <- c(nrow(init), ncol(init))
-      xdim <- c(n_vertices, ncol(train_embedding))
+      indim <- dim(init)
+      xdim <- c(n_vertices, ndim)
       if (!all(indim == xdim)) {
         stop("Initial embedding matrix has wrong dimensions, expected (",
              xdim[1], ", ", xdim[2], "), but was (",
@@ -412,8 +419,7 @@ umap_transform <- function(X = NULL, model = NULL,
     }
 
     if (is.logical(init_weighted)) {
-      # FIX ME: avoid transposing graph_block
-      embedding_block <- init_new_embedding(train_embedding, nn, t(graph_block),
+      embedding_block <- init_new_embedding(train_embedding, nnt, graph_block,
         weighted = init_weighted,
         n_threads = n_threads,
         grain_size = grain_size, verbose = verbose
@@ -428,7 +434,7 @@ umap_transform <- function(X = NULL, model = NULL,
 
     graph_block <- nn_to_sparse(nnt$idx, as.vector(graph_block),
       self_nbr = FALSE,
-      max_nbr_id = nrow(train_embedding),
+      max_nbr_id = n_train_vertices,
       by_row = FALSE
     )
     if (is.null(graph)) {
@@ -446,7 +452,7 @@ umap_transform <- function(X = NULL, model = NULL,
   }
   else {
     tsmessage("Initializing from user-supplied matrix")
-    embedding <- init
+    embedding <- t(init)
   }
 
   if (n_epochs > 0) {
@@ -477,8 +483,8 @@ umap_transform <- function(X = NULL, model = NULL,
       positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
     }
     
-    n_head_vertices <- nrow(embedding)
-    n_tail_vertices <- nrow(train_embedding)
+    n_head_vertices <- ncol(embedding)
+    n_tail_vertices <- n_train_vertices
     
     # if batch = TRUE points into the head (length == n_tail_vertices)
     # if batch = FALSE, points into the tail (length == n_head_vertices)
@@ -503,15 +509,12 @@ umap_transform <- function(X = NULL, model = NULL,
 
     method_args <- switch(method, 
       umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
-      leopold2 = list(ai = ai, aj = aj, b = b, ndim = ncol(embedding)),
+      leopold2 = list(ai = ai, aj = aj, b = b, ndim = ndim),
       list()
     )
 
     full_opt_args <- get_opt_args(opt_args, alpha)
     
-    embedding <- t(embedding)
-    row.names(train_embedding) <- NULL
-    train_embedding <- t(train_embedding)
     embedding <- optimize_layout_r(
       head_embedding = embedding,
       tail_embedding = train_embedding,
@@ -535,8 +538,8 @@ umap_transform <- function(X = NULL, model = NULL,
       verbose = verbose,
       epoch_callback = epoch_callback
     )
-    embedding <- t(embedding)
   }
+  embedding <- t(embedding)
   tsmessage("Finished")
   if (!is.null(Xnames)) {
     row.names(embedding) <- Xnames
