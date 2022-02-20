@@ -419,11 +419,16 @@ umap_transform <- function(X = NULL, model = NULL,
     }
 
     if (is.logical(init_weighted)) {
-      embedding_block <- init_new_embedding(train_embedding, nnt, graph_block,
-        weighted = init_weighted,
-        n_threads = n_threads,
-        grain_size = grain_size, verbose = verbose
-      )
+      embedding_block <-
+        init_new_embedding(
+          train_embedding = train_embedding,
+          nn = nnt,
+          graph = graph_block,
+          weighted = init_weighted,
+          n_threads = n_threads,
+          grain_size = grain_size,
+          verbose = verbose
+        )
       if (is.null(embedding)) {
         embedding <- embedding_block
       }
@@ -547,36 +552,36 @@ umap_transform <- function(X = NULL, model = NULL,
   embedding
 }
 
-init_new_embedding <- function(train_embedding, nn, graph, weighted = TRUE,
-                               n_threads = NULL,
-                               grain_size = 1, verbose = FALSE) {
-  if (is.null(n_threads)) {
-    n_threads <- default_num_threads()
-  }
-  if (weighted) {
+init_new_embedding <-
+  function(train_embedding,
+           nn,
+           graph,
+           weighted = TRUE,
+           n_threads = NULL,
+           grain_size = 1,
+           verbose = FALSE) {
+    if (is.null(n_threads)) {
+      n_threads <- default_num_threads()
+    }
+    avtype <- ifelse(weighted, "weighted ", "")
     tsmessage(
-      "Initializing by weighted average of neighbor coordinates",
+      "Initializing by ",
+      avtype,
+      "average of neighbor coordinates",
       pluralize("thread", n_threads, " using")
     )
-    embedding <- init_transform_parallel(train_embedding, nn$idx, graph,
+    nn_weights <- NULL
+    if (weighted) {
+      nn_weights <- graph
+    }
+    init_transform_parallel(
+      train_embedding = train_embedding,
+      nn_index = nn$idx,
+      nn_weights = nn_weights,
       n_threads = n_threads,
       grain_size = grain_size
     )
   }
-  else {
-    tsmessage(
-      "Initializing by average of neighbor coordinates",
-      pluralize("thread", n_threads, " using")
-    )
-    embedding <- init_transform_av_parallel(train_embedding, nn$idx,
-                                            n_threads = n_threads,
-                                            grain_size = grain_size
-    )
-  }
-
-  embedding
-}
-
 
 # Pure R implementation of (weighted) average. Superceded by C++ implementations
 init_transform <- function(train_embedding, nn_index, weights = NULL) {

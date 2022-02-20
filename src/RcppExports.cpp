@@ -156,29 +156,15 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// init_transform_av_parallel
-NumericMatrix init_transform_av_parallel(NumericMatrix train_embedding, IntegerMatrix nn_index, std::size_t n_threads, std::size_t grain_size);
-RcppExport SEXP _uwot_init_transform_av_parallel(SEXP train_embeddingSEXP, SEXP nn_indexSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type train_embedding(train_embeddingSEXP);
-    Rcpp::traits::input_parameter< IntegerMatrix >::type nn_index(nn_indexSEXP);
-    Rcpp::traits::input_parameter< std::size_t >::type n_threads(n_threadsSEXP);
-    Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(init_transform_av_parallel(train_embedding, nn_index, n_threads, grain_size));
-    return rcpp_result_gen;
-END_RCPP
-}
 // init_transform_parallel
-NumericMatrix init_transform_parallel(NumericMatrix train_embedding, IntegerMatrix nn_index, NumericMatrix nn_weights, std::size_t n_threads, std::size_t grain_size);
+NumericMatrix init_transform_parallel(NumericMatrix train_embedding, IntegerMatrix nn_index, Nullable<NumericMatrix> nn_weights, std::size_t n_threads, std::size_t grain_size);
 RcppExport SEXP _uwot_init_transform_parallel(SEXP train_embeddingSEXP, SEXP nn_indexSEXP, SEXP nn_weightsSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type train_embedding(train_embeddingSEXP);
     Rcpp::traits::input_parameter< IntegerMatrix >::type nn_index(nn_indexSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type nn_weights(nn_weightsSEXP);
+    Rcpp::traits::input_parameter< Nullable<NumericMatrix> >::type nn_weights(nn_weightsSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type n_threads(n_threadsSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
     rcpp_result_gen = Rcpp::wrap(init_transform_parallel(train_embedding, nn_index, nn_weights, n_threads, grain_size));
@@ -195,7 +181,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_uwot_fast_intersection_cpp", (DL_FUNC) &_uwot_fast_intersection_cpp, 6},
     {"_uwot_general_sset_intersection_cpp", (DL_FUNC) &_uwot_general_sset_intersection_cpp, 10},
     {"_uwot_hardware_concurrency", (DL_FUNC) &_uwot_hardware_concurrency, 0},
-    {"_uwot_init_transform_av_parallel", (DL_FUNC) &_uwot_init_transform_av_parallel, 4},
     {"_uwot_init_transform_parallel", (DL_FUNC) &_uwot_init_transform_parallel, 5},
     {NULL, NULL, 0}
 };

@@ -29,52 +29,54 @@
 
 namespace uwot {
 
-void initialize_by_mean(std::size_t begin, std::size_t end, std::size_t ndim,
-                        std::size_t n_neighbors,
-                        const std::vector<int> &nn_index,
-                        std::size_t n_test_vertices,
-                        const std::vector<float> &train_embedding,
-                        std::size_t n_train_vertices,
-                        std::vector<float> &embedding) {
-  std::vector<double> sumc(ndim);
-  for (std::size_t i = begin; i < end; i++) {
-    std::fill(sumc.begin(), sumc.end(), 0.0);
-
-    for (std::size_t j = 0; j < n_neighbors; j++) {
-      std::size_t nbr = nn_index[i * n_neighbors + j];
-
-      for (std::size_t k = 0; k < ndim; k++) {
-        sumc[k] += train_embedding[ndim * nbr + k];
-      }
-    }
-
+inline auto sum_nbrs(std::size_t i, const std::vector<float> &train_embedding,
+                     const std::vector<int> &nn_index, std::size_t n_neighbors,
+                     std::size_t ndim, std::vector<double> &sumc) -> void {
+  for (std::size_t j = 0; j < n_neighbors; j++) {
+    auto nbr = nn_index[i * n_neighbors + j];
     for (std::size_t k = 0; k < ndim; k++) {
-      embedding[ndim * i + k] = sumc[k] / n_neighbors;
+      sumc[k] += train_embedding[ndim * nbr + k];
     }
   }
 }
 
-void initialize_by_weighted_mean(std::size_t begin, std::size_t end,
-                                 std::size_t ndim, std::size_t n_neighbors,
-                                 const std::vector<int> &nn_index,
-                                 const std::vector<float> &nn_weights,
-                                 std::size_t n_test_vertices,
-                                 const std::vector<float> &train_embedding,
-                                 std::size_t n_train_vertices,
-                                 std::vector<float> &embedding) {
+inline auto sum_nbrs_weighted(std::size_t i,
+                              const std::vector<float> &train_embedding,
+                              const std::vector<int> &nn_index,
+                              std::size_t n_neighbors, std::size_t ndim,
+                              const std::vector<float> &nn_weights,
+                              std::vector<double> &sumc, double &sumw) -> void {
+  std::size_t i_nbrs = i * n_neighbors;
+  for (std::size_t j = 0; j < n_neighbors; j++) {
+    auto w = nn_weights[i_nbrs + j];
+    sumw += w;
+    auto nbr = nn_index[i_nbrs + j];
+    for (std::size_t k = 0; k < ndim; k++) {
+      sumc[k] += train_embedding[ndim * nbr + k] * w;
+    }
+  }
+}
+
+void init_by_mean(std::size_t begin, std::size_t end, std::size_t ndim,
+                  std::size_t n_neighbors, const std::vector<int> &nn_index,
+                  const std::vector<float> &nn_weights,
+                  std::size_t n_test_vertices,
+                  const std::vector<float> &train_embedding,
+                  std::size_t n_train_vertices, std::vector<float> &embedding) {
+  bool weighted = nn_weights.size() > 0;
+
   std::vector<double> sumc(ndim);
   for (std::size_t i = begin; i < end; i++) {
     std::fill(sumc.begin(), sumc.end(), 0.0);
 
     double sumw = 0.0;
-
-    for (std::size_t j = 0; j < n_neighbors; j++) {
-      std::size_t nbr = nn_index[i * n_neighbors + j];
-      float w = nn_weights[i * n_neighbors + j];
-      sumw += w;
-      for (std::size_t k = 0; k < ndim; k++) {
-        sumc[k] += train_embedding[ndim * nbr + k] * w;
-      }
+    // cost of checking this boolean N times is not going to be a bottleneck
+    if (weighted) {
+      sum_nbrs_weighted(i, train_embedding, nn_index, n_neighbors, ndim,
+                        nn_weights, sumc, sumw);
+    } else {
+      sumw = static_cast<double>(n_neighbors);
+      sum_nbrs(i, train_embedding, nn_index, n_neighbors, ndim, sumc);
     }
 
     for (std::size_t k = 0; k < ndim; k++) {
