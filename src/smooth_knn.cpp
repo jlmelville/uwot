@@ -48,7 +48,7 @@ List smooth_knn_distances_parallel(
   std::vector<double> rhos(ret_sigma ? n_vertices : 0);
 
   auto worker = [&](std::size_t begin, std::size_t end) {
-    uwot::smooth_knn(begin, end, nn_distv, n_vertices, n_neighbors, target,
+    uwot::smooth_knn(begin, end, nn_distv, n_neighbors, target,
                      local_connectivity, tol, n_iter, bandwidth,
                      min_k_dist_scale, mean_distances, ret_sigma, nn_weights,
                      sigmas, rhos, n_search_fails);
