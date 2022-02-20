@@ -35,7 +35,7 @@ smooth_knn <- function(nn_graphc,
     pluralize("thread", n_threads, " using")
   )
   if (is.null(target)) {
-    n_nbrs <- nrow(nn_graphc$idx)
+    n_nbrs <- nrow(nn_graphc$dist)
     target <- log2(n_nbrs)
   }
   affinity_matrix_res <- smooth_knn_distances_parallel(
@@ -124,7 +124,6 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
     nnt <- nn_graph_t(nn)
     affinity_matrix_res <- calc_row_probabilities_parallel(
       nn_dist = nnt$dist,
-      nn_idx = nnt$idx,
       perplexity = perplexity,
       ret_sigma = ret_sigma,
       n_threads = n_threads,

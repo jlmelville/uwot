@@ -27,8 +27,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-List calc_row_probabilities_parallel(NumericMatrix nn_dist,
-                                     IntegerMatrix nn_idx, double perplexity,
+List calc_row_probabilities_parallel(NumericMatrix nn_dist, double perplexity,
                                      std::size_t n_iter = 200,
                                      double tol = 1e-5, bool ret_sigma = false,
                                      std::size_t n_threads = 0,
@@ -37,7 +36,6 @@ List calc_row_probabilities_parallel(NumericMatrix nn_dist,
   std::size_t n_neighbors = nn_dist.nrow();
 
   auto nn_distv = as<std::vector<double>>(nn_dist);
-  auto nn_idxv = as<std::vector<int>>(nn_idx);
 
   double target = std::log(perplexity);
   std::atomic_size_t n_search_fails{0};
@@ -45,9 +43,9 @@ List calc_row_probabilities_parallel(NumericMatrix nn_dist,
   std::vector<double> sigmas(ret_sigma ? n_vertices : 0);
 
   auto worker = [&](std::size_t begin, std::size_t end) {
-    uwot::perplexity_search(begin, end, nn_distv, n_vertices, n_neighbors,
-                            nn_idxv, target, tol, n_iter, nn_weights, ret_sigma,
-                            sigmas, n_search_fails);
+    uwot::perplexity_search(begin, end, nn_distv, n_neighbors, target, tol,
+                            n_iter, nn_weights, ret_sigma, sigmas,
+                            n_search_fails);
   };
 
   RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads, grain_size);

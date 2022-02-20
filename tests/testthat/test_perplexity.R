@@ -99,7 +99,7 @@ P_row <- matrix(c(
 expected_sigmas <- c(0.3252233, 0.2679755, 0.1817380, 0.1751287, 0.3280264, 
                      0.4861266, 0.2463306, 0.2422687, 0.3463065, 0.2411619)
 
-resp <- calc_row_probabilities_parallel(t(iris10_nn10$dist), t(iris10_nn10$idx),
+resp <- calc_row_probabilities_parallel(t(iris10_nn10$dist),
   perplexity = 4,
   n_threads = 0,
   ret_sigma = TRUE
@@ -111,7 +111,7 @@ res <- nn_to_sparse(iris10_nn10$idx, as.vector(t(res)),
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 expect_equal(sqrt(resp$sigma), expected_sigmas, tol = 1e-5)
 
-res <- calc_row_probabilities_parallel(t(iris10_nn10$dist), t(iris10_nn10$idx),
+res <- calc_row_probabilities_parallel(t(iris10_nn10$dist), 
   perplexity = 4, n_threads = 1
 )$matrix
 res <- nn_to_sparse(iris10_nn10$idx, as.vector(t(res)),

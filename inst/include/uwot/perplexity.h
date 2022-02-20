@@ -33,10 +33,8 @@
 
 namespace uwot {
 
-auto find_beta(std::size_t i, const std::vector<double> &nn_dist,
-               std::size_t i_begin, std::size_t i_end, std::size_t n_vertices,
-               double target, double tol, std::size_t n_iter,
-               std::vector<double> &d2, std::size_t &n_window_search_fails)
+auto find_beta(const std::vector<double> &d2, double target, double tol,
+               std::size_t n_iter, std::size_t &n_window_search_fails)
     -> double {
   constexpr auto double_max = (std::numeric_limits<double>::max)();
   double beta = 1.0;
@@ -49,22 +47,14 @@ auto find_beta(std::size_t i, const std::vector<double> &nn_dist,
   double adiff_min = double_max;
   bool converged = false;
 
-  auto n_neighbors = i_end - i_begin;
-
-  // log-sum-exp trick
-  // shift squared distances by minimum (distances are already sorted)
-  // D2, W and Z are their shifted versions
-  // but P (and hence Shannon entropy) is unchanged
-  double dmin = nn_dist[i_begin + 1] * nn_dist[i_begin + 1];
-  for (std::size_t k = 1; k < n_neighbors; k++) {
-    d2[k - 1] = nn_dist[i_begin + k] * nn_dist[i_begin + k] - dmin;
-  }
+  // neighbors of i not including itself
+  auto n_true_neighbors = d2.size();
 
   for (std::size_t iter = 0; iter < n_iter; iter++) {
     double Z = 0.0;
     double H = 0.0;
     double sum_D2_W = 0.0;
-    for (std::size_t k = 0; k < n_neighbors - 1; k++) {
+    for (std::size_t k = 0; k < n_true_neighbors; k++) {
       double W = std::exp(-d2[k] * beta);
       Z += W;
       sum_D2_W += d2[k] * W;
@@ -106,16 +96,25 @@ auto find_beta(std::size_t i, const std::vector<double> &nn_dist,
 }
 
 void perplexity_search(std::size_t i, const std::vector<double> &nn_dist,
-                       std::size_t n_vertices, std::size_t n_neighbors,
-                       const std::vector<int> &nn_idx, double target,
-                       double tol, std::size_t n_iter, std::vector<double> &d2,
+                       std::size_t n_neighbors, double target, double tol,
+                       std::size_t n_iter, std::vector<double> &d2,
                        std::vector<double> &nn_weights, bool save_sigmas,
                        std::vector<double> &sigmas,
                        std::size_t &n_window_search_fails) {
   auto i_begin = n_neighbors * i;
-  auto i_end = i_begin + n_neighbors;
-  double beta = find_beta(i, nn_dist, i_begin, i_end, n_vertices, target, tol,
-                          n_iter, d2, n_window_search_fails);
+  // auto i_end = i_begin + n_neighbors;
+
+  // log-sum-exp trick
+  // shift squared distances by minimum (distances are already sorted)
+  // D2, W and Z are their shifted versions
+  // but P (and hence Shannon entropy) is unchanged
+  // the self neighbor is ignored leading to some +/- 1 in loops and indexing
+  double dmin = nn_dist[i_begin + 1] * nn_dist[i_begin + 1];
+  for (std::size_t k = 1; k < n_neighbors; k++) {
+    d2[k - 1] = nn_dist[i_begin + k] * nn_dist[i_begin + k] - dmin;
+  }
+
+  double beta = find_beta(d2, target, tol, n_iter, n_window_search_fails);
 
   double Z = 0.0;
   for (std::size_t k = 0; k < n_neighbors - 1; k++) {
@@ -124,14 +123,8 @@ void perplexity_search(std::size_t i, const std::vector<double> &nn_dist,
     // no longer need d2 at this point, store final W there
     d2[k] = W;
   }
-  // This will index over d2, skipping when i == j
-  std::size_t widx = 0;
-  for (std::size_t k = 0; k < n_neighbors; k++) {
-    std::size_t j = nn_idx[i_begin + k] - 1;
-    if (i != j) {
-      nn_weights[i_begin + k] = d2[widx] / Z;
-      ++widx;
-    }
+  for (std::size_t k = 1; k < n_neighbors; k++) {
+    nn_weights[i_begin + k] = d2[k - 1] / Z;
   }
 
   if (save_sigmas) {
@@ -141,9 +134,8 @@ void perplexity_search(std::size_t i, const std::vector<double> &nn_dist,
 
 void perplexity_search(std::size_t begin, std::size_t end,
                        const std::vector<double> &nn_dist,
-                       std::size_t n_vertices, std::size_t n_neighbors,
-                       const std::vector<int> &nn_idx, double target,
-                       double tol, std::size_t n_iter, std::vector<double> &res,
+                       std::size_t n_neighbors, double target, double tol,
+                       std::size_t n_iter, std::vector<double> &res,
                        bool save_sigmas, std::vector<double> &sigmas,
                        std::atomic_size_t &n_search_fails) {
   // number of binary search failures in this window
@@ -151,9 +143,8 @@ void perplexity_search(std::size_t begin, std::size_t end,
   std::vector<double> d2(n_neighbors - 1, 0.0);
 
   for (std::size_t i = begin; i < end; i++) {
-    perplexity_search(i, nn_dist, n_vertices, n_neighbors, nn_idx, target, tol,
-                      n_iter, d2, res, save_sigmas, sigmas,
-                      n_window_search_fails);
+    perplexity_search(i, nn_dist, n_neighbors, target, tol, n_iter, d2, res,
+                      save_sigmas, sigmas, n_window_search_fails);
   }
 
   // Update global count of failures
