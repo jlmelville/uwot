@@ -35,7 +35,7 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
                                       IntegerMatrix nn_index,
-                                      Nullable<NumericMatrix> nn_weights,
+                                      Nullable<NumericVector> nn_weights,
                                       std::size_t n_threads = 0,
                                       std::size_t grain_size = 1) {
 

@@ -26,7 +26,7 @@ av <- t(matrix(c(
   4.50, 14.50,
   4.75, 14.75
 ), nrow = 10, byrow = TRUE))
-embedding <- init_new_embedding(train_embedding, nnt,
+embedding <- init_new_embedding(train_embedding, nnt$idx,
   graph = NULL,
   weighted = FALSE,
   n_threads = 0,
@@ -46,7 +46,7 @@ wav <- t(matrix(c(
   5.191600, 15.19160,
   5.166667, 15.16667
 ), nrow = 10, byrow = TRUE))
-embedding <- init_new_embedding(train_embedding, nnt,
+embedding <- init_new_embedding(train_embedding, nnt$idx,
   graph = dgraph,
   weighted = TRUE,
   n_threads = 0,
@@ -56,7 +56,7 @@ expect_equal(embedding, wav, check.attributes = FALSE, tol = 1e-5)
 
 
 # Check threaded code
-embedding <- init_new_embedding(train_embedding, nnt,
+embedding <- init_new_embedding(train_embedding, nnt$idx,
   graph = NULL,
   weighted = FALSE,
   n_threads = 1,
@@ -64,7 +64,7 @@ embedding <- init_new_embedding(train_embedding, nnt,
 )
 expect_equal(embedding, av, check.attributes = FALSE)
 
-embedding <- init_new_embedding(train_embedding, nnt,
+embedding <- init_new_embedding(train_embedding, nnt$idx,
   graph = dgraph,
   weighted = TRUE,
   n_threads = 1,

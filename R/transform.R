@@ -410,6 +410,13 @@ umap_transform <- function(X = NULL, model = NULL,
       ret_sigma = need_sigma
     )
     graph_block <- sknn_res$matrix
+    graph_blockv <- as.vector(graph_block)
+    graph_block <- nn_to_sparse(nnt$idx, graph_blockv,
+      self_nbr = FALSE,
+      max_nbr_id = n_train_vertices,
+      by_row = FALSE
+    )
+    
     if (is.null(localr) && need_sigma) {
       # because of the adjusted local connectivity rho is too small compared
       # to that used to generate the "training" data but sigma is larger, so
@@ -417,13 +424,14 @@ umap_transform <- function(X = NULL, model = NULL,
       # underestimate 
       localr <- sknn_res$sigma + sknn_res$rho
     }
-
+    
+    
     if (is.logical(init_weighted)) {
       embedding_block <-
         init_new_embedding(
           train_embedding = train_embedding,
-          nn = nnt,
-          graph = graph_block,
+          nn_idx = nnt$idx,
+          graph = graph_block@x,
           weighted = init_weighted,
           n_threads = n_threads,
           grain_size = grain_size,
@@ -436,12 +444,7 @@ umap_transform <- function(X = NULL, model = NULL,
         embedding <- embedding + embedding_block
       }
     }
-
-    graph_block <- nn_to_sparse(nnt$idx, as.vector(graph_block),
-      self_nbr = FALSE,
-      max_nbr_id = n_train_vertices,
-      by_row = FALSE
-    )
+    
     if (is.null(graph)) {
       graph <- graph_block
     }
@@ -554,7 +557,7 @@ umap_transform <- function(X = NULL, model = NULL,
 
 init_new_embedding <-
   function(train_embedding,
-           nn,
+           nn_idx,
            graph,
            weighted = TRUE,
            n_threads = NULL,
@@ -576,7 +579,7 @@ init_new_embedding <-
     }
     init_transform_parallel(
       train_embedding = train_embedding,
-      nn_index = nn$idx,
+      nn_index = nn_idx,
       nn_weights = nn_weights,
       n_threads = n_threads,
       grain_size = grain_size
