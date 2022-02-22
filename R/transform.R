@@ -402,15 +402,22 @@ umap_transform <- function(X = NULL, model = NULL,
     }
     
     nnt <- nn_graph_t(nn)
-    sknn_res <- smooth_knn(nnt$dist,
+    n_nbrs <- nrow(nnt$dist)
+    target <- log2(n_nbrs)
+    nn_ptr <- n_nbrs
+    nn_dist <- nnt$dist
+    
+    sknn_res <- smooth_knn(
+      nn_dist = nnt$dist,
+      nn_ptr = nn_ptr,
+      target = target,
       local_connectivity = adjusted_local_connectivity,
       n_threads = n_threads,
       grain_size = grain_size,
       verbose = verbose,
       ret_sigma = need_sigma
     )
-    graph_block <- sknn_res$matrix
-    graph_blockv <- as.vector(graph_block)
+    graph_blockv <- sknn_res$matrix
     graph_block <- nn_to_sparse(nnt$idx, graph_blockv,
       self_nbr = FALSE,
       max_nbr_id = n_train_vertices,

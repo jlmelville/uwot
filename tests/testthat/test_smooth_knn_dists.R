@@ -1,17 +1,22 @@
 library(uwot)
 context("Smooth kNN distances")
 
+flatmat <- function(x, nr) {
+  as.vector(t(matrix(x, nrow = nr)))
+}
+
 ### C++ tests
 nn_8 <- find_nn(iris10, k = 8)
-target8 <- log2(8)
+nbrs8 <- ncol(nn_8$dist)
+target8 <- log2(nbrs8)
 res <-
   smooth_knn_distances_parallel(
     as.vector(t(nn_8$dist)),
-    n_vertices = nrow(nn_8$dist),
+    nn_ptr = nbrs8,
     ret_sigma = TRUE,
     target = target8
   )
-expect_equal(as.vector(t(res$matrix)), c(
+expect_equal(flatmat(res$matrix, nbrs8), c(
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 0.883551016667945, 0.563402698221087, 0.789087277089996,
   0.57607769298836, 0.750303047844192, 1, 0.656969510423194, 0.745156972400171,
@@ -43,16 +48,17 @@ expect_equal(res$rho, c(
 
 nn_4 <- find_nn(iris10, k = 4)
 nn4dist <- as.vector(t(nn_4$dist))
-target4 <- log2(ncol(nn_4$dist))
+nbrs4 <- ncol(nn_4$dist)
+target4 <- log2(nbrs4)
 res <-
   smooth_knn_distances_parallel(
     nn4dist,
-    n_vertices = nrow(nn_4$dist),
+    nn_ptr = nbrs4,
     ret_sigma = TRUE,
     target = target4
   )
 nn4skd <- t(res$matrix)
-expect_equal(as.vector(nn4skd), c(
+expect_equal(flatmat(res$matrix, nbrs4), c(
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 0.838084924053271, 0.538562488894191, 0.672032147261722,
   0.54465912156976, 0.719264468544344, 1, 0.646253111343435, 0.689408428587288,
@@ -61,20 +67,41 @@ expect_equal(as.vector(nn4skd), c(
   0.35375192447642, 0.310590623941469, 0.425174782792857, 0.499998079054373
 ))
 # nn4
-expect_equal(res$sigma, c(
+expected_sigma4 <- c(
   0.17993927, 0.20488739, 0.0493803, 0.09060478,
   0.24940491, 0.00390625, 0.15367126, 0.13551712,
   0.24542618, 0.20633698
-))
-expect_equal(res$rho, c(
+)
+expect_equal(res$sigma, expected_sigma4)
+expected_rho4 <- c(
   0.14142136, 0.17320508, 0.24494897, 0.24494897,
   0.14142136, 0.6164414, 0.26457513, 0.17320508, 0.3,
   0.17320508
+)
+expect_equal(res$rho, expected_rho4)
+
+# explicitly provide pointers into distances
+res <-
+  smooth_knn_distances_parallel(
+    nn4dist,
+    nn_ptr = seq(from = 0, to = 40, by = 4),
+    ret_sigma = TRUE,
+    target = target4
+  )
+expect_equal(flatmat(res$matrix, nbrs4), c(
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 0.838084924053271, 0.538562488894191, 0.672032147261722,
+  0.54465912156976, 0.719264468544344, 1, 0.646253111343435, 0.689408428587288,
+  0.574825084073865, 0.499998079054375, 0.161908061792063, 0.461447148366392,
+  0.327968484367062, 0.455344908480281, 0.280728069552432, 5.12868558931539e-10,
+  0.35375192447642, 0.310590623941469, 0.425174782792857, 0.499998079054373
 ))
+expect_equal(res$sigma, expected_sigma4)
+expect_equal(res$rho, expected_rho4)
 
 ### Various fuzzy set matrices are defined in helper_fuzzy_sets.R
 # unsymmetrized fuzzy set
-res <- nn_to_sparse(nn_4$idx, as.vector(nn4skd), self_nbr = TRUE)
+res <- nn_to_sparse(t(nn_4$idx), res$matrix, self_nbr = TRUE, by_row = FALSE)
 expect_equal(res, V_asymm, tol = 1e-4)
 
 # Fuzzy Set Union
@@ -90,30 +117,27 @@ expect_equal(fuzzy_set_union(res, set_op_mix_ratio = 0), V_intersect,
   tol = 1e-4
 )
 
-res_cpp_conn1 <-
-  t(
-    smooth_knn_distances_parallel(
-      nn4dist,
-      n_vertices = nrow(nn_4$dist),
-      target = target4,
-      n_iter = 64,
-      local_connectivity = 1.0,
-      bandwidth = 1.0,
-      tol = 1e-5,
-      min_k_dist_scale = 1e-3,
-      n_threads = 0
-    )$matrix
-  )
-expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1),
+res_cpp_conn1 <- smooth_knn_distances_parallel(
+  nn4dist,
+  nn_ptr = nbrs4,
+  target = target4,
+  n_iter = 64,
+  local_connectivity = 1.0,
+  bandwidth = 1.0,
+  tol = 1e-5,
+  min_k_dist_scale = 1e-3,
+  n_threads = 0
+)
+
+expect_equal(nn_to_sparse(nn_4$idx, flatmat(res_cpp_conn1$matrix, nbrs4),
                           self_nbr = TRUE),
              V_asymm,
              tol = 1e-4)
 
 res_cpp_conn1.5 <-
-  t(
     smooth_knn_distances_parallel(
       nn4dist,
-      n_vertices = nrow(nn_4$dist),
+      nn_ptr = nbrs4,
       target = target4,
       n_iter = 64,
       local_connectivity = 1.5,
@@ -121,19 +145,17 @@ res_cpp_conn1.5 <-
       tol = 1e-5,
       min_k_dist_scale = 1e-3,
       n_threads = 0
-    )$matrix
-  )
-expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1.5),
-                          self_nbr = TRUE),
+    )
+expect_equal(nn_to_sparse(t(nn_4$idx), res_cpp_conn1.5$matrix,
+                          self_nbr = TRUE, by_row = FALSE),
              V_asymm_local,
              tol = 1e-4)
 
 
 res_cpp_conn1 <-
-  t(
     smooth_knn_distances_parallel(
       nn4dist,
-      n_vertices = nrow(nn_4$dist),
+      nn_ptr = nbrs4,
       target = target4,
       n_iter = 64,
       local_connectivity = 1.0,
@@ -142,18 +164,16 @@ res_cpp_conn1 <-
       min_k_dist_scale = 1e-3,
       n_threads = 1,
       grain_size = 1
-    )$matrix
-  )
-expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1),
-                          self_nbr = TRUE),
+    )
+expect_equal(nn_to_sparse(t(nn_4$idx), res_cpp_conn1$matrix,
+                          self_nbr = TRUE, by_row = FALSE),
              V_asymm,
              tol = 1e-4)
 
 res_cpp_conn1.5 <-
-  t(
     smooth_knn_distances_parallel(
       nn4dist,
-      n_vertices = nrow(nn_4$dist),
+      nn_ptr = nbrs4,
       target = target4,
       n_iter = 64,
       local_connectivity = 1.5,
@@ -162,10 +182,9 @@ res_cpp_conn1.5 <-
       min_k_dist_scale = 1e-3,
       n_threads = 1,
       grain_size = 1
-    )$matrix
-  )
-expect_equal(nn_to_sparse(nn_4$idx, as.vector(res_cpp_conn1.5),
-                          self_nbr = TRUE),
+    )
+expect_equal(nn_to_sparse(t(nn_4$idx), res_cpp_conn1.5$matrix,
+                          self_nbr = TRUE, by_row = FALSE),
              V_asymm_local,
              tol = 1e-4)
 
@@ -179,10 +198,9 @@ V_asymm_local_cross <- cbind(
 )
 
 res_cpp_conn1.5_cross <-
-  t(
     smooth_knn_distances_parallel(
       nn4dist,
-      n_vertices = nrow(nn_4$dist),
+      nn_ptr = nbrs4,
       target = target4,
       n_iter = 64,
       local_connectivity = 1.5,
@@ -190,12 +208,12 @@ res_cpp_conn1.5_cross <-
       tol = 1e-5,
       min_k_dist_scale = 1e-3,
       n_threads = 0
-    )$matrix
-  )
+    )
 expect_equal(
   nn_to_sparse(
-    nn_4$idx,
-    as.vector(res_cpp_conn1.5_cross),
+    t(nn_4$idx),
+    res_cpp_conn1.5_cross$matrix,
+    by_row = FALSE,
     self_nbr = FALSE,
     max_nbr_id = 12
   ),
@@ -204,10 +222,9 @@ expect_equal(
 )
 
 res_cpp_conn1.5_cross <-
-  t(
     smooth_knn_distances_parallel(
       nn4dist,
-      n_vertices = nrow(nn_4$dist),
+      nn_ptr = nbrs4,
       target = target4,
       n_iter = 64,
       local_connectivity = 1.5,
@@ -215,12 +232,12 @@ res_cpp_conn1.5_cross <-
       tol = 1e-5,
       min_k_dist_scale = 1e-3,
       n_threads = 1
-    )$matrix
-  )
+    )
 expect_equal(
   nn_to_sparse(
-    nn_4$idx,
-    as.vector(res_cpp_conn1.5_cross),
+    t(nn_4$idx),
+    res_cpp_conn1.5_cross$matrix,
+    by_row = FALSE,
     self_nbr = FALSE,
     max_nbr_id = 12
   ),

@@ -142,7 +142,8 @@ auto find_sigma(const std::vector<double> &nn_dist, std::size_t i_begin,
 
 // NB nn_dist must be in sorted non-decreasing order
 void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
-                std::size_t n_neighbors, double target,
+                const std::vector<std::size_t> &nn_ptr, 
+                const std::vector<double> &target,
                 double local_connectivity, double tol, std::size_t n_iter,
                 double bandwidth, double min_k_dist_scale,
                 double mean_distances, bool save_sigmas,
@@ -151,9 +152,22 @@ void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
 
   // i_begin points to start of ith distances
   // i_end points to one past end of ith distances
+  auto i_begin = 0;
+  auto i_end = 0;
+  auto n_neighbors = 0;
+  // Space optimization for kNN (typical case): store the number of neighbors
+  // as the only entry in nn_ptr
+  if (nn_ptr.size() == 1) {
+    n_neighbors = nn_ptr[0];
+    i_begin = n_neighbors * i;
+    i_end = i_begin + n_neighbors;
+  } else {
+    i_begin = nn_ptr[i];
+    i_end = nn_ptr[i + 1];
+    n_neighbors = i_end - i_begin;
+  }
+
   // nzero_begin points to start of ith non-zero distances
-  auto i_begin = n_neighbors * i;
-  auto i_end = i_begin + n_neighbors;
   auto nzero_begin = i_end;
   for (auto j = i_begin; j < i_end; j++) {
     if (nn_dist[j] > 0.0) {
@@ -163,7 +177,8 @@ void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
   }
 
   auto rho = find_rho(nn_dist, nzero_begin, i_end, local_connectivity, tol);
-  auto sigma = find_sigma(nn_dist, i_begin, i_end, target, rho, tol, n_iter,
+  double targeti = target.size() == 1 ? target[0] : target[i];
+  auto sigma = find_sigma(nn_dist, i_begin, i_end, targeti, rho, tol, n_iter,
                           n_window_search_fails);
   // safeguard sigma
   if (rho > 0.0) {
@@ -187,9 +202,11 @@ void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
 }
 
 void smooth_knn(std::size_t begin, std::size_t end,
-                const std::vector<double> &nn_dist, std::size_t n_neighbors,
-                double target, double local_connectivity, double tol,
-                std::size_t n_iter, double bandwidth, double min_k_dist_scale,
+                const std::vector<double> &nn_dist,
+                const std::vector<std::size_t> &nn_ptr, 
+                const std::vector<double> &target,
+                double local_connectivity, double tol, std::size_t n_iter,
+                double bandwidth, double min_k_dist_scale,
                 double mean_distances, bool save_sigmas,
                 std::vector<double> &nn_weights, std::vector<double> &sigmas,
                 std::vector<double> &rhos, std::atomic_size_t &n_search_fails) {
@@ -197,7 +214,7 @@ void smooth_knn(std::size_t begin, std::size_t end,
   std::size_t n_window_search_fails = 0;
 
   for (std::size_t i = begin; i < end; i++) {
-    smooth_knn(i, nn_dist, n_neighbors, target, local_connectivity, tol, n_iter,
+    smooth_knn(i, nn_dist, nn_ptr, target, local_connectivity, tol, n_iter,
                bandwidth, min_k_dist_scale, mean_distances, save_sigmas,
                nn_weights, sigmas, rhos, n_window_search_fails);
   }

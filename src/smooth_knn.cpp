@@ -26,34 +26,56 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-List smooth_knn_distances_parallel(
-    NumericVector nn_dist, std::size_t n_vertices, double target,
-    std::size_t n_iter = 64, double local_connectivity = 1.0,
-    double bandwidth = 1.0, double tol = 1e-5, double min_k_dist_scale = 1e-3,
-    bool ret_sigma = false, std::size_t n_threads = 0,
-    std::size_t grain_size = 1) {
+List smooth_knn_distances_parallel(NumericVector nn_dist, IntegerVector nn_ptr,
+                                   NumericVector target, std::size_t n_iter = 64,
+                                   double local_connectivity = 1.0,
+                                   double bandwidth = 1.0, double tol = 1e-5,
+                                   double min_k_dist_scale = 1e-3,
+                                   bool ret_sigma = false,
+                                   std::size_t n_threads = 0,
+                                   std::size_t grain_size = 1) {
 
-  std::size_t n_neighbors = nn_dist.size() / n_vertices;
+  std::size_t n_neighbors = 0;
+  std::size_t n_vertices = 0;
+  std::vector<std::size_t> nn_ptrv(0);
+  if (nn_ptr.size() == 0) {
+    stop("nn_ptr cannot be empty");
+  }
+  if (nn_ptr.size() == 1) {
+    // Size optimization for the typical kNN graph case:
+    // all points have the same number of neighbors so just store that number
+    // as the single entry in the nn_ptr vector
+    n_neighbors = nn_ptr[0];
+    if (nn_dist.size() % n_neighbors != 0) {
+      stop("Invalid n_neighbors for nn_dist size");
+    }
+    nn_ptrv = std::vector<std::size_t>{n_neighbors};
+    n_vertices = nn_dist.size() / n_neighbors;
+  } else {
+    nn_ptrv = as<std::vector<std::size_t>>(nn_ptr);
+    n_vertices = nn_ptrv.size() - 1;
+  }
 
+  auto targetv = as<std::vector<double>>(target);
+  
   auto nn_distv = as<std::vector<double>>(nn_dist);
   double mean_distances = uwot::mean_average(nn_distv);
 
   std::atomic_size_t n_search_fails{0};
-  std::vector<double> nn_weights(n_vertices * n_neighbors);
+  std::vector<double> nn_weights(nn_dist.size());
   std::vector<double> sigmas(ret_sigma ? n_vertices : 0);
   std::vector<double> rhos(ret_sigma ? n_vertices : 0);
 
   auto worker = [&](std::size_t begin, std::size_t end) {
-    uwot::smooth_knn(begin, end, nn_distv, n_neighbors, target,
-                     local_connectivity, tol, n_iter, bandwidth,
-                     min_k_dist_scale, mean_distances, ret_sigma, nn_weights,
-                     sigmas, rhos, n_search_fails);
+    uwot::smooth_knn(begin, end, nn_distv, nn_ptrv, targetv, local_connectivity,
+                     tol, n_iter, bandwidth, min_k_dist_scale, mean_distances,
+                     ret_sigma, nn_weights, sigmas, rhos, n_search_fails);
   };
 
-  RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads, grain_size);
+  RcppPerpendicular::parallel_for(n_vertices, worker, n_threads, grain_size);
 
   auto res = List::create(
-      _("matrix") = NumericMatrix(n_neighbors, n_vertices, nn_weights.begin()),
+      _("matrix") = NumericVector(nn_weights.begin(), nn_weights.end()),
       _("n_failures") = static_cast<std::size_t>(n_search_fails));
   if (ret_sigma) {
     res["sigma"] = sigmas;
