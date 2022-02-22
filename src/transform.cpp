@@ -34,15 +34,15 @@ using namespace Rcpp;
 // Returns the n_test x dim matrix of initialized coordinates.
 // [[Rcpp::export]]
 NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
-                                      IntegerMatrix nn_index,
+                                      IntegerVector nn_index,
+                                      std::size_t n_test_vertices,
                                       Nullable<NumericVector> nn_weights,
                                       std::size_t n_threads = 0,
                                       std::size_t grain_size = 1) {
 
   std::size_t n_train_vertices = train_embedding.ncol();
   std::size_t ndim = train_embedding.nrow();
-  std::size_t n_test_vertices = nn_index.ncol();
-  std::size_t n_neighbors = nn_index.nrow();
+  std::size_t n_neighbors = nn_index.size() / n_test_vertices;
 
   auto train_embeddingv = as<std::vector<float>>(train_embedding);
   auto nn_indexv = as<std::vector<int>>(nn_index);

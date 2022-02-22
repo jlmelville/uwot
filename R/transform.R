@@ -430,8 +430,9 @@ umap_transform <- function(X = NULL, model = NULL,
       embedding_block <-
         init_new_embedding(
           train_embedding = train_embedding,
-          nn_idx = nnt$idx,
-          graph = graph_block@x,
+          nn_idx = as.vector(nnt$idx),
+          n_test_vertices = ncol(nnt$idx),
+          graph = graph_blockv,
           weighted = init_weighted,
           n_threads = n_threads,
           grain_size = grain_size,
@@ -558,6 +559,7 @@ umap_transform <- function(X = NULL, model = NULL,
 init_new_embedding <-
   function(train_embedding,
            nn_idx,
+           n_test_vertices,
            graph,
            weighted = TRUE,
            n_threads = NULL,
@@ -580,6 +582,7 @@ init_new_embedding <-
     init_transform_parallel(
       train_embedding = train_embedding,
       nn_index = nn_idx,
+      n_test_vertices = n_test_vertices,
       nn_weights = nn_weights,
       n_threads = n_threads,
       grain_size = grain_size
