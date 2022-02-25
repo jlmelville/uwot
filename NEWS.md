@@ -54,6 +54,12 @@ user-supplied matrix. Now the input will be scaled.
 pre-processing, causing R to allocate memory that it was disinclined to ever
 give up even after the function exited. This unnecessary manipulation is now
 avoided.
+* The behavior of the `bandwidth` parameter has been changed to give results
+more like the current version (0.5.2) of the Python UMAP implementation. This is
+likely to be a breaking change for non-default settings of `bandwidth`, but this
+is not a parameter which is actually exposed by the Python UMAP public API any
+more, so is on the road to deprecation in uwot too and I don't recommend you
+change this.
 
 # uwot 0.1.11
 

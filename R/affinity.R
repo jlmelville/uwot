@@ -23,7 +23,6 @@ smooth_knn <- function(nn_dist,
                        nn_ptr = NULL,
                        target = NULL,
                        local_connectivity = 1.0,
-                       bandwidth = 1.0,
                        n_threads = NULL,
                        grain_size = 1,
                        ret_sigma = FALSE,
@@ -42,7 +41,6 @@ smooth_knn <- function(nn_dist,
     target = target,
     n_iter = 64,
     local_connectivity = local_connectivity,
-    bandwidth = bandwidth,
     tol = 1e-5,
     min_k_dist_scale = 1e-3,
     n_threads = n_threads,
@@ -52,6 +50,67 @@ smooth_knn <- function(nn_dist,
   if (verbose && affinity_matrix_res$n_failures > 0) {
     tsmessage(affinity_matrix_res$n_failures, " smooth knn distance failures")
   }
+  affinity_matrix_res
+}
+
+smooth_knn_matrix <- function(nn,
+                              target = NULL,
+                              local_connectivity = 1.0, bandwidth = 1.0,
+                              ret_sigma = FALSE,
+                              n_threads = NULL,
+                              grain_size = 1,
+                              verbose = FALSE) {
+  if (is.null(n_threads)) {
+    n_threads <- default_num_threads()
+  }
+  
+  osparse <- NULL
+  if (methods::is(nn, "sparseMatrix")) {
+    Matrix::diag(nn) <- 0.0
+    osparse <- order_sparse(nn)
+    nn_dist <- osparse$x
+    nn_ptr <- osparse$p
+    n_nbrs <- diff(nn_ptr)
+    browser()
+    if (any(n_nbrs < 1)) {
+      stop("All observations need at least one nearest neighbor")
+    } 
+    if (is.null(target)) {
+      target <- log2(n_nbrs) * bandwidth
+    }
+  }
+  else {
+    nnt <- nn_graph_t(nn)
+    n_nbrs <- nrow(nnt$dist)
+    if (is.null(target)) {
+      target <- log2(n_nbrs) * bandwidth
+    }
+    nn_ptr <- n_nbrs
+    nn_dist <- as.vector(nnt$dist)
+  }
+  affinity_matrix_res <- smooth_knn(
+    nn_dist = nn_dist,
+    nn_ptr = nn_ptr,
+    target = target,
+    local_connectivity = local_connectivity,
+    ret_sigma = ret_sigma,
+    n_threads = n_threads,
+    grain_size = grain_size,
+    verbose = verbose
+  )
+  
+  v <- affinity_matrix_res$matrix
+  if (methods::is(nn, "sparseMatrix")) {
+    # use j instead of i to transpose it
+    v <- Matrix::sparseMatrix(j = osparse$i, p = osparse$p, x = v,
+                              dims = osparse$dims, index1 = FALSE)
+    Matrix::diag(v) <- 0.0
+    v <- Matrix::drop0(v)
+  }
+  else {
+    v <- nn_to_sparse(nnt$idx, v, self_nbr = TRUE, by_row = FALSE)
+  }
+  affinity_matrix_res$matrix <- v
   affinity_matrix_res
 }
 
@@ -69,56 +128,14 @@ fuzzy_simplicial_set <- function(nn,
                                  n_threads = NULL,
                                  grain_size = 1,
                                  verbose = FALSE) {
-  if (is.null(n_threads)) {
-    n_threads <- default_num_threads()
-  }
-  
-  osparse <- NULL
-  if (methods::is(nn, "sparseMatrix")) {
-    osparse <- order_sparse(nn)
-    nn_dist <- osparse$x
-    nn_ptr <- osparse$p
-    n_nbrs <- diff(nn_ptr)
-    if (any(n_nbrs <= 1)) {
-      stop("All observations need at least one nearest neighbor")
-    } 
-    if (is.null(target)) {
-      target <- log2(n_nbrs)
-    }
-  }
-  else {
-    nnt <- nn_graph_t(nn)
-    n_nbrs <- nrow(nnt$dist)
-    if (is.null(target)) {
-      target <- log2(n_nbrs)
-    }
-    nn_ptr <- n_nbrs
-    nn_dist <- as.vector(nnt$dist)
-  }
-  affinity_matrix_res <- smooth_knn(
-    nn_dist = nn_dist,
-    nn_ptr = nn_ptr,
-    target = target,
-    local_connectivity = local_connectivity,
-    bandwidth = bandwidth,
-    ret_sigma = ret_sigma,
-    n_threads = n_threads,
-    grain_size = grain_size,
-    verbose = verbose
-  )
-
-  v <- affinity_matrix_res$matrix
-  if (methods::is(nn, "sparseMatrix")) {
-    v <- Matrix::sparseMatrix(i = osparse$i, p = osparse$p, x = v,
-                              dims = osparse$dims, index1 = FALSE)
-    Matrix::diag(v) <- 0.0
-    v <- Matrix::drop0(v)
-  }
-  else {
-    v <- nn_to_sparse(nnt$idx, v, self_nbr = TRUE, by_row = FALSE)
-  }
-  affinity_matrix_res$matrix <- v
-
+  affinity_matrix_res <- smooth_knn_matrix(nn = nn, 
+                                           target = target, 
+                                           local_connectivity = local_connectivity,
+                                           bandwidth = bandwidth,
+                                           ret_sigma = ret_sigma,
+                                           n_threads = n_threads,
+                                           grain_size = grain_size,
+                                           verbose = verbose)
   res <- list(matrix = fuzzy_set_union(affinity_matrix_res$matrix, set_op_mix_ratio = set_op_mix_ratio))
   if (ret_sigma) {
     res$sigma <- affinity_matrix_res$sigma

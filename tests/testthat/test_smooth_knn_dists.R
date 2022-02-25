@@ -57,7 +57,6 @@ res <-
     ret_sigma = TRUE,
     target = target4
   )
-nn4skd <- t(res$matrix)
 expect_equal(flatmat(res$matrix, nbrs4), c(
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 0.838084924053271, 0.538562488894191, 0.672032147261722,
@@ -123,7 +122,6 @@ res_cpp_conn1 <- smooth_knn_distances_parallel(
   target = target4,
   n_iter = 64,
   local_connectivity = 1.0,
-  bandwidth = 1.0,
   tol = 1e-5,
   min_k_dist_scale = 1e-3,
   n_threads = 0
@@ -141,7 +139,6 @@ res_cpp_conn1.5 <-
       target = target4,
       n_iter = 64,
       local_connectivity = 1.5,
-      bandwidth = 1.0,
       tol = 1e-5,
       min_k_dist_scale = 1e-3,
       n_threads = 0
@@ -159,7 +156,6 @@ res_cpp_conn1 <-
       target = target4,
       n_iter = 64,
       local_connectivity = 1.0,
-      bandwidth = 1.0,
       tol = 1e-5,
       min_k_dist_scale = 1e-3,
       n_threads = 1,
@@ -177,7 +173,6 @@ res_cpp_conn1.5 <-
       target = target4,
       n_iter = 64,
       local_connectivity = 1.5,
-      bandwidth = 1.0,
       tol = 1e-5,
       min_k_dist_scale = 1e-3,
       n_threads = 1,
@@ -204,7 +199,6 @@ res_cpp_conn1.5_cross <-
       target = target4,
       n_iter = 64,
       local_connectivity = 1.5,
-      bandwidth = 1.0,
       tol = 1e-5,
       min_k_dist_scale = 1e-3,
       n_threads = 0
@@ -228,7 +222,6 @@ res_cpp_conn1.5_cross <-
       target = target4,
       n_iter = 64,
       local_connectivity = 1.5,
-      bandwidth = 1.0,
       tol = 1e-5,
       min_k_dist_scale = 1e-3,
       n_threads = 1
@@ -244,3 +237,79 @@ expect_equal(
   V_asymm_local_cross,
   tol = 1e-4
 )
+
+# smooth_knn_matrix
+
+expected_sknn4m <- Matrix::drop0(matrix(c(
+0, 0, 0, 0, 1.0000000, 0, 0, 8.380849e-01, 0, 0.1619081,
+0, 0, 0.5385625, 0.4614471, 0, 0, 0, 0, 0, 1.0000000, 
+0, 0.3279685, 0, 1.0000000, 0, 0, 0.6720321, 0, 0, 0,
+0, 0, 1.0000000, 0, 0, 0, 0, 0, 0.5446591, 0.4553449,
+1, 0, 0, 0, 0, 0, 0.2807281, 7.192645e-01, 0, 0,
+1, 0, 0, 0, 1.0000000, 0, 0, 5.128686e-10, 0, 0,        
+0, 0, 1.0000000, 0.6462531, 0, 0, 0, 3.537519e-01, 0, 0,        
+1, 0, 0, 0, 0.6894084, 0, 0, 0, 0, 0.3105906, 
+0, 0.4251748, 0.5748251, 1.0000000, 0, 0, 0, 0, 0, 0,        
+0, 1.0000000, 0.4999981, 0.4999981, 0, 0, 0, 0, 0, 0),
+nrow = 10, byrow = TRUE))
+
+sknn4m <- smooth_knn_matrix(nn_4)$matrix
+expect_equal(sknn4m@x, expected_sknn4m@x, tol = 1e-7)
+expect_equal(sknn4m@i, expected_sknn4m@i)
+
+# UMAP Python disagrees for sigma[6] because binary search fails here and uwot
+# keeps track of the "best" sigma
+sknn4m <- smooth_knn_matrix(nn_4, ret_sigma = TRUE, bandwidth = 0.5)
+expect_equal(sknn4m$sigma, c(0.00195312, 0.0078125 , 0.00097656, 0.00390625, 0.00390625,
+        0.0019531250, 0.00390625, 0.00390625, 0.0078125 , 0.0078125))
+# for Python UMAP sigma[6] == 0.00048322
+expect_equal(sknn4m$rho, c(0.1414214, 0.1732051, 0.244949 , 0.244949 , 0.1414214, 0.6164414,
+         0.2645751, 0.1732051, 0.3      , 0.1732051), tol = 1e-7)
+expect_equal(sknn4m$n_failures, 1)
+
+# nn4sp <- Matrix::drop0(matrix(c(
+# 0,        0,        0,        0,        0.1414214,0.6164414,0,        0.1732051,0,        0,       
+# 0,        0,        0.3000000,0,        0,        0,        0,        0,        0.5099020,0.1732051,
+# 0,        0.3000000,0,        0.2449490,0,        0,        0.2645751,0,        0.4358899,0.3162278,
+# 0,        0.3316625,0.2449490,0,        0,        0,        0.3316625,0,        0.3000000,0.3162278,
+# 0.1414214,0,        0,        0,        0,        0.6164414,0,        0.2236068,0,        0,       
+# 0,        0,        0,        0,        0,        0,        0,        0,        0,        0,       
+# 0,        0,        0.2645751,0,        0.4582576,0,        0,        0,        0,        0,       
+# 0.1732051,0,        0,        0,        0.2236068,0.7000000,0.4242641,0,        0,        0,       
+# 0,        0,        0,        0.3000000,0,        0,        0,        0,        0,        0,       
+# 0.4690416,0.1732051,0,        0.3162278,0,        0,        0,        0.3316625,0,        0),
+# nrow = 10, byrow = TRUE))
+# 
+# sknn4msp <- smooth_knn_matrix(nn4sp)$matrix
+# expect_equal(sknn4msp@x, expected_sknn4m@x, tol = 1e-6)
+# expect_equal(sknn4msp@i, expected_sknn4m@i)
+# 
+# nn3sp <- Matrix::drop0(matrix(c(
+#  0,       0,       0,       0,       0.1414212,0.6164416,0,       0.1732050,0,       0,      
+#  0,       0,       0,       0,       0,       0,       0,       0,       0,       0.1732050,
+#  0,       0.3000002,0,       0.2449490,0,       0,       0.2645751,0,       0.4358897,0,      
+#  0,       0,       0.2449490,0,       0,       0,       0.3316627,0,       0.2999998,0.3162279,
+#  0.1414212,0,       0,       0,       0,       0.6164416,0,       0.2236066,0,       0,      
+#  0,       0,       0,       0,       0,       0,       0,       0,       0,       0,      
+#  0,       0,       0.2645751,0,       0,       0,       0,       0,       0,       0,      
+#  0.1732050,0,       0,       0,       0.2236066,0,       0,       0,       0,       0,      
+#  0,       0,       0,       0.2999998,0,       0,       0,       0,       0,       0,      
+#  0,       0.1732050,0,       0,       0,       0,       0,       0,       0,       0
+# ), nrow = 10, byrow = TRUE))
+# 
+# expected_sknn3m <- Matrix::drop0(matrix(c(
+#    0, 0, 0,         0,         1.0000000, 0, 0,         0.5849702, 0,         0,   
+#    0, 0, 0.5849609, 0,         0,         0, 0,         0,         0,         1,   
+#    0, 0, 0,         1.0000000, 0,         0, 0.5849651, 0,         0,         0,   
+#    0, 0, 1.0000000, 0,         0,         0, 0,         0,         0.5849684, 0,   
+#    1, 0, 0,         0,         0,         0, 0,         0.5849684, 0,         0,   
+#    1, 0, 0,         0,         1.0000000, 0, 0,         0,         0,         0,   
+#    0, 0, 1.0000000, 0.5849615, 0,         0, 0,         0,         0,         0,   
+#    1, 0, 0,         0,         0.5849545, 0, 0,         0,         0,         0,   
+#    0, 0, 0.5849692, 1.0000000, 0,         0, 0,         0,         0,         0,   
+#    0, 1, 0,         0.5849544, 0,         0, 0,         0,         0,         0
+# ), nrow = 10, byrow = TRUE))
+# sknn3msp <- smooth_knn_matrix(nn3sp)$matrix
+# expect_equal(sknn3msp@x, expected_sknn3m@x, tol = 1e-6)
+# expect_equal(sknn3msp@i, expected_sknn3m@i)
+

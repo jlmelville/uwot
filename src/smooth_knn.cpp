@@ -26,14 +26,11 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-List smooth_knn_distances_parallel(NumericVector nn_dist, IntegerVector nn_ptr,
-                                   NumericVector target, std::size_t n_iter = 64,
-                                   double local_connectivity = 1.0,
-                                   double bandwidth = 1.0, double tol = 1e-5,
-                                   double min_k_dist_scale = 1e-3,
-                                   bool ret_sigma = false,
-                                   std::size_t n_threads = 0,
-                                   std::size_t grain_size = 1) {
+List smooth_knn_distances_parallel(
+    NumericVector nn_dist, IntegerVector nn_ptr, NumericVector target,
+    std::size_t n_iter = 64, double local_connectivity = 1.0, double tol = 1e-5,
+    double min_k_dist_scale = 1e-3, bool ret_sigma = false,
+    std::size_t n_threads = 0, std::size_t grain_size = 1) {
 
   std::size_t n_neighbors = 0;
   std::size_t n_vertices = 0;
@@ -57,7 +54,7 @@ List smooth_knn_distances_parallel(NumericVector nn_dist, IntegerVector nn_ptr,
   }
 
   auto targetv = as<std::vector<double>>(target);
-  
+
   auto nn_distv = as<std::vector<double>>(nn_dist);
   double mean_distances = uwot::mean_average(nn_distv);
 
@@ -68,8 +65,8 @@ List smooth_knn_distances_parallel(NumericVector nn_dist, IntegerVector nn_ptr,
 
   auto worker = [&](std::size_t begin, std::size_t end) {
     uwot::smooth_knn(begin, end, nn_distv, nn_ptrv, targetv, local_connectivity,
-                     tol, n_iter, bandwidth, min_k_dist_scale, mean_distances,
-                     ret_sigma, nn_weights, sigmas, rhos, n_search_fails);
+                     tol, n_iter, min_k_dist_scale, mean_distances, ret_sigma,
+                     nn_weights, sigmas, rhos, n_search_fails);
   };
 
   RcppPerpendicular::parallel_for(n_vertices, worker, n_threads, grain_size);

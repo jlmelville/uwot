@@ -2,7 +2,7 @@
 # numbers have been compared with python fuzzy_simplicial_set
 
 # Asymmetric fuzzy set data
-V_asymm <- sparseMatrix(
+V_asymm <- Matrix::sparseMatrix(
   i = c(
     5, 6, 8, 3, 9, 10, 2, 4, 7, 9, 10, 2, 3, 7, 9, 10, 1, 6, 8, 3, 5, 1,
     5, 6, 7, 4, 1, 2, 4, 8
@@ -19,7 +19,7 @@ V_asymm <- sparseMatrix(
 )
 
 # Fuzzy Set Union
-V_union <- sparseMatrix(
+V_union <- Matrix::sparseMatrix(
   i = c(
     5, 6, 8, 10, 3, 4, 9, 10, 2, 4, 7, 9, 10, 2, 3, 7, 9, 10, 1, 6, 7, 8, 1, 5,
     8, 3, 4, 5, 8, 1, 5, 6, 7, 10, 2, 3, 4, 1, 2, 3, 4, 8
@@ -37,7 +37,7 @@ V_union <- sparseMatrix(
 )
 
 # mix intersection with union
-V_mix <- sparseMatrix(
+V_mix <- Matrix::sparseMatrix(
   i = c(
     5, 6, 8, 10, 3, 4, 9, 10, 2, 4, 7, 9, 10, 2, 3, 7, 9, 10, 1, 6, 7, 8, 1, 5,
     8, 3, 4, 5, 8, 1, 5, 6, 7, 10, 2, 3, 4, 1, 2, 3, 4, 8
@@ -56,7 +56,7 @@ V_mix <- sparseMatrix(
 )
 
 # intersection
-V_intersect <- sparseMatrix(
+V_intersect <- Matrix::sparseMatrix(
   i = c(5, 8, 3, 10, 2, 4, 7, 3, 9, 10, 1, 8, 3, 1, 5, 4, 2, 4),
   j = c(1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 7, 8, 8, 9, 10, 10),
   x = c(
@@ -66,7 +66,7 @@ V_intersect <- sparseMatrix(
 )
 
 # asymm with local connectivity = 1.5
-V_asymm_local <- sparseMatrix(
+V_asymm_local <- Matrix::sparseMatrix(
   i = c(
     5, 6, 8, 3, 9, 10, 2, 4, 7, 9, 10, 2, 3, 7, 9, 10, 1, 6, 8, 3, 5, 1,
     5, 6, 7, 4, 1, 2, 4, 8
@@ -82,7 +82,7 @@ V_asymm_local <- sparseMatrix(
   )
 )
 
-V_union_local <- sparseMatrix(
+V_union_local <- Matrix::sparseMatrix(
   i = c(
     5, 6, 8, 10, 3, 4, 9, 10, 2, 4, 7, 9, 10, 2, 3, 7, 9, 10, 1, 6, 7, 8, 1,
     5, 8, 3, 4, 5, 8, 1, 5, 6, 7, 10, 2, 3, 4, 1, 2, 3, 4, 8
@@ -99,28 +99,48 @@ V_union_local <- sparseMatrix(
   )
 )
 
-V_union_bandwidth <- sparseMatrix(
+# NB have to modify UMAP source code to allow bandwidth to be specified
+# umap.umap_.fuzzy_simplicial_set(irisxy[0][5:15], 4, random_state=42, metric="euclidean", bandwidth=0.5, set_op_mix_ratio=1)[0]
+V_union_bandwidth <- Matrix::sparseMatrix(
   i = c(
-    5, 6, 8, 10, 3, 4, 9, 10, 2, 4, 7, 9, 10, 2, 3, 7, 9, 10, 1, 6, 7, 8, 1,
-    5, 8, 3, 4, 5, 8, 1, 5, 6, 7, 10, 2, 3, 4, 1, 2, 3, 4, 8
+    2, 5, 9, 2, 3, 4, 6, 8, 0, 1, 4, 5, 6, 9, 1, 7, 8, 1, 2, 6, 7, 0, 2, 9, 1, 2, 4, 7, 3, 4, 6, 8, 1, 3, 7, 0, 2, 5
   ),
   j = c(
-    1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6,
-    7, 7, 7, 7, 8, 8, 8, 8, 8, 9, 9, 9, 10, 10, 10, 10, 10
+    0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9, 9
   ),
   x = c(
-    1, 1, 1, 0.02621, 0.3664, 0.2129, 0.1808, 1, 0.3664, 1, 1, 0.3304, 0.25,
-    0.2129, 1, 0.4176, 1, 0.4055, 1, 1, 0.07881, 0.7467, 1, 1, 2.63e-19, 1,
-    0.4176, 0.07881, 0.1251, 1, 0.7467, 2.63e-19, 0.1251, 0.09647, 0.1808,
-    0.3304, 1, 0.02621, 1, 0.25, 0.4055, 0.09647
-  )
+    1.486e-10, 1, 5.145e-06, 
+    1.237e-07, 4.152e-23, 1.04e-10, 1, 3.123e-08, 
+    1.486e-10, 1.237e-07, 9.861e-07, 2.897e-09, 1, 2.381e-26,
+    4.152e-23, 1.074e-07, 1, 
+    1.04e-10, 9.861e-07, 2.353e-10, 1, 1, 2.897e-09, 1, 
+    1, 1, 2.353e-10, 1.194e-08, 
+    1.074e-07, 1, 1.194e-08, 2.639e-07, 
+    3.123e-08, 1, 2.639e-07, 
+    5.145e-06, 2.381e-26, 1
+  ),
+  index1 = FALSE
 )
 
-V_intersect_local_bandwidth <- sparseMatrix(
-  i = c(5, 8, 3, 10, 2, 4, 7, 3, 9, 10, 1, 8, 3, 1, 5, 4, 2, 4),
-  j = c(1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 7, 8, 8, 9, 10, 10),
+# umap.umap_.fuzzy_simplicial_set(irisxy[0][5:15], 4, random_state=42, metric="euclidean", local_connectivity=1.5, bandwidth=0.5, set_op_mix_ratio=0)[0]
+V_intersect_local_bandwidth <- Matrix::sparseMatrix(
+  i = c(
+    5, 9, 2, 6, 1, 4, 6, 7, 8, 2, 6, 7, 0, 9, 1, 2, 4, 3, 4, 3, 0, 5
+  ),
+  j = c(
+    0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6, 7, 7, 8, 9, 9
+  ),
   x = c(
-    1, 0.7966, 0.02126, 1, 0.02126, 1, 0.5536, 1, 0.336, 0.04417, 1, 0.364,
-    0.5536, 0.7966, 0.364, 0.336, 1, 0.04417
-  )
+    1, 3.079e-15, 
+    6.166e-24, 3.211e-09,
+    6.166e-24, 1.53e-15, 1, 
+    2.323e-16, 1, 
+    1.53e-15, 5.479e-30, 1, 
+    1, 1.673e-18, 
+    3.211e-09, 1, 5.479e-30, 
+    2.323e-16, 1, 
+    1, 
+    3.079e-15, 1.673e-18
+  ),
+  index1 = FALSE
 )
