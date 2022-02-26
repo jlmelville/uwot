@@ -101,8 +101,8 @@ auto find_sigma(const std::vector<double> &nn_dist, std::size_t i_begin,
   bool converged = false;
   for (std::size_t iter = 0; iter < n_iter; iter++) {
     double val = 0.0;
-    // NB we iterate from 1, not 0: don't use the self-distance.
-    for (auto j = i_begin + 1; j < i_end; j++) {
+    // NB i_begin should point to the first non-self neighbor
+    for (auto j = i_begin; j < i_end; j++) {
       auto rj = nn_dist[j] - rho;
       val += rj <= 0.0 ? 1.0 : std::exp(-rj / sigma);
     }
@@ -142,7 +142,7 @@ auto find_sigma(const std::vector<double> &nn_dist, std::size_t i_begin,
 
 // NB nn_dist must be in sorted non-decreasing order
 void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
-                const std::vector<std::size_t> &nn_ptr,
+                const std::vector<std::size_t> &nn_ptr, bool skip_first,
                 const std::vector<double> &target, double local_connectivity,
                 double tol, std::size_t n_iter, double min_k_dist_scale,
                 double mean_distances, bool save_sigmas,
@@ -177,8 +177,10 @@ void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
 
   auto rho = find_rho(nn_dist, nzero_begin, i_end, local_connectivity, tol);
   double targeti = target.size() == 1 ? target[0] : target[i];
-  auto sigma = find_sigma(nn_dist, i_begin, i_end, targeti, rho, tol, n_iter,
-                          n_window_search_fails);
+  // in case where self-distance (0) is passed as the nearest neighbor, skip
+  // first item in neighbors when calculating sigma
+  auto sigma = find_sigma(nn_dist, i_begin + (skip_first ? 1 : 0), i_end,
+                          targeti, rho, tol, n_iter, n_window_search_fails);
   // safeguard sigma
   if (rho > 0.0) {
     sigma = (std::max)(min_k_dist_scale * mean_average(nn_dist, i_begin, i_end),
@@ -201,7 +203,7 @@ void smooth_knn(std::size_t i, const std::vector<double> &nn_dist,
 
 void smooth_knn(std::size_t begin, std::size_t end,
                 const std::vector<double> &nn_dist,
-                const std::vector<std::size_t> &nn_ptr,
+                const std::vector<std::size_t> &nn_ptr, bool skip_first,
                 const std::vector<double> &target, double local_connectivity,
                 double tol, std::size_t n_iter, double min_k_dist_scale,
                 double mean_distances, bool save_sigmas,
@@ -211,9 +213,9 @@ void smooth_knn(std::size_t begin, std::size_t end,
   std::size_t n_window_search_fails = 0;
 
   for (std::size_t i = begin; i < end; i++) {
-    smooth_knn(i, nn_dist, nn_ptr, target, local_connectivity, tol, n_iter,
-               min_k_dist_scale, mean_distances, save_sigmas, nn_weights,
-               sigmas, rhos, n_window_search_fails);
+    smooth_knn(i, nn_dist, nn_ptr, skip_first, target, local_connectivity, tol,
+               n_iter, min_k_dist_scale, mean_distances, save_sigmas,
+               nn_weights, sigmas, rhos, n_window_search_fails);
   }
 
   // Update global count of failures

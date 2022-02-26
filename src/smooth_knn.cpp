@@ -27,8 +27,9 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 List smooth_knn_distances_parallel(
-    NumericVector nn_dist, IntegerVector nn_ptr, NumericVector target,
-    std::size_t n_iter = 64, double local_connectivity = 1.0, double tol = 1e-5,
+    NumericVector nn_dist, IntegerVector nn_ptr, bool skip_first,
+    NumericVector target, std::size_t n_iter = 64,
+    double local_connectivity = 1.0, double tol = 1e-5,
     double min_k_dist_scale = 1e-3, bool ret_sigma = false,
     std::size_t n_threads = 0, std::size_t grain_size = 1) {
 
@@ -64,9 +65,10 @@ List smooth_knn_distances_parallel(
   std::vector<double> rhos(ret_sigma ? n_vertices : 0);
 
   auto worker = [&](std::size_t begin, std::size_t end) {
-    uwot::smooth_knn(begin, end, nn_distv, nn_ptrv, targetv, local_connectivity,
-                     tol, n_iter, min_k_dist_scale, mean_distances, ret_sigma,
-                     nn_weights, sigmas, rhos, n_search_fails);
+    uwot::smooth_knn(begin, end, nn_distv, nn_ptrv, skip_first, targetv,
+                     local_connectivity, tol, n_iter, min_k_dist_scale,
+                     mean_distances, ret_sigma, nn_weights, sigmas, rhos,
+                     n_search_fails);
   };
 
   RcppPerpendicular::parallel_for(n_vertices, worker, n_threads, grain_size);

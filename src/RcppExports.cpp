@@ -92,13 +92,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // smooth_knn_distances_parallel
-List smooth_knn_distances_parallel(NumericVector nn_dist, IntegerVector nn_ptr, NumericVector target, std::size_t n_iter, double local_connectivity, double tol, double min_k_dist_scale, bool ret_sigma, std::size_t n_threads, std::size_t grain_size);
-RcppExport SEXP _uwot_smooth_knn_distances_parallel(SEXP nn_distSEXP, SEXP nn_ptrSEXP, SEXP targetSEXP, SEXP n_iterSEXP, SEXP local_connectivitySEXP, SEXP tolSEXP, SEXP min_k_dist_scaleSEXP, SEXP ret_sigmaSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP) {
+List smooth_knn_distances_parallel(NumericVector nn_dist, IntegerVector nn_ptr, bool skip_first, NumericVector target, std::size_t n_iter, double local_connectivity, double tol, double min_k_dist_scale, bool ret_sigma, std::size_t n_threads, std::size_t grain_size);
+RcppExport SEXP _uwot_smooth_knn_distances_parallel(SEXP nn_distSEXP, SEXP nn_ptrSEXP, SEXP skip_firstSEXP, SEXP targetSEXP, SEXP n_iterSEXP, SEXP local_connectivitySEXP, SEXP tolSEXP, SEXP min_k_dist_scaleSEXP, SEXP ret_sigmaSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type nn_dist(nn_distSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type nn_ptr(nn_ptrSEXP);
+    Rcpp::traits::input_parameter< bool >::type skip_first(skip_firstSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type target(targetSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type n_iter(n_iterSEXP);
     Rcpp::traits::input_parameter< double >::type local_connectivity(local_connectivitySEXP);
@@ -107,7 +108,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type ret_sigma(ret_sigmaSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type n_threads(n_threadsSEXP);
     Rcpp::traits::input_parameter< std::size_t >::type grain_size(grain_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(smooth_knn_distances_parallel(nn_dist, nn_ptr, target, n_iter, local_connectivity, tol, min_k_dist_scale, ret_sigma, n_threads, grain_size));
+    rcpp_result_gen = Rcpp::wrap(smooth_knn_distances_parallel(nn_dist, nn_ptr, skip_first, target, n_iter, local_connectivity, tol, min_k_dist_scale, ret_sigma, n_threads, grain_size));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -179,7 +180,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_uwot_annoy_search_parallel_cpp", (DL_FUNC) &_uwot_annoy_search_parallel_cpp, 7},
     {"_uwot_calc_row_probabilities_parallel", (DL_FUNC) &_uwot_calc_row_probabilities_parallel, 8},
     {"_uwot_optimize_layout_r", (DL_FUNC) &_uwot_optimize_layout_r, 21},
-    {"_uwot_smooth_knn_distances_parallel", (DL_FUNC) &_uwot_smooth_knn_distances_parallel, 10},
+    {"_uwot_smooth_knn_distances_parallel", (DL_FUNC) &_uwot_smooth_knn_distances_parallel, 11},
     {"_uwot_fast_intersection_cpp", (DL_FUNC) &_uwot_fast_intersection_cpp, 6},
     {"_uwot_general_sset_intersection_cpp", (DL_FUNC) &_uwot_general_sset_intersection_cpp, 10},
     {"_uwot_hardware_concurrency", (DL_FUNC) &_uwot_hardware_concurrency, 0},

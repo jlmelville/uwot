@@ -406,10 +406,12 @@ umap_transform <- function(X = NULL, model = NULL,
     target <- log2(n_nbrs)
     nn_ptr <- n_nbrs
     nn_dist <- nnt$dist
+    skip_first <- TRUE
     
     sknn_res <- smooth_knn(
       nn_dist = nnt$dist,
       nn_ptr = nn_ptr,
+      skip_first = skip_first,
       target = target,
       local_connectivity = adjusted_local_connectivity,
       n_threads = n_threads,
@@ -431,7 +433,6 @@ umap_transform <- function(X = NULL, model = NULL,
       # underestimate 
       localr <- sknn_res$sigma + sknn_res$rho
     }
-    
     
     if (is.logical(init_weighted)) {
       embedding_block <-

@@ -21,6 +21,7 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
 # nn distances should be stored column-wise
 smooth_knn <- function(nn_dist,
                        nn_ptr = NULL,
+                       skip_first = TRUE,
                        target = NULL,
                        local_connectivity = 1.0,
                        n_threads = NULL,
@@ -38,6 +39,7 @@ smooth_knn <- function(nn_dist,
   affinity_matrix_res <- smooth_knn_distances_parallel(
     nn_dist = nn_dist,
     nn_ptr = nn_ptr,
+    skip_first = skip_first,
     target = target,
     n_iter = 64,
     local_connectivity = local_connectivity,
@@ -55,7 +57,8 @@ smooth_knn <- function(nn_dist,
 
 smooth_knn_matrix <- function(nn,
                               target = NULL,
-                              local_connectivity = 1.0, bandwidth = 1.0,
+                              local_connectivity = 1.0, 
+                              bandwidth = 1.0,
                               ret_sigma = FALSE,
                               n_threads = NULL,
                               grain_size = 1,
@@ -66,18 +69,18 @@ smooth_knn_matrix <- function(nn,
   
   osparse <- NULL
   if (methods::is(nn, "sparseMatrix")) {
-    Matrix::diag(nn) <- 0.0
     osparse <- order_sparse(nn)
     nn_dist <- osparse$x
     nn_ptr <- osparse$p
     n_nbrs <- diff(nn_ptr)
-    browser()
     if (any(n_nbrs < 1)) {
       stop("All observations need at least one nearest neighbor")
     } 
     if (is.null(target)) {
-      target <- log2(n_nbrs) * bandwidth
+      # add 1 to n_nbrs to account for implicit self neighbor
+      target <- log2(n_nbrs + 1) * bandwidth
     }
+    skip_first <- FALSE
   }
   else {
     nnt <- nn_graph_t(nn)
@@ -87,10 +90,12 @@ smooth_knn_matrix <- function(nn,
     }
     nn_ptr <- n_nbrs
     nn_dist <- as.vector(nnt$dist)
+    skip_first <- TRUE
   }
   affinity_matrix_res <- smooth_knn(
     nn_dist = nn_dist,
     nn_ptr = nn_ptr,
+    skip_first = skip_first,
     target = target,
     local_connectivity = local_connectivity,
     ret_sigma = ret_sigma,
