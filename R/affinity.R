@@ -213,7 +213,7 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
 # edge has a weight of val (scalar or vector)
 # return a sparse matrix with dimensions of nrow(nn_idx) x max_nbr_id
 nn_to_sparse <- function(nn_idx, val = 1, self_nbr = FALSE,
-                         max_nbr_id = NULL, by_row = TRUE, n_vertices = NULL) {
+                         max_nbr_id = NULL, by_row = TRUE) {
   
   if (by_row) {
     n_obs <- nrow(nn_idx)
@@ -279,5 +279,4 @@ order_sparse <- function(spm) {
   }
   
   list(i = i_sort, p = p, x = x_sort, order = x_order, dims = spm@Dim)
-  # Matrix::sparseMatrix(i = i_sort, p = p, x = x_sort, dims = spm@Dim, index1 = FALSE)
 }

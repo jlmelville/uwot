@@ -282,30 +282,20 @@ umap_transform <- function(X = NULL, model = NULL,
     }
     checkna(X)
   } else if (nn_is_precomputed(nn_method)) {
-    if (nblocks == 1) {
-      if (length(nn_method) == 1) {
-        graph <- nn_method[[1]]
+    # store single nn graph as a one-item list
+    if (nblocks == 1 && is.list(nn_method) && !is.null(nn_method$idx)) {
+      nn_method <- list(nn_method)
+    }
+    
+    stopifnot(length(nn_method) == nblocks)
+    for (i in 1:nblocks) {
+      graph <- nn_method[[i]]
+      if (is.null(n_vertices)) {
+        n_vertices <- nrow(graph$idx)
       }
-      else {
-        graph <- nn_method
-      }
-      n_vertices <- nrow(graph$idx)
       check_graph(graph, n_vertices, n_neighbors)
       if (is.null(Xnames)) {
         Xnames <- nn_graph_row_names(graph)
-      }
-    }
-    else {
-      stopifnot(length(nn_method) == nblocks)
-      for (i in 1:nblocks) {
-        graph <- nn_method[[i]]
-        if (is.null(n_vertices)) {
-          n_vertices <- nrow(graph$idx)
-        }
-        check_graph(graph, n_vertices, n_neighbors)
-        if (is.null(Xnames)) {
-          Xnames <- nn_graph_row_names(graph)
-        }
       }
     }
   }
@@ -343,6 +333,10 @@ umap_transform <- function(X = NULL, model = NULL,
       stop("Invalid input format for 'init'")
     }
   }
+  if (is.null(n_vertices)) {
+    stop("Failed to read input correctly: invalid input format")
+  }
+  
   if (verbose) {
     x_is_matrix <- methods::is(X, "matrix")
     tsmessage("Read ", n_vertices, " rows", appendLF = !x_is_matrix)
@@ -391,16 +385,13 @@ umap_transform <- function(X = NULL, model = NULL,
                          verbose = verbose
       )
     } else if (nn_is_precomputed(nn_method)) {
-      if (nblocks == 1 && !is.null(nn_method$idx)) {
-        # When there's only one block, the NN graph can be passed directly
-        nn <- nn_method
-      }
-      else {
-        # otherwise we expect a list of NN graphs
-        nn <- nn_method[[i]]
-      }
+      # otherwise we expect a list of NN graphs
+      nn <- nn_method[[i]]
     }
-    
+    else {
+      stop("Can't transform new data if X is NULL ", 
+           "and no sparse distance matrix available")
+    }
     nnt <- nn_graph_t(nn)
     n_nbrs <- nrow(nnt$dist)
     target <- log2(n_nbrs)
