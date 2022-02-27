@@ -68,14 +68,15 @@ smooth_knn_matrix <- function(nn,
   }
   
   osparse <- NULL
-  if (methods::is(nn, "sparseMatrix")) {
+  if (is_sparse_matrix(nn)) {
+    nn <- Matrix::drop0(nn)
     osparse <- order_sparse(nn)
     nn_dist <- osparse$x
     nn_ptr <- osparse$p
     n_nbrs <- diff(nn_ptr)
     if (any(n_nbrs < 1)) {
-      stop("All observations need at least one nearest neighbor")
-    } 
+      stop("All observations need at least one neighbor")
+    }
     if (is.null(target)) {
       # add 1 to n_nbrs to account for implicit self neighbor
       target <- log2(n_nbrs + 1) * bandwidth
@@ -105,7 +106,7 @@ smooth_knn_matrix <- function(nn,
   )
   
   v <- affinity_matrix_res$matrix
-  if (methods::is(nn, "sparseMatrix")) {
+  if (is_sparse_matrix(nn)) {
     # use j instead of i to transpose it
     v <- Matrix::sparseMatrix(j = osparse$i, p = osparse$p, x = v,
                               dims = osparse$dims, index1 = FALSE)

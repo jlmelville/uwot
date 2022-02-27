@@ -1610,18 +1610,34 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   # needed
   Xnames <- NULL
   if (is.null(X)) {
-    if (!is.list(nn_method)) {
+    if (!is_precomputed_nn(nn_method)) {
       stop("If X is NULL, must provide NN data in nn_method")
     }
     if (is.character(init) && tolower(init) %in% c("spca", "pca")) {
       stop("init = 'pca' and 'spca' can't be used with X = NULL")
     }
-    n_vertices <- x2nv(nn_method)
-    stopifnot(n_vertices > 0)
-    n_neighbors <- nn_graph_nbrs(nn_method)
-    stopifnot(n_neighbors > 1 && n_neighbors <= n_vertices)
-    check_graph_list(nn_method, n_vertices, n_neighbors)
-    Xnames <- nn_graph_row_names(nn_method)
+    if (is.list(nn_method)) {
+      n_vertices <- x2nv(nn_method)
+      stopifnot(n_vertices > 0)
+      n_neighbors <- nn_graph_nbrs(nn_method)
+      stopifnot(n_neighbors > 1 && n_neighbors <= n_vertices)
+      check_graph_list(nn_method, n_vertices, n_neighbors)
+      Xnames <- nn_graph_row_names(nn_method)
+    }
+    else if (is_sparse_matrix(nn_method)) {
+      nn_method <- Matrix::drop0(nn_method)
+      n_vertices <- x2nv(nn_method, is_sparse_nn_dist = TRUE)
+      stopifnot(n_vertices > 0)
+      n_neighbors <- diff(nn_method@p)
+      if (any(n_neighbors < 1)) {
+        stop("All observations must have at least one neighbor")
+      }
+      n_neighbors <- max(n_neighbors)
+      Xnames <- row.names(nn_method)
+    }
+    else {
+      stop("BUG: unknown nn data format")
+    }
   }
   else if (methods::is(X, "dist")) {
     if (ret_model) {
@@ -1632,7 +1648,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     tsmessage("Read ", n_vertices, " rows")
     Xnames <- labels(X)
   }
-  else if (methods::is(X, "sparseMatrix")) {
+  else if (is_sparse_matrix(X)) {
     if (ret_model) {
       stop("Can only create models with dense matrix or data frame input")
     }
@@ -2089,7 +2105,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         }
       }
       else {
-        if (!is.null(nns[[1]]$index)) {
+        if (is_sparse_matrix(nns[[1]])) {
+          tsmessage("A model cannot be created when using a neighbor matrix")
+        }
+        else if (!is.null(nns[[1]]$index)) {
           res$nn_index <- nns[[1]]$index
           if (is.null(res$metric[[1]])) {
             # 31: Metric usually lists column indices or names, NULL means use all
@@ -2114,10 +2133,18 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (ret_nn) {
       res$nn <- list()
       for (i in 1:nblocks) {
-        res$nn[[i]] <- list(idx = nns[[i]]$idx, dist = nns[[i]]$dist)
-        if (!is.null(Xnames) && nrow(res$nn[[i]]$idx) == length(Xnames)) {
-          row.names(res$nn[[i]]$idx) <- Xnames
-          row.names(res$nn[[i]]$dist) <- Xnames
+        if (is.list(nns[[i]])) {
+          res$nn[[i]] <- list(idx = nns[[i]]$idx, dist = nns[[i]]$dist)
+          if (!is.null(Xnames) && nrow(res$nn[[i]]$idx) == length(Xnames)) {
+            row.names(res$nn[[i]]$idx) <- Xnames
+            row.names(res$nn[[i]]$dist) <- Xnames
+          }
+        }
+        else if (is_sparse_matrix(nns[[i]])) {
+          res$nn[[i]] <- nns[[i]]
+          if (!is.null(Xnames) && nrow(res$nn[[i]]) == length(Xnames)) {
+            row.names(res$nn[[i]]) <- Xnames
+          }
         }
       }
       names(res$nn) <- names(nns)
@@ -2493,7 +2520,7 @@ default_num_threads <- function() {
 }
 
 # Get the number of vertices in X
-x2nv <- function(X) {
+x2nv <- function(X, is_sparse_nn_dist = FALSE) {
   if (is.list(X)) {
     if (!is.null(X$idx)) {
       n_vertices <- x2nv(X$idx)
@@ -2510,8 +2537,15 @@ x2nv <- function(X) {
   else if (methods::is(X, "dist")) {
     n_vertices <- attr(X, "Size")
   }
-  else if (methods::is(X, "sparseMatrix")) {
-    n_vertices <- nrow(X)
+  else if (is_sparse_matrix(X)) {
+    if (is_sparse_nn_dist) {
+      # this code path for when nn_method takes sparse distance method
+      n_vertices <- ncol(X)
+    }
+    else {
+      # older code path, no longer recommended
+      n_vertices <- nrow(X)
+    }
   }
   else if (methods::is(X, "data.frame") || methods::is(X, "matrix")) {
     n_vertices <- nrow(X)
@@ -2688,7 +2722,6 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     nn <- x2set_res$nn
     nns[[i]] <- nn
     names(nns)[[i]] <- metric
-    n_neighbors <- ncol(nn$idx)
     if (is.null(V)) {
       V <- Vblock
     }
@@ -2837,20 +2870,30 @@ x2set <- function(X, n_neighbors, metric, nn_method,
                   n_vertices = x2nv(X),
                   tmpdir = tempdir(),
                   verbose = FALSE) {
-  nn <- x2nn(X,
-    n_neighbors = n_neighbors,
-    metric = metric,
-    nn_method = nn_method,
-    n_trees = n_trees, search_k = search_k,
-    tmpdir = tmpdir,
-    n_threads = n_threads, grain_size = grain_size,
-    ret_model = ret_model,
-    n_vertices = n_vertices,
-    verbose = verbose
-  )
-
-  if (any(is.infinite(nn$dist))) {
-    stop("Infinite distances found in nearest neighbors")
+  if (is_sparse_matrix(nn_method)) {
+    nn <- nn_method
+    if (nrow(nn) != ncol(nn)) {
+      stop("Sparse distance matrix must have same number of rows and cols")
+    }
+    if (nrow(nn) != n_vertices) {
+      stop("Sparse distance matrix must have same dimensions as input data")
+    }
+  }
+  else {
+    nn <- x2nn(X,
+      n_neighbors = n_neighbors,
+      metric = metric,
+      nn_method = nn_method,
+      n_trees = n_trees, search_k = search_k,
+      tmpdir = tmpdir,
+      n_threads = n_threads, grain_size = grain_size,
+      ret_model = ret_model,
+      n_vertices = n_vertices,
+      verbose = verbose
+    )
+    if (any(is.infinite(nn$dist))) {
+      stop("Infinite distances found in nearest neighbors")
+    }
   }
   gc()
 

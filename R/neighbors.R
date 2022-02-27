@@ -12,7 +12,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
   if (methods::is(X, "dist")) {
     res <- dist_nn(X, k, include_self = include_self)
   }
-  else if (methods::is(X, "sparseMatrix")) {
+  else if (is_sparse_matrix(X)) {
     # sparse distance matrix
     if (Matrix::isTriangular(X)) {
       res <- sparse_tri_nn(X, k, include_self = include_self)

@@ -159,6 +159,7 @@ expect_ok_matrix(res_test)
 expect_equal(dim(res_test0), c(10, 2))
 
 # return nn and a model
+set.seed(42)
 res <- tumap(iris10,
   n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
   init = "rand", verbose = FALSE, n_threads = 1,
@@ -173,6 +174,87 @@ expect_equal(names(res$nn), "euclidean")
 res_test <- umap_transform(iris10, res, n_threads = 0, verbose = FALSE)
 expect_ok_matrix(res_test)
 
+# test sparse nn matrix exactly the same as knn graph with explicit 0s for
+# self neighbors
+sparse_nbr_matrix0 <- Matrix::sparseMatrix(
+  i = c(
+    0, 4, 7, 9, 1, 2, 3, 9, 1, 2, 3, 6, 2, 3, 8, 9, 0, 4, 6, 7, 0, 4, 5, 7, 2, 3, 6, 7, 0, 4, 7, 9, 1, 2, 3, 8, 1, 2, 3, 9
+  ),
+  p = c(
+    0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40
+  ),
+  x = c(
+    0, 0.141421228647, 0.173204988241, 0.469041585922, 
+    0, 0.300000220537, 0.331662625074, 0.173205047846, 0.300000220537, 
+    0, 0.244949027896, 0.264575153589, 0.244949027896, 
+    0, 0.2999997437, 0.316227942705, 0.141421228647, 
+    0, 0.458257555962, 0.223606646061, 0.616441547871, 0.616441547871, 
+    0, 0.700000047684, 0.264575153589, 0.331662654877, 
+    0, 0.424264162779, 0.173204988241, 0.223606646061, 
+    0, 0.331662625074, 0.509901940823, 0.435889661312, 0.2999997437, 
+    0, 0.173205047846, 0.31622800231, 0.316227942705, 
+    0
+  ),
+  index1 = FALSE
+)
+set.seed(42)
+res_spnn0 <- tumap(iris10,
+             n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+             init = "rand", verbose = FALSE, n_threads = 1,
+             nn_method = sparse_nbr_matrix0, ret_nn = TRUE
+)
+expect_is(res, "list")
+expect_ok_matrix(res_spnn0$embedding)
+# should get same results as with internal nn calculation
+expect_equal(res_spnn0$embedding, res$embedding)
+
+sparse_nbr_matrix0_with_names <- sparse_nbr_matrix0
+row.names(sparse_nbr_matrix0_with_names) <- row.names(iris10)
+expect_equal(res_spnn0$nn$euclidean, sparse_nbr_matrix0_with_names)
+
+# sparse neighbor matrix without explicit zeros
+sparse_nbr_matrix <- Matrix::sparseMatrix(
+  i = c(
+    4, 7, 9, 2, 3, 9, 1, 3, 6, 2, 8, 9, 0, 6, 7, 0, 4, 7, 2, 3, 7, 0, 4, 9, 1, 2, 3, 1, 2, 3
+  ),
+  p = c(
+    0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30
+  ),
+  x = c(
+    0.141421228647, 0.173204988241, 0.469041585922, 
+    0.300000220537, 0.331662625074, 0.173205047846, 
+    0.300000220537, 0.244949027896, 0.264575153589, 
+    0.244949027896, 0.2999997437, 0.316227942705, 
+    0.141421228647, 0.458257555962, 0.223606646061, 
+    0.616441547871, 0.616441547871, 0.700000047684, 
+    0.264575153589, 0.331662654877, 0.424264162779, 
+    0.173204988241, 0.223606646061, 0.331662625074, 
+    0.509901940823, 0.435889661312, 0.2999997437, 
+    0.173205047846, 0.31622800231, 0.316227942705
+  ),
+  index1 = FALSE
+)
+
+set.seed(42)
+res_spnn <- tumap(iris10,
+                   n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+                   init = "rand", verbose = FALSE, n_threads = 1,
+                   nn_method = sparse_nbr_matrix
+)
+expect_ok_matrix(res_spnn)
+# should get same results as with internal nn calculation
+expect_equal(res_spnn, res$embedding)
+
+# null X is ok with sparse nearest neighbors
+set.seed(42)
+res_spnn_nullX <- tumap(X = NULL,
+                  n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+                  init = "rand", verbose = FALSE, n_threads = 1,
+                  nn_method = sparse_nbr_matrix0_with_names
+)
+expect_ok_matrix(res_spnn_nullX)
+# output picks up row names from input distance matrix
+expect_equal(res_spnn_nullX, res$embedding)
 
 # https://github.com/jlmelville/uwot/issues/6
 res <- umap(iris10,

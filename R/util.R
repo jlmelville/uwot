@@ -172,6 +172,14 @@ nn_graph_nbrs <- function(graph) {
   ncol(graph$idx)
 }
 
+is_sparse_matrix <- function(m) {
+  methods::is(m, "sparseMatrix")
+}
+
+is_precomputed_nn <- function(nn) {
+  is.list(nn) || is_sparse_matrix(nn)
+}
+
 # Add the (named) values in l2 to l1.
 # Use to override default values in l1 with user-supplied values in l2
 lmerge <- function(l1, l2) {
