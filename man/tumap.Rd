@@ -217,7 +217,7 @@ embedding.}
 By default, if \code{X} has less than 4,096 vertices, the exact nearest
 neighbors are found. Otherwise, approximate nearest neighbors are used.
 You may also pass pre-calculated nearest neighbor data to this argument. It
-must be a list consisting of two elements:
+must be one of two formats, either a list consisting of two elements:
 \itemize{
   \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
   containing the integer indexes of the nearest neighbors in \code{X}. Each
@@ -226,11 +226,15 @@ must be a list consisting of two elements:
   \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
   containing the distances of the nearest neighbors.
 }
-Multiple nearest neighbor data (e.g. from two different pre-calculated
-metrics) can be passed by passing a list containing the nearest neighbor
-data lists as items.
-The \code{n_neighbors} parameter is ignored when using pre-calculated
-nearest neighbor data.}
+or a sparse distance matrix of type \code{dgCMatrix}, with dimensions 
+\code{n_neighbors x n_neighbors}. Distances should be arranged by column,
+i.e. a non-zero entry in row \code{j} of the \code{i}th column indicates
+that the \code{j}th observation in \code{X} is a nearest neighbor of the
+\code{i}th observation with the distance given by the value of that
+element.
+The \code{n_neighbors} parameter is ignored when using precomputed
+nearest neighbor data. If using the sparse distance matrix input, each
+column can contain a different number of neighbors.}
 
 \item{n_trees}{Number of trees to build when constructing the nearest
 neighbor index. The more trees specified, the larger the index, but the

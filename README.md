@@ -706,6 +706,8 @@ cost of convenience, you can generate nearest neighbor data for `X` by some
 other means and pass that to `umap` (or `tumap` or `lvish`) directly via the
 `nn_method` parameter.
 
+### Nearest Neighbor Graph Format
+
 The format expected by `nn_method` is a `list` containing the following two
 entries:
 
@@ -720,6 +722,35 @@ should expect bad results.
 contains the distances of the nearest neighbors of each item (vertex) in the
 dataset, in Each item is always the nearest neighbor of itself, so the first
 element in row `i` should always be `0.0`.
+
+### Sparse Distance Matrix Format
+
+Alternatively, you can pass a sparse distance matrix where:
+
+* the format should be `dgCMatrix` (the typical sparse matrix format).
+* non-zero entries are the distances.
+* dimensions are of `n_vertices x n_vertices` for `umap` and 
+`n_model_vertices x n_vertices` for `umap_transform`
+    * to put it another way: the neighbor distances should be arranged so that
+    the non-zero entries in the `i`th column of the matrix contains the 
+    distances between observation `i` and its nearest neighbors.
+* An advantage of using a sparse distance matrix: you are not restricted to a
+fixed value of `n_neighbors` for each observation. Each column can contain a
+different number of non-zero distances. See the paper by 
+[Dalmia and Sia](https://arxiv.org/abs/2108.05525) for why you might want to do
+this. The graph edge weight calculation will be adjusted to account for the 
+different number of neighbors of each observation. There must be at least one
+neighbor for each observation.
+* Explicit zero distances will be removed from the matrix. This is in contrast
+to the use of the nearest neighbor list matrix format where typically the zero
+distance between an observation and itself is found as part of the nearest
+neighbor search routine. The sparse distance matrix approach will account for
+the zero self-distance being implicit. To keep explicit zero distances between
+other observations set them to a small but non-zero value, e.g. `1e-10`.
+* A slight disadvantage with using a distance matrix is that the distances need
+to be sorted.
+* Sparse distance matrix input is not currently supported for the `lvish` 
+method.
 
 If you use pre-computed nearest neighbor data, be aware that:
 

@@ -30,22 +30,30 @@ the \code{model}.}
 
 \item{model}{Data associated with an existing embedding.}
 
-\item{nn_method}{Optional pre-calculated nearest neighbor data. The format is 
-a list consisting of two elements:
+\item{nn_method}{Optional pre-calculated nearest neighbor data. There are
+two supported formats. The first is a list consisting of two elements:
 \itemize{
   \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix where 
-  \code{n_vertices} is the number of items to be transformed. The contents 
+  \code{n_vertices} is the number of observations in \code{X}. The contents 
   of the matrix should be the integer indexes of the data used to generate
   the \code{model}, which are the \code{n_neighbors}-nearest neighbors of
   the data to be transformed.
   \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
   containing the distances of the nearest neighbors.
 }
+The second supported format is a sparse distance matrix of type
+\code{dgCMatrix}, with dimensions \code{n_model_vertices x n_vertices}.
+where \code{n_model_vertices} is the number of observations in the original
+data that generated the model. Distances should be arranged by column, i.e.
+a non-zero entry in row \code{j} of the \code{i}th column indicates that
+the \code{j}th observation in the original data used to generate the
+\code{model} is a nearest neighbor of the \code{i}th observation in the new
+data, with the distance given by the value of that element. In this format,
+a different number of neighbors is allowed for each observation, i.e. 
+each column can contain a different number of non-zero values.
 Multiple nearest neighbor data (e.g. from two different pre-calculated
 metrics) can be passed by passing a list containing the nearest neighbor
-data lists as items.
-The \code{X} parameter is ignored when using pre-calculated nearest 
-neighbor data.}
+data lists as items.}
 
 \item{init_weighted}{If \code{TRUE}, then initialize the embedded coordinates
 of \code{X} using a weighted average of the coordinates of the nearest
