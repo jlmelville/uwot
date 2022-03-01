@@ -1610,7 +1610,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   # needed
   Xnames <- NULL
   if (is.null(X)) {
-    if (!is_precomputed_nn(nn_method)) {
+    if (!nn_is_precomputed(nn_method)) {
       stop("If X is NULL, must provide NN data in nn_method")
     }
     if (is.character(init) && tolower(init) %in% c("spca", "pca")) {
@@ -2144,6 +2144,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
           res$nn[[i]] <- nns[[i]]
           if (!is.null(Xnames) && nrow(res$nn[[i]]) == length(Xnames)) {
             row.names(res$nn[[i]]) <- Xnames
+            colnames(res$nn[[i]]) <- Xnames
           }
         }
       }

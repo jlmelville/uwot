@@ -538,7 +538,7 @@ init_is_spectral <- function(init) {
 }
 
 rand_nbr_graph <- function(n_vertices, n_nbrs, val) {
-  nn_to_sparse(rand_nbr_idx(n_vertices, n_nbrs),
+  nng_to_sparse(rand_nbr_idx(n_vertices, n_nbrs),
     val = val,
     max_nbr_id = n_vertices
   )

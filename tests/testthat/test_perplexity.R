@@ -106,7 +106,7 @@ resp <- calc_row_probabilities_parallel(iris10nn10d, n_vertices = nrow(iris10_nn
   ret_sigma = TRUE
 )
 res <- resp$matrix
-res <- nn_to_sparse(iris10_nn10$idx, as.vector(t(res)),
+res <- nng_to_sparse(iris10_nn10$idx, as.vector(t(res)),
   self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx)
 )
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
@@ -115,7 +115,7 @@ expect_equal(sqrt(resp$sigma), expected_sigmas, tol = 1e-5)
 res <- calc_row_probabilities_parallel(iris10nn10d, n_vertices = nrow(iris10_nn10$dist),
   perplexity = 4, n_threads = 1
 )$matrix
-res <- nn_to_sparse(iris10_nn10$idx, as.vector(t(res)),
+res <- nng_to_sparse(iris10_nn10$idx, as.vector(t(res)),
   self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx)
 )
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)

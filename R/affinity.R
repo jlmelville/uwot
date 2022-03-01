@@ -114,7 +114,7 @@ smooth_knn_matrix <- function(nn,
     v <- Matrix::drop0(v)
   }
   else {
-    v <- nn_to_sparse(nnt$idx, v, self_nbr = TRUE, by_row = FALSE)
+    v <- nng_to_sparse(nnt$idx, v, self_nbr = TRUE, by_row = FALSE)
   }
   affinity_matrix_res$matrix <- v
   affinity_matrix_res
@@ -186,7 +186,7 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
     if (verbose && affinity_matrix_res$n_failures > 0) {
       tsmessage(affinity_matrix_res$n_failures, " perplexity failures")
     }
-    affinity_matrix <- nn_to_sparse(nnt$idx, as.vector(affinity_matrix_res$matrix),
+    affinity_matrix <- nng_to_sparse(nnt$idx, as.vector(affinity_matrix_res$matrix),
       self_nbr = TRUE, by_row = FALSE
     )
     if (!is.null(affinity_matrix_res$sigma)) {
@@ -198,7 +198,7 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
     tsmessage("Using knn graph for input weights with k = ", ncol(nn$idx))
     # Make each row sum to 1, ignoring the self-index
     # i.e. diagonal will be zero
-    affinity_matrix <- nn_to_sparse(nn$idx, val = 1 / (ncol(nn$idx) - 1))
+    affinity_matrix <- nng_to_sparse(nn$idx, val = 1 / (ncol(nn$idx) - 1))
     Matrix::diag(affinity_matrix) <- 0
     affinity_matrix <- Matrix::drop0(affinity_matrix)
   }
@@ -212,20 +212,13 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
 # Convert the matrix of NN indices to a sparse asymmetric matrix where each
 # edge has a weight of val (scalar or vector)
 # return a sparse matrix with dimensions of nrow(nn_idx) x max_nbr_id
-nn_to_sparse <- function(nn_idx, val = 1, self_nbr = FALSE,
+nn_to_sparse <- function(nn_idxv, n_obs, val = 1, self_nbr = FALSE,
                          max_nbr_id = NULL, by_row = TRUE) {
+  n_nbrs <- length(nn_idxv) / n_obs
   
-  if (by_row) {
-    n_obs <- nrow(nn_idx)
-    n_nbrs <- ncol(nn_idx)
-  }
-  else {
-    n_obs <- ncol(nn_idx)
-    n_nbrs <- nrow(nn_idx)
-  }
 
   if (is.null(max_nbr_id)) {
-    max_nbr_id <- ifelse(self_nbr, n_obs, max(nn_idx))
+    max_nbr_id <- ifelse(self_nbr, n_obs, max(nn_idxv)) 
   }
   
   if (length(val) == 1) {
@@ -240,15 +233,28 @@ nn_to_sparse <- function(nn_idx, val = 1, self_nbr = FALSE,
   else {
     is <- rep(1:n_obs, each = n_nbrs)
   }
-  js <- as.vector(nn_idx)
 
   dims <- c(n_obs, max_nbr_id)
-  res <- Matrix::sparseMatrix(i = is, j = js, x = xs, dims = dims)
+  res <- Matrix::sparseMatrix(i = is, j = nn_idxv, x = xs, dims = dims)
+  
   if (self_nbr) {
     Matrix::diag(res) <- 0
     res <- Matrix::drop0(res)
   }
   res
+}
+
+nng_to_sparse <- function(nn_idx, val = 1, self_nbr = FALSE,
+                          max_nbr_id = NULL, by_row = TRUE) {
+  if (by_row) {
+    n_obs <- nrow(nn_idx)
+  }
+  else {
+    n_obs <- ncol(nn_idx)
+  }
+  
+  nn_to_sparse(as.vector(nn_idx), n_obs, val = val, self_nbr = self_nbr,
+               max_nbr_id = max_nbr_id, by_row = by_row)
 }
 
 # transpose the index and distance matrix

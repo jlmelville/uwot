@@ -726,8 +726,47 @@ If you use pre-computed nearest neighbor data, be aware that:
 * You can't use pre-computed nearest neighbor data and also use `metric`.
 * You can explicitly set `X` to NULL, as long as you don't try and use an
 initialization method that makes use of `X` (`init = "pca"` or `init = "spca"`).
-* Setting `ret_model = TRUE` does not produce a valid model. `umap_transform`
-will not work with this setting.
+* You *can* transform new data by setting `ret_model = TRUE`. You must provide 
+`umap_transform` with the distances between new data and the original data via
+its `nn_method` parameter.
+
+Here's an example of using pre-computed nearest neighbor data using the
+even-numbered observations in `iris` to build an initial model and then
+transforming the odd-numbered observations. This relies on some internal `uwot`
+functions which I do not promise have a stable API (i.e. this may example may be
+broken when you read this), but it gives you the general idea:
+
+```R
+iris_even <- iris[seq(2, nrow(iris), 2), ]
+iris_odd <- iris[seq(1, nrow(iris), 2), ]
+
+iris_even_nn <- uwot:::annoy_nn(
+  X = uwot:::x2m(iris_even),
+  k = 15,
+  metric = "euclidean",
+  ret_index = TRUE
+)
+
+iris_odd_nn <- annoy_search(
+  X = uwot:::x2m(iris_odd),
+  k = 15,
+  ann = iris_even_nn$index
+)
+
+# Delete the Annoy index, force the transform method to use the nn distances 
+# directly
+iris_even_nn$index <- NULL
+
+iris_even_umap <-
+  umap(
+    X = NULL,
+    nn_method = iris_even_nn,
+    ret_model = TRUE
+  )
+
+iris_odd_transform <-
+  umap_transform(X = NULL, iris_even_umap, nn_method = iris_odd_nn)
+```
 
 ### Exporting nearest neighbor data from `uwot`
 

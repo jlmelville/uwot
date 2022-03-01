@@ -15,9 +15,7 @@
 #'   have the same columns in the same order as the input data used to generate
 #'   the \code{model}.
 #' @param model Data associated with an existing embedding.
-#' @param nn_method Optional pre-calculated nearest neighbor data. 
-#' 
-#' The format is 
+#' @param nn_method Optional pre-calculated nearest neighbor data. The format is 
 #'   a list consisting of two elements:
 #'   \itemize{
 #'     \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix where 
@@ -283,19 +281,35 @@ umap_transform <- function(X = NULL, model = NULL,
     checkna(X)
   } else if (nn_is_precomputed(nn_method)) {
     # store single nn graph as a one-item list
-    if (nblocks == 1 && is.list(nn_method) && !is.null(nn_method$idx)) {
+    if (nblocks == 1 && nn_is_single(nn_method)) {
       nn_method <- list(nn_method)
     }
-    
-    stopifnot(length(nn_method) == nblocks)
+    if (length(nn_method) != nblocks) {
+      stop("Expecting ", nblocks, " separate neighbor data blocks")
+    }
     for (i in 1:nblocks) {
       graph <- nn_method[[i]]
-      if (is.null(n_vertices)) {
-        n_vertices <- nrow(graph$idx)
+      if (is.list(graph)) {
+        check_graph(graph, expected_rows = n_vertices, expected_cols = n_neighbors)
+        if (is.null(n_vertices)) {
+          n_vertices <- nrow(graph$idx)
+        }
+        if (is.null(Xnames)) {
+          Xnames <- nn_graph_row_names(graph)
+        }
       }
-      check_graph(graph, n_vertices, n_neighbors)
-      if (is.null(Xnames)) {
-        Xnames <- nn_graph_row_names(graph)
+      else if (is_sparse_matrix(graph)) {
+        # nn graph should have dims n_train_obs x n_test_obs
+        graph <- Matrix::drop0(graph)
+        if (is.null(n_vertices)) {
+          n_vertices <- ncol(graph)
+        }
+        if (is.null(Xnames)) {
+          Xnames <- colnames(graph)
+        }
+      }
+      else {
+        stop("Error: unknown neighbor graph format")
       }
     }
   }
@@ -384,7 +398,7 @@ umap_transform <- function(X = NULL, model = NULL,
                          n_threads = n_threads, grain_size = grain_size,
                          verbose = verbose
       )
-    } else if (nn_is_precomputed(nn_method)) {
+    } else if (is.list(nn_method)) {
       # otherwise we expect a list of NN graphs
       nn <- nn_method[[i]]
     }
@@ -392,15 +406,32 @@ umap_transform <- function(X = NULL, model = NULL,
       stop("Can't transform new data if X is NULL ", 
            "and no sparse distance matrix available")
     }
-    nnt <- nn_graph_t(nn)
-    n_nbrs <- nrow(nnt$dist)
-    target <- log2(n_nbrs)
-    nn_ptr <- n_nbrs
-    nn_dist <- nnt$dist
-    skip_first <- TRUE
     
+    osparse <- NULL
+    if (is_sparse_matrix(nn)) {
+      nn <- Matrix::drop0(nn)
+      osparse <- order_sparse(nn)
+      nn_idxv <- osparse$i + 1
+      nn_distv <- osparse$x
+      nn_ptr <- osparse$p
+      n_neighbors <- diff(nn_ptr)
+      if (any(n_neighbors < 1)) {
+        stop("All observations need at least one neighbor")
+      }
+      target <- log2(n_neighbors)
+      skip_first <- TRUE
+    }
+    else {
+      nnt <- nn_graph_t(nn)
+      target <- log2(n_neighbors)
+      nn_ptr <- n_neighbors
+      nn_distv <- as.vector(nnt$dist)
+      nn_idxv <- as.vector(nnt$idx)
+      skip_first <- TRUE
+    }
+
     sknn_res <- smooth_knn(
-      nn_dist = nnt$dist,
+      nn_dist = nn_distv,
       nn_ptr = nn_ptr,
       skip_first = skip_first,
       target = target,
@@ -408,15 +439,8 @@ umap_transform <- function(X = NULL, model = NULL,
       n_threads = n_threads,
       grain_size = grain_size,
       verbose = verbose,
-      ret_sigma = need_sigma
+      ret_sigma = TRUE
     )
-    graph_blockv <- sknn_res$matrix
-    graph_block <- nn_to_sparse(nnt$idx, graph_blockv,
-      self_nbr = FALSE,
-      max_nbr_id = n_train_vertices,
-      by_row = FALSE
-    )
-    
     if (is.null(localr) && need_sigma) {
       # because of the adjusted local connectivity rho is too small compared
       # to that used to generate the "training" data but sigma is larger, so
@@ -425,12 +449,25 @@ umap_transform <- function(X = NULL, model = NULL,
       localr <- sknn_res$sigma + sknn_res$rho
     }
     
+    graph_blockv <- sknn_res$matrix
+    if (is_sparse_matrix(nn)) {
+      graph_block <- Matrix::sparseMatrix(j = osparse$i, p = osparse$p, x = graph_blockv,
+                                dims = rev(osparse$dims), index1 = FALSE)
+    }
+    else {
+      graph_block <- nn_to_sparse(nn_idxv, n_vertices, graph_blockv,
+        self_nbr = FALSE,
+        max_nbr_id = n_train_vertices,
+        by_row = FALSE
+      )
+    }
+
     if (is.logical(init_weighted)) {
       embedding_block <-
         init_new_embedding(
           train_embedding = train_embedding,
-          nn_idx = as.vector(nnt$idx),
-          n_test_vertices = ncol(nnt$idx),
+          nn_idx = nn_idxv,
+          n_test_vertices = n_vertices,
           graph = graph_blockv,
           weighted = init_weighted,
           n_threads = n_threads,

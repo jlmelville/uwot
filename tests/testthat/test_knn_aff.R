@@ -9,7 +9,7 @@ for (i in seq_len(nrow(nn$idx))) {
 }
 expected_sparse <- Matrix::drop0(expected_sparse)
 
-res <- nn_to_sparse(nn$idx, val = 2)
+res <- nng_to_sparse(nn$idx, val = 2)
 expect_equal(res, expected_sparse)
 
 v <- 1
@@ -21,7 +21,7 @@ for (i in seq_len(nrow(nn$idx))) {
     v <- v + 1
   }
 }
-expect_equal(nn_to_sparse(nn$idx, matrix(1:40, nrow = 10, byrow = TRUE)),
+expect_equal(nng_to_sparse(nn$idx, matrix(1:40, nrow = 10, byrow = TRUE)),
   Matrix::drop0(expected_sparse_mv),
   check.attributes = FALSE
 )

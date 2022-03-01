@@ -103,7 +103,7 @@ expect_equal(res$rho, expected_rho4)
 
 ### Various fuzzy set matrices are defined in helper_fuzzy_sets.R
 # unsymmetrized fuzzy set
-res <- nn_to_sparse(t(nn_4$idx), res$matrix, self_nbr = TRUE, by_row = FALSE)
+res <- nng_to_sparse(t(nn_4$idx), res$matrix, self_nbr = TRUE, by_row = FALSE)
 expect_equal(res, V_asymm, tol = 1e-4)
 
 # Fuzzy Set Union
@@ -131,7 +131,7 @@ res_cpp_conn1 <- smooth_knn_distances_parallel(
   n_threads = 0
 )
 
-expect_equal(nn_to_sparse(nn_4$idx, flatmat(res_cpp_conn1$matrix, nbrs4),
+expect_equal(nng_to_sparse(nn_4$idx, flatmat(res_cpp_conn1$matrix, nbrs4),
                           self_nbr = TRUE),
              V_asymm,
              tol = 1e-4)
@@ -148,7 +148,7 @@ res_cpp_conn1.5 <-
       min_k_dist_scale = 1e-3,
       n_threads = 0
     )
-expect_equal(nn_to_sparse(t(nn_4$idx), res_cpp_conn1.5$matrix,
+expect_equal(nng_to_sparse(t(nn_4$idx), res_cpp_conn1.5$matrix,
                           self_nbr = TRUE, by_row = FALSE),
              V_asymm_local,
              tol = 1e-4)
@@ -167,7 +167,7 @@ res_cpp_conn1 <-
       n_threads = 1,
       grain_size = 1
     )
-expect_equal(nn_to_sparse(t(nn_4$idx), res_cpp_conn1$matrix,
+expect_equal(nng_to_sparse(t(nn_4$idx), res_cpp_conn1$matrix,
                           self_nbr = TRUE, by_row = FALSE),
              V_asymm,
              tol = 1e-4)
@@ -185,7 +185,7 @@ res_cpp_conn1.5 <-
       n_threads = 1,
       grain_size = 1
     )
-expect_equal(nn_to_sparse(t(nn_4$idx), res_cpp_conn1.5$matrix,
+expect_equal(nng_to_sparse(t(nn_4$idx), res_cpp_conn1.5$matrix,
                           self_nbr = TRUE, by_row = FALSE),
              V_asymm_local,
              tol = 1e-4)
@@ -212,7 +212,7 @@ res_cpp_conn1.5_cross <-
       n_threads = 0
     )
 expect_equal(
-  nn_to_sparse(
+  nng_to_sparse(
     t(nn_4$idx),
     res_cpp_conn1.5_cross$matrix,
     by_row = FALSE,
@@ -236,7 +236,7 @@ res_cpp_conn1.5_cross <-
       n_threads = 1
     )
 expect_equal(
-  nn_to_sparse(
+  nng_to_sparse(
     t(nn_4$idx),
     res_cpp_conn1.5_cross$matrix,
     by_row = FALSE,

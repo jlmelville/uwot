@@ -135,7 +135,11 @@ check_graph <- function(graph, expected_rows, expected_cols) {
   stopifnot(methods::is(idx, "matrix"))
   stopifnot(methods::is(dist, "matrix"))
   stopifnot(dim(idx) == dim(dist))
-  stopifnot(nrow(idx) == expected_rows)
+  if (!is.null(expected_rows)) {
+    # graph may be our only source of input data, in which case no other source
+    # to validate from
+    stopifnot(nrow(idx) == expected_rows)
+  }
   stopifnot(ncol(idx) == expected_cols)
 }
 
@@ -174,10 +178,6 @@ nn_graph_nbrs <- function(graph) {
 
 is_sparse_matrix <- function(m) {
   methods::is(m, "sparseMatrix")
-}
-
-is_precomputed_nn <- function(nn) {
-  is.list(nn) || is_sparse_matrix(nn)
 }
 
 # Add the (named) values in l2 to l1.

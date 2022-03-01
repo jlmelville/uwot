@@ -148,3 +148,54 @@ test_that("can use pre-calculated neighbors in transform", {
   expect_equal(iris_umap_test_rand0, test_init)
 })
 
+test_that("equivalent results with nn graph or sparse distance matrix", { 
+  set.seed(42)
+  iris_even <- iris[seq(2, 75, 2), ]
+  iris_odd <- iris[seq(1, 25, 2), ]
+  
+  iris_even_nn <- uwot:::annoy_nn(
+    X = uwot:::x2m(iris_even),
+    k = 10,
+    metric = "euclidean",
+    ret_index = TRUE
+  )
+  row.names(iris_even_nn$idx) <- row.names(iris_even)
+  row.names(iris_even_nn$dist) <- row.names(iris_even)
+  
+  iris_odd_nn <- annoy_search(
+    X = uwot:::x2m(iris_odd),
+    k = 10,
+    ann = iris_even_nn$index
+  )
+  row.names(iris_odd_nn$idx) <- row.names(iris_odd)
+  row.names(iris_odd_nn$dist) <- row.names(iris_odd)
+  
+  iris_even_nn$index <- NULL
+  
+  iris_even_umap <-
+    umap(
+      X = NULL,
+      nn_method = iris_even_nn,
+      ret_model = TRUE
+    )
+  
+  set.seed(42)
+  iris_odd_transform_nn_graph <-
+    umap_transform(X = NULL, iris_even_umap, nn_method = iris_odd_nn)
+  expect_ok_matrix(iris_odd_transform_nn_graph, nrow(iris_odd), 2)
+  expect_equal(row.names(iris_odd_transform_nn_graph), row.names(iris_odd))
+  
+  iris_odd_nn_sp <-
+    t(uwot:::nng_to_sparse(iris_odd_nn$idx, as.vector(iris_odd_nn$dist), self_nbr = FALSE,
+                           max_nbr_id = nrow(iris_even)))
+  row.names(iris_odd_nn_sp) <- row.names(iris_even_umap$embedding)
+  colnames(iris_odd_nn_sp) <- row.names(iris_odd)
+  
+  set.seed(42)
+  iris_odd_transform_sp <-
+    umap_transform(X = NULL, iris_even_umap, nn_method = iris_odd_nn_sp)
+  expect_ok_matrix(iris_odd_transform_sp, nrow(iris_odd), 2)
+  expect_equal(row.names(iris_odd_transform_sp), row.names(iris_odd))
+
+  expect_equal(iris_odd_transform_nn_graph, iris_odd_transform_sp)
+})

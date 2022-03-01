@@ -20,8 +20,6 @@ res2 <- umap(iris10,
 )
 expect_equal(res2, res)
 
-
-
 # Distance matrix input
 res <- umap(dist(iris10),
   n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
@@ -210,6 +208,8 @@ expect_equal(res_spnn0$embedding, res$embedding)
 
 sparse_nbr_matrix0_with_names <- sparse_nbr_matrix0
 row.names(sparse_nbr_matrix0_with_names) <- row.names(iris10)
+colnames(sparse_nbr_matrix0_with_names) <- row.names(iris10)
+
 expect_equal(res_spnn0$nn$euclidean, sparse_nbr_matrix0_with_names)
 
 # sparse neighbor matrix without explicit zeros
