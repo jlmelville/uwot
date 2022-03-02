@@ -1681,6 +1681,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         X <- as.matrix(X)
       }
     }
+    else {
+      stop("Unknown input data format")
+    }
     checkna(X)
     n_vertices <- nrow(X)
     tsmessage(

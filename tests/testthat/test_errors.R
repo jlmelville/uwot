@@ -1,7 +1,7 @@
 library(uwot)
 context("Input validation")
 
-
+expect_error(umap(X = list(X = "bad", Y = "wrong", nn = "what")), "data format")
 expect_error(umap(iris10, n_neighbors = 1, n_threads = 0), "n_neighbors")
 expect_error(umap(iris10, n_neighbors = 15, n_threads = 0), "n_neighbors")
 expect_error(umap(iris10, set_op_mix_ratio = 10, n_threads = 0), "set_op_mix_ratio")

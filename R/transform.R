@@ -272,7 +272,10 @@ umap_transform <- function(X = NULL, model = NULL,
   # the number of model vertices
   n_vertices <- NULL
   Xnames <- NULL
-  if (!is.null(X)){
+  if (!is.null(X)) {
+    if (!(methods::is(X, "data.frame") || methods::is(X, "matrix"))) {
+      stop("Unknown input data format")
+    }
     if (ncol(X) != norig_col) {
       stop("Incorrect dimensions: X must have ", norig_col, " columns")
     }
