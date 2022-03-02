@@ -129,27 +129,34 @@ checkna <- function(X) {
   }
 }
 
-check_graph <- function(graph, expected_rows, expected_cols) {
+check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL, max_idx = NULL) {
   idx <- graph$idx
   dist <- graph$dist
   stopifnot(methods::is(idx, "matrix"))
   stopifnot(methods::is(dist, "matrix"))
   stopifnot(dim(idx) == dim(dist))
+  # graph may be our only source of input data, in which case no other source
+  # to validate from
   if (!is.null(expected_rows)) {
-    # graph may be our only source of input data, in which case no other source
-    # to validate from
     stopifnot(nrow(idx) == expected_rows)
   }
-  stopifnot(ncol(idx) == expected_cols)
+  if (!is.null(expected_cols)) {
+    stopifnot(ncol(idx) == expected_cols)
+  }
+  if (!is.null(max_idx)) {
+    if (max(idx) > max_idx) {
+      stop("invalid neighbor indices")
+    }
+  }
 }
 
-check_graph_list <- function(graph, expected_rows, expected_cols) {
+check_graph_list <- function(graph, expected_rows = NULL, expected_cols = NULL, max_idx = NULL) {
   if (!is.null(graph$idx)) {
-    return(check_graph(graph, expected_rows, expected_cols))
+    return(check_graph(graph, expected_rows, expected_cols, max_idx))
   }
   ngraphs <- length(graph)
   for (i in 1:ngraphs) {
-    check_graph(graph[[i]], expected_rows, expected_cols)
+    check_graph(graph[[i]], expected_rows, expected_cols, max_idx)
   }
 }
 

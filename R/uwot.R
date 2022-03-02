@@ -1629,14 +1629,14 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (is.list(nn_method)) {
       n_vertices <- x2nv(nn_method)
       stopifnot(n_vertices > 0)
-      n_neighbors <- nn_graph_nbrs(nn_method)
+      n_neighbors <- max(nn_graph_nbrs(nn_method))
       stopifnot(n_neighbors > 1 && n_neighbors <= n_vertices)
-      check_graph_list(nn_method, n_vertices, n_neighbors)
+      check_graph_list(nn_method, n_vertices, max_idx = n_vertices)
       Xnames <- nn_graph_row_names(nn_method)
     }
     else if (is_sparse_matrix(nn_method)) {
       nn_method <- Matrix::drop0(nn_method)
-      n_vertices <- x2nv(nn_method, is_sparse_nn_dist = TRUE)
+      n_vertices <- x2nv(nn_method)
       stopifnot(n_vertices > 0)
       n_neighbors <- diff(nn_method@p)
       if (any(n_neighbors < 1)) {
@@ -2531,7 +2531,7 @@ default_num_threads <- function() {
 }
 
 # Get the number of vertices in X
-x2nv <- function(X, is_sparse_nn_dist = FALSE) {
+x2nv <- function(X) {
   if (is.list(X)) {
     if (!is.null(X$idx)) {
       n_vertices <- x2nv(X$idx)
@@ -2549,14 +2549,9 @@ x2nv <- function(X, is_sparse_nn_dist = FALSE) {
     n_vertices <- attr(X, "Size")
   }
   else if (is_sparse_matrix(X)) {
-    if (is_sparse_nn_dist) {
-      # this code path for when nn_method takes sparse distance method
-      n_vertices <- ncol(X)
-    }
-    else {
-      # older code path, no longer recommended
-      n_vertices <- nrow(X)
-    }
+    # older code path where distance matrix was part of X rather than nn_method
+    # used nrow, but transform was not supported so nrow == ncol
+    n_vertices <- ncol(X)
   }
   else if (methods::is(X, "data.frame") || methods::is(X, "matrix")) {
     n_vertices <- nrow(X)
@@ -2767,9 +2762,7 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
                  n_vertices = x2nv(X),
                  verbose = FALSE) {
   if (is.list(nn_method)) {
-    # on first iteration n_neighbors is NULL
-    # on subsequent iterations ensure n_neighbors is consistent for all data
-    validate_nn(nn_method, n_vertices, n_neighbors = n_neighbors)
+    validate_nn(nn_method, n_vertices)
     nn <- nn_method
   }
   else {
@@ -2794,7 +2787,7 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
   nn
 }
 
-validate_nn <- function(nn_method, n_vertices, n_neighbors = NULL) {
+validate_nn <- function(nn_method, n_vertices) {
   if (!is.matrix(nn_method$idx)) {
     stop("Couldn't find precalculated 'idx' matrix")
   }
@@ -2805,10 +2798,6 @@ validate_nn <- function(nn_method, n_vertices, n_neighbors = NULL) {
     )
   }
 
-  # set n_neighbors from these matrices if it hasn't been already set
-  if (is.null(n_neighbors)) {
-    n_neighbors <- ncol(nn_method$idx)
-  }
   if (!is.matrix(nn_method$dist)) {
     stop("Couldn't find precalculated 'dist' matrix")
   }
@@ -2816,8 +2805,8 @@ validate_nn <- function(nn_method, n_vertices, n_neighbors = NULL) {
     stop("Precalculated 'dist' matrix must have ", n_vertices, " rows, but
          found ", nrow(nn_method$dist))
   }
-  if (ncol(nn_method$dist) != n_neighbors) {
-    stop("Precalculated 'dist' matrix must have ", n_neighbors, " cols, but
+  if (ncol(nn_method$dist) !=  ncol(nn_method$idx)) {
+    stop("Precalculated 'dist' matrix must have ",  ncol(nn_method$idx), " cols, but
          found ", ncol(nn_method$dist))
   }
 }

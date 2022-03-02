@@ -36,7 +36,7 @@ expect_error(umap(
 nn5 <- nn
 nn5$idx <- cbind(nn5$idx, rep(100, nrow(nn5$idx)))
 nn5$dist <- cbind(nn5$dist, rep(100.0, nrow(nn5$dist)))
-expect_error(umap(X = NULL, n_threads = 0, nn_method = list(nn, nn5)), "expected_cols")
+expect_error(umap(X = NULL, n_threads = 0, nn_method = list(nn, nn5)), "invalid neighbor")
 expect_error(umap(iris10, n_threads = 0, pca = 0), "positive integer")
 
 expect_error(umap(iris10, n_threads = -1), "n_threads")
