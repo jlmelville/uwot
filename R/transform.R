@@ -302,8 +302,10 @@ umap_transform <- function(X = NULL, model = NULL,
     }
     for (i in 1:num_precomputed_nns) {
       graph <- nn_method[[i]]
+      
       if (is.list(graph)) {
-        check_graph(graph, expected_rows = n_vertices, expected_cols = n_neighbors[[i]])
+        check_graph(graph, expected_rows = n_vertices, 
+                    expected_cols = n_neighbors[[i]], bipartite = TRUE)
         if (is.null(n_vertices)) {
           n_vertices <- nrow(graph$idx)
         }
@@ -428,11 +430,11 @@ umap_transform <- function(X = NULL, model = NULL,
       nn_idxv <- osparse$i + 1
       nn_distv <- osparse$x
       nn_ptr <- osparse$p
-      n_neighbors <- diff(nn_ptr)
-      if (any(n_neighbors < 1)) {
+      n_nbrs <- diff(nn_ptr)
+      if (any(n_nbrs < 1)) {
         stop("All observations need at least one neighbor")
       }
-      target <- log2(n_neighbors)
+      target <- log2(n_nbrs)
       skip_first <- TRUE
     }
     else {
@@ -445,12 +447,20 @@ umap_transform <- function(X = NULL, model = NULL,
         # multiple internal blocks 
         n_nbrs <- n_neighbors
       }
+      if (is.na(n_nbrs) || n_nbrs != nrow(nnt$idx)) {
+        # original neighbor data was sparse, but we are using dense knn format
+        # or n_neighbors doesn't match
+        n_nbrs <- nrow(nnt$idx)
+        tsmessage("Possible mismatch with original vs new neighbor data ", 
+                  "format, using ", n_nbrs, " nearest neighbors")
+      }
       target <- log2(n_nbrs)
       nn_ptr <- n_nbrs
       nn_distv <- as.vector(nnt$dist)
       nn_idxv <- as.vector(nnt$idx)
       skip_first <- TRUE
     }
+
     sknn_res <- smooth_knn(
       nn_dist = nn_distv,
       nn_ptr = nn_ptr,

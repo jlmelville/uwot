@@ -129,7 +129,8 @@ checkna <- function(X) {
   }
 }
 
-check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL, max_idx = NULL) {
+check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL, 
+                        bipartite = FALSE) {
   idx <- graph$idx
   dist <- graph$dist
   stopifnot(methods::is(idx, "matrix"))
@@ -140,25 +141,52 @@ check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL, max_i
   if (!is.null(expected_rows)) {
     stopifnot(nrow(idx) == expected_rows)
   }
-  if (!is.null(expected_cols)) {
+  if (!is.null(expected_cols) && !is.na(expected_cols)) {
     stopifnot(ncol(idx) == expected_cols)
   }
-  if (!is.null(max_idx)) {
-    if (max(idx) > max_idx) {
-      stop("invalid neighbor indices")
+  # if looking at neighbors within one graph there can't be more neighbors
+  # than observations
+  if (!bipartite) {
+    if (ncol(idx) > nrow(idx)) {
+      stop("Invalid neighbors: number exceeds number of observations")
     }
+    if (max(idx) > nrow(idx)) {
+      stop("Invalid neighbors: max index exceeds number of observations")
+    } 
   }
 }
 
-check_graph_list <- function(graph, expected_rows = NULL, expected_cols = NULL, max_idx = NULL) {
-  if (nn_is_single(graph)) {
-  # if (!is.null(graph$idx)) {
-    graph <- list(graph)
+check_sparse_graph <- function(graph, expected_rows = NULL, 
+                               expected_cols = NULL, bipartite = FALSE) {
+  if (!is.null(expected_rows)) {
+    stopifnot(nrow(graph) == expected_rows)
   }
-  num_nns <- length(graph)
+  if (!is.null(expected_cols)) {
+    stopifnot(ncol(graph) == expected_cols)
+  }
+  if (!bipartite) {
+    stopifnot(ncol(graph) == ncol(graph))
+  }
+}
+
+check_graph_list <- function(graph_list, expected_rows = NULL, 
+                             expected_cols = NULL, bipartite = FALSE) {
+  if (nn_is_single(graph_list)) {
+    graph_list <- list(graph_list)
+  }
+  num_nns <- length(graph_list)
   for (i in 1:num_nns) {
-    # FIXME: sparse distance
-    check_graph(graph[[i]], expected_rows, expected_cols, max_idx)
+    graph <- graph_list[[i]]
+    if (is.list(graph)) {
+      check_graph(graph, expected_rows, expected_cols, bipartite = bipartite)
+    }
+    else if (is_sparse_matrix(graph)) {
+      check_sparse_graph(graph, expected_rows, expected_cols, 
+                         bipartite = bipartite)
+    }
+    else {
+      stop("Unknown neighbor data format")
+    }
   }
   num_nns
 }
@@ -169,8 +197,17 @@ nn_graph_row_names_list <- function(graph_list) {
   }
   xnames <- NULL
   for (i in 1:length(graph_list)) {
-    xnames <- nn_graph_row_names(graph_list[[i]])
-    if (is.null(xnames)) {
+    graph <- graph_list[[i]]
+    if (is.list(graph)) {
+      xnames <- nn_graph_row_names(graph)
+    }
+    else if (is_sparse_matrix(graph)) {
+      xnames <- row.names(graph)
+    }
+    else {
+      stop("Unknown neighbor data format")
+    }
+    if (!is.null(xnames)) {
       break
     }
   }
@@ -179,7 +216,6 @@ nn_graph_row_names_list <- function(graph_list) {
 
 # from a nn graph (or list) get the first non-NULL row names
 nn_graph_row_names <- function(graph) {
-  # FIXME: sparse distance
   xnames <- NULL
   if (!is.null(row.names(graph$idx))) {
     xnames <- row.names(graph$idx)
@@ -199,9 +235,16 @@ nn_graph_nbrs_list <- function(graph_list) {
 
 # from a nn graph (or list) get the number of neighbors
 nn_graph_nbrs <- function(graph) {
+  if (is.list(graph)) {
+    ncol(graph$idx)
+  }
+  else if (is_sparse_matrix(graph)) {
+    NA
+  }
+  else {
+    stop("Unknown neighbor data format")
+  }
 
-  # FIXME: sparse distance
-  ncol(graph$idx)
 }
 
 is_sparse_matrix <- function(m) {

@@ -187,7 +187,7 @@
 #'     containing the distances of the nearest neighbors.
 #'   }
 #'   or a sparse distance matrix of type \code{dgCMatrix}, with dimensions 
-#'   \code{n_neighbors x n_neighbors}. Distances should be arranged by column,
+#'   \code{n_vertices x n_vertices}. Distances should be arranged by column,
 #'   i.e. a non-zero entry in row \code{j} of the \code{i}th column indicates
 #'   that the \code{j}th observation in \code{X} is a nearest neighbor of the
 #'   \code{i}th observation with the distance given by the value of that
@@ -764,7 +764,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     containing the distances of the nearest neighbors.
 #'   }
 #'   or a sparse distance matrix of type \code{dgCMatrix}, with dimensions 
-#'   \code{n_neighbors x n_neighbors}. Distances should be arranged by column,
+#'   \code{n_vertices x n_vertices}. Distances should be arranged by column,
 #'   i.e. a non-zero entry in row \code{j} of the \code{i}th column indicates
 #'   that the \code{j}th observation in \code{X} is a nearest neighbor of the
 #'   \code{i}th observation with the distance given by the value of that
@@ -1625,33 +1625,14 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (is.character(init) && tolower(init) %in% c("spca", "pca")) {
       stop("init = 'pca' and 'spca' can't be used with X = NULL")
     }
-    # FIXME 1: allow list of nn_method for graph and matrix
-    if (is.list(nn_method)) {
-      if (length(nn_method) == 0) {
-        stop("Incorrect format for precalculated neighbor data")
-      }
-      n_vertices <- x2nv(nn_method)
-      stopifnot(n_vertices > 0)
-      n_neighbors <- nn_graph_nbrs_list(nn_method)
-      stopifnot(min(n_neighbors) > 1 && max(n_neighbors) <= n_vertices)
-      num_nns <- check_graph_list(nn_method, n_vertices, max_idx = n_vertices)
-      Xnames <- nn_graph_row_names_list(nn_method)
-      num_precomputed_nns <- num_nns
+    if (length(nn_method) == 0) {
+      stop("Incorrect format for precalculated neighbor data")
     }
-    else if (is_sparse_matrix(nn_method)) {
-      nn_method <- Matrix::drop0(nn_method)
-      n_vertices <- x2nv(nn_method)
-      stopifnot(n_vertices > 0)
-      n_neighbors <- diff(nn_method@p)
-      if (any(n_neighbors < 1)) {
-        stop("All observations must have at least one neighbor")
-      }
-      n_neighbors <- max(n_neighbors)
-      Xnames <- row.names(nn_method)
-    }
-    else {
-      stop("BUG: unknown nn data format")
-    }
+    n_vertices <- x2nv(nn_method)
+    stopifnot(n_vertices > 0)
+    num_precomputed_nns <- check_graph_list(nn_method, n_vertices, 
+                                            bipartite = FALSE)
+    Xnames <- nn_graph_row_names_list(nn_method)
   }
   else if (methods::is(X, "dist")) {
     if (ret_model) {
@@ -2090,7 +2071,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (ret_model) {
       res <- append(res, list(
         scale_info = if (!is.null(X)) { attr_to_scale_info(X) } else { NULL },
-        n_neighbors = n_neighbors,
         search_k = search_k,
         local_connectivity = local_connectivity,
         n_epochs = n_epochs,
@@ -2108,24 +2088,27 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         opt_args = full_opt_args,
         num_precomputed_nns = num_precomputed_nns
       ))
+      if (nn_is_precomputed(nn_method)) {
+        res$n_neighbors <- nn_graph_nbrs_list(nn_method)
+      }
+      else {
+        res$n_neighbors <- n_neighbors
+      }
       if (method == "leopold") {
         res$dens_scale <- dens_scale
         res$ai <- ai
         res$rad_coeff <- rad_coeff
       }
       if (nblocks > 1) {
-        res$nn_index <- list()
-        for (i in 1:nblocks) {
-          res$nn_index[[i]] <- nns[[i]]$index
+        if (!nn_is_precomputed(nn_method)) {
+          res$nn_index <- list()
+          for (i in 1:nblocks) {
+            res$nn_index[[i]] <- nns[[i]]$index
+          }
         }
       }
       else {
-        if (is_sparse_matrix(nns[[1]])) {
-          tsmessage("Note: model requested with precomputed neighbors. ", 
-                    "For transforming new data, distance data must be ", 
-                    "provided separately")
-        }
-        else if (!is.null(nns[[1]]$index)) {
+        if (!is.null(nns[[1]]$index)) {
           res$nn_index <- nns[[1]]$index
           if (is.null(res$metric[[1]])) {
             # 31: Metric usually lists column indices or names, NULL means use all
@@ -2140,6 +2123,13 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
             } else {
               res$metric[[1]] <- list()
             }
+          }
+        }
+        else {
+          if (nn_is_precomputed(nn_method)) {
+            tsmessage("Note: model requested with precomputed neighbors. ", 
+                      "For transforming new data, distance data must be ", 
+                      "provided separately")
           }
         }
       }
@@ -2710,12 +2700,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     # Extract this block of nn data from list of lists
     if (metric == "precomputed") {
       nn_sub <- nn_method[[i]]
-      if (i == 1) {
-        n_neighbors <- NULL
-      }
-      else {
-        n_neighbors <- ncol(nn_method[[1]]$idx)
-      }
+      n_neighbors <- NULL
     }
 
     x2set_res <- x2set(Xsub, n_neighbors, metric,

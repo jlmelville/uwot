@@ -227,7 +227,7 @@ must be one of two formats, either a list consisting of two elements:
   containing the distances of the nearest neighbors.
 }
 or a sparse distance matrix of type \code{dgCMatrix}, with dimensions 
-\code{n_neighbors x n_neighbors}. Distances should be arranged by column,
+\code{n_vertices x n_vertices}. Distances should be arranged by column,
 i.e. a non-zero entry in row \code{j} of the \code{i}th column indicates
 that the \code{j}th observation in \code{X} is a nearest neighbor of the
 \code{i}th observation with the distance given by the value of that

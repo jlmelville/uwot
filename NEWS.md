@@ -31,6 +31,24 @@ yourself.
     Even if not use `dens_weight`, visualizing the output coordinates using a
     color scale based on the value of `localr` can reveal regions of the input
     data with different densities.
+* For functions `umap` and `tumap` only: new data type for precomputed nearest
+neighbor data passed as the `nn_method` parameter: you may use a sparse distance
+matrix of format `dgCMatrix` with dimensions `N x N` where `N` is the number of
+observations in the input data. Distances should be arranged by column, i.e. a
+non-zero entry in row `j` of the `i`th column indicates that the `j`th
+observation in the input data is a nearest neighbor of the `i`th observation
+with the distance given by the value of that element. Note that this is a
+different format to the sparse distance matrix that can be passed as input to
+`X`: notably, the matrix is not assumed to be symmetric. Unlike other input
+formats, you may have a different number of neighbors for each observation (but
+there must be at least one neighbor defined per observation).
+* `umap_transform` can also take a sparse distance matrix as its `nn_method`
+parameter if precomputed nearest neighbor data is used to generate an initial
+model. The format is the same as for the `nn_method` with `umap`. Because
+distances are arranged by columns, the expected dimensions of the sparse matrix
+is `N_model x N_new` where `N_model` is the number of observations in the
+original data and `N_new` is the number of observations in the data to be
+transformed.
 
 ## Bug fixes and minor improvements
 
