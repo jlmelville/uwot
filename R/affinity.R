@@ -33,9 +33,14 @@ smooth_knn <- function(nn_dist,
   }
   tsmessage(
     "Commencing smooth kNN distance calibration",
-    pluralize("thread", n_threads, " using")
+    pluralize("thread", n_threads, " using"), appendLF = FALSE
   )
-  
+  if (length(target) == 1) {
+    tsmessage(" with target n_neighbors = ", formatC(2 ^ target), time_stamp = FALSE)
+  }
+  else {
+    tsmessage(time_stamp = FALSE)
+  }
   affinity_matrix_res <- smooth_knn_distances_parallel(
     nn_dist = nn_dist,
     nn_ptr = nn_ptr,

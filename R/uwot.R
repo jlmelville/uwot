@@ -1617,6 +1617,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   # row names for the input data, which we will apply to the embedding if
   # needed
   Xnames <- NULL
+  num_precomputed_nns <- 0
   if (is.null(X)) {
     if (!nn_is_precomputed(nn_method)) {
       stop("If X is NULL, must provide NN data in nn_method")
@@ -1625,14 +1626,17 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       stop("init = 'pca' and 'spca' can't be used with X = NULL")
     }
     # FIXME 1: allow list of nn_method for graph and matrix
-    # FIXME 2: allow n_neighbors to vary
     if (is.list(nn_method)) {
+      if (length(nn_method) == 0) {
+        stop("Incorrect format for precalculated neighbor data")
+      }
       n_vertices <- x2nv(nn_method)
       stopifnot(n_vertices > 0)
-      n_neighbors <- max(nn_graph_nbrs(nn_method))
-      stopifnot(n_neighbors > 1 && n_neighbors <= n_vertices)
-      check_graph_list(nn_method, n_vertices, max_idx = n_vertices)
-      Xnames <- nn_graph_row_names(nn_method)
+      n_neighbors <- nn_graph_nbrs_list(nn_method)
+      stopifnot(min(n_neighbors) > 1 && max(n_neighbors) <= n_vertices)
+      num_nns <- check_graph_list(nn_method, n_vertices, max_idx = n_vertices)
+      Xnames <- nn_graph_row_names_list(nn_method)
+      num_precomputed_nns <- num_nns
     }
     else if (is_sparse_matrix(nn_method)) {
       nn_method <- Matrix::drop0(nn_method)
@@ -1719,7 +1723,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_neighbors <- perplexity
   }
 
-  if (n_neighbors > n_vertices) {
+  if (max(n_neighbors) > n_vertices) {
     # pre-calculated nearest neighbors ignores the user-supplied n_neighbors
     # which is handled later
     if (!is.list(nn_method)) {
@@ -2101,7 +2105,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         norig_col = norig_col,
         pcg_rand = pcg_rand,
         batch = batch,
-        opt_args = full_opt_args
+        opt_args = full_opt_args,
+        num_precomputed_nns = num_precomputed_nns
       ))
       if (method == "leopold") {
         res$dens_scale <- dens_scale
@@ -2116,7 +2121,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       }
       else {
         if (is_sparse_matrix(nns[[1]])) {
-          tsmessage("A model cannot be created when using a neighbor matrix")
+          tsmessage("Note: model requested with precomputed neighbors. ", 
+                    "For transforming new data, distance data must be ", 
+                    "provided separately")
         }
         else if (!is.null(nns[[1]]$index)) {
           res$nn_index <- nns[[1]]$index

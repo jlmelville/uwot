@@ -151,20 +151,35 @@ check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL, max_i
 }
 
 check_graph_list <- function(graph, expected_rows = NULL, expected_cols = NULL, max_idx = NULL) {
-  if (!is.null(graph$idx)) {
-    return(check_graph(graph, expected_rows, expected_cols, max_idx))
+  if (nn_is_single(graph)) {
+  # if (!is.null(graph$idx)) {
+    graph <- list(graph)
   }
-  ngraphs <- length(graph)
-  for (i in 1:ngraphs) {
+  num_nns <- length(graph)
+  for (i in 1:num_nns) {
+    # FIXME: sparse distance
     check_graph(graph[[i]], expected_rows, expected_cols, max_idx)
   }
+  num_nns
+}
+
+nn_graph_row_names_list <- function(graph_list) {
+  if (nn_is_single(graph_list)) {
+    graph_list <- list(graph_list)
+  }
+  xnames <- NULL
+  for (i in 1:length(graph_list)) {
+    xnames <- nn_graph_row_names(graph_list[[i]])
+    if (is.null(xnames)) {
+      break
+    }
+  }
+  xnames
 }
 
 # from a nn graph (or list) get the first non-NULL row names
 nn_graph_row_names <- function(graph) {
-  if (is.null(graph$idx)) {
-    graph <- graph[[1]]
-  }
+  # FIXME: sparse distance
   xnames <- NULL
   if (!is.null(row.names(graph$idx))) {
     xnames <- row.names(graph$idx)
@@ -175,11 +190,17 @@ nn_graph_row_names <- function(graph) {
   xnames
 }
 
+nn_graph_nbrs_list <- function(graph_list) {
+  if (nn_is_single(graph_list)) {
+    graph_list <- list(graph_list)
+  }
+  sapply(graph_list, nn_graph_nbrs)
+}
+
 # from a nn graph (or list) get the number of neighbors
 nn_graph_nbrs <- function(graph) {
-  if (is.null(graph$idx)) {
-    graph <- graph[[1]]
-  }
+
+  # FIXME: sparse distance
   ncol(graph$idx)
 }
 

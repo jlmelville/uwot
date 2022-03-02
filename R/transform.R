@@ -267,7 +267,8 @@ umap_transform <- function(X = NULL, model = NULL,
     tsmessage("Using PCG for random number generation")
     pcg_rand <- TRUE
   }
-
+  num_precomputed_nns <- model$num_precomputed_nns
+  
   # the number of model vertices
   n_vertices <- NULL
   Xnames <- NULL
@@ -289,16 +290,20 @@ umap_transform <- function(X = NULL, model = NULL,
     checkna(X)
   } else if (nn_is_precomputed(nn_method)) {
     # store single nn graph as a one-item list
-    if (nblocks == 1 && nn_is_single(nn_method)) {
+    if (num_precomputed_nns == 1 && nn_is_single(nn_method)) {
       nn_method <- list(nn_method)
     }
-    if (length(nn_method) != nblocks) {
-      stop("Expecting ", nblocks, " separate neighbor data blocks")
+    if (length(nn_method) != num_precomputed_nns) {
+      stop("Expecting ", pluralize("pre-computed neighbor data block", num_precomputed_nns))
     }
-    for (i in 1:nblocks) {
+    if (length(n_neighbors) != num_precomputed_nns) {
+      stop("Expecting ", 
+           pluralize("n_neighbor values (one per neighbor block)", num_precomputed_nns))
+    }
+    for (i in 1:num_precomputed_nns) {
       graph <- nn_method[[i]]
       if (is.list(graph)) {
-        check_graph(graph, expected_rows = n_vertices, expected_cols = n_neighbors)
+        check_graph(graph, expected_rows = n_vertices, expected_cols = n_neighbors[[i]])
         if (is.null(n_vertices)) {
           n_vertices <- nrow(graph$idx)
         }
@@ -320,6 +325,7 @@ umap_transform <- function(X = NULL, model = NULL,
         stop("Error: unknown neighbor graph format")
       }
     }
+    nblocks <- num_precomputed_nns
   }
   
   if (!is.null(init)) {
@@ -379,26 +385,26 @@ umap_transform <- function(X = NULL, model = NULL,
   need_sigma <- method == "leopold" && nblocks == 1
   for (i in 1:nblocks) {
     tsmessage("Processing block ", i, " of ", nblocks)
-    if (nblocks == 1) {
-      ann <- nn_index
-      Xsub <- X
-    }
-    else {
-      ann <- nn_index[[i]]
-      subset <- metric[[i]]
-      if (is.list(subset)) {
-        subset <- lsplit_unnamed(subset)$unnamed[[1]]
-      }
-      Xsub <- X[, subset, drop = FALSE]
-    }
-
-    if (!is.null(pca_models) && !is.null(pca_models[[as.character(i)]])) {
-      Xsub <- apply_pca(
-        X = Xsub, pca_res = pca_models[[as.character(i)]],
-        verbose = verbose
-      )
-    }
     if (!is.null(X)) {
+      if (nblocks == 1) {
+        Xsub <- X
+        ann <- nn_index
+      }
+      else {
+        subset <- metric[[i]]
+        if (is.list(subset)) {
+          subset <- lsplit_unnamed(subset)$unnamed[[1]]
+        }
+        Xsub <- X[, subset, drop = FALSE]
+        ann <- nn_index[[i]]
+      }
+      
+      if (!is.null(pca_models) && !is.null(pca_models[[as.character(i)]])) {
+        Xsub <- apply_pca(
+          X = Xsub, pca_res = pca_models[[as.character(i)]],
+          verbose = verbose
+        )
+      }
       nn <- annoy_search(Xsub,
                          k = n_neighbors, ann = ann, search_k = search_k,
                          prep_data = TRUE,
@@ -431,13 +437,20 @@ umap_transform <- function(X = NULL, model = NULL,
     }
     else {
       nnt <- nn_graph_t(nn)
-      target <- log2(n_neighbors)
-      nn_ptr <- n_neighbors
+      if (length(n_neighbors) == nblocks) {
+        # if model came from multiple different external neighbor data
+        n_nbrs <- n_neighbors[[i]]
+      }
+      else {
+        # multiple internal blocks 
+        n_nbrs <- n_neighbors
+      }
+      target <- log2(n_nbrs)
+      nn_ptr <- n_nbrs
       nn_distv <- as.vector(nnt$dist)
       nn_idxv <- as.vector(nnt$idx)
       skip_first <- TRUE
     }
-
     sknn_res <- smooth_knn(
       nn_dist = nn_distv,
       nn_ptr = nn_ptr,
@@ -494,7 +507,9 @@ umap_transform <- function(X = NULL, model = NULL,
       graph <- graph_block
     }
     else {
-      graph <- set_intersect(graph, graph_block, weight = 0.5, reset = TRUE)
+      # resetting local connectivity relies on fuzzy set union which relies on
+      # the graph being square, so we can only reset if the graph is square
+      graph <- set_intersect(graph, graph_block, weight = 0.5, reset = nrow(graph) == ncol(graph))
     }
   }
 
