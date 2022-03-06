@@ -41,8 +41,9 @@ namespace uwot {
 auto mean_average(const std::vector<double> &v, std::size_t begin,
                   std::size_t end) -> double {
   long double mean = 0.0;
+  auto b1 = 1 - begin;
   for (auto i = begin; i < end; ++i) {
-    mean += (v[i] - mean) / (i + 1);
+    mean += (v[i] - mean) / (i + b1);
   }
   return static_cast<double>(mean);
 }
