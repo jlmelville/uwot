@@ -520,9 +520,7 @@ umap_transform <- function(X = NULL, model = NULL,
       graph <- graph_block
     }
     else {
-      # resetting local connectivity relies on fuzzy set union which relies on
-      # the graph being square, so we can only reset if the graph is square
-      graph <- set_intersect(graph, graph_block, weight = 0.5, reset = nrow(graph) == ncol(graph))
+      graph <- set_intersect(graph, graph_block, weight = 0.5, reset = FALSE)
     }
   }
 

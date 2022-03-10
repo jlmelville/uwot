@@ -2920,11 +2920,11 @@ set_intersect <- function(A, B, weight = 0.5, reset = TRUE) {
   A <- general_simplicial_set_intersection(
     A, B, weight
   )
-
+  A <- Matrix::drop0(A)
   # https://github.com/lmcinnes/umap/issues/58#issuecomment-437633658
   # For now always reset
   if (reset) {
-    A <- reset_local_connectivity(Matrix::drop0(A))
+    A <- reset_local_connectivity(A)
   }
   A
 }

@@ -78,6 +78,9 @@ likely to be a breaking change for non-default settings of `bandwidth`, but this
 is not a parameter which is actually exposed by the Python UMAP public API any
 more, so is on the road to deprecation in uwot too and I don't recommend you
 change this.
+* Transforming data with multiple blocks would give an error if the number of
+rows of the new data did not equal the number of number of rows in the original
+data.
 
 # uwot 0.1.11
 
