@@ -59,10 +59,13 @@ transformed.
 rather than an 'Imports'. If you have RSpectra installed, it will be used
 automatically where previous versions required it (for spectral initialization).
 Otherwise, [irlba](https://cran.r-project.org/package=irlba) will be used.
-You are unlikely to notice much difference in speed or accuracy with real-world
-data. For highly-structured simulation datasets (e.g. spectral initialization of 
-a 1D line) then RSpectra will give much better, faster initializations, but
-these are not the typical use cases envisaged for this package.
+For two-dimensional output, you are unlikely to notice much difference in speed
+or accuracy with real-world data. For highly-structured simulation datasets
+(e.g. spectral initialization of a 1D line) then RSpectra will give much better,
+faster initializations, but these are not the typical use cases envisaged for
+this package. For embedding into higher dimensions (e.g. `n_components = 100` or
+higher), RSpectra is recommended and will likely out-perform irlba even if you
+have installed a good linear algebra library.
 * `init = "laplacian"` returned the wrong coordinates because of a slightly 
 subtle issue around how to order the eigenvectors when using the random walk
 transition matrix rather than normalized graph laplacians.
