@@ -287,6 +287,9 @@ umap_transform <- function(X = NULL, model = NULL,
       X <- as.matrix(X[, indexes])
     }
     n_vertices <- nrow(X)
+    if (n_vertices < 1) {
+      stop("Not enough rows in X")
+    }
     if (!is.null(row.names(X))) {
       Xnames <- row.names(X)
     }

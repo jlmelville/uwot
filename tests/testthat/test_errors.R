@@ -74,3 +74,7 @@ nnsp10_nbr0 <- nnsp10
 nnsp10_nbr0[, 5] <- 0
 nnsp10_nbr0 <- Matrix::drop0(nnsp10_nbr0)
 expect_error(umap(X = NULL, n_neighbors = 4, nn_method = nnsp10_nbr0), "at least one neighbor")
+
+# 76: umap_transform does not validate input sufficiently
+model <- umap(iris[1:10, ], n_neighbors = 4, n_epochs = 0, ret_model = TRUE)
+expect_error(trans <- umap_transform(iris[0, ], model = model), "Not enough rows")
