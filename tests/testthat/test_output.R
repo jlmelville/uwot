@@ -114,6 +114,32 @@ expect_equal(res_nnl$nn[[1]], res$nn[[1]])
 expect_equal(names(res_nnl$nn), "precomputed")
 expect_equal(res_nnxn, res_nnl$embedding)
 
+# Passing nn list directly and return a model
+set.seed(1337)
+res_nnl <- umap(iris10,
+                nn_method = res$nn, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
+                init = "rand", verbose = FALSE, n_threads = 0,
+                ret_nn = TRUE, ret_model = TRUE
+)
+expect_ok_matrix(res_nnl$embedding)
+expect_equal(res_nnl$nn[[1]], res$nn[[1]])
+expect_equal(names(res_nnl$nn), "precomputed")
+expect_equal(res_nnxn, res_nnl$embedding)
+expect_equal(res_nnl$num_precomputed_nns, 1)
+
+# Passing nn list directly and return a model and set X to NULL
+set.seed(1337)
+res_nnl <- umap(X = NULL,
+                nn_method = res$nn, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
+                init = "rand", verbose = FALSE, n_threads = 0,
+                ret_nn = TRUE, ret_model = TRUE
+)
+expect_ok_matrix(res_nnl$embedding)
+expect_equal(res_nnl$nn[[1]], res$nn[[1]])
+expect_equal(names(res_nnl$nn), "precomputed")
+expect_equal(res_nnxn, res_nnl$embedding)
+expect_equal(res_nnl$num_precomputed_nns, 1)
+
 # Use multiple nn data
 res_nn2 <- umap(iris10,
   nn_method = list(nn, nn), n_epochs = 2, learning_rate = 0.5,

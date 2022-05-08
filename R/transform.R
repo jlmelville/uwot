@@ -184,6 +184,7 @@ umap_transform <- function(X = NULL, model = NULL,
   else {
     if (!is.null(X)) {
       tsmessage('argument "nn_method" is provided, ignoring argument "X"')
+      X <- NULL
     }
   }
   
@@ -276,7 +277,7 @@ umap_transform <- function(X = NULL, model = NULL,
     if (!(methods::is(X, "data.frame") || methods::is(X, "matrix"))) {
       stop("Unknown input data format")
     }
-    if (ncol(X) != norig_col) {
+    if (!is.null(norig_col) && ncol(X) != norig_col) {
       stop("Incorrect dimensions: X must have ", norig_col, " columns")
     }
     if (methods::is(X, "data.frame")) {

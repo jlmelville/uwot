@@ -1703,6 +1703,15 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     )
   }
 
+  # Store number of precomputed nn if X is non-NULL (NULL X case handled above)
+  if (nn_is_precomputed(nn_method) && num_precomputed_nns == 0) {
+    num_precomputed_nns <- check_graph_list(nn_method, n_vertices, 
+                                          bipartite = FALSE)
+    if (is.null(Xnames)) {
+      Xnames <- nn_graph_row_names_list(nn_method)
+    }
+  }
+  
   if (method == "largevis" && kernel == "knn") {
     n_neighbors <- perplexity
   }

@@ -133,16 +133,26 @@ check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL,
                         bipartite = FALSE) {
   idx <- graph$idx
   dist <- graph$dist
-  stopifnot(methods::is(idx, "matrix"))
-  stopifnot(methods::is(dist, "matrix"))
-  stopifnot(dim(idx) == dim(dist))
+  if (!methods::is(idx, "matrix")) {
+    stop("neighbor graph must contain an 'idx' matrix")
+  }
+  if (!methods::is(dist, "matrix")) {
+    stop("neighbor graph must contain a 'dist' matrix")
+  }
+  if (!all(dim(idx) == dim(dist))) {
+    stop("'idx' and 'dist' matrices must have identical dimensions")
+  }
   # graph may be our only source of input data, in which case no other source
   # to validate from
   if (!is.null(expected_rows)) {
-    stopifnot(nrow(idx) == expected_rows)
+    if (nrow(idx) != expected_rows) {
+      stop("idx matrix has unexpected number of rows")
+    }
   }
   if (!is.null(expected_cols) && !is.na(expected_cols)) {
-    stopifnot(ncol(idx) == expected_cols)
+    if (ncol(idx) != expected_cols) {
+      stop("idx matrix has unexpected number of columns")
+    }
   }
   # if looking at neighbors within one graph there can't be more neighbors
   # than observations
@@ -159,13 +169,19 @@ check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL,
 check_sparse_graph <- function(graph, expected_rows = NULL, 
                                expected_cols = NULL, bipartite = FALSE) {
   if (!is.null(expected_rows)) {
-    stopifnot(nrow(graph) == expected_rows)
+    if (nrow(graph) != expected_rows) {
+      stop("Sparse distance matrix has unexpected number of rows")
+    }
   }
   if (!is.null(expected_cols)) {
-    stopifnot(ncol(graph) == expected_cols)
+    if (ncol(graph) != expected_cols) {
+      stop("Sparse distance matrix has unexpected number of cols")
+    }
   }
   if (!bipartite) {
-    stopifnot(ncol(graph) == ncol(graph))
+    if (nrow(graph) != ncol(graph)) {
+      stop("Sparse distance matrix must have same number of rows and cols")      
+    }
   }
 }
 
@@ -175,6 +191,9 @@ check_graph_list <- function(graph_list, expected_rows = NULL,
     graph_list <- list(graph_list)
   }
   num_nns <- length(graph_list)
+  if (num_nns == 0) {
+    stop("precalculated graph list is empty")
+  }
   for (i in 1:num_nns) {
     graph <- graph_list[[i]]
     if (is.list(graph)) {
