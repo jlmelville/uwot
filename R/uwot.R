@@ -3000,7 +3000,7 @@ find_ab_params <- function(spread = 1, min_dist = 0.001) {
     },
     silent = TRUE
   )
-  if (class(result) == "try-error") {
+  if (inherits(result, "try-error")) {
     stop(
       "Can't find a, b for provided spread = ", spread,
       " min_dist = ", min_dist
