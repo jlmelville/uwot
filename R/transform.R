@@ -585,8 +585,11 @@ umap_transform <- function(X = NULL, model = NULL,
     if (method == "leopold") {
       # Use the linear model 2 log ai = -m log(localr) + c
       aj <- exp(0.5 * ((-log(localr) * rad_coeff[2]) + rad_coeff[1]))
-      # Prevent too-small aj
-      aj[aj < 0.1] <- 0.1
+      # Prevent too-small/large aj
+      min_aj <- min(sqrt(a * 10 ^ (-2 * dens_scale)), 0.1)
+      aj[aj < min_aj] <- min_aj
+      max_aj <- sqrt(a * 10 ^ (2 * dens_scale))
+      aj[aj > max_aj] <- max_aj
       method <- "leopold2"
     }
 
