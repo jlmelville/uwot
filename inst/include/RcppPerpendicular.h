@@ -60,12 +60,13 @@ inline auto split_input_range(const IndexRange &range, std::size_t n_threads,
 
   // compute grain_size (including enforcing requested minimum)
   std::size_t length = range.second - range.first;
-  if (n_threads == 1)
+  if (n_threads == 1) {
     grain_size = length;
-  else if ((length % n_threads) == 0) // perfect division
+  } else if ((length % n_threads) == 0) { // perfect division
     grain_size = (std::max)(length / n_threads, grain_size);
-  else // imperfect division, divide by threads - 1
+  } else { // imperfect division, divide by threads - 1
     grain_size = (std::max)(length / (n_threads - 1), grain_size);
+  }
 
   // allocate ranges
   std::vector<IndexRange> ranges;
@@ -90,6 +91,7 @@ inline void parallel_for(std::size_t begin, std::size_t end, Worker &worker,
         split_input_range(input_range, n_threads, grain_size);
 
     std::vector<std::thread> threads;
+    threads.reserve(ranges.size());
     for (auto &range : ranges) {
       threads.push_back(
           std::thread(&worker_thread<Worker>, std::ref(worker), range));
