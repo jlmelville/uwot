@@ -1538,7 +1538,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  method <- match.arg(tolower(method), c("umap", "tumap", "largevis", "pacmap"))
+  method <- match.arg(tolower(method), c("umap", "tumap", "largevis", "pacmap", "ntumap"))
   
   if (method == "umap" && (is.null(a) || is.null(b))) {
     ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
@@ -2036,6 +2036,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       pacmap = list(a = a, b = b),
       largevis = list(gamma = gamma),
       leopold = list(ai = ai, b = b, ndim = n_components),
+      ntumap = list(gamma = gamma),
       stop("Unknown dimensionality reduction method '", method, "'")
     )
 

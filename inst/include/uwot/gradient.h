@@ -168,6 +168,23 @@ public:
   static const constexpr float clamp_lo = -4.0;
 };
 
+
+class ntumap_gradient {
+public:
+  ntumap_gradient(float gamma) : gamma(gamma) {}
+  auto grad_attr(float d2, std::size_t, std::size_t) const -> float {
+    auto w = 1.0 / (1.0 + d2);
+    return (-2.0 * gamma * w) / (gamma + w);
+  }
+  auto grad_rep(float d2, std::size_t, std::size_t) const -> float {
+    auto w = 1.0 / (1.0 + d2);
+    return (2.0 * w * w) / (gamma + w);
+  }
+  inline auto clamp_grad(float grad_d) const -> float { return grad_d; }
+private:
+  float gamma;
+};
+
 // UMAP where a varies for each observation
 class umapai_gradient {
 public:
