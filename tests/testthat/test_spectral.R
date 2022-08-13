@@ -18,7 +18,7 @@ test_that("1 dimensional output gives a matrix", {
 
 test_that("connected components", {
   # Example from doc of scipy.sparse.csgraph.connected_components
-  graph <- Matrix::drop0(matrix(
+  graph <- as(Matrix::drop0(matrix(
     c(
       0, 1, 1, 0, 0,
       0, 0, 1, 0, 0,
@@ -27,7 +27,7 @@ test_that("connected components", {
       0, 0, 0, 0, 0
     ),
     nrow = 5, byrow = TRUE
-  ))
+  )), "generalMatrix")
 
   cc_res <- connected_components(graph)
   expect_equal(cc_res$n_components, 2)

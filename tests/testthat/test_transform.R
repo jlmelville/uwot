@@ -1,7 +1,8 @@
 library(uwot)
 context("Transform")
 
-graph <- V_asymm + diag(1, nrow(V_asymm), ncol(V_asymm))
+diagonal1s <- as(diag(1, nrow(V_asymm), ncol(V_asymm)), "generalMatrix")
+graph <- V_asymm + diagonal1s
 dV <- as.matrix(graph)
 vdV <- as.vector(t(dV))
 dgraph <- matrix(vdV[vdV > 0], byrow = TRUE, nrow = 10)

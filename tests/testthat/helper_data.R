@@ -46,7 +46,7 @@ create_data <- function() {
 
   dmiris10zl <- dmiris10
   dmiris10zl[dmiris10zl > 0.71] <- 0
-  dmiris10z <<- Matrix::drop0(dmiris10zl)
+  dmiris10z <<- as(Matrix::drop0(dmiris10zl), "generalMatrix")
 
   # some Y data
   ycat <<- as.factor(c(levels(iris$Species)[rep(1:3, each = 3)], NA))

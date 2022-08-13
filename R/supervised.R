@@ -15,7 +15,7 @@ categorical_simplicial_set_intersection <- function(
                                                     verbose = FALSE) {
 
   # Convert to dgTMatrix to get to the j indices
-  simplicial_set <- methods::as(simplicial_set, "dgTMatrix")
+  simplicial_set <- methods::as(simplicial_set, "TsparseMatrix")
   simplicial_set@x <- fast_intersection_cpp(
     simplicial_set@i,
     simplicial_set@j,
@@ -60,7 +60,7 @@ fast_intersection <- function(rows, cols, values, target, unknown_dist = 1.0,
 }
 
 general_simplicial_set_intersection <- function(left, right, weight) {
-  result <- methods::as(left + right, "dgTMatrix")
+  result <- methods::as(left + right, "TsparseMatrix")
 
   result@x <- general_sset_intersection_cpp(
     left@p,
