@@ -15,7 +15,7 @@ directory that was used in either the save or load of the model.}
 \item{verbose}{if \code{TRUE}, log information to the console.}
 }
 \description{
-Unloads the UMAP model. This prevents the model being used with 
+Unloads the UMAP model. This prevents the model being used with
 \code{\link{umap_transform}}, but allows the temporary working directory
 associated with saving or loading the model to be removed.
 }

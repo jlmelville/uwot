@@ -114,25 +114,25 @@ test_that("can use pre-calculated neighbors in transform", {
   set.seed(1337)
   X_train <-as.matrix(iris[c(1:10,51:60), -5])
   X_test <- as.matrix(iris[101:110, -5])
-  iris_train_nn <- annoy_nn(X = X_train, k = 4, 
+  iris_train_nn <- annoy_nn(X = X_train, k = 4,
                             metric = "euclidean", n_threads = 0,
                             ret_index = TRUE)
   # (81) test row names are found if it's just the dist matrix of the NN graph
   row.names(iris_train_nn$dist) <- row.names(X_train)
-  iris_umap_train <- umap(X = NULL, nn_method = iris_train_nn, ret_model = TRUE, 
+  iris_umap_train <- umap(X = NULL, nn_method = iris_train_nn, ret_model = TRUE,
                           n_neighbors = 4)
   expect_equal(row.names(iris_umap_train$embedding), row.names(X_train))
 
-  query_ref_nn <- annoy_search(X = X_test, k = 4, 
+  query_ref_nn <- annoy_search(X = X_test, k = 4,
                                ann = iris_train_nn$index, n_threads = 0)
   # (81) test row names are found if it's just the index matrix of the NN graph
   row.names(query_ref_nn$dist) <- row.names(X_test)
-  
-  iris_umap_test <- umap_transform(X = NULL, model = iris_umap_train, 
+
+  iris_umap_test <- umap_transform(X = NULL, model = iris_umap_train,
                                    nn_method = query_ref_nn)
   expect_ok_matrix(iris_umap_test)
   expect_equal(row.names(iris_umap_test), row.names(X_test))
-  
+
   # also test that we can provide our own input and it's unchanged with 0 epochs
   nr <- nrow(query_ref_nn$idx)
   nc <- ncol(iris_umap_train$embedding)
@@ -141,18 +141,18 @@ test_that("can use pre-calculated neighbors in transform", {
   # we can get row names from init matrix if needed
   row.names(test_init) <- row.names(X_test)
   row.names(query_ref_nn$dist) <- NULL
-  
-  iris_umap_test_rand0 <- umap_transform(X = NULL,  model = iris_umap_train, 
-                                   nn_method = query_ref_nn, 
+
+  iris_umap_test_rand0 <- umap_transform(X = NULL,  model = iris_umap_train,
+                                   nn_method = query_ref_nn,
                                    init = test_init, n_epochs = 0)
   expect_equal(iris_umap_test_rand0, test_init)
 })
 
-test_that("equivalent results with nn graph or sparse distance matrix", { 
+test_that("equivalent results with nn graph or sparse distance matrix", {
   set.seed(42)
   iris_even <- iris[seq(2, 75, 2), ]
   iris_odd <- iris[seq(1, 25, 2), ]
-  
+
   iris_even_nn <- uwot:::annoy_nn(
     X = uwot:::x2m(iris_even),
     k = 10,
@@ -161,7 +161,7 @@ test_that("equivalent results with nn graph or sparse distance matrix", {
   )
   row.names(iris_even_nn$idx) <- row.names(iris_even)
   row.names(iris_even_nn$dist) <- row.names(iris_even)
-  
+
   iris_odd_nn <- annoy_search(
     X = uwot:::x2m(iris_odd),
     k = 10,
@@ -169,28 +169,28 @@ test_that("equivalent results with nn graph or sparse distance matrix", {
   )
   row.names(iris_odd_nn$idx) <- row.names(iris_odd)
   row.names(iris_odd_nn$dist) <- row.names(iris_odd)
-  
+
   iris_even_nn$index <- NULL
-  
+
   iris_even_umap <-
     umap(
       X = NULL,
       nn_method = iris_even_nn,
       ret_model = TRUE
     )
-  
+
   set.seed(42)
   iris_odd_transform_nn_graph <-
     umap_transform(X = NULL, iris_even_umap, nn_method = iris_odd_nn)
   expect_ok_matrix(iris_odd_transform_nn_graph, nrow(iris_odd), 2)
   expect_equal(row.names(iris_odd_transform_nn_graph), row.names(iris_odd))
-  
+
   iris_odd_nn_sp <-
     t(uwot:::nng_to_sparse(iris_odd_nn$idx, as.vector(iris_odd_nn$dist), self_nbr = FALSE,
                            max_nbr_id = nrow(iris_even)))
   row.names(iris_odd_nn_sp) <- row.names(iris_even_umap$embedding)
   colnames(iris_odd_nn_sp) <- row.names(iris_odd)
-  
+
   set.seed(42)
   iris_odd_transform_sp <-
     umap_transform(X = NULL, iris_even_umap, nn_method = iris_odd_nn_sp)

@@ -224,8 +224,8 @@ search. Only used if the \code{nn_method} is \code{"annoy"}.}
 
 \item{n_threads}{Number of threads to use (except during stochastic gradient
 descent). Default is half the number of concurrent threads supported by the
-system. For nearest neighbor search, only applies if 
-\code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index 
+system. For nearest neighbor search, only applies if
+\code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index
 will be temporarily written to disk in the location determined by
 \code{\link[base]{tempfile}}.}
 
@@ -302,9 +302,9 @@ any combination of the following strings:
     would not be sampled by the probabilistic edge sampling employed for
     optimization and therefore the number of non-zero elements in the
     matrix is dependent on \code{n_epochs}. If you are only interested in
-    the fuzzy input graph (e.g. for clustering), setting 
-    \code{n_epochs = 0} will avoid any further sparsifying. Be aware that 
-    setting \code{binary_edge_weights = TRUE} will affect this graph (all 
+    the fuzzy input graph (e.g. for clustering), setting
+    \code{n_epochs = 0} will avoid any further sparsifying. Be aware that
+    setting \code{binary_edge_weights = TRUE} will affect this graph (all
     non-zero edge weights will be 1).
  \item \code{sigma} a vector of the bandwidths used to calibrate the input
     Gaussians to reproduce the target \code{"perplexity"}.
@@ -325,11 +325,11 @@ at the cost of a slightly higher memory use. You may also have to modify
 a speed increase over the single-threaded optimization is likely to be
 dataset and hardware-dependent.}
 
-\item{opt_args}{A list of optimizer parameters, used when 
+\item{opt_args}{A list of optimizer parameters, used when
 \code{batch = TRUE}. The default optimization method used is Adam (Kingma
 and Ba, 2014).
 \itemize{
-  \item \code{method} The optimization method to use. Either \code{"adam"} 
+  \item \code{method} The optimization method to use. Either \code{"adam"}
   or \code{"sgd"} (stochastic gradient descent). Default: \code{"adam"}.
   \item \code{beta1} (Adam only). The weighting parameter for the
   exponential moving average of the first moment estimator. Effectively the
@@ -348,14 +348,14 @@ and Ba, 2014).
   step-size adaptivity and bring the behavior closer to stochastic gradient
   descent with momentum. Typical values are between 1e-8 and 1e-3. Default:
   \code{1e-7}.
-  \item \code{alpha} The initial learning rate. Default: the value of the 
+  \item \code{alpha} The initial learning rate. Default: the value of the
   \code{learning_rate} parameter.
 }}
 
 \item{epoch_callback}{A function which will be invoked at the end of every
 epoch. Its signature should be: \code{(epoch, n_epochs, coords)}, where:
 \itemize{
-  \item \code{epoch} The current epoch number (between \code{1} and 
+  \item \code{epoch} The current epoch number (between \code{1} and
   \code{n_epochs}).
   \item \code{n_epochs} Number of epochs to use during the optimization of
   the embedded coordinates.
@@ -364,20 +364,20 @@ epoch. Its signature should be: \code{(epoch, n_epochs, coords)}, where:
 }}
 
 \item{pca_method}{Method to carry out any PCA dimensionality reduction when
-the \code{pca} parameter is specified. Allowed values are: 
+the \code{pca} parameter is specified. Allowed values are:
 \itemize{
   \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
   \href{https://cran.r-project.org/package=irlba}{irlba} package.
   \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
   the \href{https://cran.r-project.org/package=irlba}{irlba} package.
   This is likely to give much faster but potentially less accurate results
-  than using \code{"irlba"}. For the purposes of nearest neighbor 
+  than using \code{"irlba"}. For the purposes of nearest neighbor
   calculation and coordinates initialization, any loss of accuracy doesn't
   seem to matter much.
   \item{\code{"bigstatsr"}}. Uses \code{\link[bigstatsr]{big_randomSVD}}
   from the \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}
-  package. The SVD methods used in \code{bigstatsr} may be faster on 
-  systems without access to efficient linear algebra libraries (e.g. 
+  package. The SVD methods used in \code{bigstatsr} may be faster on
+  systems without access to efficient linear algebra libraries (e.g.
   Windows). \strong{Note}: \code{bigstatsr} is \emph{not} a dependency of
   uwot: if you choose to use this package for PCA, you \emph{must} install
   it yourself.
@@ -439,7 +439,7 @@ following:
 \examples{
 # Default number of epochs is much larger than for UMAP, assumes random
 # initialization. Use perplexity rather than n_neighbors to control the size
-# of the local neighborhood 20 epochs may be too small for a random 
+# of the local neighborhood 20 epochs may be too small for a random
 # initialization
 iris_lvish <- lvish(iris,
   perplexity = 50, learning_rate = 0.5,

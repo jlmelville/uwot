@@ -186,7 +186,7 @@
 #'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
 #'     containing the distances of the nearest neighbors.
 #'   }
-#'   or a sparse distance matrix of type \code{dgCMatrix}, with dimensions 
+#'   or a sparse distance matrix of type \code{dgCMatrix}, with dimensions
 #'   \code{n_vertices x n_vertices}. Distances should be arranged by column,
 #'   i.e. a non-zero entry in row \code{j} of the \code{i}th column indicates
 #'   that the \code{j}th observation in \code{X} is a nearest neighbor of the
@@ -260,20 +260,20 @@
 #'   carrying out PCA. For binary data, it's recommended to set this to
 #'   \code{FALSE}.
 #' @param pca_method Method to carry out any PCA dimensionality reduction when
-#'   the \code{pca} parameter is specified. Allowed values are: 
+#'   the \code{pca} parameter is specified. Allowed values are:
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
-#'     than using \code{"irlba"}. For the purposes of nearest neighbor 
+#'     than using \code{"irlba"}. For the purposes of nearest neighbor
 #'     calculation and coordinates initialization, any loss of accuracy doesn't
 #'     seem to matter much.
 #'     \item{\code{"bigstatsr"}}. Uses \code{\link[bigstatsr]{big_randomSVD}}
 #'     from the \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}
-#'     package. The SVD methods used in \code{bigstatsr} may be faster on 
-#'     systems without access to efficient linear algebra libraries (e.g. 
+#'     package. The SVD methods used in \code{bigstatsr} may be faster on
+#'     systems without access to efficient linear algebra libraries (e.g.
 #'     Windows). \strong{Note}: \code{bigstatsr} is \emph{not} a dependency of
 #'     uwot: if you choose to use this package for PCA, you \emph{must} install
 #'     it yourself.
@@ -351,8 +351,8 @@
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
-#'   system. For nearest neighbor search, only applies if 
-#'   \code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index 
+#'   system. For nearest neighbor search, only applies if
+#'   \code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
@@ -372,11 +372,11 @@
 #'   only written to disk if \code{n_threads > 1} and
 #'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
-#' @param opt_args A list of optimizer parameters, used when 
+#' @param opt_args A list of optimizer parameters, used when
 #'   \code{batch = TRUE}. The default optimization method used is Adam (Kingma
 #'   and Ba, 2014).
 #'   \itemize{
-#'     \item \code{method} The optimization method to use. Either \code{"adam"} 
+#'     \item \code{method} The optimization method to use. Either \code{"adam"}
 #'     or \code{"sgd"} (stochastic gradient descent). Default: \code{"adam"}.
 #'     \item \code{beta1} (Adam only). The weighting parameter for the
 #'     exponential moving average of the first moment estimator. Effectively the
@@ -395,13 +395,13 @@
 #'     step-size adaptivity and bring the behavior closer to stochastic gradient
 #'     descent with momentum. Typical values are between 1e-8 and 1e-3. Default:
 #'     \code{1e-7}.
-#'     \item \code{alpha} The initial learning rate. Default: the value of the 
+#'     \item \code{alpha} The initial learning rate. Default: the value of the
 #'     \code{learning_rate} parameter.
 #'   }
 #' @param epoch_callback A function which will be invoked at the end of every
 #'   epoch. Its signature should be: \code{(epoch, n_epochs, coords)}, where:
 #'   \itemize{
-#'     \item \code{epoch} The current epoch number (between \code{1} and 
+#'     \item \code{epoch} The current epoch number (between \code{1} and
 #'     \code{n_epochs}).
 #'     \item \code{n_epochs} Number of epochs to use during the optimization of
 #'     the embedded coordinates.
@@ -416,7 +416,7 @@
 #'   effect on UMAP's performance.
 #' @param dens_scale A value between 0 and 1. If > 0 then the output attempts
 #'   to preserve relative local density around each observation. This uses an
-#'   approximation to the densMAP method (Narayan and co-workers, 2021). The 
+#'   approximation to the densMAP method (Narayan and co-workers, 2021). The
 #'   larger the value of \code{dens_scale}, the greater the range of output
 #'   densities that will be used to map the input densities. This option is
 #'   ignored if using multiple \code{metric} blocks.
@@ -426,7 +426,7 @@
 #'     \code{"model"}), returns a list containing extra information that can be
 #'     used to add new data to an existing embedding via
 #'     \code{\link{umap_transform}}. In this case, the coordinates are available
-#'     in the list item \code{embedding}. \bold{NOTE}: The contents of 
+#'     in the list item \code{embedding}. \bold{NOTE}: The contents of
 #'     the \code{model} list should \emph{not} be considered stable or part of
 #'     the public API, and are purposely left undocumented.
 #'     \item if \code{ret_nn = TRUE} (or \code{ret_extra} contains \code{"nn"}),
@@ -440,17 +440,17 @@
 #'     \link[Matrix]{dgCMatrix-class}.
 #'     \item if \code{ret_extra} contains \code{"sigma"}, returns a vector of the
 #'     smooth knn distance normalization terms for each observation as
-#'     \code{"sigma"} and a vector \code{"rho"} containing the largest 
+#'     \code{"sigma"} and a vector \code{"rho"} containing the largest
 #'     distance to the locally connected neighbors of each observation.
-#'     \item if \code{ret_extra} contains \code{"localr"}, returns a vector of 
+#'     \item if \code{ret_extra} contains \code{"localr"}, returns a vector of
 #'     the estimated local radii, the sum of \code{"sigma"} and \code{"rho"}.
 #'   }
 #'   The returned list contains the combined data from any combination of
 #'   specifying \code{ret_model}, \code{ret_nn} and \code{ret_extra}.
 #' @examples
-#' 
+#'
 #' iris30 <- iris[c(1:10, 51:60, 101:110), ]
-#' 
+#'
 #' # Non-numeric columns are automatically removed so you can pass data frames
 #' # directly in a lot of cases without pre-processing
 #' iris_umap <- umap(iris30, n_neighbors = 5, learning_rate = 0.5, init = "random", n_epochs = 20)
@@ -464,7 +464,7 @@
 #' iris_umap <- umap(iris30, n_neighbors = 5, min_dist = 1, spread = 5, nn_method = nn, n_epochs = 20)
 #'
 #' # Supervised dimension reduction using the 'Species' factor column
-#' iris_sumap <- umap(iris30, n_neighbors = 5, min_dist = 0.001, y = iris30$Species, 
+#' iris_sumap <- umap(iris30, n_neighbors = 5, min_dist = 0.001, y = iris30$Species,
 #'                    target_weight = 0.5, n_epochs = 20)
 #'
 #' # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
@@ -479,19 +479,19 @@
 #' In \emph{Advances in neural information processing systems}
 #' (pp. 585-591).
 #' \url{http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf}
-#' 
-#' Böhm, J. N., Berens, P., & Kobak, D. (2020). 
-#' A unifying perspective on neighbor embeddings along the attraction-repulsion spectrum. 
+#'
+#' Böhm, J. N., Berens, P., & Kobak, D. (2020).
+#' A unifying perspective on neighbor embeddings along the attraction-repulsion spectrum.
 #' \emph{arXiv preprint} \emph{arXiv:2007.08902}.
 #' \url{https://arxiv.org/abs/2007.08902}
-#' 
-#' Damrich, S., & Hamprecht, F. A. (2021). 
-#' On UMAP's true loss function. 
+#'
+#' Damrich, S., & Hamprecht, F. A. (2021).
+#' On UMAP's true loss function.
 #' \emph{Advances in Neural Information Processing Systems}, \emph{34}.
 #' \url{https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html}
 #'
-#' Kingma, D. P., & Ba, J. (2014). 
-#' Adam: A method for stochastic optimization. 
+#' Kingma, D. P., & Ba, J. (2014).
+#' Adam: A method for stochastic optimization.
 #' \emph{arXiv preprint} \emph{arXiv}:1412.6980.
 #' \url{https://arxiv.org/abs/1412.6980}
 #'
@@ -501,7 +501,7 @@
 #' \url{https://arxiv.org/abs/1802.03426}
 #'
 #' Narayan, A., Berger, B., & Cho, H. (2021).
-#' Assessing single-cell transcriptomic variability through density-preserving data visualization. 
+#' Assessing single-cell transcriptomic variability through density-preserving data visualization.
 #' \emph{Nature biotechnology}, \emph{39}(6), 765-774.
 #' \url{https://doi.org/10.1038/s41587-020-00801-7}
 #'
@@ -521,12 +521,12 @@
 #' Visualizing data using t-SNE.
 #' \emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
 #' \url{https://www.jmlr.org/papers/v9/vandermaaten08a.html}
-#' 
-#' Wang, Y., Huang, H., Rudin, C., & Shaposhnik, Y. (2021). 
+#'
+#' Wang, Y., Huang, H., Rudin, C., & Shaposhnik, Y. (2021).
 #' Understanding How Dimension Reduction Tools Work: An Empirical Approach to Deciphering t-SNE, UMAP, TriMap, and PaCMAP for Data Visualization.
 #' \emph{Journal of Machine Learning Research}, \emph{22}(201), 1-73.
 #' \url{https://www.jmlr.org/papers/v22/20-1061.html}
-#' 
+#'
 #' @export
 umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_epochs = NULL, learning_rate = 1, scale = FALSE,
@@ -763,7 +763,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
 #'     containing the distances of the nearest neighbors.
 #'   }
-#'   or a sparse distance matrix of type \code{dgCMatrix}, with dimensions 
+#'   or a sparse distance matrix of type \code{dgCMatrix}, with dimensions
 #'   \code{n_vertices x n_vertices}. Distances should be arranged by column,
 #'   i.e. a non-zero entry in row \code{j} of the \code{i}th column indicates
 #'   that the \code{j}th observation in \code{X} is a nearest neighbor of the
@@ -834,20 +834,20 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   carrying out PCA. For binary data, it's recommended to set this to
 #'   \code{FALSE}.
 #' @param pca_method Method to carry out any PCA dimensionality reduction when
-#'   the \code{pca} parameter is specified. Allowed values are: 
+#'   the \code{pca} parameter is specified. Allowed values are:
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
-#'     than using \code{"irlba"}. For the purposes of nearest neighbor 
+#'     than using \code{"irlba"}. For the purposes of nearest neighbor
 #'     calculation and coordinates initialization, any loss of accuracy doesn't
 #'     seem to matter much.
 #'     \item{\code{"bigstatsr"}}. Uses \code{\link[bigstatsr]{big_randomSVD}}
 #'     from the \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}
-#'     package. The SVD methods used in \code{bigstatsr} may be faster on 
-#'     systems without access to efficient linear algebra libraries (e.g. 
+#'     package. The SVD methods used in \code{bigstatsr} may be faster on
+#'     systems without access to efficient linear algebra libraries (e.g.
 #'     Windows). \strong{Note}: \code{bigstatsr} is \emph{not} a dependency of
 #'     uwot: if you choose to use this package for PCA, you \emph{must} install
 #'     it yourself.
@@ -924,8 +924,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
-#'   system. For nearest neighbor search, only applies if 
-#'   \code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index 
+#'   system. For nearest neighbor search, only applies if
+#'   \code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
@@ -945,11 +945,11 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   only written to disk if \code{n_threads > 1} and
 #'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
-#' @param opt_args A list of optimizer parameters, used when 
+#' @param opt_args A list of optimizer parameters, used when
 #'   \code{batch = TRUE}. The default optimization method used is Adam (Kingma
 #'   and Ba, 2014).
 #'   \itemize{
-#'     \item \code{method} The optimization method to use. Either \code{"adam"} 
+#'     \item \code{method} The optimization method to use. Either \code{"adam"}
 #'     or \code{"sgd"} (stochastic gradient descent). Default: \code{"adam"}.
 #'     \item \code{beta1} (Adam only). The weighting parameter for the
 #'     exponential moving average of the first moment estimator. Effectively the
@@ -968,13 +968,13 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     step-size adaptivity and bring the behavior closer to stochastic gradient
 #'     descent with momentum. Typical values are between 1e-8 and 1e-3. Default:
 #'     \code{1e-7}.
-#'     \item \code{alpha} The initial learning rate. Default: the value of the 
+#'     \item \code{alpha} The initial learning rate. Default: the value of the
 #'     \code{learning_rate} parameter.
 #'   }
 #' @param epoch_callback A function which will be invoked at the end of every
 #'   epoch. Its signature should be: \code{(epoch, n_epochs, coords)}, where:
 #'   \itemize{
-#'     \item \code{epoch} The current epoch number (between \code{1} and 
+#'     \item \code{epoch} The current epoch number (between \code{1} and
 #'     \code{n_epochs}).
 #'     \item \code{n_epochs} Number of epochs to use during the optimization of
 #'     the embedded coordinates.
@@ -993,7 +993,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \code{"model"}), returns a list containing extra information that can be
 #'     used to add new data to an existing embedding via
 #'     \code{\link{umap_transform}}. In this case, the coordinates are available
-#'     in the list item \code{embedding}. \bold{NOTE}: The contents of 
+#'     in the list item \code{embedding}. \bold{NOTE}: The contents of
 #'     the \code{model} list should \emph{not} be considered stable or part of
 #'     the public API, and are purposely left undocumented.
 #'     \item if \code{ret_nn = TRUE} (or \code{ret_extra} contains \code{"nn"}),
@@ -1007,9 +1007,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \link[Matrix]{dgCMatrix-class}.
 #'     \item if \code{ret_extra} contains \code{"sigma"}, returns a vector of the
 #'     smooth knn distance normalization terms for each observation as
-#'     \code{"sigma"} and a vector \code{"rho"} containing the largest 
+#'     \code{"sigma"} and a vector \code{"rho"} containing the largest
 #'     distance to the locally connected neighbors of each observation.
-#'     \item if \code{ret_extra} contains \code{"localr"}, returns a vector of 
+#'     \item if \code{ret_extra} contains \code{"localr"}, returns a vector of
 #'     the estimated local radii, the sum of \code{"sigma"} and \code{"rho"}.
 #'   }
 #'   The returned list contains the combined data from any combination of
@@ -1268,8 +1268,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
-#'   system. For nearest neighbor search, only applies if 
-#'   \code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index 
+#'   system. For nearest neighbor search, only applies if
+#'   \code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
@@ -1304,20 +1304,20 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   carrying out PCA. For binary data, it's recommended to set this to
 #'   \code{FALSE}.
 #' @param pca_method Method to carry out any PCA dimensionality reduction when
-#'   the \code{pca} parameter is specified. Allowed values are: 
+#'   the \code{pca} parameter is specified. Allowed values are:
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
-#'     than using \code{"irlba"}. For the purposes of nearest neighbor 
+#'     than using \code{"irlba"}. For the purposes of nearest neighbor
 #'     calculation and coordinates initialization, any loss of accuracy doesn't
 #'     seem to matter much.
 #'     \item{\code{"bigstatsr"}}. Uses \code{\link[bigstatsr]{big_randomSVD}}
 #'     from the \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}
-#'     package. The SVD methods used in \code{bigstatsr} may be faster on 
-#'     systems without access to efficient linear algebra libraries (e.g. 
+#'     package. The SVD methods used in \code{bigstatsr} may be faster on
+#'     systems without access to efficient linear algebra libraries (e.g.
 #'     Windows). \strong{Note}: \code{bigstatsr} is \emph{not} a dependency of
 #'     uwot: if you choose to use this package for PCA, you \emph{must} install
 #'     it yourself.
@@ -1368,9 +1368,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       would not be sampled by the probabilistic edge sampling employed for
 #'       optimization and therefore the number of non-zero elements in the
 #'       matrix is dependent on \code{n_epochs}. If you are only interested in
-#'       the fuzzy input graph (e.g. for clustering), setting 
-#'       \code{n_epochs = 0} will avoid any further sparsifying. Be aware that 
-#'       setting \code{binary_edge_weights = TRUE} will affect this graph (all 
+#'       the fuzzy input graph (e.g. for clustering), setting
+#'       \code{n_epochs = 0} will avoid any further sparsifying. Be aware that
+#'       setting \code{binary_edge_weights = TRUE} will affect this graph (all
 #'       non-zero edge weights will be 1).
 #'    \item \code{sigma} a vector of the bandwidths used to calibrate the input
 #'       Gaussians to reproduce the target \code{"perplexity"}.
@@ -1380,11 +1380,11 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   only written to disk if \code{n_threads > 1} and
 #'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
 #' @param verbose If \code{TRUE}, log details to the console.
-#' @param opt_args A list of optimizer parameters, used when 
+#' @param opt_args A list of optimizer parameters, used when
 #'   \code{batch = TRUE}. The default optimization method used is Adam (Kingma
 #'   and Ba, 2014).
 #'   \itemize{
-#'     \item \code{method} The optimization method to use. Either \code{"adam"} 
+#'     \item \code{method} The optimization method to use. Either \code{"adam"}
 #'     or \code{"sgd"} (stochastic gradient descent). Default: \code{"adam"}.
 #'     \item \code{beta1} (Adam only). The weighting parameter for the
 #'     exponential moving average of the first moment estimator. Effectively the
@@ -1403,13 +1403,13 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     step-size adaptivity and bring the behavior closer to stochastic gradient
 #'     descent with momentum. Typical values are between 1e-8 and 1e-3. Default:
 #'     \code{1e-7}.
-#'     \item \code{alpha} The initial learning rate. Default: the value of the 
+#'     \item \code{alpha} The initial learning rate. Default: the value of the
 #'     \code{learning_rate} parameter.
 #'   }
 #' @param epoch_callback A function which will be invoked at the end of every
 #'   epoch. Its signature should be: \code{(epoch, n_epochs, coords)}, where:
 #'   \itemize{
-#'     \item \code{epoch} The current epoch number (between \code{1} and 
+#'     \item \code{epoch} The current epoch number (between \code{1} and
 #'     \code{n_epochs}).
 #'     \item \code{n_epochs} Number of epochs to use during the optimization of
 #'     the embedded coordinates.
@@ -1447,7 +1447,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @examples
 #' # Default number of epochs is much larger than for UMAP, assumes random
 #' # initialization. Use perplexity rather than n_neighbors to control the size
-#' # of the local neighborhood 20 epochs may be too small for a random 
+#' # of the local neighborhood 20 epochs may be too small for a random
 #' # initialization
 #' iris_lvish <- lvish(iris,
 #'   perplexity = 50, learning_rate = 0.5,
@@ -1539,7 +1539,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_threads <- default_num_threads()
   }
   method <- match.arg(tolower(method), c("umap", "tumap", "largevis", "pacmap"))
-  
+
   if (method == "umap" && (is.null(a) || is.null(b))) {
     ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
     a <- ab_res[1]
@@ -1584,13 +1584,13 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   pca_method <-
     match.arg(pca_method,
               choices = c("irlba", "svdr", "bigstatsr", "svd", "auto"))
-  
+
   if (fast_sgd) {
     n_sgd_threads <- "auto"
     pcg_rand <- FALSE
     approx_pow <- TRUE
   }
-  
+
   if (n_threads < 0) {
     stop("n_threads cannot be < 0")
   }
@@ -1630,7 +1630,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
     n_vertices <- x2nv(nn_method)
     stopifnot(n_vertices > 0)
-    num_precomputed_nns <- check_graph_list(nn_method, n_vertices, 
+    num_precomputed_nns <- check_graph_list(nn_method, n_vertices,
                                             bipartite = FALSE)
     Xnames <- nn_graph_row_names_list(nn_method)
   }
@@ -1664,11 +1664,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       cat_ids <- cat_res$categoricals
       # Convert categorical columns to factors if they aren't already
       if (!is.null(cat_ids)) {
-        X[, cat_ids] <- sapply(X[, cat_ids, drop = FALSE], factor, 
+        X[, cat_ids] <- sapply(X[, cat_ids, drop = FALSE], factor,
                                simplify = methods::is(X, "matrix"))
         Xcat <- X[, cat_ids, drop = FALSE]
       }
-      
+
       if (methods::is(X, "data.frame")) {
         indexes <- which(vapply(X, is.numeric, logical(1)))
         if (length(indexes) == 0) {
@@ -1705,13 +1705,13 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
   # Store number of precomputed nn if X is non-NULL (NULL X case handled above)
   if (nn_is_precomputed(nn_method) && num_precomputed_nns == 0) {
-    num_precomputed_nns <- check_graph_list(nn_method, n_vertices, 
+    num_precomputed_nns <- check_graph_list(nn_method, n_vertices,
                                           bipartite = FALSE)
     if (is.null(Xnames)) {
       Xnames <- nn_graph_row_names_list(nn_method)
     }
   }
-  
+
   if (method == "largevis" && kernel == "knn") {
     n_neighbors <- perplexity
   }
@@ -1721,7 +1721,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     # which is handled later
     if (!is.list(nn_method)) {
       if (method == "largevis") {
-        # for LargeVis, n_neighbors normally determined from perplexity not an 
+        # for LargeVis, n_neighbors normally determined from perplexity not an
         # error to be too large
         tsmessage("Setting n_neighbors to ", n_vertices)
         n_neighbors <- n_vertices
@@ -1731,7 +1731,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       }
     }
   }
-  
+
   if (!is.list(metric)) {
     metrics <- list(c())
     names(metrics) <- metric
@@ -1938,9 +1938,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         # we handle scaling pca below
         spca = pca_init(X, ndim = n_components, pca_method = pca_method,
                         verbose = verbose),
-        pca = pca_init(X, ndim = n_components, pca_method = pca_method, 
+        pca = pca_init(X, ndim = n_components, pca_method = pca_method,
                        verbose = verbose),
-        pacpca = pca_init(X, ndim = n_components, pca_method = pca_method, 
+        pacpca = pca_init(X, ndim = n_components, pca_method = pca_method,
                            verbose = verbose),
         ispectral = irlba_spectral_init(V, ndim = n_components, verbose = verbose),
         inormlaplacian = irlba_normalized_laplacian_init(V,
@@ -1951,7 +1951,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
           n_neg_nbrs = negative_sample_rate,
           ndim = n_components, verbose = verbose
         ),
-        irlba_spectral = spectral_init(V, ndim = n_components, verbose = verbose, force_irlba = TRUE), 
+        irlba_spectral = spectral_init(V, ndim = n_components, verbose = verbose, force_irlba = TRUE),
         irlba_laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose, force_irlba = TRUE),
         stop("Unknown initialization method: '", init, "'")
       )
@@ -1959,7 +1959,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (init == "pacpca") {
       embedding <- 0.01 * embedding
     }
-    
+
     if (!is.null(init_sdev) || init == "spca") {
       if (is.null(init_sdev)) {
         init_sdev <- 1e-4
@@ -1987,7 +1987,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (binary_edge_weights) {
     V@x <- rep(1, length(V@x))
   }
-  
+
   if (n_epochs > 0) {
     V@x[V@x < max(V@x) / n_epochs] <- 0
     V <- Matrix::drop0(V)
@@ -2010,7 +2010,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     # start/end pointers into the ordered vector
     positive_ptr <- V@p
     epochs_per_sample <- make_epochs_per_sample(V@x, n_epochs)
-    
+
     tsmessage(
       "Commencing optimization for ", n_epochs, " epochs, with ",
       length(positive_head), " positive edges",
@@ -2052,7 +2052,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       epochs_per_sample = epochs_per_sample,
       method = method,
       method_args = method_args,
-      initial_alpha = alpha, 
+      initial_alpha = alpha,
       opt_args = full_opt_args,
       negative_sample_rate = negative_sample_rate,
       pcg_rand = pcg_rand,
@@ -2064,11 +2064,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       verbose = verbose
     )
     embedding <- t(embedding)
-    
+
     gc()
     # Center the points before returning
     embedding <- scale(embedding, center = TRUE, scale = FALSE)
-    
+
     if (is.null(row.names(embedding)) &&
         !is.null(Xnames) && length(Xnames) == nrow(embedding)) {
       row.names(embedding) <- Xnames
@@ -2124,10 +2124,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
           res$nn_index <- nns[[1]]$index
           if (is.null(res$metric[[1]])) {
             # 31: Metric usually lists column indices or names, NULL means use all
-            # of them, but for loading the NN index we need the number of 
+            # of them, but for loading the NN index we need the number of
             # columns explicitly (we don't have access to the column dimension of
             # the input data at load time)
-            # To be sure of the dimensionality, fetch the first item from the 
+            # To be sure of the dimensionality, fetch the first item from the
             # index and see how many elements are in the returned vector.
             if(!is.null(X)){
               rcppannoy <- get_rcppannoy(res$nn_index)
@@ -2139,8 +2139,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         }
         else {
           if (nn_is_precomputed(nn_method)) {
-            tsmessage("Note: model requested with precomputed neighbors. ", 
-                      "For transforming new data, distance data must be ", 
+            tsmessage("Note: model requested with precomputed neighbors. ",
+                      "For transforming new data, distance data must be ",
                       "provided separately")
           }
         }
@@ -2217,51 +2217,51 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @examples
 #' iris_train <- iris[c(1:10, 51:60), ]
 #' iris_test <- iris[100:110, ]
-#' 
+#'
 #' # create model
 #' model <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
-#' 
+#'
 #' # save without unloading: this leaves behind a temporary working directory
 #' model_file <- tempfile("iris_umap")
 #' model <- save_uwot(model, file = model_file)
-#' 
+#'
 #' # The model can continue to be used
 #' test_embedding <- umap_transform(iris_test, model)
-#' 
+#'
 #' # To manually unload the model from memory when finished and to clean up
 #' # the working directory (this doesn't touch your model file)
 #' unload_uwot(model)
-#' 
+#'
 #' # At this point, model cannot be used with umap_transform, this would fail:
 #' # test_embedding2 <- umap_transform(iris_test, model)
-#' 
+#'
 #' # restore the model: this also creates a temporary working directory
 #' model2 <- load_uwot(file = model_file)
 #' test_embedding2 <- umap_transform(iris_test, model2)
-#' 
+#'
 #' # Unload and clean up the loaded model temp directory
 #' unload_uwot(model2)
-#' 
+#'
 #' # clean up the model file
 #' unlink(model_file)
-#' 
+#'
 #' # save with unloading: this deletes the temporary working directory but
 #' # doesn't allow the model to be re-used
 #' model3 <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
 #' model_file3 <- tempfile("iris_umap")
 #' model3 <- save_uwot(model3, file = model_file3, unload = TRUE)
-#' 
+#'
 #' @seealso \code{\link{load_uwot}}, \code{\link{unload_uwot}}
 #' @export
 save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
   if (!all_nn_indices_are_loaded(model)) {
     stop("cannot save: NN index is unloaded")
   }
-  
+
   wd <- getwd()
   model_file <- abspath(file)
   if (file.exists(model_file)) {
-    stop("model file ", model_file, " already exists")    
+    stop("model file ", model_file, " already exists")
   }
 
   tmp_model_file <- NULL
@@ -2271,16 +2271,16 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
       mod_dir <- tempfile(pattern = "dir")
       tsmessage("Creating temp model dir ", mod_dir)
       dir.create(mod_dir)
-      
+
       # create the tempdir/uwot subdirectory
       uwot_dir <- file.path(mod_dir, "uwot")
       tsmessage("Creating dir ", mod_dir)
       dir.create(uwot_dir)
-      
+
       # save model file to tempdir/uwot/model
       model_tmpfname <- file.path(uwot_dir, "model")
       saveRDS(model, file = model_tmpfname)
-      
+
       # save each nn index inside tempdir/uwot/model
       metrics <- names(model$metric)
       n_metrics <- length(metrics)
@@ -2293,7 +2293,7 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
           model$nn_index[[i]]$ann$save(nn_tmpfname)
         }
       }
-      
+
       # archive the files under the temp dir into the single target file
       # change directory so the archive only contains one directory
       tsmessage("Changing to ", mod_dir)
@@ -2331,40 +2331,40 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
 #' @examples
 #' iris_train <- iris[c(1:10, 51:60), ]
 #' iris_test <- iris[100:110, ]
-#' 
+#'
 #' # create model
 #' model <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
-#' 
+#'
 #' # save without unloading: this leaves behind a temporary working directory
 #' model_file <- tempfile("iris_umap")
 #' model <- save_uwot(model, file = model_file)
-#' 
+#'
 #' # The model can continue to be used
 #' test_embedding <- umap_transform(iris_test, model)
-#' 
+#'
 #' # To manually unload the model from memory when finished and to clean up
 #' # the working directory (this doesn't touch your model file)
 #' unload_uwot(model)
-#' 
+#'
 #' # At this point, model cannot be used with umap_transform, this would fail:
 #' # test_embedding2 <- umap_transform(iris_test, model)
-#' 
+#'
 #' # restore the model: this also creates a temporary working directory
 #' model2 <- load_uwot(file = model_file)
 #' test_embedding2 <- umap_transform(iris_test, model2)
-#' 
+#'
 #' # Unload and clean up the loaded model temp directory
 #' unload_uwot(model2)
-#' 
+#'
 #' # clean up the model file
 #' unlink(model_file)
-#' 
+#'
 #' # save with unloading: this deletes the temporary working directory but
 #' # doesn't allow the model to be re-used
 #' model3 <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
 #' model_file3 <- tempfile("iris_umap")
 #' model3 <- save_uwot(model3, file = model_file3, unload = TRUE)
-#' 
+#'
 #' @seealso \code{\link{save_uwot}}, \code{\link{unload_uwot}}
 #' @export
 load_uwot <- function(file, verbose = FALSE) {
@@ -2372,18 +2372,18 @@ load_uwot <- function(file, verbose = FALSE) {
   mod_dir <- tempfile(pattern = "dir")
   tsmessage("Creating temp directory ", mod_dir)
   dir.create(mod_dir)
-  
+
   utils::untar(abspath(file), exdir = mod_dir, verbose = verbose)
-  
+
   model_fname <- file.path(mod_dir, "uwot/model")
   if (!file.exists(model_fname)) {
     stop("Can't find model in ", file)
   }
   model <- readRDS(file = model_fname)
-  
+
   metrics <- names(model$metric)
   n_metrics <- length(metrics)
-  
+
   for (i in 1:n_metrics) {
     nn_fname <- file.path(mod_dir, paste0("uwot/nn", i))
     if (!file.exists(nn_fname)) {
@@ -2408,7 +2408,7 @@ load_uwot <- function(file, verbose = FALSE) {
     }
     ann <- create_ann(annoy_metric, ndim = ndim)
     ann$load(nn_fname)
-    
+
     if (n_metrics == 1) {
       model$nn_index <- list(ann = ann, type = "annoyv1", metric = annoy_metric)
     }
@@ -2417,14 +2417,14 @@ load_uwot <- function(file, verbose = FALSE) {
     }
   }
   model$mod_dir <- mod_dir
-  
+
   model
 }
 
 
 #' Unload a Model
 #'
-#' Unloads the UMAP model. This prevents the model being used with 
+#' Unloads the UMAP model. This prevents the model being used with
 #' \code{\link{umap_transform}}, but allows the temporary working directory
 #' associated with saving or loading the model to be removed.
 #'
@@ -2436,34 +2436,34 @@ load_uwot <- function(file, verbose = FALSE) {
 #' @examples
 #' iris_train <- iris[c(1:10, 51:60), ]
 #' iris_test <- iris[100:110, ]
-#' 
+#'
 #' # create model
 #' model <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
-#' 
+#'
 #' # save without unloading: this leaves behind a temporary working directory
 #' model_file <- tempfile("iris_umap")
 #' model <- save_uwot(model, file = model_file)
-#' 
+#'
 #' # The model can continue to be used
 #' test_embedding <- umap_transform(iris_test, model)
-#' 
+#'
 #' # To manually unload the model from memory when finished and to clean up
 #' # the working directory (this doesn't touch your model file)
 #' unload_uwot(model)
-#' 
+#'
 #' # At this point, model cannot be used with umap_transform, this would fail:
 #' # test_embedding2 <- umap_transform(iris_test, model)
-#' 
+#'
 #' # restore the model: this also creates a temporary working directory
 #' model2 <- load_uwot(file = model_file)
 #' test_embedding2 <- umap_transform(iris_test, model2)
-#' 
+#'
 #' # Unload and clean up the loaded model temp directory
 #' unload_uwot(model2)
-#' 
+#'
 #' # clean up the model file
 #' unlink(model_file)
-#' 
+#'
 #' # save with unloading: this deletes the temporary working directory but
 #' # doesn't allow the model to be re-used
 #' model3 <- umap(iris_train, ret_model = TRUE, n_epochs = 20)
@@ -2486,7 +2486,7 @@ unload_uwot <- function(model, cleanup = TRUE, verbose = FALSE) {
       rcppannoy$unload()
     }
   }
-  
+
   if (cleanup) {
     if (is.null(model$mod_dir)) {
       tsmessage("Model is missing temp dir location, can't clean up")
@@ -2511,7 +2511,7 @@ all_nn_indices_are_loaded <- function(model) {
   if (is.null(model$nn_index)) {
     stop("Invalid model: has no 'nn_index'")
   }
-  
+
   if (is.list(model$nn_index) && is.null(model$nn_index$type)) {
     for (i in 1:length(model$nn_index)) {
       rcppannoy <- get_rcppannoy(model$nn_index[[i]])
@@ -2533,7 +2533,7 @@ abspath <- function(filename) {
   file.path(normalizePath(dirname(filename)), basename(filename))
 }
 
-# Half of whatever the C++ implementation thinks are the number of concurrent 
+# Half of whatever the C++ implementation thinks are the number of concurrent
 # threads supported, but at least 1
 default_num_threads <- function() {
   max(1, hardware_concurrency() / 2)
@@ -2821,7 +2821,7 @@ nn2set <- function(method, nn,
                    ret_sigma,
                    n_threads, grain_size,
                    verbose = FALSE) {
-  
+
   sigma <- NULL
   res <- list()
   if (method == "largevis") {
@@ -2908,7 +2908,7 @@ x2set <- function(X, n_neighbors, metric, nn_method,
     verbose = verbose
   )
   V <- nn2set_res$V
-  
+
   if (any(is.na(V))) {
     stop("Non-finite entries in the input matrix")
   }
@@ -3136,13 +3136,13 @@ get_opt_args <- function(opt_args, alpha) {
   lmerge(default_opt_args[[opt_args$method]], opt_args)
 }
 
-# Takes local radii from the input dimension and converts to approximate 
+# Takes local radii from the input dimension and converts to approximate
 # densities in the output space by mapping them to a vector of a parameters
 # as used in the UMAP output weight: 1/(1 + a + d^2b).
 # Based on testing a rough range of usable a values is 0.01-100. To get that
 # we want each a value to be the product of the local density of i and j, so
 # a = sqrt(a_i * a_j)
-# Also, we want dens_scale to control the spread of a values and for 
+# Also, we want dens_scale to control the spread of a values and for
 # dens_scale = 0, the vector of a_i give the the user-selected scalar value of
 # a, so we scale the log of the reciprocal of localr to be within [log(a * 1e-(2
 # * dens_scale)) ... log(a * 1e(2 * dens_scale))] We take the sqrt of the a_i in

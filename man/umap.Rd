@@ -251,7 +251,7 @@ must be one of two formats, either a list consisting of two elements:
   \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
   containing the distances of the nearest neighbors.
 }
-or a sparse distance matrix of type \code{dgCMatrix}, with dimensions 
+or a sparse distance matrix of type \code{dgCMatrix}, with dimensions
 \code{n_vertices x n_vertices}. Distances should be arranged by column,
 i.e. a non-zero entry in row \code{j} of the \code{i}th column indicates
 that the \code{j}th observation in \code{X} is a nearest neighbor of the
@@ -400,8 +400,8 @@ any combination of the following strings:
 
 \item{n_threads}{Number of threads to use (except during stochastic gradient
 descent). Default is half the number of concurrent threads supported by the
-system. For nearest neighbor search, only applies if 
-\code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index 
+system. For nearest neighbor search, only applies if
+\code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index
 will be temporarily written to disk in the location determined by
 \code{\link[base]{tempfile}}.}
 
@@ -434,11 +434,11 @@ at the cost of a slightly higher memory use. You may also have to modify
 a speed increase over the single-threaded optimization is likely to be
 dataset and hardware-dependent.}
 
-\item{opt_args}{A list of optimizer parameters, used when 
+\item{opt_args}{A list of optimizer parameters, used when
 \code{batch = TRUE}. The default optimization method used is Adam (Kingma
 and Ba, 2014).
 \itemize{
-  \item \code{method} The optimization method to use. Either \code{"adam"} 
+  \item \code{method} The optimization method to use. Either \code{"adam"}
   or \code{"sgd"} (stochastic gradient descent). Default: \code{"adam"}.
   \item \code{beta1} (Adam only). The weighting parameter for the
   exponential moving average of the first moment estimator. Effectively the
@@ -457,14 +457,14 @@ and Ba, 2014).
   step-size adaptivity and bring the behavior closer to stochastic gradient
   descent with momentum. Typical values are between 1e-8 and 1e-3. Default:
   \code{1e-7}.
-  \item \code{alpha} The initial learning rate. Default: the value of the 
+  \item \code{alpha} The initial learning rate. Default: the value of the
   \code{learning_rate} parameter.
 }}
 
 \item{epoch_callback}{A function which will be invoked at the end of every
 epoch. Its signature should be: \code{(epoch, n_epochs, coords)}, where:
 \itemize{
-  \item \code{epoch} The current epoch number (between \code{1} and 
+  \item \code{epoch} The current epoch number (between \code{1} and
   \code{n_epochs}).
   \item \code{n_epochs} Number of epochs to use during the optimization of
   the embedded coordinates.
@@ -473,20 +473,20 @@ epoch. Its signature should be: \code{(epoch, n_epochs, coords)}, where:
 }}
 
 \item{pca_method}{Method to carry out any PCA dimensionality reduction when
-the \code{pca} parameter is specified. Allowed values are: 
+the \code{pca} parameter is specified. Allowed values are:
 \itemize{
   \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
   \href{https://cran.r-project.org/package=irlba}{irlba} package.
   \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
   the \href{https://cran.r-project.org/package=irlba}{irlba} package.
   This is likely to give much faster but potentially less accurate results
-  than using \code{"irlba"}. For the purposes of nearest neighbor 
+  than using \code{"irlba"}. For the purposes of nearest neighbor
   calculation and coordinates initialization, any loss of accuracy doesn't
   seem to matter much.
   \item{\code{"bigstatsr"}}. Uses \code{\link[bigstatsr]{big_randomSVD}}
   from the \href{https://cran.r-project.org/package=bigstatsr}{bigstatsr}
-  package. The SVD methods used in \code{bigstatsr} may be faster on 
-  systems without access to efficient linear algebra libraries (e.g. 
+  package. The SVD methods used in \code{bigstatsr} may be faster on
+  systems without access to efficient linear algebra libraries (e.g.
   Windows). \strong{Note}: \code{bigstatsr} is \emph{not} a dependency of
   uwot: if you choose to use this package for PCA, you \emph{must} install
   it yourself.
@@ -506,7 +506,7 @@ effect on UMAP's performance.}
 
 \item{dens_scale}{A value between 0 and 1. If > 0 then the output attempts
 to preserve relative local density around each observation. This uses an
-approximation to the densMAP method (Narayan and co-workers, 2021). The 
+approximation to the densMAP method (Narayan and co-workers, 2021). The
 larger the value of \code{dens_scale}, the greater the range of output
 densities that will be used to map the input densities. This option is
 ignored if using multiple \code{metric} blocks.}
@@ -518,7 +518,7 @@ A matrix of optimized coordinates, or:
     \code{"model"}), returns a list containing extra information that can be
     used to add new data to an existing embedding via
     \code{\link{umap_transform}}. In this case, the coordinates are available
-    in the list item \code{embedding}. \bold{NOTE}: The contents of 
+    in the list item \code{embedding}. \bold{NOTE}: The contents of
     the \code{model} list should \emph{not} be considered stable or part of
     the public API, and are purposely left undocumented.
     \item if \code{ret_nn = TRUE} (or \code{ret_extra} contains \code{"nn"}),
@@ -532,9 +532,9 @@ A matrix of optimized coordinates, or:
     \link[Matrix]{dgCMatrix-class}.
     \item if \code{ret_extra} contains \code{"sigma"}, returns a vector of the
     smooth knn distance normalization terms for each observation as
-    \code{"sigma"} and a vector \code{"rho"} containing the largest 
+    \code{"sigma"} and a vector \code{"rho"} containing the largest
     distance to the locally connected neighbors of each observation.
-    \item if \code{ret_extra} contains \code{"localr"}, returns a vector of 
+    \item if \code{ret_extra} contains \code{"localr"}, returns a vector of
     the estimated local radii, the sum of \code{"sigma"} and \code{"rho"}.
   }
   The returned list contains the combined data from any combination of
@@ -563,7 +563,7 @@ nn <- iris_umap$nn
 iris_umap <- umap(iris30, n_neighbors = 5, min_dist = 1, spread = 5, nn_method = nn, n_epochs = 20)
 
 # Supervised dimension reduction using the 'Species' factor column
-iris_sumap <- umap(iris30, n_neighbors = 5, min_dist = 0.001, y = iris30$Species, 
+iris_sumap <- umap(iris30, n_neighbors = 5, min_dist = 0.001, y = iris30$Species,
                    target_weight = 0.5, n_epochs = 20)
 
 # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
@@ -580,18 +580,18 @@ In \emph{Advances in neural information processing systems}
 (pp. 585-591).
 \url{http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf}
 
-Böhm, J. N., Berens, P., & Kobak, D. (2020). 
-A unifying perspective on neighbor embeddings along the attraction-repulsion spectrum. 
+Böhm, J. N., Berens, P., & Kobak, D. (2020).
+A unifying perspective on neighbor embeddings along the attraction-repulsion spectrum.
 \emph{arXiv preprint} \emph{arXiv:2007.08902}.
 \url{https://arxiv.org/abs/2007.08902}
 
-Damrich, S., & Hamprecht, F. A. (2021). 
-On UMAP's true loss function. 
+Damrich, S., & Hamprecht, F. A. (2021).
+On UMAP's true loss function.
 \emph{Advances in Neural Information Processing Systems}, \emph{34}.
 \url{https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html}
 
-Kingma, D. P., & Ba, J. (2014). 
-Adam: A method for stochastic optimization. 
+Kingma, D. P., & Ba, J. (2014).
+Adam: A method for stochastic optimization.
 \emph{arXiv preprint} \emph{arXiv}:1412.6980.
 \url{https://arxiv.org/abs/1412.6980}
 
@@ -601,7 +601,7 @@ UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
 \url{https://arxiv.org/abs/1802.03426}
 
 Narayan, A., Berger, B., & Cho, H. (2021).
-Assessing single-cell transcriptomic variability through density-preserving data visualization. 
+Assessing single-cell transcriptomic variability through density-preserving data visualization.
 \emph{Nature biotechnology}, \emph{39}(6), 765-774.
 \url{https://doi.org/10.1038/s41587-020-00801-7}
 
@@ -622,7 +622,7 @@ Visualizing data using t-SNE.
 \emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
 \url{https://www.jmlr.org/papers/v9/vandermaaten08a.html}
 
-Wang, Y., Huang, H., Rudin, C., & Shaposhnik, Y. (2021). 
+Wang, Y., Huang, H., Rudin, C., & Shaposhnik, Y. (2021).
 Understanding How Dimension Reduction Tools Work: An Empirical Approach to Deciphering t-SNE, UMAP, TriMap, and PaCMAP for Data Visualization.
 \emph{Journal of Machine Learning Research}, \emph{22}(201), 1-73.
 \url{https://www.jmlr.org/papers/v22/20-1061.html}

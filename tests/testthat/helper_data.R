@@ -53,15 +53,15 @@ create_data <- function() {
   ycat2 <<- as.factor(c(NA, levels(iris$Species)[rep(1:3, times = 3)]))
   ynum <<- (1:10) / 10
   ynum2 <<- seq(from = 10, to = -10, length.out = 10) / 100
-  
+
   nnl <- find_nn(iris10,
                  k = 4, method = "fnn", metric = "euclidean",
                  n_threads = 0, verbose = FALSE)
   row.names(nnl$idx) <- row.names(iris10)
   row.names(nnl$dist) <- row.names(iris10)
   nn <<- nnl
-  
-  
+
+
   # ten iris entries where the 4 nearest neighbors are distinct
   uiris <- unique(iris)
   uirism <- as.matrix(uiris[, -5])
@@ -92,7 +92,7 @@ create_data <- function() {
       0.5830952, 0.6782330, 1.0440307, 1.2328828
     ), nrow = 10, byrow = TRUE)
   )
-  
+
   self_unn4 <<- list(
     idx = matrix(c(
       1, 6, 10, 3,
