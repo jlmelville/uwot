@@ -1,7 +1,7 @@
 library(uwot)
 context("Transform")
 
-diagonal1s <- as(diag(1, nrow(V_asymm), ncol(V_asymm)), "generalMatrix")
+diagonal1s <- as(Matrix::drop0(diag(1, nrow(V_asymm), ncol(V_asymm))), "generalMatrix")
 graph <- V_asymm + diagonal1s
 dV <- as.matrix(graph)
 vdV <- as.vector(t(dV))
