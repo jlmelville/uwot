@@ -245,10 +245,7 @@ spectral_init <- function(A, ndim = 2, verbose = FALSE, force_irlba = FALSE) {
     tsmessage("Initializing from normalized Laplacian + noise (using irlba)")
     coords <- irlba_tsvd_normalized_laplacian_init(A, ndim, verbose = FALSE)
   }
-  expansion <- 10.0 / max(abs(coords))
-  (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.0001),
-    ncol = ndim
-  )
+  scale_and_jitter(coords, max_coord = 10.0, sd = 0.0001)
 }
 
 irlba_spectral_init <- function(A, ndim = 2, verbose = FALSE) {
@@ -259,9 +256,15 @@ irlba_spectral_init <- function(A, ndim = 2, verbose = FALSE) {
   tsmessage("Initializing from normalized Laplacian (using irlba) + noise")
 
   coords <- irlba_normalized_laplacian_init(A, ndim, verbose = FALSE)
-  expansion <- 10.0 / max(coords)
-  (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = 0.001),
-    ncol = ndim
+  scale_and_jitter(coords, max_coord = 10.0, sd = 0.0001)
+}
+
+# Scales coords so that the largest absolute coordinate is 10.0 then jitters by
+# adding gaussian noise with mean 0 and standard deviation sd
+scale_and_jitter <- function(coords, max_coord = 10.0, sd = 0.0001) {
+   expansion <- 10.0 / max(abs(coords))
+  (coords * expansion) + matrix(stats::rnorm(n = prod(dim(coords)), sd = sd),
+    ncol = ncol(coords)
   )
 }
 
