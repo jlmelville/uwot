@@ -18,6 +18,7 @@ rspectra_eigs_asym <- function(L, ndim) {
       NULL
     }
   ))
+  res
 }
 
 rspectra_eigs_sym <- function(L, ndim, verbose = FALSE) {
