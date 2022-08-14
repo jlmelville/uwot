@@ -16,15 +16,25 @@ test_that("normalized laplacian", {
   #   vector that we can't supply with either RSpectra or eigen.
   # 3. The eigenvectors are only identical up to a sign, so we take the absolute
   #   values.
-  expected_norm_lap <-
+  abs_expected_norm_lap <-
+    abs(
     c2y(
       0.7477, -0.1292, -0.03001, 0.02127, -0.563, -0.01149, 0.1402,
       -0.2725, -0.01241, 0.1084, -0.106, -0.5723, 0.2024, -0.3082,
       0.1642, -5.549e-05, -0.04843, -0.1747, 0.1684, 0.6611
     )
+    )
 
-  res <- normalized_laplacian_init(Matrix::drop0(x2d(iris[1:10, ])))
-  expect_equal(abs(res), abs(expected_norm_lap), tolerance = 0.2)
+  sparse_m <- Matrix::drop0(x2d(iris[1:10, ]))
+  res <- normalized_laplacian_init(sparse_m)
+  expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
+
+  # ensure irlba code path gets tested
+  res <- irlba_tsvd_normalized_laplacian_init(sparse_m)
+  expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
+
+  res <- irlba_normalized_laplacian_init(sparse_m)
+  expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
 })
 
 test_that("laplacian eigenmap", {

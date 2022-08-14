@@ -182,23 +182,25 @@ irlba_eigs_asym <- function(L, ndim) {
   error = function(c) {
     NULL
   }))
+  res
 }
 
-irlba_eigs_sym <- function(L, ndim) {
+irlba_eigs_sym <- function(L, ndim, smallest = TRUE) {
   suppressWarnings(res <- tryCatch(
     res <- irlba::partial_eigen(
       L,
       n = ndim + 1,
       symmetric = TRUE,
-      smallest = TRUE,
+      smallest = smallest,
       tol = 1e-3,
       maxit = 1000,
-      verbose = TRUE
+      verbose = FALSE
     ),
     error = function(c) {
       NULL
     }
   ))
+  res
 }
 
 # Use irlba's partial_eigen instead of RSpectra
@@ -209,9 +211,13 @@ irlba_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   }
   tsmessage("Initializing from normalized Laplacian (using irlba)")
 
-  L <- form_normalized_laplacian(A)
-  res <- irlba_eigs_sym(L, ndim)
-
+  # Using the normalized Laplacian and looking for smallest eigenvalues does
+  # not work well with irlba's partial_eigen routine, so form the shifted
+  # Laplacian and look for largest eigenvalues
+  L <- form_modified_laplacian(A)
+  res <- irlba_eigs_sym(L, ndim, smallest = FALSE)
+  # shift back the eigenvalues
+  res$values <- 2.0 - res$values
   if (is.null(res) || ncol(res$vectors) < ndim) {
     message(
       "Spectral initialization failed to converge, ",
