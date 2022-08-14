@@ -1,4 +1,4 @@
-# uwot 0.1.11.9000
+# uwot 0.1.12
 
 ## New features
 
@@ -28,7 +28,7 @@ yourself.
     `local_connectivity`. Only applies for `umap` and `tumap`.
     * `"localr"`: exports a vector of the local radii, the sum of `sigma` and
     `rho` and used to scale the output coordinates when `dens_weight` is set.
-    Even if not use `dens_weight`, visualizing the output coordinates using a
+    Even if not using `dens_weight`, visualizing the output coordinates using a
     color scale based on the value of `localr` can reveal regions of the input
     data with different densities.
 * For functions `umap` and `tumap` only: new data type for precomputed nearest
