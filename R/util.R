@@ -282,3 +282,10 @@ lmerge <- function(l1, l2) {
 range_scale <- function(x, min = 0, max = 1) {
   (x - min(x)) / (max(x) - min(x)) * (max - min) + min
 }
+
+is_installed <- function(pkgname) {
+  requireNamespace(pkgname,
+                   quietly = TRUE,
+                   warn.conflicts = FALSE)
+  isNamespaceLoaded(pkgname)
+}

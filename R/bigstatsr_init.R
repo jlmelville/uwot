@@ -1,7 +1,5 @@
 bigstatsr_is_installed <- function() {
-  requireNamespace("bigstatsr",
-                   quietly = TRUE,
-                   warn.conflicts = FALSE)
+  is_installed("bigstatsr")
 }
 
 bigstatsr_scores <- function(X,

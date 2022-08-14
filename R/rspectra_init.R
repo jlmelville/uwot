@@ -1,8 +1,5 @@
 rspectra_is_installed <- function() {
-  requireNamespace("RSpectra",
-                   quietly = TRUE,
-                   warn.conflicts = FALSE)
-  isNamespaceLoaded("RSpectra")
+  is_installed("RSpectra")
 }
 
 rspectra_eigs_asym <- function(L, ndim) {
