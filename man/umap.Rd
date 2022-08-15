@@ -603,7 +603,7 @@ UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
 Narayan, A., Berger, B., & Cho, H. (2021).
 Assessing single-cell transcriptomic variability through density-preserving data visualization.
 \emph{Nature biotechnology}, \emph{39}(6), 765-774.
-\url{https://doi.org/10.1038/s41587-020-00801-7}
+\doi{10.1038/s41587-020-00801-7}
 
 O’Neill, M. E. (2014).
 \emph{PCG: A family of simple fast space-efficient statistically good
