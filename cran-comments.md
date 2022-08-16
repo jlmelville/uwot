@@ -1,13 +1,20 @@
-## New Release
+## Resubmission
 
-This is a new feature and bug fix release to maintain compatibility with a
-forthcoming version of the Matrix package.
+This is a re-submission to deal with a broken vignette in a CRAN reverse
+dependency which is using a non-public function.
+
+The original submission was a new feature and bug fix release to maintain 
+compatibility with a forthcoming version of the Matrix package.
 
 ## Test environments
 
 * mac OS X Big Sur (on github actions), R 4.2.1
+* Fedora Linux, R-devel, clang, gfortran (on R-hub)
+* Ubuntu Linux 20.04.1 LTS, R-release, GCC (on R-hub)
+* Debian Linux, R-devel, GCC ASAN/UBSAN (on R-hub)
 * ubuntu 22.04 R 4.2.1 (with valgrind)
 * ubuntu 20.04 (on github actions) R 4.1.3, R 4.2.1, devel
+* Windows Server 2022, R-devel, 64 bit (on R-hub)
 * win-builder R devel
 * local Windows 11 build, R 4.2.1
 * Windows Server 2012 (on appveyor) R 4.2.1

@@ -1,3 +1,10 @@
+# uwot 0.1.13
+
+* This is a resubmission of 0.1.12 but with an internal function 
+(`fuzzy_simplicial_set`) refactored to behave more like that of previous 
+versions. This change was breaking the behavior of the CRAN package 
+[bbknnR](https://cran.r-project.org/package=bbknnR).
+
 # uwot 0.1.12
 
 ## New features
