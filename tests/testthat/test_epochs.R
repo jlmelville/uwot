@@ -2,7 +2,7 @@ library(uwot)
 context("Epochs")
 
 
-V <- fuzzy_simplicial_set(nn = nn)$matrix
+V <- fuzzy_simplicial_set(nn = nn)
 
 n_epochs <- 500
 V@x[V@x < max(V@x) / n_epochs] <- 0

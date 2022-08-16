@@ -62,7 +62,7 @@ smooth_knn <- function(nn_dist,
 
 smooth_knn_matrix <- function(nn,
                               target = NULL,
-                              local_connectivity = 1.0, 
+                              local_connectivity = 1.0,
                               bandwidth = 1.0,
                               ret_sigma = FALSE,
                               n_threads = NULL,
@@ -71,7 +71,7 @@ smooth_knn_matrix <- function(nn,
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  
+
   osparse <- NULL
   if (is_sparse_matrix(nn)) {
     nn <- Matrix::drop0(nn)
@@ -109,7 +109,7 @@ smooth_knn_matrix <- function(nn,
     grain_size = grain_size,
     verbose = verbose
   )
-  
+
   v <- affinity_matrix_res$matrix
   if (is_sparse_matrix(nn)) {
     # use j instead of i to transpose it
@@ -139,16 +139,17 @@ fuzzy_simplicial_set <- function(nn,
                                  n_threads = NULL,
                                  grain_size = 1,
                                  verbose = FALSE) {
-  affinity_matrix_res <- smooth_knn_matrix(nn = nn, 
-                                           target = target, 
+  affinity_matrix_res <- smooth_knn_matrix(nn = nn,
+                                           target = target,
                                            local_connectivity = local_connectivity,
                                            bandwidth = bandwidth,
                                            ret_sigma = ret_sigma,
                                            n_threads = n_threads,
                                            grain_size = grain_size,
                                            verbose = verbose)
-  res <- list(matrix = fuzzy_set_union(affinity_matrix_res$matrix, set_op_mix_ratio = set_op_mix_ratio))
+  res <- fuzzy_set_union(affinity_matrix_res$matrix, set_op_mix_ratio = set_op_mix_ratio)
   if (ret_sigma) {
+    res <- list(matrix = res)
     res$sigma <- affinity_matrix_res$sigma
     res$rho <- affinity_matrix_res$rho
   }
@@ -177,7 +178,7 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
       "Commencing calibration for perplexity = ", formatC(perplexity),
       pluralize("thread", n_threads, " using")
     )
-    
+
     nnt <- nn_graph_t(nn)
     n_vertices <- ncol(nnt$dist)
     affinity_matrix_res <- calc_row_probabilities_parallel(
@@ -220,12 +221,12 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
 nn_to_sparse <- function(nn_idxv, n_obs, val = 1, self_nbr = FALSE,
                          max_nbr_id = NULL, by_row = TRUE) {
   n_nbrs <- length(nn_idxv) / n_obs
-  
+
 
   if (is.null(max_nbr_id)) {
-    max_nbr_id <- ifelse(self_nbr, n_obs, max(nn_idxv)) 
+    max_nbr_id <- ifelse(self_nbr, n_obs, max(nn_idxv))
   }
-  
+
   if (length(val) == 1) {
     xs <- rep(val, n_obs * n_nbrs)
   }
@@ -241,7 +242,7 @@ nn_to_sparse <- function(nn_idxv, n_obs, val = 1, self_nbr = FALSE,
 
   dims <- c(n_obs, max_nbr_id)
   res <- Matrix::sparseMatrix(i = is, j = nn_idxv, x = xs, dims = dims)
-  
+
   if (self_nbr) {
     Matrix::diag(res) <- 0
     res <- Matrix::drop0(res)
@@ -257,7 +258,7 @@ nng_to_sparse <- function(nn_idx, val = 1, self_nbr = FALSE,
   else {
     n_obs <- ncol(nn_idx)
   }
-  
+
   nn_to_sparse(as.vector(nn_idx), n_obs, val = val, self_nbr = self_nbr,
                max_nbr_id = max_nbr_id, by_row = by_row)
 }
@@ -271,12 +272,12 @@ order_sparse <- function(spm) {
   x <- spm@x
   i <- spm@i
   p <- spm@p
-  
+
   x_sort <- rep(0, length(x))
   i_sort <- rep(0, length(i))
-  
+
   n_vertices <- length(p) - 1
-  
+
   for (v in 1:n_vertices) {
     p_begin <- p[v]
     p_end <- p[v + 1]
@@ -288,6 +289,6 @@ order_sparse <- function(spm) {
     x_sort[pb1:p_end] <- x[x_order + p_begin]
     i_sort[pb1:p_end] <- i[x_order + p_begin]
   }
-  
+
   list(i = i_sort, p = p, x = x_sort, order = x_order, dims = spm@Dim)
 }

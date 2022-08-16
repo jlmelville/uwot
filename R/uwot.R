@@ -2854,10 +2854,13 @@ nn2set <- function(method, nn,
       verbose = verbose
     )
 
-    res$V <- Vres$matrix
     if (ret_sigma) {
+      res$V <- Vres$matrix
       res$sigma <- Vres$sigma
       res$rho <- Vres$rho
+    }
+    else {
+      res$V <- Vres
     }
   }
   res
