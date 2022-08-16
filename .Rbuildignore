@@ -12,3 +12,4 @@
 ^.*\/*DONTCHECKMEIN.*$
 ^\.github$
 ^revdep$
+^CRAN-SUBMISSION$
