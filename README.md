@@ -20,6 +20,14 @@ the basic method. Translated from the
 
 ## News
 
+*August 16 2022* Version 0.1.13 has been released to CRAN (0.1.12 was a failed
+submission). Among other things you can now pass your own nearest neighbors data
+in sparse matrix form. Also there is an option to reproduce relative cluster
+density by
+[approximating the densMAP method](https://jlmelville.github.io/uwot/leopold.html).
+See the [NEWS](https://github.com/jlmelville/uwot/blob/master/NEWS.md#uwot-0113)
+page for more.
+
 *December 12 2021* Version 0.1.11 has been released to CRAN. It is now possible
 to get reproducible results (for a given value of `set.seed`) when running
 the optimization step with multiple threads (`n_sgd_threads` greater than 1).
