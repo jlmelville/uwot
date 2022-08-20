@@ -1609,6 +1609,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     tsmessage("Non-integer 'n_sgd_threads' provided. Setting to ", n_sgd_threads)
   }
 
+  ret_extra <- ret_model || ret_nn || ret_fgraph || ret_sigma || ret_localr
+
   # Store categorical columns to be used to generate the graph
   Xcat <- NULL
   # number of original columns in data frame (or matrix)
@@ -1888,8 +1890,21 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     embedding <- scale_coords(init, init_sdev, verbose = verbose)
   }
   else if (!(methods::is(init, "character") && length(init) == 1)) {
-    stop("init should be either a matrix or string describing the ",
-         "initialization method")
+    if (is.null(init) && !is.null(n_epochs) && n_epochs == 0) {
+      embedding <- NULL
+      if (!ret_extra) {
+        warning("Neither high-dimensional nor low-dimensional data will be ",
+        "returned with this combination of settings")
+      }
+      if (ret_model) {
+        warning("Returning a model but it will not be valid for transforming ",
+                "new data")
+      }
+    }
+    else {
+      stop("init should be either a matrix or string describing the ",
+           "initialization method")
+    }
   }
   else {
     init <- match.arg(tolower(init), c(
@@ -2076,7 +2091,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     tsmessage("Optimization finished")
   }
 
-  ret_extra <- ret_model || ret_nn || ret_fgraph || ret_sigma || ret_localr
   if (ret_extra) {
     nblocks <- length(nns)
     res <- list(embedding = embedding)

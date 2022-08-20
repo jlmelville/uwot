@@ -212,6 +212,12 @@ umap_transform <- function(X = NULL, model = NULL,
   local_connectivity <- model$local_connectivity
 
   train_embedding <- model$embedding
+  if (!is.matrix(train_embedding)) {
+    # this should only happen if the user set
+    # `n_epochs = 0, init = NULL, ret_model = TRUE`
+    stop("Invalid embedding coordinates: should be a matrix, but got ",
+         paste0(class(train_embedding), collapse = " "))
+  }
   n_train_vertices <- nrow(train_embedding)
   ndim <- ncol(train_embedding)
   row.names(train_embedding) <- NULL

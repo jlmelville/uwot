@@ -7,6 +7,21 @@ couldn't use `umap_transform` with pre-generated nearest neighbors (also the
 error message was completely useless).Thank you to 
 [AustinHartman](https://github.com/AustinHartman) for reporting this 
 (<https://github.com/jlmelville/uwot/issues/97>).
+* If you are more interested in the high-dimensional graph/fuzzy simplicial set
+representation of your input data, and don't care about the low dimensional
+approximation, you may now provide these parameters: 
+`ret_extra = c("fgraph"), n_epochs = 0, init = NULL` and neither the 
+initialization nor optimization of low-dimensional coordinates will be
+performed. Previously initialization always occurred. This also works with
+`lvish` if you wish to use a t-SNE-style similarity graph: in this case, use
+`ret_extra = c("P"), n_epochs = 0, init = NULL`. Note that if you don't ask for
+any extra high-dimensional information to be returned (e.g. via `ret_extra`) you
+will get a warning that no useful data of any kind will be returned. Also, while
+it is ok to provide `ret_model = TRUE`, you will *also* get a warning if you do
+this because the resulting model *cannot* be used for transforming new data. You
+*will* get an error if you try to use that model with `umap_transform`. That
+combination of parameters is only a good idea if you plan to extract something
+from the model yourself (which I don't recommend).
 
 # uwot 0.1.13
 
