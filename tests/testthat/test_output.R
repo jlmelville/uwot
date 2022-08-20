@@ -786,25 +786,3 @@ umap_test_2 <- umap_transform(X = NULL, model = umap_train_x,
                               nn_method = query_ref_nn)
 expect_equal(umap_test_1, umap_test_2)
 
-# 96: allow for no initialization if n_epochs = 0
-# Allowable but returns nothing of value
-expect_warning(res <- umap(iris10, n_neighbors = 4, init = NULL, n_epochs = 0),
-               "will be returned")
-expect_null(res)
-
-# More sensibly, return high-dimensional data
-res <- umap(iris10, n_neighbors = 4, init = NULL, n_epochs = 0,
-            ret_extra = c("fgraph"))
-expect_is(res, "list")
-expect_null(res$embedding)
-expect_is(res$fgraph, "sparseMatrix")
-
-# also a bad idea but maybe ok to extract something from the return value
-# manually
-expect_warning(res <- umap(iris10, n_neighbors = 4, init = NULL, n_epochs = 0,
-                           ret_model = TRUE),
-               "will not be valid for transforming")
-expect_is(res, "list")
-expect_null(res$embedding)
-# but you cannot use umap_transform with the model
-expect_error(umap_transform(iris10, res), "(?i)invalid embedding coordinates")
