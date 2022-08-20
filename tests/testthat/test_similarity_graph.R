@@ -69,3 +69,11 @@ sim_graph_bbknnR <- similarity_graph(
   local_connectivity = 2
 )
 expect_equal(sim_graph_bbknnR, fss)
+
+# supervised
+sim_graphy <- similarity_graph(iris10, n_neighbors = 4, y = ynum)
+expect_is(sim_graphy, "sparseMatrix")
+
+# binary edge weights
+sim_graphb <- similarity_graph(iris10, n_neighbors = 4, binary_edge_weights = TRUE)
+expect_true(all(sim_graphb@x == 1))

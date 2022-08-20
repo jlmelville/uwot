@@ -3,6 +3,7 @@
 export(load_uwot)
 export(lvish)
 export(save_uwot)
+export(similarity_graph)
 export(tumap)
 export(umap)
 export(umap_transform)
