@@ -1503,6 +1503,82 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
   )
 }
 
+similarity_graph <- function(X = NULL, n_neighbors = NULL, metric = "euclidean",
+                             n_epochs = NULL, scale = NULL,
+                             set_op_mix_ratio = 1.0, local_connectivity = 1.0,
+                             bandwidth = 1.0, repulsion_strength = 1.0,
+                             nn_method = NULL, n_trees = 50,
+                             search_k = 2 * n_neighbors * n_trees,
+                             perplexity = 50,
+                             method = "umap",
+                             y = NULL, target_n_neighbors = n_neighbors,
+                             target_metric = "euclidean",
+                             target_weight = 0.5,
+                             pca = NULL, pca_center = TRUE,
+                             ret_extra = c(),
+                             n_threads = NULL,
+                             grain_size = 1,
+                             kernel = "gauss",
+                             tmpdir = tempdir(),
+                             verbose = getOption("verbose", TRUE),
+                             pca_method = NULL,
+                             binary_edge_weights = FALSE) {
+  if (is.null(n_neighbors)) {
+    if (method == "largevis") {
+      n_neighbors <- perplexity * 3
+      scale <- "maxabs"
+    }
+    else {
+      n_neighbors <- 15
+      scale <- FALSE
+    }
+  }
+
+  uwot_res <- uwot(
+    X = X, n_neighbors = n_neighbors,
+    metric = metric, n_epochs = 0, scale = scale,
+    init = NULL,
+    set_op_mix_ratio = set_op_mix_ratio,
+    local_connectivity = local_connectivity, bandwidth = bandwidth,
+    nn_method = nn_method, n_trees = n_trees,
+    search_k = search_k,
+    method = method,
+    n_threads = n_threads,
+    grain_size = grain_size,
+    kernel = kernel, perplexity = perplexity,
+    y = y, target_n_neighbors = target_n_neighbors,
+    target_weight = target_weight, target_metric = target_metric,
+    pca = pca, pca_center = pca_center, pca_method = pca_method,
+    ret_model = FALSE,
+    ret_nn = "nn" %in% ret_extra,
+    ret_fgraph = TRUE,
+    ret_sigma = "sigma" %in% ret_extra,
+    ret_localr = "localr" %in% ret_extra,
+    binary_edge_weights = binary_edge_weights,
+    tmpdir = tempdir(),
+    verbose = verbose
+  )
+
+  res <- list()
+  for (name in names(uwot_res)) {
+    if (name == "embedding") {
+      # embedding will be NULL so remove it
+      next
+    }
+    if (name == "P" || name == "fgraph") {
+      res$similarity_graph <- uwot_res[[name]]
+    }
+    else {
+      res[[name]] <- uwot_res[[name]]
+    }
+  }
+  if (length(names(res)) == 1 && !is.null(res$similarity_graph)) {
+    # return just the similarity graph if no extras were requested
+    res <- res$similarity_graph
+  }
+  res
+}
+
 # Function that does all the real work
 uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_epochs = NULL,
