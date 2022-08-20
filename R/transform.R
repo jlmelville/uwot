@@ -18,8 +18,8 @@
 #' @param nn_method Optional pre-calculated nearest neighbor data. There are
 #'   two supported formats. The first is a list consisting of two elements:
 #'   \itemize{
-#'     \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix where 
-#'     \code{n_vertices} is the number of observations in \code{X}. The contents 
+#'     \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix where
+#'     \code{n_vertices} is the number of observations in \code{X}. The contents
 #'     of the matrix should be the integer indexes of the data used to generate
 #'     the \code{model}, which are the \code{n_neighbors}-nearest neighbors of
 #'     the data to be transformed.
@@ -34,7 +34,7 @@
 #'   the \code{j}th observation in the original data used to generate the
 #'   \code{model} is a nearest neighbor of the \code{i}th observation in the new
 #'   data, with the distance given by the value of that element. In this format,
-#'   a different number of neighbors is allowed for each observation, i.e. 
+#'   a different number of neighbors is allowed for each observation, i.e.
 #'   each column can contain a different number of non-zero values.
 #'   Multiple nearest neighbor data (e.g. from two different pre-calculated
 #'   metrics) can be passed by passing a list containing the nearest neighbor
@@ -78,7 +78,7 @@
 #'     coordinates of the nearest neighbors from the original embedding in
 #'     \code{model}, where the weights used are the edge weights from the UMAP
 #'     smoothed knn distances. Equivalent to \code{init_weighted = TRUE}.
-#'     \item \code{"average"}. Use the mean average of the coordinates of 
+#'     \item \code{"average"}. Use the mean average of the coordinates of
 #'     the nearest neighbors from the original embedding in \code{model}.
 #'     Equivalent to \code{init_weighted = FALSE}.
 #'     \item A matrix of user-specified input coordinates, which must have
@@ -92,15 +92,15 @@
 #'   \code{learning_rate} and increase \code{n_epochs}, so whether this provides
 #'   a speed increase over the single-threaded optimization is likely to be
 #'   dataset and hardware-dependent. If \code{NULL}, the transform will use the
-#'   value provided in the \code{model}, if available. Default: \code{FALSE}. 
+#'   value provided in the \code{model}, if available. Default: \code{FALSE}.
 #' @param learning_rate Initial learning rate used in optimization of the
 #'   coordinates. This overrides the value associated with the \code{model}.
 #'   This should be left unspecified under most circumstances.
-#' @param opt_args A list of optimizer parameters, used when 
+#' @param opt_args A list of optimizer parameters, used when
 #'   \code{batch = TRUE}. The default optimization method used is Adam (Kingma
 #'   and Ba, 2014).
 #'   \itemize{
-#'     \item \code{method} The optimization method to use. Either \code{"adam"} 
+#'     \item \code{method} The optimization method to use. Either \code{"adam"}
 #'     or \code{"sgd"} (stochastic gradient descent). Default: \code{"adam"}.
 #'     \item \code{beta1} (Adam only). The weighting parameter for the
 #'     exponential moving average of the first moment estimator. Effectively the
@@ -119,23 +119,23 @@
 #'     step-size adaptivity and bring the behavior closer to stochastic gradient
 #'     descent with momentum. Typical values are between 1e-8 and 1e-3. Default:
 #'     \code{1e-7}.
-#'     \item \code{alpha} The initial learning rate. Default: the value of the 
+#'     \item \code{alpha} The initial learning rate. Default: the value of the
 #'     \code{learning_rate} parameter.
 #'   }
-#'   If \code{NULL}, the transform will use the value provided in the 
+#'   If \code{NULL}, the transform will use the value provided in the
 #'   \code{model}, if available.
 #' @param epoch_callback A function which will be invoked at the end of every
 #'   epoch. Its signature should be:
 #'   \code{(epoch, n_epochs, coords, fixed_coords)}, where:
 #'   \itemize{
-#'     \item \code{epoch} The current epoch number (between \code{1} and 
+#'     \item \code{epoch} The current epoch number (between \code{1} and
 #'     \code{n_epochs}).
 #'     \item \code{n_epochs} Number of epochs to use during the optimization of
 #'     the embedded coordinates.
 #'     \item \code{coords} The embedded coordinates as of the end of the current
 #'     epoch, as a matrix with dimensions (N, \code{n_components}).
 #'     \item \code{fixed_coords} The originally embedded coordinates from the
-#'     \code{model}. These are fixed and do not change. A matrix with dimensions 
+#'     \code{model}. These are fixed and do not change. A matrix with dimensions
 #'     (Nmodel, \code{n_components}) where \code{Nmodel} is the number of
 #'     observations in the original data.
 #'   }
@@ -187,7 +187,7 @@ umap_transform <- function(X = NULL, model = NULL,
       X <- NULL
     }
   }
-  
+
   if (is.null(n_epochs)) {
     n_epochs <- model$n_epochs
     if (is.null(n_epochs)) {
@@ -202,15 +202,15 @@ umap_transform <- function(X = NULL, model = NULL,
       n_epochs <- max(2, round(n_epochs / 3))
     }
   }
-  
+
   if (is.null(search_k)) {
     search_k <- model$search_k
   }
-  
+
   nn_index <- model$nn_index
   n_neighbors <- model$n_neighbors
   local_connectivity <- model$local_connectivity
-  
+
   train_embedding <- model$embedding
   n_train_vertices <- nrow(train_embedding)
   ndim <- ncol(train_embedding)
@@ -223,13 +223,13 @@ umap_transform <- function(X = NULL, model = NULL,
   metric <- model$metric
   nblocks <- length(metric)
   pca_models <- model$pca_models
-  
+
   if (method == "leopold") {
     dens_scale <- model$dens_scale
     ai <- model$ai
     rad_coeff <- model$rad_coeff
   }
-  
+
   if (is.null(batch)) {
     if (!is.null(model$batch)) {
       batch <- model$batch
@@ -238,7 +238,7 @@ umap_transform <- function(X = NULL, model = NULL,
       batch <- FALSE
     }
   }
-  
+
   if (is.null(opt_args)) {
     if (!is.null(model$opt_args)) {
       opt_args <- model$opt_args
@@ -269,7 +269,7 @@ umap_transform <- function(X = NULL, model = NULL,
     pcg_rand <- TRUE
   }
   num_precomputed_nns <- model$num_precomputed_nns
-  
+
   # the number of model vertices
   n_vertices <- NULL
   Xnames <- NULL
@@ -296,22 +296,29 @@ umap_transform <- function(X = NULL, model = NULL,
     }
     checkna(X)
   } else if (nn_is_precomputed(nn_method)) {
+    # https://github.com/jlmelville/uwot/issues/97
+    # In the case where the training model didn't use pre-computed neighbors
+    # we treat it like it had one block
+    if (num_precomputed_nns == 0) {
+      num_precomputed_nns <- 1
+    }
     # store single nn graph as a one-item list
     if (num_precomputed_nns == 1 && nn_is_single(nn_method)) {
       nn_method <- list(nn_method)
     }
     if (length(nn_method) != num_precomputed_nns) {
-      stop("Expecting ", pluralize("pre-computed neighbor data block", num_precomputed_nns))
+      stop("Wrong # pre-computed neighbor data blocks, expected: ",
+           num_precomputed_nns, " but got: ", length(nn_method))
     }
     if (length(n_neighbors) != num_precomputed_nns) {
-      stop("Expecting ", 
-           pluralize("n_neighbor values (one per neighbor block)", num_precomputed_nns))
+      stop("Wrong # n_neighbor values (one per neighbor block), expected: ",
+           num_precomputed_nns, " but got: ", length(n_neighbors))
     }
     for (i in 1:num_precomputed_nns) {
       graph <- nn_method[[i]]
-      
+
       if (is.list(graph)) {
-        check_graph(graph, expected_rows = n_vertices, 
+        check_graph(graph, expected_rows = n_vertices,
                     expected_cols = n_neighbors[[i]], bipartite = TRUE)
         if (is.null(n_vertices)) {
           n_vertices <- nrow(graph$idx)
@@ -336,7 +343,7 @@ umap_transform <- function(X = NULL, model = NULL,
     }
     nblocks <- num_precomputed_nns
   }
-  
+
   if (!is.null(init)) {
     if (is.logical(init)) {
       init_weighted <- init
@@ -373,7 +380,7 @@ umap_transform <- function(X = NULL, model = NULL,
   if (is.null(n_vertices)) {
     stop("Failed to read input correctly: invalid input format")
   }
-  
+
   if (verbose) {
     x_is_matrix <- methods::is(X, "matrix")
     tsmessage("Read ", n_vertices, " rows", appendLF = !x_is_matrix)
@@ -407,7 +414,7 @@ umap_transform <- function(X = NULL, model = NULL,
         Xsub <- X[, subset, drop = FALSE]
         ann <- nn_index[[i]]
       }
-      
+
       if (!is.null(pca_models) && !is.null(pca_models[[as.character(i)]])) {
         Xsub <- apply_pca(
           X = Xsub, pca_res = pca_models[[as.character(i)]],
@@ -426,10 +433,10 @@ umap_transform <- function(X = NULL, model = NULL,
       nn <- nn_method[[i]]
     }
     else {
-      stop("Can't transform new data if X is NULL ", 
+      stop("Can't transform new data if X is NULL ",
            "and no sparse distance matrix available")
     }
-    
+
     osparse <- NULL
     if (is_sparse_matrix(nn)) {
       nn <- Matrix::drop0(nn)
@@ -451,14 +458,14 @@ umap_transform <- function(X = NULL, model = NULL,
         n_nbrs <- n_neighbors[[i]]
       }
       else {
-        # multiple internal blocks 
+        # multiple internal blocks
         n_nbrs <- n_neighbors
       }
       if (is.na(n_nbrs) || n_nbrs != nrow(nnt$idx)) {
         # original neighbor data was sparse, but we are using dense knn format
         # or n_neighbors doesn't match
         n_nbrs <- nrow(nnt$idx)
-        tsmessage("Possible mismatch with original vs new neighbor data ", 
+        tsmessage("Possible mismatch with original vs new neighbor data ",
                   "format, using ", n_nbrs, " nearest neighbors")
       }
       target <- log2(n_nbrs)
@@ -482,11 +489,11 @@ umap_transform <- function(X = NULL, model = NULL,
     if (is.null(localr) && need_sigma) {
       # because of the adjusted local connectivity rho is too small compared
       # to that used to generate the "training" data but sigma is larger, so
-      # let's just stick with sigma + rho even though it tends to be an 
-      # underestimate 
+      # let's just stick with sigma + rho even though it tends to be an
+      # underestimate
       localr <- sknn_res$sigma + sknn_res$rho
     }
-    
+
     graph_blockv <- sknn_res$matrix
     if (is_sparse_matrix(nn)) {
       graph_block <- Matrix::sparseMatrix(j = osparse$i, p = osparse$p, x = graph_blockv,
@@ -519,7 +526,7 @@ umap_transform <- function(X = NULL, model = NULL,
         embedding <- embedding + embedding_block
       }
     }
-    
+
     if (is.null(graph)) {
       graph <- graph_block
     }
@@ -550,7 +557,7 @@ umap_transform <- function(X = NULL, model = NULL,
     if (batch) {
       # This is the same arrangement as Python UMAP
       graph <- Matrix::t(graph)
-      # ordered indices of the new data nodes. Coordinates are updated 
+      # ordered indices of the new data nodes. Coordinates are updated
       # during optimization
       positive_head <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
       # unordered indices of the model nodes (some may not have any incoming
@@ -558,23 +565,23 @@ umap_transform <- function(X = NULL, model = NULL,
       positive_tail <- graph@i
     }
     else {
-      # unordered indices of the new data nodes. Coordinates are updated 
+      # unordered indices of the new data nodes. Coordinates are updated
       # during optimization
       positive_head <- graph@i
       # ordered indices of the model nodes (some may not have any incoming edges)
       # these coordinates will NOT update during the optimization
       positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
     }
-    
+
     n_head_vertices <- ncol(embedding)
     n_tail_vertices <- n_train_vertices
-    
+
     # if batch = TRUE points into the head (length == n_tail_vertices)
     # if batch = FALSE, points into the tail (length == n_head_vertices)
     positive_ptr <- graph@p
 
     epochs_per_sample <- make_epochs_per_sample(graph@x, n_epochs)
-    
+
     tsmessage(
       "Commencing optimization for ", n_epochs, " epochs, with ",
       length(positive_head), " positive edges",
@@ -593,14 +600,14 @@ umap_transform <- function(X = NULL, model = NULL,
       method <- "leopold2"
     }
 
-    method_args <- switch(method, 
+    method_args <- switch(method,
       umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
       leopold2 = list(ai = ai, aj = aj, b = b, ndim = ndim),
       list()
     )
 
     full_opt_args <- get_opt_args(opt_args, alpha)
-    
+
     embedding <- optimize_layout_r(
       head_embedding = embedding,
       tail_embedding = train_embedding,

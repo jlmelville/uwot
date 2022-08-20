@@ -1,3 +1,13 @@
+# uwot 0.1.13.9000
+
+## Bug fixes and minor improvements
+
+* If a model was generated without using pre-generated nearest neighbors, you
+couldn't use `umap_transform` with pre-generated nearest neighbors (also the
+error message was completely useless).Thank you to 
+[AustinHartman](https://github.com/AustinHartman) for reporting this 
+(<https://github.com/jlmelville/uwot/issues/97>).
+
 # uwot 0.1.13
 
 * This is a resubmission of 0.1.12 but with an internal function 

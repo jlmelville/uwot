@@ -208,15 +208,15 @@ sparse_nbr_matrix0 <- Matrix::sparseMatrix(
     0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40
   ),
   x = c(
-    0, 0.141421228647, 0.173204988241, 0.469041585922, 
-    0, 0.300000220537, 0.331662625074, 0.173205047846, 0.300000220537, 
-    0, 0.244949027896, 0.264575153589, 0.244949027896, 
-    0, 0.2999997437, 0.316227942705, 0.141421228647, 
-    0, 0.458257555962, 0.223606646061, 0.616441547871, 0.616441547871, 
-    0, 0.700000047684, 0.264575153589, 0.331662654877, 
-    0, 0.424264162779, 0.173204988241, 0.223606646061, 
-    0, 0.331662625074, 0.509901940823, 0.435889661312, 0.2999997437, 
-    0, 0.173205047846, 0.31622800231, 0.316227942705, 
+    0, 0.141421228647, 0.173204988241, 0.469041585922,
+    0, 0.300000220537, 0.331662625074, 0.173205047846, 0.300000220537,
+    0, 0.244949027896, 0.264575153589, 0.244949027896,
+    0, 0.2999997437, 0.316227942705, 0.141421228647,
+    0, 0.458257555962, 0.223606646061, 0.616441547871, 0.616441547871,
+    0, 0.700000047684, 0.264575153589, 0.331662654877,
+    0, 0.424264162779, 0.173204988241, 0.223606646061,
+    0, 0.331662625074, 0.509901940823, 0.435889661312, 0.2999997437,
+    0, 0.173205047846, 0.31622800231, 0.316227942705,
     0
   ),
   index1 = FALSE
@@ -247,15 +247,15 @@ sparse_nbr_matrix <- Matrix::sparseMatrix(
     0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30
   ),
   x = c(
-    0.141421228647, 0.173204988241, 0.469041585922, 
-    0.300000220537, 0.331662625074, 0.173205047846, 
-    0.300000220537, 0.244949027896, 0.264575153589, 
-    0.244949027896, 0.2999997437, 0.316227942705, 
-    0.141421228647, 0.458257555962, 0.223606646061, 
-    0.616441547871, 0.616441547871, 0.700000047684, 
-    0.264575153589, 0.331662654877, 0.424264162779, 
-    0.173204988241, 0.223606646061, 0.331662625074, 
-    0.509901940823, 0.435889661312, 0.2999997437, 
+    0.141421228647, 0.173204988241, 0.469041585922,
+    0.300000220537, 0.331662625074, 0.173205047846,
+    0.300000220537, 0.244949027896, 0.264575153589,
+    0.244949027896, 0.2999997437, 0.316227942705,
+    0.141421228647, 0.458257555962, 0.223606646061,
+    0.616441547871, 0.616441547871, 0.700000047684,
+    0.264575153589, 0.331662654877, 0.424264162779,
+    0.173204988241, 0.223606646061, 0.331662625074,
+    0.509901940823, 0.435889661312, 0.2999997437,
     0.173205047846, 0.31622800231, 0.316227942705
   ),
   index1 = FALSE
@@ -584,14 +584,14 @@ expect_is(res$P, "Matrix")
 # 22 Pearson correlation
 set.seed(42)
 res_cor <- tumap(iris10, n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
-                 metric = "correlation", init = "spectral", verbose = FALSE, 
+                 metric = "correlation", init = "spectral", verbose = FALSE,
                  n_threads = 0, ret_model = TRUE)
 expect_ok_matrix(res_cor$embedding)
 
 # Ensure cosine results are different from correlation
 set.seed(42)
 res_cos <- tumap(iris10, n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
-                 metric = "cosine", init = "spectral", verbose = FALSE, 
+                 metric = "cosine", init = "spectral", verbose = FALSE,
                  n_threads = 0, ret_model = TRUE)
 expect_gt(sum((res_cor$embedding - res_cos$embedding) ^ 2), 1e-3)
 
@@ -757,3 +757,31 @@ expect_equal(res$dens_scale, 0.5)
 ret_trans <- umap_transform(iris10, res)
 expect_ok_matrix(res$embedding)
 
+# 97: should be able to create a model without pre-computed nns and allow
+# umap_transform to work with pre-computed nns
+train_nn <- annoy_nn(X = iris10, k = 4, metric = "euclidean", n_threads = 0,
+                     ret_index = TRUE)
+set.seed(42)
+umap_train_x_null <- umap(X = NULL, nn_method = train_nn, ret_model = TRUE,
+                          n_neighbors = 4)
+set.seed(42)
+umap_train_x <- umap(X = iris10, ret_model = TRUE, n_neighbors = 4)
+
+# make the test set a different size to the training set
+iris9test <- x2m(iris[11:19, ])
+query_ref_nn <- annoy_search(X = iris9test, k = 4, ann = train_nn$index,
+                             n_threads = 0)
+row.names(query_ref_nn$dist) <- row.names(iris9test)
+
+# Success
+set.seed(42)
+umap_test_1 <- umap_transform(X = NULL, model = umap_train_x_null,
+                              nn_method = query_ref_nn)
+
+# This was throwing an error because umap_train_x doesn't have pre-computed
+# neighbors (and there is no reason to insist that it should have just because
+# the test data uses them)
+set.seed(42)
+umap_test_2 <- umap_transform(X = NULL, model = umap_train_x,
+                              nn_method = query_ref_nn)
+expect_equal(umap_test_1, umap_test_2)
