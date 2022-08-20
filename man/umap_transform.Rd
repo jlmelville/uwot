@@ -33,8 +33,8 @@ the \code{model}.}
 \item{nn_method}{Optional pre-calculated nearest neighbor data. There are
 two supported formats. The first is a list consisting of two elements:
 \itemize{
-  \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix where 
-  \code{n_vertices} is the number of observations in \code{X}. The contents 
+  \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix where
+  \code{n_vertices} is the number of observations in \code{X}. The contents
   of the matrix should be the integer indexes of the data used to generate
   the \code{model}, which are the \code{n_neighbors}-nearest neighbors of
   the data to be transformed.
@@ -49,7 +49,7 @@ a non-zero entry in row \code{j} of the \code{i}th column indicates that
 the \code{j}th observation in the original data used to generate the
 \code{model} is a nearest neighbor of the \code{i}th observation in the new
 data, with the distance given by the value of that element. In this format,
-a different number of neighbors is allowed for each observation, i.e. 
+a different number of neighbors is allowed for each observation, i.e.
 each column can contain a different number of non-zero values.
 Multiple nearest neighbor data (e.g. from two different pre-calculated
 metrics) can be passed by passing a list containing the nearest neighbor
@@ -102,7 +102,7 @@ be used. Used in conjunction with \code{n_threads} and
     coordinates of the nearest neighbors from the original embedding in
     \code{model}, where the weights used are the edge weights from the UMAP
     smoothed knn distances. Equivalent to \code{init_weighted = TRUE}.
-    \item \code{"average"}. Use the mean average of the coordinates of 
+    \item \code{"average"}. Use the mean average of the coordinates of
     the nearest neighbors from the original embedding in \code{model}.
     Equivalent to \code{init_weighted = FALSE}.
     \item A matrix of user-specified input coordinates, which must have
@@ -123,11 +123,11 @@ value provided in the \code{model}, if available. Default: \code{FALSE}.}
 coordinates. This overrides the value associated with the \code{model}.
 This should be left unspecified under most circumstances.}
 
-\item{opt_args}{A list of optimizer parameters, used when 
+\item{opt_args}{A list of optimizer parameters, used when
 \code{batch = TRUE}. The default optimization method used is Adam (Kingma
 and Ba, 2014).
 \itemize{
-  \item \code{method} The optimization method to use. Either \code{"adam"} 
+  \item \code{method} The optimization method to use. Either \code{"adam"}
   or \code{"sgd"} (stochastic gradient descent). Default: \code{"adam"}.
   \item \code{beta1} (Adam only). The weighting parameter for the
   exponential moving average of the first moment estimator. Effectively the
@@ -146,24 +146,24 @@ and Ba, 2014).
   step-size adaptivity and bring the behavior closer to stochastic gradient
   descent with momentum. Typical values are between 1e-8 and 1e-3. Default:
   \code{1e-7}.
-  \item \code{alpha} The initial learning rate. Default: the value of the 
+  \item \code{alpha} The initial learning rate. Default: the value of the
   \code{learning_rate} parameter.
 }
-If \code{NULL}, the transform will use the value provided in the 
+If \code{NULL}, the transform will use the value provided in the
 \code{model}, if available.}
 
 \item{epoch_callback}{A function which will be invoked at the end of every
 epoch. Its signature should be:
 \code{(epoch, n_epochs, coords, fixed_coords)}, where:
 \itemize{
-  \item \code{epoch} The current epoch number (between \code{1} and 
+  \item \code{epoch} The current epoch number (between \code{1} and
   \code{n_epochs}).
   \item \code{n_epochs} Number of epochs to use during the optimization of
   the embedded coordinates.
   \item \code{coords} The embedded coordinates as of the end of the current
   epoch, as a matrix with dimensions (N, \code{n_components}).
   \item \code{fixed_coords} The originally embedded coordinates from the
-  \code{model}. These are fixed and do not change. A matrix with dimensions 
+  \code{model}. These are fixed and do not change. A matrix with dimensions
   (Nmodel, \code{n_components}) where \code{Nmodel} is the number of
   observations in the original data.
 }}
