@@ -1,10 +1,18 @@
-## Resubmission
+## New minor release
 
-This is a re-submission to deal with a broken vignette in a CRAN reverse
-dependency which is using a non-public function.
+This is a new minor release to support a change in a reverse dependency which
+has been asked to resubmit their package. To explain the situation: version
+0.1.12 of uwot failed a reverse dependency check because of a broken vignette in
+the bbknnR package. This was due to that package using a non-exported function
+from this package, the internal structure of which changed when 0.1.12 was
+created. I reversed that change as part of a successful re-submission creating
+CRAN version 0.1.13.
 
-The original submission was a new feature and bug fix release to maintain 
-compatibility with a forthcoming version of the Matrix package.
+This newest submission (0.1.14) exports a public function which bbknnR can use
+in place of the non-exported function. I am aware of the policy of not
+submitting new versions of packages to CRAN with such frequency. I apologize for
+doing so, but request it be allowed to help the bbknnR package come back into
+compliance with CRAN policies without undue delay.
 
 ## Test environments
 
@@ -24,7 +32,7 @@ compatibility with a forthcoming version of the Matrix package.
 
 There are no WARNINGs or ERRORs.
 
-There was one NOTE:
+There were two NOTEs:
 
 N  checking installed package size ...
      installed size is 17.4Mb
@@ -32,6 +40,23 @@ N  checking installed package size ...
        libs  16.9Mb
 
 This is due to the underlying C++ implementation using templates.
+
+The second NOTE:
+
+* checking CRAN incoming feasibility ... [21s] NOTE
+Maintainer: 'James Melville <jlmelville@gmail.com>'
+
+Days since last update: 5
+
+As mentioned above, this release is to provide a public function for the CRAN
+package bbknnR to use, to replace its use of a non-exported internal function
+from this package. Once this package is on CRAN, the bbknnR maintainer will be
+able to submit a new version of their package and be back to following CRAN
+policies. I regret causing extra work for the CRAN team but I think it's better
+to give the bbknnR maintainer the opportunity to fix their package as soon as
+possible. Uwe Ligges is aware of the issue with bbknnR and has asked the bbknnR
+maintainers to resubmit their package, so I hope that this pattern of swift
+resubmissions will be forgiven on this occasion.
 
 * There was a message about possibly mis-spelled words in DESCRIPTION:
   
