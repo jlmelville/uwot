@@ -20,6 +20,13 @@ the basic method. Translated from the
 
 ## News
 
+*August 22 2022* Just when you least expected it, version 0.1.14 has been 
+released to CRAN (the `NEWS` file on CRAN calls it `0.1.13.9000` because I
+forgot to update that file, but let's keep that amongst ourselves). This release
+includes a bug fix for `umap_transform` when you use external nearest neighbors
+and new function `similarity_graph`, to support extracting just the high
+dimensional fuzzy simplicial set.
+
 *August 16 2022* Version 0.1.13 has been released to CRAN (0.1.12 was a failed
 submission). Among other things you can now pass your own nearest neighbors data
 in sparse matrix form. Also there is an option to reproduce relative cluster
