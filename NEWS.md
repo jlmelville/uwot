@@ -1,4 +1,4 @@
-# uwot 0.1.13.9000
+# uwot 0.1.14
 
 ## New features
 
@@ -21,7 +21,6 @@ couldn't use `umap_transform` with pre-generated nearest neighbors (also the
 error message was completely useless).Thank you to 
 [AustinHartman](https://github.com/AustinHartman) for reporting this 
 (<https://github.com/jlmelville/uwot/issues/97>).
-
 
 # uwot 0.1.13
 
