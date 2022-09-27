@@ -208,15 +208,15 @@ test_that("n_components can be > n_neighbors (#102)", {
   train_umap <-
     umap(
       train,
-      n_components = 8,
+      n_components = 4,
       ret_model = TRUE,
       y = train$Petal.Length,
       init = "rand" ,
-      n_neighbors = 4
+      n_neighbors = 3
     )
   set.seed(42)
   test_umap <- umap_transform(test, train_umap)
 
-  expect_equal(dim(test_umap), c(10, 8))
+  expect_equal(dim(test_umap), c(10, 4))
 })
 

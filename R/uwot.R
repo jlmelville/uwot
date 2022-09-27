@@ -2079,6 +2079,16 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         }
         X <- as.matrix(X)
       }
+      if (n_components > ncol(X)) {
+        warning(
+          "n_components ",
+          "> number of columns in input data: ",
+          n_components,
+          " > ",
+          ncol(X),
+          ", this may give poor or unexpected results"
+        )
+      }
     }
     else {
       stop("Unknown input data format")
@@ -2378,6 +2388,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       }
       embedding <- scale_coords(embedding, init_sdev, verbose = verbose)
     }
+  }
+  if (any(is.na(embedding))) {
+    stop("Initial data contains NA values: is n_components too high?")
   }
 
   if (is.null(n_epochs) || n_epochs < 0) {

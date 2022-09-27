@@ -5,6 +5,8 @@
 * If `n_components` was greater than `n_neighbors` then `umap_transform` would
 crash the R session. Thank you to [ChVav](https://github.com/ChVav) for 
 reporting this  (<https://github.com/jlmelville/uwot/issues/102>).
+* Some new checks for NA values in input data have been added. Also a warning
+will be emitted if `n_components` seems to have been set too high.
 
 # uwot 0.1.14
 

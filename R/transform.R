@@ -218,6 +218,9 @@ umap_transform <- function(X = NULL, model = NULL,
     stop("Invalid embedding coordinates: should be a matrix, but got ",
          paste0(class(train_embedding), collapse = " "))
   }
+  if (any(is.na(train_embedding))) {
+    stop("Model embedding coordinates contains NA values")
+  }
   n_train_vertices <- nrow(train_embedding)
   ndim <- ncol(train_embedding)
   row.names(train_embedding) <- NULL
@@ -373,6 +376,9 @@ umap_transform <- function(X = NULL, model = NULL,
         stop("Initial embedding matrix has wrong dimensions, expected (",
              xdim[1], ", ", xdim[2], "), but was (",
              indim[1], ", ", indim[2], ")")
+      }
+      if (any(is.na(init))) {
+        stop("Initial embedding matrix coordinates contains NA values")
       }
       if (is.null(Xnames) && !is.null(row.names(init))) {
         Xnames <- row.names(init)
