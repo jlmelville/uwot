@@ -27,11 +27,11 @@
 using namespace Rcpp;
 
 // Initialize embedding as a weighted average of nearest neighbors of each point
-// train_embedding: n_train x dim matrix of final embedding coordinates
-// nn_index: n_test x n_nbrs matrix of indexes of neighbors in X_train that are
+// train_embedding: dim x n_train matrix of final embedding coordinates
+// nn_index: n_nbrs x n_test matrix of indexes of neighbors in X_train that are
 //   nearest neighbors of X_test
-// weights: n_test x n_nbrs weight matrix
-// Returns the n_test x dim matrix of initialized coordinates.
+// weights: n_nbrs x n_test weight matrix
+// Returns the dim x n_test matrix of initialized coordinates.
 // [[Rcpp::export]]
 NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
                                       IntegerVector nn_index,
@@ -50,7 +50,7 @@ NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
   for (int &i : nn_indexv) {
     --i;
   }
-  std::vector<float> embedding(n_test_vertices * n_neighbors);
+  std::vector<float> embedding(n_test_vertices * ndim);
 
   std::vector<float> nn_weightsv(0);
   if (nn_weights.isNotNull()) {
