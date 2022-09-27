@@ -185,7 +185,12 @@ circumstances. Scaling the result of \code{init = "pca"} is usually
 recommended and \code{init = "spca"} as an alias for \code{init = "pca",
 init_sdev = 1e-4} but for the spectral initializations the scaled versions
 usually aren't necessary unless you are using a large value of
-\code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher).}
+\code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher). For
+compatibility with recent versions of the Python UMAP package, if you are
+using \code{init = "spectral"}, then you should also set
+\code{init_sdev = "range"}, which will range scale each of the columns
+containing the initial data between 0-10. This is not set by default to
+maintain backwards compatibility with previous versions of uwot.}
 
 \item{spread}{The effective scale of embedded points. In combination with
 \code{min_dist}, this determines how clustered/clumped the embedded points
