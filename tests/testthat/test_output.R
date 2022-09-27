@@ -173,9 +173,25 @@ res <- umap(iris10,
 )
 expect_is(res, "list")
 expect_ok_matrix(res$embedding)
+# #95: export min_dist and spread in returned model
+expect_equal(res$min_dist, 0.001)
+expect_equal(res$spread, 1)
+
+resab <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, a = 1, b = 0.9,
+            init = "rand", verbose = FALSE, n_threads = 1,
+            ret_model = TRUE
+)
+expect_equal(resab$a, 1)
+expect_equal(resab$b, 0.9)
+# min_dist and spread in returned model are NULL if a and b are set
+expect_null(resab$min_dist)
+expect_null(resab$spread)
+
 
 res_test <- umap_transform(iris10, res, n_threads = 1, verbose = FALSE)
 expect_ok_matrix(res_test)
+
 
 # test we can use 0 epochs
 res_test0 <- umap_transform(iris10, res, n_epochs = 0, n_threads = 1, verbose = FALSE)

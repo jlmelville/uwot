@@ -1952,11 +1952,19 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
   method <- match.arg(tolower(method), c("umap", "tumap", "largevis", "pacmap"))
 
-  if (method == "umap" && (is.null(a) || is.null(b))) {
-    ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
-    a <- ab_res[1]
-    b <- ab_res[2]
-    tsmessage("UMAP embedding parameters a = ", formatC(a), " b = ", formatC(b))
+  if (method == "umap") {
+    if (is.null(a) || is.null(b)) {
+      ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
+      a <- ab_res[1]
+      b <- ab_res[2]
+      tsmessage("UMAP embedding parameters a = ", formatC(a), " b = ", formatC(b))
+    }
+    else {
+      # set min_dist and spread to NULL so if ret_model = TRUE, their default
+      # values are not mistaken for having been used for anything
+      min_dist <- NULL
+      spread <- NULL
+    }
   }
 
   if (n_neighbors < 2) {
@@ -2544,7 +2552,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         pcg_rand = pcg_rand,
         batch = batch,
         opt_args = full_opt_args,
-        num_precomputed_nns = num_precomputed_nns
+        num_precomputed_nns = num_precomputed_nns,
+        # #95: min_dist and spread are exported for documentation purposes only
+        min_dist = min_dist,
+        spread = spread
       ))
       if (nn_is_precomputed(nn_method)) {
         res$n_neighbors <- nn_graph_nbrs_list(nn_method)

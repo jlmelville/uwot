@@ -4,7 +4,7 @@
 
 * If `n_components` was greater than `n_neighbors` then `umap_transform` would
 crash the R session. Thank you to [ChVav](https://github.com/ChVav) for 
-reporting this  (<https://github.com/jlmelville/uwot/issues/102>).
+reporting this (<https://github.com/jlmelville/uwot/issues/102>).
 * Some new checks for NA values in input data have been added. Also a warning
 will be emitted if `n_components` seems to have been set too high.
 * A new setting for `init_sdev`: set `init_sdev = "range"` and initial
@@ -13,6 +13,14 @@ pre-processing was added to the Python UMAP package at some point after `uwot`
 began development and so should probably always be used with the default 
 `init = "spectral"` setting. However, it is not set by default to maintain
 backwards compatibility with older versions of `uwot`.
+* The `min_dist` and `spread` parameters are now returned in the model when
+`umap` is run with `ret_model = TRUE`. This is just for documentation purposes, 
+these values are not used directly by the model in `umap_transform`. If the 
+parameters `a` and `b` are set directly when invoking `umap`, then both 
+`min_dist` and `spread` will be set to `NULL` in the returned model. This 
+feature was added in response to a question from 
+[kjiang18](https://github.com/kjiang18) 
+(<https://github.com/jlmelville/uwot/issues/95>).
 
 # uwot 0.1.14
 
