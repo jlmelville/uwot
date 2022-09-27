@@ -130,7 +130,12 @@
 #'   recommended and \code{init = "spca"} as an alias for \code{init = "pca",
 #'   init_sdev = 1e-4} but for the spectral initializations the scaled versions
 #'   usually aren't necessary unless you are using a large value of
-#'   \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher).
+#'   \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher). For
+#'   compatibility with recent versions of the Python UMAP package, if you are
+#'   using \code{init = "spectral"}, then you should also set
+#'   \code{init_sdev = "range"}, which will range scale each of the columns
+#'   containing the initial data between 0-10. This is not set by default to
+#'   maintain backwards compatibility with previous versions of uwot.
 #' @param spread The effective scale of embedded points. In combination with
 #'   \code{min_dist}, this determines how clustered/clumped the embedded points
 #'   are.
@@ -722,7 +727,12 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   recommended and \code{init = "spca"} as an alias for \code{init = "pca",
 #'   init_sdev = 1e-4} but for the spectral initializations the scaled versions
 #'   usually aren't necessary unless you are using a large value of
-#'   \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher).
+#'   \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher). For
+#'   compatibility with recent versions of the Python UMAP package, if you are
+#'   using \code{init = "spectral"}, then you should also set
+#'   \code{init_sdev = "range"}, which will range scale each of the columns
+#'   containing the initial data between 0-10. This is not set by default to
+#'   maintain backwards compatibility with previous versions of uwot.
 #' @param set_op_mix_ratio Interpolate between (fuzzy) union and intersection as
 #'   the set operation used to combine local fuzzy simplicial sets to obtain a
 #'   global fuzzy simplicial sets. Both fuzzy set operations use the product
@@ -1226,7 +1236,12 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   recommended and \code{init = "spca"} as an alias for \code{init = "pca",
 #'   init_sdev = 1e-4} but for the spectral initializations the scaled versions
 #'   usually aren't necessary unless you are using a large value of
-#'   \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher).
+#'   \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher). For
+#'   compatibility with recent versions of the Python UMAP package, if you are
+#'   using \code{init = "spectral"}, then you should also set
+#'   \code{init_sdev = "range"}, which will range scale each of the columns
+#'   containing the initial data between 0-10. This is not set by default to
+#'   maintain backwards compatibility with previous versions of uwot.
 #' @param repulsion_strength Weighting applied to negative samples in low
 #'   dimensional embedding optimization. Values higher than one will result in
 #'   greater weight being given to negative samples.
@@ -2386,7 +2401,14 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       if (is.null(init_sdev)) {
         init_sdev <- 1e-4
       }
-      embedding <- scale_coords(embedding, init_sdev, verbose = verbose)
+      if (is.numeric(init_sdev)) {
+        embedding <- scale_coords(embedding, init_sdev, verbose = verbose)
+      }
+      else if (is.character(init_sdev) && init_sdev == "range") {
+        # #99: range scale coordinates like python UMAP does
+        tsmessage("Range-scaling initial input columns to 0-10")
+        embedding <- apply(embedding, 2, range_scale, max = 10.0)
+      }
     }
   }
   if (any(is.na(embedding))) {

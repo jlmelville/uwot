@@ -786,3 +786,15 @@ umap_test_2 <- umap_transform(X = NULL, model = umap_train_x,
                               nn_method = query_ref_nn)
 expect_equal(umap_test_1, umap_test_2)
 
+
+
+res <- umap(iris10,
+            n_neighbors = 4, n_epochs = 2, learning_rate = 0.5,
+            init = "laplacian", verbose = FALSE, n_threads = 0,
+            init_sdev = 0.1
+)
+expect_ok_matrix(res)
+
+# 99 init_sdev = "range" range scales input data columns 0-10
+res <- umap(iris10, n_neighbors = 4, init_sdev = "range", n_epochs = 0)
+expect_equal(apply(res, 2, range), matrix(c(0, 10, 0, 10), ncol = 2))

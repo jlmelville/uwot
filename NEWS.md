@@ -7,6 +7,12 @@ crash the R session. Thank you to [ChVav](https://github.com/ChVav) for
 reporting this  (<https://github.com/jlmelville/uwot/issues/102>).
 * Some new checks for NA values in input data have been added. Also a warning
 will be emitted if `n_components` seems to have been set too high.
+* A new setting for `init_sdev`: set `init_sdev = "range"` and initial
+coordinates will be range-scaled so each column takes values between 0-10. This
+pre-processing was added to the Python UMAP package at some point after `uwot`
+began development and so should probably always be used with the default 
+`init = "spectral"` setting. However, it is not set by default to maintain
+backwards compatibility with older versions of `uwot`.
 
 # uwot 0.1.14
 
