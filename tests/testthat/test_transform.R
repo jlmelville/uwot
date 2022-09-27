@@ -200,3 +200,23 @@ test_that("equivalent results with nn graph or sparse distance matrix", {
 
   expect_equal(iris_odd_transform_nn_graph, iris_odd_transform_sp)
 })
+
+test_that("n_components can be > n_neighbors (#102)", {
+  train <- iris[1:20, ]
+  test <- iris[101:110, ]
+  set.seed(42)
+  train_umap <-
+    umap(
+      train,
+      n_components = 8,
+      ret_model = TRUE,
+      y = train$Petal.Length,
+      init = "rand" ,
+      n_neighbors = 4
+    )
+  set.seed(42)
+  test_umap <- umap_transform(test, train_umap)
+
+  expect_equal(dim(test_umap), c(10, 8))
+})
+
