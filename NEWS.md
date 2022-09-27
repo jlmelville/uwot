@@ -1,3 +1,11 @@
+# uwot 0.1.14.9000
+
+## Bug fixes and minor improvements
+
+* If `n_components` was greater than `n_neighbors` then `umap_transform` would
+crash the R session. Thank you to [ChVav](https://github.com/ChVav) for 
+reporting this  (<https://github.com/jlmelville/uwot/issues/102>).
+
 # uwot 0.1.14
 
 ## New features
@@ -18,7 +26,7 @@ setting `method = "largevis"`.
 
 * If a model was generated without using pre-generated nearest neighbors, you
 couldn't use `umap_transform` with pre-generated nearest neighbors (also the
-error message was completely useless).Thank you to 
+error message was completely useless). Thank you to 
 [AustinHartman](https://github.com/AustinHartman) for reporting this 
 (<https://github.com/jlmelville/uwot/issues/97>).
 
