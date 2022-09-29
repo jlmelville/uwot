@@ -251,10 +251,6 @@ the \code{pca} parameter is specified. Allowed values are:
 
 \item{binary_edge_weights}{If \code{TRUE} then edge weights in the input
 graph are treated as binary (0/1) rather than real valued.}
-
-\item{pca_center}{If \code{TRUE}, center the columns of \code{X} before
-carrying out PCA. For binary data, it's recommended to set this to
-\code{FALSE}.}
 }
 \value{
 A matrix of optimized coordinates.
