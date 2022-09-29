@@ -2,6 +2,7 @@
 
 export(load_uwot)
 export(lvish)
+export(optimize_graph_layout)
 export(save_uwot)
 export(similarity_graph)
 export(tumap)

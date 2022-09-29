@@ -77,3 +77,15 @@ expect_is(sim_graphy, "sparseMatrix")
 # binary edge weights
 sim_graphb <- similarity_graph(iris10, n_neighbors = 4, binary_edge_weights = TRUE)
 expect_true(all(sim_graphb@x == 1))
+
+
+test_that("optimize graph layout", {
+  iris30 <- iris[c(1:10, 51:60, 101:110), ]
+  iris30_sim_graph <- similarity_graph(iris30, n_neighbors = 10)
+  set.seed(42)
+  iris30_opt <- optimize_graph_layout(iris30_sim_graph, X = iris30)
+
+  set.seed(42)
+  iris30_umap <- umap(iris30, n_neighbors = 10)
+  expect_equal(iris30_opt, iris30_umap)
+})

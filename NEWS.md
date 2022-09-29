@@ -1,5 +1,16 @@
 # uwot 0.1.14.9000
 
+## New features:
+
+* New function: `optimize_graph_layout`. Use this to produce optimized output 
+coordinates that reflect an input similarity graph (such as that produced by
+the `similarity_graph` function. `similarity_graph` followed by 
+`optimize_graph_layout` is the same as running `umap`, so the purpose of these
+functions is to allow for more flexibility and decoupling between generating
+the nearest neighbor graph and optimizing the low-dimensional approximation
+to it. Based on a request by user [Chengwei94](https://github.com/Chengwei94) 
+(<https://github.com/jlmelville/uwot/issues/98>).
+
 ## Bug fixes and minor improvements
 
 * If `n_components` was greater than `n_neighbors` then `umap_transform` would
