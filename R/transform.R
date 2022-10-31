@@ -139,8 +139,34 @@
 #'     (Nmodel, \code{n_components}) where \code{Nmodel} is the number of
 #'     observations in the original data.
 #'   }
+#' @param ret_extra A vector indicating what extra data to return. May contain
+#'   any combination of the following strings:
+#'   \itemize{
+#'     \item \code{"fgraph"} the high dimensional fuzzy graph (i.e. the fuzzy
+#'       simplicial set of the merged local views of the input data). The graph
+#'       is returned as a sparse matrix of class \link[Matrix]{dgCMatrix-class}
+#'       with dimensions \code{NX} x \code{Nmodel}, where \code{NX} is the number
+#'       of items in the data to transform in \code{X}, and \code{NModel} is
+#'       the number of items in the data used to build the UMAP \code{model}.
+#'       A non-zero entry (i, j) gives the membership strength of the edge
+#'       connecting the vertex representing the ith item in \code{X} to the
+#'       jth item in the data used to build the \code{model}. Note that the
+#'       graph is further sparsified by removing edges with sufficiently low
+#'       membership strength that they would not be sampled by the probabilistic
+#'       edge sampling employed for optimization and therefore the number of
+#'       non-zero elements in the matrix is dependent on \code{n_epochs}. If you
+#'       are only interested in the fuzzy input graph (e.g. for clustering),
+#'       setting \code{n_epochs = 0} will avoid any further sparsifying.
+#'   }
 #' @return A matrix of coordinates for \code{X} transformed into the space
-#'   of the \code{model}.
+#'   of the \code{model}, or if \code{ret_extra} is specified, a list
+#'   containing:
+#'   \itemize{
+#'     \item \code{embedding} the matrix of optimized coordinates
+#'     \item if \code{ret_extra} contains \code{"fgraph"}, returns the high
+#'     dimensional fuzzy graph as a sparse matrix called \code{fgraph}, of type
+#'     \link[Matrix]{dgCMatrix-class}.
+#'   }
 #' @examples
 #'
 #' iris_train <- iris[1:100, ]
@@ -164,7 +190,8 @@ umap_transform <- function(X = NULL, model = NULL,
                            batch = NULL,
                            learning_rate = NULL,
                            opt_args = NULL,
-                           epoch_callback = NULL
+                           epoch_callback = NULL,
+                           ret_extra = NULL
                            ) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
@@ -649,7 +676,17 @@ umap_transform <- function(X = NULL, model = NULL,
   if (!is.null(Xnames)) {
     row.names(embedding) <- Xnames
   }
-  embedding
+  if (length(ret_extra) > 0) {
+    result <- list(embedding = embedding)
+    if ("fgraph" %in% ret_extra) {
+      result$fgraph <- graph
+    }
+  }
+  else {
+    result <- embedding
+  }
+
+  result
 }
 
 init_new_embedding <-

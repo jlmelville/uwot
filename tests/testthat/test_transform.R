@@ -220,3 +220,23 @@ test_that("n_components can be > n_neighbors (#102)", {
   expect_equal(dim(test_umap), c(10, 4))
 })
 
+test_that("return transform fgraph (#104)", {
+  train <- iris[1:20, ]
+  test <- iris[101:110, ]
+  set.seed(42)
+  train_umap <-
+    umap(
+      train,
+      ret_model = TRUE,
+      n_neighbors = 3
+    )
+  set.seed(42)
+  test_umap <- umap_transform(test, train_umap, ret_extra = c("fgraph"))
+  expect_is(test_umap, "list")
+  expect_ok_matrix(test_umap$embedding)
+  expect_equal(dim(test_umap$embedding), c(10, 2))
+  expect_is(test_umap$fgraph, "Matrix")
+  expect_equal(dim(test_umap$fgraph), c(10, 20))
+})
+
+
