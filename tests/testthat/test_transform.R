@@ -231,12 +231,19 @@ test_that("return transform fgraph (#104)", {
       n_neighbors = 3
     )
   set.seed(42)
-  test_umap <- umap_transform(test, train_umap, ret_extra = c("fgraph"))
+  test_umap <- umap_transform(test, train_umap,
+                              ret_extra = c("fgraph", "localr", "sigma"))
   expect_is(test_umap, "list")
   expect_ok_matrix(test_umap$embedding)
   expect_equal(dim(test_umap$embedding), c(10, 2))
   expect_is(test_umap$fgraph, "Matrix")
   expect_equal(dim(test_umap$fgraph), c(10, 20))
+  expect_is(test_umap$localr, "numeric")
+  expect_is(test_umap$sigma, "numeric")
+  expect_is(test_umap$rho, "numeric")
+  expect_equal(length(test_umap$localr), 10)
+  expect_equal(length(test_umap$sigma), 10)
+  expect_equal(length(test_umap$rho), 10)
 })
 
 

@@ -198,6 +198,12 @@ A matrix of coordinates for \code{X} transformed into the space
     \item if \code{ret_extra} contains \code{"fgraph"}, returns the high
     dimensional fuzzy graph as a sparse matrix called \code{fgraph}, of type
     \link[Matrix]{dgCMatrix-class}.
+    \item if \code{ret_extra} contains \code{"sigma"}, returns a vector of the
+    smooth knn distance normalization terms for each observation as
+    \code{"sigma"} and a vector \code{"rho"} containing the largest
+    distance to the locally connected neighbors of each observation.
+    \item if \code{ret_extra} contains \code{"localr"}, returns a vector of
+    the estimated local radii, the sum of \code{"sigma"} and \code{"rho"}.
   }
 }
 \description{

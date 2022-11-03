@@ -11,13 +11,11 @@ the nearest neighbor graph and optimizing the low-dimensional approximation
 to it. Based on a request by user [Chengwei94](https://github.com/Chengwei94) 
 (<https://github.com/jlmelville/uwot/issues/98>).
 * New parameter for `umap_transform`: `ret_extra`. This works like the
-equivalent parameter for `umap`, and should be a character vector specifying
-the extra information you would like returned in addition to the embedding, in
-which case a list will be returned with an `embedding` member containing the
-optimized coordinates. The only accepted value for `ret_extra` is `c("fgraph")`,
-which returns the fuzzy graph containing the membership values for each point
-in the new data to transform with respect to the items used to build the UMAP
-model. Based on a request by user 
+equivalent parameter for `umap`, and should be a character vector specifying the
+extra information you would like returned in addition to the embedding, in which
+case a list will be returned with an `embedding` member containing the optimized
+coordinates. Supported values are `"fgraph"`, `"sigma"` and `"localr"`.
+Based on a request by user 
 [PedroMilanezAlmeida](https://github.com/PedroMilanezAlmeida) 
 (<https://github.com/jlmelville/uwot/issues/104>).
 

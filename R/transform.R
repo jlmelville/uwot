@@ -166,6 +166,12 @@
 #'     \item if \code{ret_extra} contains \code{"fgraph"}, returns the high
 #'     dimensional fuzzy graph as a sparse matrix called \code{fgraph}, of type
 #'     \link[Matrix]{dgCMatrix-class}.
+#'     \item if \code{ret_extra} contains \code{"sigma"}, returns a vector of the
+#'     smooth knn distance normalization terms for each observation as
+#'     \code{"sigma"} and a vector \code{"rho"} containing the largest
+#'     distance to the locally connected neighbors of each observation.
+#'     \item if \code{ret_extra} contains \code{"localr"}, returns a vector of
+#'     the estimated local radii, the sum of \code{"sigma"} and \code{"rho"}.
 #'   }
 #' @examples
 #'
@@ -437,7 +443,9 @@ umap_transform <- function(X = NULL, model = NULL,
   graph <- NULL
   embedding <- NULL
   localr <- NULL
-  need_sigma <- method == "leopold" && nblocks == 1
+  sigma <- NULL
+  rho <- NULL
+  need_sigma <- (method == "leopold" && nblocks == 1) || "sigma" %in% ret_extra
   for (i in 1:nblocks) {
     tsmessage("Processing block ", i, " of ", nblocks)
     if (!is.null(X)) {
@@ -530,6 +538,8 @@ umap_transform <- function(X = NULL, model = NULL,
       # to that used to generate the "training" data but sigma is larger, so
       # let's just stick with sigma + rho even though it tends to be an
       # underestimate
+      sigma <- sknn_res$sigma
+      rho <- sknn_res$rho
       localr <- sknn_res$sigma + sknn_res$rho
     }
 
@@ -678,9 +688,19 @@ umap_transform <- function(X = NULL, model = NULL,
   }
   if (length(ret_extra) > 0) {
     result <- list(embedding = embedding)
-    if ("fgraph" %in% ret_extra) {
-      result$fgraph <- graph
+    for (name in ret_extra) {
+      if (name == "fgraph") {
+        result$fgraph <- graph
+      }
+      if (name == "sigma") {
+        result$sigma <- sigma
+        result$rho <- rho
+      }
+      if (name == "localr" && !is.null(localr)) {
+        result$localr <- localr
+      }
     }
+
   }
   else {
     result <- embedding
