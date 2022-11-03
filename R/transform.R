@@ -262,7 +262,7 @@ umap_transform <- function(X = NULL, model = NULL,
 
   if (method == "leopold") {
     dens_scale <- model$dens_scale
-    ai <- model$ai
+    aj <- model$ai
     rad_coeff <- model$rad_coeff
   }
 
@@ -630,12 +630,12 @@ umap_transform <- function(X = NULL, model = NULL,
     method <- tolower(method)
     if (method == "leopold") {
       # Use the linear model 2 log ai = -m log(localr) + c
-      aj <- exp(0.5 * ((-log(localr) * rad_coeff[2]) + rad_coeff[1]))
+      ai <- exp(0.5 * ((-log(localr) * rad_coeff[2]) + rad_coeff[1]))
       # Prevent too-small/large aj
-      min_aj <- min(sqrt(a * 10 ^ (-2 * dens_scale)), 0.1)
-      aj[aj < min_aj] <- min_aj
-      max_aj <- sqrt(a * 10 ^ (2 * dens_scale))
-      aj[aj > max_aj] <- max_aj
+      min_ai <- min(sqrt(a * 10 ^ (-2 * dens_scale)), 0.1)
+      ai[ai < min_ai] <- min_ai
+      max_ai <- sqrt(a * 10 ^ (2 * dens_scale))
+      ai[ai > max_ai] <- max_ai
       method <- "leopold2"
     }
 

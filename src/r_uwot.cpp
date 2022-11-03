@@ -269,7 +269,7 @@ void create_umapai2(UmapFactory &umap_factory, List method_args) {
   validate_args(method_args, arg_names);
 
   std::vector<float> ai = method_args["ai"];
-  std::vector<float> aj = method_args["ai"];
+  std::vector<float> aj = method_args["aj"];
   float b = method_args["b"];
   std::size_t ndim = method_args["ndim"];
   const uwot::umapai2_gradient gradient(ai, aj, b, ndim);
