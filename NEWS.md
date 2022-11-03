@@ -21,11 +21,6 @@ Based on a request by user
 
 ## Bug fixes and minor improvements
 
-* If `n_components` was greater than `n_neighbors` then `umap_transform` would
-crash the R session. Thank you to [ChVav](https://github.com/ChVav) for 
-reporting this (<https://github.com/jlmelville/uwot/issues/102>).
-* Some new checks for NA values in input data have been added. Also a warning
-will be emitted if `n_components` seems to have been set too high.
 * A new setting for `init_sdev`: set `init_sdev = "range"` and initial
 coordinates will be range-scaled so each column takes values between 0-10. This
 pre-processing was added to the Python UMAP package at some point after `uwot`
@@ -40,6 +35,17 @@ parameters `a` and `b` are set directly when invoking `umap`, then both
 feature was added in response to a question from 
 [kjiang18](https://github.com/kjiang18) 
 (<https://github.com/jlmelville/uwot/issues/95>).
+* Some new checks for NA values in input data have been added. Also a warning
+will be emitted if `n_components` seems to have been set too high.
+* If `n_components` was greater than `n_neighbors` then `umap_transform` would
+crash the R session. Thank you to [ChVav](https://github.com/ChVav) for 
+reporting this (<https://github.com/jlmelville/uwot/issues/102>).
+* Using `umap_transform` with a model where `dens_scale` was set could cause
+a segmentation fault, destroying the session. Even if it didn't it could give
+an entirely artifactual "ring" structure. Thank you 
+[FemkeSmit](https://github.com/FemkeSmit) for reporting this and providing
+assistance in diagnosing the underlying cause 
+(<https://github.com/jlmelville/uwot/issues/103>).
 
 # uwot 0.1.14
 

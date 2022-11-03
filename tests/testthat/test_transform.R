@@ -246,4 +246,27 @@ test_that("return transform fgraph (#104)", {
   expect_equal(length(test_umap$rho), 10)
 })
 
+# regression tests the bug reported in #103 where ai and aj were transposed and
+# also the data being transformed is larger than the original data
+# this at best leads to a wide ring structure being formed for some of the
+# transformed data (but may also lead to NaN or a seg fault). This test checks
+# that the transformed data doesn't cover a large range, which would be
+# diagnostic of the ring forming: with the error present, the range of
+# coordinates is around c(-40, 40) vs c(-6, 6) otherwise
+test_that("leopold transform (#103)", {
+  iris_species_12 <- iris[1:100, ]
+  iris_species_3 <- iris[101:150, ]
+
+  set.seed(42)
+  iris_s3_leopold <- umap(iris_species_3, dens_scale = 1, ret_model = TRUE)
+
+  set.seed(42)
+  iris_s12_transform <- umap_transform(iris_species_12, iris_s3_leopold)
+
+  transform_range <- range(iris_s12_transform)
+  # as long as the coordinates aren't in the c(-40, 40) range then we are
+  # probably ok
+  expect_gt(transform_range[1], -10.0)
+  expect_lt(transform_range[2], 10.0)
+})
 
