@@ -14,7 +14,7 @@ to it. Based on a request by user [Chengwei94](https://github.com/Chengwei94)
 equivalent parameter for `umap`, and should be a character vector specifying the
 extra information you would like returned in addition to the embedding, in which
 case a list will be returned with an `embedding` member containing the optimized
-coordinates. Supported values are `"fgraph"`, `"sigma"` and `"localr"`.
+coordinates. Supported values are `"fgraph"`, `"nn"`, `"sigma"` and `"localr"`.
 Based on a request by user 
 [PedroMilanezAlmeida](https://github.com/PedroMilanezAlmeida) 
 (<https://github.com/jlmelville/uwot/issues/104>).

@@ -162,16 +162,20 @@
 #'   of the \code{model}, or if \code{ret_extra} is specified, a list
 #'   containing:
 #'   \itemize{
-#'     \item \code{embedding} the matrix of optimized coordinates
-#'     \item if \code{ret_extra} contains \code{"fgraph"}, returns the high
-#'     dimensional fuzzy graph as a sparse matrix called \code{fgraph}, of type
-#'     \link[Matrix]{dgCMatrix-class}.
-#'     \item if \code{ret_extra} contains \code{"sigma"}, returns a vector of the
-#'     smooth knn distance normalization terms for each observation as
+#'     \item \code{embedding} the matrix of optimized coordinates.
+#'     \item if \code{ret_extra} contains \code{"fgraph"}, an item of the same
+#'     name containing the high-dimensional fuzzy graph as a sparse matrix, of
+#'     type \link[Matrix]{dgCMatrix-class}.
+#'     \item if \code{ret_extra} contains \code{"sigma"}, returns a vector of
+#'     the smooth knn distance normalization terms for each observation as
 #'     \code{"sigma"} and a vector \code{"rho"} containing the largest
 #'     distance to the locally connected neighbors of each observation.
-#'     \item if \code{ret_extra} contains \code{"localr"}, returns a vector of
-#'     the estimated local radii, the sum of \code{"sigma"} and \code{"rho"}.
+#'     \item if \code{ret_extra} contains \code{"localr"}, an item of the same
+#'     name containing a vector of the estimated local radii, the sum of
+#'     \code{"sigma"} and \code{"rho"}.
+#'     \item if \code{ret_extra} contains \code{"nn"}, an item of the same name
+#'     containing the nearest neighbors of each item in \code{X} (with respect
+#'     to the items that created the \code{model}).
 #'   }
 #' @examples
 #'
@@ -445,6 +449,12 @@ umap_transform <- function(X = NULL, model = NULL,
   localr <- NULL
   sigma <- NULL
   rho <- NULL
+  export_nns <- NULL
+  ret_nn <- FALSE
+  if ("nn" %in% ret_extra) {
+    ret_nn <- TRUE
+    export_nns <- list()
+  }
   need_sigma <- (method == "leopold" && nblocks == 1) || "sigma" %in% ret_extra
   for (i in 1:nblocks) {
     tsmessage("Processing block ", i, " of ", nblocks)
@@ -473,11 +483,18 @@ umap_transform <- function(X = NULL, model = NULL,
                          prep_data = TRUE,
                          tmpdir = tmpdir,
                          n_threads = n_threads, grain_size = grain_size,
-                         verbose = verbose
-      )
+                         verbose = verbose)
+      if (ret_nn) {
+        export_nns[[i]] <- nn
+        names(export_nns)[[i]] <- ann$metric
+      }
     } else if (is.list(nn_method)) {
       # otherwise we expect a list of NN graphs
       nn <- nn_method[[i]]
+      if (ret_nn) {
+        export_nns[[i]] <- nn
+        names(export_nns)[[i]] <- "precomputed"
+      }
     }
     else {
       stop("Can't transform new data if X is NULL ",
@@ -687,26 +704,29 @@ umap_transform <- function(X = NULL, model = NULL,
     row.names(embedding) <- Xnames
   }
   if (length(ret_extra) > 0) {
-    result <- list(embedding = embedding)
+    res <- list(embedding = embedding)
     for (name in ret_extra) {
       if (name == "fgraph") {
-        result$fgraph <- graph
+        res$fgraph <- graph
       }
       if (name == "sigma") {
-        result$sigma <- sigma
-        result$rho <- rho
+        res$sigma <- sigma
+        res$rho <- rho
       }
       if (name == "localr" && !is.null(localr)) {
-        result$localr <- localr
+        res$localr <- localr
+      }
+      if (ret_nn && !is.null(export_nns)) {
+        res$nn <- export_nns
       }
     }
 
   }
   else {
-    result <- embedding
+    res <- embedding
   }
 
-  result
+  res
 }
 
 init_new_embedding <-

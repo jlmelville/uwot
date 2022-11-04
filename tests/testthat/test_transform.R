@@ -130,9 +130,11 @@ test_that("can use pre-calculated neighbors in transform", {
   row.names(query_ref_nn$dist) <- row.names(X_test)
 
   iris_umap_test <- umap_transform(X = NULL, model = iris_umap_train,
-                                   nn_method = query_ref_nn)
-  expect_ok_matrix(iris_umap_test)
-  expect_equal(row.names(iris_umap_test), row.names(X_test))
+                                   nn_method = query_ref_nn, ret_extra = c("nn"))
+  expect_ok_matrix(iris_umap_test$embedding)
+  expect_equal(row.names(iris_umap_test$embedding), row.names(X_test))
+  expect_equal(iris_umap_test$nn$precomputed$idx, query_ref_nn$idx)
+  expect_equal(iris_umap_test$nn$precomputed$dist, query_ref_nn$dist)
 
   # also test that we can provide our own input and it's unchanged with 0 epochs
   nr <- nrow(query_ref_nn$idx)
@@ -193,12 +195,14 @@ test_that("equivalent results with nn graph or sparse distance matrix", {
   colnames(iris_odd_nn_sp) <- row.names(iris_odd)
 
   set.seed(42)
-  iris_odd_transform_sp <-
-    umap_transform(X = NULL, iris_even_umap, nn_method = iris_odd_nn_sp)
-  expect_ok_matrix(iris_odd_transform_sp, nrow(iris_odd), 2)
-  expect_equal(row.names(iris_odd_transform_sp), row.names(iris_odd))
+  iris_odd_transform_sp <- umap_transform(X = NULL, iris_even_umap,
+                                          nn_method = iris_odd_nn_sp,
+                                          ret_extra = c("nn"))
+  expect_ok_matrix(iris_odd_transform_sp$embedding, nrow(iris_odd), 2)
+  expect_equal(row.names(iris_odd_transform_sp$embedding), row.names(iris_odd))
+  expect_equal(iris_odd_transform_sp$embedding, iris_odd_transform_nn_graph)
 
-  expect_equal(iris_odd_transform_nn_graph, iris_odd_transform_sp)
+  expect_equal(iris_odd_transform_sp$nn$precomputed, iris_odd_nn_sp)
 })
 
 test_that("n_components can be > n_neighbors (#102)", {
@@ -232,7 +236,7 @@ test_that("return transform fgraph (#104)", {
     )
   set.seed(42)
   test_umap <- umap_transform(test, train_umap,
-                              ret_extra = c("fgraph", "localr", "sigma"))
+                              ret_extra = c("fgraph", "localr", "sigma", "nn"))
   expect_is(test_umap, "list")
   expect_ok_matrix(test_umap$embedding)
   expect_equal(dim(test_umap$embedding), c(10, 2))
@@ -244,6 +248,8 @@ test_that("return transform fgraph (#104)", {
   expect_equal(length(test_umap$localr), 10)
   expect_equal(length(test_umap$sigma), 10)
   expect_equal(length(test_umap$rho), 10)
+  expect_equal(dim(test_umap$nn$euclidean$idx), c(10, 3))
+  expect_equal(dim(test_umap$nn$euclidean$dist), c(10, 3))
 })
 
 # regression tests the bug reported in #103 where ai and aj were transposed and
