@@ -2892,7 +2892,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         num_precomputed_nns = num_precomputed_nns,
         # #95: min_dist and spread are exported for documentation purposes only
         min_dist = min_dist,
-        spread = spread
+        spread = spread,
+        binary_edge_weights = binary_edge_weights
       ))
       if (nn_is_precomputed(nn_method)) {
         res$n_neighbors <- nn_graph_nbrs_list(nn_method)

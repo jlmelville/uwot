@@ -276,3 +276,16 @@ test_that("leopold transform (#103)", {
   expect_lt(transform_range[2], 10.0)
 })
 
+
+test_that("can transform with binary edge weights", {
+  iris_species_12 <- iris[1:100, ]
+  iris_species_3 <- iris[101:150, ]
+
+  set.seed(42)
+  iris_s3 <- umap(iris_species_3, binary_edge_weights = TRUE, ret_model = TRUE)
+  expect_true(iris_s3$binary_edge_weights)
+
+  iris_s12_transform <- umap_transform(iris_species_12, iris_s3,
+                                       ret_extra = c("fgraph"))
+  expect_true(all(iris_s12_transform$fgraph@x == 1))
+})

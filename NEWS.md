@@ -46,6 +46,10 @@ an entirely artifactual "ring" structure. Thank you
 [FemkeSmit](https://github.com/FemkeSmit) for reporting this and providing
 assistance in diagnosing the underlying cause 
 (<https://github.com/jlmelville/uwot/issues/103>).
+* If you set `binary_edge_weights = TRUE`, this setting was not exported when
+`ret_model = TRUE`, and was therefore not respected by `umap_transform`. This 
+has now been fixed, but you will need to regenerate any models that used
+binary edge weights.
 
 # uwot 0.1.14
 

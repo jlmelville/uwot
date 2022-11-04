@@ -315,6 +315,10 @@ umap_transform <- function(X = NULL, model = NULL,
     pcg_rand <- TRUE
   }
   num_precomputed_nns <- model$num_precomputed_nns
+  binary_edge_weights <- model$binary_edge_weights
+  if (is.null(binary_edge_weights)) {
+    binary_edge_weights <- FALSE
+  }
 
   # the number of model vertices
   n_vertices <- NULL
@@ -609,6 +613,11 @@ umap_transform <- function(X = NULL, model = NULL,
   else {
     tsmessage("Initializing from user-supplied matrix")
     embedding <- t(init)
+  }
+
+  if (binary_edge_weights) {
+    tsmessage("Using binary edge weights")
+    graph@x <- rep(1, length(graph@x))
   }
 
   if (n_epochs > 0) {
