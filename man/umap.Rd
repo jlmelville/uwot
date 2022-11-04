@@ -279,7 +279,8 @@ search. Only used if the \code{nn_method} is \code{"annoy"}.}
 
 \item{approx_pow}{If \code{TRUE}, use an approximation to the power function
 in the UMAP gradient, from
-\url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.}
+\url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.
+Ignored if \code{dens_scale} is non-\code{NULL}.}
 
 \item{y}{Optional target data for supervised dimension reduction. Can be a
 vector, matrix or data frame. Use the \code{target_metric} parameter to
