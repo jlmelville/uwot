@@ -2351,6 +2351,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_sgd_threads <- round(n_sgd_threads)
     tsmessage("Non-integer 'n_sgd_threads' provided. Setting to ", n_sgd_threads)
   }
+  if (!is.null(dens_scale) && approx_pow) {
+    warning("approx_pow parameter is ignored when using dens_scale")
+    approx_pow <- FALSE
+  }
+
 
   ret_extra <- ret_model || ret_nn || ret_fgraph || ret_sigma || ret_localr
 
