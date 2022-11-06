@@ -27,7 +27,6 @@
 #ifndef UWOT_EPOCH_H
 #define UWOT_EPOCH_H
 
-#include "sampler.h"
 #include "update.h"
 
 namespace uwot {
@@ -54,13 +53,13 @@ void run_epoch(Worker &worker, std::size_t epoch, std::size_t n_epochs,
 
 // Gradient: the type of gradient used in the optimization
 // Update: type of update to the embedding coordinates
-template <typename Gradient, typename Update, typename RngFactory>
+template <typename Gradient, typename Update, typename Sampler, typename RngFactory>
 struct EdgeWorker {
   const Gradient gradient;
   Update &update;
   const std::vector<unsigned int> &positive_head;
   const std::vector<unsigned int> &positive_tail;
-  uwot::Sampler sampler;
+  Sampler sampler;
   std::size_t ndim;
   std::size_t n_tail_vertices;
   std::size_t n_items;
@@ -70,7 +69,7 @@ struct EdgeWorker {
   EdgeWorker(const Gradient &gradient, Update &update,
              const std::vector<unsigned int> &positive_head,
              const std::vector<unsigned int> &positive_tail,
-             uwot::Sampler &sampler, std::size_t ndim,
+             Sampler &sampler, std::size_t ndim,
              std::size_t n_tail_vertices, std::size_t n_threads)
       : gradient(gradient), update(update), positive_head(positive_head),
         positive_tail(positive_tail), sampler(sampler), ndim(ndim),
@@ -80,7 +79,7 @@ struct EdgeWorker {
 
   void epoch_begin(std::size_t epoch, std::size_t n_epochs) {
     rng_factory.reseed();
-    sampler.epoch = epoch;
+    sampler.epoch_begin(epoch);
     update.epoch_begin(epoch, n_epochs);
   }
 
@@ -103,14 +102,14 @@ struct EdgeWorker {
   }
 };
 
-template <typename Gradient, typename Update, typename RngFactory>
+template <typename Gradient, typename Update, typename Sampler, typename RngFactory>
 struct NodeWorker {
   const Gradient gradient;
   Update &update;
   const std::vector<unsigned int> &positive_head;
   const std::vector<unsigned int> &positive_tail;
   const std::vector<unsigned int> &positive_ptr;
-  uwot::Sampler sampler;
+  Sampler sampler;
   std::size_t ndim;
   std::size_t n_tail_vertices;
   std::size_t n_items;
@@ -120,7 +119,7 @@ struct NodeWorker {
              const std::vector<unsigned int> &positive_head,
              const std::vector<unsigned int> &positive_tail,
              const std::vector<unsigned int> &positive_ptr,
-             uwot::Sampler &sampler, std::size_t ndim,
+             Sampler &sampler, std::size_t ndim,
              std::size_t n_tail_vertices)
       : gradient(gradient), update(update), positive_head(positive_head),
         positive_tail(positive_tail), positive_ptr(positive_ptr),

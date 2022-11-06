@@ -2273,7 +2273,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  method <- match.arg(tolower(method), c("umap", "tumap", "largevis", "pacmap"))
+  method <- match.arg(tolower(method), c("umap", "tumap", "largevis", "pacmap", "ntumap"))
 
   if (method == "umap") {
     if (is.null(a) || is.null(b)) {
@@ -2355,7 +2355,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     warning("approx_pow parameter is ignored when using dens_scale")
     approx_pow <- FALSE
   }
-
 
   ret_extra <- ret_model || ret_nn || ret_fgraph || ret_sigma || ret_localr
 
@@ -2777,6 +2776,34 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
 
+  # TODO: make this work with umap_transform
+  # TODO: allow "ncvis" option to work with more than 5 negatives per sample
+  if (is.character(negative_sample_rate)) {
+    if (negative_sample_rate != "ncvis") {
+      stop("Unknown negative sample rate '", negative_sample_rate, "'")
+    }
+    negative_plan <-
+      ncvis_negative(n_negative = 5, n_epochs = n_epochs)
+    negative_sample_rate <- 0
+  }
+  else if (length(negative_sample_rate) > 1) {
+    if (length(negative_sample_rate) != n_epochs) {
+      warning(
+        "Vector of negative sample rate does not match n_epochs = ",
+        n_epochs,
+        " using n_epochs = ",
+        length(negative_sample_rate),
+        " instead"
+      )
+      n_epochs <- length(negative_sample_rate)
+    }
+    negative_plan <- negative_sample_rate
+    negative_sample_rate <- 0
+  }
+  else {
+    negative_plan <- c()
+  }
+
   full_opt_args <- get_opt_args(opt_args, alpha)
 
   if (binary_edge_weights) {
@@ -2834,6 +2861,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       pacmap = list(a = a, b = b),
       largevis = list(gamma = gamma),
       leopold = list(ai = ai, b = b, ndim = n_components),
+      ntumap = list(gamma = gamma),
       stop("Unknown dimensionality reduction method '", method, "'")
     )
 
@@ -2852,6 +2880,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       method_args = method_args,
       initial_alpha = alpha,
       opt_args = full_opt_args,
+      negative_plan = negative_plan,
       negative_sample_rate = negative_sample_rate,
       pcg_rand = pcg_rand,
       batch = batch,
@@ -3782,7 +3811,13 @@ categorical_intersection <- function(x, V, weight, verbose = FALSE) {
 # Creates the number of epochs per sample for each weight
 # weights are the non-zero input affinities (1-simplex)
 # n_epoch the total number of epochs
-# There is an inverse relationship between the weights and the return vector.
+# There is an inverse relationship between the weights and the return vector:
+# Values are how often (# epochs) each edge is sampled
+# e.g. 1 means every epoch, 2 means every 2 epochs and so on. Values are scaled
+# so the edge with the highest weight is sampled every epoch and then lower
+# weights are sampled proportionally to that, so if an edge with weight 1 is
+# sampled every epoch, one with weight 0.5 is sampled every 2 epochs, one
+# with weight 0.1 every 10 epochs etc.
 make_epochs_per_sample <- function(weights, n_epochs) {
   result <- rep(-1, length(weights))
   n_samples <- n_epochs * (weights / max(weights))

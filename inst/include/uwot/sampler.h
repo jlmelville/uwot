@@ -42,33 +42,75 @@ public:
         epoch_of_next_sample(epochs_per_sample),
         epochs_per_negative_sample(epochs_per_sample.size()),
         epoch_of_next_negative_sample(epochs_per_sample.size()) {
-    std::size_t esz = epochs_per_sample.size();
+    std::size_t n_edges = epochs_per_sample.size();
     float nsr = 1.0 / negative_sample_rate;
-    for (std::size_t i = 0; i < esz; i++) {
+    for (std::size_t i = 0; i < n_edges; i++) {
       epochs_per_negative_sample[i] = epochs_per_sample[i] * nsr;
       epoch_of_next_negative_sample[i] = epochs_per_negative_sample[i];
     }
   }
+
+  auto epoch_begin(std::size_t epoch) -> void {
+    this->epoch = epoch;
+  }
+
+  // are we due to sample the edge on the current epoch?
   auto is_sample_edge(std::size_t edge) const -> bool {
     return epoch_of_next_sample[edge] <= epoch;
   }
+
   auto get_num_neg_samples(std::size_t edge) const -> std::size_t {
     return static_cast<std::size_t>(
         (epoch - epoch_of_next_negative_sample[edge]) /
-        epochs_per_negative_sample[edge]);
+          epochs_per_negative_sample[edge]);
   }
 
   void next_sample(std::size_t edge, std::size_t num_neg_samples) {
+    // set the next epoch when this edge will be sampled
     epoch_of_next_sample[edge] += epochs_per_sample[edge];
     epoch_of_next_negative_sample[edge] +=
         num_neg_samples * epochs_per_negative_sample[edge];
   }
 
 private:
+  // how often to sample each edge
   std::vector<float> epochs_per_sample;
+  // the epoch when the edge should be sampled next
   std::vector<float> epoch_of_next_sample;
   std::vector<float> epochs_per_negative_sample;
   std::vector<float> epoch_of_next_negative_sample;
+};
+
+
+class NCVisSampler {
+public:
+  std::size_t epoch;
+  NCVisSampler(const std::vector<float> &epochs_per_sample,
+               const std::vector<std::size_t> &negative_plan)
+    : epochs_per_sample(epochs_per_sample),
+      epoch_of_next_sample(epochs_per_sample),
+      negative_plan(negative_plan) {}
+
+  auto epoch_begin(std::size_t epoch) -> void {
+    this->epoch = epoch;
+  }
+
+  auto is_sample_edge(std::size_t edge) const -> bool {
+    return epoch_of_next_sample[edge] <= epoch;
+  }
+
+  auto get_num_neg_samples(std::size_t edge) const -> std::size_t {
+    return negative_plan[epoch];
+  }
+
+  void next_sample(std::size_t edge, std::size_t num_neg_samples) {
+    epoch_of_next_sample[edge] += epochs_per_sample[edge];
+  }
+
+private:
+  std::vector<float> epochs_per_sample;
+  std::vector<float> epoch_of_next_sample;
+  std::vector<std::size_t> negative_plan;
 };
 
 } // namespace uwot

@@ -47,7 +47,7 @@ struct DoNothingCallback : EpochCallback {
                   const std::vector<float> &) override {}
 };
 
-template <typename Update, typename Gradient, typename Prng>
+template <typename Update, typename Gradient, typename Sampler, typename Prng>
 inline void
 process_edge(Update &update, Gradient &gradient, Sampler &sampler, Prng &prng,
              const std::vector<unsigned int> &positive_head,

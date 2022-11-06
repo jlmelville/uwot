@@ -66,6 +66,7 @@ struct UmapFactory {
   float initial_alpha;
   List opt_args;
   float negative_sample_rate;
+  const Nullable<IntegerVector> &negative_plan;
   bool batch;
   std::size_t n_threads;
   std::size_t grain_size;
@@ -81,7 +82,8 @@ struct UmapFactory {
               unsigned int n_epochs, unsigned int n_head_vertices,
               unsigned int n_tail_vertices,
               const std::vector<float> &epochs_per_sample, float initial_alpha,
-              List opt_args, float negative_sample_rate, bool batch,
+              List opt_args, float negative_sample_rate, const Nullable<IntegerVector> &negative_plan,
+              bool batch,
               std::size_t n_threads, std::size_t grain_size,
               uwot::EpochCallback *epoch_callback, bool verbose)
       : move_other(move_other), pcg_rand(pcg_rand),
@@ -91,6 +93,7 @@ struct UmapFactory {
         n_head_vertices(n_head_vertices), n_tail_vertices(n_tail_vertices),
         epochs_per_sample(epochs_per_sample), initial_alpha(initial_alpha),
         opt_args(opt_args), negative_sample_rate(negative_sample_rate),
+        negative_plan(negative_plan),
         batch(batch), n_threads(n_threads), grain_size(grain_size),
         epoch_callback(epoch_callback), verbose(verbose) {}
 
@@ -113,11 +116,27 @@ struct UmapFactory {
 
   template <typename BatchRngFactory, bool DoMove, typename Gradient>
   void create_impl(const Gradient &gradient, bool pcg_rand, bool batch) {
+
+    if (negative_plan.isNotNull()) {
+      auto negative_planv = as<std::vector<std::size_t>>(negative_plan);
+      uwot::NCVisSampler sampler(epochs_per_sample, negative_planv);
+      create_impl<BatchRngFactory, DoMove>(gradient, sampler, pcg_rand, batch);
+    }
+    else {
+      uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
+      create_impl<BatchRngFactory, DoMove>(gradient, sampler, pcg_rand, batch);
+    }
+  }
+
+  template <typename BatchRngFactory, bool DoMove, typename Gradient, typename Sampler>
+  void create_impl(const Gradient &gradient, Sampler &sampler, bool pcg_rand, bool batch) {
     if (pcg_rand) {
       create_impl<typename BatchRngFactory::PcgFactoryType, DoMove>(gradient,
+                                                                    sampler,
                                                                     batch);
     } else {
       create_impl<typename BatchRngFactory::TauFactoryType, DoMove>(gradient,
+                                                                    sampler,
                                                                     batch);
     }
   }
@@ -146,40 +165,38 @@ struct UmapFactory {
     return uwot::Sgd(alpha);
   }
 
-  template <typename RandFactory, bool DoMove, typename Gradient>
-  void create_impl(const Gradient &gradient, bool batch) {
+  template <typename RandFactory, bool DoMove, typename Gradient, typename Sampler>
+  void create_impl(const Gradient &gradient, Sampler &sampler, bool batch) {
     if (batch) {
       std::string opt_name = opt_args["method"];
       if (opt_name == "adam") {
         auto opt = create_adam(opt_args);
-        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, opt, batch);
+        create_impl_batch_opt<RandFactory, DoMove>(
+            gradient, opt, sampler, batch);
       } else if (opt_name == "sgd") {
         auto opt = create_sgd(opt_args);
-        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, opt, batch);
+        create_impl_batch_opt<RandFactory, DoMove>(
+            gradient, opt, sampler, batch);
       } else {
         stop("Unknown optimization method");
       }
     } else {
       const std::size_t ndim = head_embedding.size() / n_head_vertices;
-      uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
       uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
                                          initial_alpha, epoch_callback);
-      uwot::EdgeWorker<Gradient, decltype(update), RandFactory> worker(
+      uwot::EdgeWorker<Gradient, decltype(update), decltype(sampler), RandFactory> worker(
           gradient, update, positive_head, positive_tail, sampler, ndim,
           n_tail_vertices, n_threads);
       create_impl(worker, gradient);
     }
   }
 
-  template <typename Opt, typename RandFactory, bool DoMove, typename Gradient>
-  void create_impl_batch_opt(const Gradient &gradient, Opt &opt, bool batch) {
-    uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
+  template <typename RandFactory, bool DoMove, typename Opt, typename Gradient, typename Sampler>
+  void create_impl_batch_opt(const Gradient &gradient, Opt &opt, Sampler &sampler, bool batch) {
     const std::size_t ndim = head_embedding.size() / n_head_vertices;
     uwot::BatchUpdate<DoMove, decltype(opt)> update(
         head_embedding, tail_embedding, opt, epoch_callback);
-    uwot::NodeWorker<Gradient, decltype(update), RandFactory> worker(
+    uwot::NodeWorker<Gradient, decltype(update), decltype(sampler), RandFactory> worker(
         gradient, update, positive_head, positive_tail, positive_ptr, sampler,
         ndim, n_tail_vertices);
     create_impl(worker, gradient);
@@ -250,6 +267,15 @@ void create_umap(UmapFactory &umap_factory, List method_args) {
 
 void create_tumap(UmapFactory &umap_factory, List) {
   const uwot::tumap_gradient gradient;
+  umap_factory.create(gradient);
+}
+
+void create_ntumap(UmapFactory &umap_factory, List method_args) {
+  std::vector<std::string> arg_names = {"gamma"};
+  validate_args(method_args, arg_names);
+  float gamma = method_args["gamma"];
+
+  const uwot::ntumap_gradient gradient(gamma);
   umap_factory.create(gradient);
 }
 
@@ -349,6 +375,7 @@ NumericMatrix optimize_layout_r(
     const std::vector<float> epochs_per_sample, const std::string &method,
     List method_args, float initial_alpha, List opt_args,
     Nullable<Function> epoch_callback, float negative_sample_rate,
+    const Nullable<IntegerVector> &negative_plan,
     bool pcg_rand = true, bool batch = false, std::size_t n_threads = 0,
     std::size_t grain_size = 1, bool move_other = true, bool verbose = false) {
 
@@ -361,7 +388,8 @@ NumericMatrix optimize_layout_r(
                            coords.get_tail_embedding(), positive_head,
                            positive_tail, positive_ptr, n_epochs,
                            n_head_vertices, n_tail_vertices, epochs_per_sample,
-                           initial_alpha, opt_args, negative_sample_rate, batch,
+                           initial_alpha, opt_args, negative_sample_rate,
+                           negative_plan, batch,
                            n_threads, grain_size, uwot_ecb, verbose);
   if (verbose) {
     Rcerr << "Using method '" << method << "'" << std::endl;
@@ -378,6 +406,8 @@ NumericMatrix optimize_layout_r(
     create_umapai(umap_factory, method_args);
   } else if (method == "leopold2") {
     create_umapai2(umap_factory, method_args);
+  } else if (method == "ntumap") {
+    create_ntumap(umap_factory, method_args);
   } else {
     stop("Unknown method: '" + method + "'");
   }
