@@ -111,13 +111,13 @@
 #'     \item A matrix of initial coordinates.
 #'   }
 #'  For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},
-#'  \code{"laplacian"}), if more than one connected component is identified,
-#'  each connected component is initialized separately and the results are
-#'  merged. If \code{verbose = TRUE} the number of connected components are
-#'  logged to the console. The existence of multiple connected components
-#'  implies that a global view of the data cannot be attained with this
-#'  initialization. Either a PCA-based initialization or increasing the value of
-#'  \code{n_neighbors} may be more appropriate.
+#'  \code{"laplacian"}, \code{"agspectral"}), if more than one connected
+#'  component is identified, no spectral initialization is attempted. Instead
+#'  a PCA-based initialization is attempted. If \code{verbose = TRUE} the
+#'  number of connected components are logged to the console. The existence of
+#'  multiple connected components implies that a global view of the data cannot
+#'  be attained with this initialization. Increasing the value of
+#'  \code{n_neighbors} may help.
 #' @param init_sdev If non-\code{NULL}, scales each dimension of the initialized
 #'   coordinates (including any user-supplied matrix) to this standard
 #'   deviation. By default no scaling is carried out, except when \code{init =
@@ -709,13 +709,13 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item A matrix of initial coordinates.
 #'   }
 #'  For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},
-#'  \code{"laplacian"}), if more than one connected component is identified,
-#'  each connected component is initialized separately and the results are
-#'  merged. If \code{verbose = TRUE} the number of connected components are
-#'  logged to the console. The existence of multiple connected components
-#'  implies that a global view of the data cannot be attained with this
-#'  initialization. Either a PCA-based initialization or increasing the value of
-#'  \code{n_neighbors} may be more appropriate.
+#'  \code{"laplacian"}, \code{"agspectral"}), if more than one connected
+#'  component is identified, no spectral initialization is attempted. Instead
+#'  a PCA-based initialization is attempted. If \code{verbose = TRUE} the
+#'  number of connected components are logged to the console. The existence of
+#'  multiple connected components implies that a global view of the data cannot
+#'  be attained with this initialization. Increasing the value of
+#'  \code{n_neighbors} may help.
 #' @param init_sdev If non-\code{NULL}, scales each dimension of the initialized
 #'   coordinates (including any user-supplied matrix) to this standard
 #'   deviation. By default no scaling is carried out, except when \code{init =
@@ -1218,13 +1218,13 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item A matrix of initial coordinates.
 #'   }
 #'  For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},
-#'  \code{"laplacian"}), if more than one connected component is identified,
-#'  each connected component is initialized separately and the results are
-#'  merged. If \code{verbose = TRUE} the number of connected components are
-#'  logged to the console. The existence of multiple connected components
-#'  implies that a global view of the data cannot be attained with this
-#'  initialization. Either a PCA-based initialization or increasing the value of
-#'  \code{n_neighbors} may be more appropriate.
+#'  \code{"laplacian"}, \code{"agspectral"}), if more than one connected
+#'  component is identified, no spectral initialization is attempted. Instead
+#'  a PCA-based initialization is attempted. If \code{verbose = TRUE} the
+#'  number of connected components are logged to the console. The existence of
+#'  multiple connected components implies that a global view of the data cannot
+#'  be attained with this initialization. Increasing the value of
+#'  \code{n_neighbors} may help.
 #' @param init_sdev If non-\code{NULL}, scales each dimension of the initialized
 #'   coordinates (including any user-supplied matrix) to this standard
 #'   deviation. By default no scaling is carried out, except when \code{init =
@@ -1978,13 +1978,13 @@ similarity_graph <- function(X = NULL, n_neighbors = NULL, metric = "euclidean",
 #'     \item A matrix of initial coordinates.
 #'   }
 #'  For spectral initializations, (\code{"spectral"}, \code{"normlaplacian"},
-#'  \code{"laplacian"}), if more than one connected component is identified,
-#'  each connected component is initialized separately and the results are
-#'  merged. If \code{verbose = TRUE} the number of connected components are
-#'  logged to the console. The existence of multiple connected components
-#'  implies that a global view of the data cannot be attained with this
-#'  initialization. Either a PCA-based initialization or increasing the value of
-#'  \code{n_neighbors} may be more appropriate.
+#'  \code{"laplacian"}, \code{"agspectral"}), if more than one connected
+#'  component is identified, no spectral initialization is attempted. Instead
+#'  a PCA-based initialization is attempted. If \code{verbose = TRUE} the
+#'  number of connected components are logged to the console. The existence of
+#'  multiple connected components implies that a global view of the data cannot
+#'  be attained with this initialization. Increasing the value of
+#'  \code{n_neighbors} may help.
 #' @param init_sdev If non-\code{NULL}, scales each dimension of the initialized
 #'   coordinates (including any user-supplied matrix) to this standard
 #'   deviation. By default no scaling is carried out, except when \code{init =

@@ -56,6 +56,11 @@ assistance in diagnosing the underlying cause
 `ret_model = TRUE`, and was therefore not respected by `umap_transform`. This 
 has now been fixed, but you will need to regenerate any models that used
 binary edge weights.
+* The rdoc for the `init` param said that if there were multiple disconnected
+components, a spectral initialization would attempt to merge multiple 
+sub-graphs. Not true: actually, spectral initialization is abandoned in favor
+of PCA. The documentation has been updated to reflect the true state of affairs.
+No idea what I was thinking of there.
 
 # uwot 0.1.14
 
