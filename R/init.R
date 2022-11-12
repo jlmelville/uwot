@@ -541,7 +541,8 @@ irlba_svdr_scores <-
 init_is_spectral <- function(init) {
   res <- pmatch(tolower(init), c(
     "normlaplacian", "spectral", "laplacian",
-    "inormlaplacian", "ispectral", "agspectral"
+    "inormlaplacian", "ispectral", "agspectral",
+    "irlba_spectral", "irlba_laplacian"
   ))
   length(res) > 0 && !is.na(res)
 }
