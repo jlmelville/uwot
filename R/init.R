@@ -31,7 +31,7 @@ rspectra_laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
     tsmessage("Graph too small, using random initialization instead")
     return(rand_init(nrow(A), ndim))
   }
-  
+
   tsmessage("Initializing from Laplacian Eigenmap (via RSpectra)")
   # Equivalent to: D <- diag(colSums(A)); M <- solve(D) %*% A
   # This effectively row-normalizes A: colSums is normally faster than rowSums
@@ -46,7 +46,7 @@ rspectra_laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
     n <- nrow(M)
     return(rand_init(n, ndim))
   }
-  
+
   # return the smallest eigenvalues
   as.matrix(Re(res$vectors[, 2:(ndim + 1)]))
 }
@@ -77,7 +77,7 @@ form_normalized_laplacian <- function(A) {
   # I <- diag(1, nrow = n, ncol = n)
   # D <- diag(1 / sqrt(colSums(A)))
   # L <- I - D %*% A %*% D
-  
+
   # A lot faster (order of magnitude when n = 1000)
   Dsq <- sqrt(Matrix::colSums(A))
   L <- -Matrix::t(A / Dsq) / Dsq
@@ -146,7 +146,7 @@ irlba_tsvd_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     return(rand_init(nrow(A), ndim))
   }
   tsmessage("Initializing from normalized Laplacian")
-  
+
   L <- form_modified_laplacian(A)
   res <- irlba_spectral_tsvd(L, ndim + 1)
   if (is.null(res) || ncol(res$vectors) < ndim || !res$converged) {
@@ -541,7 +541,7 @@ irlba_svdr_scores <-
 init_is_spectral <- function(init) {
   res <- pmatch(tolower(init), c(
     "normlaplacian", "spectral", "laplacian",
-    "inormlaplacian", "ispectral"
+    "inormlaplacian", "ispectral", "agspectral"
   ))
   length(res) > 0 && !is.na(res)
 }
