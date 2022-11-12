@@ -93,10 +93,9 @@ P_row <- matrix(c(
   8.735213e-04, 0.11962802, 0.21444851, 0.493687059, 8.735213e-04, 2.023140e-08, 0.08570012, 0.0059452421, 0.000000e+00, 0.07884399,
   1.960264e-02, 0.51417681, 0.15431120, 0.154311203, 6.986716e-03, 2.081749e-08, 0.01650597, 0.1299343209, 4.171117e-03, 0.00000000
 ), nrow = 10, byrow = TRUE)
-# in smallvis the gaussian sigma is the standard deviation
-# in uwot it's a generic "bandwidth" normalizer, so exported sigma is the
-# square root of these
-expected_sigmas <- c(0.3252233, 0.2679755, 0.1817380, 0.1751287, 0.3280264, 
+
+# taken from smallvis
+expected_sigmas <- c(0.3252233, 0.2679755, 0.1817380, 0.1751287, 0.3280264,
                      0.4861266, 0.2463306, 0.2422687, 0.3463065, 0.2411619)
 
 iris10nn10d <- as.vector(t(iris10_nn10$dist))
@@ -110,7 +109,7 @@ res <- nng_to_sparse(iris10_nn10$idx, as.vector(t(res)),
   self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx)
 )
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
-expect_equal(sqrt(resp$sigma), expected_sigmas, tol = 1e-5)
+expect_equal(resp$sigma, expected_sigmas, tol = 1e-5)
 
 res <- calc_row_probabilities_parallel(iris10nn10d, n_vertices = nrow(iris10_nn10$dist),
   perplexity = 4, n_threads = 1
@@ -165,7 +164,7 @@ Prow_niris_p150_k50_betas <-
     11.272705, 15.021484, 9.565918, 9.592529, 15.895508, 22.691895, 22.258789, 13.867188, 22.583008
   )
 res <- perplexity_similarities(
-  perplexity = 50, n_threads = 0, verbose = FALSE, 
+  perplexity = 50, n_threads = 0, verbose = FALSE,
   ret_sigma = TRUE,
   nn = find_nn(normiris,
     k = 149, method = "fnn",
@@ -174,7 +173,7 @@ res <- perplexity_similarities(
   )
 )
 expect_equal(Matrix::rowSums(res$matrix), Prow_iris_p150_k50_rowSums, tol = 1e-6)
-expect_equal(1 / res$sigma, Prow_niris_p150_k50_betas, tol = 1e-6)
+expect_equal(1 / res$sigma ^ 2, Prow_niris_p150_k50_betas, tol = 1e-6)
 
 res <- perplexity_similarities(
   perplexity = 50, n_threads = 1, verbose = FALSE,

@@ -1449,6 +1449,10 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     \item if \code{ret_extra} contains \code{"P"}, returns the high
 #'     dimensional probability matrix as a sparse matrix called \code{P}, of
 #'     type \link[Matrix]{dgCMatrix-class}.
+#'     \item if \code{ret_extra} contains \code{"sigma"}, returns a vector of
+#'     the high dimensional gaussian bandwidths for each point, and
+#'     \code{"dint"} a vector of estimates of the intrinsic dimensionality at
+#'     each point, based on the method given by Lee and co-workers (2015).
 #'   }
 #'   The returned list contains the combined data from any combination of
 #'   specifying \code{ret_nn} and \code{ret_extra}.
@@ -1459,6 +1463,11 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' (pp. 287-297).
 #' International World Wide Web Conferences Steering Committee.
 #' \url{https://arxiv.org/abs/1602.00370}
+#'
+#' Lee, J. A., Peluffo-Ordóñez, D. H., & Verleysen, M. (2015).
+#' Multi-scale similarities in stochastic neighbour embedding: Reducing
+#' dimensionality while preserving both local and global structure.
+#' \emph{Neurocomputing}, \emph{169}, 246-261.
 #'
 #' @examples
 #' # Default number of epochs is much larger than for UMAP, assumes random
@@ -2558,9 +2567,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   sigma <- NULL
   rho <- NULL
   localr <- NULL
+  dint <- NULL
   if (need_sigma) {
     sigma <- d2sr$sigma
     rho <- d2sr$rho
+    dint <- d2sr$dint
   }
   if (!is.null(dens_scale) || ret_localr) {
     localr <- sigma + rho
@@ -2981,6 +2992,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (ret_sigma) {
       res$sigma <- sigma
       res$rho <- rho
+      res$dint <- dint
     }
     if (ret_localr && !is.null(localr)) {
       res$localr <- localr
@@ -3544,6 +3556,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       # first set
       sigma <- x2set_res$sigma
       rho <- x2set_res$rho
+      dint <- x2set_res$dint
     }
   }
 
@@ -3555,6 +3568,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
   if (!is.null(sigma)) {
     res$sigma <- sigma
     res$rho <- rho
+    res$dint <- dint
   }
   res
 }
@@ -3641,6 +3655,7 @@ nn2set <- function(method, nn,
     res$V <- Vres$matrix
     if (ret_sigma && !is.null(Vres$sigma)) {
       res$sigma <- Vres$sigma
+      res$dint <- Vres$dint
     }
   }
   else {
@@ -3654,7 +3669,6 @@ nn2set <- function(method, nn,
       grain_size = grain_size,
       verbose = verbose
     )
-
     if (ret_sigma) {
       res$V <- Vres$matrix
       res$sigma <- Vres$sigma
@@ -3725,6 +3739,7 @@ x2set <- function(X, n_neighbors, metric, nn_method,
   if (ret_sigma && !is.null(nn2set_res$sigma)) {
     res$sigma <- nn2set_res$sigma
     res$rho <- nn2set_res$rho
+    res$dint <- nn2set_res$dint
   }
   res
 }

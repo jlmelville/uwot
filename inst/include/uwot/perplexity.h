@@ -28,6 +28,7 @@
 #define UWOT_PERPLEXITY_H
 
 #include <atomic>
+#include <cmath>
 #include <limits>
 #include <vector>
 
@@ -102,7 +103,6 @@ void perplexity_search(std::size_t i, const std::vector<double> &nn_dist,
                        std::vector<double> &sigmas,
                        std::size_t &n_window_search_fails) {
   auto i_begin = n_neighbors * i;
-  // auto i_end = i_begin + n_neighbors;
 
   // log-sum-exp trick
   // shift squared distances by minimum (distances are already sorted)
@@ -128,7 +128,7 @@ void perplexity_search(std::size_t i, const std::vector<double> &nn_dist,
   }
 
   if (save_sigmas) {
-    sigmas[i] = 1 / beta;
+    sigmas[i] = 1 / sqrt(beta);
   }
 }
 

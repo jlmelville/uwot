@@ -27,6 +27,12 @@ pre-processing was added to the Python UMAP package at some point after `uwot`
 began development and so should probably always be used with the default 
 `init = "spectral"` setting. However, it is not set by default to maintain
 backwards compatibility with older versions of `uwot`.
+* `ret_extra = c("sigma")` is now supported by `lvish`. The Gaussian bandwidths
+are returned in a `sigma` vector. In addition, a vector of intrinsic
+dimensionalities estimated for each point using an analytical expression of the
+finite difference method given by 
+[Lee and co-workers](https://doi.org/10.1016/j.neucom.2014.12.095) is returned 
+in the `dint` vector.
 * The `min_dist` and `spread` parameters are now returned in the model when
 `umap` is run with `ret_model = TRUE`. This is just for documentation purposes, 
 these values are not used directly by the model in `umap_transform`. If the 

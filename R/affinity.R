@@ -192,6 +192,22 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
     if (verbose && affinity_matrix_res$n_failures > 0) {
       tsmessage(affinity_matrix_res$n_failures, " perplexity failures")
     }
+
+    dint <- NULL
+    if (ret_sigma && !is.null(affinity_matrix_res$sigma)) {
+      # An analytical version of the "soft" correlation dimension estimate of
+      # intrinsic dimensionality from multi-scale SNE by Lee et al (2015).
+      # http://jlmelville.github.io/sneer/dimensionality.html
+      d <- nnt$dist
+      p <- affinity_matrix_res$matrix
+      logp <- log(p + .Machine$double.eps)
+      s <- affinity_matrix_res$sigma
+      h <- -colSums(p * logp)
+      lph <- sweep(logp, 2, h, `+`)
+      dhdb <- colSums(d * d * p * lph)
+      dint <- -2 * dhdb / s
+    }
+
     affinity_matrix <- nng_to_sparse(nnt$idx, as.vector(affinity_matrix_res$matrix),
       self_nbr = TRUE, by_row = FALSE
     )
@@ -211,6 +227,9 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
   res <- list(matrix = symmetrize(affinity_matrix))
   if (ret_sigma && !is.null(sigma)) {
     res$sigma <- sigma
+    if (!is.null(dint)) {
+      res$dint <- dint
+    }
   }
   res
 }
