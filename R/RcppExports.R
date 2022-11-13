@@ -21,12 +21,20 @@ smooth_knn_distances_parallel <- function(nn_dist, nn_ptr, skip_first, target, n
     .Call(`_uwot_smooth_knn_distances_parallel`, nn_dist, nn_ptr, skip_first, target, n_iter, local_connectivity, tol, min_k_dist_scale, ret_sigma, n_threads, grain_size)
 }
 
+reset_local_metrics_parallel <- function(indptr, probabilities, n_iter = 32L, tol = 1e-5, num_local_metric_neighbors = 15.0, n_threads = 0L) {
+    .Call(`_uwot_reset_local_metrics_parallel`, indptr, probabilities, n_iter, tol, num_local_metric_neighbors, n_threads)
+}
+
 fast_intersection_cpp <- function(rows, cols, values, target, unknown_dist = 1.0, far_dist = 5.0) {
     .Call(`_uwot_fast_intersection_cpp`, rows, cols, values, target, unknown_dist, far_dist)
 }
 
 general_sset_intersection_cpp <- function(indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val, mix_weight = 0.5) {
     .Call(`_uwot_general_sset_intersection_cpp`, indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val, mix_weight)
+}
+
+general_sset_union_cpp <- function(indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val) {
+    .Call(`_uwot_general_sset_union_cpp`, indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val)
 }
 
 hardware_concurrency <- function() {

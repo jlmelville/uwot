@@ -601,7 +601,8 @@ umap_transform <- function(X = NULL, model = NULL,
       graph <- graph_block
     }
     else {
-      graph <- set_intersect(graph, graph_block, weight = 0.5, reset = FALSE)
+      graph <- set_intersect(graph, graph_block, weight = 0.5,
+                             reset_connectivity = FALSE)
     }
   }
 

@@ -101,5 +101,39 @@ void general_sset_intersection(
   }
 }
 
+void general_sset_union(
+    const std::vector<int> &indptr1, const std::vector<int> &indices1,
+    const std::vector<double> &data1, const std::vector<int> &indptr2,
+    const std::vector<int> &indices2, const std::vector<double> &data2,
+    const std::vector<int> &result_row, const std::vector<int> &result_col,
+    std::vector<double> &result_val, double mix_weight = 0.5) {
+
+  double left_min =
+    (std::max)(*std::min_element(data1.begin(), data1.end()) / 2.0, 1.0e-8);
+  double right_min =
+    (std::max)(*std::min_element(data2.begin(), data2.end()) / 2.0, 1.0e-8);
+
+  for (std::size_t idx = 0; idx < result_row.size(); idx++) {
+    auto i = result_col[idx];
+    auto j = result_row[idx];
+
+    double left_val = left_min;
+    for (auto k = indptr1[i]; k < indptr1[i + 1]; k++) {
+      if (indices1[k] == j) {
+        left_val = data1[k];
+      }
+    }
+
+    double right_val = right_min;
+    for (auto k = indptr2[i]; k < indptr2[i + 1]; k++) {
+      if (indices2[k] == j) {
+        right_val = data2[k];
+      }
+    }
+
+    result_val[idx] = left_val + right_val - left_val * right_val;
+  }
+}
+
 } // namespace uwot
 #endif // UWOT_SUPERVISED_H

@@ -2246,6 +2246,41 @@ optimize_graph_layout <-
     )
   }
 
+simplicial_set_union <-
+  function(x,
+           y,
+           n_threads = NULL,
+           verbose = FALSE) {
+    z <- methods::as(x + y, "TsparseMatrix")
+
+    z@x <- general_sset_union_cpp(
+      x@p,
+      x@i,
+      x@x,
+      y@p,
+      y@i,
+      y@x,
+      z@i,
+      z@j,
+      z@x
+    )
+
+    z <- Matrix::drop0(z)
+    reset_local_connectivity(
+      z,
+      reset_local_metric = TRUE,
+      n_threads = n_threads,
+      verbose = verbose
+    )
+  }
+
+simplicial_set_intersect <- function(x, y, weight = 0.5, n_threads = NULL,
+                                     verbose = FALSE) {
+  set_intersect(A = x, B = y, weight = weight, reset_connectivity = TRUE,
+                reset_local_metric = TRUE, n_threads = n_threads,
+                verbose = verbose)
+}
+
 # Function that does all the real work
 uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  n_epochs = NULL,
@@ -2326,7 +2361,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (pca < n_components) {
       stop("'pca' must be >= n_components")
     }
-    if (pca > min(nrow(X), ncol(X))) {
+    if (pca > min(nrow(X), na.rm = col(X))) {
       stop("'pca' must be <= min(nrow(X), ncol(X))")
     }
   }
@@ -2645,7 +2680,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         "Intersecting X and Y sets with target weight = ",
         formatC(target_weight)
       )
-      V <- set_intersect(V, yd2sr$V, target_weight, reset = TRUE)
+      # behavior for supervised UMAP: do reset local connectivity
+      # don't reset metric (same as Python UMAP as of 0.5.3)
+      V <- set_intersect(V, yd2sr$V, target_weight, reset_connectivity = TRUE)
       yd2sr$V <- NULL
       yd2sr$nns <- NULL
     }
@@ -3549,7 +3586,9 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       V <- Vblock
     }
     else {
-      V <- set_intersect(V, Vblock, weight = 0.5, reset = TRUE)
+      # TODO: should at least offer the option to reset the local metric here
+      # TODO: make this the default (breaking change)
+      V <- set_intersect(V, Vblock, weight = 0.5, reset_connectivity = TRUE)
     }
     if (ret_sigma && is.null(sigma)) {
       # No idea how to combine different neighborhood sizes so just return the
@@ -3744,15 +3783,18 @@ x2set <- function(X, n_neighbors, metric, nn_method,
   res
 }
 
-set_intersect <- function(A, B, weight = 0.5, reset = TRUE) {
+set_intersect <- function(A, B, weight = 0.5, reset_connectivity = TRUE,
+                          reset_local_metric = FALSE, n_threads = NULL,
+                          verbose = FALSE) {
   A <- general_simplicial_set_intersection(
     A, B, weight
   )
   A <- Matrix::drop0(A)
   # https://github.com/lmcinnes/umap/issues/58#issuecomment-437633658
   # For now always reset
-  if (reset) {
-    A <- reset_local_connectivity(A)
+  if (reset_connectivity) {
+    A <- reset_local_connectivity(A, reset_local_metric = reset_local_metric,
+                                  n_threads = n_threads, verbose = verbose)
   }
   A
 }

@@ -223,6 +223,85 @@ void smooth_knn(std::size_t begin, std::size_t end,
   n_search_fails += n_window_search_fails;
 }
 
+auto reset_local_metric(const std::vector<double> &probabilities,
+                        std::size_t i_begin, std::size_t i_end, double target,
+                        double tol, std::size_t n_iter,
+                        std::size_t &n_window_search_fails) -> double {
+
+  constexpr auto double_max = (std::numeric_limits<double>::max)();
+  double lo = 0.0;
+  double hi = double_max;
+  double mid = 1.0;
+  double mid_best = mid;
+  double adiff_min = double_max;
+
+  bool converged = false;
+  for (std::size_t iter = 0; iter < n_iter; iter++) {
+    double psum = 0.0;
+    for (auto j = i_begin; j < i_end; j++) {
+      psum += std::pow(probabilities[j], mid);
+    }
+
+    double adiff = std::abs(psum - target);
+    if (adiff < tol) {
+      converged = true;
+      break;
+    }
+
+    if (adiff < adiff_min) {
+      adiff_min = adiff;
+      mid_best = mid;
+    }
+
+    if (psum < target) {
+      hi = mid;
+      mid = 0.5 * (lo + hi);
+    } else {
+      lo = mid;
+      if (hi == double_max) {
+        mid *= 2;
+      } else {
+        mid = 0.5 * (lo + hi);
+      }
+    }
+  }
+  if (!converged) {
+    ++n_window_search_fails;
+    mid = mid_best;
+  }
+  return mid;
+}
+
+void reset_local_metric(std::vector<double> &probabilities,
+                        const std::vector<std::size_t> &prob_ptr, std::size_t i,
+                        double target, double tol, std::size_t n_iter,
+                        std::size_t &n_window_search_fails) {
+
+  auto i_begin = prob_ptr[i];
+  auto i_end = prob_ptr[i + 1];
+
+  auto mid = reset_local_metric(probabilities, i_begin, i_end, target, tol,
+                                n_iter, n_window_search_fails);
+
+  // create the final membership strengths
+  for (auto j = i_begin; j < i_end; j++) {
+    probabilities[j] = std::pow(probabilities[j], mid);
+  }
+}
+
+void reset_local_metric(std::size_t begin, std::size_t end,
+                        std::vector<double> &probabilities,
+                        const std::vector<std::size_t> &prob_ptr, double target,
+                        double tol, std::size_t n_iter,
+                        std::atomic_size_t &n_search_fails) {
+  std::size_t n_window_search_fails = 0;
+  for (auto i = begin; i < end; i++) {
+    reset_local_metric(probabilities, prob_ptr, i, target, tol, n_iter,
+                       n_window_search_fails);
+  }
+  n_search_fails += n_window_search_fails;
+}
+
 } // namespace uwot
 
 #endif // UWOT_SMOOTH_KNN_H

@@ -62,14 +62,38 @@ sm <- Matrix::drop0(matrix(c(
   0.4990913, -0.1631884, -0.03232201,
   0.2156861, 0.4341653, 0.92592670
 ), byrow = TRUE, nrow = 3))
+# make matrix positive and symmetric like typical UMAP fuzzy graph
+sms <- (Matrix::t(sm) + sm) ^ 2
 
-expected <- matrix(c(
-  -4.310855, 1, 1,
-  1, -0.7608521, 0.4345031,
-  1, 0.4345031, 1
+expected <- matrix(c(1,
+    1, 0.43551409, 1, 0.24170431, 0.23371835,
+    0.43551409, 0.23371835, 1
 ), byrow = TRUE, nrow = 3)
 
-expect_equal(as.matrix(reset_local_connectivity(sm)), expected,
+# checked against python version
+expect_equal(as.matrix(reset_local_connectivity(sms)), expected,
+  tol = 1e-7,
+  check.attributes = FALSE
+)
+
+# tested on a modified python version with the effect n_neighbors changed
+expected_reset_local_metric <-
+  matrix(c(1, 1, 0.5972302,
+           1, 0.44010492, 0.43783589,
+           0.5972302, 0.43783589, 1
+), byrow = TRUE, nrow = 3)
+expect_equal(
+  as.matrix(
+    reset_local_connectivity(sms, reset_local_metric = TRUE, num_local_metric_neighbors = 3)),
+  expected_reset_local_metric,
+  tol = 1e-7,
+  check.attributes = FALSE
+)
+
+expect_equal(
+  as.matrix(
+    reset_local_connectivity(sms, reset_local_metric = TRUE, num_local_metric_neighbors = 3, n_threads = 2)),
+  expected_reset_local_metric,
   tol = 1e-7,
   check.attributes = FALSE
 )
@@ -126,3 +150,6 @@ sp34 <- Matrix::drop0(matrix(nrow = 3, byrow = TRUE, c(
 )))
 
 expect_equal(colMaxs(sp34), c(0, 0.7403984, 0.9472488, 0.6574427))
+
+
+

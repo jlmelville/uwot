@@ -112,6 +112,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// reset_local_metrics_parallel
+List reset_local_metrics_parallel(IntegerVector indptr, NumericVector probabilities, std::size_t n_iter, double tol, double num_local_metric_neighbors, std::size_t n_threads);
+RcppExport SEXP _uwot_reset_local_metrics_parallel(SEXP indptrSEXP, SEXP probabilitiesSEXP, SEXP n_iterSEXP, SEXP tolSEXP, SEXP num_local_metric_neighborsSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type indptr(indptrSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type probabilities(probabilitiesSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type n_iter(n_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< double >::type num_local_metric_neighbors(num_local_metric_neighborsSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(reset_local_metrics_parallel(indptr, probabilities, n_iter, tol, num_local_metric_neighbors, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fast_intersection_cpp
 NumericVector fast_intersection_cpp(IntegerVector rows, IntegerVector cols, NumericVector values, IntegerVector target, double unknown_dist, double far_dist);
 RcppExport SEXP _uwot_fast_intersection_cpp(SEXP rowsSEXP, SEXP colsSEXP, SEXP valuesSEXP, SEXP targetSEXP, SEXP unknown_distSEXP, SEXP far_distSEXP) {
@@ -148,6 +164,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// general_sset_union_cpp
+NumericVector general_sset_union_cpp(IntegerVector indptr1, IntegerVector indices1, NumericVector data1, IntegerVector indptr2, IntegerVector indices2, NumericVector data2, IntegerVector result_row, IntegerVector result_col, NumericVector result_val);
+RcppExport SEXP _uwot_general_sset_union_cpp(SEXP indptr1SEXP, SEXP indices1SEXP, SEXP data1SEXP, SEXP indptr2SEXP, SEXP indices2SEXP, SEXP data2SEXP, SEXP result_rowSEXP, SEXP result_colSEXP, SEXP result_valSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type indptr1(indptr1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type indices1(indices1SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type data1(data1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type indptr2(indptr2SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type indices2(indices2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type data2(data2SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type result_row(result_rowSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type result_col(result_colSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type result_val(result_valSEXP);
+    rcpp_result_gen = Rcpp::wrap(general_sset_union_cpp(indptr1, indices1, data1, indptr2, indices2, data2, result_row, result_col, result_val));
+    return rcpp_result_gen;
+END_RCPP
+}
 // hardware_concurrency
 unsigned int hardware_concurrency();
 RcppExport SEXP _uwot_hardware_concurrency() {
@@ -181,8 +216,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_uwot_calc_row_probabilities_parallel", (DL_FUNC) &_uwot_calc_row_probabilities_parallel, 8},
     {"_uwot_optimize_layout_r", (DL_FUNC) &_uwot_optimize_layout_r, 21},
     {"_uwot_smooth_knn_distances_parallel", (DL_FUNC) &_uwot_smooth_knn_distances_parallel, 11},
+    {"_uwot_reset_local_metrics_parallel", (DL_FUNC) &_uwot_reset_local_metrics_parallel, 6},
     {"_uwot_fast_intersection_cpp", (DL_FUNC) &_uwot_fast_intersection_cpp, 6},
     {"_uwot_general_sset_intersection_cpp", (DL_FUNC) &_uwot_general_sset_intersection_cpp, 10},
+    {"_uwot_general_sset_union_cpp", (DL_FUNC) &_uwot_general_sset_union_cpp, 9},
     {"_uwot_hardware_concurrency", (DL_FUNC) &_uwot_hardware_concurrency, 0},
     {"_uwot_init_transform_parallel", (DL_FUNC) &_uwot_init_transform_parallel, 6},
     {NULL, NULL, 0}
