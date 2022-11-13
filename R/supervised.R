@@ -54,9 +54,11 @@ reset_local_connectivity <-
                                      num_local_metric_neighbors = num_local_metric_neighbors,
                                      n_threads = n_threads)
       simplicial_set@x <- metric_res$values
-      if (metric_res$n_failures > 0) {
-        tsmessage(metric_res$n_failures, " local metric reset failures")
-      }
+      # TODO: at least some failures are very typical and it doesn't seem to
+      # affect results, so not worth reporting this for now.
+      # if (metric_res$n_failures > 0) {
+      #   tsmessage(metric_res$n_failures, " local metric reset failures")
+      # }
     }
     fuzzy_set_union(simplicial_set)
   }

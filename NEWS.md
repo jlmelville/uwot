@@ -10,6 +10,11 @@ functions is to allow for more flexibility and decoupling between generating
 the nearest neighbor graph and optimizing the low-dimensional approximation
 to it. Based on a request by user [Chengwei94](https://github.com/Chengwei94) 
 (<https://github.com/jlmelville/uwot/issues/98>).
+* New functions: `simplicial_set_union` and `simplicial_set_intersect`. These
+allow for the combination of different fuzzy graph representations of a dataset
+into a single fuzzy graph using the UMAP simplicial set operations. Based on a
+request in the Python UMAP issues tracker by user 
+[Dhar xion](https://github.com/ratheraarif).
 * New parameter for `umap_transform`: `ret_extra`. This works like the
 equivalent parameter for `umap`, and should be a character vector specifying the
 extra information you would like returned in addition to the embedding, in which

@@ -2246,11 +2246,47 @@ optimize_graph_layout <-
     )
   }
 
+#' Merge Similarity Graph by Simplicial Set Union
+#'
+#' Combine two similarity graphs by treating them as fuzzy topological sets and
+#' forming the union.
+#'
+#' @param x A sparse matrix representing the first similarity graph in the union
+#'   operation.
+#' @param y A sparse matrix representing the second similarity graph in the
+#'   union operation.
+#' @param n_threads Number of threads to use when resetting the local metric.
+#'   Default is half the number of concurrent threads supported by the system.
+#' @param verbose If \code{TRUE}, log progress to the console.
+#' @returns A sparse matrix containing the union of \code{x} and \code{y}.
+#' @examples
+#'
+#' # Form two different "views" of the same data
+#' iris30 <- iris[c(1:10, 51:60, 101:110), ]
+#' iris_sg12 = similarity_graph(iris30[, 1:2], n_neighbors = 5)
+#' iris_sg34 = similarity_graph(iris30[, 3:4], n_neighbors = 5)
+#'
+#' # Combine the two representations into one
+#' iris_combined <- simplicial_set_union(iris_sg12, iris_sg34)
+#'
+#' # Optimize the layout based on the combined view
+#' iris_combined_umap <- optimize_graph_layout(iris_combined, n_epochs = 100)
+#' @export
 simplicial_set_union <-
   function(x,
            y,
            n_threads = NULL,
            verbose = FALSE) {
+    if (!is_sparse_matrix(x)) {
+      stop("similarity graph x must be a sparse matrix")
+    }
+    if (!is_sparse_matrix(y)) {
+      stop("similarity graph y must be a sparse matrix")
+    }
+    if (!all(dim(x) == dim(y))) {
+      stop("x and y must have identical dimensions")
+    }
+
     z <- methods::as(x + y, "TsparseMatrix")
 
     z@x <- general_sset_union_cpp(
@@ -2274,8 +2310,53 @@ simplicial_set_union <-
     )
   }
 
+
+#' Merge Similarity Graph by Simplicial Set Intersection
+#'
+#' Combine two similarity graphs by treating them as fuzzy topological sets and
+#' forming the intersection.
+#'
+#' @param x A sparse matrix representing the first similarity graph in the
+#'   intersection operation.
+#' @param y A sparse matrix representing the second similarity graph in the
+#'   intersection operation.
+#' @param weight A value between \code{0 - 1}, controlling the relative
+#'   influence of \code{x} and \code{y} in the intersection. Default
+#'   (\code{0.5}) gives equal influence. Values smaller than \code{0.5} put more
+#'   weight on \code{x}. Values greater than \code{0.5} put more weight on
+#'   \code{y}.
+#' @param n_threads Number of threads to use when resetting the local metric.
+#'   Default is half the number of concurrent threads supported by the system.
+#' @param verbose If \code{TRUE}, log progress to the console.
+#' @returns A sparse matrix containing the intersection of \code{x} and
+#'   \code{y}.
+#' @examples
+#'
+#' # Form two different "views" of the same data
+#' iris30 <- iris[c(1:10, 51:60, 101:110), ]
+#' iris_sg12 = similarity_graph(iris30[, 1:2], n_neighbors = 5)
+#' iris_sg34 = similarity_graph(iris30[, 3:4], n_neighbors = 5)
+#'
+#' # Combine the two representations into one
+#' iris_combined <- simplicial_set_intersect(iris_sg12, iris_sg34)
+#'
+#' # Optimize the layout based on the combined view
+#' iris_combined_umap <- optimize_graph_layout(iris_combined, n_epochs = 100)
+#' @export
 simplicial_set_intersect <- function(x, y, weight = 0.5, n_threads = NULL,
                                      verbose = FALSE) {
+  if (weight < 0 || weight > 1) {
+    stop("weight must be between 0-1")
+  }
+  if (!is_sparse_matrix(x)) {
+    stop("similarity graph x must be a sparse matrix")
+  }
+  if (!is_sparse_matrix(y)) {
+    stop("similarity graph y must be a sparse matrix")
+  }
+  if (!all(dim(x) == dim(y))) {
+    stop("x and y must have identical dimensions")
+  }
   set_intersect(A = x, B = y, weight = weight, reset_connectivity = TRUE,
                 reset_local_metric = TRUE, n_threads = n_threads,
                 verbose = verbose)
