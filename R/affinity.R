@@ -205,7 +205,7 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
       h <- -colSums(p * logp)
       lph <- sweep(logp, 2, h, `+`)
       dhdb <- colSums(d * d * p * lph)
-      dint <- -2 * dhdb / s
+      dint <- -2 * dhdb / (s * s)
     }
 
     affinity_matrix <- nng_to_sparse(nnt$idx, as.vector(affinity_matrix_res$matrix),
