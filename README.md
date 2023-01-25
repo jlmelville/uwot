@@ -908,6 +908,11 @@ uwot directly contains code that originates with
 [RcppParallel](https://github.com/RcppCore/RcppParallel),
 which is [GPLv2](https://cran.r-project.org/web/licenses/GPL-2).
 
+## Citation
+
+If you want to cite the use of uwot, then use the output of running 
+`citation("uwot")` (you can do this with any R package).
+
 ## See Also
 
 * The [UMAP reference implementation](https://github.com/lmcinnes/umap) and
