@@ -2398,7 +2398,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  method <- match.arg(tolower(method), c("umap", "tumap", "largevis", "pacmap"))
+  method <- match.arg(tolower(method), c("umap", "tumap", "largevis", "pacmap", "htumap"))
 
   if (method == "umap") {
     if (is.null(a) || is.null(b)) {
@@ -2907,7 +2907,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
 
   full_opt_args <- get_opt_args(opt_args, alpha)
-
   if (binary_edge_weights) {
     V@x <- rep(1, length(V@x))
   }
@@ -2944,7 +2943,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     )
 
     ai <- NULL
-    if (!is.null(dens_scale)) {
+    if (!is.null(dens_scale) && method != "htumap") {
       ai <- scale_radii(localr, dens_scale, a)
       method <- "leopold"
       if (ret_model) {
@@ -2963,6 +2962,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       pacmap = list(a = a, b = b),
       largevis = list(gamma = gamma),
       leopold = list(ai = ai, b = b, ndim = n_components),
+      htumap = list(a = a, b = b, ndim = n_components),
       stop("Unknown dimensionality reduction method '", method, "'")
     )
 

@@ -266,6 +266,44 @@ public:
   }
   inline auto clamp_grad(float grad_d) const -> float { return grad_d; }
 };
+
+// UMAP using the heavy-tailed kernel a=1 => cauchy a->Inf gaussian (1000 is
+// fine)
+
+class htumap_gradient {
+public:
+  htumap_gradient(float a, float b, std::size_t ndim)
+      : nega(-a), ndim(ndim), b_m2(-2.0 * b), b_2(2.0 * b), onediva(1.0 / a),
+        bdiva(b / a), a1diva((1.0f + a) / a) {}
+
+  auto clamp_grad(float grad_d) const -> float {
+    return clamp(grad_d, clamp_lo, clamp_hi);
+  }
+  static const constexpr float clamp_hi = 4.0;
+  static const constexpr float clamp_lo = -4.0;
+
+  auto grad_attr(float d2, std::size_t i, std::size_t j) const -> float {
+    auto w = std::pow(1.0f + bdiva * d2, nega);
+
+    return b_m2 * std::pow(w, onediva);
+  }
+
+  auto grad_rep(float d2, std::size_t i, std::size_t j) const -> float {
+    auto w = std::pow(1.0f + bdiva * d2, nega);
+
+    return (b_2 * std::pow(w, a1diva)) / (1.001f - w);
+  }
+
+private:
+  float nega;
+  std::size_t ndim;
+  float b_m2;
+  float b_2;
+  float onediva;
+  float bdiva;
+  float a1diva;
+};
+
 } // namespace uwot
 
 #endif // UWOT_GRADIENT_H
