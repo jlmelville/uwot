@@ -21,7 +21,7 @@ Suggests: testthat,
     covr,
     bigstatsr,
     RSpectra
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Depends: Matrix
 LinkingTo: Rcpp, RcppProgress, RcppAnnoy, dqrng
 Imports: Rcpp,
