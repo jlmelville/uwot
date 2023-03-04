@@ -1,0 +1,4 @@
+CXX_STD = CXX11
+
+PKG_CXXFLAGS = -DRCPP_NO_RTTI -Wa,-mbig-obj
+PKG_CPPFLAGS = -I../inst/include/
