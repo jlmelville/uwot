@@ -248,24 +248,6 @@ private:
   float gamma_2;
 };
 
-class pacmap_gradient {
-public:
-  float a;
-  float b;
-  float ab2m;
-  float b1;
-
-  // near: a 1-3, b = 10; mid: a = 3-1000, b = 10,000
-  pacmap_gradient(float a, float b)
-      : a(1.0), b(10.0), ab2m(-2.0 * a * b), b1(b + 1.0) {}
-  auto grad_attr(float d2, std::size_t, std::size_t) const -> float {
-    return ab2m / ((b1 + d2) * (b1 + d2));
-  }
-  auto grad_rep(float d2, std::size_t, std::size_t) const -> float {
-    return 2.0 / ((2.0 + d2) * (2.0 + d2));
-  }
-  inline auto clamp_grad(float grad_d) const -> float { return grad_d; }
-};
 } // namespace uwot
 
 #endif // UWOT_GRADIENT_H

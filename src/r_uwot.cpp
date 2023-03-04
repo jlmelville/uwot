@@ -276,16 +276,6 @@ void create_umapai2(UmapFactory &umap_factory, List method_args) {
   umap_factory.create(gradient);
 }
 
-void create_pacmap(UmapFactory &umap_factory, List method_args) {
-  std::vector<std::string> arg_names = {"a", "b"};
-  validate_args(method_args, arg_names);
-
-  float a = method_args["a"];
-  float b = method_args["b"];
-  const uwot::pacmap_gradient gradient(a, b);
-  umap_factory.create(gradient);
-}
-
 void create_largevis(UmapFactory &umap_factory, List method_args) {
   std::vector<std::string> arg_names = {"gamma"};
   validate_args(method_args, arg_names);
@@ -372,8 +362,6 @@ NumericMatrix optimize_layout_r(
     create_tumap(umap_factory, method_args);
   } else if (method == "largevis") {
     create_largevis(umap_factory, method_args);
-  } else if (method == "pacmap") {
-    create_pacmap(umap_factory, method_args);
   } else if (method == "leopold") {
     create_umapai(umap_factory, method_args);
   } else if (method == "leopold2") {

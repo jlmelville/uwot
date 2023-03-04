@@ -2398,7 +2398,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  method <- match.arg(tolower(method), c("umap", "tumap", "largevis", "pacmap"))
+  method <- match.arg(tolower(method), c("umap", "tumap", "largevis"))
 
   if (method == "umap") {
     if (is.null(a) || is.null(b)) {
