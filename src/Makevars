@@ -1,5 +1,2 @@
-# Turn on C++11 support to get access to long long (guaranteed 64-bit ints)
-CXX_STD = CXX11
-
 PKG_CXXFLAGS = -DRCPP_NO_RTTI
 PKG_CPPFLAGS = -I../inst/include/
