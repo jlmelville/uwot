@@ -3231,7 +3231,16 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
       setwd(mod_dir)
       tmp_model_file <- abspath(file)
       tsmessage("Creating ", tmp_model_file)
-      utils::tar(tarfile = tmp_model_file, files = "uwot/")
+
+      # #109: Windows 7 tar needs "--force-local" to avoid interpreting colon
+      # as indicating a remote machine
+      extra_flags <- ""
+      if (is_win7()) {
+        extra_flags <- "--force-local"
+      }
+      utils::tar(tarfile = tmp_model_file,
+                 extra_flags = extra_flags,
+                 files = "uwot/")
     },
     finally = {
       setwd(wd)
@@ -3304,7 +3313,16 @@ load_uwot <- function(file, verbose = FALSE) {
   tsmessage("Creating temp directory ", mod_dir)
   dir.create(mod_dir)
 
-  utils::untar(abspath(file), exdir = mod_dir, verbose = verbose)
+  # #109: Windows 7 tar needs "--force-local" to avoid interpreting colon
+  # as indicating a remote machine
+  extras <- NULL
+  if (is_win7()) {
+    extras <- "--force-local"
+  }
+  utils::untar(abspath(file),
+               exdir = mod_dir,
+               extras = extras,
+               verbose = verbose)
 
   model_fname <- file.path(mod_dir, "uwot/model")
   if (!file.exists(model_fname)) {

@@ -116,7 +116,7 @@ progress_for <- function(n, nchunks, fun) {
     chunk_end <- chunk_start + round(remaining / (nchunks - i + 1)) - 1
     remaining <- remaining - (chunk_end - chunk_start + 1)
     fun(chunk_start, chunk_end)
-    
+
     message("*", appendLF = FALSE)
     utils::flush.console()
   }
@@ -129,7 +129,7 @@ checkna <- function(X) {
   }
 }
 
-check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL, 
+check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL,
                         bipartite = FALSE) {
   idx <- graph$idx
   dist <- graph$dist
@@ -162,11 +162,11 @@ check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL,
     }
     if (max(idx) > nrow(idx)) {
       stop("Invalid neighbors: max index exceeds number of observations")
-    } 
+    }
   }
 }
 
-check_sparse_graph <- function(graph, expected_rows = NULL, 
+check_sparse_graph <- function(graph, expected_rows = NULL,
                                expected_cols = NULL, bipartite = FALSE) {
   if (!is.null(expected_rows)) {
     if (nrow(graph) != expected_rows) {
@@ -180,12 +180,12 @@ check_sparse_graph <- function(graph, expected_rows = NULL,
   }
   if (!bipartite) {
     if (nrow(graph) != ncol(graph)) {
-      stop("Sparse distance matrix must have same number of rows and cols")      
+      stop("Sparse distance matrix must have same number of rows and cols")
     }
   }
 }
 
-check_graph_list <- function(graph_list, expected_rows = NULL, 
+check_graph_list <- function(graph_list, expected_rows = NULL,
                              expected_cols = NULL, bipartite = FALSE) {
   if (nn_is_single(graph_list)) {
     graph_list <- list(graph_list)
@@ -200,7 +200,7 @@ check_graph_list <- function(graph_list, expected_rows = NULL,
       check_graph(graph, expected_rows, expected_cols, bipartite = bipartite)
     }
     else if (is_sparse_matrix(graph)) {
-      check_sparse_graph(graph, expected_rows, expected_cols, 
+      check_sparse_graph(graph, expected_rows, expected_cols,
                          bipartite = bipartite)
     }
     else {
@@ -288,4 +288,10 @@ is_installed <- function(pkgname) {
                    quietly = TRUE,
                    warn.conflicts = FALSE)
   isNamespaceLoaded(pkgname)
+}
+
+is_win7 <- function() {
+  sys_info <- Sys.info()
+  sys_info[["sysname"]] == "Windows" &&
+    strsplit(sys_info["release"], split = " ")$release[[1]] == "7"
 }

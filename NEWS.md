@@ -66,6 +66,10 @@ components, a spectral initialization would attempt to merge multiple
 sub-graphs. Not true: actually, spectral initialization is abandoned in favor
 of PCA. The documentation has been updated to reflect the true state of affairs.
 No idea what I was thinking of there.
+* `load_model` and `save_model` didn't work on Windows 7 due to how the version
+of `tar` there handles drive letters. Thank you
+[mytarmail](https://github.com/mytarmail) for the report 
+(<https://github.com/jlmelville/uwot/issues/109>).
 
 # uwot 0.1.14
 
