@@ -108,3 +108,8 @@ old11 <- model$embedding[1, 1]
 model$embedding[1, 1] <- NA
 expect_error(trans <- umap_transform(iris[51:55, ], model = model), "contains NA")
 model$embedding[1, 1] <- old11
+
+# 110: warn if standard deviation of initial input could create small gradients
+expect_warning(umap(iris10, init_sdev = 100.0, n_neighbors = 4),
+               "embedding standard deviation")
+

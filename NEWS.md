@@ -70,6 +70,10 @@ No idea what I was thinking of there.
 of `tar` there handles drive letters. Thank you
 [mytarmail](https://github.com/mytarmail) for the report 
 (<https://github.com/jlmelville/uwot/issues/109>).
+* Warn if the initial coordinates have a very large scale (a standard deviation 
+> 10.0), because this can lead to small gradients and poor optimization. Thank
+you [SuhasSrinivasan](https://github.com/SuhasSrinivasan) for the report
+(<https://github.com/jlmelville/uwot/issues/110>).
 
 # uwot 0.1.14
 

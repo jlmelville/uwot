@@ -2913,6 +2913,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
 
   if (n_epochs > 0) {
+    if (any(apply(embedding, 2, stats::sd) > 10.0)) {
+      warning("Initial embedding standard deviation > 10.0, this can lead to ",
+              "poor optimization")
+    }
+
     # remove edges which can't be sampled due to n_epochs
     V@x[V@x < max(V@x) / n_epochs] <- 0
     V <- Matrix::drop0(V)
