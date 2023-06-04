@@ -289,3 +289,73 @@ test_that("can transform with binary edge weights", {
                                        ret_extra = c("fgraph"))
   expect_true(all(iris_s12_transform$fgraph@x == 1))
 })
+
+test_that("transform can set or inherit model seed", {
+  iris_species_12 <- iris[1:100, ]
+  iris_species_3 <- iris[101:150, ]
+
+  # transform inherits seed from model by default
+  iris_model <-
+    umap(
+      iris_species_12,
+      seed = 42,
+      ret_model = TRUE,
+      n_sgd_threads = 1
+    )
+  iris_transform1 <-
+    umap_transform(iris_species_3, iris_model, n_sgd_threads = 1)
+  iris_transform2 <-
+    umap_transform(iris_species_3, iris_model, n_sgd_threads = 1)
+  expect_equal(iris_transform1, iris_transform2)
+
+  iris_transform3 <-
+    umap_transform(iris_species_3,
+      iris_model,
+      seed = 42,
+      n_sgd_threads = 1
+    )
+  expect_equal(iris_transform1, iris_transform3)
+
+  # external seed setting should be same as internal
+  set.seed(42)
+  iris_model2 <-
+    umap(iris_species_12,
+      ret_model = TRUE,
+      n_sgd_threads = 1
+    )
+  set.seed(42)
+  iris_transform4 <-
+    umap_transform(iris_species_3, iris_model2, n_sgd_threads = 1)
+  expect_equal(iris_transform1, iris_transform4)
+
+  # setting seed explicitly overrides model seed, gives different results
+  iris_transform5 <-
+    umap_transform(iris_species_3,
+      iris_model,
+      seed = 123,
+      n_sgd_threads = 1
+    )
+  diff15 <- iris_transform1 - iris_transform5
+  expect_gt(sqrt(sum(diff15 * diff15) / length(diff15)), 0.01)
+
+  # force model seed setting off
+  iris_transform6 <-
+    umap_transform(iris_species_3,
+      iris_model,
+      seed = FALSE,
+      n_sgd_threads = 1
+    )
+  diff16 <- iris_transform1 - iris_transform6
+  expect_gt(sqrt(sum(diff16 * diff16) / length(diff16)), 0.01)
+  iris_transform7 <-
+    umap_transform(iris_species_3,
+      iris_model,
+      seed = FALSE,
+      n_sgd_threads = 1
+    )
+  diff17 <- iris_transform1 - iris_transform7
+  expect_gt(sqrt(sum(diff17 * diff17) / length(diff17)), 0.01)
+  # and transforms are different from each other
+  diff67 <- iris_transform6 - iris_transform7
+  expect_gt(sqrt(sum(diff67 * diff67) / length(diff67)), 0.01)
+})

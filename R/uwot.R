@@ -426,6 +426,14 @@
 #'   larger the value of \code{dens_scale}, the greater the range of output
 #'   densities that will be used to map the input densities. This option is
 #'   ignored if using multiple \code{metric} blocks.
+#' @param seed Integer seed to use to initialize the random number generator
+#'   state. Combined with \code{n_sgd_threads = 1} or \code{batch = TRUE}, this
+#'   should give consistent output across multiple runs on a given installation.
+#'   Setting this value is equivalent to calling \code{\link[base]{set.seed}},
+#'   but it may be more convenient in some situations than having to call a
+#'   separate function. The default is to not set a seed. If
+#'   \code{ret_model = TRUE}, the seed will be stored in the output model and
+#'   then used to set the seed inside \code{\link{umap_transform}}.
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
 #'     \item if \code{ret_model = TRUE} (or \code{ret_extra} contains
@@ -559,7 +567,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  batch = FALSE,
                  opt_args = NULL, epoch_callback = NULL, pca_method = NULL,
                  binary_edge_weights = FALSE,
-                 dens_scale = NULL) {
+                 dens_scale = NULL,
+                 seed = NULL) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
@@ -589,7 +598,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     binary_edge_weights = binary_edge_weights,
     tmpdir = tempdir(),
     verbose = verbose,
-    dens_scale = dens_scale
+    dens_scale = dens_scale,
+    seed = seed
   )
 }
 
@@ -998,6 +1008,14 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   method (Wang and co-workers, 2020). Practical (Böhm and co-workers, 2020)
 #'   and theoretical (Damrich and Hamprecht, 2021) work suggests this has little
 #'   effect on UMAP's performance.
+#' @param seed Integer seed to use to initialize the random number generator
+#'   state. Combined with \code{n_sgd_threads = 1} or \code{batch = TRUE}, this
+#'   should give consistent output across multiple runs on a given installation.
+#'   Setting this value is equivalent to calling \code{\link[base]{set.seed}},
+#'   but it may be more convenient in some situations than having to call a
+#'   separate function. The default is to not set a seed. If
+#'   \code{ret_model = TRUE}, the seed will be stored in the output model and
+#'   then used to set the seed inside \code{\link{umap_transform}}.
 #' @return A matrix of optimized coordinates, or:
 #'   \itemize{
 #'     \item if \code{ret_model = TRUE} (or \code{ret_extra} contains
@@ -1052,7 +1070,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   batch = FALSE,
                   opt_args = NULL, epoch_callback = NULL,
                   pca_method = NULL,
-                  binary_edge_weights = FALSE) {
+                  binary_edge_weights = FALSE,
+                  seed = NULL) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -1080,6 +1099,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     opt_args = opt_args,
     epoch_callback = epoch_callback,
     binary_edge_weights = binary_edge_weights,
+    seed = seed,
     tmpdir = tmpdir,
     verbose = verbose
   )
@@ -2394,7 +2414,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  epoch_callback = NULL,
                  binary_edge_weights = FALSE,
                  dens_scale = NULL,
-                 is_similarity_graph = FALSE) {
+                 is_similarity_graph = FALSE,
+                 seed = NULL) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -2479,6 +2500,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (!is.null(dens_scale) && approx_pow) {
     warning("approx_pow parameter is ignored when using dens_scale")
     approx_pow <- FALSE
+  }
+  # 110: for more consistent reproducibility set a user-supplied seed
+  if (!is.null(seed)) {
+    tsmessage("Setting random seed ", seed)
+    set.seed(seed)
   }
 
 
@@ -3033,7 +3059,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         # #95: min_dist and spread are exported for documentation purposes only
         min_dist = min_dist,
         spread = spread,
-        binary_edge_weights = binary_edge_weights
+        binary_edge_weights = binary_edge_weights,
+        seed = seed
       ))
       if (nn_is_precomputed(nn_method)) {
         res$n_neighbors <- nn_graph_nbrs_list(nn_method)

@@ -48,7 +48,8 @@ umap(
   epoch_callback = NULL,
   pca_method = NULL,
   binary_edge_weights = FALSE,
-  dens_scale = NULL
+  dens_scale = NULL,
+  seed = NULL
 )
 }
 \arguments{
@@ -516,6 +517,15 @@ approximation to the densMAP method (Narayan and co-workers, 2021). The
 larger the value of \code{dens_scale}, the greater the range of output
 densities that will be used to map the input densities. This option is
 ignored if using multiple \code{metric} blocks.}
+
+\item{seed}{Integer seed to use to initialize the random number generator
+state. Combined with \code{n_sgd_threads = 1} or \code{batch = TRUE}, this
+should give consistent output across multiple runs on a given installation.
+Setting this value is equivalent to calling \code{\link[base]{set.seed}},
+but it may be more convenient in some situations than having to call a
+separate function. The default is to not set a seed. If
+\code{ret_model = TRUE}, the seed will be stored in the output model and
+then used to set the seed inside \code{\link{umap_transform}}.}
 }
 \value{
 A matrix of optimized coordinates, or:

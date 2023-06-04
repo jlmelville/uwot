@@ -42,7 +42,8 @@ tumap(
   opt_args = NULL,
   epoch_callback = NULL,
   pca_method = NULL,
-  binary_edge_weights = FALSE
+  binary_edge_weights = FALSE,
+  seed = NULL
 )
 }
 \arguments{
@@ -478,6 +479,15 @@ sampling frequency of neighbors and is the strategy used by the PaCMAP
 method (Wang and co-workers, 2020). Practical (Böhm and co-workers, 2020)
 and theoretical (Damrich and Hamprecht, 2021) work suggests this has little
 effect on UMAP's performance.}
+
+\item{seed}{Integer seed to use to initialize the random number generator
+state. Combined with \code{n_sgd_threads = 1} or \code{batch = TRUE}, this
+should give consistent output across multiple runs on a given installation.
+Setting this value is equivalent to calling \code{\link[base]{set.seed}},
+but it may be more convenient in some situations than having to call a
+separate function. The default is to not set a seed. If
+\code{ret_model = TRUE}, the seed will be stored in the output model and
+then used to set the seed inside \code{\link{umap_transform}}.}
 }
 \value{
 A matrix of optimized coordinates, or:

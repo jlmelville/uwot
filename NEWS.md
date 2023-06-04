@@ -23,6 +23,14 @@ coordinates. Supported values are `"fgraph"`, `"nn"`, `"sigma"` and `"localr"`.
 Based on a request by user 
 [PedroMilanezAlmeida](https://github.com/PedroMilanezAlmeida) 
 (<https://github.com/jlmelville/uwot/issues/104>).
+* New parameter from `umap`, `tumap` and `umap_transform`: `seed`. This will do
+the equivalent of calling `set.seed` internally, and hence will help with 
+reproducibility. The chosen seed is exported if `ret_model = TRUE` and 
+`umap_transform` will use that seed if present, so you only need to specify
+it in `umap_transform` if you want to change the seed. The default behavior 
+remains to not modify the random number state. Based on a request by
+[SuhasSrinivasan](https://github.com/SuhasSrinivasan)
+(<https://github.com/jlmelville/uwot/issues/110>).
 
 ## Bug fixes and minor improvements
 

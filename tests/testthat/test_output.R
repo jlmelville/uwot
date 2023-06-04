@@ -942,3 +942,69 @@ test_that("intersect and union", {
                check.attributes = FALSE
   )
 })
+
+test_that("can set seed internally", {
+  set.seed(42)
+  res <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      n_epochs = 10,
+      learning_rate = 0.5,
+      n_sgd_threads = 1
+    )
+  expect_ok_matrix(res)
+
+  # default doesn't reset the seed
+  res2 <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      n_epochs = 10,
+      learning_rate = 0.5,
+      n_sgd_threads = 1
+    )
+  diff12 <- res - res2
+  expect_gt(sqrt(sum(diff12 * diff12) / length(diff12)), 0.01)
+
+  # set seed internally same as calling set.seed
+  res3 <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      n_epochs = 10,
+      learning_rate = 0.5,
+      n_sgd_threads = 1,
+      seed = 42
+    )
+  expect_equal(res, res3)
+
+  # creating a model stores the seed but also forces annoy for nearest neighbors
+  # which changes the RNG state more than when FNN can be used internally
+  res_model <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      n_epochs = 10,
+      learning_rate = 0.5,
+      n_sgd_threads = 1,
+      seed = 42,
+      ret_model = TRUE
+    )
+  expect(res_model$seed, 42)
+  diff1m <- res - res_model$embedding
+  expect_gt(sqrt(sum(diff1m * diff1m) / length(diff1m)), 0.01)
+
+  # explicitly set annoy nn and things are reproducible again
+  res4 <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      n_epochs = 10,
+      learning_rate = 0.5,
+      n_sgd_threads = 1,
+      seed = 42,
+      nn_method = "annoy"
+    )
+  expect_equal(res_model$embedding, res4)
+})
