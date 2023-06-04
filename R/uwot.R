@@ -320,6 +320,14 @@
 #'   that were included via the \code{metric} parameter. In the latter case, the
 #'   model produced is based only on the numeric data. A transformation using
 #'   new data is possible, but the factor columns in the new data are ignored.
+#'   Note that setting \code{ret_model = TRUE} forces the use of the approximate
+#'   nearest neighbors method. Because small datasets would otherwise use exact
+#'   nearest neighbor calculations, setting \code{ret_model = TRUE} means that
+#'   different results may be returned for small datasets in terms of both the
+#'   returned nearest neighbors (if requested) and the final embedded
+#'   coordinates, compared to \code{ret_model = FALSE}, even if the random
+#'   number seed is fixed. To avoid this, explicitly set
+#'   \code{nn_method = "annoy"} in the \code{ret_model = FALSE} case.
 #' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
 #'   nearest neighbor data that can be used as input to \code{nn_method} to
 #'   avoid the overhead of repeatedly calculating the nearest neighbors when
@@ -908,6 +916,14 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   that were included via the \code{metric} parameter. In the latter case, the
 #'   model produced is based only on the numeric data. A transformation using
 #'   new data is possible, but the factor columns in the new data are ignored.
+#'   Note that setting \code{ret_model = TRUE} forces the use of the approximate
+#'   nearest neighbors method. Because small datasets would otherwise use exact
+#'   nearest neighbor calculations, setting \code{ret_model = TRUE} means that
+#'   different results may be returned for small datasets in terms of both the
+#'   returned nearest neighbors (if requested) and the final embedded
+#'   coordinates, compared to \code{ret_model = FALSE}, even if the random
+#'   number seed is fixed. To avoid this, explicitly set
+#'   \code{nn_method = "annoy"} in the \code{ret_model = FALSE} case.
 #' @param ret_nn If \code{TRUE}, then in addition to the embedding, also return
 #'   nearest neighbor data that can be used as input to \code{nn_method} to
 #'   avoid the overhead of repeatedly calculating the nearest neighbors when
