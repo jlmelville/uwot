@@ -21,6 +21,36 @@
 
 #include "RcppAnnoy.h"
 
+#if ANNOY_VERSION >= Annoy_Version(1,17,3)
+
+typedef Annoy::AnnoyIndexSingleThreadedBuildPolicy AnnoyIndexThreadedBuildPolicy;
+
+struct UwotAnnoyEuclidean {
+  using Distance = Annoy::Euclidean;
+  using S = int32_t;
+  using T = float;
+};
+
+struct UwotAnnoyCosine {
+  using Distance = Annoy::Angular;
+  using S = int32_t;
+  using T = float;
+};
+
+struct UwotAnnoyManhattan {
+  using Distance = Annoy::Manhattan;
+  using S = int32_t;
+  using T = float;
+};
+
+struct UwotAnnoyHamming {
+  using Distance = Annoy::Hamming;
+  using S = int32_t;
+  using T = uint64_t;
+};
+
+#else
+
 typedef AnnoyIndexSingleThreadedBuildPolicy AnnoyIndexThreadedBuildPolicy;
 
 struct UwotAnnoyEuclidean {
@@ -46,6 +76,8 @@ struct UwotAnnoyHamming {
   using S = int32_t;
   using T = uint64_t;
 };
+
+#endif  // of 'if ANNOY_VERSION >= Annoy_Version(1,17,3)'
 
 template <typename UwotAnnoyDistance> struct NNWorker {
   const std::string &index_name;
