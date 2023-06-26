@@ -20,6 +20,15 @@ the basic method. Translated from the
 
 ## News
 
+*June 26 2023* Version 0.1.15 has been released to CRAN. This is to support a
+new release of [RcppAnnoy](https://cran.r-project.org/package=RcppAnnoy), but
+there are also some bug fixes and other minor improvements. There are some new
+functions: `optimize_graph_layout` will carry out the UMAP optimization
+step on a sparse similiarity matrix, e.g. the output of `similarity_graph`.
+`simplicial_set_union` and `simplicial_set_intersect` provide ways to merge 
+different views of the same data into one sparse similiarity matrix. As usual,
+`NEWS.md` has all the details.
+
 *August 22 2022* Just when you least expected it, version 0.1.14 has been 
 released to CRAN (the `NEWS` file on CRAN calls it `0.1.13.9000` because I
 forgot to update that file, but let's keep that amongst ourselves). This release
