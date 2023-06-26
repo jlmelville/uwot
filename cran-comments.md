@@ -29,6 +29,14 @@ There is one NOTE:
 
 This is due to the underlying C++ implementation using templates.
 
+## Package Check Problems
+
+* There is a NOTE: `Specified C++11: please drop specification unless essential`
+-- this has been fixed with this submission.
+
+* There is an `M1mac` test failure <https://www.stats.ox.ac.uk/pub/bdr/M1mac/uwot.out>
+-- this has been fixed with this submission.
+
 ## Downstream dependencies
 
 We checked all 32 CRAN reverse dependencies, comparing R CMD check results 

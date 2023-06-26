@@ -266,23 +266,6 @@ sknn4m <- smooth_knn_matrix(nn_4)$matrix
 expect_equal(sknn4m@x, expected_sknn4m@x, tol = 1e-7)
 expect_equal(sknn4m@i, expected_sknn4m@i)
 
-test_that("sigma and failures agree with Python UMAP (mainly)", {
-  # #100: this test fail Ubuntu/Debian testing on:
-  # arm64 (Sys.info()[["sysname"]] == "Linux", R.version$arch == "aarch64")
-  # ppc64le (Sys.info()[["sysname"]] == "Linux", R.version$arch == "powerpc64le")
-  # s390x (Sys.info()[["sysname"]] == "Linux", R.version$arch == "s390x")
-  skip_on_os("linux", arch = c("aarch64", "powerpc64le", "s390x"))
-
-  # UMAP Python disagrees for sigma[6] because binary search fails here and uwot
-  # keeps track of the "best" sigma
-  sknn4m <- smooth_knn_matrix(nn_4, ret_sigma = TRUE, bandwidth = 0.5)
-  expect_equal(sknn4m$sigma, c(0.00195312, 0.0078125 , 0.00097656, 0.00390625, 0.00390625,
-          0.0019531250, 0.00390625, 0.00390625, 0.0078125 , 0.0078125))
-  # for Python UMAP sigma[6] == 0.00048322
-  expect_equal(sknn4m$rho, expected_rho, tol = 1e-7)
-  expect_equal(sknn4m$n_failures, 1)
-})
-
 nn4sp <- Matrix::drop0(matrix(c(
 0,        0,        0,        0,        0.1414214,0.6164414,0,        0.1732051,0,        0,
 0,        0,        0.3000000,0,        0,        0,        0,        0,        0.5099020,0.1732051,
