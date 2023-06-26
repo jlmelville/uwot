@@ -1,4 +1,4 @@
-# uwot 0.1.14.9000
+# uwot 0.1.15
 
 ## New features:
 
@@ -82,6 +82,10 @@ of `tar` there handles drive letters. Thank you
 > 10.0), because this can lead to small gradients and poor optimization. Thank
 you [SuhasSrinivasan](https://github.com/SuhasSrinivasan) for the report
 (<https://github.com/jlmelville/uwot/issues/110>).
+* A change to accommodate a forthcoming version of 
+[RcppAnnoy](https://cran.r-project.org/package=RcppAnnoy). Thank
+you [Dirk Eddelbuettel](https://github.com/eddelbuettel) for the PR
+(<https://github.com/jlmelville/uwot/issues/111>).
 
 # uwot 0.1.14
 
