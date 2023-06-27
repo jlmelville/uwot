@@ -89,10 +89,17 @@ template <typename UwotAnnoyDistance> struct NNWorker {
   std::vector<int> idx;
   std::vector<typename UwotAnnoyDistance::T> dists;
 
+#if ANNOY_VERSION >= Annoy_Version(1,17,3)
+  Annoy::AnnoyIndex<typename UwotAnnoyDistance::S, typename UwotAnnoyDistance::T,
+                    typename UwotAnnoyDistance::Distance, Kiss64Random,
+                    AnnoyIndexThreadedBuildPolicy>
+      index;
+#else
   AnnoyIndex<typename UwotAnnoyDistance::S, typename UwotAnnoyDistance::T,
              typename UwotAnnoyDistance::Distance, Kiss64Random,
              AnnoyIndexThreadedBuildPolicy>
       index;
+#endif
 
   NNWorker(const std::string &index_name, const std::vector<double> &mat,
            std::size_t ncol, std::size_t n_neighbors, std::size_t search_k)
