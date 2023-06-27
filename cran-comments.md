@@ -1,7 +1,16 @@
 ## New minor release
 
-This is a new minor release to support a forthcoming release of one of this 
-package's dependencies, RcppAnnoy. There are also new features and bug fixes.
+This is a new minor release to support a forthcoming release of one of this
+package's dependencies, RcppAnnoy. Testing of the forthcoming submission of
+RcppAnnoy with the previous version of this package identified the need for a
+further modification of uwot to support one of uwot's reverse dependencies.
+Reverse dependency checking of uwot could not have found this until RcppAnnoy is
+updated on CRAN.
+
+## Recent resubmission
+
+0.1.15 was submitted only two days ago. My apologies for the swift resubmission.
+This is to account for the issues found as noted above.
 
 ## Test environments
 
@@ -30,6 +39,9 @@ There is one NOTE:
 This is due to the underlying C++ implementation using templates.
 
 ## Package Check Problems
+
+These issues were fixed with the previous release of uwot, but as not all checks
+are complete yet, I am including this here to avoid confusion:
 
 * There is a NOTE: `Specified C++11: please drop specification unless essential`
 -- this has been fixed with this submission.

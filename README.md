@@ -20,6 +20,9 @@ the basic method. Translated from the
 
 ## News
 
+*June 28 2023* Version 0.1.16 has been released to CRAN. This is a very minor
+tweak to 0.1.15 to further support the new release of [RcppAnnoy](https://cran.r-project.org/package=RcppAnnoy).
+
 *June 26 2023* Version 0.1.15 has been released to CRAN. This is to support a
 new release of [RcppAnnoy](https://cran.r-project.org/package=RcppAnnoy), but
 there are also some bug fixes and other minor improvements. There are some new
