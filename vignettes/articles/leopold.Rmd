@@ -394,12 +394,12 @@ for leopold) and that the values for $\sigma$ and $\rho$ are calculated *before*
 the symmetrization of the UMAP input edge weights. So these values are missing
 the influence of observations outside the initial k-nearest neighborhood graph. 
 
-For the output radii, I know from looking at the [output weight function
-parameters](https://jlmelville.github.io/uwot/abparams.html), that increasing
-the `a` parameter makes the clusters in a UMAP plot shrink, and vice versa. So
-let's use that as measure of the output density, i.e. the inverse of the local
-radius. As every point has its own radius, the value for a given weight between
-points $i$ and $j$ will be the geometric mean of the two radii:
+For the output radii, I know from looking at the 
+[output weight function parameters](https://jlmelville.github.io/uwot/articles/umap-examples.html), 
+that increasing the `a` parameter makes the clusters in a UMAP plot shrink, and
+vice versa. So let's use that as measure of the output density, i.e. the inverse
+of the local radius. As every point has its own radius, the value for a given
+weight between points $i$ and $j$ will be the geometric mean of the two radii:
 
 $$
 w_{ij} = 1 / \left(1 + \frac{d_{ij}^2}{\sqrt{r_i r_j}} \right)

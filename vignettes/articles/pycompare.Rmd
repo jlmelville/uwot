@@ -26,7 +26,7 @@ refer to the Python implementation with the formatting
 `UMAP`.
 
 For details on the datasets, see the 
-[UMAP examples gallery](https://jlmelville.github.io/uwot/umap-examples.html).
+[UMAP examples gallery](https://jlmelville.github.io/uwot/articles/umap-examples.html).
 The `uwot` results have been re-run for the images here using different random 
 seeds, but they should resemble the `uwot` output on that page.
 
@@ -202,7 +202,7 @@ methods considered here.
 ![cifar10 r](img/pycompare/cifar10_r.png)|![cifar10 py](img/pycompare/cifar10_py.png)
 
 Based on results with this dataset in the 
-[UMAP examples gallery](https://jlmelville.github.io/uwot/umap-examples.html),
+[UMAP examples gallery](https://jlmelville.github.io/uwot/articles/umap-examples.html),
 I wasn't expecting these results to be a feast for the eyes. After seeing the
 difference in results with `macosko2015`, I am just relieved that these two
 results look disappointing in a similar way.

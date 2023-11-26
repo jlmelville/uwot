@@ -3,7 +3,7 @@
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/jlmelville/uwot/workflows/R-CMD-check/badge.svg)](https://github.com/jlmelville/uwot/actions)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/jlmelville/uwot?branch=master&svg=true)](https://ci.appveyor.com/project/jlmelville/uwot)
-[![Coverage Status](https://img.shields.io/codecov/c/github/jlmelville/uwot/master.svg)](https://codecov.io/github/jlmelville/uwot?branch=master)
+[![Coverage Status](https://img.shields.io/codecov/c/github/jlmelville/uwot/master.svg)](https://app.codecov.io/github/jlmelville/uwot?branch=master)
 [![CRAN Status Badge](http://www.r-pkg.org/badges/version/uwot)](https://cran.r-project.org/package=uwot)
 [![Dependencies](https://tinyverse.netlify.com/badge/uwot)](https://cran.r-project.org/package=uwot)
 [![CRAN Monthly Downloads](https://cranlogs.r-pkg.org/badges/uwot)](https://cran.r-project.org/package=uwot)
@@ -43,7 +43,7 @@ dimensional fuzzy simplicial set.
 submission). Among other things you can now pass your own nearest neighbors data
 in sparse matrix form. Also there is an option to reproduce relative cluster
 density by
-[approximating the densMAP method](https://jlmelville.github.io/uwot/leopold.html).
+[approximating the densMAP method](https://jlmelville.github.io/uwot/articles/leopold.html).
 See the [NEWS](https://github.com/jlmelville/uwot/blob/master/NEWS.md#uwot-0113)
 page for more.
 
@@ -59,8 +59,7 @@ changes.
 *December 15 2020* Version 0.1.10 has been released to CRAN. This is mainly
 to maintain compatibility with RcppAnnoy, but also a small change was made to
 avoid it grinding away pointlessly in the presence of `NA` values, based on
-an observation by
-[David McGaughey on Twitter](https://twitter.com/David_McGaughey/status/1328389091239501824).
+an observation by David McGaughey on Twitter (which I can no longer link to).
 
 *November 15 2020* Version 0.1.9 has been released to CRAN. The main addition is
 support for the Pearson correlation. Also, a slight license change from GPL-3
@@ -85,7 +84,7 @@ using `std::thread` rather than tinythread++.
 issues that originate from RcppAnnoy and RcppParallel. I am hopeful that the
 Annoy behavior is fixed and a suitable version of RcppAnnoy will be released
 onto CRAN eventually. The RcppParallel issues originate with the use of
-[tbb](https://github.com/intel/tbb) and seems much harder to deal with. As there
+[tbb](https://github.com/oneapi-src/oneTBB) and seems much harder to deal with. As there
 is no way to use RcppParallel without tbb yet, I am temporarily replacing the
 use of RcppParallel with just a subset of the code needed to run parallel for
 loops with the [tinythread++](https://tinythreadpp.bitsnbites.eu/) library.
@@ -226,7 +225,7 @@ iris_umap_batch <- umap(iris, batch = TRUE, opt_args = list(beta1 = 0.9, beta2 =
 
 ## Documentation
 
-<https://jlmelville.github.io/uwot>.
+<https://jlmelville.github.io/uwot/>.
 
 ## A Note on Reproducibility
 
@@ -315,7 +314,7 @@ The right hand image is the result of using `uwot`.
 |-----------------------------------|---------------------------------|
 | ![mnist-py.png](man/figures/readme/mnist-py.png) | ![mnist-r.png](man/figures/readme/mnist-r.png) |
 
-The project documentation contains some more [examples](https://jlmelville.github.io/uwot/umap-examples.html).
+The project documentation contains some more [examples](https://jlmelville.github.io/uwot/articles/umap-examples.html).
 
 ## Performance
 
@@ -368,7 +367,7 @@ approximation to the `pow` function suggested by [Martin Ankerl](https://martin.
 and the squared distance (`0`-`1000`), I found the maximum relative error was
 about `0.06`. However, I haven't done much testing, beyond looking to see that
 results from the
-[examples page](https://jlmelville.github.io/uwot/umap-examples.html) are not
+[examples page](https://jlmelville.github.io/uwot/articles/umap-examples.html) are not
 obviously worsened. Results in the table above with `approx_pow = TRUE` do show
 a worthwhile improvement.
 
@@ -432,7 +431,7 @@ scheduler. This is the same behavior as largeVis.
 that Annoy itself says it works best with dimensions < 100, but still works
 "surprisingly well" up to 1000.
 * Experience with
-[COIL-100](http://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php),
+[COIL-100](https://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php),
 which has 49,152 features, suggests that Annoy will *definitely* struggle with
 datasets of this dimensionality. I strongly recommend using the `pca` option
 to reduce the dimensionality, e.g `pca = 100`.
@@ -548,7 +547,7 @@ mnist_lv <- lvish(mnist, kernel = "knn", perplexity = 15, n_epochs = 1500,
                   init = "lvrand", verbose = TRUE)
 ```
 
-See the [lvish examples](https://jlmelville.github.io/uwot/lvish.html) page for
+See the [lvish examples](https://jlmelville.github.io/uwot/articles/lvish.html) page for
 more results.
 
 ## Mixed Data Types
@@ -913,7 +912,7 @@ If you want to cite the use of uwot, then use the output of running
 [publication](https://arxiv.org/abs/1802.03426).
 * There is now a [UMAP package on CRAN](https://cran.r-project.org/package=umap)
 (see also its [github repo](https://github.com/tkonopka/umap)).
-* Another R package is [umapr](https://github.com/ropenscilabs/umapr), but it is 
+* Another R package is [umapr](https://github.com/ropensci-archive/umapr), but it is 
 no longer being maintained.
 * [umappp](https://github.com/LTLA/umappp) is a full C++ implementation, and
 [yaumap](https://github.com/LTLA/yaumap) provides an R wrapper. The batch

@@ -140,7 +140,7 @@ coordinates. This is an approximation to the
 `dens_weight` will use a larger range of output densities to reflect the input
 data. If the data is too spread out, reduce the value of `dens_weight`. For
 more information see the 
-[documentation at the uwot repo](https://jlmelville.github.io/uwot/leopold.html).
+[documentation at the uwot repo](https://jlmelville.github.io/uwot/articles/leopold.html).
 * New parameter: `binary_edge_weights`. If set to `TRUE`, instead of smoothed
 knn distances, non-zero edge weights all have a value of 1. This is how
 [PaCMAP](https://www.jmlr.org/papers/v22/20-1061.html) works and there is

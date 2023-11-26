@@ -106,7 +106,7 @@ embedding <- umap(data, init = "lvrand")
 
 Below, we'll explore the effect of these settings. For more details on the
 datasets, see the 
-[examples](https://jlmelville.github.io/uwot/umap-examples.html) page.
+[examples](https://jlmelville.github.io/uwot/articles/umap-examples.html) page.
 
 Apart from changing `init`, mainly default settings where used, except using
 `pca = 100`, which is necessary with high dimensional datasets for the

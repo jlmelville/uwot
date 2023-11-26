@@ -66,7 +66,7 @@ mnist_umap_fast <- umap(mnist, pca = 100, fast_sgd = TRUE, verbose = TRUE)
 Six threads were used in the stochastic gradient descent.
 
 For details on the datasets, see the 
-[examples](https://jlmelville.github.io/uwot/umap-examples.html) page. The 
+[examples](https://jlmelville.github.io/uwot/articles/umap-examples.html) page. The 
 timings are given in the title, in minutes and seconds. Note that this is for
 entire run, not just the optimization phase, i.e. it includes the PCA
 dimensionality reduction and nearest neighbor search, which is usually the
