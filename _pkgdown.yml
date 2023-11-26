@@ -3,6 +3,10 @@ template:
   bootstrap: 5
 
 articles:
+- title: What's New
+  desc: "A summary of the latest changes to `uwot`."
+  contents:
+   - articles/whatsnew
 - title: Examples
   desc: Lots of example output of UMAP in its various modes.
   contents:
@@ -22,4 +26,3 @@ articles:
   - articles/init
   - articles/leopold
   - articles/lvish
-
