@@ -13,3 +13,6 @@
 ^\.github$
 ^revdep$
 ^CRAN-SUBMISSION$
+^_pkgdown\.yml$
+^pkgdown$
+^vignettes/articles$

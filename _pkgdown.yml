@@ -1,0 +1,18 @@
+url: https://jlmelville.github.io/uwot/
+template:
+  bootstrap: 5
+
+articles:
+- title: Articles
+  desc: Some longer, more involved examples.
+  contents:
+  - articles/abparams
+  - articles/fast-sgd
+  - articles/init
+  - articles/leopold
+  - articles/lvish
+  - articles/metric-learning
+  - articles/pycompare
+  - articles/umap-examples
+  - articles/umap-for-tsne
+  - articles/umap-simple

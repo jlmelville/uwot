@@ -226,25 +226,7 @@ iris_umap_batch <- umap(iris, batch = TRUE, opt_args = list(beta1 = 0.9, beta2 =
 
 ## Documentation
 
-Apart from the man pages in R: you may be interested in:
-
-* A [description of UMAP](https://jlmelville.github.io/uwot/umap-for-tsne.html)
-using algorithmic terminology similar to t-SNE, rather than the more topological
-approach of the UMAP publication.
-* [Examples](https://jlmelville.github.io/uwot/umap-examples.html) of the
-output of UMAP on some datasets, compared to t-SNE.
-* Some results of running
-[UMAP on the simple datasets](https://jlmelville.github.io/uwot/umap-simple.html)
-from [How to Use t-SNE Effectively](https://distill.pub/2016/misread-tsne/).
-* A comparison of
-[`uwot` output to the Python UMAP implementation](https://jlmelville.github.io/uwot/pycompare).
-* How to use UMAP for
-[Supervised and Metric Learning](https://jlmelville.github.io/uwot/metric-learning.html).
-* An attempt to illustrate the effect of [`min_dist` and `spread`](https://jlmelville.github.io/uwot/abparams.html).
-* The effect of using [approximations to speed up the stochastic gradient descent](https://jlmelville.github.io/uwot/fast-sgd.html).
-* An exploration of some [initialization options](https://jlmelville.github.io/uwot/init.html).
-* A list of examples of using the LargeVis-like
-[`lvish`](https://jlmelville.github.io/uwot/lvish.html) method.
+<https://jlmelville.github.io/uwot>.
 
 ## A Note on Reproducibility
 
@@ -331,7 +313,7 @@ The right hand image is the result of using `uwot`.
 
 |                                   |                                 |
 |-----------------------------------|---------------------------------|
-| ![mnist-py.png](img/readme/mnist-py.png) | ![mnist-r.png](img/readme/mnist-r.png) |
+| ![mnist-py.png](man/figures/readme/mnist-py.png) | ![mnist-r.png](man/figures/readme/mnist-r.png) |
 
 The project documentation contains some more [examples](https://jlmelville.github.io/uwot/umap-examples.html).
 
@@ -534,7 +516,7 @@ believe they would be identical, but they look pretty similar:
 
 |                                               |                                         |
 |-----------------------------------------------|-----------------------------------------|
-| ![mnist-largevis.png](img/readme/mnist-largevis.png) | ![mnist-lvish.png](img/readme/mnist-lvish.png) |
+| ![mnist-largevis.png](man/figures/readme/mnist-largevis.png) | ![mnist-lvish.png](man/figures/readme/mnist-lvish.png) |
 
 Because the default number of neighbors is 3 times the `perplexity`, and the
 default `perplexity = 50`, the nearest neighbor search needs to find 150 nearest

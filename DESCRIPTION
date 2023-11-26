@@ -1,31 +1,45 @@
 Package: uwot
-Title: The Uniform Manifold Approximation and Projection (UMAP) Method for Dimensionality Reduction
+Title: The Uniform Manifold Approximation and Projection (UMAP) Method for
+    Dimensionality Reduction
 Version: 0.1.16.9000
-Authors@R: 
-    c(person("James", "Melville", email = "jlmelville@gmail.com", role = c("aut", "cre")),
-    person("Aaron", "Lun", role="ctb"),person("Mohamed Nadhir", "Djekidel", role="ctb"),
-    person("Yuhan", "Hao", role="ctb"),person("Dirk", "Eddelbuettel", role="ctb"))
-Description: An implementation of the Uniform Manifold Approximation and 
-    Projection dimensionality reduction by McInnes et al. (2018) 
-    <arXiv:1802.03426>. It also provides means to transform new data and to 
-    carry out supervised dimensionality reduction. An implementation of the 
-    related LargeVis method of Tang et al. (2016) <arXiv:1602.00370> is also 
-    provided. This is a complete re-implementation in R (and C++, via the 'Rcpp'
-    package): no Python installation is required. See the uwot website 
-    (<https://github.com/jlmelville/uwot>) for more documentation and examples.
+Authors@R: c(
+    person("James", "Melville", , "jlmelville@gmail.com", role = c("aut", "cre", "cph")),
+    person("Aaron", "Lun", role = "ctb"),
+    person("Mohamed Nadhir", "Djekidel", role = "ctb"),
+    person("Yuhan", "Hao", role = "ctb"),
+    person("Dirk", "Eddelbuettel", role = "ctb")
+  )
+Description: An implementation of the Uniform Manifold Approximation and
+    Projection dimensionality reduction by McInnes et al. (2018)
+    <arXiv:1802.03426>. It also provides means to transform new data and
+    to carry out supervised dimensionality reduction. An implementation of
+    the related LargeVis method of Tang et al. (2016) <arXiv:1602.00370>
+    is also provided. This is a complete re-implementation in R (and C++,
+    via the 'Rcpp' package): no Python installation is required. See the
+    uwot website (<https://github.com/jlmelville/uwot>) for more
+    documentation and examples.
 License: GPL (>= 3)
-URL: https://github.com/jlmelville/uwot
+URL: https://github.com/jlmelville/uwot,
+    https://jlmelville.github.io/uwot/
 BugReports: https://github.com/jlmelville/uwot/issues
-Encoding: UTF-8
-Suggests: testthat,
-    covr,
-    bigstatsr,
-    RSpectra
-RoxygenNote: 7.2.3
-Depends: Matrix
-LinkingTo: Rcpp, RcppProgress, RcppAnnoy, dqrng
-Imports: Rcpp,
-    methods,
+Depends: 
+    Matrix
+Imports: 
     FNN,
-    RcppAnnoy (>= 0.0.17),
-    irlba
+    irlba,
+    methods,
+    Rcpp,
+    RcppAnnoy (>= 0.0.17)
+Suggests: 
+    bigstatsr,
+    covr,
+    RSpectra,
+    testthat
+LinkingTo: 
+    dqrng,
+    Rcpp,
+    RcppAnnoy,
+    RcppProgress
+Encoding: UTF-8
+RoxygenNote: 7.2.3
+Config/Needs/website: rmarkdown
