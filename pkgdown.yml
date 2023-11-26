@@ -1,0 +1,19 @@
+pandoc: 2.19.2
+pkgdown: 2.0.7
+pkgdown_sha: ~
+articles:
+  abparams: abparams.html
+  fast-sgd: fast-sgd.html
+  init: init.html
+  leopold: leopold.html
+  lvish: lvish.html
+  metric-learning: metric-learning.html
+  pycompare: pycompare.html
+  umap-examples: umap-examples.html
+  umap-for-tsne: umap-for-tsne.html
+  umap-simple: umap-simple.html
+last_built: 2023-11-26T19:38Z
+urls:
+  reference: https://jlmelville.github.io/uwot/reference
+  article: https://jlmelville.github.io/uwot/articles
+
