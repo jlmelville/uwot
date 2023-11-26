@@ -245,12 +245,7 @@ package). Neither approach is supremely efficient at the moment. Proper sparse
 matrix support is limited by the nearest neighbor search routine: Annoy is
 intended for dense vectors. Adding a library for sparse nearest neighbor search
 would be a good extension.
-* If `n_sgd_threads` is set larger than `1`, then even if you use `set.seed`,
-results of the embeddings are not repeatable, This is because there is no
-locking carried out on the underlying coordinate matrix, and work is partitioned
-by edge not vertex and a given vertex may be processed by different threads. The
-order in which reads and writes occur is of course at the whim of the thread
-scheduler. This is the same behavior as largeVis.
+
 * I haven't applied `uwot` on anything much larger than MNIST and Fashion MNIST
 (so at least around 100,000 rows with 500-1,000 columns works fine). Bear in mind
 that Annoy itself says it works best with dimensions < 100, but still works
