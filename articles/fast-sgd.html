@@ -135,7 +135,7 @@ the dimensionality to 100:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1337</span><span class="op">)</span></span>
 <span><span class="va">mnist_umap_fast</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, pca <span class="op">=</span> <span class="fl">100</span>, fast_sgd <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Six threads were used in the stochastic gradient descent.</p>
-<p>For details on the datasets, see the <a href="https://jlmelville.github.io/uwot/umap-examples.html">examples</a>
+<p>For details on the datasets, see the <a href="https://jlmelville.github.io/uwot/articles/umap-examples.html">examples</a>
 page. The timings are given in the title, in minutes and seconds. Note
 that this is for entire run, not just the optimization phase, i.e. it
 includes the PCA dimensionality reduction and nearest neighbor search,
