@@ -64,6 +64,15 @@ iris_umap <- umap(iris)
 # mnist <- snedata::download_mnist()
 
 mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
+plot(
+  mnist_umap,
+  cex = 0.1,
+  col = grDevices::rainbow(n = length(levels(mnist$Label)))[as.integer(mnist$Label)] |>
+    grDevices::adjustcolor(alpha.f = 0.1),
+  main = "R uwot::umap",
+  xlab = "",
+  ylab = ""
+)
 ```
 
 ![MNIST UMAP](man/figures/readme/mnist-r.png)
