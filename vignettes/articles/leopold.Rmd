@@ -4,8 +4,6 @@ subtitle: "Approximating densMAP"
 date: "February 16 2022"
 ---
 
-This is part of the documentation of [uwot](https://github.com/jlmelville/uwot).
-
 ## densMAP
 
 [densMAP](https://doi.org/10.1038/s41587-020-00801-7) is a variation on UMAP

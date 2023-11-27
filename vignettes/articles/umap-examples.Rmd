@@ -1,14 +1,6 @@
 ---
 title: "UMAP Examples"
-output:
-  html_document:
-    theme: cosmo
-    toc: true
-    toc_float:
-      collapsed: false
 ---
-
-This is part of the documentation for [uwot](https://github.com/jlmelville/uwot).
 
 *December 29 2018* New, better settings for t-SNE, better plots and a couple of
 new datasets. Removed neighborhood preservation values until I've double checked

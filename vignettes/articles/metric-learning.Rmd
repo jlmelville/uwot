@@ -1,13 +1,6 @@
 ---
 title: "Metric Learning with UMAP"
-output:
-  html_document:
-    theme: cosmo
-    toc: true
-    toc_float:
-      collapsed: false
 ---
-This is part of the documentation of [uwot](https://github.com/jlmelville/uwot).
 
 Among other things, UMAP provides two interesting extensions to its basic
 dimensionality reduction. First, it can do a supervised embedding, where 

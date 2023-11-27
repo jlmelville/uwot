@@ -1,15 +1,7 @@
 ---
 title: "Python Comparison"
 subtitle: "and some nearest neighbor comparisons"
-output:
-  html_document:
-    theme: cosmo
-    toc: true
-    toc_float:
-      collapsed: false
 ---
-
-This is part of the documentation for [uwot](https://github.com/jlmelville/uwot).
 
 This page is a gallery of images comparing the output of `uwot` version 0.1.3
 to the [Python `UMAP` package](https://github.com/lmcinnes/umap) version 0.3.8. 

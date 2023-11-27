@@ -1,14 +1,6 @@
 ---
 title: "Fine-tuning UMAP Visualizations"
-output:
-  html_document:
-    theme: cosmo
-    toc: true
-    toc_float:
-      collapsed: false
 ---
-
-This is part of the documentation for [uwot](https://github.com/jlmelville/uwot).
 
 If you look at the UMAP 
 [examples](https://jlmelville.github.io/uwot/articles/umap-examples.html), it's clear

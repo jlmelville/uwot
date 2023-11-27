@@ -1,14 +1,6 @@
 ---
 title: "UMAP on some simple datasets"
-output:
-  html_document:
-    theme: cosmo
-    toc: true
-    toc_float:
-      collapsed: false
 ---
-
-This is part of the documentation for [uwot](https://github.com/jlmelville/uwot).
 
 The distill publication 
 [How to Use t-SNE Effectively](https://distill.pub/2016/misread-tsne/) provides

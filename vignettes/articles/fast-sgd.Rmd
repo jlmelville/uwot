@@ -1,14 +1,6 @@
 ---
 title: "Fast SGD settings"
-output:
-  html_document:
-    theme: cosmo
-    toc: true
-    toc_float:
-      collapsed: false
 ---
-
-This is part of the documentation for [uwot](https://github.com/jlmelville/uwot).
 
 By default, `uwot` uses some conservative settings during the stochastic 
 gradient descent. But there are some options that can speed things up:

@@ -1,14 +1,6 @@
 ---
 title: "UMAP for t-SNE"
-output:
-  html_document:
-    theme: cosmo
-    toc: true
-    toc_float:
-      collapsed: false
 ---
-
-This is part of the documentation for [uwot](https://github.com/jlmelville/uwot).
 
 *January 1 2020:* I used to say that "the 
 [UMAP paper](https://arxiv.org/abs/1802.03426v1) does not go into much 

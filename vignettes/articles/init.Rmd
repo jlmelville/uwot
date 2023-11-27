@@ -1,14 +1,6 @@
 ---
 title: "Initialization"
-output:
-  html_document:
-    theme: cosmo
-    toc: true
-    toc_float:
-      collapsed: false
 ---
-
-This is part of the documentation for [uwot](https://github.com/jlmelville/uwot).
 
 The default initialization for UMAP uses the eigenvectors of a normalized graph
 Laplacian of the sparse affinity matrix. This normally works well except when:
