@@ -18,3 +18,7 @@ mnist_tumap <- tumap(mnist, n_neighbors = 15, verbose = TRUE)
 
 Note that using `umap(a = 1, b = 1)` doesn't use the simplified gradient, so
 you won't see any speed-up that way.
+
+Some examples comparing UMAP and t-UMAP are in the
+[examples](https://jlmelville.github.io/uwot/articles/umap-examples.html)
+article.

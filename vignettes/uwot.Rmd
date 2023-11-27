@@ -1,10 +1,24 @@
 ---
 title: "uwot"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{uwot}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-```R
-library(uwot)
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
+```{r load}
+library(uwot)
+```
+
+```R
 # See function man page for help
 ?umap
 
@@ -135,14 +149,12 @@ For the datasets I've tried it with, the results look at least reminiscent of
 those obtained using the
 [official Python implementation](https://github.com/lmcinnes/umap).
 Below are results for the 70,000 MNIST digits (downloaded using the
-[snedata](https://github.com/jlmelville/snedata) package). On the left
+[snedata](https://github.com/jlmelville/snedata) package). Below,
 is the result of using the official Python UMAP implementation
 (via the [reticulate](https://cran.r-project.org/package=reticulate) package).
-The right hand image is the result of using `uwot`.
+Under that is the result of using `uwot`.
 
-|                                   |                                 |
-|-----------------------------------|---------------------------------|
-| ![mnist-py.png](man/figures/readme/mnist-py.png) | ![mnist-r.png](man/figures/readme/mnist-r.png) |
+![mnist-py.png](articles/img/uwot/mnist-py.png) ![mnist-r.png](articles/img/uwot/mnist-r.png)
 
 The project documentation contains some more [examples](https://jlmelville.github.io/uwot/articles/umap-examples.html),
 and [comparison with Python](https://jlmelville.github.io/uwot/articles/pycompare.html).

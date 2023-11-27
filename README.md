@@ -75,7 +75,7 @@ plot(
 )
 ```
 
-![MNIST UMAP](man/figures/readme/mnist-r.png)
+![MNIST UMAP](man/figures/mnist-r.png)
 
 ## Documentation
 
