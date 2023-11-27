@@ -33,6 +33,8 @@ Imports:
 Suggests: 
     bigstatsr,
     covr,
+    knitr,
+    rmarkdown,
     RSpectra,
     testthat
 LinkingTo: 
@@ -40,6 +42,8 @@ LinkingTo:
     Rcpp,
     RcppAnnoy,
     RcppProgress
+VignetteBuilder: 
+    knitr
+Config/Needs/website: rmarkdown
 Encoding: UTF-8
 RoxygenNote: 7.2.3
-Config/Needs/website: rmarkdown
