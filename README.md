@@ -19,8 +19,11 @@ method. Translated from the
 
 ## News
 
-*June 28 2023* Version 0.1.16 has been released to CRAN. This is a very minor
-tweak to 0.1.15 to further support the new release of [RcppAnnoy](https://cran.r-project.org/package=RcppAnnoy).
+*November 26 2023* Happy 1 million CRAN downloads to `uwot`. To celebrate 
+(actually it's just a coincidence) I have reorganized the horror-show that was
+the sprawling README into actual articles, via the fantastic
+[pkgdown](https://pkgdown.r-lib.org/) package. Find it at
+<https://jlmelville.github.io/uwot/>.
 
 ## Installing
 
