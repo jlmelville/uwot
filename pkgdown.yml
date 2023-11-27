@@ -8,11 +8,18 @@ articles:
   leopold: leopold.html
   lvish: lvish.html
   metric-learning: metric-learning.html
+  mixed-data-types: mixed-data-types.html
+  nearest-neighbors-format: nearest-neighbors-format.html
+  performance: performance.html
   pycompare: pycompare.html
+  reproducibility: reproducibility.html
+  tumap: tumap.html
   umap-examples: umap-examples.html
   umap-for-tsne: umap-for-tsne.html
   umap-simple: umap-simple.html
-last_built: 2023-11-26T20:03Z
+  whatsnew: whatsnew.html
+  uwot: uwot.html
+last_built: 2023-11-27T01:23Z
 urls:
   reference: https://jlmelville.github.io/uwot/reference
   article: https://jlmelville.github.io/uwot/articles
