@@ -101,8 +101,8 @@ sparse data.</p>
 which I recently added a <code>download_twenty_newsgroups</code>
 function. That took up a large chunk of one afternoon and evening. The
 second problem is solved by replicating the PyNNDescent package in R.
-This took me a bit longer, but a mere 4 years later, the <a href="https://github.com/jlmelville/rnndescent" class="external-link">rnndescent</a> package
-is finally in a usable state.</p>
+This took me a bit longer, but a mere 4 years later, the <a href="https://cran.r-project.org/package=rnndescent" class="external-link">rnndescent</a>
+package is finally in a usable state.</p>
 <p>So let’s get started. Apart from the Python example above, some other
 good resources for doing text analysis on this dataset can be found in
 chapter 9 of <a href="https://www.tidytextmining.com/usenet#usenet" class="external-link">text
@@ -444,11 +444,10 @@ going to L1-normalize each row of the sparse matrix:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/Diagonal.html" class="external-link">Diagonal</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="va">res</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">X</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">tfidf_spl1</span> <span class="op">&lt;-</span> <span class="fu">l1_normalize</span><span class="op">(</span><span class="va">tfidf_sp</span><span class="op">)</span></span></code></pre></div>
-<p>Now we can find the neighbors. <code>rnndescent</code> is not yet on
-CRAN, so for now you will have to install it from github:</p>
+<p>Now we can find the neighbors.</p>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"jlmelville/rnndescent"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">rnndescent</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rnndescent"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jlmelville.github.io/rnndescent/" class="external-link">rnndescent</a></span><span class="op">)</span></span></code></pre></div>
 <p>I will use the brute-force search in <code>rnndescent</code> as the
 dataset is small enough for us to handle an exact search comfortably, at
 least if you have enough cores:</p>
