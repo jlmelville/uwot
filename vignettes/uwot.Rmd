@@ -1,6 +1,9 @@
 ---
 title: "uwot"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    fig_width: 4
+    fig_height: 4
 vignette: >
   %\VignetteIndexEntry{uwot}
   %\VignetteEngine{knitr::rmarkdown}
@@ -18,85 +21,249 @@ knitr::opts_chunk$set(
 library(uwot)
 ```
 
-```R
-# See function man page for help
-?umap
+`uwot` is the a package for implementing the UMAP dimensionality reduction 
+method. For more information on UMAP, see the 
+[original paper](https://arxiv.org/abs/1802.03426) and the 
+[Python package](https://github.com/lmcinnes/umap).
 
-# Non-numeric columns are ignored, so in a lot of cases you can pass a data
-# frame directly to umap
-iris_umap <- umap(iris, n_neighbors = 50, learning_rate = 0.5, init = "random")
+We'll use the `iris` dataset in these examples. It's not the ideal dataset
+because it's not terribly large nor high-dimensional (with only 4 numeric
+columns), but you'll get the general idea.
 
-# Load mnist from somewhere, e.g.
-# devtools::install_github("jlmelville/snedata")
-# mnist <- snedata::download_mnist()
-mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
+The default output dimensionality of UMAP is into two-dimensions, so it's
+amenable for visualization, but you can set a larger value with `n_components`.
+In this vignette we'll stick with two dimensions. We will need a function to
+make plotting easier:
 
-# For high dimensional datasets (> 100-1000 columns) using PCA to reduce
-# dimensionality is highly recommended to avoid the nearest neighbor search
-# taking a long time. Keeping only 50 dimensions can speed up calculations
-# without affecting the visualization much
-mnist_umap <- umap(mnist, pca = 50)
+```{r plot function}
+kabsch <- function(pm, qm) {
+  pm_dims <- dim(pm)
+  if (!all(dim(qm) == pm_dims)) {
+    stop(call. = TRUE, "Point sets must have the same dimensions")
+  }
+  # The rotation matrix will have (ncol - 1) leading ones in the diagonal
+  diag_ones <- rep(1, pm_dims[2] - 1)
 
-# Use a specific number of threads
-mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8)
+  # center the points
+  pm <- scale(pm, center = TRUE, scale = FALSE)
+  qm <- scale(qm, center = TRUE, scale = FALSE)
 
-# Use a different metric
-mnist_umap_cosine <- umap(mnist, n_neighbors = 15, metric = "cosine", min_dist = 0.001, verbose = TRUE, n_threads = 8)
+  am <- crossprod(pm, qm)
 
-# If you are only interested in visualization, `fast_sgd = TRUE` gives a much faster optimization
-mnist_umap_fast_sgd <- umap(mnist, n_neighbors = 15, metric = "cosine", min_dist = 0.001, verbose = TRUE, fast_sgd = TRUE)
+  svd_res <- svd(am)
+  # use the sign of the determinant to ensure a right-hand coordinate system
+  d <- determinant(tcrossprod(svd_res$v, svd_res$u))$sign
+  dm <- diag(c(diag_ones, d))
 
-# Supervised dimension reduction
-mnist_umap_s <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE, n_threads = 8,
-                     y = mnist$Label, target_weight = 0.5)
+  # rotation matrix
+  um <- svd_res$v %*% tcrossprod(dm, svd_res$u)
 
-# Add new points to an existing embedding
-mnist_train <- head(mnist, 60000)
-mnist_test <- tail(mnist, 10000)
-
-# You must set ret_model = TRUE to return extra data we need
-# coordinates are in mnist_train_umap$embedding
-mnist_train_umap <- umap(mnist_train, verbose = TRUE, ret_model = TRUE)
-mnist_test_umap <- umap_transform(mnist_test, mnist_train_umap, verbose = TRUE)
-
-# Save the nearest neighbor data
-mnist_nn <- umap(mnist, ret_nn = TRUE)
-# coordinates are now in mnist_nn$embedding
-
-# Re-use the nearest neighor data and save a lot of time
-mnist_nn_spca <- umap(mnist, nn_method = mnist_nn$nn, init = "spca")
-
-# No problem to have ret_nn = TRUE and ret_model = TRUE at the same time
-# Or just use the ret_extra parameter:
-mnist_nn_and_model <- umap(mnist, ret_extra = c("model", "nn"))
-
-# You can also get to the input fuzzy graph as a sparse matrix via "fgraph"
-mnist_with_fgraph <- umap(mnist, ret_extra = c("fgraph"))
-# equivalent for lvish is to use "P" (input probability matrix):
-mnist_with_P <- lvish(mnist, ret_extra = c("P"))
-
-# Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
-iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),
-                                      "euclidean" = c("Petal.Length", "Petal.Width")))
-# Can also use individual factor columns
-iris_umap <- umap(iris, metric = list("euclidean" = c("Sepal.Length", "Sepal.Width"),
-                                      "euclidean" = c("Petal.Length", "Petal.Width"),
-                                      "categorical" = "Species"))
-
-# Batch mode allows for multiple threads while being reproducible
-# (at the cost of needing more epochs for larger datasets)
-set.seed(42)
-iris_umap_batch <- umap(iris, batch = TRUE, n_sgd_threads = 4)
-# This will give the same results
-set.seed(42)
-iris_umap_batch2 <- umap(iris, batch = TRUE, n_sgd_threads = 2)
-all(iris_umap_batch == iris_umap_batch2)
-# TRUE
-
-# Batch mode uses Adam optimizer by default. Control the parameters with the opt_args list
-iris_umap_batch <- umap(iris, batch = TRUE, opt_args = list(beta1 = 0.9, beta2 = 0.999))
-
+  # Rotate and then translate to the original centroid location of qm
+  sweep(t(tcrossprod(um, pm)), 2, -attr(qm, "scaled:center"))
+}
+iris_pca2 <- prcomp(iris[, 1:4])$x[, 1:2]
+plot_umap <- function(coords, col = iris$Species, pca = iris_pca2) {
+  plot(kabsch(coords, pca), col = col, xlab = "", ylab = "")
+}
 ```
+
+Most of this code is just the
+[kabsch algorithm](https://en.wikipedia.org/wiki/Kabsch_algorithm)
+to align two point sets, which I am going to use to align the results of UMAP
+over the first two principal components. This is to keep the relative
+orientation of the output the same across different plots which makes it a bit
+easier to see the differences between them. UMAP is a stochastic algorithm
+so the output will be different each time you run it and small changes to the
+parameters can affect the *absolute* values of the coordinates, although the
+interpoint differences are usually similar. There's no need to go to such
+trouble in most circumstances: the output of `umap` is a perfectly useful
+2D matrix of coordinates you can pass into a plotting function with no further
+processing required.
+
+## Basic UMAP
+
+The defaults of the `umap` function should work for most datasets. No scaling
+of the input data is done, but non-numeric columns are ignored:
+
+```{r basic UMAP}
+set.seed(42)
+iris_umap <- umap(iris)
+plot_umap(iris_umap)
+```
+
+### Parameters
+
+`uwot` has accumulated many parameters over time, but most of the time there
+are only a handful you need worry about. The most important ones are:
+
+#### `min_dist`
+
+This is a mainly aesthetic parameter, which defines how close points can get in
+the output space. A smaller value tends to make any clusters in the output more
+compact. You should experiment with values between 0 and 1, although don't
+choose exactly zero. The default is 0.01, which seems like it's a bit small for
+`iris`. Let's crank up `min_dist` to `0.3`:
+
+```{r min_dist 0.5}
+set.seed(42)
+iris_umap_md05 <- umap(iris, min_dist = 0.3)
+plot_umap(iris_umap_md05)
+```
+
+This has made the clusters bigger and closer together, so we'll use 
+`min_dist = 0.3` for the other examples with `iris`.
+
+#### `n_neighbors`
+
+This defines the number of items in the dataset that define the neighborhood
+around each point. Set it too low and you will get a more fragmented layout.
+Set it too high and you will get something that will miss a lot of local 
+structure.
+
+Here's a result with 5 neighbors:
+
+```{r 5 neighbors}
+set.seed(42)
+iris_umap_nbrs5 <- umap(iris, n_neighbors = 5, min_dist = 0.3)
+plot_umap(iris_umap_nbrs5)
+```
+
+It's not hugely different from the default of 15 neighbors, but the clusters
+are a bit more broken up. 
+
+There should be a more pronounced difference going the other way and looking at
+100 neighbors:
+
+```{r 100 neighbors}
+set.seed(42)
+iris_umap_nbrs100 <- umap(iris, n_neighbors = 100, min_dist = 0.3)
+plot_umap(iris_umap_nbrs100)
+```
+
+Here there is a much more uniform appearance to the results. It's always worth
+trying a few different values of `n_neighbors`, especially larger values,
+although larger values of `n_neighbors` will lead to longer run times. Sometimes
+small clusters that you think are meaningful may in fact be artifacts of setting
+`n_neighbors` too small, so starting with a larger value and looking at the
+effect of reducing `n_neighbors` can help you avoid over interpreting results.
+
+#### `init`
+
+The default initialization of UMAP is to use spectral initialization, which acts
+upon the (symmetrized) k-nearest neighbor graph that is in determined by your
+choice of `n_neighbors`. This is usually a good choice, but it involves a very
+sparse matrix, which can sometimes be a bit *too* sparse, which leads to numerical
+difficulties which manifest as slow run times or even hanging calculations. If
+your dataset causes these issues, you can either try increasing `n_neighbors`
+but I have seen cases where that would be inconvenient in terms of CPU and RAM
+usage. An alternative is to use the first two principal components of the data,
+which at least uses the data you provide to give a solid global picture of the
+data that UMAP can refine. It's not appropriate for every dataset, but in most
+cases, it's a perfectly good alternative.
+
+The only gotcha with it is that depending on the scaling of your data, the 
+initial coordinates can have large inter-point distances. UMAP will not optimize
+that well, so such an output should be scaled to a small standard deviation.
+If you set `init = "spca"`, it will do all that for you, although to be more
+aligned with the UMAP coordinate initialization, I recommend you also set
+`init_sdev = "range"` as well. `init_sdev` can also take a numerical value
+for the standard deviation. Values from `1e-4` to `10` are reasonable, but I
+recommend you stick to the default of `"range"`.
+
+```{r spca init}
+set.seed(42)
+iris_umap_spca <-
+  umap(iris,
+       init = "spca",
+       init_sdev = "range",
+       min_dist = 0.3)
+plot_umap(iris_umap_spca)
+```
+
+This doesn't have a big effect on `iris`, but it's good to know about this as
+an option: and it can also smooth out the effect of changing `n_neighbors` on
+the initial coordinates with the standard spectral initialization, which can
+make it easier to see the effect of changing `n_neighbors` on the final result.
+
+Some other `init` options to know about:
+
+* `"random"`: if the worst comes to the worst, you can always fall back to
+randomly assigning the initial coordinates. You really want to avoid this if you
+can though, because it will take longer to optimize the coordinates to the
+same quality, so you will need to increase `n_epochs` to compensate. Even if you
+do that, it's *much* more likely that you will end up in a minimum that is less
+desirable than one based on a good initialization. This will make interpreting
+the results harder, as you are more likely to end up with different clusters
+beings split or mixed with each other.
+* If you have some coordinates you like from another method, you can pass them
+in as a matrix. But remember will probably want to scale them with `init_sdev`
+though.
+
+#### `dens_scale`
+
+The `dens_scale` parameter varies from 0 to 1 and controls how much of the
+relative densities of the input data is attempted to be preserved in the
+output.
+
+```{r UMAP with density scaling}
+set.seed(42)
+iris_umapds <- umap(iris, min_dist = 0.3, dens_scale = 0.5)
+plot_umap(iris_umapds)
+```
+
+This has shrunk the black cluster on the left of the plot (those are of species
+`setosa`), which reflect that the density of the `setosa` points is less spread
+out in the input data than the other two species. For more on `dens_scale`
+please read its dedicated
+[article](https://jlmelville.github.io/uwot/articles/leopold.html).
+
+## Embedding New Data
+
+Once you have an embedding, you can use it to embed new data, although you need
+to remember to ask for a "model" to return. Instead of just the coordinates, you
+will now get back a list which contains all the extra parameters you will need
+for transforming new data. The coordinates are still available in the
+`$embedding` component.
+
+Let's try building a UMAP with just the `setosa` and `versicolor` iris species:
+
+```{r create a UMAP model}
+set.seed(42)
+
+iris_train <- iris[iris$Species %in% c("setosa", "versicolor"),]
+iris_train_umap <-
+  umap(iris_train, min_dist = 0.3, ret_model = TRUE)
+plot(
+  iris_train_umap$embedding,
+  col = iris_train$Species,
+  xlab = "",
+  ylab = "",
+  main = "UMAP setosa + versicolor"
+)
+```
+
+Next, you can use `umap_transform` to embed the new points:
+
+
+```{r embed new coordinates}
+iris_test <- iris[iris$Species == "virginica",]
+set.seed(42)
+iris_test_umap <- umap_transform(iris_test, iris_train_umap)
+plot(
+  rbind(iris_train_umap$embedding, iris_test_umap),
+  col = iris$Species,
+  xlab = "",
+  ylab = "",
+  main = "UMAP transform virginica"
+)
+```
+
+The green points in the top-right show the embedded data. Note that the original
+(black and red) clusters do not get optimized any further. While we haven't
+perfectly reproduced the full UMAP, the `virginica` points are located in more
+or less the right place, close to the `versicolor` items. Just like with any
+machine learning method, you must be careful with how you choose your training
+set.
 
 ## Supported Distances
 
@@ -154,7 +321,13 @@ is the result of using the official Python UMAP implementation
 (via the [reticulate](https://cran.r-project.org/package=reticulate) package).
 Under that is the result of using `uwot`.
 
-![mnist-py.png](articles/img/uwot/mnist-py.png) ![mnist-r.png](articles/img/uwot/mnist-r.png)
+```{r, echo=FALSE, out.width="75%", fig.cap="MNIST UMAP (Python)"}
+knitr::include_graphics("mnist-py.png")
+```
+
+```{r, echo=FALSE, out.width="75%", fig.cap="MNIST UMAP (R)"}
+knitr::include_graphics("mnist-r.png")
+```
 
 The project documentation contains some more [examples](https://jlmelville.github.io/uwot/articles/umap-examples.html),
 and [comparison with Python](https://jlmelville.github.io/uwot/articles/pycompare.html).
