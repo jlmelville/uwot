@@ -34,8 +34,8 @@ The first problem is solved with the
 added a `download_twenty_newsgroups` function. That took up a large chunk of one
 afternoon and evening. The second problem is solved by replicating the
 PyNNDescent package in R. This took me a bit longer, but a mere 4 years later,
-the [rnndescent](https://github.com/jlmelville/rnndescent) package is finally in
-a usable state.
+the [rnndescent](https://cran.r-project.org/package=rnndescent) package is
+finally in a usable state.
 
 So let's get started. Apart from the Python example above, some other good
 resources for doing text analysis on this dataset can be found in chapter 9 of
@@ -477,11 +477,10 @@ l1_normalize <- function(X) {
 tfidf_spl1 <- l1_normalize(tfidf_sp)
 ```
 
-Now we can find the neighbors. `rnndescent` is not yet on CRAN, so for now you
-will have to install it from github:
+Now we can find the neighbors.
 
 ```{r install rnndescent}
-devtools::install_github("jlmelville/rnndescent")
+install.packages("rnndescent")
 library(rnndescent)
 ```
 
