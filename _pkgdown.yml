@@ -19,10 +19,14 @@ articles:
   - articles/umap-for-tsne
   - articles/umap-simple
   - articles/abparams
+- title: Nearest Neighbors Methods
+  desc: Using external nearest neighbor data with `uwot`.
+  contents:
+  - articles/nearest-neighbors-format
+  - articles/hnsw-umap
 - title: Articles
   desc: More details on some of what `uwot` can do.
   contents:
-  - articles/nearest-neighbors-format
   - articles/mixed-data-types
   - articles/fast-sgd
   - articles/init
