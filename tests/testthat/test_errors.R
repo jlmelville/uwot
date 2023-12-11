@@ -51,21 +51,21 @@ expect_error(umap(iris10, n_neighbors = 4, init = iris), "matrix or string")
 
 # Don't use data with NA in it
 test_that("Detect data with NA in", {
-diris10na <- diris10
-diris10na[1] <- NA
-expect_error(umap(diris10na), "missing", ignore.case = TRUE)
+  diris10na <- diris10
+  diris10na[1] <- NA
+  expect_error(umap(diris10na), "missing", ignore.case = TRUE)
 
-dmiris10zna <- dmiris10z
-dmiris10zna[2, 1] <- NA
-expect_error(umap(dmiris10zna, n_neighbors = 4), "missing", ignore.case = TRUE)
+  dmiris10zna <- dmiris10z
+  dmiris10zna[2, 1] <- NA
+  expect_error(umap(dmiris10zna, n_neighbors = 4), "missing", ignore.case = TRUE)
 
-iris10na <- iris10
-iris10na[1, 1] <- NA
-expect_error(umap(iris10na, n_neighbors = 4), "missing", ignore.case = TRUE)
+  iris10na <- iris10
+  iris10na[1, 1] <- NA
+  expect_error(umap(iris10na, n_neighbors = 4), "missing", ignore.case = TRUE)
 })
 
 set.seed(42)
-nnsp10 <- Matrix::drop0(matrix(runif(100), nrow = 10) ^ 2, 0.5)
+nnsp10 <- Matrix::drop0(matrix(runif(100), nrow = 10)^2, 0.5)
 expect_error(umap(iris10, n_neighbors = 4, nn_method = nnsp10[, -10]), "same number")
 expect_error(umap(iris10, n_neighbors = 4, nn_method = nnsp10[-10, -10]), "unexpected number of rows")
 
@@ -95,8 +95,10 @@ expect_warning(
   "n_components >"
 )
 
-suppressWarnings(expect_error(umap(iris[1:100,], n_components = 10),
-                              "Initial data contains NA"))
+suppressWarnings(expect_error(
+  umap(iris[1:100, ], n_components = 10),
+  "Initial data contains NA"
+))
 
 # user-supplied intialization should not contain NA
 transform_init <- model$embedding[1:5, ]
@@ -110,6 +112,7 @@ expect_error(trans <- umap_transform(iris[51:55, ], model = model), "contains NA
 model$embedding[1, 1] <- old11
 
 # 110: warn if standard deviation of initial input could create small gradients
-expect_warning(umap(iris10, init_sdev = 100.0, n_neighbors = 4),
-               "embedding standard deviation")
-
+expect_warning(
+  umap(iris10, init_sdev = 100.0, n_neighbors = 4),
+  "embedding standard deviation"
+)

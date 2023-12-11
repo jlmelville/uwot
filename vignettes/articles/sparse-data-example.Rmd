@@ -146,7 +146,7 @@ dim(ng20spl)
 Now the first row looks like:
 
 ```{r first row split}
- ng20spl[1, ]
+ng20spl[1, ]
 ```
 ```R
        Id FileId                               Text Subset Label   Newsgroup
@@ -159,8 +159,10 @@ and footers (assumed to be anything after the first line of repeated hyphens):
 ```{r}
 cleaned_text <- ng20spl |>
   group_by(`Newsgroup`, `Id`) |>
-  filter(cumsum(`Text` == "") > 0,
-         cumsum(str_detect(`Text`, "^--")) == 0) |>
+  filter(
+    cumsum(`Text` == "") > 0,
+    cumsum(str_detect(`Text`, "^--")) == 0
+  ) |>
   ungroup()
 dim(cleaned_text)
 ```
@@ -202,11 +204,13 @@ the other columns from the original `ng20` data:
 
 ```{r unsplit text}
 text_unsplit <-
-  cleaned_text |> group_by(`Id`) |> summarise(`Text` = paste(`Text`, collapse = " "))
+  cleaned_text |>
+  group_by(`Id`) |>
+  summarise(`Text` = paste(`Text`, collapse = " "))
 text_unsplit <- ng20 |>
   select(-`Text`) |>
   left_join(text_unsplit, by = "Id")
-text_unsplit <- 
+text_unsplit <-
   text_unsplit[, c("Id", "FileId", "Text", "Subset", "Label", "Newsgroup")]
 dim(text_unsplit)
 ```
@@ -264,7 +268,10 @@ methods.
 
 ```{r number of words}
 count_words <- function(doc) {
-  doc |> strsplit(" ") |> unlist() |> length()
+  doc |>
+    strsplit(" ") |>
+    unlist() |>
+    length()
 }
 
 nwords <- sapply(corpus, count_words)
@@ -293,7 +300,7 @@ So 95% of the data contains 250 words or less.
 What is this massive document. Let's (carefully) take a look:
 
 ```{r longest document}
-substr(ng20[which.max(nwords),]$Text, 0, 80)
+substr(ng20[which.max(nwords), ]$Text, 0, 80)
 ```
 ```R
 [1] "From: jeh@cmkrnl.com\nSubject: Electrical wiring FAQ (was: A question about 120VA"
@@ -303,7 +310,9 @@ Ah, it's a FAQ. Ok that makes sense. Now let's look at the distribution of the
 raw length of the documents in terms of number of characters:
 
 ```{r summary of number of characters}
-nchars <- sapply(corpus, function(doc) { doc |> str_length() })
+nchars <- sapply(corpus, function(doc) {
+  doc |> str_length()
+})
 summary(nchars)
 ```
 ```R
@@ -336,7 +345,8 @@ skewed distribution:
 
 ```{r histogram of average word lengths}
 hist(avg_word_lengths[avg_word_lengths <= quantile(avg_word_lengths, 0.95, na.rm = TRUE)],
-     main = "0-95% average word length distribution")
+  main = "0-95% average word length distribution"
+)
 ```
 
 ![0-95% average word length distribution](img/sparse-data-example/avg-word-length-dist.png)
@@ -366,7 +376,7 @@ length(corpus)
 
 ```{r filter suspiciously long documents}
 is_suspiciously_long <- function(doc) {
-	doc |> count_words() >= 2000
+  doc |> count_words() >= 2000
 }
 suspiciously_long_indices <- sapply(corpus, is_suspiciously_long)
 corpus <- corpus[!suspiciously_long_indices]
@@ -396,7 +406,7 @@ length(corpus)
 
 ```{r filter suspiciously long words}
 has_suspiciously_long_words <- function(doc) {
-	doc |> avg_word_len() > 15
+  doc |> avg_word_len() > 15
 }
 suspiciously_long_word_indices <- sapply(corpus, has_suspiciously_long_words)
 corpus <- corpus[!suspiciously_long_word_indices]
@@ -489,13 +499,13 @@ for us to handle an exact search comfortably, at least if you have enough cores:
 
 ```{r nearest neighbors}
 tfidfl1_hell_bf <-
-    brute_force_knn(
-        tfidf_spl1,
-        k = 15,
-        metric = "hellinger",
-        n_threads = 6,
-        verbose = TRUE
-    )
+  brute_force_knn(
+    tfidf_spl1,
+    k = 15,
+    metric = "hellinger",
+    n_threads = 6,
+    verbose = TRUE
+  )
 ```
 
 This took under a minute on my laptop.
@@ -561,20 +571,20 @@ Ok, now to make the plot with [ggplot2](https://ggplot2.tidyverse.org/):
 library(ggplot2)
 
 ggplot(
-    data.frame(ng20_umap_rotated, Newsgroup = text_unsplit$Newsgroup),
-    aes(x = X1, y = X2, color = Newsgroup)
+  data.frame(ng20_umap_rotated, Newsgroup = text_unsplit$Newsgroup),
+  aes(x = X1, y = X2, color = Newsgroup)
 ) +
-    geom_point(alpha = 0.4, size = 0.5) +
-    scale_color_manual(values = palette) +
-    theme_minimal() +
-    labs(
-        title = "Sparse Hellinger 20Newsgroups UMAP",
-        x = "",
-        y = "",
-        color = "Newsgroup"
-    ) +
-    theme(legend.position = "right") +
-    guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+  geom_point(alpha = 0.4, size = 0.5) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "Sparse Hellinger 20Newsgroups UMAP",
+    x = "",
+    y = "",
+    color = "Newsgroup"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
 ```
 
 ![UMAP](img/sparse-data-example/ng20-umap.png)

@@ -8,12 +8,10 @@
 # unknown_dist The distance an unknown label (-1) is assumed to be from any point.
 # far_dist The distance between unmatched labels.
 # Return The resulting intersected fuzzy simplicial set.
-categorical_simplicial_set_intersection <- function(
-                                                    simplicial_set, target,
+categorical_simplicial_set_intersection <- function(simplicial_set, target,
                                                     unknown_dist = 1.0,
                                                     far_dist = 5.0,
                                                     verbose = FALSE) {
-
   # Convert to dgTMatrix to get to the j indices
   simplicial_set <- methods::as(simplicial_set, "TsparseMatrix")
   simplicial_set@x <- fast_intersection_cpp(
@@ -51,8 +49,9 @@ reset_local_connectivity <-
       )
       metric_res <-
         reset_local_metrics_parallel(simplicial_set@p, simplicial_set@x,
-                                     num_local_metric_neighbors = num_local_metric_neighbors,
-                                     n_threads = n_threads)
+          num_local_metric_neighbors = num_local_metric_neighbors,
+          n_threads = n_threads
+        )
       simplicial_set@x <- metric_res$values
       # TODO: at least some failures are very typical and it doesn't seem to
       # affect results, so not worth reporting this for now.
@@ -76,8 +75,7 @@ fast_intersection <- function(rows, cols, values, target, unknown_dist = 1.0,
     j <- cols[nz]
     if (is.na(target[i]) || is.na(target[j])) {
       values[nz] <- values[nz] * ex_unknown
-    }
-    else if (target[i] != target[j]) {
+    } else if (target[i] != target[j]) {
       values[nz] <- values[nz] * ex_far
     }
   }
@@ -141,8 +139,7 @@ general_sset_intersection <- function(indptr1,
       if (mix_weight < 0.5) {
         result_val[idx] <- left_val *
           right_val^(mix_weight / (1.0 - mix_weight))
-      }
-      else {
+      } else {
         result_val[idx] <- right_val *
           left_val^(((1.0 - mix_weight) / mix_weight))
       }

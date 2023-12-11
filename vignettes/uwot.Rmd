@@ -174,9 +174,10 @@ recommend you stick to the default of `"range"`.
 set.seed(42)
 iris_umap_spca <-
   umap(iris,
-       init = "spca",
-       init_sdev = "range",
-       min_dist = 0.3)
+    init = "spca",
+    init_sdev = "range",
+    min_dist = 0.3
+  )
 plot_umap(iris_umap_spca)
 ```
 
@@ -230,7 +231,7 @@ Let's try building a UMAP with just the `setosa` and `versicolor` iris species:
 ```{r create a UMAP model}
 set.seed(42)
 
-iris_train <- iris[iris$Species %in% c("setosa", "versicolor"),]
+iris_train <- iris[iris$Species %in% c("setosa", "versicolor"), ]
 iris_train_umap <-
   umap(iris_train, min_dist = 0.3, ret_model = TRUE)
 plot(
@@ -246,7 +247,7 @@ Next, you can use `umap_transform` to embed the new points:
 
 
 ```{r embed new coordinates}
-iris_test <- iris[iris$Species == "virginica",]
+iris_test <- iris[iris$Species == "virginica", ]
 set.seed(42)
 iris_test_umap <- umap_transform(iris_test, iris_train_umap)
 plot(

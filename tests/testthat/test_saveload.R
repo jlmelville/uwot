@@ -24,7 +24,7 @@ test_that("can save and load simple model", {
   expect_false(file.exists(model$mod_dir))
   # Can't use transform now model is unloaded
   expect_error(umap_transform(iris10, model), "is unloaded")
-  
+
   modelload <- load_uwot(file = mod_fname)
   set.seed(1337)
   resload_trans <- umap_transform(iris10, modelload)
@@ -34,7 +34,7 @@ test_that("can save and load simple model", {
   if (file.exists(mod_fname)) {
     unlink(mod_fname)
   }
-  
+
   # Clean up temp dir from loading
   expect_true(file.exists(modelload$mod_dir))
   unload_uwot(modelload)
@@ -71,7 +71,7 @@ test_that("can save and load mixed distance model", {
   expect_false(file.exists(model$mod_dir))
   # Can't use transform now model is unloaded
   expect_error(umap_transform(iris10, model), "is unloaded")
-  
+
   modelload <- load_uwot(file = mod_fname)
   set.seed(1337)
   resload_trans <- umap_transform(jiris10, modelload)
@@ -81,7 +81,7 @@ test_that("can save and load mixed distance model", {
   if (file.exists(mod_fname)) {
     unlink(mod_fname)
   }
-  
+
   # Clean up temp dir from loading
   expect_true(file.exists(modelload$mod_dir))
   unload_uwot(modelload)
@@ -91,18 +91,18 @@ test_that("can save and load mixed distance model", {
 test_that("unloading a model on save", {
   set.seed(1337)
   model <- umap(iris10,
-                n_neighbors = 4, n_epochs = 2, init = "spca",
-                metric = "euclidean", verbose = FALSE, n_threads = 0,
-                ret_model = TRUE
+    n_neighbors = 4, n_epochs = 2, init = "spca",
+    metric = "euclidean", verbose = FALSE, n_threads = 0,
+    ret_model = TRUE
   )
-  
+
   mod_fname <- tempfile(tmpdir = tempdir())
   model <- save_uwot(model, file = mod_fname, unload = TRUE)
   expect_false(file.exists(model$mod_dir))
-  
+
   # Trying to transform with a model that got unloaded won't work
   expect_error(umap_transform(iris10, model), "is unloaded")
-  
+
   modelload <- load_uwot(file = mod_fname)
   # Clean up temp dir from loading
   expect_true(file.exists(modelload$mod_dir))
@@ -112,13 +112,13 @@ test_that("unloading a model on save", {
   # Can unload multiple times
   unload_uwot(modelload, cleanup = TRUE)
   expect_false(file.exists(modelload$mod_dir))
-}) 
+})
 
 # #88
 test_that("save-load-save", {
   set.seed(1337)
   X <- matrix(rnorm(100), 10, 10)
-  
+
   model <- uwot::umap(X, n_neighbors = 4, ret_model = TRUE)
   model_file <- tempfile(tmpdir = tempdir())
   model <- uwot::save_uwot(model, file = model_file)
@@ -126,7 +126,7 @@ test_that("save-load-save", {
   new_file <- tempfile(tmpdir = tempdir())
   uwot::save_uwot(model2, file = new_file)
   expect_true(file.exists(new_file))
-  
+
   modelm <- uwot::umap(X, n_neighbors = 4, metric = list("euclidean" = 1:5, "euclidean" = 6:10), ret_model = TRUE)
   modelm_file <- tempfile(tmpdir = tempdir())
   modelm <- uwot::save_uwot(modelm, file = modelm_file)
@@ -134,5 +134,4 @@ test_that("save-load-save", {
   new_filem <- tempfile(tmpdir = tempdir())
   uwot::save_uwot(modelm2, file = new_filem)
   expect_true(file.exists(new_filem))
-  
-}) 
+})

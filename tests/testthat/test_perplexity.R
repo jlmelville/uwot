@@ -95,11 +95,14 @@ P_row <- matrix(c(
 ), nrow = 10, byrow = TRUE)
 
 # taken from smallvis
-expected_sigmas <- c(0.3252233, 0.2679755, 0.1817380, 0.1751287, 0.3280264,
-                     0.4861266, 0.2463306, 0.2422687, 0.3463065, 0.2411619)
+expected_sigmas <- c(
+  0.3252233, 0.2679755, 0.1817380, 0.1751287, 0.3280264,
+  0.4861266, 0.2463306, 0.2422687, 0.3463065, 0.2411619
+)
 
 iris10nn10d <- as.vector(t(iris10_nn10$dist))
-resp <- calc_row_probabilities_parallel(iris10nn10d, n_vertices = nrow(iris10_nn10$dist),
+resp <- calc_row_probabilities_parallel(iris10nn10d,
+  n_vertices = nrow(iris10_nn10$dist),
   perplexity = 4,
   n_threads = 0,
   ret_sigma = TRUE
@@ -111,7 +114,8 @@ res <- nng_to_sparse(iris10_nn10$idx, as.vector(t(res)),
 expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
 expect_equal(resp$sigma, expected_sigmas, tol = 1e-5)
 
-res <- calc_row_probabilities_parallel(iris10nn10d, n_vertices = nrow(iris10_nn10$dist),
+res <- calc_row_probabilities_parallel(iris10nn10d,
+  n_vertices = nrow(iris10_nn10$dist),
   perplexity = 4, n_threads = 1
 )$matrix
 res <- nng_to_sparse(iris10_nn10$idx, as.vector(t(res)),
@@ -173,7 +177,7 @@ res <- perplexity_similarities(
   )
 )
 expect_equal(Matrix::rowSums(res$matrix), Prow_iris_p150_k50_rowSums, tol = 1e-6)
-expect_equal(1 / res$sigma ^ 2, Prow_niris_p150_k50_betas, tol = 1e-6)
+expect_equal(1 / res$sigma^2, Prow_niris_p150_k50_betas, tol = 1e-6)
 
 res <- perplexity_similarities(
   perplexity = 50, n_threads = 1, verbose = FALSE,

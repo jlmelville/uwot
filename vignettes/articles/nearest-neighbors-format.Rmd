@@ -9,7 +9,7 @@ cost of convenience, you can generate nearest neighbor data for `X` by some
 other means and pass that to `umap` (or `tumap` or `lvish`) directly via the
 `nn_method` parameter.
 
-### Nearest Neighbor Graph Format
+## Nearest Neighbor Graph Format
 
 The format expected by `nn_method` is a `list` containing the following two
 entries:
@@ -26,7 +26,7 @@ contains the distances of the nearest neighbors of each item (vertex) in the
 dataset, in Each item is always the nearest neighbor of itself, so the first
 element in row `i` should always be `0.0`.
 
-### Sparse Distance Matrix Format
+## Sparse Distance Matrix Format
 
 Alternatively, you can pass a sparse distance matrix where:
 
@@ -102,7 +102,7 @@ iris_odd_transform <-
   umap_transform(X = NULL, iris_even_umap, nn_method = iris_odd_nn)
 ```
 
-### Exporting nearest neighbor data from `uwot`
+## Exporting nearest neighbor data from `uwot`
 
 If you set `ret_nn = TRUE`, the return value of `umap` will be a list, and the
 `nn` item contains the nearest neighbor data in a format that can be used
@@ -142,7 +142,7 @@ If for some reason you specify `ret_nn` while supplying precomputed nearest
 neighbor data to `nn_method`, the returned data should be identical to what
 you passed in, and the list item names will be `precomputed`.
 
-### Multiple neighbor data
+## Multiple neighbor data
 
 As discussed under the
 [Mixed Data Types](https://github.com/jlmelville/uwot#mixed-data-types) section,
@@ -174,7 +174,7 @@ umap_res <- umap(nn_method = list(nn_metric1, nn_metric2), ...)
 The different neighbor data must all have the same number of neighbors, i.e.
 the number of columns in all the matrices must be the same.
 
-### Numeric `y`
+## Numeric `y`
 
 If you are using supervised UMAP with a numeric `y`, then you can also pass
 nearest neighbor data to `y`, using the same format as above. In this case the

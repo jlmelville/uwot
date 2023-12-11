@@ -63,11 +63,12 @@ sm <- Matrix::drop0(matrix(c(
   0.2156861, 0.4341653, 0.92592670
 ), byrow = TRUE, nrow = 3))
 # make matrix positive and symmetric like typical UMAP fuzzy graph
-sms <- (Matrix::t(sm) + sm) ^ 2
+sms <- (Matrix::t(sm) + sm)^2
 
-expected <- matrix(c(1,
-    1, 0.43551409, 1, 0.24170431, 0.23371835,
-    0.43551409, 0.23371835, 1
+expected <- matrix(c(
+  1,
+  1, 0.43551409, 1, 0.24170431, 0.23371835,
+  0.43551409, 0.23371835, 1
 ), byrow = TRUE, nrow = 3)
 
 # checked against python version
@@ -78,13 +79,15 @@ expect_equal(as.matrix(reset_local_connectivity(sms)), expected,
 
 # tested on a modified python version with the effect n_neighbors changed
 expected_reset_local_metric <-
-  matrix(c(1, 1, 0.5972302,
-           1, 0.44010492, 0.43783589,
-           0.5972302, 0.43783589, 1
-), byrow = TRUE, nrow = 3)
+  matrix(c(
+    1, 1, 0.5972302,
+    1, 0.44010492, 0.43783589,
+    0.5972302, 0.43783589, 1
+  ), byrow = TRUE, nrow = 3)
 expect_equal(
   as.matrix(
-    reset_local_connectivity(sms, reset_local_metric = TRUE, num_local_metric_neighbors = 3)),
+    reset_local_connectivity(sms, reset_local_metric = TRUE, num_local_metric_neighbors = 3)
+  ),
   expected_reset_local_metric,
   tol = 1e-7,
   check.attributes = FALSE
@@ -92,7 +95,8 @@ expect_equal(
 
 expect_equal(
   as.matrix(
-    reset_local_connectivity(sms, reset_local_metric = TRUE, num_local_metric_neighbors = 3, n_threads = 2)),
+    reset_local_connectivity(sms, reset_local_metric = TRUE, num_local_metric_neighbors = 3, n_threads = 2)
+  ),
   expected_reset_local_metric,
   tol = 1e-7,
   check.attributes = FALSE
@@ -123,23 +127,25 @@ sparr2 <- new("dgCMatrix",
 
 # Numbers taken from Python implementation
 int09 <- general_simplicial_set_intersection(sparr, sparr2, 0.9)
-res09 <- matrix(c(
-  1.66877087146, 0.137467853888, 1.40799953091,
-  1.84399206494, 0.889673751622, 1.86201852389,
-  0.223218799442, 0.879058365893, 0.000000
-),
-nrow = 3, byrow = TRUE
+res09 <- matrix(
+  c(
+    1.66877087146, 0.137467853888, 1.40799953091,
+    1.84399206494, 0.889673751622, 1.86201852389,
+    0.223218799442, 0.879058365893, 0.000000
+  ),
+  nrow = 3, byrow = TRUE
 )
 expect_equal(as.matrix(int09), res09, check.attributes = FALSE, tol = 1e-6)
 
 
 int01 <- general_simplicial_set_intersection(sparr, sparr2, 0.1)
-res01 <- matrix(c(
-  0.97318335824, 1.12392924757, 0.734457833761,
-  0.0182018202924, 0.164728272878, 0.0361324854953,
-  0.186072986202, 0.432422466467, 0.000000
-),
-nrow = 3, byrow = TRUE
+res01 <- matrix(
+  c(
+    0.97318335824, 1.12392924757, 0.734457833761,
+    0.0182018202924, 0.164728272878, 0.0361324854953,
+    0.186072986202, 0.432422466467, 0.000000
+  ),
+  nrow = 3, byrow = TRUE
 )
 expect_equal(as.matrix(int01), res01, check.attributes = FALSE, tol = 1e-6)
 
@@ -150,6 +156,3 @@ sp34 <- Matrix::drop0(matrix(nrow = 3, byrow = TRUE, c(
 )))
 
 expect_equal(colMaxs(sp34), c(0, 0.7403984, 0.9472488, 0.6574427))
-
-
-

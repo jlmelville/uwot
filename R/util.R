@@ -49,8 +49,7 @@ pluralize <- function(str, n, prefix = NULL, inc_num = TRUE) {
 x2m <- function(X) {
   if (!methods::is(X, "matrix")) {
     m <- as.matrix(X[, which(vapply(X, is.numeric, logical(1)))])
-  }
-  else {
+  } else {
     m <- X
   }
   m
@@ -198,12 +197,11 @@ check_graph_list <- function(graph_list, expected_rows = NULL,
     graph <- graph_list[[i]]
     if (is.list(graph)) {
       check_graph(graph, expected_rows, expected_cols, bipartite = bipartite)
-    }
-    else if (is_sparse_matrix(graph)) {
+    } else if (is_sparse_matrix(graph)) {
       check_sparse_graph(graph, expected_rows, expected_cols,
-                         bipartite = bipartite)
-    }
-    else {
+        bipartite = bipartite
+      )
+    } else {
       stop("Unknown neighbor data format")
     }
   }
@@ -219,11 +217,9 @@ nn_graph_row_names_list <- function(graph_list) {
     graph <- graph_list[[i]]
     if (is.list(graph)) {
       xnames <- nn_graph_row_names(graph)
-    }
-    else if (is_sparse_matrix(graph)) {
+    } else if (is_sparse_matrix(graph)) {
       xnames <- row.names(graph)
-    }
-    else {
+    } else {
       stop("Unknown neighbor data format")
     }
     if (!is.null(xnames)) {
@@ -256,14 +252,11 @@ nn_graph_nbrs_list <- function(graph_list) {
 nn_graph_nbrs <- function(graph) {
   if (is.list(graph)) {
     ncol(graph$idx)
-  }
-  else if (is_sparse_matrix(graph)) {
+  } else if (is_sparse_matrix(graph)) {
     NA
-  }
-  else {
+  } else {
     stop("Unknown neighbor data format")
   }
-
 }
 
 is_sparse_matrix <- function(m) {
@@ -285,8 +278,9 @@ range_scale <- function(x, min = 0, max = 1) {
 
 is_installed <- function(pkgname) {
   requireNamespace(pkgname,
-                   quietly = TRUE,
-                   warn.conflicts = FALSE)
+    quietly = TRUE,
+    warn.conflicts = FALSE
+  )
   isNamespaceLoaded(pkgname)
 }
 

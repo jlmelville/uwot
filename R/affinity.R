@@ -5,11 +5,9 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
   XX <- X * Matrix::t(X)
   if (set_op_mix_ratio == 0) {
     Matrix::drop0(XX)
-  }
-  else if (set_op_mix_ratio == 1) {
+  } else if (set_op_mix_ratio == 1) {
     Matrix::drop0(X + Matrix::t(X) - XX)
-  }
-  else {
+  } else {
     Matrix::drop0(
       set_op_mix_ratio * (X + Matrix::t(X) - XX) + (1 - set_op_mix_ratio) * XX
     )
@@ -33,12 +31,12 @@ smooth_knn <- function(nn_dist,
   }
   tsmessage(
     "Commencing smooth kNN distance calibration",
-    pluralize("thread", n_threads, " using"), appendLF = FALSE
+    pluralize("thread", n_threads, " using"),
+    appendLF = FALSE
   )
   if (length(target) == 1) {
-    tsmessage(" with target n_neighbors = ", formatC(2 ^ target), time_stamp = FALSE)
-  }
-  else {
+    tsmessage(" with target n_neighbors = ", formatC(2^target), time_stamp = FALSE)
+  } else {
     tsmessage(time_stamp = FALSE)
   }
   affinity_matrix_res <- smooth_knn_distances_parallel(
@@ -87,8 +85,7 @@ smooth_knn_matrix <- function(nn,
       target <- log2(n_nbrs + 1) * bandwidth
     }
     skip_first <- FALSE
-  }
-  else {
+  } else {
     nnt <- nn_graph_t(nn)
     n_nbrs <- nrow(nnt$dist)
     if (is.null(target)) {
@@ -113,12 +110,13 @@ smooth_knn_matrix <- function(nn,
   v <- affinity_matrix_res$matrix
   if (is_sparse_matrix(nn)) {
     # use j instead of i to transpose it
-    v <- Matrix::sparseMatrix(j = osparse$i, p = osparse$p, x = v,
-                              dims = osparse$dims, index1 = FALSE)
+    v <- Matrix::sparseMatrix(
+      j = osparse$i, p = osparse$p, x = v,
+      dims = osparse$dims, index1 = FALSE
+    )
     Matrix::diag(v) <- 0.0
     v <- Matrix::drop0(v)
-  }
-  else {
+  } else {
     v <- nng_to_sparse(nnt$idx, v, self_nbr = TRUE, by_row = FALSE)
   }
   affinity_matrix_res$matrix <- v
@@ -139,14 +137,16 @@ fuzzy_simplicial_set <- function(nn,
                                  n_threads = NULL,
                                  grain_size = 1,
                                  verbose = FALSE) {
-  affinity_matrix_res <- smooth_knn_matrix(nn = nn,
-                                           target = target,
-                                           local_connectivity = local_connectivity,
-                                           bandwidth = bandwidth,
-                                           ret_sigma = ret_sigma,
-                                           n_threads = n_threads,
-                                           grain_size = grain_size,
-                                           verbose = verbose)
+  affinity_matrix_res <- smooth_knn_matrix(
+    nn = nn,
+    target = target,
+    local_connectivity = local_connectivity,
+    bandwidth = bandwidth,
+    ret_sigma = ret_sigma,
+    n_threads = n_threads,
+    grain_size = grain_size,
+    verbose = verbose
+  )
   res <- fuzzy_set_union(affinity_matrix_res$matrix, set_op_mix_ratio = set_op_mix_ratio)
   if (ret_sigma) {
     res <- list(matrix = res)
@@ -214,8 +214,7 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
     if (!is.null(affinity_matrix_res$sigma)) {
       sigma <- affinity_matrix_res$sigma
     }
-  }
-  else {
+  } else {
     # knn kernel
     tsmessage("Using knn graph for input weights with k = ", ncol(nn$idx))
     # Make each row sum to 1, ignoring the self-index
@@ -248,14 +247,12 @@ nn_to_sparse <- function(nn_idxv, n_obs, val = 1, self_nbr = FALSE,
 
   if (length(val) == 1) {
     xs <- rep(val, n_obs * n_nbrs)
-  }
-  else {
+  } else {
     xs <- val
   }
   if (by_row) {
     is <- rep(1:n_obs, times = n_nbrs)
-  }
-  else {
+  } else {
     is <- rep(1:n_obs, each = n_nbrs)
   }
 
@@ -273,13 +270,14 @@ nng_to_sparse <- function(nn_idx, val = 1, self_nbr = FALSE,
                           max_nbr_id = NULL, by_row = TRUE) {
   if (by_row) {
     n_obs <- nrow(nn_idx)
-  }
-  else {
+  } else {
     n_obs <- ncol(nn_idx)
   }
 
-  nn_to_sparse(as.vector(nn_idx), n_obs, val = val, self_nbr = self_nbr,
-               max_nbr_id = max_nbr_id, by_row = by_row)
+  nn_to_sparse(as.vector(nn_idx), n_obs,
+    val = val, self_nbr = self_nbr,
+    max_nbr_id = max_nbr_id, by_row = by_row
+  )
 }
 
 # transpose the index and distance matrix

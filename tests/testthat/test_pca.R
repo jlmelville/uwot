@@ -13,10 +13,10 @@ test_that("PCA initialization", {
   expect_equal(abs(iris10prcomp$x[, 1:2]), abs(iris10_irlba_scores),
     check.attributes = FALSE
   )
-  
+
   suppressWarnings(iris10_svdr_scores <- irlba_svdr_scores(iris10, ncol = 2))
   expect_equal(abs(iris10prcomp$x[, 1:2]), abs(iris10_svdr_scores),
-               check.attributes = FALSE
+    check.attributes = FALSE
   )
 })
 

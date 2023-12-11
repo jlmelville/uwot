@@ -486,8 +486,10 @@
 #' iris_umap <- umap(iris30, n_neighbors = 5, min_dist = 1, spread = 5, nn_method = nn, n_epochs = 20)
 #'
 #' # Supervised dimension reduction using the 'Species' factor column
-#' iris_sumap <- umap(iris30, n_neighbors = 5, min_dist = 0.001, y = iris30$Species,
-#'                    target_weight = 0.5, n_epochs = 20)
+#' iris_sumap <- umap(iris30,
+#'   n_neighbors = 5, min_dist = 0.001, y = iris30$Species,
+#'   target_weight = 0.5, n_epochs = 20
+#' )
 #'
 #' # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
 #' iris_umap <- umap(iris30, metric = list(
@@ -1865,11 +1867,15 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #' # to control neighborhood size. Use ret_extra = "nn" to return nearest
 #' # neighbor data as well as the similarity graph. Return value is a list
 #' # containing similarity_graph' and 'nn' items.
-#' iris30_lv_graph <- similarity_graph(iris30, perplexity = 10,
-#'                                     method = "largevis", ret_extra = "nn")
+#' iris30_lv_graph <- similarity_graph(iris30,
+#'   perplexity = 10,
+#'   method = "largevis", ret_extra = "nn"
+#' )
 #' # If you have the neighbor information you don't need the original data
-#' iris30_lv_graph_nn <- similarity_graph(nn_method = iris30_lv_graph$nn,
-#'                                        perplexity = 10, method = "largevis")
+#' iris30_lv_graph_nn <- similarity_graph(
+#'   nn_method = iris30_lv_graph$nn,
+#'   perplexity = 10, method = "largevis"
+#' )
 #' all(iris30_lv_graph_nn == iris30_lv_graph$similarity_graph)
 #'
 #' @references
@@ -1909,8 +1915,7 @@ similarity_graph <- function(X = NULL, n_neighbors = NULL, metric = "euclidean",
     if (method == "largevis") {
       n_neighbors <- perplexity * 3
       scale <- "maxabs"
-    }
-    else {
+    } else {
       n_neighbors <- 15
       scale <- FALSE
     }
@@ -1949,8 +1954,7 @@ similarity_graph <- function(X = NULL, n_neighbors = NULL, metric = "euclidean",
     }
     if (name == "P" || name == "fgraph") {
       res$similarity_graph <- uwot_res[[name]]
-    }
-    else {
+    } else {
       res[[name]] <- uwot_res[[name]]
     }
   }
@@ -2247,8 +2251,7 @@ optimize_graph_layout <-
       n_vertices <- nrow(graph)
       if (n_vertices <= 10000) {
         n_epochs <- 500
-      }
-      else {
+      } else {
         n_epochs <- 200
       }
     }
@@ -2299,8 +2302,8 @@ optimize_graph_layout <-
 #'
 #' # Form two different "views" of the same data
 #' iris30 <- iris[c(1:10, 51:60, 101:110), ]
-#' iris_sg12 = similarity_graph(iris30[, 1:2], n_neighbors = 5)
-#' iris_sg34 = similarity_graph(iris30[, 3:4], n_neighbors = 5)
+#' iris_sg12 <- similarity_graph(iris30[, 1:2], n_neighbors = 5)
+#' iris_sg34 <- similarity_graph(iris30[, 3:4], n_neighbors = 5)
 #'
 #' # Combine the two representations into one
 #' iris_combined <- simplicial_set_union(iris_sg12, iris_sg34)
@@ -2370,8 +2373,8 @@ simplicial_set_union <-
 #'
 #' # Form two different "views" of the same data
 #' iris30 <- iris[c(1:10, 51:60, 101:110), ]
-#' iris_sg12 = similarity_graph(iris30[, 1:2], n_neighbors = 5)
-#' iris_sg34 = similarity_graph(iris30[, 3:4], n_neighbors = 5)
+#' iris_sg12 <- similarity_graph(iris30[, 1:2], n_neighbors = 5)
+#' iris_sg34 <- similarity_graph(iris30[, 3:4], n_neighbors = 5)
 #'
 #' # Combine the two representations into one
 #' iris_combined <- simplicial_set_intersect(iris_sg12, iris_sg34)
@@ -2393,9 +2396,11 @@ simplicial_set_intersect <- function(x, y, weight = 0.5, n_threads = NULL,
   if (!all(dim(x) == dim(y))) {
     stop("x and y must have identical dimensions")
   }
-  set_intersect(A = x, B = y, weight = weight, reset_connectivity = TRUE,
-                reset_local_metric = TRUE, n_threads = n_threads,
-                verbose = verbose)
+  set_intersect(
+    A = x, B = y, weight = weight, reset_connectivity = TRUE,
+    reset_local_metric = TRUE, n_threads = n_threads,
+    verbose = verbose
+  )
 }
 
 # Function that does all the real work
@@ -2443,8 +2448,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       a <- ab_res[1]
       b <- ab_res[2]
       tsmessage("UMAP embedding parameters a = ", formatC(a), " b = ", formatC(b))
-    }
-    else {
+    } else {
       # set min_dist and spread to NULL so if ret_model = TRUE, their default
       # values are not mistaken for having been used for anything
       min_dist <- NULL
@@ -2488,7 +2492,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
   pca_method <-
     match.arg(pca_method,
-              choices = c("irlba", "svdr", "bigstatsr", "svd", "auto"))
+      choices = c("irlba", "svdr", "bigstatsr", "svd", "auto")
+    )
 
   if (fast_sgd) {
     n_sgd_threads <- "auto"
@@ -2548,10 +2553,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_vertices <- x2nv(nn_method)
     stopifnot(n_vertices > 0)
     num_precomputed_nns <- check_graph_list(nn_method, n_vertices,
-                                            bipartite = FALSE)
+      bipartite = FALSE
+    )
     Xnames <- nn_graph_row_names_list(nn_method)
-  }
-  else if (methods::is(X, "dist")) {
+  } else if (methods::is(X, "dist")) {
     if (ret_model) {
       stop("Can only create models with dense matrix or data frame input")
     }
@@ -2559,8 +2564,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_vertices <- attr(X, "Size")
     tsmessage("Read ", n_vertices, " rows")
     Xnames <- labels(X)
-  }
-  else if (is_sparse_matrix(X)) {
+  } else if (is_sparse_matrix(X)) {
     if (ret_model) {
       stop("Can only create models with dense matrix or data frame input")
     }
@@ -2571,8 +2575,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
     tsmessage("Read ", n_vertices, " rows of sparse distance matrix")
     Xnames <- row.names(X)
-  }
-  else {
+  } else {
     cat_ids <- NULL
     norig_col <- ncol(X)
     if (methods::is(X, "data.frame") || methods::is(X, "matrix")) {
@@ -2582,7 +2585,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       # Convert categorical columns to factors if they aren't already
       if (!is.null(cat_ids)) {
         X[, cat_ids] <- sapply(X[, cat_ids, drop = FALSE], factor,
-                               simplify = methods::is(X, "matrix"))
+          simplify = methods::is(X, "matrix")
+        )
         Xcat <- X[, cat_ids, drop = FALSE]
       }
 
@@ -2593,7 +2597,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         }
         tsmessage("Converting dataframe to numerical matrix")
         if (length(indexes) != ncol(X)) {
-         X <- X[, indexes]
+          X <- X[, indexes]
         }
         X <- as.matrix(X)
       }
@@ -2607,8 +2611,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
           ", this may give poor or unexpected results"
         )
       }
-    }
-    else {
+    } else {
       stop("Unknown input data format")
     }
     checkna(X)
@@ -2633,7 +2636,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   # Store number of precomputed nn if X is non-NULL (NULL X case handled above)
   if (nn_is_precomputed(nn_method) && num_precomputed_nns == 0) {
     num_precomputed_nns <- check_graph_list(nn_method, n_vertices,
-                                          bipartite = FALSE)
+      bipartite = FALSE
+    )
     if (is.null(Xnames)) {
       Xnames <- nn_graph_row_names_list(nn_method)
     }
@@ -2652,8 +2656,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         # error to be too large
         tsmessage("Setting n_neighbors to ", n_vertices)
         n_neighbors <- n_vertices
-      }
-      else {
+      } else {
         stop("n_neighbors must be smaller than the dataset size")
       }
     }
@@ -2662,8 +2665,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (!is.list(metric)) {
     metrics <- list(c())
     names(metrics) <- metric
-  }
-  else {
+  } else {
     metrics <- metric
   }
 
@@ -2682,8 +2684,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       X <- pca_res$scores
       pca_models[["1"]] <- pca_res[c("center", "rotation")]
       pca_res <- NULL
-    }
-    else {
+    } else {
       X <- pca_res
     }
     pca_shortcut <- TRUE
@@ -2699,8 +2700,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         rho = NULL
       )
     need_sigma <- FALSE
-  }
-  else {
+  } else {
     need_sigma <- ret_sigma || ret_localr || !is.null(dens_scale)
     d2sr <- data2set(X, Xcat, n_neighbors, metrics, nn_method,
       n_trees, search_k,
@@ -2741,8 +2741,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (!is.list(target_metric)) {
       target_metrics <- list(c())
       names(target_metrics) <- target_metric
-    }
-    else {
+    } else {
       target_metrics <- target_metric
     }
 
@@ -2754,8 +2753,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       ycat_ids <- ycat_res$categoricals
       if (!is.null(ycat_ids)) {
         ycat <- y[, ycat_ids, drop = FALSE]
-      }
-      else {
+      } else {
         ycindexes <- which(vapply(y, is.factor, logical(1)))
         if (length(ycindexes) > 0) {
           ycat <- (y[, ycindexes, drop = FALSE])
@@ -2766,18 +2764,14 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
       if (length(yindexes) > 0) {
         y <- as.matrix(y[, yindexes])
-      }
-      else {
+      } else {
         y <- NULL
       }
-    }
-    else if (is.list(y)) {
+    } else if (is.list(y)) {
       nn_method <- y
-    }
-    else if (is.numeric(y)) {
+    } else if (is.numeric(y)) {
       y <- as.matrix(y)
-    }
-    else if (is.factor(y)) {
+    } else if (is.factor(y)) {
       ycat <- data.frame(y)
       y <- NULL
     }
@@ -2808,8 +2802,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       V <- set_intersect(V, yd2sr$V, target_weight, reset_connectivity = TRUE)
       yd2sr$V <- NULL
       yd2sr$nns <- NULL
-    }
-    else if (!is.null(ycat)) {
+    } else if (!is.null(ycat)) {
       V <- categorical_intersection_df(ycat, V,
         weight = target_weight,
         verbose = verbose
@@ -2829,25 +2822,28 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
     tsmessage("Initializing from user-supplied matrix")
     embedding <- scale_coords(init, init_sdev, verbose = verbose)
-  }
-  else if (!(methods::is(init, "character") && length(init) == 1)) {
+  } else if (!(methods::is(init, "character") && length(init) == 1)) {
     if (is.null(init) && !is.null(n_epochs) && n_epochs == 0) {
       embedding <- NULL
       if (!ret_extra) {
-        warning("Neither high-dimensional nor low-dimensional data will be ",
-        "returned with this combination of settings")
+        warning(
+          "Neither high-dimensional nor low-dimensional data will be ",
+          "returned with this combination of settings"
+        )
       }
       if (ret_model) {
-        warning("Returning a model but it will not be valid for transforming ",
-                "new data")
+        warning(
+          "Returning a model but it will not be valid for transforming ",
+          "new data"
+        )
       }
+    } else {
+      stop(
+        "init should be either a matrix or string describing the ",
+        "initialization method"
+      )
     }
-    else {
-      stop("init should be either a matrix or string describing the ",
-           "initialization method")
-    }
-  }
-  else {
+  } else {
     init <- match.arg(tolower(init), c(
       "spectral", "random", "lvrandom", "normlaplacian",
       "laplacian", "spca", "pca", "inormlaplacian", "ispectral",
@@ -2861,10 +2857,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         if (is.null(X)) {
           tsmessage("falling back to random initialization", time_stamp = FALSE)
           init <- "random"
-        }
-        else {
+        } else {
           tsmessage("falling back to 'spca' initialization with init_sdev = 1",
-                    time_stamp = FALSE)
+            time_stamp = FALSE
+          )
           init <- "spca"
           init_sdev <- 1
         }
@@ -2874,14 +2870,13 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     # Don't repeat PCA initialization if we've already done it once
     if (pca_shortcut && init %in% c("spca", "pca", "pacpca") && pca >= n_components) {
       embedding <- X[, 1:n_components]
-      switch (init,
+      switch(init,
         spca = tsmessage("Initializing from scaled PCA"),
         pca = tsmessage("Initializing from PCA"),
         pacpca = tsmessage("Initializing from PaCMAP-style PCA"),
         stop("Unknown init method '", init, "'")
       )
-    }
-    else {
+    } else {
       embedding <- switch(init,
         spectral = spectral_init(V, ndim = n_components, verbose = verbose),
         random = rand_init(n_vertices, n_components, verbose = verbose),
@@ -2892,12 +2887,18 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         ),
         laplacian = laplacian_eigenmap(V, ndim = n_components, verbose = verbose),
         # we handle scaling pca below
-        spca = pca_init(X, ndim = n_components, pca_method = pca_method,
-                        verbose = verbose),
-        pca = pca_init(X, ndim = n_components, pca_method = pca_method,
-                       verbose = verbose),
-        pacpca = pca_init(X, ndim = n_components, pca_method = pca_method,
-                           verbose = verbose),
+        spca = pca_init(X,
+          ndim = n_components, pca_method = pca_method,
+          verbose = verbose
+        ),
+        pca = pca_init(X,
+          ndim = n_components, pca_method = pca_method,
+          verbose = verbose
+        ),
+        pacpca = pca_init(X,
+          ndim = n_components, pca_method = pca_method,
+          verbose = verbose
+        ),
         ispectral = irlba_spectral_init(V, ndim = n_components, verbose = verbose),
         inormlaplacian = irlba_normalized_laplacian_init(V,
           ndim = n_components,
@@ -2922,8 +2923,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       }
       if (is.numeric(init_sdev)) {
         embedding <- scale_coords(embedding, init_sdev, verbose = verbose)
-      }
-      else if (is.character(init_sdev) && init_sdev == "range") {
+      } else if (is.character(init_sdev) && init_sdev == "range") {
         # #99: range scale coordinates like python UMAP does
         tsmessage("Range-scaling initial input columns to 0-10")
         embedding <- apply(embedding, 2, range_scale, max = 10.0)
@@ -2937,12 +2937,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (is.null(n_epochs) || n_epochs < 0) {
     if (method == "largevis") {
       n_epochs <- lvish_epochs(n_vertices, V)
-    }
-    else {
+    } else {
       if (n_vertices <= 10000) {
         n_epochs <- 500
-      }
-      else {
+      } else {
         n_epochs <- 200
       }
     }
@@ -2956,8 +2954,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 
   if (n_epochs > 0) {
     if (any(apply(embedding, 2, stats::sd) > 10.0)) {
-      warning("Initial embedding standard deviation > 10.0, this can lead to ",
-              "poor optimization")
+      warning(
+        "Initial embedding standard deviation > 10.0, this can lead to ",
+        "poor optimization"
+      )
     }
 
     # remove edges which can't be sampled due to n_epochs
@@ -2972,8 +2972,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       positive_head <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
       # tail is unordered
       positive_tail <- V@i
-    }
-    else {
+    } else {
       # Use the Python UMAP ordering
       # head is unordered
       positive_head <- V@i
@@ -3044,7 +3043,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     embedding <- scale(embedding, center = TRUE, scale = FALSE)
 
     if (is.null(row.names(embedding)) &&
-        !is.null(Xnames) && length(Xnames) == nrow(embedding)) {
+      !is.null(Xnames) && length(Xnames) == nrow(embedding)) {
       row.names(embedding) <- Xnames
     }
     tsmessage("Optimization finished")
@@ -3055,7 +3054,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     res <- list(embedding = embedding)
     if (ret_model) {
       res <- append(res, list(
-        scale_info = if (!is.null(X)) { attr_to_scale_info(X) } else { NULL },
+        scale_info = if (!is.null(X)) {
+          attr_to_scale_info(X)
+        } else {
+          NULL
+        },
         search_k = search_k,
         local_connectivity = local_connectivity,
         n_epochs = n_epochs,
@@ -3080,8 +3083,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       ))
       if (nn_is_precomputed(nn_method)) {
         res$n_neighbors <- nn_graph_nbrs_list(nn_method)
-      }
-      else {
+      } else {
         res$n_neighbors <- n_neighbors
       }
       if (method == "leopold") {
@@ -3096,8 +3098,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
             res$nn_index[[i]] <- nns[[i]]$index
           }
         }
-      }
-      else {
+      } else {
         if (!is.null(nns[[1]]$index)) {
           res$nn_index <- nns[[1]]$index
           if (is.null(res$metric[[1]])) {
@@ -3107,19 +3108,20 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
             # the input data at load time)
             # To be sure of the dimensionality, fetch the first item from the
             # index and see how many elements are in the returned vector.
-            if(!is.null(X)){
+            if (!is.null(X)) {
               rcppannoy <- get_rcppannoy(res$nn_index)
               res$metric[[1]] <- list(ndim = length(rcppannoy$getItemsVector(0)))
             } else {
               res$metric[[1]] <- list()
             }
           }
-        }
-        else {
+        } else {
           if (nn_is_precomputed(nn_method)) {
-            tsmessage("Note: model requested with precomputed neighbors. ",
-                      "For transforming new data, distance data must be ",
-                      "provided separately")
+            tsmessage(
+              "Note: model requested with precomputed neighbors. ",
+              "For transforming new data, distance data must be ",
+              "provided separately"
+            )
           }
         }
       }
@@ -3136,8 +3138,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
             row.names(res$nn[[i]]$idx) <- Xnames
             row.names(res$nn[[i]]$dist) <- Xnames
           }
-        }
-        else if (is_sparse_matrix(nns[[i]])) {
+        } else if (is_sparse_matrix(nns[[i]])) {
           res$nn[[i]] <- nns[[i]]
           if (!is.null(Xnames) && nrow(res$nn[[i]]) == length(Xnames)) {
             row.names(res$nn[[i]]) <- Xnames
@@ -3150,8 +3151,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (ret_fgraph) {
       if (method == "largevis") {
         res$P <- V
-      }
-      else {
+      } else {
         res$fgraph <- V
       }
     }
@@ -3163,8 +3163,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (ret_localr && !is.null(localr)) {
       res$localr <- localr
     }
-  }
-  else {
+  } else {
     res <- embedding
   }
 
@@ -3267,8 +3266,7 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
         nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
         if (n_metrics == 1) {
           model$nn_index$ann$save(nn_tmpfname)
-        }
-        else {
+        } else {
           model$nn_index[[i]]$ann$save(nn_tmpfname)
         }
       }
@@ -3286,9 +3284,11 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
       if (is_win7()) {
         extra_flags <- "--force-local"
       }
-      utils::tar(tarfile = tmp_model_file,
-                 extra_flags = extra_flags,
-                 files = "uwot/")
+      utils::tar(
+        tarfile = tmp_model_file,
+        extra_flags = extra_flags,
+        files = "uwot/"
+      )
     },
     finally = {
       setwd(wd)
@@ -3368,9 +3368,10 @@ load_uwot <- function(file, verbose = FALSE) {
     extras <- "--force-local"
   }
   utils::untar(abspath(file),
-               exdir = mod_dir,
-               extras = extras,
-               verbose = verbose)
+    exdir = mod_dir,
+    extras = extras,
+    verbose = verbose
+  )
 
   model_fname <- file.path(mod_dir, "uwot/model")
   if (!file.exists(model_fname)) {
@@ -3393,11 +3394,10 @@ load_uwot <- function(file, verbose = FALSE) {
       # named 'ndim' giving the number of dimensions directly: all columns
       # are used in this metric
       ndim <- model$metric[[i]]$ndim
-    }
-    else {
+    } else {
       # otherwise, metric specifies the name or index used for each metric,
       # so the dimension is the number of them
-      ndim = length(model$metric[[i]])
+      ndim <- length(model$metric[[i]])
     }
     annoy_metric <- metric
     if (metric == "correlation") {
@@ -3408,8 +3408,7 @@ load_uwot <- function(file, verbose = FALSE) {
 
     if (n_metrics == 1) {
       model$nn_index <- list(ann = ann, type = "annoyv1", metric = annoy_metric)
-    }
-    else {
+    } else {
       model$nn_index[[i]] <- list(ann = ann, type = "annoyv1", metric = annoy_metric)
     }
   }
@@ -3477,8 +3476,7 @@ unload_uwot <- function(model, cleanup = TRUE, verbose = FALSE) {
     if (n_metrics == 1) {
       rcppannoy <- get_rcppannoy(model$nn_index)
       rcppannoy$unload()
-    }
-    else {
+    } else {
       rcppannoy <- get_rcppannoy(model$nn_index[[i]])
       rcppannoy$unload()
     }
@@ -3488,8 +3486,7 @@ unload_uwot <- function(model, cleanup = TRUE, verbose = FALSE) {
     if (is.null(model$mod_dir)) {
       tsmessage("Model is missing temp dir location, can't clean up")
       return()
-    }
-    else {
+    } else {
       mod_dir <- model$mod_dir
       if (!file.exists(mod_dir)) {
         tsmessage("model temp dir location '", mod_dir, "' no longer exists")
@@ -3516,8 +3513,7 @@ all_nn_indices_are_loaded <- function(model) {
         return(FALSE)
       }
     }
-  }
-  else {
+  } else {
     rcppannoy <- get_rcppannoy(model$nn_index)
     if (rcppannoy$getNTrees() == 0) {
       return(FALSE)
@@ -3541,31 +3537,24 @@ x2nv <- function(X) {
   if (is.list(X)) {
     if (!is.null(X$idx)) {
       n_vertices <- x2nv(X$idx)
-    }
-    else {
+    } else {
       if (length(X) > 0) {
         n_vertices <- x2nv(X[[1]])
-      }
-      else {
+      } else {
         stop("Can't find n_vertices for list X")
       }
     }
-  }
-  else if (methods::is(X, "dist")) {
+  } else if (methods::is(X, "dist")) {
     n_vertices <- attr(X, "Size")
-  }
-  else if (is_sparse_matrix(X)) {
+  } else if (is_sparse_matrix(X)) {
     # older code path where distance matrix was part of X rather than nn_method
     # used nrow, but transform was not supported so nrow == ncol
     n_vertices <- ncol(X)
-  }
-  else if (methods::is(X, "data.frame") || methods::is(X, "matrix")) {
+  } else if (methods::is(X, "data.frame") || methods::is(X, "matrix")) {
     n_vertices <- nrow(X)
-  }
-  else if (is.numeric(X)) {
+  } else if (is.numeric(X)) {
     n_vertices <- length(X)
-  }
-  else {
+  } else {
     stop("Can't find number of vertices for X of type '", class(X)[1], "'")
   }
   n_vertices
@@ -3593,8 +3582,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       if (nblocks == 0) {
         stop("Incorrect format for precalculated neighbor data")
       }
-    }
-    else {
+    } else {
       nblocks <- 1
       # wrap nn data in a list so data is always a list of lists
       nn_method <- list(nn_method)
@@ -3612,8 +3600,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     if (n_vertices < 4096 && !ret_model && all(mnames == "euclidean")) {
       tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
       nn_method <- "fnn"
-    }
-    else {
+    } else {
       tsmessage("Using Annoy for neighbor search, n_neighbors = ", n_neighbors)
       nn_method <- "annoy"
     }
@@ -3633,8 +3620,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     subset <- metrics[[i]]
     if (is.null(subset)) {
       Xsub <- X
-    }
-    else if (is.list(subset)) {
+    } else if (is.list(subset)) {
       # e.g. "euclidean" = list(1:10, pca_center = FALSE),
       lsres <- lsplit_unnamed(subset)
       if (is.null(lsres$unnamed)) {
@@ -3658,8 +3644,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
         }
       }
       Xsub <- X[, subset, drop = FALSE]
-    }
-    else {
+    } else {
       Xsub <- X[, subset, drop = FALSE]
     }
 
@@ -3675,8 +3660,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
           " using metric '", metric, "'"
         )
       }
-    }
-    else {
+    } else {
       # X is NULL or dist or something like that
       if (nblocks > 1) {
         tsmessage(
@@ -3699,8 +3683,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
         Xsub <- pca_res$scores
         pca_models[[as.character(i)]] <- pca_res[c("center", "rotation")]
         pca_res <- NULL
-      }
-      else {
+      } else {
         Xsub <- pca_res
       }
     }
@@ -3731,8 +3714,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
     names(nns)[[i]] <- metric
     if (is.null(V)) {
       V <- Vblock
-    }
-    else {
+    } else {
       # TODO: should at least offer the option to reset the local metric here
       # TODO: make this the default (breaking change)
       V <- set_intersect(V, Vblock, weight = 0.5, reset_connectivity = TRUE)
@@ -3769,8 +3751,7 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
   if (is.list(nn_method)) {
     validate_nn(nn_method, n_vertices)
     nn <- nn_method
-  }
-  else {
+  } else {
     nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
     if (nn_method == "fnn" && metric != "euclidean") {
       stop(
@@ -3810,8 +3791,8 @@ validate_nn <- function(nn_method, n_vertices) {
     stop("Precalculated 'dist' matrix must have ", n_vertices, " rows, but
          found ", nrow(nn_method$dist))
   }
-  if (ncol(nn_method$dist) !=  ncol(nn_method$idx)) {
-    stop("Precalculated 'dist' matrix must have ",  ncol(nn_method$idx), " cols, but
+  if (ncol(nn_method$dist) != ncol(nn_method$idx)) {
+    stop("Precalculated 'dist' matrix must have ", ncol(nn_method$idx), " cols, but
          found ", ncol(nn_method$dist))
   }
 }
@@ -3822,7 +3803,6 @@ nn2set <- function(method, nn,
                    ret_sigma,
                    n_threads, grain_size,
                    verbose = FALSE) {
-
   sigma <- NULL
   res <- list()
   if (method == "largevis") {
@@ -3843,8 +3823,7 @@ nn2set <- function(method, nn,
       res$sigma <- Vres$sigma
       res$dint <- Vres$dint
     }
-  }
-  else {
+  } else {
     Vres <- fuzzy_simplicial_set(
       nn = nn,
       set_op_mix_ratio = set_op_mix_ratio,
@@ -3859,8 +3838,7 @@ nn2set <- function(method, nn,
       res$V <- Vres$matrix
       res$sigma <- Vres$sigma
       res$rho <- Vres$rho
-    }
-    else {
+    } else {
       res$V <- Vres
     }
   }
@@ -3886,8 +3864,7 @@ x2set <- function(X, n_neighbors, metric, nn_method,
     if (nrow(nn) != n_vertices) {
       stop("Sparse distance matrix must have same dimensions as input data")
     }
-  }
-  else {
+  } else {
     nn <- x2nn(X,
       n_neighbors = n_neighbors,
       metric = metric,
@@ -3940,8 +3917,10 @@ set_intersect <- function(A, B, weight = 0.5, reset_connectivity = TRUE,
   # https://github.com/lmcinnes/umap/issues/58#issuecomment-437633658
   # For now always reset
   if (reset_connectivity) {
-    A <- reset_local_connectivity(A, reset_local_metric = reset_local_metric,
-                                  n_threads = n_threads, verbose = verbose)
+    A <- reset_local_connectivity(A,
+      reset_local_metric = reset_local_metric,
+      n_threads = n_threads, verbose = verbose
+    )
   }
   A
 }
@@ -3966,8 +3945,7 @@ categorical_intersection <- function(x, V, weight, verbose = FALSE) {
   }
   if (weight < 1.0) {
     far_dist <- 2.5 * (1.0 / (1.0 - weight))
-  }
-  else {
+  } else {
     far_dist <- 1.0e12
   }
   tsmessage(
@@ -4023,11 +4001,9 @@ lvish_samples <- function(n_vertices) {
 
   if (n_vertices < 10000) {
     n_samples <- 1000
-  }
-  else if (n_vertices < 1000000) {
+  } else if (n_vertices < 1000000) {
     n_samples <- (n_vertices - 10000) * 9000 / (1000000 - 10000) + 1000
-  }
-  else {
+  } else {
     n_samples <- n_vertices / 100
   }
 
@@ -4045,11 +4021,9 @@ lvish_epochs <- function(n_vertices, V) {
 scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
   if (is.null(scale_type)) {
     scale_type <- "none"
-  }
-  else if (is.logical(scale_type)) {
+  } else if (is.logical(scale_type)) {
     scale_type <- ifelse(scale_type, "scale", "none")
-  }
-  else if (tolower(scale_type) == "z") {
+  } else if (tolower(scale_type) == "z") {
     scale_type <- "scale"
   }
 
@@ -4127,7 +4101,7 @@ attr_to_scale_info <- function(X) {
 }
 
 get_opt_args <- function(opt_args, alpha) {
-  default_batch_opt = "adam"
+  default_batch_opt <- "adam"
   default_opt_args <- list(
     sgd = list(alpha = alpha),
     adam = list(alpha = alpha, beta1 = 0.5, beta2 = 0.9, eps = 1e-7)
@@ -4157,9 +4131,9 @@ get_opt_args <- function(opt_args, alpha) {
 # this function to avoid repeatedly calling it inside the optimization loop.
 scale_radii <- function(localr, dens_scale, a) {
   log_denso <- -log(localr)
-  min_densl <- a * (10 ^ (-2 * dens_scale))
+  min_densl <- a * (10^(-2 * dens_scale))
   log_min_densl <- log(min_densl)
-  max_densl <- a * (10 ^ (2 * dens_scale))
+  max_densl <- a * (10^(2 * dens_scale))
   log_max_densl <- log(max_densl)
   log_denso_scale <- range_scale(log_denso, log_min_densl, log_max_densl)
   sqrt(exp(log_denso_scale))
