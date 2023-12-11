@@ -352,8 +352,10 @@ ggplot(
 ```
 
 ```{r plot test data}
-ggplot(data.frame(mnist_test_umap, Digit = mnist_test$Label),
-       aes(x = X1, y = X2, color = Digit)) +
+ggplot(
+  data.frame(mnist_test_umap, Digit = mnist_test$Label),
+  aes(x = X1, y = X2, color = Digit)
+) +
   geom_point(alpha = 0.5, size = 1.0) +
   scale_color_manual(values = palette) +
   theme_minimal() +
