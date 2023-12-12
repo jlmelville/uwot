@@ -145,7 +145,7 @@ you passed in, and the list item names will be `precomputed`.
 ## Multiple neighbor data
 
 As discussed under the
-[Mixed Data Types](https://github.com/jlmelville/uwot#mixed-data-types) section,
+[Mixed Data Types](https://jlmelville.github.io/uwot/articles/mixed-data-types.html) article,
 you can apply multiple distance metrics to different parts of matrix or
 data frame input data. if you do this, then `ret_nn` will return all the
 neighbor data. The list under `nn` will now contain as many items as metrics,
