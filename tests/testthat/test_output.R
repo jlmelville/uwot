@@ -839,6 +839,17 @@ expect_ok_matrix(res)
 res <- umap(iris10, n_neighbors = 4, init_sdev = "range", n_epochs = 0)
 expect_equal(apply(res, 2, range), matrix(c(0, 10, 0, 10), ncol = 2))
 
+# init_sdev = "range" should rescale with user-supplied input too
+res <-
+  umap(
+    iris10,
+    n_neighbors = 4,
+    init = res,
+    init_sdev = "range",
+    n_epochs = 0
+  )
+expect_equal(apply(res, 2, range), matrix(c(0, 10, 0, 10), ncol = 2))
+
 # 101 intersect and union
 test_that("intersect and union", {
   # expected values are confirmed via the python implementation

@@ -2528,7 +2528,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     set.seed(seed)
   }
 
-
   ret_extra <- ret_model || ret_nn || ret_fgraph || ret_sigma || ret_localr
 
   # Store categorical columns to be used to generate the graph
@@ -2916,18 +2915,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (init == "pacpca") {
       embedding <- 0.01 * embedding
     }
-
     if (!is.null(init_sdev) || init == "spca") {
       if (is.null(init_sdev)) {
         init_sdev <- 1e-4
       }
-      if (is.numeric(init_sdev)) {
-        embedding <- scale_coords(embedding, init_sdev, verbose = verbose)
-      } else if (is.character(init_sdev) && init_sdev == "range") {
-        # #99: range scale coordinates like python UMAP does
-        tsmessage("Range-scaling initial input columns to 0-10")
-        embedding <- apply(embedding, 2, range_scale, max = 10.0)
-      }
+      embedding <- scale_coords(embedding, init_sdev, verbose = verbose)
     }
   }
   if (any(is.na(embedding))) {

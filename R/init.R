@@ -290,6 +290,12 @@ rand_init_lv <- function(n, ndim, verbose = FALSE) {
 # distances lead to small gradients, and hence small updates, so should be
 # avoided.
 scale_coords <- function(X, sdev = 1e-4, verbose = FALSE) {
+  if (is.character(sdev) && sdev == "range") {
+    # #99: range scale coordinates like python UMAP does
+    tsmessage("Range-scaling initial input columns to 0-10")
+    return(apply(X, 2, range_scale, max = 10.0))
+  }
+
   if (is.null(sdev)) {
     return(X)
   }

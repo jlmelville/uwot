@@ -1,4 +1,8 @@
-# uwot 0.1.16.9000
+# uwot (development version)
+
+## Bug fixes and minor improvements
+
+* `init_sdev = "range"` caused an error with a user-supplied `init` matrix.
 
 # uwot 0.1.16
 
