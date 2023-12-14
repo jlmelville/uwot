@@ -312,9 +312,9 @@ pca_init <- function(X, ndim = min(dim(X)), center = TRUE, ret_extra = FALSE,
                      pca_method = "auto", verbose = FALSE) {
   if (methods::is(X, "dist")) {
     res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ndim)
-
     if (ret_extra || verbose) {
       lambda <- res_mds$eig
+      lambda[lambda < 0] <- 0
       varex <- sum(lambda[1:ndim]) / sum(lambda)
       tsmessage(
         "PCA (using classical MDS): ", ndim, " components explained ",
