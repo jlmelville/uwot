@@ -9,14 +9,15 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
+
   if (methods::is(X, "dist")) {
-    res <- dist_nn(X, k, include_self = include_self)
+    res <- dist_nn(X, k, include_self = include_self, verbose = verbose)
   } else if (is_sparse_matrix(X)) {
     # sparse distance matrix
     if (Matrix::isTriangular(X)) {
-      res <- sparse_tri_nn(X, k, include_self = include_self)
+      res <- sparse_tri_nn(X, k, include_self = include_self, verbose = verbose)
     } else {
-      res <- sparse_nn(X, k, include_self = include_self)
+      res <- sparse_nn(X, k, include_self = include_self, verbose = verbose)
     }
   } else {
     # normal matrix
@@ -342,7 +343,8 @@ FNN_nn <- function(X, k = 10, include_self = TRUE) {
   list(idx = idx, dist = dist)
 }
 
-dist_nn <- function(X, k, include_self = TRUE) {
+dist_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
+  tsmessage("Finding nearest neighbors from distance matrix")
   X <- as.matrix(X)
 
   if (!include_self) {
@@ -366,7 +368,9 @@ dist_nn <- function(X, k, include_self = TRUE) {
   list(idx = nn_idx, dist = nn_dist)
 }
 
-sparse_nn <- function(X, k, include_self = TRUE) {
+sparse_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
+  tsmessage("Finding nearest neighbors from sparse matrix")
+
   if (include_self) {
     k <- k - 1
   }
@@ -403,7 +407,8 @@ sparse_nn <- function(X, k, include_self = TRUE) {
 }
 
 # Extract knn data from sparse lower/upper triangular matrix
-sparse_tri_nn <- function(X, k, include_self = TRUE) {
+sparse_tri_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
+  tsmessage("Finding nearest neighbors from sparse triangular matrix")
   if (include_self) {
     k <- k - 1
   }

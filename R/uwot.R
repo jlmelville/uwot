@@ -3589,12 +3589,20 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
   }
   mnames <- tolower(names(metrics))
   if (is.null(nn_method)) {
-    if (n_vertices < 4096 && !ret_model && all(mnames == "euclidean")) {
-      tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
-      nn_method <- "fnn"
-    } else {
-      tsmessage("Using Annoy for neighbor search, n_neighbors = ", n_neighbors)
-      nn_method <- "annoy"
+    if (methods::is(X, "matrix")) {
+      if (n_vertices < 4096 &&
+        !ret_model &&
+        all(mnames == "euclidean")) {
+        tsmessage("Using FNN for neighbor search, n_neighbors = ", n_neighbors)
+        nn_method <- "fnn"
+      } else {
+        tsmessage("Using Annoy for neighbor search, n_neighbors = ", n_neighbors)
+        nn_method <- "annoy"
+      }
+    }
+    else {
+      # It's a dist, or an actual distance matrix (sparse or triangular)
+      nn_method <- "matrix"
     }
   }
 
@@ -3708,7 +3716,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       V <- Vblock
     } else {
       # TODO: should at least offer the option to reset the local metric here
-      # TODO: make this the default (breaking change)
+      # TODO: make , reset_local_metric = TRUE the default (breaking change)
       V <- set_intersect(V, Vblock, weight = 0.5, reset_connectivity = TRUE)
     }
     if (ret_sigma && is.null(sigma)) {
@@ -3744,7 +3752,7 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
     validate_nn(nn_method, n_vertices)
     nn <- nn_method
   } else {
-    nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn"))
+    nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn", "matrix"))
     if (nn_method == "fnn" && metric != "euclidean") {
       stop(
         "nn_method = 'FNN' is only compatible with distance metric ",
