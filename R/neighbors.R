@@ -99,13 +99,7 @@ annoy_nn <- function(X, k = 10,
 }
 
 annoy_create <- function(metric, ndim) {
-  if (metric == "correlation") {
-    name <- "cosine"
-  } else {
-    name <- metric
-  }
-
-  rcppannoy <- create_ann(name, ndim)
+  rcppannoy <- create_ann(metric, ndim)
 
   list(
     ann = rcppannoy,
@@ -154,12 +148,14 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
 }
 
 # create RcppAnnoy class from metric name with ndim dimensions
+# Correlation uses AnnoyAngular, input data needs to be centered first
 create_ann <- function(name, ndim) {
   ann <- switch(name,
     cosine = methods::new(RcppAnnoy::AnnoyAngular, ndim),
     manhattan = methods::new(RcppAnnoy::AnnoyManhattan, ndim),
     euclidean = methods::new(RcppAnnoy::AnnoyEuclidean, ndim),
     hamming = methods::new(RcppAnnoy::AnnoyHamming, ndim),
+    correlation = methods::new(RcppAnnoy::AnnoyAngular, ndim),
     stop("BUG: unknown Annoy metric '", name, "'")
   )
 }

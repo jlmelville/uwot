@@ -3,6 +3,10 @@
 ## Bug fixes and minor improvements
 
 * `init_sdev = "range"` caused an error with a user-supplied `init` matrix.
+* Transforming new data with the `correlation` metric was actually using the
+`cosine` metric if you saved and reloaded the model. Thank you 
+[Holly Hall](https://github.com/mdrnao) for the report and helpful detective
+work (<https://github.com/jlmelville/uwot/issues/117>).
 
 # uwot 0.1.16
 

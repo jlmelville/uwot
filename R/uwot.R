@@ -3392,9 +3392,6 @@ load_uwot <- function(file, verbose = FALSE) {
       ndim <- length(model$metric[[i]])
     }
     annoy_metric <- metric
-    if (metric == "correlation") {
-      annoy_metric <- "cosine"
-    }
     ann <- create_ann(annoy_metric, ndim = ndim)
     ann$load(nn_fname)
 

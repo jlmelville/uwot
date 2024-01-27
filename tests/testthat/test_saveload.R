@@ -135,3 +135,50 @@ test_that("save-load-save", {
   uwot::save_uwot(modelm2, file = new_filem)
   expect_true(file.exists(new_filem))
 })
+
+# #117 correlation metric not correctly restored
+test_that("reload-correlation", {
+  set.seed(1337)
+  model <- umap(iris10,
+                n_neighbors = 4, n_epochs = 2, init = "spca",
+                metric = "correlation", verbose = FALSE, n_threads = 0,
+                ret_model = TRUE, ret_extra = c("nn")
+  )
+  expect_equal(names(model$metric), "correlation")
+  expect_equal(model$nn_index$metric, "correlation")
+
+  set.seed(1337)
+  transformed_before_reload <-
+    umap_transform(iris10,
+                   model,
+                   n_epochs = 2,
+                   ret_extra = c("nn"))
+
+  expect_equal(transformed_before_reload$nn$correlation$dist,
+               model$nn$correlation$dist, check.attributes = FALSE)
+
+  mod_fname <- tempfile(tmpdir = tempdir())
+  model <- save_uwot(model, file = mod_fname, unload = TRUE)
+
+  modelload <- load_uwot(file = mod_fname)
+
+  expect_equal(names(model$metric), "correlation")
+  expect_equal(model$nn_index$metric, "correlation")
+
+  set.seed(1337)
+  transformed_after_reload <-
+    umap_transform(iris10,
+                   modelload,
+                   n_epochs = 2,
+                   ret_extra = c("nn"))
+  expect_equal(transformed_after_reload$nn$correlation$dist,
+               model$nn$correlation$dist, check.attributes = FALSE)
+
+  if (file.exists(mod_fname)) {
+    unlink(mod_fname)
+  }
+  expect_true(file.exists(modelload$mod_dir))
+  unload_uwot(modelload)
+  expect_false(file.exists(modelload$mod_dir))
+})
+
