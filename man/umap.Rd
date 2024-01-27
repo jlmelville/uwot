@@ -587,8 +587,10 @@ nn <- iris_umap$nn
 iris_umap <- umap(iris30, n_neighbors = 5, min_dist = 1, spread = 5, nn_method = nn, n_epochs = 20)
 
 # Supervised dimension reduction using the 'Species' factor column
-iris_sumap <- umap(iris30, n_neighbors = 5, min_dist = 0.001, y = iris30$Species,
-                   target_weight = 0.5, n_epochs = 20)
+iris_sumap <- umap(iris30,
+  n_neighbors = 5, min_dist = 0.001, y = iris30$Species,
+  target_weight = 0.5, n_epochs = 20
+)
 
 # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
 iris_umap <- umap(iris30, metric = list(

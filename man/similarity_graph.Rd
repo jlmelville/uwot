@@ -361,11 +361,15 @@ iris30_sim_graph <- similarity_graph(iris30, n_neighbors = 10)
 # to control neighborhood size. Use ret_extra = "nn" to return nearest
 # neighbor data as well as the similarity graph. Return value is a list
 # containing similarity_graph' and 'nn' items.
-iris30_lv_graph <- similarity_graph(iris30, perplexity = 10,
-                                    method = "largevis", ret_extra = "nn")
+iris30_lv_graph <- similarity_graph(iris30,
+  perplexity = 10,
+  method = "largevis", ret_extra = "nn"
+)
 # If you have the neighbor information you don't need the original data
-iris30_lv_graph_nn <- similarity_graph(nn_method = iris30_lv_graph$nn,
-                                       perplexity = 10, method = "largevis")
+iris30_lv_graph_nn <- similarity_graph(
+  nn_method = iris30_lv_graph$nn,
+  perplexity = 10, method = "largevis"
+)
 all(iris30_lv_graph_nn == iris30_lv_graph$similarity_graph)
 
 }

@@ -29,8 +29,8 @@ forming the union.
 
 # Form two different "views" of the same data
 iris30 <- iris[c(1:10, 51:60, 101:110), ]
-iris_sg12 = similarity_graph(iris30[, 1:2], n_neighbors = 5)
-iris_sg34 = similarity_graph(iris30[, 3:4], n_neighbors = 5)
+iris_sg12 <- similarity_graph(iris30[, 1:2], n_neighbors = 5)
+iris_sg34 <- similarity_graph(iris30[, 3:4], n_neighbors = 5)
 
 # Combine the two representations into one
 iris_combined <- simplicial_set_union(iris_sg12, iris_sg34)
