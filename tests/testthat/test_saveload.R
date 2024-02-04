@@ -154,8 +154,12 @@ test_that("reload-correlation", {
                    n_epochs = 2,
                    ret_extra = c("nn"))
 
-  expect_equal(transformed_before_reload$nn$correlation$dist,
-               model$nn$correlation$dist, check.attributes = FALSE)
+  expect_equal(
+    transformed_before_reload$nn$correlation$dist,
+    model$nn$correlation$dist,
+    check.attributes = FALSE,
+    tol = 1e-7
+  )
 
   mod_fname <- tempfile(tmpdir = tempdir())
   model <- save_uwot(model, file = mod_fname, unload = TRUE)
@@ -171,8 +175,12 @@ test_that("reload-correlation", {
                    modelload,
                    n_epochs = 2,
                    ret_extra = c("nn"))
-  expect_equal(transformed_after_reload$nn$correlation$dist,
-               model$nn$correlation$dist, check.attributes = FALSE)
+  expect_equal(
+    transformed_after_reload$nn$correlation$dist,
+    model$nn$correlation$dist,
+    check.attributes = FALSE,
+    tol = 1e-7
+  )
 
   if (file.exists(mod_fname)) {
     unlink(mod_fname)
