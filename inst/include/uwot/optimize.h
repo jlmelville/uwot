@@ -40,22 +40,34 @@ float linear_grow(double val, std::size_t epoch, std::size_t n_epochs) {
   return val * (static_cast<float>(epoch) / static_cast<float>(n_epochs));
 }
 
-struct Sgd {
+struct Optimizer {
+  virtual ~Optimizer() = default;
+  virtual void update(std::vector<float> &v, std::vector<float> &grad,
+                      std::size_t begin, std::size_t end) = 0;
+  virtual void epoch_end(std::size_t epoch, std::size_t n_epochs) = 0;
+};
+
+struct Sgd : public Optimizer {
   float initial_alpha;
   float alpha;
 
   Sgd(float alpha) : initial_alpha(alpha), alpha(alpha){};
 
-  void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
-    v[i] += alpha * grad[i];
+  virtual ~Sgd() = default;
+
+  void update(std::vector<float> &v, std::vector<float> &grad,
+              std::size_t begin, std::size_t end) override {
+    for (std::size_t i = begin; i < end; i++) {
+      v[i] += alpha * grad[i];
+    }
   }
 
-  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
+  void epoch_end(std::size_t epoch, std::size_t n_epochs) override {
     alpha = linear_decay(initial_alpha, epoch, n_epochs);
   }
 };
 
-struct Adam {
+struct Adam : public Optimizer {
   float initial_alpha;
   float alpha;
   float beta1;
@@ -85,17 +97,22 @@ struct Adam {
         eps(eps), epsc(eps * sqrt(beta21)),
         ad_scale(alpha * sqrt(beta21) / beta11), mt(vec_size), vt(vec_size) {}
 
-  void update(std::vector<float> &v, std::vector<float> &grad, std::size_t i) {
-    // this takes advantage of updating in-place to give a more compact version
-    // of mt[i] = beta1 * mt[i] + beta11 * grad[i] etc.
-    vt[i] += beta21 * (grad[i] * grad[i] - vt[i]);
-    mt[i] += beta11 * (grad[i] - mt[i]);
+  virtual ~Adam() = default;
 
-    // ad_scale and epsc handle the debiasing
-    v[i] += ad_scale * mt[i] / (sqrt(vt[i]) + epsc);
+  void update(std::vector<float> &v, std::vector<float> &grad,
+              std::size_t begin, std::size_t end) override {
+    for (std::size_t i = begin; i < end; i++) {
+      // this takes advantage of updating in-place to give a more compact
+      // version of mt[i] = beta1 * mt[i] + beta11 * grad[i] etc.
+      vt[i] += beta21 * (grad[i] * grad[i] - vt[i]);
+      mt[i] += beta11 * (grad[i] - mt[i]);
+
+      // ad_scale and epsc handle the debiasing
+      v[i] += ad_scale * mt[i] / (sqrt(vt[i]) + epsc);
+    }
   }
 
-  void epoch_end(std::size_t epoch, std::size_t n_epochs) {
+  void epoch_end(std::size_t epoch, std::size_t n_epochs) override {
     alpha = linear_decay(initial_alpha, epoch, n_epochs);
 
     // update debiasing factors

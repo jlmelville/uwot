@@ -27,6 +27,8 @@
 #ifndef UWOT_UPDATE_H
 #define UWOT_UPDATE_H
 
+#include <memory>
+
 #include "gradient.h"
 #include "optimize.h"
 #include "sampler.h"
@@ -179,25 +181,19 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
 // different data. The tail coordinates are fixed in this case, so again they
 // do not move. Hence both so in both cases we only ever need to update the head
 // coordinates.
-template <bool DoMoveVertex, typename Opt> struct BatchUpdate {
+template <bool DoMoveVertex> struct BatchUpdate {
   std::vector<float> &head_embedding;
   std::vector<float> &tail_embedding;
-  Opt &opt;
+  std::unique_ptr<Optimizer> opt;
   std::vector<float> gradient;
   std::unique_ptr<EpochCallback> epoch_callback;
 
   BatchUpdate(std::vector<float> &head_embedding,
-              std::vector<float> &tail_embedding, Opt &opt,
-              EpochCallback *epoch_callback)
+              std::vector<float> &tail_embedding,
+              std::unique_ptr<Optimizer> opt, EpochCallback *epoch_callback)
       : head_embedding(head_embedding), tail_embedding(tail_embedding),
-        opt(opt), gradient(head_embedding.size()),
+        opt(std::move(opt)), gradient(head_embedding.size()),
         epoch_callback(std::move(epoch_callback)) {}
-
-  BatchUpdate(BatchUpdate &&other)
-      : head_embedding(other.head_embedding),
-        tail_embedding(other.tail_embedding), opt(other.opt),
-        gradient(other.head_embedding.size()),
-        epoch_callback(std::move(other.epoch_callback)) {}
 
   inline void attract(std::size_t dj, std::size_t dk, std::size_t d,
                       float grad_d, std::size_t) {
@@ -216,14 +212,11 @@ template <bool DoMoveVertex, typename Opt> struct BatchUpdate {
   template <typename Parallel>
   void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel) {
     auto worker = [&](std::size_t begin, std::size_t end, std::size_t) {
-      for (std::size_t i = begin; i < end; i++) {
-        // head_embedding[i] += opt.alpha * gradient[i];
-        opt.update(head_embedding, gradient, i);
-      }
+      opt->update(head_embedding, gradient, begin, end);
     };
     parallel.pfor(head_embedding.size(), worker);
 
-    opt.epoch_end(epoch, n_epochs);
+    opt->epoch_end(epoch, n_epochs);
     (*epoch_callback)(epoch, n_epochs, head_embedding, tail_embedding);
   }
 };

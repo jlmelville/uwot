@@ -122,48 +122,47 @@ struct UmapFactory {
     }
   }
 
-  auto create_adam(List opt_args) -> uwot::Adam {
-    float alpha = lget(opt_args, "alpha", 1.0);
-    float beta1 = lget(opt_args, "beta1", 0.9);
-    float beta2 = lget(opt_args, "beta2", 0.999);
-    float eps = lget(opt_args, "eps", 1e-7);
-    if (verbose) {
-      Rcerr << "Optimizing with Adam"
-            << " alpha = " << alpha << " beta1 = " << beta1
-            << " beta2 = " << beta2 << " eps = " << eps << std::endl;
+  std::unique_ptr<uwot::Optimizer> create_optimizer(List opt_args) {
+    std::string method = lget(opt_args, "method", "adam");
+    if (method == "adam") {
+      float alpha = lget(opt_args, "alpha", 1.0);
+      float beta1 = lget(opt_args, "beta1", 0.9);
+      float beta2 = lget(opt_args, "beta2", 0.999);
+      float eps = lget(opt_args, "eps", 1e-7);
+      if (verbose) {
+        Rcerr << "Optimizing with Adam"
+              << " alpha = " << alpha << " beta1 = " << beta1
+              << " beta2 = " << beta2 << " eps = " << eps << std::endl;
+      }
+      return std::make_unique<uwot::Adam>(alpha, beta1, beta2, eps,
+                                          head_embedding.size());
+    } else if (method == "sgd") {
+      float alpha = lget(opt_args, "alpha", 1.0);
+      if (verbose) {
+        Rcerr << "Optimizing with SGD"
+              << " alpha = " << alpha << std::endl;
+      }
+      return std::make_unique<uwot::Sgd>(alpha);
+    } else {
+      stop("Unknown optimization method: " + method);
     }
-
-    return uwot::Adam(alpha, beta1, beta2, eps, head_embedding.size());
-  }
-
-  auto create_sgd(List opt_args) -> uwot::Sgd {
-    float alpha = lget(opt_args, "alpha", 1.0);
-    if (verbose) {
-      Rcerr << "Optimizing with SGD"
-            << " alpha = " << alpha << std::endl;
-    }
-
-    return uwot::Sgd(alpha);
   }
 
   template <typename RandFactory, bool DoMove, typename Gradient>
   void create_impl(const Gradient &gradient, bool batch) {
+    uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
+    const std::size_t ndim = head_embedding.size() / n_head_vertices;
+
     if (batch) {
       std::string opt_name = opt_args["method"];
-      if (opt_name == "adam") {
-        auto opt = create_adam(opt_args);
-        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, opt, batch);
-      } else if (opt_name == "sgd") {
-        auto opt = create_sgd(opt_args);
-        create_impl_batch_opt<decltype(opt), RandFactory, DoMove, Gradient>(
-            gradient, opt, batch);
-      } else {
-        stop("Unknown optimization method");
-      }
+      auto opt = create_optimizer(opt_args);
+      uwot::BatchUpdate<DoMove> update(head_embedding, tail_embedding,
+                                       std::move(opt), epoch_callback);
+      uwot::NodeWorker<Gradient, decltype(update), RandFactory> worker(
+          gradient, update, positive_head, positive_tail, positive_ptr, sampler,
+          ndim, n_tail_vertices);
+      create_impl(worker, gradient);
     } else {
-      const std::size_t ndim = head_embedding.size() / n_head_vertices;
-      uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
       uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
                                          initial_alpha, epoch_callback);
       uwot::EdgeWorker<Gradient, decltype(update), RandFactory> worker(
@@ -171,18 +170,6 @@ struct UmapFactory {
           n_tail_vertices, n_threads);
       create_impl(worker, gradient);
     }
-  }
-
-  template <typename Opt, typename RandFactory, bool DoMove, typename Gradient>
-  void create_impl_batch_opt(const Gradient &gradient, Opt &opt, bool batch) {
-    uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
-    const std::size_t ndim = head_embedding.size() / n_head_vertices;
-    uwot::BatchUpdate<DoMove, decltype(opt)> update(
-        head_embedding, tail_embedding, opt, epoch_callback);
-    uwot::NodeWorker<Gradient, decltype(update), RandFactory> worker(
-        gradient, update, positive_head, positive_tail, positive_ptr, sampler,
-        ndim, n_tail_vertices);
-    create_impl(worker, gradient);
   }
 
   template <typename Worker, typename Gradient>
