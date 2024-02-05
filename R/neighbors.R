@@ -21,21 +21,26 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
     }
   } else {
     # normal matrix
-    if (method == "fnn") {
-      res <- FNN_nn(X, k = k, include_self = include_self)
-    } else {
-      res <- annoy_nn(X,
-        k = k,
-        metric = metric,
-        n_trees = n_trees, search_k = search_k,
-        tmpdir = tmpdir,
-        n_threads = n_threads,
-        ret_index = ret_index,
-        verbose = verbose
-      )
-    }
+    switch(method,
+      "fnn" = {
+        res <- FNN_nn(X, k = k, include_self = include_self)
+      },
+      "annoy" = {
+        res <- annoy_nn(
+          X,
+          k = k,
+          metric = metric,
+          n_trees = n_trees,
+          search_k = search_k,
+          tmpdir = tmpdir,
+          n_threads = n_threads,
+          ret_index = ret_index,
+          verbose = verbose
+        )
+      },
+      stop("Unknown method: ", method)
+    )
   }
-
   res
 }
 
