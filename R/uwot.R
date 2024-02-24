@@ -3098,13 +3098,18 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
             # of them, but for loading the NN index we need the number of
             # columns explicitly (we don't have access to the column dimension of
             # the input data at load time)
-            # To be sure of the dimensionality, fetch the first item from the
-            # index and see how many elements are in the returned vector.
-            if (!is.null(X)) {
-              rcppannoy <- get_rcppannoy(res$nn_index)
-              res$metric[[1]] <- list(ndim = length(rcppannoy$getItemsVector(0)))
-            } else {
-              res$metric[[1]] <- list()
+            if (res$nn_index$type %in% c("annoyv2", "hnswv1")) {
+              res$metric[[1]] <- list(ndim = res$nn_index$ndim)
+            }
+            else {
+              # To be sure of the dimensionality, fetch the first item from the
+              # index and see how many elements are in the returned vector.
+              if (!is.null(X)) {
+                rcppannoy <- get_rcppannoy(res$nn_index)
+                res$metric[[1]] <- list(ndim = length(rcppannoy$getItemsVector(0)))
+              } else {
+                res$metric[[1]] <- list()
+              }
             }
           }
         } else {
@@ -3749,7 +3754,8 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
     validate_nn(nn_method, n_vertices)
     nn <- nn_method
   } else {
-    nn_method <- match.arg(tolower(nn_method), c("annoy", "fnn", "matrix"))
+    nn_method <-
+      match.arg(tolower(nn_method), c("annoy", "fnn", "matrix", "hnsw"))
     if (nn_method == "fnn" && metric != "euclidean") {
       stop(
         "nn_method = 'FNN' is only compatible with distance metric ",

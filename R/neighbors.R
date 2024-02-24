@@ -38,6 +38,16 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
           verbose = verbose
         )
       },
+      "hnsw" = {
+        res <- hnsw_nn(
+          X,
+          k = k,
+          metric = metric,
+          n_threads = n_threads,
+          ret_index = ret_index,
+          verbose = verbose
+        )
+      },
       stop("Unknown method: ", method)
     )
   }
@@ -59,6 +69,10 @@ nn_is_precomputed <- function(nn) {
 # TRUE if we are using an annoy index
 nn_is_annoy <- function(ann) {
   is.list(ann) && !is.null(ann$type) && startsWith(ann$type, "annoy")
+}
+
+nn_is_hnsw <- function(ann) {
+  is.list(ann) && !is.null(ann$type) && startsWith(ann$type, "hnsw")
 }
 
 # n_trees - number of trees to build when constructing the index. The more trees
@@ -109,7 +123,8 @@ annoy_create <- function(metric, ndim) {
   list(
     ann = rcppannoy,
     type = "annoyv1",
-    metric = metric
+    metric = metric,
+    ndim = ndim
   )
 }
 
@@ -170,6 +185,8 @@ get_rcppannoy <- function(nni) {
   if (startsWith(class(nni), "Rcpp_Annoy")) {
     rcppannoy <- nni
   } else if (nn_is_annoy(nni)) {
+    rcppannoy <- nni$ann
+  } else if (nn_is_hnsw(nni)) {
     rcppannoy <- nni$ann
   } else {
     stop(
