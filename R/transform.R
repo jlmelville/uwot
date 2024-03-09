@@ -862,19 +862,3 @@ apply_pca <- function(X, pca_res, verbose = FALSE) {
   }
   X %*% pca_res$rotation
 }
-
-all_nn_indices_are_loaded <- function(model) {
-  if (is.null(model$nn_index)) {
-    stop("Invalid model: has no 'nn_index'")
-  }
-  if (is.list(model$nn_index)) {
-    for (i in 1:length(model$nn_index)) {
-      if (model$nn_index$getNTrees() == 0) {
-        return(FALSE)
-      }
-    }
-  } else if (model$nn_index$getNTrees() == 0) {
-    return(FALSE)
-  }
-  TRUE
-}
