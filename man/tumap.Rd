@@ -219,6 +219,10 @@ embedding.}
     \href{https://cran.r-project.org/package=FNN}{FNN} package.
   \item \code{"annoy"} Use approximate nearest neighbors via the
     \href{https://cran.r-project.org/package=RcppAnnoy}{RcppAnnoy} package.
+  \item \code{"hnsw"} Use approximate nearest neighbors via the
+    \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
+    \code{RcppHNSW} is not a dependency of this package: this option is
+    only available if you have installed \code{RcppHNSW} yourself.
  }
 By default, if \code{X} has less than 4,096 vertices, the exact nearest
 neighbors are found. Otherwise, approximate nearest neighbors are used.

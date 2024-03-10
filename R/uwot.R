@@ -178,6 +178,10 @@
 #'       \href{https://cran.r-project.org/package=FNN}{FNN} package.
 #'     \item \code{"annoy"} Use approximate nearest neighbors via the
 #'       \href{https://cran.r-project.org/package=RcppAnnoy}{RcppAnnoy} package.
+#'     \item \code{"hnsw"} Use approximate nearest neighbors via the
+#'       \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
+#'       \code{RcppHNSW} is not a dependency of this package: this option is
+#'       only available if you have installed \code{RcppHNSW} yourself.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -781,6 +785,10 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       \href{https://cran.r-project.org/package=FNN}{FNN} package.
 #'     \item \code{"annoy"} Use approximate nearest neighbors via the
 #'       \href{https://cran.r-project.org/package=RcppAnnoy}{RcppAnnoy} package.
+#'     \item \code{"hnsw"} Use approximate nearest neighbors via the
+#'       \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
+#'       \code{RcppHNSW} is not a dependency of this package: this option is
+#'       only available if you have installed \code{RcppHNSW} yourself.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -1293,6 +1301,10 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       \href{https://cran.r-project.org/package=FNN}{FNN} package.
 #'     \item \code{"annoy"} Use approximate nearest neighbors via the
 #'       \href{https://cran.r-project.org/package=RcppAnnoy}{RcppAnnoy} package.
+#'     \item \code{"hnsw"} Use approximate nearest neighbors via the
+#'       \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
+#'       \code{RcppHNSW} is not a dependency of this package: this option is
+#'       only available if you have installed \code{RcppHNSW} yourself.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -1666,6 +1678,10 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #'       \href{https://cran.r-project.org/package=FNN}{FNN} package.
 #'     \item \code{"annoy"} Use approximate nearest neighbors via the
 #'       \href{https://cran.r-project.org/package=RcppAnnoy}{RcppAnnoy} package.
+#'     \item \code{"hnsw"} Use approximate nearest neighbors via the
+#'       \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
+#'       \code{RcppHNSW} is not a dependency of this package: this option is
+#'       only available if you have installed \code{RcppHNSW} yourself.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
