@@ -25,10 +25,18 @@ hnsw_nn <- function(X,
 }
 
 hnsw_build <- function(X, metric, n_threads, verbose) {
+
+  hnsw_distance <- metric
+  if (metric == "correlation") {
+    tsmessage("Annoy build: subtracting row means for correlation")
+    X <- sweep(X, 1, rowMeans(X))
+    hnsw_distance <- "cosine"
+  }
+
   index <-
     RcppHNSW::hnsw_build(
       X,
-      distance = metric,
+      distance = hnsw_distance,
       M = 16,
       ef = 200,
       verbose = verbose,

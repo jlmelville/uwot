@@ -514,13 +514,31 @@ umap_transform <- function(X = NULL, model = NULL,
           verbose = verbose
         )
       }
-      nn <- annoy_search(Xsub,
-        k = n_neighbors, ann = ann, search_k = search_k,
-        prep_data = TRUE,
-        tmpdir = tmpdir,
-        n_threads = n_threads, grain_size = grain_size,
-        verbose = verbose
-      )
+      if (is.null(ann$type) || startsWith(ann$type, "annoy")) {
+        nn <- annoy_search(
+          Xsub,
+          k = n_neighbors,
+          ann = ann,
+          search_k = search_k,
+          prep_data = TRUE,
+          tmpdir = tmpdir,
+          n_threads = n_threads,
+          grain_size = grain_size,
+          verbose = verbose
+        )
+      }
+      else if (startsWith(ann$type, "hnsw")) {
+        nn <- hnsw_search (
+          X,
+          k = n_neighbors,
+          ann =  ann,
+          n_threads = n_threads,
+          verbose = verbose
+        )
+      }
+      else {
+        stop("Unknown nn method: ", ann$type)
+      }
       if (ret_nn) {
         export_nns[[i]] <- nn
         names(export_nns)[[i]] <- ann$metric

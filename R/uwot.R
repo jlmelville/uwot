@@ -3500,13 +3500,26 @@ all_nn_indices_are_loaded <- function(model) {
   if (is.null(model$nn_index)) {
     stop("Invalid model: has no 'nn_index'")
   }
-
-  if (is.list(model$nn_index) && is.null(model$nn_index$type)) {
-    for (i in 1:length(model$nn_index)) {
-      rcppannoy <- get_rcppannoy(model$nn_index[[i]])
+  if (is.list(model$nn_index)) {
+    if (is.null(model$nn_index$type)) {
+      for (i in 1:length(model$nn_index)) {
+        rcppannoy <- get_rcppannoy(model$nn_index[[i]])
+        if (rcppannoy$getNTrees() == 0) {
+          return(FALSE)
+        }
+      }
+    }
+    else if (model$nn_index$type == "annoyv1") {
+      rcppannoy <- get_rcppannoy(model$nn_index)
       if (rcppannoy$getNTrees() == 0) {
         return(FALSE)
       }
+    }
+    else if (model$nn_index$type == "hnswv1") {
+      return(TRUE)
+    }
+    else {
+      stop("Invalid model: has unknown 'nn_index' type ", model$nn_index$type)
     }
   } else {
     rcppannoy <- get_rcppannoy(model$nn_index)
@@ -4175,3 +4188,4 @@ remove_scaling_attrs <- function(X) {
   }
   X
 }
+
