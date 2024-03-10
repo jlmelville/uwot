@@ -3407,24 +3407,32 @@ load_uwot <- function(file, verbose = FALSE) {
       ann <- create_ann(annoy_metric, ndim = ndim)
       ann$load(nn_fname)
 
+      idx <-
+        list(
+          ann = ann,
+          type = "annoyv1",
+          metric = annoy_metric,
+          ndim = ndim
+        )
       if (n_metrics == 1) {
-        model$nn_index <- list(ann = ann, type = "annoyv1", metric = annoy_metric)
+        model$nn_index <- idx
       } else {
-        model$nn_index[[i]] <- list(ann = ann, type = "annoyv1", metric = annoy_metric)
+        model$nn_index[[i]] <- idx
       }
     }
     else if (nn_method == "hnsw") {
-      stop("Embarassingly, I don't know how to load an HNSW index yet")
-      # FIXME: need to save nitems and ndim per index
-      nitems <- NULL
-      ndim <- NULL
-      ann <- create_hnsw(metric, nitems = nitems, ndim = ndim)
-      # FIXME: oops this doesn't exist
-      ann$loadIndex(nn_fname)
+      ann <- hnsw_load(metric, ndim = ndim, filename = nn_fname)
+      idx <-
+        list(
+          ann = ann,
+          type = "hnswv1",
+          metric = metric,
+          ndim = ndim
+        )
       if (n_metrics == 1) {
-        model$nn_index <- list(ann = ann, type = "hnswv1", metric = metric)
+        model$nn_index <- idx
       } else {
-        model$nn_index[[i]] <- list(ann = ann, type = "hnswv1", metric = metric)
+        model$nn_index[[i]] <- idx
       }
     }
     else {

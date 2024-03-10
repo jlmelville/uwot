@@ -60,9 +60,6 @@ hnsw_search <-
     if (is.null(n_threads)) {
       n_threads <- default_num_threads()
     }
-    if (verbose) {
-      message("Searching HNSW index")
-    }
     if (ann$metric == "correlation") {
       tsmessage("HNSW search: subtracting row means for correlation")
       X <- sweep(X, 1, rowMeans(X))
@@ -81,15 +78,13 @@ hnsw_search <-
     res
   }
 
-create_hnsw <- function(name, nitems, ndim) {
-  # FIXME: read M and ef from the model
-  M <- 16
-  ef <- 10
-  switch(
+hnsw_load <- function(name, ndim, filename) {
+  class_name <- switch(
     name,
-    cosine = methods::new(RcppHNSW::HnswCosine, ndim, nitems, M, ef),
-    euclidean = methods::new(RcppHNSW::HnswL2, ndim, nitems, M, ef),
-    correlation = methods::new(RcppHNSW::HnswCosine, nitems, ndim, M, ef),
+    cosine =RcppHNSW::HnswCosine,
+    euclidean = RcppHNSW::HnswL2,
+    correlation = RcppHNSW::HnswCosine,
     stop("BUG: unknown HNSW metric '", name, "'")
   )
+  methods::new(class_name, ndim, filename)
 }
