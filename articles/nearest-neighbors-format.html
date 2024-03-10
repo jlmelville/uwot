@@ -88,9 +88,9 @@ convenience, you can generate nearest neighbor data for <code>X</code>
 by some other means and pass that to <code>umap</code> (or
 <code>tumap</code> or <code>lvish</code>) directly via the
 <code>nn_method</code> parameter.</p>
-<div class="section level3">
-<h3 id="nearest-neighbor-graph-format">Nearest Neighbor Graph Format<a class="anchor" aria-label="anchor" href="#nearest-neighbor-graph-format"></a>
-</h3>
+<div class="section level2">
+<h2 id="nearest-neighbor-graph-format">Nearest Neighbor Graph Format<a class="anchor" aria-label="anchor" href="#nearest-neighbor-graph-format"></a>
+</h2>
 <p>The format expected by <code>nn_method</code> is a <code>list</code>
 containing the following two entries:</p>
 <ul>
@@ -112,9 +112,9 @@ in Each item is always the nearest neighbor of itself, so the first
 element in row <code>i</code> should always be <code>0.0</code>.</li>
 </ul>
 </div>
-<div class="section level3">
-<h3 id="sparse-distance-matrix-format">Sparse Distance Matrix Format<a class="anchor" aria-label="anchor" href="#sparse-distance-matrix-format"></a>
-</h3>
+<div class="section level2">
+<h2 id="sparse-distance-matrix-format">Sparse Distance Matrix Format<a class="anchor" aria-label="anchor" href="#sparse-distance-matrix-format"></a>
+</h2>
 <p>Alternatively, you can pass a sparse distance matrix where:</p>
 <ul>
 <li>the format should be <code>dgCMatrix</code> (the typical sparse
@@ -199,9 +199,9 @@ but it gives you the general idea:</p>
 <span><span class="va">iris_odd_transform</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/umap_transform.html">umap_transform</a></span><span class="op">(</span>X <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">iris_even_umap</span>, nn_method <span class="op">=</span> <span class="va">iris_odd_nn</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="exporting-nearest-neighbor-data-from-uwot">Exporting nearest neighbor data from <code>uwot</code><a class="anchor" aria-label="anchor" href="#exporting-nearest-neighbor-data-from-uwot"></a>
-</h3>
+<div class="section level2">
+<h2 id="exporting-nearest-neighbor-data-from-uwot">Exporting nearest neighbor data from <code>uwot</code><a class="anchor" aria-label="anchor" href="#exporting-nearest-neighbor-data-from-uwot"></a>
+</h2>
 <p>If you set <code>ret_nn = TRUE</code>, the return value of
 <code>umap</code> will be a list, and the <code>nn</code> item contains
 the nearest neighbor data in a format that can be used with
@@ -213,36 +213,36 @@ can be the most time-consuming part of the calculation.</p>
 of which is the nearest neighbor data. The name is the type of metric
 that generated the data. As an example, here’s what the first few items
 of the <code>iris</code> 5-NN data should look like:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(<span class="fu">umap</span>(iris, <span class="at">ret_nn =</span> <span class="cn">TRUE</span>, <span class="at">n_neighbors =</span> <span class="dv">5</span>)<span class="sc">$</span>nn<span class="sc">$</span>euclidean, head)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span><span class="st">`</span><span class="at">idx</span><span class="st">`</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>     [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>,]    <span class="dv">1</span>   <span class="dv">18</span>    <span class="dv">5</span>   <span class="dv">40</span>   <span class="dv">29</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>[<span class="dv">2</span>,]    <span class="dv">2</span>   <span class="dv">35</span>   <span class="dv">46</span>   <span class="dv">13</span>   <span class="dv">10</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>[<span class="dv">3</span>,]    <span class="dv">3</span>   <span class="dv">48</span>    <span class="dv">4</span>    <span class="dv">7</span>   <span class="dv">13</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>[<span class="dv">4</span>,]    <span class="dv">4</span>   <span class="dv">48</span>   <span class="dv">30</span>   <span class="dv">31</span>    <span class="dv">3</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>[<span class="dv">5</span>,]    <span class="dv">5</span>   <span class="dv">38</span>    <span class="dv">1</span>   <span class="dv">18</span>   <span class="dv">41</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>[<span class="dv">6</span>,]    <span class="dv">6</span>   <span class="dv">19</span>   <span class="dv">11</span>   <span class="dv">49</span>   <span class="dv">45</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span>dist</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>     [,<span class="dv">1</span>]      [,<span class="dv">2</span>]      [,<span class="dv">3</span>]      [,<span class="dv">4</span>]      [,<span class="dv">5</span>]</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>,]    <span class="dv">0</span> <span class="fl">0.1000000</span> <span class="fl">0.1414214</span> <span class="fl">0.1414214</span> <span class="fl">0.1414214</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>[<span class="dv">2</span>,]    <span class="dv">0</span> <span class="fl">0.1414214</span> <span class="fl">0.1414214</span> <span class="fl">0.1414214</span> <span class="fl">0.1732051</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>[<span class="dv">3</span>,]    <span class="dv">0</span> <span class="fl">0.1414214</span> <span class="fl">0.2449490</span> <span class="fl">0.2645751</span> <span class="fl">0.2645751</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>[<span class="dv">4</span>,]    <span class="dv">0</span> <span class="fl">0.1414214</span> <span class="fl">0.1732051</span> <span class="fl">0.2236068</span> <span class="fl">0.2449490</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>[<span class="dv">5</span>,]    <span class="dv">0</span> <span class="fl">0.1414214</span> <span class="fl">0.1414214</span> <span class="fl">0.1732051</span> <span class="fl">0.1732051</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>[<span class="dv">6</span>,]    <span class="dv">0</span> <span class="fl">0.3316625</span> <span class="fl">0.3464102</span> <span class="fl">0.3605551</span> <span class="fl">0.3741657</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">lapply</span>(<span class="fu">umap</span>(iris, <span class="at">ret_nn =</span> <span class="cn">TRUE</span>, <span class="at">n_neighbors =</span> <span class="dv">5</span>)<span class="sc">$</span>nn<span class="sc">$</span>euclidean, head)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="sc">$</span><span class="st">`</span><span class="at">idx</span><span class="st">`</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>     [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>[<span class="dv">1</span>,]    <span class="dv">1</span>   <span class="dv">18</span>    <span class="dv">5</span>   <span class="dv">40</span>   <span class="dv">29</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>[<span class="dv">2</span>,]    <span class="dv">2</span>   <span class="dv">35</span>   <span class="dv">46</span>   <span class="dv">13</span>   <span class="dv">10</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>[<span class="dv">3</span>,]    <span class="dv">3</span>   <span class="dv">48</span>    <span class="dv">4</span>    <span class="dv">7</span>   <span class="dv">13</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>[<span class="dv">4</span>,]    <span class="dv">4</span>   <span class="dv">48</span>   <span class="dv">30</span>   <span class="dv">31</span>    <span class="dv">3</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>[<span class="dv">5</span>,]    <span class="dv">5</span>   <span class="dv">38</span>    <span class="dv">1</span>   <span class="dv">18</span>   <span class="dv">41</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>[<span class="dv">6</span>,]    <span class="dv">6</span>   <span class="dv">19</span>   <span class="dv">11</span>   <span class="dv">49</span>   <span class="dv">45</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="sc">$</span>dist</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>     [,<span class="dv">1</span>]      [,<span class="dv">2</span>]      [,<span class="dv">3</span>]      [,<span class="dv">4</span>]      [,<span class="dv">5</span>]</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>[<span class="dv">1</span>,]    <span class="dv">0</span> <span class="fl">0.1000000</span> <span class="fl">0.1414214</span> <span class="fl">0.1414214</span> <span class="fl">0.1414214</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>[<span class="dv">2</span>,]    <span class="dv">0</span> <span class="fl">0.1414214</span> <span class="fl">0.1414214</span> <span class="fl">0.1414214</span> <span class="fl">0.1732051</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>[<span class="dv">3</span>,]    <span class="dv">0</span> <span class="fl">0.1414214</span> <span class="fl">0.2449490</span> <span class="fl">0.2645751</span> <span class="fl">0.2645751</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>[<span class="dv">4</span>,]    <span class="dv">0</span> <span class="fl">0.1414214</span> <span class="fl">0.1732051</span> <span class="fl">0.2236068</span> <span class="fl">0.2449490</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>[<span class="dv">5</span>,]    <span class="dv">0</span> <span class="fl">0.1414214</span> <span class="fl">0.1414214</span> <span class="fl">0.1732051</span> <span class="fl">0.1732051</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>[<span class="dv">6</span>,]    <span class="dv">0</span> <span class="fl">0.3316625</span> <span class="fl">0.3464102</span> <span class="fl">0.3605551</span> <span class="fl">0.3741657</span></span></code></pre></div>
 <p>If for some reason you specify <code>ret_nn</code> while supplying
 precomputed nearest neighbor data to <code>nn_method</code>, the
 returned data should be identical to what you passed in, and the list
 item names will be <code>precomputed</code>.</p>
 </div>
-<div class="section level3">
-<h3 id="multiple-neighbor-data">Multiple neighbor data<a class="anchor" aria-label="anchor" href="#multiple-neighbor-data"></a>
-</h3>
-<p>As discussed under the <a href="https://github.com/jlmelville/uwot#mixed-data-types" class="external-link">Mixed Data
-Types</a> section, you can apply multiple distance metrics to different
-parts of matrix or data frame input data. if you do this, then
+<div class="section level2">
+<h2 id="multiple-neighbor-data">Multiple neighbor data<a class="anchor" aria-label="anchor" href="#multiple-neighbor-data"></a>
+</h2>
+<p>As discussed under the <a href="https://jlmelville.github.io/uwot/articles/mixed-data-types.html">Mixed
+Data Types</a> article, you can apply multiple distance metrics to
+different parts of matrix or data frame input data. if you do this, then
 <code>ret_nn</code> will return all the neighbor data. The list under
 <code>nn</code> will now contain as many items as metrics, in the order
 they were specified. For instance, if the <code>metric</code> argument
@@ -267,9 +267,9 @@ don’t need to set them. Roughly, do something like this:</p>
 neighbors, i.e. the number of columns in all the matrices must be the
 same.</p>
 </div>
-<div class="section level3">
-<h3 id="numeric-y">Numeric <code>y</code><a class="anchor" aria-label="anchor" href="#numeric-y"></a>
-</h3>
+<div class="section level2">
+<h2 id="numeric-y">Numeric <code>y</code><a class="anchor" aria-label="anchor" href="#numeric-y"></a>
+</h2>
 <p>If you are using supervised UMAP with a numeric <code>y</code>, then
 you can also pass nearest neighbor data to <code>y</code>, using the
 same format as above. In this case the nearest neighbors should be with

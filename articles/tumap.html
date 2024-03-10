@@ -83,14 +83,36 @@
 <p>If you choose the UMAP curve parameters to be <code>a = 1</code> and
 <code>b = 1</code>, you get back the Cauchy distribution used in <a href="https://lvdmaaten.github.io/tsne/" class="external-link">t-Distributed Stochastic
 Neighbor Embedding</a> and <a href="https://arxiv.org/abs/1602.00370" class="external-link">LargeVis</a>. This also happens
-to significantly simplify the gradient leading to a noticeable speed-up:
-for MNIST, I saw the optimization time drop from 66 seconds to 18
-seconds. The trade off is that you will see larger, more spread-out
-clusters than with the typical UMAP settings (they’re still more compact
-than you see in t-SNE, however). To try t-UMAP, use the
-<code>tumap</code> function:</p>
+to significantly simplify the gradient leading to a noticeable
+speed-up.</p>
+<p>For MNIST:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mnist_tumap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tumap.html">tumap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/uwot" class="external-link">uwot</a></span><span class="op">)</span></span>
+<span><span class="co"># install snedata package from github</span></span>
+<span><span class="co"># pak::pkg_install("jlmelville/snedata")</span></span>
+<span><span class="va">mnist</span> <span class="op">&lt;-</span> <span class="fu">snedata</span><span class="fu">::</span><span class="fu">download_mnist</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>I saw the optimization time drop from 66 seconds with UMAP:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="img/tumap/umap.png" alt="MNIST UMAP" width="75%"><p class="caption">
+MNIST UMAP
+</p>
+</div>
+<p>to 18 seconds with t-UMAP:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist_tumap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tumap.html">tumap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="img/tumap/tumap.png" alt="MNIST t-UMAP" width="75%"><p class="caption">
+MNIST t-UMAP
+</p>
+</div>
+<p>You will still spend most of the time in the nearest neighbor search,
+so you will really see a difference in terms of total time with larger
+values of <code>n_epochs</code>. The trade off, as you can see, is that
+you will see larger, more spread-out clusters than with the typical UMAP
+settings (they’re still more compact than you see in t-SNE, however). I
+think it’s worth the trade-off.</p>
 <p>Note that using <code>umap(a = 1, b = 1)</code> doesn’t use the
 simplified gradient, so you won’t see any speed-up that way.</p>
 <p>Some examples comparing UMAP and t-UMAP are in the <a href="https://jlmelville.github.io/uwot/articles/umap-examples.html">examples</a>

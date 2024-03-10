@@ -132,11 +132,11 @@ up afterwards. If something goes wrong it should log the directory it
 downloaded to.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ng20</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">18846</span>     <span class="dv">6</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">18846</span>     <span class="dv">6</span></span></code></pre></div>
 <p>The data is returned as a data frame with 6 columns:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ng20</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Id"</span>        <span class="st">"FileId"</span>    <span class="st">"Text"</span>      <span class="st">"Subset"</span>    <span class="st">"Label"</span>     <span class="st">"Newsgroup"</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"Id"</span>        <span class="st">"FileId"</span>    <span class="st">"Text"</span>      <span class="st">"Subset"</span>    <span class="st">"Label"</span>     <span class="st">"Newsgroup"</span></span></code></pre></div>
 <p>The <code>Id</code> column is a unique identifier for each post,
 <code>FileId</code> is the filename combined with the
 <code>Subset</code>, <code>Text</code> is the post text,
@@ -150,12 +150,12 @@ first row without the <code>Text</code> column (we can safely ignore the
 row id):</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ng20</span><span class="op">[</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>                   Id FileId Subset Label   Newsgroup</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>alt.atheism<span class="fl">.1</span> train_1  <span class="dv">49960</span>  train     <span class="dv">0</span> alt.atheism</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>                   Id FileId Subset Label   Newsgroup</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>alt.atheism<span class="fl">.1</span> train_1  <span class="dv">49960</span>  train     <span class="dv">0</span> alt.atheism</span></code></pre></div>
 <p>And here’s the first few characters of the text:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="va">ng20</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span><span class="op">$</span><span class="va">Text</span>, <span class="fl">1</span>, <span class="fl">72</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"From: mathew &lt;mathew@mantis.co.uk&gt;</span><span class="sc">\n</span><span class="st">Subject: Alt.Atheism FAQ: Atheist Res"</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"From: mathew &lt;mathew@mantis.co.uk&gt;</span><span class="sc">\n</span><span class="st">Subject: Alt.Atheism FAQ: Atheist Res"</span></span></code></pre></div>
 <p>There is a <em>lot</em> more where that came from, which I invite you
 to investigate (and fill your terminal with) yourself. Notably,
 <code>snedata</code> doesn’t do any processing of the posts, so the
@@ -183,34 +183,36 @@ original post:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ng20spl</span> <span class="op">&lt;-</span> <span class="va">ng20</span> <span class="op">|&gt;</span> <span class="fu">separate_longer_delim</span><span class="op">(</span><span class="va">`Text`</span>, delim <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ng20spl</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">834780</span>      <span class="dv">6</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">834780</span>      <span class="dv">6</span></span></code></pre></div>
 <p>Now the first row looks like:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span> <span class="va">ng20spl</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>       Id FileId                               Text Subset Label   Newsgroup</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> train_1  <span class="dv">49960</span> From<span class="sc">:</span> mathew <span class="sc">&lt;</span>mathew<span class="sc">@</span>mantis.co.uk<span class="sc">&gt;</span>  train     <span class="dv">0</span> alt.atheism</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">ng20spl</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>       Id FileId                               Text Subset Label   Newsgroup</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="dv">1</span> train_1  <span class="dv">49960</span> From<span class="sc">:</span> mathew <span class="sc">&lt;</span>mathew<span class="sc">@</span>mantis.co.uk<span class="sc">&gt;</span>  train     <span class="dv">0</span> alt.atheism</span></code></pre></div>
 <p>The first filtering is to remove headers (anything before the first
 blank line) and footers (assumed to be anything after the first line of
 repeated hyphens):</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cleaned_text</span> <span class="op">&lt;-</span> <span class="va">ng20spl</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">`Newsgroup`</span>, <span class="va">`Id`</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="va">`Text`</span> <span class="op">==</span> <span class="st">""</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>,</span>
-<span>         <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">`Text`</span>, <span class="st">"^--"</span><span class="op">)</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="va">`Text`</span> <span class="op">==</span> <span class="st">""</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">`Text`</span>, <span class="st">"^--"</span><span class="op">)</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">cleaned_text</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">599249</span>      <span class="dv">6</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">599249</span>      <span class="dv">6</span></span></code></pre></div>
 <p>And this attempts to removed quoted text:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cleaned_text</span> <span class="op">&lt;-</span> <span class="va">cleaned_text</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">`Text`</span>, <span class="st">"^[^&gt;]+[A-Za-z\\d]"</span><span class="op">)</span> <span class="op">|</span></span>
+<span>    <span class="fu">str_detect</span><span class="op">(</span><span class="va">`Text`</span>, <span class="st">"^[^&gt;]+[A-Za-z\\d]"</span><span class="op">)</span> <span class="op">|</span></span>
 <span>      <span class="va">`Text`</span> <span class="op">==</span> <span class="st">""</span>,</span>
-<span>    <span class="op">!</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">`Text`</span>, <span class="st">"writes(:|\\.\\.\\.)$"</span><span class="op">)</span>,</span>
-<span>    <span class="op">!</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">`Text`</span>, <span class="st">"^In article &lt;"</span><span class="op">)</span></span>
+<span>    <span class="op">!</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">`Text`</span>, <span class="st">"writes(:|\\.\\.\\.)$"</span><span class="op">)</span>,</span>
+<span>    <span class="op">!</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">`Text`</span>, <span class="st">"^In article &lt;"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">cleaned_text</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">445080</span>      <span class="dv">6</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">445080</span>      <span class="dv">6</span></span></code></pre></div>
 <p>These functions are a bit different from the ones used on the python
 side by <a href="https://github.com/scikit-learn/scikit-learn/blob/3f89022fa04d293152f1d32fbc2a5bdaaf2df364/sklearn/datasets/_twenty_newsgroups.py" class="external-link">scikit-learn</a>
 – see the functions <code>strip_newsgroup_header</code>,
@@ -230,14 +232,16 @@ them, and also re-associate the other columns from the original
 <code>ng20</code> data:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">text_unsplit</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">cleaned_text</span> <span class="op">|&gt;</span> <span class="fu">group_by</span><span class="op">(</span><span class="va">`Id`</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">summarise</span><span class="op">(</span>`Text` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">`Text`</span>, collapse <span class="op">=</span> <span class="st">" "</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">cleaned_text</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">`Id`</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span>`Text` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">`Text`</span>, collapse <span class="op">=</span> <span class="st">" "</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">text_unsplit</span> <span class="op">&lt;-</span> <span class="va">ng20</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">`Text`</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">left_join</span><span class="op">(</span><span class="va">text_unsplit</span>, by <span class="op">=</span> <span class="st">"Id"</span><span class="op">)</span></span>
-<span><span class="va">text_unsplit</span> <span class="op">&lt;-</span> </span>
+<span><span class="va">text_unsplit</span> <span class="op">&lt;-</span></span>
 <span>  <span class="va">text_unsplit</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Id"</span>, <span class="st">"FileId"</span>, <span class="st">"Text"</span>, <span class="st">"Subset"</span>, <span class="st">"Label"</span>, <span class="st">"Newsgroup"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">text_unsplit</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">18846</span>     <span class="dv">6</span></span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">18846</span>     <span class="dv">6</span></span></code></pre></div>
 <p>Back to the original structure. This processing isn’t perfect, but it
 should do a decent job. Now we can do some actual text processing.</p>
 </div>
@@ -269,7 +273,7 @@ without issue.</p>
 <span>  <span class="fu">tm_map</span><span class="op">(</span><span class="va">removeWords</span>, <span class="fu">stopwords</span><span class="op">(</span><span class="st">"english"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">tm_map</span><span class="op">(</span><span class="va">stripWhitespace</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">corpus</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">18846</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">18846</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="filtering-out-bad-documents">Filtering Out Bad Documents<a class="anchor" aria-label="anchor" href="#filtering-out-bad-documents"></a>
 </h3>
@@ -284,42 +288,47 @@ as well see if we can come up with some reasonable filter values using
 some simple methods.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">count_words</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">doc</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="st">" "</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">doc</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="st">" "</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">nwords</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">corpus</span>, <span class="va">count_words</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">nwords</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>   <span class="fl">0.00</span>   <span class="fl">24.00</span>   <span class="fl">46.00</span>   <span class="fl">84.42</span>   <span class="fl">86.00</span> <span class="fl">6592.00</span> </span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>   Min. <span class="dv">1</span>st Qu.  Median    Mean <span class="dv">3</span>rd Qu.    Max. </span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>   <span class="fl">0.00</span>   <span class="fl">24.00</span>   <span class="fl">46.00</span>   <span class="fl">84.42</span>   <span class="fl">86.00</span> <span class="fl">6592.00</span> </span></code></pre></div>
 <p>Clearly there is quite a skew in terms of the number of words. Some
 messages now have zero words, and one has nearly 7000. But the median is
 less than 50 words. Let’s look at the distribution of the number of
 words, but stop at 95% of the data to avoid the outliers:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">nwords</span><span class="op">[</span><span class="va">nwords</span> <span class="op">&lt;=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">nwords</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">]</span>, main <span class="op">=</span> <span class="st">"0-95% word count distribution"</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="img/sparse-data-example/word-dist.png" alt=""><p class="caption">0-95% word count distribution</p>
+<div class="float">
+<img src="img/sparse-data-example/word-dist.png" alt="0-95% word count distribution"><div class="figcaption">0-95% word count distribution</div>
 </div>
 <p>So 95% of the data contains 250 words or less.</p>
 <p>What is this massive document. Let’s (carefully) take a look:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="va">ng20</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">nwords</span><span class="op">)</span>,<span class="op">]</span><span class="op">$</span><span class="va">Text</span>, <span class="fl">0</span>, <span class="fl">80</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"From: jeh@cmkrnl.com</span><span class="sc">\n</span><span class="st">Subject: Electrical wiring FAQ (was: A question about 120VA"</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="va">ng20</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">nwords</span><span class="op">)</span>, <span class="op">]</span><span class="op">$</span><span class="va">Text</span>, <span class="fl">0</span>, <span class="fl">80</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"From: jeh@cmkrnl.com</span><span class="sc">\n</span><span class="st">Subject: Electrical wiring FAQ (was: A question about 120VA"</span></span></code></pre></div>
 <p>Ah, it’s a FAQ. Ok that makes sense. Now let’s look at the
 distribution of the raw length of the documents in terms of number of
 characters:</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nchars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">corpus</span>, <span class="kw">function</span><span class="op">(</span><span class="va">doc</span><span class="op">)</span> <span class="op">{</span> <span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_length.html" class="external-link">str_length</a></span><span class="op">(</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">nchars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">corpus</span>, <span class="kw">function</span><span class="op">(</span><span class="va">doc</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu">str_length</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">nchars</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.0</span>   <span class="fl">158.0</span>   <span class="fl">310.0</span>   <span class="fl">594.6</span>   <span class="fl">593.0</span> <span class="fl">67441.0</span> </span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>   Min. <span class="dv">1</span>st Qu.  Median    Mean <span class="dv">3</span>rd Qu.    Max. </span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>    <span class="fl">0.0</span>   <span class="fl">158.0</span>   <span class="fl">310.0</span>   <span class="fl">594.6</span>   <span class="fl">593.0</span> <span class="fl">67441.0</span> </span></code></pre></div>
 <p>Seems reminiscent of the word count distribution. So let’s see how
 related they are (you’d assume very related but you never know):</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">nwords</span>, <span class="va">nchars</span>, main <span class="op">=</span> <span class="st">"Number of words vs number of characters"</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="img/sparse-data-example/word-char-correlation.png" alt=""><p class="caption">Number of words vs number of characters</p>
+<div class="float">
+<img src="img/sparse-data-example/word-char-correlation.png" alt="Number of words vs number of characters"><div class="figcaption">Number of words vs number of characters</div>
 </div>
 <p>Ok that’s a very good relation, which makes those documents which
 don’t appear on the main trendline all the more suspicious. The easy way
@@ -327,15 +336,16 @@ to deal with this is to define an average word length:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">avg_word_lengths</span> <span class="op">&lt;-</span> <span class="va">nchars</span> <span class="op">/</span> <span class="va">nwords</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">avg_word_lengths</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA<span class="st">'s </span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="st">  1.000   6.294   6.750   6.720   7.213  27.533      77 </span></span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>   Min. <span class="dv">1</span>st Qu.  Median    Mean <span class="dv">3</span>rd Qu.    Max.    NA<span class="st">'s </span></span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a><span class="st">  1.000   6.294   6.750   6.720   7.213  27.533      77 </span></span></code></pre></div>
 <p>Those <code>NA</code>’s are the documents with zero words. This looks
 like another rather skewed distribution:</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">avg_word_lengths</span><span class="op">[</span><span class="va">avg_word_lengths</span> <span class="op">&lt;=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">avg_word_lengths</span>, <span class="fl">0.95</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">]</span>,</span>
-<span>     main <span class="op">=</span> <span class="st">"0-95% average word length distribution"</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="img/sparse-data-example/avg-word-length-dist.png" alt=""><p class="caption">0-95% average word length distribution</p>
+<span>  main <span class="op">=</span> <span class="st">"0-95% average word length distribution"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<div class="float">
+<img src="img/sparse-data-example/avg-word-length-dist.png" alt="0-95% average word length distribution"><div class="figcaption">0-95% average word length distribution</div>
 </div>
 <p>So 95% of the data has an average word length of 8 or less.</p>
 <p>This gives us a bit of a feel for what might be some reasonable
@@ -353,19 +363,19 @@ investigating the suspicious documents in this article.</p>
 <span><span class="va">corpus</span> <span class="op">&lt;-</span> <span class="va">corpus</span><span class="op">[</span><span class="op">!</span><span class="va">suspiciously_short_indices</span><span class="op">]</span></span>
 <span><span class="va">text_unsplit</span> <span class="op">&lt;-</span> <span class="va">text_unsplit</span><span class="op">[</span><span class="op">!</span><span class="va">suspiciously_short_indices</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">corpus</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">17708</span></span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">17708</span></span></code></pre></div>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">is_suspiciously_long</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">doc</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu">count_words</span><span class="op">(</span><span class="op">)</span> <span class="op">&gt;=</span> <span class="fl">2000</span></span>
+<span>  <span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu">count_words</span><span class="op">(</span><span class="op">)</span> <span class="op">&gt;=</span> <span class="fl">2000</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">suspiciously_long_indices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">corpus</span>, <span class="va">is_suspiciously_long</span><span class="op">)</span></span>
 <span><span class="va">corpus</span> <span class="op">&lt;-</span> <span class="va">corpus</span><span class="op">[</span><span class="op">!</span><span class="va">suspiciously_long_indices</span><span class="op">]</span></span>
 <span><span class="va">text_unsplit</span> <span class="op">&lt;-</span> <span class="va">text_unsplit</span><span class="op">[</span><span class="op">!</span><span class="va">suspiciously_long_indices</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">corpus</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">17675</span></span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">17675</span></span></code></pre></div>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">avg_word_len</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">doc</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="op">(</span><span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_length.html" class="external-link">str_length</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu">count_words</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">(</span><span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu">str_length</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu">count_words</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">has_suspiciously_short_words</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">doc</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu">avg_word_len</span><span class="op">(</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">4</span></span>
@@ -375,16 +385,16 @@ investigating the suspicious documents in this article.</p>
 <span><span class="va">corpus</span> <span class="op">&lt;-</span> <span class="va">corpus</span><span class="op">[</span><span class="op">!</span><span class="va">suspiciously_short_word_indices</span><span class="op">]</span></span>
 <span><span class="va">text_unsplit</span> <span class="op">&lt;-</span> <span class="va">text_unsplit</span><span class="op">[</span><span class="op">!</span><span class="va">suspiciously_short_word_indices</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">corpus</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">17670</span></span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">17670</span></span></code></pre></div>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">has_suspiciously_long_words</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">doc</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu">avg_word_len</span><span class="op">(</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">15</span></span>
+<span>  <span class="va">doc</span> <span class="op">|&gt;</span> <span class="fu">avg_word_len</span><span class="op">(</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">15</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">suspiciously_long_word_indices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">corpus</span>, <span class="va">has_suspiciously_long_words</span><span class="op">)</span></span>
 <span><span class="va">corpus</span> <span class="op">&lt;-</span> <span class="va">corpus</span><span class="op">[</span><span class="op">!</span><span class="va">suspiciously_long_word_indices</span><span class="op">]</span></span>
 <span><span class="va">text_unsplit</span> <span class="op">&lt;-</span> <span class="va">text_unsplit</span><span class="op">[</span><span class="op">!</span><span class="va">suspiciously_long_word_indices</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">corpus</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">17666</span></span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">17666</span></span></code></pre></div>
 <p>Ok, I think we’ve done enough to move on.</p>
 </div>
 </div>
@@ -396,7 +406,7 @@ values:</p>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tfidf</span> <span class="op">&lt;-</span> <span class="fu">weightTfIdf</span><span class="op">(</span><span class="fu">DocumentTermMatrix</span><span class="op">(</span><span class="va">corpus</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">tfidf</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">17666</span> <span class="dv">88894</span></span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">17666</span> <span class="dv">88894</span></span></code></pre></div>
 <p>Nearly 90,000 dimensions, each one a weighted word frequency. How
 sparse is it:</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
@@ -453,13 +463,13 @@ dataset is small enough for us to handle an exact search comfortably, at
 least if you have enough cores:</p>
 <div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tfidfl1_hell_bf</span> <span class="op">&lt;-</span></span>
-<span>    <span class="fu">brute_force_knn</span><span class="op">(</span></span>
-<span>        <span class="va">tfidf_spl1</span>,</span>
-<span>        k <span class="op">=</span> <span class="fl">15</span>,</span>
-<span>        metric <span class="op">=</span> <span class="st">"hellinger"</span>,</span>
-<span>        n_threads <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>        verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu">brute_force_knn</span><span class="op">(</span></span>
+<span>    <span class="va">tfidf_spl1</span>,</span>
+<span>    k <span class="op">=</span> <span class="fl">15</span>,</span>
+<span>    metric <span class="op">=</span> <span class="st">"hellinger"</span>,</span>
+<span>    n_threads <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 <p>This took under a minute on my laptop.</p>
 </div>
 <div class="section level2">
@@ -514,22 +524,22 @@ axes:</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">ng20_umap_rotated</span>, Newsgroup <span class="op">=</span> <span class="va">text_unsplit</span><span class="op">$</span><span class="va">Newsgroup</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">X1</span>, y <span class="op">=</span> <span class="va">X2</span>, color <span class="op">=</span> <span class="va">Newsgroup</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">ng20_umap_rotated</span>, Newsgroup <span class="op">=</span> <span class="va">text_unsplit</span><span class="op">$</span><span class="va">Newsgroup</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">X1</span>, y <span class="op">=</span> <span class="va">X2</span>, color <span class="op">=</span> <span class="va">Newsgroup</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.4</span>, size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">palette</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>        title <span class="op">=</span> <span class="st">"Sparse Hellinger 20Newsgroups UMAP"</span>,</span>
-<span>        x <span class="op">=</span> <span class="st">""</span>,</span>
-<span>        y <span class="op">=</span> <span class="st">""</span>,</span>
-<span>        color <span class="op">=</span> <span class="st">"Newsgroup"</span></span>
-<span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="img/sparse-data-example/ng20-umap.png" alt=""><p class="caption">UMAP</p>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.4</span>, size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">palette</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"Sparse Hellinger 20Newsgroups UMAP"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">""</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">""</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"Newsgroup"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="float">
+<img src="img/sparse-data-example/ng20-umap.png" alt="UMAP"><div class="figcaption">UMAP</div>
 </div>
 <p>Although we can’t compare this result too easily with the Python
 example, as that one plots the training and test set separately, and

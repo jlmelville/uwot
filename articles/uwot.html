@@ -83,83 +83,252 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/uwot" class="external-link">uwot</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; Loading required package: Matrix</span></span></code></pre></div>
+<p><code>uwot</code> is the a package for implementing the UMAP
+dimensionality reduction method. For more information on UMAP, see the
+<a href="https://arxiv.org/abs/1802.03426" class="external-link">original paper</a> and the <a href="https://github.com/lmcinnes/umap" class="external-link">Python package</a>.</p>
+<p>We’ll use the <code>iris</code> dataset in these examples. It’s not
+the ideal dataset because it’s not terribly large nor high-dimensional
+(with only 4 numeric columns), but you’ll get the general idea.</p>
+<p>The default output dimensionality of UMAP is into two-dimensions, so
+it’s amenable for visualization, but you can set a larger value with
+<code>n_components</code>. In this vignette we’ll stick with two
+dimensions. We will need a function to make plotting easier:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># See function man page for help</span></span>
-<span><span class="op">?</span><span class="va">umap</span></span>
+<code class="sourceCode R"><span><span class="va">kabsch</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pm</span>, <span class="va">qm</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">pm_dims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">pm</span><span class="op">)</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">qm</span><span class="op">)</span> <span class="op">==</span> <span class="va">pm_dims</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span>call. <span class="op">=</span> <span class="cn">TRUE</span>, <span class="st">"Point sets must have the same dimensions"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="co"># The rotation matrix will have (ncol - 1) leading ones in the diagonal</span></span>
+<span>  <span class="va">diag_ones</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">pm_dims</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Non-numeric columns are ignored, so in a lot of cases you can pass a data</span></span>
-<span><span class="co"># frame directly to umap</span></span>
-<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, n_neighbors <span class="op">=</span> <span class="fl">50</span>, learning_rate <span class="op">=</span> <span class="fl">0.5</span>, init <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span>
+<span>  <span class="co"># center the points</span></span>
+<span>  <span class="va">pm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">pm</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="va">qm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">qm</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Load mnist from somewhere, e.g.</span></span>
-<span><span class="co"># devtools::install_github("jlmelville/snedata")</span></span>
-<span><span class="co"># mnist &lt;- snedata::download_mnist()</span></span>
-<span><span class="va">mnist_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, min_dist <span class="op">=</span> <span class="fl">0.001</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="va">am</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/matrix-products.html" class="external-link">crossprod</a></span><span class="op">(</span><span class="va">pm</span>, <span class="va">qm</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># For high dimensional datasets (&gt; 100-1000 columns) using PCA to reduce</span></span>
-<span><span class="co"># dimensionality is highly recommended to avoid the nearest neighbor search</span></span>
-<span><span class="co"># taking a long time. Keeping only 50 dimensions can speed up calculations</span></span>
-<span><span class="co"># without affecting the visualization much</span></span>
-<span><span class="va">mnist_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, pca <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
+<span>  <span class="va">svd_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/svd.html" class="external-link">svd</a></span><span class="op">(</span><span class="va">am</span><span class="op">)</span></span>
+<span>  <span class="co"># use the sign of the determinant to ensure a right-hand coordinate system</span></span>
+<span>  <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/det.html" class="external-link">determinant</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/matrix-products.html" class="external-link">tcrossprod</a></span><span class="op">(</span><span class="va">svd_res</span><span class="op">$</span><span class="va">v</span>, <span class="va">svd_res</span><span class="op">$</span><span class="va">u</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">sign</span></span>
+<span>  <span class="va">dm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">diag_ones</span>, <span class="va">d</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Use a specific number of threads</span></span>
-<span><span class="va">mnist_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, min_dist <span class="op">=</span> <span class="fl">0.001</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, n_threads <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span>  <span class="co"># rotation matrix</span></span>
+<span>  <span class="va">um</span> <span class="op">&lt;-</span> <span class="va">svd_res</span><span class="op">$</span><span class="va">v</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/matrix-products.html" class="external-link">tcrossprod</a></span><span class="op">(</span><span class="va">dm</span>, <span class="va">svd_res</span><span class="op">$</span><span class="va">u</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Use a different metric</span></span>
-<span><span class="va">mnist_umap_cosine</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, metric <span class="op">=</span> <span class="st">"cosine"</span>, min_dist <span class="op">=</span> <span class="fl">0.001</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, n_threads <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span>  <span class="co"># Rotate and then translate to the original centroid location of qm</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sweep.html" class="external-link">sweep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/matrix-products.html" class="external-link">tcrossprod</a></span><span class="op">(</span><span class="va">um</span>, <span class="va">pm</span><span class="op">)</span><span class="op">)</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">qm</span>, <span class="st">"scaled:center"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">iris_pca2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span><span class="op">$</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span>
+<span><span class="va">plot_umap</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">coords</span>, <span class="va">col</span> <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span>, <span class="va">pca</span> <span class="op">=</span> <span class="va">iris_pca2</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">kabsch</span><span class="op">(</span><span class="va">coords</span>, <span class="va">pca</span><span class="op">)</span>, col <span class="op">=</span> <span class="va">col</span>, xlab <span class="op">=</span> <span class="st">""</span>, ylab <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>Most of this code is just the <a href="https://en.wikipedia.org/wiki/Kabsch_algorithm" class="external-link">kabsch
+algorithm</a> to align two point sets, which I am going to use to align
+the results of UMAP over the first two principal components. This is to
+keep the relative orientation of the output the same across different
+plots which makes it a bit easier to see the differences between them.
+UMAP is a stochastic algorithm so the output will be different each time
+you run it and small changes to the parameters can affect the
+<em>absolute</em> values of the coordinates, although the interpoint
+differences are usually similar. There’s no need to go to such trouble
+in most circumstances: the output of <code>umap</code> is a perfectly
+useful 2D matrix of coordinates you can pass into a plotting function
+with no further processing required.</p>
+<div class="section level2">
+<h2 id="basic-umap">Basic UMAP<a class="anchor" aria-label="anchor" href="#basic-umap"></a>
+</h2>
+<p>The defaults of the <code>umap</code> function should work for most
+datasets. No scaling of the input data is done, but non-numeric columns
+are ignored:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span>
+<span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umap</span><span class="op">)</span></span></code></pre></div>
+<p><img src="uwot_files/figure-html/basic%20UMAP-1.png" width="700"></p>
+<div class="section level3">
+<h3 id="parameters">Parameters<a class="anchor" aria-label="anchor" href="#parameters"></a>
+</h3>
+<p><code>uwot</code> has accumulated many parameters over time, but most
+of the time there are only a handful you need worry about. The most
+important ones are:</p>
+<div class="section level4">
+<h4 id="min_dist">
+<code>min_dist</code><a class="anchor" aria-label="anchor" href="#min_dist"></a>
+</h4>
+<p>This is a mainly aesthetic parameter, which defines how close points
+can get in the output space. A smaller value tends to make any clusters
+in the output more compact. You should experiment with values between 0
+and 1, although don’t choose exactly zero. The default is 0.01, which
+seems like it’s a bit small for <code>iris</code>. Let’s crank up
+<code>min_dist</code> to <code>0.3</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">iris_umap_md05</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, min_dist <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
+<span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umap_md05</span><span class="op">)</span></span></code></pre></div>
+<p><img src="uwot_files/figure-html/min_dist%200.5-1.png" width="700"></p>
+<p>This has made the clusters bigger and closer together, so we’ll use
+<code>min_dist = 0.3</code> for the other examples with
+<code>iris</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="n_neighbors">
+<code>n_neighbors</code><a class="anchor" aria-label="anchor" href="#n_neighbors"></a>
+</h4>
+<p>This defines the number of items in the dataset that define the
+neighborhood around each point. Set it too low and you will get a more
+fragmented layout. Set it too high and you will get something that will
+miss a lot of local structure.</p>
+<p>Here’s a result with 5 neighbors:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">iris_umap_nbrs5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, n_neighbors <span class="op">=</span> <span class="fl">5</span>, min_dist <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
+<span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umap_nbrs5</span><span class="op">)</span></span></code></pre></div>
+<p><img src="uwot_files/figure-html/5%20neighbors-1.png" width="700"></p>
+<p>It’s not hugely different from the default of 15 neighbors, but the
+clusters are a bit more broken up.</p>
+<p>There should be a more pronounced difference going the other way and
+looking at 100 neighbors:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">iris_umap_nbrs100</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, n_neighbors <span class="op">=</span> <span class="fl">100</span>, min_dist <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
+<span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umap_nbrs100</span><span class="op">)</span></span></code></pre></div>
+<p><img src="uwot_files/figure-html/100%20neighbors-1.png" width="700"></p>
+<p>Here there is a much more uniform appearance to the results. It’s
+always worth trying a few different values of <code>n_neighbors</code>,
+especially larger values, although larger values of
+<code>n_neighbors</code> will lead to longer run times. Sometimes small
+clusters that you think are meaningful may in fact be artifacts of
+setting <code>n_neighbors</code> too small, so starting with a larger
+value and looking at the effect of reducing <code>n_neighbors</code> can
+help you avoid over interpreting results.</p>
+</div>
+<div class="section level4">
+<h4 id="init">
+<code>init</code><a class="anchor" aria-label="anchor" href="#init"></a>
+</h4>
+<p>The default initialization of UMAP is to use spectral initialization,
+which acts upon the (symmetrized) k-nearest neighbor graph that is in
+determined by your choice of <code>n_neighbors</code>. This is usually a
+good choice, but it involves a very sparse matrix, which can sometimes
+be a bit <em>too</em> sparse, which leads to numerical difficulties
+which manifest as slow run times or even hanging calculations. If your
+dataset causes these issues, you can either try increasing
+<code>n_neighbors</code> but I have seen cases where that would be
+inconvenient in terms of CPU and RAM usage. An alternative is to use the
+first two principal components of the data, which at least uses the data
+you provide to give a solid global picture of the data that UMAP can
+refine. It’s not appropriate for every dataset, but in most cases, it’s
+a perfectly good alternative.</p>
+<p>The only gotcha with it is that depending on the scaling of your
+data, the initial coordinates can have large inter-point distances. UMAP
+will not optimize that well, so such an output should be scaled to a
+small standard deviation. If you set <code>init = "spca"</code>, it will
+do all that for you, although to be more aligned with the UMAP
+coordinate initialization, I recommend you also set
+<code>init_sdev = "range"</code> as well. <code>init_sdev</code> can
+also take a numerical value for the standard deviation. Values from
+<code>1e-4</code> to <code>10</code> are reasonable, but I recommend you
+stick to the default of <code>"range"</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">iris_umap_spca</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>,</span>
+<span>    init <span class="op">=</span> <span class="st">"spca"</span>,</span>
+<span>    init_sdev <span class="op">=</span> <span class="st">"range"</span>,</span>
+<span>    min_dist <span class="op">=</span> <span class="fl">0.3</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umap_spca</span><span class="op">)</span></span></code></pre></div>
+<p><img src="uwot_files/figure-html/spca%20init-1.png" width="700"></p>
+<p>This doesn’t have a big effect on <code>iris</code>, but it’s good to
+know about this as an option: and it can also smooth out the effect of
+changing <code>n_neighbors</code> on the initial coordinates with the
+standard spectral initialization, which can make it easier to see the
+effect of changing <code>n_neighbors</code> on the final result.</p>
+<p>Some other <code>init</code> options to know about:</p>
+<ul>
+<li>
+<code>"random"</code>: if the worst comes to the worst, you can
+always fall back to randomly assigning the initial coordinates. You
+really want to avoid this if you can though, because it will take longer
+to optimize the coordinates to the same quality, so you will need to
+increase <code>n_epochs</code> to compensate. Even if you do that, it’s
+<em>much</em> more likely that you will end up in a minimum that is less
+desirable than one based on a good initialization. This will make
+interpreting the results harder, as you are more likely to end up with
+different clusters beings split or mixed with each other.</li>
+<li>If you have some coordinates you like from another method, you can
+pass them in as a matrix. But remember will probably want to scale them
+with <code>init_sdev</code> though.</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="dens_scale">
+<code>dens_scale</code><a class="anchor" aria-label="anchor" href="#dens_scale"></a>
+</h4>
+<p>The <code>dens_scale</code> parameter varies from 0 to 1 and controls
+how much of the relative densities of the input data is attempted to be
+preserved in the output.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">iris_umapds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, min_dist <span class="op">=</span> <span class="fl">0.3</span>, dens_scale <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umapds</span><span class="op">)</span></span></code></pre></div>
+<p><img src="uwot_files/figure-html/UMAP%20with%20density%20scaling-1.png" width="700"></p>
+<p>This has shrunk the black cluster on the left of the plot (those are
+of species <code>setosa</code>), which reflect that the density of the
+<code>setosa</code> points is less spread out in the input data than the
+other two species. For more on <code>dens_scale</code> please read its
+dedicated <a href="https://jlmelville.github.io/uwot/articles/leopold.html">article</a>.</p>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="embedding-new-data">Embedding New Data<a class="anchor" aria-label="anchor" href="#embedding-new-data"></a>
+</h2>
+<p>Once you have an embedding, you can use it to embed new data,
+although you need to remember to ask for a “model” to return. Instead of
+just the coordinates, you will now get back a list which contains all
+the extra parameters you will need for transforming new data. The
+coordinates are still available in the <code>$embedding</code>
+component.</p>
+<p>Let’s try building a UMAP with just the <code>setosa</code> and
+<code>versicolor</code> iris species:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># If you are only interested in visualization, `fast_sgd = TRUE` gives a much faster optimization</span></span>
-<span><span class="va">mnist_umap_fast_sgd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, metric <span class="op">=</span> <span class="st">"cosine"</span>, min_dist <span class="op">=</span> <span class="fl">0.001</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, fast_sgd <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Supervised dimension reduction</span></span>
-<span><span class="va">mnist_umap_s</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, min_dist <span class="op">=</span> <span class="fl">0.001</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, n_threads <span class="op">=</span> <span class="fl">8</span>,</span>
-<span>                     y <span class="op">=</span> <span class="va">mnist</span><span class="op">$</span><span class="va">Label</span>, target_weight <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Add new points to an existing embedding</span></span>
-<span><span class="va">mnist_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mnist</span>, <span class="fl">60000</span><span class="op">)</span></span>
-<span><span class="va">mnist_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">mnist</span>, <span class="fl">10000</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># You must set ret_model = TRUE to return extra data we need</span></span>
-<span><span class="co"># coordinates are in mnist_train_umap$embedding</span></span>
-<span><span class="va">mnist_train_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist_train</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, ret_model <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">mnist_test_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap_transform.html">umap_transform</a></span><span class="op">(</span><span class="va">mnist_test</span>, <span class="va">mnist_train_umap</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Save the nearest neighbor data</span></span>
-<span><span class="va">mnist_nn</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, ret_nn <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co"># coordinates are now in mnist_nn$embedding</span></span>
-<span></span>
-<span><span class="co"># Re-use the nearest neighor data and save a lot of time</span></span>
-<span><span class="va">mnist_nn_spca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, nn_method <span class="op">=</span> <span class="va">mnist_nn</span><span class="op">$</span><span class="va">nn</span>, init <span class="op">=</span> <span class="st">"spca"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># No problem to have ret_nn = TRUE and ret_model = TRUE at the same time</span></span>
-<span><span class="co"># Or just use the ret_extra parameter:</span></span>
-<span><span class="va">mnist_nn_and_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, ret_extra <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"nn"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># You can also get to the input fuzzy graph as a sparse matrix via "fgraph"</span></span>
-<span><span class="va">mnist_with_fgraph</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, ret_extra <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fgraph"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># equivalent for lvish is to use "P" (input probability matrix):</span></span>
-<span><span class="va">mnist_with_P</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lvish.html">lvish</a></span><span class="op">(</span><span class="va">mnist</span>, ret_extra <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"P"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):</span></span>
-<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, metric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"euclidean"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Sepal.Width"</span><span class="op">)</span>,</span>
-<span>                                      <span class="st">"euclidean"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Petal.Length"</span>, <span class="st">"Petal.Width"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># Can also use individual factor columns</span></span>
-<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, metric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"euclidean"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sepal.Length"</span>, <span class="st">"Sepal.Width"</span><span class="op">)</span>,</span>
-<span>                                      <span class="st">"euclidean"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Petal.Length"</span>, <span class="st">"Petal.Width"</span><span class="op">)</span>,</span>
-<span>                                      <span class="st">"categorical"</span> <span class="op">=</span> <span class="st">"Species"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Batch mode allows for multiple threads while being reproducible</span></span>
-<span><span class="co"># (at the cost of needing more epochs for larger datasets)</span></span>
+<span><span class="va">iris_train</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="va">iris</span><span class="op">$</span><span class="va">Species</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"setosa"</span>, <span class="st">"versicolor"</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="va">iris_train_umap</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris_train</span>, min_dist <span class="op">=</span> <span class="fl">0.3</span>, ret_model <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">iris_train_umap</span><span class="op">$</span><span class="va">embedding</span>,</span>
+<span>  col <span class="op">=</span> <span class="va">iris_train</span><span class="op">$</span><span class="va">Species</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  ylab <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  main <span class="op">=</span> <span class="st">"UMAP setosa + versicolor"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="uwot_files/figure-html/create%20a%20UMAP%20model-1.png" width="700"></p>
+<p>Next, you can use <code>umap_transform</code> to embed the new
+points:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">iris_test</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="va">iris</span><span class="op">$</span><span class="va">Species</span> <span class="op">==</span> <span class="st">"virginica"</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">iris_umap_batch</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, batch <span class="op">=</span> <span class="cn">TRUE</span>, n_sgd_threads <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co"># This will give the same results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">iris_umap_batch2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, batch <span class="op">=</span> <span class="cn">TRUE</span>, n_sgd_threads <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">iris_umap_batch</span> <span class="op">==</span> <span class="va">iris_umap_batch2</span><span class="op">)</span></span>
-<span><span class="co"># TRUE</span></span>
-<span></span>
-<span><span class="co"># Batch mode uses Adam optimizer by default. Control the parameters with the opt_args list</span></span>
-<span><span class="va">iris_umap_batch</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, batch <span class="op">=</span> <span class="cn">TRUE</span>, opt_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta1 <span class="op">=</span> <span class="fl">0.9</span>, beta2 <span class="op">=</span> <span class="fl">0.999</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">iris_test_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap_transform.html">umap_transform</a></span><span class="op">(</span><span class="va">iris_test</span>, <span class="va">iris_train_umap</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">iris_train_umap</span><span class="op">$</span><span class="va">embedding</span>, <span class="va">iris_test_umap</span><span class="op">)</span>,</span>
+<span>  col <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  ylab <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  main <span class="op">=</span> <span class="st">"UMAP transform virginica"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="uwot_files/figure-html/embed%20new%20coordinates-1.png" width="700"></p>
+<p>The green points in the top-right show the embedded data. Note that
+the original (black and red) clusters do not get optimized any further.
+While we haven’t perfectly reproduced the full UMAP, the
+<code>virginica</code> points are located in more or less the right
+place, close to the <code>versicolor</code> items. Just like with any
+machine learning method, you must be careful with how you choose your
+training set.</p>
+</div>
 <div class="section level2">
 <h2 id="supported-distances">Supported Distances<a class="anchor" aria-label="anchor" href="#supported-distances"></a>
 </h2>
@@ -184,13 +353,11 @@ Also be aware that the Pearson correlation distance is the cosine
 distance applied to row-centered vectors.</p>
 <p>If you need other metrics, and can generate the nearest neighbor info
 externally, you can pass the data directly to <code>uwot</code> via the
-<code>nn_method</code> parameter. See the <a href="https://github.com/jlmelville/uwot#nearest-neighbor-data-format" class="external-link">Nearest
-Neighbor Data Format section</a> for more details. Please note that the
-Hamming support is a lot slower than the other metrics. I do not
-recommend using it if you have more than a few hundred features, and
-even then expect it to take several minutes during the index building
-phase in situations where the Euclidean metric would take only a few
-seconds.</p>
+<code>nn_method</code> parameter. Please note that the Hamming support
+is a lot slower than the other metrics. I do not recommend using it if
+you have more than a few hundred features, and even then expect it to
+take several minutes during the index building phase in situations where
+the Euclidean metric would take only a few seconds.</p>
 </div>
 <div class="section level2">
 <h2 id="multi-threading-support">Multi-threading support<a class="anchor" aria-label="anchor" href="#multi-threading-support"></a>
@@ -216,7 +383,16 @@ implementation</a>. Below are results for the 70,000 MNIST digits
 Below, is the result of using the official Python UMAP implementation
 (via the <a href="https://cran.r-project.org/package=reticulate" class="external-link">reticulate</a>
 package). Under that is the result of using <code>uwot</code>.</p>
-<p><img src="articles/img/uwot/mnist-py.png" alt="mnist-py.png"><img src="articles/img/uwot/mnist-r.png" alt="mnist-r.png"></p>
+<div class="figure">
+<img src="mnist-py.png" alt="MNIST UMAP (Python)" width="75%"><p class="caption">
+MNIST UMAP (Python)
+</p>
+</div>
+<div class="figure">
+<img src="mnist-r.png" alt="MNIST UMAP (R)" width="75%"><p class="caption">
+MNIST UMAP (R)
+</p>
+</div>
 <p>The project documentation contains some more <a href="https://jlmelville.github.io/uwot/articles/umap-examples.html">examples</a>,
 and <a href="https://jlmelville.github.io/uwot/articles/pycompare.html">comparison
 with Python</a>.</p>
@@ -235,7 +411,7 @@ input.</p>
 <p>However, <code>uwot</code> <em>does</em> let you pass in nearest
 neighbor data. So if you have access to other nearest neighbor methods,
 you can generate data that can be used with <code>uwot</code>. See the
-<a href="https://github.com/jlmelville/uwot#nearest-neighbor-data-format" class="external-link">Nearest
+<a href="https://jlmelville.github.io/uwot/articles/nearest-neighbors-format.html">Nearest
 Neighbor Data Format</a> article. Or if you can calculate a distance
 matrix for your data, you can pass it in as <code>dist</code>
 object.</p>

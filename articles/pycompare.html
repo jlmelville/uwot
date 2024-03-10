@@ -130,8 +130,8 @@ affects the following datasets: <code>iris</code>, <code>coil20</code>,
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, pca <span class="op">=</span> <span class="fl">100</span>, min_dist <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># iris X data read from CSV</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>iris_umap <span class="op">=</span> umap.UMAP().fit_transform(iris_x)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># iris X data read from CSV</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>iris_umap <span class="op">=</span> umap.UMAP().fit_transform(iris_x)</span></code></pre></div>
 <p>Below the results on the left are for the <code>uwot</code> output.
 The image on the right is from <code>UMAP</code>. I present most of
 these results without comment because they seem to be very similar to

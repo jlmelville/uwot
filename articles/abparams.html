@@ -160,8 +160,8 @@ using the Python UMAP defaults of <code>spread = 1</code>,
 <span></span>
 <span><span class="fu">graphics</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/graphics/mtext.html" class="external-link">mtext</a></span><span class="op">(</span><span class="va">sub</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">xv</span>, <span class="fl">1</span> <span class="op">/</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">a</span> <span class="op">*</span> <span class="va">xv</span><span class="op">^</span><span class="op">(</span><span class="fl">2.0</span> <span class="op">*</span> <span class="va">b</span><span class="op">)</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"#1B9E77FF"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="img/abparams/umap_ab_curve.png" alt=""><p class="caption">UMAP a,b curve</p>
+<div class="float">
+<img src="img/abparams/umap_ab_curve.png" alt="UMAP a,b curve"><div class="figcaption">UMAP a,b curve</div>
 </div>
 <p>As the title indicates, this curve leads to the default parameters of
 <span class="math inline">\(a = 1.577\)</span>, <span class="math inline">\(b = 0.895\)</span>. <code>uwot</code> uses a
@@ -179,8 +179,8 @@ back <span class="math inline">\(a = 0.99\)</span>, <span class="math inline">\(
 <code>uwot</code> default results in orange and the Cauchy results in
 blue overlaid with the UMAP defaults (green, same as in the previous
 plot):</p>
-<div class="figure">
-<img src="img/abparams/umap_ab_curve_other.png" alt=""><p class="caption">Other UMAP a,b curve</p>
+<div class="float">
+<img src="img/abparams/umap_ab_curve_other.png" alt="Other UMAP a,b curve"><div class="figcaption">Other UMAP a,b curve</div>
 </div>
 <p>This still leaves open the question of how changing
 <code>spread</code> and <code>min_dist</code>, or <code>a</code> and

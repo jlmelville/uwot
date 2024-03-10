@@ -468,11 +468,15 @@ International World Wide Web Conferences Steering Committee.
 <span class="r-in"><span><span class="co"># to control neighborhood size. Use ret_extra = "nn" to return nearest</span></span></span>
 <span class="r-in"><span><span class="co"># neighbor data as well as the similarity graph. Return value is a list</span></span></span>
 <span class="r-in"><span><span class="co"># containing similarity_graph' and 'nn' items.</span></span></span>
-<span class="r-in"><span><span class="va">iris30_lv_graph</span> <span class="op">&lt;-</span> <span class="fu">similarity_graph</span><span class="op">(</span><span class="va">iris30</span>, perplexity <span class="op">=</span> <span class="fl">10</span>,</span></span>
-<span class="r-in"><span>                                    method <span class="op">=</span> <span class="st">"largevis"</span>, ret_extra <span class="op">=</span> <span class="st">"nn"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">iris30_lv_graph</span> <span class="op">&lt;-</span> <span class="fu">similarity_graph</span><span class="op">(</span><span class="va">iris30</span>,</span></span>
+<span class="r-in"><span>  perplexity <span class="op">=</span> <span class="fl">10</span>,</span></span>
+<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"largevis"</span>, ret_extra <span class="op">=</span> <span class="st">"nn"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># If you have the neighbor information you don't need the original data</span></span></span>
-<span class="r-in"><span><span class="va">iris30_lv_graph_nn</span> <span class="op">&lt;-</span> <span class="fu">similarity_graph</span><span class="op">(</span>nn_method <span class="op">=</span> <span class="va">iris30_lv_graph</span><span class="op">$</span><span class="va">nn</span>,</span></span>
-<span class="r-in"><span>                                       perplexity <span class="op">=</span> <span class="fl">10</span>, method <span class="op">=</span> <span class="st">"largevis"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">iris30_lv_graph_nn</span> <span class="op">&lt;-</span> <span class="fu">similarity_graph</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  nn_method <span class="op">=</span> <span class="va">iris30_lv_graph</span><span class="op">$</span><span class="va">nn</span>,</span></span>
+<span class="r-in"><span>  perplexity <span class="op">=</span> <span class="fl">10</span>, method <span class="op">=</span> <span class="st">"largevis"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">iris30_lv_graph_nn</span> <span class="op">==</span> <span class="va">iris30_lv_graph</span><span class="op">$</span><span class="va">similarity_graph</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>

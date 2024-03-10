@@ -94,35 +94,27 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># create model</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="umap.html">umap</a></span><span class="op">(</span><span class="va">iris_train</span>, ret_model <span class="op">=</span> <span class="cn">TRUE</span>, n_epochs <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in irlba::irlba(L, nv = n, nu = 0, maxit = iters):</span> function 'sexp_as_cholmod_sparse' not provided by package 'Matrix'</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># save without unloading: this leaves behind a temporary working directory</span></span></span>
 <span class="r-in"><span><span class="va">model_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"iris_umap"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="save_uwot.html">save_uwot</a></span><span class="op">(</span><span class="va">model</span>, file <span class="op">=</span> <span class="va">model_file</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'model' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The model can continue to be used</span></span></span>
 <span class="r-in"><span><span class="va">test_embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="umap_transform.html">umap_transform</a></span><span class="op">(</span><span class="va">iris_test</span>, <span class="va">model</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'model' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># To manually unload the model from memory when finished and to clean up</span></span></span>
 <span class="r-in"><span><span class="co"># the working directory (this doesn't touch your model file)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="unload_uwot.html">unload_uwot</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'model' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># At this point, model cannot be used with umap_transform, this would fail:</span></span></span>
 <span class="r-in"><span><span class="co"># test_embedding2 &lt;- umap_transform(iris_test, model)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># restore the model: this also creates a temporary working directory</span></span></span>
 <span class="r-in"><span><span class="va">model2</span> <span class="op">&lt;-</span> <span class="fu">load_uwot</span><span class="op">(</span>file <span class="op">=</span> <span class="va">model_file</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>‘/usr/bin/tar -xf '/tmp/RtmpWmsZ8u/iris_umap188716a5735b' -C '/tmp/RtmpWmsZ8u/dir18877d482e9b'’ returned error code 2</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in load_uwot(file = model_file):</span> Can't find model in /tmp/RtmpWmsZ8u/iris_umap188716a5735b</span>
 <span class="r-in"><span><span class="va">test_embedding2</span> <span class="op">&lt;-</span> <span class="fu"><a href="umap_transform.html">umap_transform</a></span><span class="op">(</span><span class="va">iris_test</span>, <span class="va">model2</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'model2' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Unload and clean up the loaded model temp directory</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="unload_uwot.html">unload_uwot</a></span><span class="op">(</span><span class="va">model2</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'model2' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># clean up the model file</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">model_file</span><span class="op">)</span></span></span>
@@ -130,10 +122,8 @@
 <span class="r-in"><span><span class="co"># save with unloading: this deletes the temporary working directory but</span></span></span>
 <span class="r-in"><span><span class="co"># doesn't allow the model to be re-used</span></span></span>
 <span class="r-in"><span><span class="va">model3</span> <span class="op">&lt;-</span> <span class="fu"><a href="umap.html">umap</a></span><span class="op">(</span><span class="va">iris_train</span>, ret_model <span class="op">=</span> <span class="cn">TRUE</span>, n_epochs <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in irlba::irlba(L, nv = n, nu = 0, maxit = iters):</span> function 'sexp_as_cholmod_sparse' not provided by package 'Matrix'</span>
 <span class="r-in"><span><span class="va">model_file3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"iris_umap"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model3</span> <span class="op">&lt;-</span> <span class="fu"><a href="save_uwot.html">save_uwot</a></span><span class="op">(</span><span class="va">model3</span>, file <span class="op">=</span> <span class="va">model_file3</span>, unload <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'model3' not found</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
