@@ -7,6 +7,9 @@
 `cosine` metric if you saved and reloaded the model. Thank you 
 [Holly Hall](https://github.com/mdrnao) for the report and helpful detective
 work (<https://github.com/jlmelville/uwot/issues/117>).
+* `umap_transform` could fail if the new data to be transformed had the 
+`scaled:center` and `scaled:scale` attributes set (e.g. from applying the
+`scale` function). This has now been fixed.
 
 # uwot 0.1.16
 

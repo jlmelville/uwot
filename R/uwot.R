@@ -2626,6 +2626,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       )
     }
     Xnames <- row.names(X)
+    X <- remove_scaling_attrs(X)
     X <- scale_input(X,
       scale_type = scale, ret_model = ret_model,
       verbose = verbose
@@ -4146,4 +4147,31 @@ scale_radii <- function(localr, dens_scale, a) {
 #' @importFrom Rcpp sourceCpp
 .onUnload <- function(libpath) {
   library.dynam.unload("uwot", libpath)
+}
+
+# Remove scaling attributes from a matrix
+# if the `scale` parameter is set then these attributes are assumed to have
+# been applied by uwot's internals and the equivalent scaling will be applied
+# to new data in umap_transform. However, these attributes could have been
+# applied by manually scaling the data before running any code in uwot, in which
+# case we should not save them as part of the model. This function is called
+# before applying any other scaling
+remove_scaling_attrs <- function(X) {
+  uwot_attrs <- c(
+    "scaled:range:min",
+    "scaled:range:max",
+    "scaled:colrange:min",
+    "scaled:colrange:max",
+    "scaled:maxabs",
+    "scaled:nzvcols",
+    "scaled:center",
+    "scaled:scale"
+  )
+  attrs <- names(attributes(X))
+  for (attr in attrs) {
+    if (attr %in% uwot_attrs) {
+      attributes(X)[[attr]] <- NULL
+    }
+  }
+  X
 }
