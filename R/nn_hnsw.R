@@ -33,6 +33,7 @@ hnsw_build <- function(X, metric, n_threads, verbose) {
     hnsw_distance <- "cosine"
   }
 
+  # FIXME: allow for different M and ef values
   index <-
     RcppHNSW::hnsw_build(
       X,
@@ -67,7 +68,7 @@ hnsw_search <-
       X <- sweep(X, 1, rowMeans(X))
     }
 
-
+    # FIXME: allow for different ef values
     res <- RcppHNSW::hnsw_search(
       X = X,
       k = k,
@@ -79,3 +80,16 @@ hnsw_search <-
 
     res
   }
+
+create_hnsw <- function(name, nitems, ndim) {
+  # FIXME: read M and ef from the model
+  M <- 16
+  ef <- 10
+  switch(
+    name,
+    cosine = methods::new(RcppHNSW::HnswCosine, ndim, nitems, M, ef),
+    euclidean = methods::new(RcppHNSW::HnswL2, ndim, nitems, M, ef),
+    correlation = methods::new(RcppHNSW::HnswCosine, nitems, ndim, M, ef),
+    stop("BUG: unknown HNSW metric '", name, "'")
+  )
+}

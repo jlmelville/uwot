@@ -3072,7 +3072,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         min_dist = min_dist,
         spread = spread,
         binary_edge_weights = binary_edge_weights,
-        seed = seed
+        seed = seed,
+        nn_method = nn_method
       ))
       if (nn_is_precomputed(nn_method)) {
         res$n_neighbors <- nn_graph_nbrs_list(nn_method)
@@ -3380,6 +3381,10 @@ load_uwot <- function(file, verbose = FALSE) {
   metrics <- names(model$metric)
   n_metrics <- length(metrics)
 
+  nn_method <- model$nn_method
+  if (is.null(nn_method)) {
+    nn_method <- "annoy"
+  }
   for (i in 1:n_metrics) {
     nn_fname <- file.path(mod_dir, paste0("uwot/nn", i))
     if (!file.exists(nn_fname)) {
@@ -3397,14 +3402,33 @@ load_uwot <- function(file, verbose = FALSE) {
       # so the dimension is the number of them
       ndim <- length(model$metric[[i]])
     }
-    annoy_metric <- metric
-    ann <- create_ann(annoy_metric, ndim = ndim)
-    ann$load(nn_fname)
+    if (nn_method == "annoy") {
+      annoy_metric <- metric
+      ann <- create_ann(annoy_metric, ndim = ndim)
+      ann$load(nn_fname)
 
-    if (n_metrics == 1) {
-      model$nn_index <- list(ann = ann, type = "annoyv1", metric = annoy_metric)
-    } else {
-      model$nn_index[[i]] <- list(ann = ann, type = "annoyv1", metric = annoy_metric)
+      if (n_metrics == 1) {
+        model$nn_index <- list(ann = ann, type = "annoyv1", metric = annoy_metric)
+      } else {
+        model$nn_index[[i]] <- list(ann = ann, type = "annoyv1", metric = annoy_metric)
+      }
+    }
+    else if (nn_method == "hnsw") {
+      stop("Embarassingly, I don't know how to load an HNSW index yet")
+      # FIXME: need to save nitems and ndim per index
+      nitems <- NULL
+      ndim <- NULL
+      ann <- create_hnsw(metric, nitems = nitems, ndim = ndim)
+      # FIXME: oops this doesn't exist
+      ann$loadIndex(nn_fname)
+      if (n_metrics == 1) {
+        model$nn_index <- list(ann = ann, type = "hnswv1", metric = metric)
+      } else {
+        model$nn_index[[i]] <- list(ann = ann, type = "hnswv1", metric = metric)
+      }
+    }
+    else {
+      stop("Unknown nearest neighbor method ", nn_method)
     }
   }
   model$mod_dir <- mod_dir
