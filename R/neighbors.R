@@ -1,6 +1,7 @@
 find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                     metric = "euclidean",
                     n_trees = 50, search_k = 2 * k * n_trees,
+                    nn_args = nn_args,
                     tmpdir = tempdir(),
                     n_threads = NULL,
                     grain_size = 1,
@@ -26,6 +27,16 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
         res <- FNN_nn(X, k = k, include_self = include_self)
       },
       "annoy" = {
+        nn_args_names <- names(nn_args)
+
+        if ("n_trees" %in% nn_args_names) {
+          n_trees <- nn_args$n_trees
+        }
+
+        if ("search_k" %in% nn_args_names) {
+          search_k <- nn_args$search_k
+        }
+
         res <- annoy_nn(
           X,
           k = k,
@@ -39,10 +50,36 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
         )
       },
       "hnsw" = {
+        nn_args_names <- names(nn_args)
+
+        if ("M" %in% nn_args_names) {
+          M <- nn_args$M
+        }
+        else {
+          M <- 16
+        }
+
+        if ("ef_construction" %in% nn_args_names) {
+          ef_construction <- nn_args$ef_construction
+        }
+        else {
+          ef_construction <- 200
+        }
+
+        if ("ef" %in% nn_args_names) {
+          ef <- nn_args$ef
+        }
+        else {
+          ef <- 10
+        }
+
         res <- hnsw_nn(
           X,
           k = k,
           metric = metric,
+          M = M,
+          ef_construction = ef_construction,
+          ef = ef,
           n_threads = n_threads,
           ret_index = ret_index,
           verbose = verbose

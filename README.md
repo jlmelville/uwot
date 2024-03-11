@@ -76,6 +76,11 @@ plot(
   xlab = "",
   ylab = ""
 )
+
+# Installing RcppHNSW will allow the use of the usually faster HNSW method:
+# install.packages("RcppHNSW")
+mnist_umap_hnsw <- umap(mnist, n_neighbors = 15, min_dist = 0.001, 
+                        nn_method = "hnsw")
 ```
 
 ![MNIST UMAP](man/figures/mnist-r.png)

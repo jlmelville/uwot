@@ -1,5 +1,20 @@
 # uwot (development version)
 
+## New features:
+
+* The [HNSW](https://github.com/nmslib/hnswlib) approximate nearest neighbor
+search algorithm is now supported via the
+[RcppHNSW](https://cran.r-project.org/package=RcppHNSW) package. Set
+`nn_method = "hnsw"` to use it. The behavior of the method can be controlled by
+the new `nn_args` parameter, a list which may contain `M`, `ef_construction`
+and `ef`. See the hnswlib library's 
+[ALGO_PARAMS documentation](https://github.com/nmslib/hnswlib/blob/master/ALGO_PARAMS.md)
+for details on these parameters. Although typically faster than Annoy (for a
+given accuracy), be aware that the only supported `metric` values are
+`"euclidean"`, `"cosine"` and `"correlation"`. Finally, RcppHNSW is only a
+suggested package, not a requirement, so you need to install it yourself (e.g.
+via `install.packages("RcppHNSW")`).
+
 ## Bug fixes and minor improvements
 
 * `init_sdev = "range"` caused an error with a user-supplied `init` matrix.

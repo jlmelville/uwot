@@ -1,6 +1,9 @@
 hnsw_nn <- function(X,
                     k = 10,
                     metric = "euclidean",
+                    M = 16,
+                    ef_construction = 200,
+                    ef = 10,
                     n_threads = NULL,
                     ret_index = FALSE,
                     verbose = FALSE) {
@@ -10,12 +13,19 @@ hnsw_nn <- function(X,
   ann <-
     hnsw_build(X,
       metric = metric,
+      M = M,
+      ef_construction = ef_construction,
       n_threads = n_threads,
       verbose = verbose
     )
   res <-
-    hnsw_search(X, k, ann, n_threads = n_threads, verbose = verbose)
+    hnsw_search(X, k, ann, ef = ef, n_threads = n_threads, verbose = verbose)
 
+  # We actually use the L2 HNSW metric so we need to convert here
+  # (also umap_transform must do this)
+  if (metric == "euclidean") {
+    res$dist <- sqrt(res$dist)
+  }
 
   res <- list(idx = res$idx, dist = res$dist)
   if (ret_index) {
@@ -24,22 +34,25 @@ hnsw_nn <- function(X,
   res
 }
 
-hnsw_build <- function(X, metric, n_threads, verbose) {
-
+hnsw_build <- function(X, metric, M, ef_construction, n_threads, verbose) {
   hnsw_distance <- metric
   if (metric == "correlation") {
     tsmessage("Annoy build: subtracting row means for correlation")
     X <- sweep(X, 1, rowMeans(X))
     hnsw_distance <- "cosine"
   }
+  # To avoid issues with whether a dedicated Euclidean class exists in RcppHNSW
+  # we will always use L2 and manually process the distances when we are done
+  if (metric == "euclidean") {
+    hnsw_distance <- "l2"
+  }
 
-  # FIXME: allow for different M and ef values
   index <-
     RcppHNSW::hnsw_build(
       X,
       distance = hnsw_distance,
-      M = 16,
-      ef = 200,
+      M = M,
+      ef = ef_construction,
       verbose = verbose,
       n_threads = n_threads
     )
@@ -51,10 +64,12 @@ hnsw_build <- function(X, metric, n_threads, verbose) {
   )
 }
 
+# called by hnsw_nn when building a model, and by umap_transform directly
 hnsw_search <-
   function(X,
            k,
            ann,
+           ef,
            n_threads = NULL,
            verbose = FALSE) {
     if (is.null(n_threads)) {
@@ -65,12 +80,11 @@ hnsw_search <-
       X <- sweep(X, 1, rowMeans(X))
     }
 
-    # FIXME: allow for different ef values
     res <- RcppHNSW::hnsw_search(
       X = X,
       k = k,
       ann = ann$ann,
-      ef = 10,
+      ef = ef,
       n_threads = n_threads,
       verbose = verbose
     )
@@ -82,14 +96,7 @@ hnsw_load <- function(name, ndim, filename) {
   class_name <- switch(
     name,
     cosine = RcppHNSW::HnswCosine,
-    # For versions of RcppHNSW <= 0.6 which don't have HnswEuclidean, we fall
-    # back to L2 and will apply an attribute to the object to indicate that
-    # it's actually euclidean
-    euclidean = tryCatch((RcppHNSW::HnswEuclidean),
-                         error = function(c) {
-                           RcppHNSW::HnswL2
-                         }
-    ),
+    euclidean = RcppHNSW::HnswL2,
     correlation = RcppHNSW::HnswCosine,
     stop("BUG: unknown HNSW metric '", name, "'")
   )

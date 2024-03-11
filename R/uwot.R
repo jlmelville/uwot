@@ -181,7 +181,10 @@
 #'     \item \code{"hnsw"} Use approximate nearest neighbors via the
 #'       \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
 #'       \code{RcppHNSW} is not a dependency of this package: this option is
-#'       only available if you have installed \code{RcppHNSW} yourself.
+#'       only available if you have installed \code{RcppHNSW} yourself. Only
+#'       Also, HNSW only supports the following arguments for \code{metric} and
+#'       \code{target_metric}: \code{"euclidean"}, \code{"cosine"} and
+#'       \code{"correlation"}.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -213,6 +216,24 @@
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
+#' @param nn_args A list containing additional arguments to pass to the nearest
+#'   neighbor method. For \code{nn_method = "annoy"}, you can specify
+#'   \code{"n_trees"} and \code{"search_k"}, and these will override the
+#'   \code{n_trees} and \code{search_k} parameters.
+#'   For \code{nn_method = "hnsw"}, you may specify the following arguments:
+#'   \itemize{
+#'   \item \code{M} The maximum number of neighbors to keep for each vertex.
+#'   Reasonable values are \code{2} to \code{100}. Higher values give better
+#'   recall at the cost of more memory. Default value is \code{16}.
+#'   \item \code{ef_construction} A positive integer specifying the size of
+#'   the dynamic list used during index construction. A higher value will
+#'   provide better results at the cost of a longer time to build the index.
+#'   Default is \code{200}.
+#'   \item \code{ef} A positive integer specifying the size of the dynamic
+#'   list used during search. This cannot be smaller than \code{n_neighbors}
+#'   and cannot be higher than the number of items in the index. Default is
+#'   \code{10}.
+#'   }
 #' @param approx_pow If \code{TRUE}, use an approximation to the power function
 #'   in the UMAP gradient, from
 #'   \url{https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/}.
@@ -582,7 +603,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  opt_args = NULL, epoch_callback = NULL, pca_method = NULL,
                  binary_edge_weights = FALSE,
                  dens_scale = NULL,
-                 seed = NULL) {
+                 seed = NULL,
+                 nn_args = list()) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
@@ -613,7 +635,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     tmpdir = tempdir(),
     verbose = verbose,
     dens_scale = dens_scale,
-    seed = seed
+    seed = seed,
+    nn_args = nn_args
   )
 }
 
@@ -789,6 +812,9 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
 #'       \code{RcppHNSW} is not a dependency of this package: this option is
 #'       only available if you have installed \code{RcppHNSW} yourself.
+#'       Also, HNSW only supports the following arguments for \code{metric} and
+#'       \code{target_metric}: \code{"euclidean"}, \code{"cosine"} and
+#'       \code{"correlation"}.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -820,6 +846,24 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
+#' @param nn_args A list containing additional arguments to pass to the nearest
+#'   neighbor method. For \code{nn_method = "annoy"}, you can specify
+#'   \code{"n_trees"} and \code{"search_k"}, and these will override the
+#'   \code{n_trees} and \code{search_k} parameters.
+#'   For \code{nn_method = "hnsw"}, you may specify the following arguments:
+#'   \itemize{
+#'   \item \code{M} The maximum number of neighbors to keep for each vertex.
+#'   Reasonable values are \code{2} to \code{100}. Higher values give better
+#'   recall at the cost of more memory. Default value is \code{16}.
+#'   \item \code{ef_construction} A positive integer specifying the size of
+#'   the dynamic list used during index construction. A higher value will
+#'   provide better results at the cost of a longer time to build the index.
+#'   Default is \code{200}.
+#'   \item \code{ef} A positive integer specifying the size of the dynamic
+#'   list used during search. This cannot be smaller than \code{n_neighbors}
+#'   and cannot be higher than the number of items in the index. Default is
+#'   \code{10}.
+#'   }
 #' @param y Optional target data for supervised dimension reduction. Can be a
 #' vector, matrix or data frame. Use the \code{target_metric} parameter to
 #' specify the metrics to use, using the same syntax as \code{metric}. Usually
@@ -1097,7 +1141,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   opt_args = NULL, epoch_callback = NULL,
                   pca_method = NULL,
                   binary_edge_weights = FALSE,
-                  seed = NULL) {
+                  seed = NULL,
+                  nn_args = list()) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -1127,7 +1172,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     binary_edge_weights = binary_edge_weights,
     seed = seed,
     tmpdir = tmpdir,
-    verbose = verbose
+    verbose = verbose,
+    nn_args = nn_args
   )
 }
 
@@ -1305,6 +1351,9 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
 #'       \code{RcppHNSW} is not a dependency of this package: this option is
 #'       only available if you have installed \code{RcppHNSW} yourself.
+#'       Also, HNSW only supports the following arguments for \code{metric} and
+#'       \code{target_metric}: \code{"euclidean"}, \code{"cosine"} and
+#'       \code{"correlation"}.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -1332,6 +1381,24 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
+#' @param nn_args A list containing additional arguments to pass to the nearest
+#'   neighbor method. For \code{nn_method = "annoy"}, you can specify
+#'   \code{"n_trees"} and \code{"search_k"}, and these will override the
+#'   \code{n_trees} and \code{search_k} parameters.
+#'   For \code{nn_method = "hnsw"}, you may specify the following arguments:
+#'   \itemize{
+#'   \item \code{M} The maximum number of neighbors to keep for each vertex.
+#'   Reasonable values are \code{2} to \code{100}. Higher values give better
+#'   recall at the cost of more memory. Default value is \code{16}.
+#'   \item \code{ef_construction} A positive integer specifying the size of
+#'   the dynamic list used during index construction. A higher value will
+#'   provide better results at the cost of a longer time to build the index.
+#'   Default is \code{200}.
+#'   \item \code{ef} A positive integer specifying the size of the dynamic
+#'   list used during search. This cannot be smaller than \code{n_neighbors}
+#'   and cannot be higher than the number of items in the index. Default is
+#'   \code{10}.
+#'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
 #'   system. For nearest neighbor search, only applies if
@@ -1550,7 +1617,8 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   batch = FALSE,
                   opt_args = NULL, epoch_callback = NULL,
                   pca_method = NULL,
-                  binary_edge_weights = FALSE) {
+                  binary_edge_weights = FALSE,
+                  nn_args = list()) {
   uwot(X,
     n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -1574,7 +1642,8 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     epoch_callback = epoch_callback,
     tmpdir = tmpdir,
     binary_edge_weights = binary_edge_weights,
-    verbose = verbose
+    verbose = verbose,
+    nn_args = list()
   )
 }
 
@@ -1682,6 +1751,9 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #'       \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
 #'       \code{RcppHNSW} is not a dependency of this package: this option is
 #'       only available if you have installed \code{RcppHNSW} yourself.
+#'       Also, HNSW only supports the following arguments for \code{metric} and
+#'       \code{target_metric}: \code{"euclidean"}, \code{"cosine"} and
+#'       \code{"correlation"}.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -1713,6 +1785,24 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #'   larger k, the more the accurate results, but the longer the search takes.
 #'   With \code{n_trees}, determines the accuracy of the Annoy nearest neighbor
 #'   search. Only used if the \code{nn_method} is \code{"annoy"}.
+#' @param nn_args A list containing additional arguments to pass to the nearest
+#'   neighbor method. For \code{nn_method = "annoy"}, you can specify
+#'   \code{"n_trees"} and \code{"search_k"}, and these will override the
+#'   \code{n_trees} and \code{search_k} parameters.
+#'   For \code{nn_method = "hnsw"}, you may specify the following arguments:
+#'   \itemize{
+#'   \item \code{M} The maximum number of neighbors to keep for each vertex.
+#'   Reasonable values are \code{2} to \code{100}. Higher values give better
+#'   recall at the cost of more memory. Default value is \code{16}.
+#'   \item \code{ef_construction} A positive integer specifying the size of
+#'   the dynamic list used during index construction. A higher value will
+#'   provide better results at the cost of a longer time to build the index.
+#'   Default is \code{200}.
+#'   \item \code{ef} A positive integer specifying the size of the dynamic
+#'   list used during search. This cannot be smaller than \code{n_neighbors}
+#'   and cannot be higher than the number of items in the index. Default is
+#'   \code{10}.
+#'   }
 #' @param perplexity Used only if \code{method = "largevis"}. Controls the size
 #'   of the local neighborhood used for manifold approximation. Should be a
 #'   value between 1 and one less than the number of items in \code{X}. If
@@ -1926,7 +2016,8 @@ similarity_graph <- function(X = NULL, n_neighbors = NULL, metric = "euclidean",
                              tmpdir = tempdir(),
                              verbose = getOption("verbose", TRUE),
                              pca_method = NULL,
-                             binary_edge_weights = FALSE) {
+                             binary_edge_weights = FALSE,
+                             nn_args = list()) {
   if (is.null(n_neighbors)) {
     if (method == "largevis") {
       n_neighbors <- perplexity * 3
@@ -1959,7 +2050,8 @@ similarity_graph <- function(X = NULL, n_neighbors = NULL, metric = "euclidean",
     ret_localr = "localr" %in% ret_extra,
     binary_edge_weights = binary_edge_weights,
     tmpdir = tempdir(),
-    verbose = verbose
+    verbose = verbose,
+    nn_args = nn_args
   )
 
   res <- list()
@@ -2452,7 +2544,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  binary_edge_weights = FALSE,
                  dens_scale = NULL,
                  is_similarity_graph = FALSE,
-                 seed = NULL) {
+                 seed = NULL,
+                 nn_args = list()) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -2544,9 +2637,23 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     set.seed(seed)
   }
 
-  if (is.character(nn_method) &&
-      nn_method == "hnsw" && !is_installed("RcppHNSW")) {
-    stop("RcppHNSW is required for nn_method = 'hnsw', please install it")
+  if (is.character(nn_method) && nn_method == "hnsw") {
+    if (!is_installed("RcppHNSW")) {
+      stop("RcppHNSW is required for nn_method = 'hnsw', please install it")
+    }
+    hnsw_metrics <- c("euclidean", "cosine", "correlation")
+    if (!metric %in% hnsw_metrics) {
+      stop(
+        "bad metric: hnsw only supports 'euclidean', 'cosine' or ",
+        "'correlation' metrics"
+      )
+    }
+    if (!target_metric %in% hnsw_metrics) {
+      stop(
+        "bad target_metric: hnsw only supports 'euclidean', 'cosine' or ",
+        "'correlation' metrics"
+      )
+    }
   }
 
   ret_extra <- ret_model || ret_nn || ret_fgraph || ret_sigma || ret_localr
@@ -2732,6 +2839,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       ret_model,
       pca = pca, pca_center = pca_center, pca_method = pca_method,
       n_vertices = n_vertices,
+      nn_args = nn_args,
       tmpdir = tmpdir,
       verbose = verbose
     )
@@ -3094,7 +3202,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         spread = spread,
         binary_edge_weights = binary_edge_weights,
         seed = seed,
-        nn_method = nn_method
+        nn_method = nn_method,
+        nn_args = nn_args
       ))
       if (nn_is_precomputed(nn_method)) {
         res$n_neighbors <- nn_graph_nbrs_list(nn_method)
@@ -3633,6 +3742,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
                      n_vertices = x2nv(X),
                      tmpdir = tempdir(),
                      pca = NULL, pca_center = TRUE, pca_method = "irlba",
+                     nn_args = list(),
                      verbose = FALSE) {
   V <- NULL
   nns <- list()
@@ -3776,6 +3886,7 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       n_threads, grain_size,
       ret_model,
       n_vertices = n_vertices,
+      nn_args = nn_args,
       tmpdir = tmpdir,
       verbose = verbose
     )
@@ -3818,6 +3929,7 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
                  n_threads, grain_size,
                  ret_model,
                  n_vertices = x2nv(X),
+                 nn_args = list(),
                  verbose = FALSE) {
   if (is.list(nn_method)) {
     validate_nn(nn_method, n_vertices)
@@ -3837,6 +3949,7 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
     nn <- find_nn(X, n_neighbors,
       method = nn_method, metric = metric,
       n_trees = n_trees, search_k = search_k,
+      nn_args = nn_args,
       tmpdir = tmpdir,
       n_threads = n_threads, grain_size = grain_size,
       ret_index = ret_model, verbose = verbose
@@ -3927,6 +4040,7 @@ x2set <- function(X, n_neighbors, metric, nn_method,
                   ret_model,
                   n_vertices = x2nv(X),
                   tmpdir = tempdir(),
+                  nn_args = list(),
                   verbose = FALSE) {
   if (is_sparse_matrix(nn_method)) {
     nn <- nn_method
@@ -3945,6 +4059,7 @@ x2set <- function(X, n_neighbors, metric, nn_method,
       tmpdir = tmpdir,
       n_threads = n_threads, grain_size = grain_size,
       ret_model = ret_model,
+      nn_args = nn_args,
       n_vertices = n_vertices,
       verbose = verbose
     )
