@@ -528,13 +528,23 @@ umap_transform <- function(X = NULL, model = NULL,
         )
       }
       else if (startsWith(ann$type, "hnsw")) {
-        nn <- hnsw_search (
+        nn <- hnsw_search(
           X,
           k = n_neighbors,
-          ann =  ann,
+          ann = ann,
           n_threads = n_threads,
           verbose = verbose
         )
+        # In RcppHNSW 0.6.0 and earlier there is no Euclidean distance class,
+        # just an attribute on the L2 class that will indicate to RcppHNSW
+        # that the distances should have a square root correction applied to
+        # them. Unfortunately, that doesn't survive serialization, so if it's
+        # not present we will apply the correction here.
+        if (names(model$metric)[[1]] == "euclidean" &&
+            class(ann$ann) == "Rcpp_HnswL2" &&
+            !("distance" %in% names(attributes(ann$ann)))) {
+          nn$dist <- sqrt(nn$dist)
+        }
       }
       else {
         stop("Unknown nn method: ", ann$type)

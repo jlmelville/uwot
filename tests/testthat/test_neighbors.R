@@ -221,6 +221,7 @@ expect_equal(res$index$metric, "correlation")
 
 
 test_that("hnsw gives correct euclidean neighbor results", {
+  testthat::skip_if_not_installed("RcppHNSW")
   iris10_annoy <-
     umap(
       iris10,
@@ -282,6 +283,7 @@ test_that("hnsw gives correct euclidean neighbor results", {
 })
 
 test_that("hnsw gives correct cosine neighbor results", {
+  testthat::skip_if_not_installed("RcppHNSW")
   iris10_annoy <-
     umap(
       iris10,
@@ -345,6 +347,7 @@ test_that("hnsw gives correct cosine neighbor results", {
 })
 
 test_that("hnsw gives correct correlation neighbor results", {
+  testthat::skip_if_not_installed("RcppHNSW")
   iris10_annoy <-
     umap(
       iris10,
@@ -408,6 +411,7 @@ test_that("hnsw gives correct correlation neighbor results", {
 })
 
 test_that("hnsw gives correct correlation neighbor results and multiple threads", {
+  testthat::skip_if_not_installed("RcppHNSW")
   iris10_annoy <-
     umap(
       iris10,

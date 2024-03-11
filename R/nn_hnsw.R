@@ -81,8 +81,15 @@ hnsw_search <-
 hnsw_load <- function(name, ndim, filename) {
   class_name <- switch(
     name,
-    cosine =RcppHNSW::HnswCosine,
-    euclidean = RcppHNSW::HnswL2,
+    cosine = RcppHNSW::HnswCosine,
+    # For versions of RcppHNSW <= 0.6 which don't have HnswEuclidean, we fall
+    # back to L2 and will apply an attribute to the object to indicate that
+    # it's actually euclidean
+    euclidean = tryCatch((RcppHNSW::HnswEuclidean),
+                         error = function(c) {
+                           RcppHNSW::HnswL2
+                         }
+    ),
     correlation = RcppHNSW::HnswCosine,
     stop("BUG: unknown HNSW metric '", name, "'")
   )

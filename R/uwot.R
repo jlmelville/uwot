@@ -2544,6 +2544,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     set.seed(seed)
   }
 
+  if (is.character(nn_method) &&
+      nn_method == "hnsw" && !is_installed("RcppHNSW")) {
+    stop("RcppHNSW is required for nn_method = 'hnsw', please install it")
+  }
+
   ret_extra <- ret_model || ret_nn || ret_fgraph || ret_sigma || ret_localr
 
   # Store categorical columns to be used to generate the graph
@@ -3512,16 +3517,18 @@ load_uwot <- function(file, verbose = FALSE) {
 #' @seealso \code{\link{save_uwot}}, \code{\link{load_uwot}}
 #' @export
 unload_uwot <- function(model, cleanup = TRUE, verbose = FALSE) {
-  tsmessage("Unloading NN index: model will be invalid")
-  metrics <- names(model$metric)
-  n_metrics <- length(metrics)
-  for (i in 1:n_metrics) {
-    if (n_metrics == 1) {
-      rcppannoy <- get_rcppannoy(model$nn_index)
-      rcppannoy$unload()
-    } else {
-      rcppannoy <- get_rcppannoy(model$nn_index[[i]])
-      rcppannoy$unload()
+  if (is.null(model$nn_method) || model$nn_method == "annoy") {
+    tsmessage("Unloading NN index: model will be invalid")
+    metrics <- names(model$metric)
+    n_metrics <- length(metrics)
+    for (i in 1:n_metrics) {
+      if (n_metrics == 1) {
+        rcppannoy <- get_rcppannoy(model$nn_index)
+        rcppannoy$unload()
+      } else {
+        rcppannoy <- get_rcppannoy(model$nn_index[[i]])
+        rcppannoy$unload()
+      }
     }
   }
 
