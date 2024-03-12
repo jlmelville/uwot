@@ -699,6 +699,11 @@ umap_transform <- function(X = NULL, model = NULL,
     graph@x <- rep(1, length(graph@x))
   }
 
+  if (batch) {
+    # This is the same arrangement as Python UMAP
+    graph <- Matrix::t(graph)
+  }
+
   if (n_epochs > 0) {
     graph@x[graph@x < max(graph@x) / n_epochs] <- 0
     graph <- Matrix::drop0(graph)
@@ -709,8 +714,6 @@ umap_transform <- function(X = NULL, model = NULL,
     # i.e. the presence of (i->j) does NOT mean (j->i) is also present because
     # i and j now come from different data
     if (batch) {
-      # This is the same arrangement as Python UMAP
-      graph <- Matrix::t(graph)
       # ordered indices of the new data nodes. Coordinates are updated
       # during optimization
       positive_head <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
