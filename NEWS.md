@@ -10,6 +10,10 @@ work (<https://github.com/jlmelville/uwot/issues/117>).
 * `umap_transform` could fail if the new data to be transformed had the 
 `scaled:center` and `scaled:scale` attributes set (e.g. from applying the
 `scale` function).
+* If you asked `umap_transform` to return the fuzzy graph (
+`ret_extra = c("fgraph")`), it was transposed when `batch = TRUE, n_epochs = 0`.
+Thank you [PedroMilanezAlmeida](https://github.com/PedroMilanezAlmeida) for 
+reporting (<https://github.com/jlmelville/uwot/issues/118>).
 
 # uwot 0.1.16
 

@@ -375,3 +375,35 @@ test_that("transform can set or inherit model seed", {
   diff67 <- iris_transform6 - iris_transform7
   expect_gt(sqrt(sum(diff67 * diff67) / length(diff67)), 0.01)
 })
+
+#118 fgraph must be transposed even if n_epochs = 0
+test_that("graph dim is consistent when n_epochs = 0", {
+  iris_species_12 <- iris[1:100, ]
+  iris_species_3 <- iris[101:150, ]
+
+  iris_model <-
+    umap(
+      iris_species_12,
+      ret_model = TRUE,
+      n_epochs = 0,
+      batch = TRUE
+    )
+
+  iris_transform_10 <- umap_transform(iris_species_3,
+    iris_model,
+    n_epochs = 10,
+    ret_extra = "fgraph"
+  )
+
+  iris_transform_0 <- umap_transform(iris_species_3,
+    iris_model,
+    n_epochs = 0,
+    ret_extra = "fgraph"
+  )
+
+  expect_equal(
+    dim(iris_transform_10$fgraph),
+    dim(iris_transform_0$fgraph)
+  )
+  expect_equal(dim(iris_transform_10$fgraph), c(100, 50))
+})
