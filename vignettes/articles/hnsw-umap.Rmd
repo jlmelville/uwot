@@ -11,19 +11,37 @@ knitr::opts_chunk$set(
 )
 ```
 
+# HNSW for nearest neighbors
+
 The Hierachical Navigable Small World (HNSW) method for finding approximate
 nearest neighbors is a popular due to its speed and good performance. A
 header-only C++ implementation by the HNSW authors can be found at
 [hnswlib](https://github.com/nmslib/hnswlib), and R-bindings are available in
 the package [RcppHNSW](https://cran.r-project.org/package=RcppHNSW).
 
-`uwot` does not currently integrate `RcppHNSW `directly, but it is possible to
-use the nearest neighbor data from `RcppHNSW` with `uwot`. This article will
-demonstrate how to generate nearest neighbors data for both an initial UMAP
-embedding and also for transforming new data.
+If you would like to use HNSW for nearest neighbor search, `uwot` now integrates
+with `RcppHNSW` as an optional dependency. You just need to install the 
+`RcppHNSW` package:
 
-We'll use the MNIST digits data set for this article, for which you will need to
-install the `snedata` package from GitHub:
+```{r install hnswlib}
+install.packages("RcppHNSW")
+```
+
+`uwot` will now be able to use it if you set `nn_method = "hnsw"`, e.g.
+
+```{r uwot hnsw}
+library(uwot)
+# doesn't use HNSW
+iris_umap <- umap(iris)
+
+# does use HNSW
+iris_umap_hnsw <- umap(iris, nn_method = "hnsw")
+```
+
+## MNIST example
+
+For a more involved example we'll use the MNIST digits data set for this 
+article, for which you will need to install the `snedata` package from GitHub:
 
 ```{r install snedata}
 # install.packages("pak")
@@ -46,10 +64,198 @@ mnist_test <- tail(mnist, 10000)
 
 `mnist` is a dataframe where the first 768 columns contain the pixel data for
 each image, and the last column is a factor `Label`, which contains the digit
-the image represents. We won't use the labels for calculating nearest neighbors,
-and in fact `RcppHNSW` wants numerical matrix data only for input, so we will
-define a function to convert the dataframe to a matrix containing only the
-numerical data and then generate the matrices we need.
+the image represents. 
+
+### UMAP on training data with HNSW
+
+As noted above, you only need to use `nn_method = "hnsw"` to use HNSW. But I
+am going to also set some other non-default parameters:
+
+* `verbose = TRUE` -- I just like to know what's going on.
+* `n_sgd_threads = 6` is the number of threads to use in the optimization step.
+* `batch = TRUE` is an alternative optimization method that gives a bit more
+repeatable results when setting `n_sgd_threads` to greater than one.
+* `n_epochs = 500` is the number of epochs to use in the optimization step.
+I find that when `batch = TRUE`, you need to use a larger number of epochs than
+the usual default (which for MNIST-sized datasets would be `n_epochs = 200`).
+* `ret_model = TRUE` is a parameter that tells `uwot` to return the UMAP model
+so that we can transform new data later.
+
+```{r UMAP on training data}
+mnist_train_umap <-
+  umap(
+    mnist_train,
+    nn_method = "hnsw",
+    batch = TRUE,
+    n_epochs = 500,
+    n_sgd_threads = 6,
+    ret_model = TRUE,
+    verbose = TRUE
+  )
+```
+```R
+UMAP embedding parameters a = 1.896 b = 0.8006
+Converting dataframe to numerical matrix
+Read 60000 rows and found 784 numeric columns
+Building HNSW index with metric 'l2' ef = 200 M = 16 using 6 threads
+Finished building index
+Searching HNSW index with ef = 15 and 6 threads
+Finished searching
+Commencing smooth kNN distance calibration using 6 threads with target n_neighbors = 15
+Initializing from normalized Laplacian + noise (using RSpectra)
+Commencing optimization for 500 epochs, with 1239066 positive edges using 6 threads
+Using method 'umap'
+Optimizing with Adam alpha = 1 beta1 = 0.5 beta2 = 0.9 eps = 1e-07
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Optimization finished
+```
+
+### UMAP on test data
+
+You don't need to specify the use of HNSW for transforming new data, the model
+contains the necessary information. So we can just use the `umap_transform`
+as normal:
+
+```{r UMAP on test data}
+mnist_test_umap <-
+  umap_transform(
+    X = mnist_test,
+    model = mnist_train_umap,
+    n_sgd_threads = 6,
+    verbose = TRUE
+  )
+```
+```R
+Read 10000 rows and found 784 numeric columns
+Processing block 1 of 1
+Finished searching
+Commencing smooth kNN distance calibration using 6 threads with target n_neighbors = 15
+Initializing by weighted average of neighbor coordinates using 6 threads
+Commencing optimization for 167 epochs, with 150000 positive edges using 6 threads
+Using method 'umap'
+Optimizing with Adam alpha = 1 beta1 = 0.5 beta2 = 0.9 eps = 1e-07
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Finished
+```
+
+### Plotting the results
+
+Let's plot the embeddings to make sure that HNSW is giving us useful results.
+I will use `ggplot2`, and the `Polychrome` package to create a set of distinct
+colors for each digit.
+
+```{r plot setup}
+install.packages(c("ggplot2", "Polychrome"))
+library(ggplot2)
+library(Polychrome)
+```
+
+This gives a palette of 10 colors following a recipe that is a bit like
+that in the Python [glasbey](https://github.com/lmcinnes/glasbey) package:
+
+```{r create palette}
+palette <- as.vector(Polychrome::createPalette(
+  length(levels(mnist$Label)) + 2,
+  seedcolors = c("#ffffff", "#000000"),
+  range = c(10, 90)
+)[-(1:2)])
+```
+
+Now we can plot the training and test data, which I will do in two separate
+plots.
+
+```{r plot training data}
+ggplot(
+  data.frame(mnist_train_umap$embedding, Digit = mnist_train$Label),
+  aes(x = X1, y = X2, color = Digit)
+) +
+  geom_point(alpha = 0.5, size = 1.0) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "MNIST training set UMAP",
+    x = "",
+    y = "",
+    color = "Digit"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+```
+
+```{r plot test data}
+ggplot(
+  data.frame(mnist_test_umap, Digit = mnist_test$Label),
+  aes(x = X1, y = X2, color = Digit)
+) +
+  geom_point(alpha = 0.5, size = 1.0) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "MNIST test set UMAP",
+    x = "",
+    y = "",
+    color = "Digit"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+```
+
+![MNIST training data](img/hnsw-umap/mnist-train.png)
+
+![MNIST test set](img/hnsw-umap/mnist-test.png)
+
+The training set embedding looks like a very typical UMAP-on-MNIST result, and
+the test clusters are all in the right place relative to the training set. So
+we can celebrate victory and a successful use of HNSW.
+
+## HNSW parameters
+
+`umap` has a number of parameters that can be set to control the behavior of
+nearest neighbor search with its default method, Annoy, namely `n_trees` and
+`search_k`. These are not used when `nn_method = "hnsw"` is set. Instead, you
+can control the behavior of the HNSW index by passing a list of arguments as
+`nn_args`. For HNSW, you can set:
+
+* `M`: The number of bi-directional links created for every new element during
+  construction. Higher values mean more accurate search, but slower
+  construction and larger index size. Default is 16.
+* `ef_construction`: The size of the dynamic list for the nearest neighbors
+  during the construction. Higher values mean more accurate search, but slower
+  construction and larger index size. Default is 200.
+* `ef`: The size of the dynamic list for the nearest neighbors during
+  the search. Higher values mean more accurate search, but slower search.
+  Default is 10, but it will be set to `n_neighbors` if the latter is larger.
+
+For example you could do something like:
+
+```{r HNSW nn_args}
+iris_umap <- umap(iris, nn_method = "hnsw", 
+                  nn_args = list(M = 12, ef_construction = 64, ef = 20))
+```
+
+## Using RcppHNSW Directly
+
+The `nn_method = "hnsw"` is a new feature in `uwot`. In previous versions, you
+could still make use of HNSW neighbors but you would need to work with
+`RcppHNSW` directly. The rest of this article shows you how to do this, and can
+be used as a way to understand how `RcppHNSW` works and how to use external
+nearest neighbor data with `uwot`.
+
+### Preparing the data
+
+Our starting point is still `mnist_train` and `mnist_test`. As a reminder,
+these are dataframes with both the numerical pixel intensities of the images
+as well as the `Label` factor describing the number the digit represents.
+
+We won't use the labels for calculating nearest neighbors, and in fact
+`RcppHNSW` is a bit more fussy than `uwot`. It only wants numerical matrix data
+only for input, so we will define a function to convert the dataframe to a
+matrix containing only the numerical data and then generate the matrices we
+need.
 
 ```{r convert to matrix}
 df2m <- function(X) {
@@ -62,10 +268,9 @@ mnist_test_data <- df2m(mnist_test)
 
 ## Using RcppHNSW
 
-Now install RcppHNSW and load it:
+Now load RcppHNSW:
 
 ```{r load hnswlib}
-install.packages("RcppHNSW")
 library(RcppHNSW)
 ```
 
@@ -217,12 +422,7 @@ the nearest neighbor distances are not zero.
 
 ## Using HNSW k-nearest neighbors with UMAP
 
-We are now ready to use the HNSW k-nearest neighbors with UMAP. So time to
-fire up `uwot`.
-
-```{r setup}
-library(uwot)
-```
+We are now ready to use the HNSW k-nearest neighbors with `uwot`.
 
 ### UMAP on training data with HNSW knn
 
@@ -233,17 +433,8 @@ so:
 * set `X = NULL`.
 * pass the nearest neighbor data as the `nn_method` parameter.
 
-I'm also going to set some other parameters here:
-
-* `verbose = TRUE` -- I just like to know what's going on.
-* `n_sgd_threads = 6` is the number of threads to use in the optimization step.
-* `batch = TRUE` is an alternative optimization method that gives a bit more
-repeatable results when setting `n_sgd_threads` to greater than one.
-* `n_epochs = 500` is the number of epochs to use in the optimization step.
-I find that when `batch = TRUE`, you need to use a larger number of epochs than
-the usual default (which for MNIST-sized datasets would be `n_epochs = 200`).
-* `ret_model = TRUE` is a parameter that tells `uwot` to return the UMAP model
-so that we can transform new data later.
+The other parameters are the same as those we used before with 
+`nn_method = "hnsw"`, so see above for a description.
 
 ```{r UMAP on training data with HNSW knn}
 mnist_train_umap <-
@@ -307,78 +498,20 @@ Optimizing with Adam alpha = 1 beta1 = 0.5 beta2 = 0.9 eps = 1e-07
 Finished
 ```
 
-### Plotting the results
-
-Let's plot the embeddings to make sure that HNSW is giving us useful results.
-I will use `ggplot2`, and the `Polychrome` package to create a set of distinct
-colors for each digit.
-
-```{r plot setup}
-install.packages(c("ggplot2", "Polychrome"))
-library(ggplot2)
-library(Polychrome)
-```
-
-This gives a palette of 10 colors following a recipe that is a bit like
-that in the Python [glasbey](https://github.com/lmcinnes/glasbey) package:
-
-```{r create palette}
-palette <- as.vector(Polychrome::createPalette(
-  length(levels(mnist$Label)) + 2,
-  seedcolors = c("#ffffff", "#000000"),
-  range = c(10, 90)
-)[-(1:2)])
-```
-
-Now we can plot the training and test data, which I will do in two separate
-plots.
-
-```{r plot training data}
-ggplot(
-  data.frame(mnist_train_umap$embedding, Digit = mnist_train$Label),
-  aes(x = X1, y = X2, color = Digit)
-) +
-  geom_point(alpha = 0.5, size = 1.0) +
-  scale_color_manual(values = palette) +
-  theme_minimal() +
-  labs(
-    title = "MNIST training set UMAP",
-    x = "",
-    y = "",
-    color = "Digit"
-  ) +
-  theme(legend.position = "right") +
-  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
-```
-
-```{r plot test data}
-ggplot(
-  data.frame(mnist_test_umap, Digit = mnist_test$Label),
-  aes(x = X1, y = X2, color = Digit)
-) +
-  geom_point(alpha = 0.5, size = 1.0) +
-  scale_color_manual(values = palette) +
-  theme_minimal() +
-  labs(
-    title = "MNIST test set UMAP",
-    x = "",
-    y = "",
-    color = "Digit"
-  ) +
-  theme(legend.position = "right") +
-  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
-```
-
-![MNIST training data](img/hnsw-umap/mnist-train.png)
-![MNIST test set](img/hnsw-umap/mnist-test.png)
-
-The training set embedding looks like a very typical UMAP-on-MNIST result, and
-the test clusters are all in the right place relative to the training set. So
-we can celebrate victory and a successful use of HNSW.
+At this point we could visualize the data again, but you can take my word for
+it that it looks just like the `nn_method = "hnsw"` approach.
 
 ## Conclusions
 
-To summarize, to use `RcppHNSW` for UMAP do the following:
+To summarize, to use HNSW with `uwot` do the following:
+
+* Make sure `RcppHNSW` is installed.
+* Set `nn_method = "hsnw"`.
+* Pass an `nn_args` list containing a combination of `M`, `ef_construction` and
+`ef` to control the speed/accuracy trade-off.
+* To transform new data, just use `umap_transform` as normal.
+
+To use `RcppHNSW` directly for UMAP do the following:
 
 * build an index for your data with `hnsw_build`.
 * query the index with `hnsw_search` to obtain the k-nearest neighbors.
@@ -399,6 +532,3 @@ neighbors, so you can set `X = NULL` when running `umap` and `umap_transform`.
 But that data can still be useful for initialization. For example if you want to
 use a PCA-based initialization then you *will* need to keep your original data
 around. But it's not necessary with the default settings for `umap`.
-
-I plan to integrate `RcppHNSW` more tightly into `uwot` in a future release, but
-for now this should hopefully be enough to get you started.
