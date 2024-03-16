@@ -218,3 +218,260 @@ expect_true(!is.null(res$index))
 expect_is(res$index, "list")
 expect_is(res$index$ann, "Rcpp_AnnoyAngular")
 expect_equal(res$index$metric, "correlation")
+
+
+test_that("hnsw gives correct euclidean neighbor results", {
+  testthat::skip_if_not_installed("RcppHNSW")
+  iris10_annoy <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "annoy",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0
+    )
+  iris10_hnsw <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "hnsw",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0
+    )
+  expect_equal(iris10_annoy$nn$euclidean$idx,
+               iris10_hnsw$nn$euclidean$idx,
+               check.attributes = FALSE)
+  expect_equal(iris10_annoy$nn$euclidean$dist,
+               iris10_hnsw$nn$euclidean$dist,
+               check.attributes = FALSE,
+               tol = 1e-7)
+
+  iris10_transform_hnsw <-
+    umap_transform(iris10,
+                   iris10_hnsw,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_hnsw$nn$euclidean$idx,
+    iris10_transform_hnsw$nn$euclidean$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_hnsw$nn$euclidean$dist,
+    iris10_transform_hnsw$nn$euclidean$dist,
+    check.attributes = FALSE
+  )
+
+  iris10_transform_annoy <-
+    umap_transform(iris10,
+                   iris10_annoy,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_transform_annoy$nn$euclidean$idx,
+    iris10_transform_hnsw$nn$euclidean$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_transform_annoy$nn$euclidean$dist,
+    iris10_transform_hnsw$nn$euclidean$dist,
+    check.attributes = FALSE,
+    tol = 1e-6
+  )
+})
+
+test_that("hnsw gives correct cosine neighbor results", {
+  testthat::skip_if_not_installed("RcppHNSW")
+  iris10_annoy <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "annoy",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "cosine"
+    )
+  iris10_hnsw <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "hnsw",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "cosine"
+    )
+  expect_equal(iris10_annoy$nn$cosine$idx,
+               iris10_hnsw$nn$cosine$idx,
+               check.attributes = FALSE)
+  expect_equal(iris10_annoy$nn$cosine$dist,
+               iris10_hnsw$nn$cosine$dist,
+               check.attributes = FALSE,
+               tol = 1e-6)
+
+  iris10_transform_hnsw <-
+    umap_transform(iris10,
+                   iris10_hnsw,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_hnsw$nn$cosine$idx,
+    iris10_transform_hnsw$nn$cosine$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_hnsw$nn$cosine$dist,
+    iris10_transform_hnsw$nn$cosine$dist,
+    check.attributes = FALSE
+  )
+
+  iris10_transform_annoy <-
+    umap_transform(iris10,
+                   iris10_annoy,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_transform_annoy$nn$cosine$idx,
+    iris10_transform_hnsw$nn$cosine$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_transform_annoy$nn$cosine$dist,
+    iris10_transform_hnsw$nn$cosine$dist,
+    check.attributes = FALSE,
+    tol = 1e-6
+  )
+})
+
+test_that("hnsw gives correct correlation neighbor results", {
+  testthat::skip_if_not_installed("RcppHNSW")
+  iris10_annoy <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "annoy",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "correlation"
+    )
+  iris10_hnsw <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "hnsw",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "correlation"
+    )
+  expect_equal(iris10_annoy$nn$correlation$idx,
+               iris10_hnsw$nn$correlation$idx,
+               check.attributes = FALSE)
+  expect_equal(iris10_annoy$nn$correlation$dist,
+               iris10_hnsw$nn$correlation$dist,
+               check.attributes = FALSE,
+               tol = 1e-6)
+
+  iris10_transform_hnsw <-
+    umap_transform(iris10,
+                   iris10_hnsw,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_hnsw$nn$correlation$idx,
+    iris10_transform_hnsw$nn$correlation$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_hnsw$nn$correlation$dist,
+    iris10_transform_hnsw$nn$correlation$dist,
+    check.attributes = FALSE
+  )
+
+  iris10_transform_annoy <-
+    umap_transform(iris10,
+                   iris10_annoy,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_transform_annoy$nn$correlation$idx,
+    iris10_transform_hnsw$nn$correlation$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_transform_annoy$nn$correlation$dist,
+    iris10_transform_hnsw$nn$correlation$dist,
+    check.attributes = FALSE,
+    tol = 1e-6
+  )
+})
+
+test_that("hnsw gives correct correlation neighbor results and multiple threads", {
+  testthat::skip_if_not_installed("RcppHNSW")
+  iris10_annoy <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "annoy",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "correlation"
+    )
+  iris10_hnsw <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "hnsw",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "correlation",
+      n_threads = 2
+    )
+  expect_equal(iris10_annoy$nn$correlation$idx,
+               iris10_hnsw$nn$correlation$idx,
+               check.attributes = FALSE)
+  expect_equal(iris10_annoy$nn$correlation$dist,
+               iris10_hnsw$nn$correlation$dist,
+               check.attributes = FALSE,
+               tol = 1e-6)
+
+  iris10_transform_hnsw <-
+    umap_transform(iris10,
+                   iris10_hnsw,
+                   n_epochs = 0,
+                   ret_extra = c("nn"),
+                   n_threads = 2)
+  expect_equal(
+    iris10_hnsw$nn$correlation$idx,
+    iris10_transform_hnsw$nn$correlation$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_hnsw$nn$correlation$dist,
+    iris10_transform_hnsw$nn$correlation$dist,
+    check.attributes = FALSE
+  )
+
+  iris10_transform_annoy <-
+    umap_transform(iris10,
+                   iris10_annoy,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_transform_annoy$nn$correlation$idx,
+    iris10_transform_hnsw$nn$correlation$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_transform_annoy$nn$correlation$dist,
+    iris10_transform_hnsw$nn$correlation$dist,
+    check.attributes = FALSE,
+    tol = 1e-6
+  )
+})

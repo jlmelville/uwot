@@ -237,6 +237,13 @@ umap_transform <- function(X = NULL, model = NULL,
     }
   }
 
+  if (is.character(model$nn_method) &&
+      model$nn_method == "hnsw" && !is_installed("RcppHNSW")) {
+    stop(
+      "This model requires the RcppHNSW package to be installed."
+    )
+  }
+
   if (is.null(n_epochs)) {
     n_epochs <- model$n_epochs
     if (is.null(n_epochs)) {
@@ -514,13 +521,50 @@ umap_transform <- function(X = NULL, model = NULL,
           verbose = verbose
         )
       }
-      nn <- annoy_search(Xsub,
-        k = n_neighbors, ann = ann, search_k = search_k,
-        prep_data = TRUE,
-        tmpdir = tmpdir,
-        n_threads = n_threads, grain_size = grain_size,
-        verbose = verbose
-      )
+      if (is.null(ann$type) || startsWith(ann$type, "annoy")) {
+        nn <- annoy_search(
+          Xsub,
+          k = n_neighbors,
+          ann = ann,
+          search_k = search_k,
+          prep_data = TRUE,
+          tmpdir = tmpdir,
+          n_threads = n_threads,
+          grain_size = grain_size,
+          verbose = verbose
+        )
+      }
+      else if (startsWith(ann$type, "hnsw")) {
+        if (is.list(model$nn_args)) {
+          nn_args <- model$nn_args
+          nn_args_names <- names(nn_args)
+
+          if ("ef" %in% nn_args_names) {
+            ef <- nn_args$ef
+          }
+          else {
+            ef <- 10
+          }
+        }
+
+        nn <- hnsw_search(
+          X,
+          k = n_neighbors,
+          ann = ann,
+          ef = ef,
+          n_threads = n_threads,
+          verbose = verbose
+        )
+
+        # We use the L2 HNSW index for Euclidean so we need to process the
+        # distances
+        if (names(model$metric)[[1]] == "euclidean") {
+          nn$dist <- sqrt(nn$dist)
+        }
+      }
+      else {
+        stop("Unknown nn method: ", ann$type)
+      }
       if (ret_nn) {
         export_nns[[i]] <- nn
         names(export_nns)[[i]] <- ann$metric

@@ -43,7 +43,8 @@ tumap(
   epoch_callback = NULL,
   pca_method = NULL,
   binary_edge_weights = FALSE,
-  seed = NULL
+  seed = NULL,
+  nn_args = list()
 )
 }
 \arguments{
@@ -219,6 +220,13 @@ embedding.}
     \href{https://cran.r-project.org/package=FNN}{FNN} package.
   \item \code{"annoy"} Use approximate nearest neighbors via the
     \href{https://cran.r-project.org/package=RcppAnnoy}{RcppAnnoy} package.
+  \item \code{"hnsw"} Use approximate nearest neighbors via the
+    \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
+    \code{RcppHNSW} is not a dependency of this package: this option is
+    only available if you have installed \code{RcppHNSW} yourself.
+    Also, HNSW only supports the following arguments for \code{metric} and
+    \code{target_metric}: \code{"euclidean"}, \code{"cosine"} and
+    \code{"correlation"}.
  }
 By default, if \code{X} has less than 4,096 vertices, the exact nearest
 neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -496,6 +504,25 @@ but it may be more convenient in some situations than having to call a
 separate function. The default is to not set a seed. If
 \code{ret_model = TRUE}, the seed will be stored in the output model and
 then used to set the seed inside \code{\link{umap_transform}}.}
+
+\item{nn_args}{A list containing additional arguments to pass to the nearest
+neighbor method. For \code{nn_method = "annoy"}, you can specify
+\code{"n_trees"} and \code{"search_k"}, and these will override the
+\code{n_trees} and \code{search_k} parameters.
+For \code{nn_method = "hnsw"}, you may specify the following arguments:
+\itemize{
+\item \code{M} The maximum number of neighbors to keep for each vertex.
+Reasonable values are \code{2} to \code{100}. Higher values give better
+recall at the cost of more memory. Default value is \code{16}.
+\item \code{ef_construction} A positive integer specifying the size of
+the dynamic list used during index construction. A higher value will
+provide better results at the cost of a longer time to build the index.
+Default is \code{200}.
+\item \code{ef} A positive integer specifying the size of the dynamic
+list used during search. This cannot be smaller than \code{n_neighbors}
+and cannot be higher than the number of items in the index. Default is
+\code{10}.
+}}
 }
 \value{
 A matrix of optimized coordinates, or:

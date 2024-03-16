@@ -1058,3 +1058,19 @@ test_that("can set seed internally", {
     )
   expect_equal(res_model$embedding, res4)
 })
+
+test_that("can provide nn_args", {
+  res <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      n_epochs = 10,
+      learning_rate = 0.5,
+      n_trees = 5,
+      nn_args = list(n_trees = 10),
+      ret_model = TRUE
+    )
+  expect_ok_matrix(res$embedding)
+  expect_equal(res$nn_args$n_trees, 10)
+})
+
