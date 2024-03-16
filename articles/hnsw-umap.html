@@ -82,19 +82,36 @@ Navigable) Small World After All</h3>
 
     
     
+<div class="section level2">
+<h2 id="hnsw-for-nearest-neighbors">HNSW for nearest neighbors<a class="anchor" aria-label="anchor" href="#hnsw-for-nearest-neighbors"></a>
+</h2>
 <p>The Hierachical Navigable Small World (HNSW) method for finding
 approximate nearest neighbors is a popular due to its speed and good
 performance. A header-only C++ implementation by the HNSW authors can be
 found at <a href="https://github.com/nmslib/hnswlib" class="external-link">hnswlib</a>, and
 R-bindings are available in the package <a href="https://cran.r-project.org/package=RcppHNSW" class="external-link">RcppHNSW</a>.</p>
-<p><code>uwot</code> does not currently integrate
-<code>RcppHNSW</code>directly, but it is possible to use the nearest
-neighbor data from <code>RcppHNSW</code> with <code>uwot</code>. This
-article will demonstrate how to generate nearest neighbors data for both
-an initial UMAP embedding and also for transforming new data.</p>
-<p>We’ll use the MNIST digits data set for this article, for which you
-will need to install the <code>snedata</code> package from GitHub:</p>
+<p>If you would like to use HNSW for nearest neighbor search,
+<code>uwot</code> now integrates with <code>RcppHNSW</code> as an
+optional dependency. You just need to install the <code>RcppHNSW</code>
+package:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"RcppHNSW"</span><span class="op">)</span></span></code></pre></div>
+<p><code>uwot</code> will now be able to use it if you set
+<code>nn_method = "hnsw"</code>, e.g.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/uwot" class="external-link">uwot</a></span><span class="op">)</span></span>
+<span><span class="co"># doesn't use HNSW</span></span>
+<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># does use HNSW</span></span>
+<span><span class="va">iris_umap_hnsw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, nn_method <span class="op">=</span> <span class="st">"hnsw"</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="mnist-example">MNIST example<a class="anchor" aria-label="anchor" href="#mnist-example"></a>
+</h3>
+<p>For a more involved example we’ll use the MNIST digits data set for
+this article, for which you will need to install the
+<code>snedata</code> package from GitHub:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span><span class="st">"jlmelville/snedata"</span><span class="op">)</span></span>
 <span></span>
@@ -104,160 +121,19 @@ will need to install the <code>snedata</code> package from GitHub:</p>
 <p>Then, download the MNIST dataset (this requires access to the
 internet), and we will split the data into the traditional training/test
 split used with this dataset.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mnist</span> <span class="op">&lt;-</span> <span class="fu">snedata</span><span class="fu">::</span><span class="fu">download_mnist</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mnist_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mnist</span>, <span class="fl">60000</span><span class="op">)</span></span>
 <span><span class="va">mnist_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">mnist</span>, <span class="fl">10000</span><span class="op">)</span></span></code></pre></div>
 <p><code>mnist</code> is a dataframe where the first 768 columns contain
 the pixel data for each image, and the last column is a factor
-<code>Label</code>, which contains the digit the image represents. We
-won’t use the labels for calculating nearest neighbors, and in fact
-<code>RcppHNSW</code> wants numerical matrix data only for input, so we
-will define a function to convert the dataframe to a matrix containing
-only the numerical data and then generate the matrices we need.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df2m</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">is.numeric</span>, <span class="fu"><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">mnist_train_data</span> <span class="op">&lt;-</span> <span class="fu">df2m</span><span class="op">(</span><span class="va">mnist_train</span><span class="op">)</span></span>
-<span><span class="va">mnist_test_data</span> <span class="op">&lt;-</span> <span class="fu">df2m</span><span class="op">(</span><span class="va">mnist_test</span><span class="op">)</span></span></code></pre></div>
-<div class="section level2">
-<h2 id="using-rcpphnsw">Using RcppHNSW<a class="anchor" aria-label="anchor" href="#using-rcpphnsw"></a>
-</h2>
-<p>Now install RcppHNSW and load it:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"RcppHNSW"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/rcpphnsw" class="external-link">RcppHNSW</a></span><span class="op">)</span></span></code></pre></div>
-<p>Time to build an index using the training data. The default settings
-for <code>hnsw_build</code> are perfectly good for MNIST, so we’ll go
-with that. I recommend using as many threads as you can for this stage.
-Here I use 6 threads:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mnist_index</span> <span class="op">&lt;-</span> <span class="fu">hnsw_build</span><span class="op">(</span><span class="va">mnist_train_data</span>, n_threads <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="mnist-training-data-k-nearest-neighbors">MNIST training data k-nearest neighbors<a class="anchor" aria-label="anchor" href="#mnist-training-data-k-nearest-neighbors"></a>
-</h3>
-<p>Now we will query the index with the training data to find the
-k-nearest neighbors of the training data. Note that in this case we
-built the index with the same data that we are querying it with.</p>
-<p>As with the index building, we can get good performance with default
-settings, but it’s recommended to use as many threads as you can. The
-searching should be substantially faster than the index building,
-though. The only other extra parameter we need is to specify the number
-of neighbors we want. In <code>uwot</code>, the default number of
-neighbors is 15, so we shall use that for the <code>k</code>
-parameter:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mnist_train_knn</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">hnsw_search</span><span class="op">(</span></span>
-<span>    <span class="va">mnist_train_data</span>,</span>
-<span>    <span class="va">mnist_index</span>,</span>
-<span>    k <span class="op">=</span> <span class="fl">15</span>,</span>
-<span>    n_threads <span class="op">=</span> <span class="fl">6</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-<p>There is a separate <a href="https://jlmelville.github.io/uwot/articles/nearest-neighbors-format.html">article
-on <code>uwot</code>’s nearest neighbor format</a> but the good news is
-that the output format from RcppHNSW is already in the right format for
-<code>uwot</code> (this is not a coincidence: I created and maintain the
-RcppHNSW package). Nonetheless, let’s take a look at the output, which
-is a list of two matrices:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mnist_train_knn</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"idx"</span>  <span class="st">"dist"</span></span></code></pre></div>
-<p>The first matrix, <code>idx</code>, contains the indices of the
-nearest neighbors for each point in the training data. The second
-matrix, <code>dist</code>, contains the distances to the nearest
-neighbors. Let’s take a look at the dimensions of these matrices:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">mnist_train_knn</span>, <span class="va">`dim`</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="sc">$</span>idx</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">60000</span>    <span class="dv">15</span></span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="sc">$</span>dist</span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">60000</span>    <span class="dv">15</span></span></code></pre></div>
-<p>So we have 60,000 rows, one for each point in the training data, and
-15 columns, one for each nearest neighbor. Let’s take a look at the
-first few rows and columns of each matrix:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mnist_train_knn</span><span class="op">$</span><span class="va">idx</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>     [,<span class="dv">1</span>]  [,<span class="dv">2</span>]  [,<span class="dv">3</span>]</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>[<span class="dv">1</span>,]    <span class="dv">1</span> <span class="dv">32249</span>  <span class="dv">8729</span></span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>[<span class="dv">2</span>,]    <span class="dv">2</span>   <span class="dv">640</span> <span class="dv">51122</span></span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>[<span class="dv">3</span>,]    <span class="dv">3</span> <span class="dv">54198</span> <span class="dv">46129</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mnist_train_knn</span><span class="op">$</span><span class="va">dist</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>     [,<span class="dv">1</span>]     [,<span class="dv">2</span>]     [,<span class="dv">3</span>]</span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>[<span class="dv">1</span>,]    <span class="dv">0</span> <span class="fl">1561.472</span> <span class="fl">1591.601</span></span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>[<span class="dv">2</span>,]    <span class="dv">0</span> <span class="fl">1020.647</span> <span class="fl">1100.529</span></span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>[<span class="dv">3</span>,]    <span class="dv">0</span> <span class="fl">1377.631</span> <span class="fl">1541.127</span></span></code></pre></div>
-<p>For the k-nearest neighbors of a dataset, it’s often a convention
-that the nearest neighbor of any item is the item itself, which is why
-the nearest neighbor of the first item has the index <code>1</code>, and
-the distance is zero. Not all nearest neighbor packages follow this
-convention, but <code>uwot</code> does, so we’re good.</p>
-</div>
-<div class="section level3">
-<h3 id="mnist-test-set-query-neighbors">MNIST test set query neighbors<a class="anchor" aria-label="anchor" href="#mnist-test-set-query-neighbors"></a>
-</h3>
-<p>We will also need the test set neighbors, so let’s do that now. We
-are not going to build an index with the test set, but instead we will
-query each test set item against the training set index:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mnist_test_query_neighbors</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">hnsw_search</span><span class="op">(</span></span>
-<span>    <span class="va">mnist_test_data</span>,</span>
-<span>    <span class="va">mnist_index</span>,</span>
-<span>    k <span class="op">=</span> <span class="fl">15</span>,</span>
-<span>    n_threads <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-<p>The output is the same format as for the training set neighbors, so
-there should be no surprises here:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">mnist_test_query_neighbors</span>, <span class="va">`dim`</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="sc">$</span>idx</span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">10000</span>    <span class="dv">15</span></span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="sc">$</span>dist</span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">10000</span>    <span class="dv">15</span></span></code></pre></div>
-<p>Here are the first few indices and distances for the test set:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mnist_test_query_neighbors</span><span class="op">$</span><span class="va">idx</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>      [,<span class="dv">1</span>]  [,<span class="dv">2</span>]  [,<span class="dv">3</span>]</span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>[<span class="dv">1</span>,] <span class="dv">53844</span> <span class="dv">38621</span> <span class="dv">16187</span></span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>[<span class="dv">2</span>,] <span class="dv">28883</span> <span class="dv">49161</span> <span class="dv">24613</span></span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>[<span class="dv">3</span>,] <span class="dv">58742</span> <span class="dv">46513</span> <span class="dv">15225</span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mnist_test_query_neighbors</span><span class="op">$</span><span class="va">dist</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>          [,<span class="dv">1</span>]      [,<span class="dv">2</span>]      [,<span class="dv">3</span>]</span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>[<span class="dv">1</span>,]  <span class="fl">676.5841</span>  <span class="fl">793.9868</span>  <span class="fl">862.6766</span></span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>[<span class="dv">2</span>,] <span class="fl">1162.9316</span> <span class="fl">1211.8445</span> <span class="fl">1285.9285</span></span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>[<span class="dv">3</span>,]  <span class="fl">321.6629</span>  <span class="fl">332.4635</span>  <span class="fl">341.0484</span></span></code></pre></div>
-<p>Remember that we queried the test set against the training set, so
-the test set indices don’t get a chance to be neighbors of themselves.
-Consequently, also the nearest neighbor distances are not zero.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="using-hnsw-k-nearest-neighbors-with-umap">Using HNSW k-nearest neighbors with UMAP<a class="anchor" aria-label="anchor" href="#using-hnsw-k-nearest-neighbors-with-umap"></a>
-</h2>
-<p>We are now ready to use the HNSW k-nearest neighbors with UMAP. So
-time to fire up <code>uwot</code>.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/uwot" class="external-link">uwot</a></span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="umap-on-training-data-with-hnsw-knn">UMAP on training data with HNSW knn<a class="anchor" aria-label="anchor" href="#umap-on-training-data-with-hnsw-knn"></a>
-</h3>
-<p>UMAP works on the nearest neighbor graph, so if you pass it
-pre-computed nearest neighbor data, you don’t actually need to give it
-any other data. To do so:</p>
-<ul>
-<li>set <code>X = NULL</code>.</li>
-<li>pass the nearest neighbor data as the <code>nn_method</code>
-parameter.</li>
-</ul>
-<p>I’m also going to set some other parameters here:</p>
+<code>Label</code>, which contains the digit the image represents.</p>
+<div class="section level4">
+<h4 id="umap-on-training-data-with-hnsw">UMAP on training data with HNSW<a class="anchor" aria-label="anchor" href="#umap-on-training-data-with-hnsw"></a>
+</h4>
+<p>As noted above, you only need to use <code>nn_method = "hnsw"</code>
+to use HNSW. But I am going to also set some other non-default
+parameters:</p>
 <ul>
 <li>
 <code>verbose = TRUE</code> – I just like to know what’s going
@@ -279,77 +155,75 @@ MNIST-sized datasets would be <code>n_epochs = 200</code>).</li>
 <code>uwot</code> to return the UMAP model so that we can transform new
 data later.</li>
 </ul>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mnist_train_umap</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span></span>
-<span>    X <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>    nn_method <span class="op">=</span> <span class="va">mnist_train_knn</span>,</span>
+<span>    <span class="va">mnist_train</span>,</span>
+<span>    nn_method <span class="op">=</span> <span class="st">"hnsw"</span>,</span>
 <span>    batch <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    n_epochs <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>    n_sgd_threads <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>    ret_model <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>UMAP embedding parameters a <span class="ot">=</span> <span class="fl">1.896</span> b <span class="ot">=</span> <span class="fl">0.8006</span></span>
-<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>Commencing smooth kNN distance calibration using <span class="dv">6</span> threads with target n_neighbors <span class="ot">=</span> <span class="dv">15</span></span>
-<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>Initializing from normalized Laplacian <span class="sc">+</span> <span class="fu">noise</span> (using irlba)</span>
-<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a>Commencing optimization <span class="cf">for</span> <span class="dv">500</span> epochs, with <span class="dv">1239236</span> positive edges using <span class="dv">6</span> threads</span>
-<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a>Using method <span class="st">'umap'</span></span>
-<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a>Optimizing with Adam alpha <span class="ot">=</span> <span class="dv">1</span> beta1 <span class="ot">=</span> <span class="fl">0.5</span> beta2 <span class="ot">=</span> <span class="fl">0.9</span> eps <span class="ot">=</span> <span class="fl">1e-07</span></span>
-<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a><span class="dv">0</span><span class="sc">%   10   20   30   40   50   60   70   80   90   100%</span></span>
-<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a>[<span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span></span>
-<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a><span class="er">**************************************************|</span></span>
-<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a>Optimization finished</span>
-<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a>Note<span class="sc">:</span> model requested with precomputed neighbors. For transforming new data, distance data must be provided separately</span></code></pre></div>
-<p>Nothing very exciting is in the output, except that notice the last
-line of output reminding us that if we want to transform new data we
-better have generated neighbors for that data too. And we did, so we’re
-ok.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>UMAP embedding parameters a <span class="ot">=</span> <span class="fl">1.896</span> b <span class="ot">=</span> <span class="fl">0.8006</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>Converting dataframe to numerical matrix</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>Read <span class="dv">60000</span> rows and found <span class="dv">784</span> numeric columns</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>Building HNSW index with metric <span class="st">'l2'</span> ef <span class="ot">=</span> <span class="dv">200</span> M <span class="ot">=</span> <span class="dv">16</span> using <span class="dv">6</span> threads</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>Finished building index</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>Searching HNSW index with ef <span class="ot">=</span> <span class="dv">15</span> and <span class="dv">6</span> threads</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>Finished searching</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>Commencing smooth kNN distance calibration using <span class="dv">6</span> threads with target n_neighbors <span class="ot">=</span> <span class="dv">15</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>Initializing from normalized Laplacian <span class="sc">+</span> <span class="fu">noise</span> (using RSpectra)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>Commencing optimization <span class="cf">for</span> <span class="dv">500</span> epochs, with <span class="dv">1239066</span> positive edges using <span class="dv">6</span> threads</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>Using method <span class="st">'umap'</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>Optimizing with Adam alpha <span class="ot">=</span> <span class="dv">1</span> beta1 <span class="ot">=</span> <span class="fl">0.5</span> beta2 <span class="ot">=</span> <span class="fl">0.9</span> eps <span class="ot">=</span> <span class="fl">1e-07</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="dv">0</span><span class="sc">%   10   20   30   40   50   60   70   80   90   100%</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>[<span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="er">**************************************************|</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>Optimization finished</span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="transforming-the-test-data">Transforming the test data<a class="anchor" aria-label="anchor" href="#transforming-the-test-data"></a>
-</h3>
-<p>Let us now transform the test data using the UMAP model we just
-created. There are far fewer nobs to twiddle when transforming new data
-as that is mainly baked into the UMAP model. Again, we pass
-<code>X = NULL</code> as we don’t need the original test set data, and
-pass the test set nearest neighbor data as the <code>nn_method</code>
-parameter. We also need to pass the UMAP model we just created.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="section level4">
+<h4 id="umap-on-test-data">UMAP on test data<a class="anchor" aria-label="anchor" href="#umap-on-test-data"></a>
+</h4>
+<p>You don’t need to specify the use of HNSW for transforming new data,
+the model contains the necessary information. So we can just use the
+<code>umap_transform</code> as normal:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mnist_test_umap</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/umap_transform.html">umap_transform</a></span><span class="op">(</span></span>
-<span>    X <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    X <span class="op">=</span> <span class="va">mnist_test</span>,</span>
 <span>    model <span class="op">=</span> <span class="va">mnist_train_umap</span>,</span>
-<span>    nn_method <span class="op">=</span> <span class="va">mnist_test_query_neighbors</span>,</span>
 <span>    n_sgd_threads <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>Read <span class="dv">10000</span> rows</span>
-<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>Processing block <span class="dv">1</span> of <span class="dv">1</span></span>
-<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>Commencing smooth kNN distance calibration using <span class="dv">6</span> threads with target n_neighbors <span class="ot">=</span> <span class="dv">15</span></span>
-<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>Initializing by weighted average of neighbor coordinates using <span class="dv">6</span> threads</span>
-<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>Commencing optimization <span class="cf">for</span> <span class="dv">167</span> epochs, with <span class="dv">150000</span> positive edges using <span class="dv">6</span> threads</span>
-<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a>Using method <span class="st">'umap'</span></span>
-<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>Optimizing with Adam alpha <span class="ot">=</span> <span class="dv">1</span> beta1 <span class="ot">=</span> <span class="fl">0.5</span> beta2 <span class="ot">=</span> <span class="fl">0.9</span> eps <span class="ot">=</span> <span class="fl">1e-07</span></span>
-<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a><span class="dv">0</span><span class="sc">%   10   20   30   40   50   60   70   80   90   100%</span></span>
-<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a>[<span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span></span>
-<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a><span class="er">**************************************************|</span></span>
-<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a>Finished</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>Read <span class="dv">10000</span> rows and found <span class="dv">784</span> numeric columns</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>Processing block <span class="dv">1</span> of <span class="dv">1</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>Finished searching</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>Commencing smooth kNN distance calibration using <span class="dv">6</span> threads with target n_neighbors <span class="ot">=</span> <span class="dv">15</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>Initializing by weighted average of neighbor coordinates using <span class="dv">6</span> threads</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>Commencing optimization <span class="cf">for</span> <span class="dv">167</span> epochs, with <span class="dv">150000</span> positive edges using <span class="dv">6</span> threads</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>Using method <span class="st">'umap'</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>Optimizing with Adam alpha <span class="ot">=</span> <span class="dv">1</span> beta1 <span class="ot">=</span> <span class="fl">0.5</span> beta2 <span class="ot">=</span> <span class="fl">0.9</span> eps <span class="ot">=</span> <span class="fl">1e-07</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="dv">0</span><span class="sc">%   10   20   30   40   50   60   70   80   90   100%</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>[<span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="er">**************************************************|</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>Finished</span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="plotting-the-results">Plotting the results<a class="anchor" aria-label="anchor" href="#plotting-the-results"></a>
-</h3>
+<div class="section level4">
+<h4 id="plotting-the-results">Plotting the results<a class="anchor" aria-label="anchor" href="#plotting-the-results"></a>
+</h4>
 <p>Let’s plot the embeddings to make sure that HNSW is giving us useful
 results. I will use <code>ggplot2</code>, and the
 <code>Polychrome</code> package to create a set of distinct colors for
 each digit.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, <span class="st">"Polychrome"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://oompa.r-forge.r-project.org/" class="external-link">Polychrome</a></span><span class="op">)</span></span></code></pre></div>
 <p>This gives a palette of 10 colors following a recipe that is a bit
 like that in the Python <a href="https://github.com/lmcinnes/glasbey" class="external-link">glasbey</a> package:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">palette</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu">Polychrome</span><span class="fu">::</span><span class="fu">createPalette</span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">mnist</span><span class="op">$</span><span class="va">Label</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fl">2</span>,</span>
 <span>  seedcolors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#ffffff"</span>, <span class="st">"#000000"</span><span class="op">)</span>,</span>
@@ -357,7 +231,7 @@ like that in the Python <a href="https://github.com/lmcinnes/glasbey" class="ext
 <span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p>Now we can plot the training and test data, which I will do in two
 separate plots.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">mnist_train_umap</span><span class="op">$</span><span class="va">embedding</span>, Digit <span class="op">=</span> <span class="va">mnist_train</span><span class="op">$</span><span class="va">Label</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">X1</span>, y <span class="op">=</span> <span class="va">X2</span>, color <span class="op">=</span> <span class="va">Digit</span><span class="op">)</span></span>
@@ -373,7 +247,7 @@ separate plots.</p>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">mnist_test_umap</span>, Digit <span class="op">=</span> <span class="va">mnist_test</span><span class="op">$</span><span class="va">Label</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">X1</span>, y <span class="op">=</span> <span class="va">X2</span>, color <span class="op">=</span> <span class="va">Digit</span><span class="op">)</span></span>
@@ -389,18 +263,290 @@ separate plots.</p>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="img/hnsw-umap/mnist-train.png" alt="MNIST training data"><img src="img/hnsw-umap/mnist-test.png" alt="MNIST test set"></p>
+<div class="float">
+<img src="img/hnsw-umap/mnist-train.png" alt="MNIST training data"><div class="figcaption">MNIST training data</div>
+</div>
+<div class="float">
+<img src="img/hnsw-umap/mnist-test.png" alt="MNIST test set"><div class="figcaption">MNIST test set</div>
+</div>
 <p>The training set embedding looks like a very typical UMAP-on-MNIST
 result, and the test clusters are all in the right place relative to the
 training set. So we can celebrate victory and a successful use of
 HNSW.</p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="conclusions">Conclusions<a class="anchor" aria-label="anchor" href="#conclusions"></a>
-</h2>
-<p>To summarize, to use <code>RcppHNSW</code> for UMAP do the
+<div class="section level3">
+<h3 id="hnsw-parameters">HNSW parameters<a class="anchor" aria-label="anchor" href="#hnsw-parameters"></a>
+</h3>
+<p><code>umap</code> has a number of parameters that can be set to
+control the behavior of nearest neighbor search with its default method,
+Annoy, namely <code>n_trees</code> and <code>search_k</code>. These are
+not used when <code>nn_method = "hnsw"</code> is set. Instead, you can
+control the behavior of the HNSW index by passing a list of arguments as
+<code>nn_args</code>. For HNSW, you can set:</p>
+<ul>
+<li>
+<code>M</code>: The number of bi-directional links created for every
+new element during construction. Higher values mean more accurate
+search, but slower construction and larger index size. Default is
+16.</li>
+<li>
+<code>ef_construction</code>: The size of the dynamic list for the
+nearest neighbors during the construction. Higher values mean more
+accurate search, but slower construction and larger index size. Default
+is 200.</li>
+<li>
+<code>ef</code>: The size of the dynamic list for the nearest
+neighbors during the search. Higher values mean more accurate search,
+but slower search. Default is 10, but it will be set to
+<code>n_neighbors</code> if the latter is larger.</li>
+</ul>
+<p>For example you could do something like:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, nn_method <span class="op">=</span> <span class="st">"hnsw"</span>, </span>
+<span>                  nn_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>M <span class="op">=</span> <span class="fl">12</span>, ef_construction <span class="op">=</span> <span class="fl">64</span>, ef <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="using-rcpphnsw-directly">Using RcppHNSW Directly<a class="anchor" aria-label="anchor" href="#using-rcpphnsw-directly"></a>
+</h3>
+<p>The <code>nn_method = "hnsw"</code> is a new feature in
+<code>uwot</code>. In previous versions, you could still make use of
+HNSW neighbors but you would need to work with <code>RcppHNSW</code>
+directly. The rest of this article shows you how to do this, and can be
+used as a way to understand how <code>RcppHNSW</code> works and how to
+use external nearest neighbor data with <code>uwot</code>.</p>
+<div class="section level4">
+<h4 id="preparing-the-data">Preparing the data<a class="anchor" aria-label="anchor" href="#preparing-the-data"></a>
+</h4>
+<p>Our starting point is still <code>mnist_train</code> and
+<code>mnist_test</code>. As a reminder, these are dataframes with both
+the numerical pixel intensities of the images as well as the
+<code>Label</code> factor describing the number the digit
+represents.</p>
+<p>We won’t use the labels for calculating nearest neighbors, and in
+fact <code>RcppHNSW</code> is a bit more fussy than <code>uwot</code>.
+It only wants numerical matrix data only for input, so we will define a
+function to convert the dataframe to a matrix containing only the
+numerical data and then generate the matrices we need.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df2m</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">is.numeric</span>, <span class="fu"><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">mnist_train_data</span> <span class="op">&lt;-</span> <span class="fu">df2m</span><span class="op">(</span><span class="va">mnist_train</span><span class="op">)</span></span>
+<span><span class="va">mnist_test_data</span> <span class="op">&lt;-</span> <span class="fu">df2m</span><span class="op">(</span><span class="va">mnist_test</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level3">
+<h3 id="using-rcpphnsw">Using RcppHNSW<a class="anchor" aria-label="anchor" href="#using-rcpphnsw"></a>
+</h3>
+<p>Now load RcppHNSW:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/rcpphnsw" class="external-link">RcppHNSW</a></span><span class="op">)</span></span></code></pre></div>
+<p>Time to build an index using the training data. The default settings
+for <code>hnsw_build</code> are perfectly good for MNIST, so we’ll go
+with that. I recommend using as many threads as you can for this stage.
+Here I use 6 threads:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist_index</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/RcppHNSW/man/hnsw_build.html" class="external-link">hnsw_build</a></span><span class="op">(</span><span class="va">mnist_train_data</span>, n_threads <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
+<div class="section level4">
+<h4 id="mnist-training-data-k-nearest-neighbors">MNIST training data k-nearest neighbors<a class="anchor" aria-label="anchor" href="#mnist-training-data-k-nearest-neighbors"></a>
+</h4>
+<p>Now we will query the index with the training data to find the
+k-nearest neighbors of the training data. Note that in this case we
+built the index with the same data that we are querying it with.</p>
+<p>As with the index building, we can get good performance with default
+settings, but it’s recommended to use as many threads as you can. The
+searching should be substantially faster than the index building,
+though. The only other extra parameter we need is to specify the number
+of neighbors we want. In <code>uwot</code>, the default number of
+neighbors is 15, so we shall use that for the <code>k</code>
+parameter:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist_train_knn</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/RcppHNSW/man/hnsw_search.html" class="external-link">hnsw_search</a></span><span class="op">(</span></span>
+<span>    <span class="va">mnist_train_data</span>,</span>
+<span>    <span class="va">mnist_index</span>,</span>
+<span>    k <span class="op">=</span> <span class="fl">15</span>,</span>
+<span>    n_threads <span class="op">=</span> <span class="fl">6</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<p>There is a separate <a href="https://jlmelville.github.io/uwot/articles/nearest-neighbors-format.html">article
+on <code>uwot</code>’s nearest neighbor format</a> but the good news is
+that the output format from RcppHNSW is already in the right format for
+<code>uwot</code> (this is not a coincidence: I created and maintain the
+RcppHNSW package). Nonetheless, let’s take a look at the output, which
+is a list of two matrices:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mnist_train_knn</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"idx"</span>  <span class="st">"dist"</span></span></code></pre></div>
+<p>The first matrix, <code>idx</code>, contains the indices of the
+nearest neighbors for each point in the training data. The second
+matrix, <code>dist</code>, contains the distances to the nearest
+neighbors. Let’s take a look at the dimensions of these matrices:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">mnist_train_knn</span>, <span class="va">`dim`</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="sc">$</span>idx</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">60000</span>    <span class="dv">15</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a><span class="sc">$</span>dist</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">60000</span>    <span class="dv">15</span></span></code></pre></div>
+<p>So we have 60,000 rows, one for each point in the training data, and
+15 columns, one for each nearest neighbor. Let’s take a look at the
+first few rows and columns of each matrix:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist_train_knn</span><span class="op">$</span><span class="va">idx</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>     [,<span class="dv">1</span>]  [,<span class="dv">2</span>]  [,<span class="dv">3</span>]</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>[<span class="dv">1</span>,]    <span class="dv">1</span> <span class="dv">32249</span>  <span class="dv">8729</span></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>[<span class="dv">2</span>,]    <span class="dv">2</span>   <span class="dv">640</span> <span class="dv">51122</span></span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>[<span class="dv">3</span>,]    <span class="dv">3</span> <span class="dv">54198</span> <span class="dv">46129</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist_train_knn</span><span class="op">$</span><span class="va">dist</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>     [,<span class="dv">1</span>]     [,<span class="dv">2</span>]     [,<span class="dv">3</span>]</span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>[<span class="dv">1</span>,]    <span class="dv">0</span> <span class="fl">1561.472</span> <span class="fl">1591.601</span></span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>[<span class="dv">2</span>,]    <span class="dv">0</span> <span class="fl">1020.647</span> <span class="fl">1100.529</span></span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>[<span class="dv">3</span>,]    <span class="dv">0</span> <span class="fl">1377.631</span> <span class="fl">1541.127</span></span></code></pre></div>
+<p>For the k-nearest neighbors of a dataset, it’s often a convention
+that the nearest neighbor of any item is the item itself, which is why
+the nearest neighbor of the first item has the index <code>1</code>, and
+the distance is zero. Not all nearest neighbor packages follow this
+convention, but <code>uwot</code> does, so we’re good.</p>
+</div>
+<div class="section level4">
+<h4 id="mnist-test-set-query-neighbors">MNIST test set query neighbors<a class="anchor" aria-label="anchor" href="#mnist-test-set-query-neighbors"></a>
+</h4>
+<p>We will also need the test set neighbors, so let’s do that now. We
+are not going to build an index with the test set, but instead we will
+query each test set item against the training set index:</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist_test_query_neighbors</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/RcppHNSW/man/hnsw_search.html" class="external-link">hnsw_search</a></span><span class="op">(</span></span>
+<span>    <span class="va">mnist_test_data</span>,</span>
+<span>    <span class="va">mnist_index</span>,</span>
+<span>    k <span class="op">=</span> <span class="fl">15</span>,</span>
+<span>    n_threads <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<p>The output is the same format as for the training set neighbors, so
+there should be no surprises here:</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">mnist_test_query_neighbors</span>, <span class="va">`dim`</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="sc">$</span>idx</span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">10000</span>    <span class="dv">15</span></span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a><span class="sc">$</span>dist</span>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">10000</span>    <span class="dv">15</span></span></code></pre></div>
+<p>Here are the first few indices and distances for the test set:</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist_test_query_neighbors</span><span class="op">$</span><span class="va">idx</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>      [,<span class="dv">1</span>]  [,<span class="dv">2</span>]  [,<span class="dv">3</span>]</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>[<span class="dv">1</span>,] <span class="dv">53844</span> <span class="dv">38621</span> <span class="dv">16187</span></span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>[<span class="dv">2</span>,] <span class="dv">28883</span> <span class="dv">49161</span> <span class="dv">24613</span></span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a>[<span class="dv">3</span>,] <span class="dv">58742</span> <span class="dv">46513</span> <span class="dv">15225</span></span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist_test_query_neighbors</span><span class="op">$</span><span class="va">dist</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>          [,<span class="dv">1</span>]      [,<span class="dv">2</span>]      [,<span class="dv">3</span>]</span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>[<span class="dv">1</span>,]  <span class="fl">676.5841</span>  <span class="fl">793.9868</span>  <span class="fl">862.6766</span></span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a>[<span class="dv">2</span>,] <span class="fl">1162.9316</span> <span class="fl">1211.8445</span> <span class="fl">1285.9285</span></span>
+<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a>[<span class="dv">3</span>,]  <span class="fl">321.6629</span>  <span class="fl">332.4635</span>  <span class="fl">341.0484</span></span></code></pre></div>
+<p>Remember that we queried the test set against the training set, so
+the test set indices don’t get a chance to be neighbors of themselves.
+Consequently, also the nearest neighbor distances are not zero.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="using-hnsw-k-nearest-neighbors-with-umap">Using HNSW k-nearest neighbors with UMAP<a class="anchor" aria-label="anchor" href="#using-hnsw-k-nearest-neighbors-with-umap"></a>
+</h3>
+<p>We are now ready to use the HNSW k-nearest neighbors with
+<code>uwot</code>.</p>
+<div class="section level4">
+<h4 id="umap-on-training-data-with-hnsw-knn">UMAP on training data with HNSW knn<a class="anchor" aria-label="anchor" href="#umap-on-training-data-with-hnsw-knn"></a>
+</h4>
+<p>UMAP works on the nearest neighbor graph, so if you pass it
+pre-computed nearest neighbor data, you don’t actually need to give it
+any other data. To do so:</p>
+<ul>
+<li>set <code>X = NULL</code>.</li>
+<li>pass the nearest neighbor data as the <code>nn_method</code>
+parameter.</li>
+</ul>
+<p>The other parameters are the same as those we used before with
+<code>nn_method = "hnsw"</code>, so see above for a description.</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist_train_umap</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span></span>
+<span>    X <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    nn_method <span class="op">=</span> <span class="va">mnist_train_knn</span>,</span>
+<span>    batch <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    n_epochs <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>    n_sgd_threads <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>    ret_model <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>UMAP embedding parameters a <span class="ot">=</span> <span class="fl">1.896</span> b <span class="ot">=</span> <span class="fl">0.8006</span></span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>Commencing smooth kNN distance calibration using <span class="dv">6</span> threads with target n_neighbors <span class="ot">=</span> <span class="dv">15</span></span>
+<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a>Initializing from normalized Laplacian <span class="sc">+</span> <span class="fu">noise</span> (using irlba)</span>
+<span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a>Commencing optimization <span class="cf">for</span> <span class="dv">500</span> epochs, with <span class="dv">1239236</span> positive edges using <span class="dv">6</span> threads</span>
+<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a>Using method <span class="st">'umap'</span></span>
+<span id="cb34-6"><a href="#cb34-6" tabindex="-1"></a>Optimizing with Adam alpha <span class="ot">=</span> <span class="dv">1</span> beta1 <span class="ot">=</span> <span class="fl">0.5</span> beta2 <span class="ot">=</span> <span class="fl">0.9</span> eps <span class="ot">=</span> <span class="fl">1e-07</span></span>
+<span id="cb34-7"><a href="#cb34-7" tabindex="-1"></a><span class="dv">0</span><span class="sc">%   10   20   30   40   50   60   70   80   90   100%</span></span>
+<span id="cb34-8"><a href="#cb34-8" tabindex="-1"></a>[<span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span></span>
+<span id="cb34-9"><a href="#cb34-9" tabindex="-1"></a><span class="er">**************************************************|</span></span>
+<span id="cb34-10"><a href="#cb34-10" tabindex="-1"></a>Optimization finished</span>
+<span id="cb34-11"><a href="#cb34-11" tabindex="-1"></a>Note<span class="sc">:</span> model requested with precomputed neighbors. For transforming new data, distance data must be provided separately</span></code></pre></div>
+<p>Nothing very exciting is in the output, except that notice the last
+line of output reminding us that if we want to transform new data we
+better have generated neighbors for that data too. And we did, so we’re
+ok.</p>
+</div>
+<div class="section level4">
+<h4 id="transforming-the-test-data">Transforming the test data<a class="anchor" aria-label="anchor" href="#transforming-the-test-data"></a>
+</h4>
+<p>Let us now transform the test data using the UMAP model we just
+created. There are far fewer nobs to twiddle when transforming new data
+as that is mainly baked into the UMAP model. Again, we pass
+<code>X = NULL</code> as we don’t need the original test set data, and
+pass the test set nearest neighbor data as the <code>nn_method</code>
+parameter. We also need to pass the UMAP model we just created.</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist_test_umap</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="../reference/umap_transform.html">umap_transform</a></span><span class="op">(</span></span>
+<span>    X <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    model <span class="op">=</span> <span class="va">mnist_train_umap</span>,</span>
+<span>    nn_method <span class="op">=</span> <span class="va">mnist_test_query_neighbors</span>,</span>
+<span>    n_sgd_threads <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>Read <span class="dv">10000</span> rows</span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a>Processing block <span class="dv">1</span> of <span class="dv">1</span></span>
+<span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a>Commencing smooth kNN distance calibration using <span class="dv">6</span> threads with target n_neighbors <span class="ot">=</span> <span class="dv">15</span></span>
+<span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a>Initializing by weighted average of neighbor coordinates using <span class="dv">6</span> threads</span>
+<span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a>Commencing optimization <span class="cf">for</span> <span class="dv">167</span> epochs, with <span class="dv">150000</span> positive edges using <span class="dv">6</span> threads</span>
+<span id="cb36-6"><a href="#cb36-6" tabindex="-1"></a>Using method <span class="st">'umap'</span></span>
+<span id="cb36-7"><a href="#cb36-7" tabindex="-1"></a>Optimizing with Adam alpha <span class="ot">=</span> <span class="dv">1</span> beta1 <span class="ot">=</span> <span class="fl">0.5</span> beta2 <span class="ot">=</span> <span class="fl">0.9</span> eps <span class="ot">=</span> <span class="fl">1e-07</span></span>
+<span id="cb36-8"><a href="#cb36-8" tabindex="-1"></a><span class="dv">0</span><span class="sc">%   10   20   30   40   50   60   70   80   90   100%</span></span>
+<span id="cb36-9"><a href="#cb36-9" tabindex="-1"></a>[<span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span><span class="sc">----</span><span class="er">|</span></span>
+<span id="cb36-10"><a href="#cb36-10" tabindex="-1"></a><span class="er">**************************************************|</span></span>
+<span id="cb36-11"><a href="#cb36-11" tabindex="-1"></a>Finished</span></code></pre></div>
+<p>At this point we could visualize the data again, but you can take my
+word for it that it looks just like the <code>nn_method = "hnsw"</code>
+approach.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="conclusions">Conclusions<a class="anchor" aria-label="anchor" href="#conclusions"></a>
+</h3>
+<p>To summarize, to use HNSW with <code>uwot</code> do the
 following:</p>
+<ul>
+<li>Make sure <code>RcppHNSW</code> is installed.</li>
+<li>Set <code>nn_method = "hsnw"</code>.</li>
+<li>Pass an <code>nn_args</code> list containing a combination of
+<code>M</code>, <code>ef_construction</code> and <code>ef</code> to
+control the speed/accuracy trade-off.</li>
+<li>To transform new data, just use <code>umap_transform</code> as
+normal.</li>
+</ul>
+<p>To use <code>RcppHNSW</code> directly for UMAP do the following:</p>
 <ul>
 <li>build an index for your data with <code>hnsw_build</code>.</li>
 <li>query the index with <code>hnsw_search</code> to obtain the
@@ -426,9 +572,7 @@ still be useful for initialization. For example if you want to use a
 PCA-based initialization then you <em>will</em> need to keep your
 original data around. But it’s not necessary with the default settings
 for <code>umap</code>.</p>
-<p>I plan to integrate <code>RcppHNSW</code> more tightly into
-<code>uwot</code> in a future release, but for now this should hopefully
-be enough to get you started.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

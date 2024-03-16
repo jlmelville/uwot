@@ -136,7 +136,12 @@
 <span>  main <span class="op">=</span> <span class="st">"R uwot::umap"</span>,</span>
 <span>  xlab <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  ylab <span class="op">=</span> <span class="st">""</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Installing RcppHNSW will allow the use of the usually faster HNSW method:</span></span>
+<span><span class="co"># install.packages("RcppHNSW")</span></span>
+<span><span class="va">mnist_umap_hnsw</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, min_dist <span class="op">=</span> <span class="fl">0.001</span>, </span>
+<span>                        nn_method <span class="op">=</span> <span class="st">"hnsw"</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
 <img src="reference/figures/mnist-r.png" alt="MNIST UMAP"><div class="figcaption">MNIST UMAP</div>
 </div>

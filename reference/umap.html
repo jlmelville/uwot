@@ -111,7 +111,8 @@ implementation at <a href="https://github.com/lmcinnes/umap" class="external-lin
 <span>  pca_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  binary_edge_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  dens_scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nn_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -330,6 +331,13 @@ these values are set automatically as determined by <code>min_dist</code> and
     <a href="https://cran.r-project.org/package=FNN" class="external-link">FNN</a> package.</p></li>
 <li><p><code>"annoy"</code> Use approximate nearest neighbors via the
     <a href="https://cran.r-project.org/package=RcppAnnoy" class="external-link">RcppAnnoy</a> package.</p></li>
+<li><p><code>"hnsw"</code> Use approximate nearest neighbors via the
+    <a href="https://cran.r-project.org/package=RcppHNSW" class="external-link">RcppHNSW</a> package.
+    <code>RcppHNSW</code> is not a dependency of this package: this option is
+    only available if you have installed <code>RcppHNSW</code> yourself. Only
+    Also, HNSW only supports the following arguments for <code>metric</code> and
+    <code>target_metric</code>: <code>"euclidean"</code>, <code>"cosine"</code> and
+    <code>"correlation"</code>.</p></li>
 </ul><p>By default, if <code>X</code> has less than 4,096 vertices, the exact nearest
 neighbors are found. Otherwise, approximate nearest neighbors are used.
 You may also pass pre-calculated nearest neighbor data to this argument. It
@@ -657,6 +665,25 @@ but it may be more convenient in some situations than having to call a
 separate function. The default is to not set a seed. If
 <code>ret_model = TRUE</code>, the seed will be stored in the output model and
 then used to set the seed inside <code><a href="umap_transform.html">umap_transform</a></code>.</p></dd>
+
+
+<dt>nn_args</dt>
+<dd><p>A list containing additional arguments to pass to the nearest
+neighbor method. For <code>nn_method = "annoy"</code>, you can specify
+<code>"n_trees"</code> and <code>"search_k"</code>, and these will override the
+<code>n_trees</code> and <code>search_k</code> parameters.
+For <code>nn_method = "hnsw"</code>, you may specify the following arguments:</p><ul><li><p><code>M</code> The maximum number of neighbors to keep for each vertex.
+Reasonable values are <code>2</code> to <code>100</code>. Higher values give better
+recall at the cost of more memory. Default value is <code>16</code>.</p></li>
+<li><p><code>ef_construction</code> A positive integer specifying the size of
+the dynamic list used during index construction. A higher value will
+provide better results at the cost of a longer time to build the index.
+Default is <code>200</code>.</p></li>
+<li><p><code>ef</code> A positive integer specifying the size of the dynamic
+list used during search. This cannot be smaller than <code>n_neighbors</code>
+and cannot be higher than the number of items in the index. Default is
+<code>10</code>.</p></li>
+</ul></dd>
 
 </dl></div>
     <div class="section level2">
