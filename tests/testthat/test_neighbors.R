@@ -489,6 +489,23 @@ test_that("nndescent gives correct euclidean neighbor results", {
       ret_model = TRUE,
       n_epochs = 0
     )
+  iris10_nnd_no_model <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "nndescent",
+      ret_extra = c("nn"),
+      ret_model = FALSE,
+      n_epochs = 0
+    )
+  expect_equal(iris10_annoy$nn$euclidean$idx,
+               iris10_nnd_no_model$nn$euclidean$idx,
+               check.attributes = FALSE)
+  expect_equal(iris10_annoy$nn$euclidean$dist,
+               iris10_nnd_no_model$nn$euclidean$dist,
+               check.attributes = FALSE,
+               tol = 1e-7)
+
   iris10_nnd <-
     umap(
       iris10,
@@ -731,5 +748,31 @@ test_that("nndescent gives correct correlation neighbor results and multiple thr
     iris10_transform_nnd$nn$correlation$dist,
     check.attributes = FALSE,
     tol = 1e-6
+  )
+
+  model_with_args <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    init = "spca",
+    metric = "euclidean",
+    verbose = FALSE,
+    n_threads = 0,
+    ret_model = TRUE,
+    ret_extra = c("nn"),
+    nn_method = "nndescent",
+    nn_args = list(
+      init = "rand",
+      prune_reverse = TRUE,
+      epsilon = 0.0
+    )
+  )
+  expect_equal(
+    model_with_args$nn_args,
+    list(
+      init = "rand",
+      prune_reverse = TRUE,
+      epsilon = 0
+    )
   )
 })

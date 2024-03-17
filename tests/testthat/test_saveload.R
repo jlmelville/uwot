@@ -308,4 +308,33 @@ test_that("save-load nndescent", {
     transformed_before_reload$embedding,
     transformed_after_reload$embedding
   )
+
+  mod_fname2 <- tempfile(tmpdir = tempdir())
+  saveRDS(modelload, mod_fname2)
+  modelload2 <- readRDS(mod_fname2)
+  expect_equal(modelload2$nn_method, "nndescent")
+  set.seed(1337)
+  transformed_after_reload2 <-
+    umap_transform(iris10,
+                   modelload2,
+                   n_epochs = 2,
+                   ret_extra = c("nn")
+    )
+  expect_equal(
+    transformed_after_reload$nn$euclidean$idx,
+    transformed_after_reload2$nn$euclidean$idx,
+  )
+  expect_equal(
+    transformed_after_reload$nn$euclidean$dist,
+    transformed_after_reload2$nn$euclidean$dist,
+    check.attributes = FALSE,
+    tol = 1e-7
+  )
+  expect_equal(
+    transformed_after_reload$embedding,
+    transformed_after_reload2$embedding
+  )
+  if (file.exists(mod_fname2)) {
+    unlink(mod_fname2)
+  }
 })

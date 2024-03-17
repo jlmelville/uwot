@@ -570,12 +570,12 @@ umap_transform <- function(X = NULL, model = NULL,
         }
       }
       else if (startsWith(ann$type, "nndescent")) {
-        # FIXME: nn_args for query only
         nn <-
           nndescent_search(
             X,
             k = n_neighbors,
             ann = ann,
+            nn_args = model$nn_args,
             n_threads = n_threads,
             verbose = verbose
           )

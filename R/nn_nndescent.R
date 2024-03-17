@@ -10,12 +10,16 @@ nndescent_nn <- function(X,
   }
 
   if (!ret_index) {
-    nn_args$data <- X
-    nn_args$k <- k
-    nn_args$metric <- metric
-    nn_args$n_threads <- n_threads
-    nn_args$verbose <- verbose
-    return(do.call(rnndescent::rnnd_knn, nn_args))
+    nn_knn_args <- get_nndescent_knn_args(nn_args)
+    nn_knn_args <- lreplace(
+      nn_knn_args,
+      data = X,
+      k = k,
+      metric = metric,
+      n_threads = n_threads,
+      verbose = verbose
+    )
+    return(do.call(rnndescent::rnnd_knn, nn_knn_args))
   }
 
   ann <- nndescent_build(
@@ -42,12 +46,17 @@ nndescent_build <- function(X,
                             nn_args = list(),
                             n_threads = NULL,
                             verbose = FALSE) {
-  nn_args$data <- X
-  nn_args$k <- k
-  nn_args$metric <- metric
-  nn_args$n_threads <- n_threads
-  nn_args$verbose <- verbose
-  index <- do.call(rnndescent::rnnd_build, nn_args)
+  nn_build_args <- get_nndescent_build_args(nn_args)
+  nn_build_args <- lreplace(
+    nn_build_args,
+    data = X,
+    k = k,
+    metric = metric,
+    n_threads = n_threads,
+    verbose = verbose
+  )
+
+  index <- do.call(rnndescent::rnnd_build, nn_build_args)
   list(
     ann = index,
     type = "nndescentv1",
@@ -63,10 +72,79 @@ nndescent_search <- function(X,
                              nn_args = list(),
                              n_threads = NULL,
                              verbose = FALSE) {
-  nn_args$index <- ann$ann
-  nn_args$query <- X
-  nn_args$k <- k
-  nn_args$n_threads <- n_threads
-  nn_args$verbose <- verbose
-  do.call(rnndescent::rnnd_query, nn_args)
+  nn_query_args <- get_nndescent_query_args(nn_args)
+  nn_query_args <- lreplace(
+    nn_query_args,
+    index = ann$ann,
+    query = X,
+    k = k,
+    n_threads = n_threads,
+    verbose = verbose
+  )
+
+  do.call(rnndescent::rnnd_query, nn_query_args)
+}
+
+get_nndescent_knn_args <- function(nn_args) {
+  nn_knn_args <- list()
+  nnd_knn_names <- c(
+    "use_alt_metric",
+    "init",
+    "n_trees",
+    "leaf_size",
+    "max_tree_depth",
+    "margin",
+    "n_iters",
+    "delta",
+    "max_candidates",
+    "weight_by_degree",
+    "low_memory"
+  )
+  for (name in nnd_knn_names) {
+    if (name %in% names(nn_args)) {
+      nn_knn_args[[name]] <- nn_args[[name]]
+    }
+  }
+  nn_knn_args
+}
+
+get_nndescent_build_args <- function(nn_args) {
+  nn_build_args <- list()
+  nnd_build_names <- c(
+    "use_alt_metric",
+    "init",
+    "n_trees",
+    "leaf_size",
+    "max_tree_depth",
+    "margin",
+    "n_iters",
+    "delta",
+    "max_candidates",
+    "weight_by_degree",
+    "low_memory",
+    "n_search_trees",
+    "pruning_degree_multiplier",
+    "diversify_prob",
+    "prune_reverse"
+  )
+  for (name in nnd_build_names) {
+    if (name %in% names(nn_args)) {
+      nn_build_args[[name]] <- nn_args[[name]]
+    }
+  }
+  nn_build_args
+}
+
+get_nndescent_query_args <- function(nn_args) {
+  nn_query_args <- list()
+  nnd_query_names <- c(
+    "epsilon",
+    "max_search_fraction"
+  )
+  for (name in nnd_query_names) {
+    if (name %in% names(nn_args)) {
+      nn_query_args[[name]] <- nn_args[[name]]
+    }
+  }
+  nn_query_args
 }

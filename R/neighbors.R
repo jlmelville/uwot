@@ -50,40 +50,14 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
         )
       },
       "hnsw" = {
-        nn_args_names <- names(nn_args)
+        nn_args$X <- X
+        nn_args$k <- k
+        nn_args$metric <- metric
+        nn_args$n_threads <- n_threads
+        nn_args$verbose <- verbose
+        nn_args$ret_index <- ret_index
 
-        if ("M" %in% nn_args_names) {
-          M <- nn_args$M
-        }
-        else {
-          M <- 16
-        }
-
-        if ("ef_construction" %in% nn_args_names) {
-          ef_construction <- nn_args$ef_construction
-        }
-        else {
-          ef_construction <- 200
-        }
-
-        if ("ef" %in% nn_args_names) {
-          ef <- nn_args$ef
-        }
-        else {
-          ef <- 10
-        }
-
-        res <- hnsw_nn(
-          X,
-          k = k,
-          metric = metric,
-          M = M,
-          ef_construction = ef_construction,
-          ef = ef,
-          n_threads = n_threads,
-          ret_index = ret_index,
-          verbose = verbose
-        )
+        res <- do.call(hnsw_nn, nn_args)
       },
       "nndescent" = {
         res <- nndescent_nn(
