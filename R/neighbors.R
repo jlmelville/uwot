@@ -85,6 +85,17 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
           verbose = verbose
         )
       },
+      "nndescent" = {
+        res <- nndescent_nn(
+          X,
+          k = k,
+          metric = metric,
+          nn_args = nn_args,
+          n_threads = n_threads,
+          ret_index = ret_index,
+          verbose = verbose
+        )
+      },
       stop("Unknown method: ", method)
     )
   }

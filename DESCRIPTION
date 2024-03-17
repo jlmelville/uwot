@@ -36,6 +36,7 @@ Suggests:
     knitr,
     RcppHNSW,
     rmarkdown,
+    rnndescent,
     RSpectra,
     testthat
 LinkingTo: 

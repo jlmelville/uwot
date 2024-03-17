@@ -2656,6 +2656,13 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
 
+  if (is.character(nn_method) && nn_method == "nndescent") {
+    if (!is_installed("rnndescent")) {
+      stop("rnndescent is required for nn_method = 'nndescent',",
+           "please install it")
+    }
+  }
+
   ret_extra <- ret_model || ret_nn || ret_fgraph || ret_sigma || ret_localr
 
   # Store categorical columns to be used to generate the graph
@@ -3230,7 +3237,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
             # of them, but for loading the NN index we need the number of
             # columns explicitly (we don't have access to the column dimension of
             # the input data at load time)
-            if (res$nn_index$type %in% c("annoyv2", "hnswv1")) {
+            if (res$nn_index$type %in% c("annoyv2", "hnswv1", "nndescentv1")) {
               res$metric[[1]] <- list(ndim = res$nn_index$ndim)
             }
             else {
@@ -3391,12 +3398,33 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
       # save each nn index inside tempdir/uwot/model
       metrics <- names(model$metric)
       n_metrics <- length(metrics)
+
       for (i in 1:n_metrics) {
-        nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
         if (n_metrics == 1) {
-          model$nn_index$ann$save(nn_tmpfname)
-        } else {
-          model$nn_index[[i]]$ann$save(nn_tmpfname)
+          nn_index <- model$nn_index
+        }
+        else {
+          nn_index <- model$nn_index[[i]]
+        }
+
+        if (startsWith(nn_index$type, "annoy") ||
+            startsWith(nn_index$type, "hnsw")) {
+
+            nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
+            nn_meta_tmpfname <- file.path(uwot_dir, paste0("nn-meta", i))
+            nn_index$ann$save(nn_tmpfname)
+
+            # save metadata wrapper around the index separately
+            meta_data <- nn_index
+            meta_data$ann <- NULL
+            saveRDS(meta_data, file = nn_meta_tmpfname)
+        }
+        else if (startsWith(nn_index$type, "nndescent")) {
+          nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
+          saveRDS(nn_index, file = nn_tmpfname)
+        }
+        else {
+          stop("unsupported nn index type: ", model$nn_index$type)
         }
       }
 
@@ -3552,13 +3580,18 @@ load_uwot <- function(file, verbose = FALSE) {
     }
     else if (nn_method == "hnsw") {
       ann <- hnsw_load(metric, ndim = ndim, filename = nn_fname)
-      idx <-
-        list(
-          ann = ann,
-          type = "hnswv1",
-          metric = metric,
-          ndim = ndim
-        )
+      nn_meta_tmpfname <- file.path(mod_dir, paste0("uwot/nn-meta", i))
+      idx <- readRDS(nn_meta_tmpfname)
+      idx$ann <- ann
+
+      if (n_metrics == 1) {
+        model$nn_index <- idx
+      } else {
+        model$nn_index[[i]] <- idx
+      }
+    }
+    else if (nn_method == "nndescent") {
+      idx <- readRDS(nn_fname)
       if (n_metrics == 1) {
         model$nn_index <- idx
       } else {
@@ -3680,6 +3713,9 @@ all_nn_indices_are_loaded <- function(model) {
       }
     }
     else if (model$nn_index$type == "hnswv1") {
+      return(TRUE)
+    }
+    else if (model$nn_index$type == "nndescentv1") {
       return(TRUE)
     }
     else {
@@ -3936,7 +3972,8 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
     nn <- nn_method
   } else {
     nn_method <-
-      match.arg(tolower(nn_method), c("annoy", "fnn", "matrix", "hnsw"))
+      match.arg(tolower(nn_method),
+                c("annoy", "fnn", "matrix", "hnsw", "nndescent"))
     if (nn_method == "fnn" && metric != "euclidean") {
       stop(
         "nn_method = 'FNN' is only compatible with distance metric ",
