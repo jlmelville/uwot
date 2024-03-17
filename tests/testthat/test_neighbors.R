@@ -475,3 +475,261 @@ test_that("hnsw gives correct correlation neighbor results and multiple threads"
     tol = 1e-6
   )
 })
+
+# rnndescent
+
+test_that("nndescent gives correct euclidean neighbor results", {
+  testthat::skip_if_not_installed("rnndescent")
+  iris10_annoy <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "annoy",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0
+    )
+  iris10_nnd <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "nndescent",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0
+    )
+  expect_equal(iris10_annoy$nn$euclidean$idx,
+               iris10_nnd$nn$euclidean$idx,
+               check.attributes = FALSE)
+  expect_equal(iris10_annoy$nn$euclidean$dist,
+               iris10_nnd$nn$euclidean$dist,
+               check.attributes = FALSE,
+               tol = 1e-7)
+
+  iris10_transform_nnd <-
+    umap_transform(iris10,
+                   iris10_nnd,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_nnd$nn$euclidean$idx,
+    iris10_transform_nnd$nn$euclidean$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_nnd$nn$euclidean$dist,
+    iris10_transform_nnd$nn$euclidean$dist,
+    check.attributes = FALSE
+  )
+
+  iris10_transform_annoy <-
+    umap_transform(iris10,
+                   iris10_annoy,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_transform_annoy$nn$euclidean$idx,
+    iris10_transform_nnd$nn$euclidean$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_transform_annoy$nn$euclidean$dist,
+    iris10_transform_nnd$nn$euclidean$dist,
+    check.attributes = FALSE,
+    tol = 1e-6
+  )
+})
+
+test_that("nndescent gives correct cosine neighbor results", {
+  testthat::skip_if_not_installed("rnndescent")
+  iris10_annoy <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "annoy",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "cosine"
+    )
+  iris10_nnd <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "nndescent",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "cosine"
+    )
+  expect_equal(iris10_annoy$nn$cosine$idx,
+               iris10_nnd$nn$cosine$idx,
+               check.attributes = FALSE)
+  expect_equal(iris10_annoy$nn$cosine$dist,
+               iris10_nnd$nn$cosine$dist,
+               check.attributes = FALSE,
+               tol = 1e-6)
+
+  iris10_transform_nnd <-
+    umap_transform(iris10,
+                   iris10_nnd,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_nnd$nn$cosine$idx,
+    iris10_transform_nnd$nn$cosine$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_nnd$nn$cosine$dist,
+    iris10_transform_nnd$nn$cosine$dist,
+    check.attributes = FALSE
+  )
+
+  iris10_transform_annoy <-
+    umap_transform(iris10,
+                   iris10_annoy,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_transform_annoy$nn$cosine$idx,
+    iris10_transform_nnd$nn$cosine$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_transform_annoy$nn$cosine$dist,
+    iris10_transform_nnd$nn$cosine$dist,
+    check.attributes = FALSE,
+    tol = 1e-6
+  )
+})
+
+test_that("nndescent gives correct correlation neighbor results", {
+  testthat::skip_if_not_installed("rnndescent")
+  iris10_annoy <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "annoy",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "correlation"
+    )
+  iris10_nnd <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "nndescent",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "correlation"
+    )
+  expect_equal(iris10_annoy$nn$correlation$idx,
+               iris10_nnd$nn$correlation$idx,
+               check.attributes = FALSE)
+  expect_equal(iris10_annoy$nn$correlation$dist,
+               iris10_nnd$nn$correlation$dist,
+               check.attributes = FALSE,
+               tol = 1e-6)
+
+  iris10_transform_nnd <-
+    umap_transform(iris10,
+                   iris10_nnd,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_nnd$nn$correlation$idx,
+    iris10_transform_nnd$nn$correlation$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_nnd$nn$correlation$dist,
+    iris10_transform_nnd$nn$correlation$dist,
+    check.attributes = FALSE
+  )
+
+  iris10_transform_annoy <-
+    umap_transform(iris10,
+                   iris10_annoy,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_transform_annoy$nn$correlation$idx,
+    iris10_transform_nnd$nn$correlation$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_transform_annoy$nn$correlation$dist,
+    iris10_transform_nnd$nn$correlation$dist,
+    check.attributes = FALSE,
+    tol = 1e-6
+  )
+})
+
+test_that("nndescent gives correct correlation neighbor results and multiple threads", {
+  testthat::skip_if_not_installed("rnndescent")
+  iris10_annoy <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "annoy",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "correlation"
+    )
+  iris10_nnd <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      nn_method = "nndescent",
+      ret_extra = c("nn"),
+      ret_model = TRUE,
+      n_epochs = 0,
+      metric = "correlation",
+      n_threads = 2
+    )
+  expect_equal(iris10_annoy$nn$correlation$idx,
+               iris10_nnd$nn$correlation$idx,
+               check.attributes = FALSE)
+  expect_equal(iris10_annoy$nn$correlation$dist,
+               iris10_nnd$nn$correlation$dist,
+               check.attributes = FALSE,
+               tol = 1e-6)
+
+  iris10_transform_nnd <-
+    umap_transform(iris10,
+                   iris10_nnd,
+                   n_epochs = 0,
+                   ret_extra = c("nn"),
+                   n_threads = 2)
+  expect_equal(
+    iris10_nnd$nn$correlation$idx,
+    iris10_transform_nnd$nn$correlation$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_nnd$nn$correlation$dist,
+    iris10_transform_nnd$nn$correlation$dist,
+    check.attributes = FALSE
+  )
+
+  iris10_transform_annoy <-
+    umap_transform(iris10,
+                   iris10_annoy,
+                   n_epochs = 0,
+                   ret_extra = c("nn"))
+  expect_equal(
+    iris10_transform_annoy$nn$correlation$idx,
+    iris10_transform_nnd$nn$correlation$idx,
+    check.attributes = FALSE
+  )
+  expect_equal(
+    iris10_transform_annoy$nn$correlation$dist,
+    iris10_transform_nnd$nn$correlation$dist,
+    check.attributes = FALSE,
+    tol = 1e-6
+  )
+})
