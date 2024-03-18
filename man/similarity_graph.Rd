@@ -127,11 +127,13 @@ dimension of the manifold. Ignored if \code{method = "largevis"}.}
     \href{https://cran.r-project.org/package=FNN}{FNN} package.
   \item \code{"annoy"} Use approximate nearest neighbors via the
     \href{https://cran.r-project.org/package=RcppAnnoy}{RcppAnnoy} package.
-  \item \code{"hnsw"} Use approximate nearest neighbors via the
+  \item \code{"hnsw"} Use approximate nearest neighbors with the
+    Hierarchical Navigable Small World (HNSW) method (Malkov and Yashunin,
+    2018) via the
     \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
     \code{RcppHNSW} is not a dependency of this package: this option is
-    only available if you have installed \code{RcppHNSW} yourself.
-    Also, HNSW only supports the following arguments for \code{metric} and
+    only available if you have installed \code{RcppHNSW} yourself. Also,
+    HNSW only supports the following arguments for \code{metric} and
     \code{target_metric}: \code{"euclidean"}, \code{"cosine"} and
     \code{"correlation"}.
  }
@@ -401,6 +403,11 @@ all(iris30_lv_graph_nn == iris30_lv_graph$similarity_graph)
 
 }
 \references{
+Malkov, Y. A., & Yashunin, D. A. (2018).
+Efficient and robust approximate nearest neighbor search using hierarchical
+navigable small world graphs.
+\emph{IEEE transactions on pattern analysis and machine intelligence}, \emph{42}(4), 824-836.
+
 McInnes, L., Healy, J., & Melville, J. (2018).
 UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
 \emph{arXiv preprint} \emph{arXiv}:1802.03426.

@@ -220,11 +220,13 @@ embedding.}
     \href{https://cran.r-project.org/package=FNN}{FNN} package.
   \item \code{"annoy"} Use approximate nearest neighbors via the
     \href{https://cran.r-project.org/package=RcppAnnoy}{RcppAnnoy} package.
-  \item \code{"hnsw"} Use approximate nearest neighbors via the
+  \item \code{"hnsw"} Use approximate nearest neighbors with the
+    Hierarchical Navigable Small World (HNSW) method (Malkov and Yashunin,
+    2018) via the
     \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
     \code{RcppHNSW} is not a dependency of this package: this option is
-    only available if you have installed \code{RcppHNSW} yourself.
-    Also, HNSW only supports the following arguments for \code{metric} and
+    only available if you have installed \code{RcppHNSW} yourself. Also,
+    HNSW only supports the following arguments for \code{metric} and
     \code{target_metric}: \code{"euclidean"}, \code{"cosine"} and
     \code{"correlation"}.
  }
@@ -554,15 +556,71 @@ A matrix of optimized coordinates, or:
   specifying \code{ret_model}, \code{ret_nn} and \code{ret_extra}.
 }
 \description{
-A faster (but less flexible) version of the UMAP gradient. For more detail on
-UMAP, see the  \code{\link{umap}} function.
+A faster (but less flexible) version of the UMAP (McInnes et al, 2018)
+gradient. For more detail on UMAP, see the \code{\link{umap}} function.
 }
 \details{
 By setting the UMAP curve parameters \code{a} and \code{b} to \code{1}, you
-get back the Cauchy distribution as used in t-SNE and LargeVis. It also
-results in a substantially simplified gradient expression. This can give
-a speed improvement of around 50\%.
+get back the Cauchy distribution as used in t-SNE (van der Maaten and Hinton,
+2008) and LargeVis (Tang et al., 2016). It also results in a substantially
+simplified gradient expression. This can give a speed improvement of around
+50\%.
 }
 \examples{
 iris_tumap <- tumap(iris, n_neighbors = 50, learning_rate = 0.5)
+
+}
+\references{
+Belkin, M., & Niyogi, P. (2002).
+Laplacian eigenmaps and spectral techniques for embedding and clustering.
+In \emph{Advances in neural information processing systems}
+(pp. 585-591).
+\url{http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf}
+
+Böhm, J. N., Berens, P., & Kobak, D. (2020).
+A unifying perspective on neighbor embeddings along the attraction-repulsion spectrum.
+\emph{arXiv preprint} \emph{arXiv:2007.08902}.
+\url{https://arxiv.org/abs/2007.08902}
+
+Damrich, S., & Hamprecht, F. A. (2021).
+On UMAP's true loss function.
+\emph{Advances in Neural Information Processing Systems}, \emph{34}.
+\url{https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html}
+
+Kingma, D. P., & Ba, J. (2014).
+Adam: A method for stochastic optimization.
+\emph{arXiv preprint} \emph{arXiv}:1412.6980.
+\url{https://arxiv.org/abs/1412.6980}
+
+Malkov, Y. A., & Yashunin, D. A. (2018).
+Efficient and robust approximate nearest neighbor search using hierarchical
+navigable small world graphs.
+\emph{IEEE transactions on pattern analysis and machine intelligence}, \emph{42}(4), 824-836.
+
+McInnes, L., Healy, J., & Melville, J. (2018).
+UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
+\emph{arXiv preprint} \emph{arXiv}:1802.03426.
+\url{https://arxiv.org/abs/1802.03426}
+
+O’Neill, M. E. (2014).
+\emph{PCG: A family of simple fast space-efficient statistically good
+algorithms for random number generation}
+(Report No. HMC-CS-2014-0905). Harvey Mudd College.
+
+Tang, J., Liu, J., Zhang, M., & Mei, Q. (2016, April).
+Visualizing large-scale and high-dimensional data.
+In \emph{Proceedings of the 25th International Conference on World Wide Web}
+(pp. 287-297).
+International World Wide Web Conferences Steering Committee.
+\url{https://arxiv.org/abs/1602.00370}
+
+Van der Maaten, L., & Hinton, G. (2008).
+Visualizing data using t-SNE.
+\emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
+\url{https://www.jmlr.org/papers/v9/vandermaaten08a.html}
+
+Wang, Y., Huang, H., Rudin, C., & Shaposhnik, Y. (2021).
+Understanding How Dimension Reduction Tools Work: An Empirical Approach to Deciphering t-SNE, UMAP, TriMap, and PaCMAP for Data Visualization.
+\emph{Journal of Machine Learning Research}, \emph{22}(201), 1-73.
+\url{https://www.jmlr.org/papers/v22/20-1061.html}
 }
