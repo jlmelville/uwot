@@ -11,13 +11,15 @@ nndescent_nn <- function(X,
 
   if (!ret_index) {
     nn_knn_args <- get_nndescent_knn_args(nn_args)
-    nn_knn_args <- lreplace(
+    nn_knn_args <- lmerge(
       nn_knn_args,
-      data = X,
-      k = k,
-      metric = metric,
-      n_threads = n_threads,
-      verbose = verbose
+      list(
+        data = X,
+        k = k,
+        metric = metric,
+        n_threads = n_threads,
+        verbose = verbose
+      )
     )
     return(do.call(rnndescent::rnnd_knn, nn_knn_args))
   }
@@ -47,13 +49,15 @@ nndescent_build <- function(X,
                             n_threads = NULL,
                             verbose = FALSE) {
   nn_build_args <- get_nndescent_build_args(nn_args)
-  nn_build_args <- lreplace(
+  nn_build_args <- lmerge(
     nn_build_args,
-    data = X,
-    k = k,
-    metric = metric,
-    n_threads = n_threads,
-    verbose = verbose
+    list(
+      data = X,
+      k = k,
+      metric = metric,
+      n_threads = n_threads,
+      verbose = verbose
+    )
   )
 
   index <- do.call(rnndescent::rnnd_build, nn_build_args)
@@ -73,13 +77,15 @@ nndescent_search <- function(X,
                              n_threads = NULL,
                              verbose = FALSE) {
   nn_query_args <- get_nndescent_query_args(nn_args)
-  nn_query_args <- lreplace(
+  nn_query_args <- lmerge(
     nn_query_args,
-    index = ann$ann,
-    query = X,
-    k = k,
-    n_threads = n_threads,
-    verbose = verbose
+    list(
+      index = ann$ann,
+      query = X,
+      k = k,
+      n_threads = n_threads,
+      verbose = verbose
+    )
   )
 
   do.call(rnndescent::rnnd_query, nn_query_args)
