@@ -3041,14 +3041,13 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     if (!is_installed("RcppHNSW")) {
       stop("RcppHNSW is required for nn_method = 'hnsw', please install it")
     }
-    hnsw_metrics <- c("euclidean", "cosine", "correlation")
-    if (!metric %in% hnsw_metrics) {
+    if (!is_ok_hnsw_metric(metric)) {
       stop(
         "bad metric: hnsw only supports 'euclidean', 'cosine' or ",
         "'correlation' metrics"
       )
     }
-    if (!target_metric %in% hnsw_metrics) {
+    if (!is_ok_hnsw_metric(target_metric)) {
       stop(
         "bad target_metric: hnsw only supports 'euclidean', 'cosine' or ",
         "'correlation' metrics"
