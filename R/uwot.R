@@ -187,6 +187,12 @@
 #'       HNSW only supports the following arguments for \code{metric} and
 #'       \code{target_metric}: \code{"euclidean"}, \code{"cosine"} and
 #'       \code{"correlation"}.
+#'     \item \code{"nndescent"} Use approximate nearest neighbors with the
+#'       Nearest Neighbor Descent method (Dong et al., 2011) via the
+#'       \href{https://cran.r-project.org/package=rnndescent}{rnndescent}
+#'       package. \code{rnndescent} is not a dependency of this package: this
+#'       option is only available if you have installed \code{rnndescent}
+#'       yourself.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -541,6 +547,13 @@
 #' \emph{Advances in Neural Information Processing Systems}, \emph{34}.
 #' \url{https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html}
 #'
+#' Dong, W., Moses, C., & Li, K. (2011, March).
+#' Efficient k-nearest neighbor graph construction for generic similarity measures.
+#' In \emph{Proceedings of the 20th international conference on World Wide Web}
+#' (pp. 577-586).
+#' ACM.
+#' \doi{10.1145/1963405.1963487}.
+#'
 #' Kingma, D. P., & Ba, J. (2014).
 #' Adam: A method for stochastic optimization.
 #' \emph{arXiv preprint} \emph{arXiv}:1412.6980.
@@ -825,6 +838,12 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       HNSW only supports the following arguments for \code{metric} and
 #'       \code{target_metric}: \code{"euclidean"}, \code{"cosine"} and
 #'       \code{"correlation"}.
+#'     \item \code{"nndescent"} Use approximate nearest neighbors with the
+#'       Nearest Neighbor Descent method (Dong et al., 2011) via the
+#'       \href{https://cran.r-project.org/package=rnndescent}{rnndescent}
+#'       package. \code{rnndescent} is not a dependency of this package: this
+#'       option is only available if you have installed \code{rnndescent}
+#'       yourself.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -1143,6 +1162,13 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' \emph{Advances in Neural Information Processing Systems}, \emph{34}.
 #' \url{https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html}
 #'
+#' Dong, W., Moses, C., & Li, K. (2011, March).
+#' Efficient k-nearest neighbor graph construction for generic similarity measures.
+#' In \emph{Proceedings of the 20th international conference on World Wide Web}
+#' (pp. 577-586).
+#' ACM.
+#' \doi{10.1145/1963405.1963487}.
+#'
 #' Kingma, D. P., & Ba, J. (2014).
 #' Adam: A method for stochastic optimization.
 #' \emph{arXiv preprint} \emph{arXiv}:1412.6980.
@@ -1420,6 +1446,12 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'       only available if you have installed \code{RcppHNSW} yourself. Also,
 #'       HNSW only supports the following arguments for \code{metric}:
 #'       \code{"euclidean"}, \code{"cosine"} and \code{"correlation"}.
+#'     \item \code{"nndescent"} Use approximate nearest neighbors with the
+#'       Nearest Neighbor Descent method (Dong et al., 2011) via the
+#'       \href{https://cran.r-project.org/package=rnndescent}{rnndescent}
+#'       package. \code{rnndescent} is not a dependency of this package: this
+#'       option is only available if you have installed \code{rnndescent}
+#'       yourself.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -1667,6 +1699,13 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' \emph{Advances in Neural Information Processing Systems}, \emph{34}.
 #' \url{https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html}
 #'
+#' Dong, W., Moses, C., & Li, K. (2011, March).
+#' Efficient k-nearest neighbor graph construction for generic similarity measures.
+#' In \emph{Proceedings of the 20th international conference on World Wide Web}
+#' (pp. 577-586).
+#' ACM.
+#' \doi{10.1145/1963405.1963487}.
+#'
 #' Kingma, D. P., & Ba, J. (2014).
 #' Adam: A method for stochastic optimization.
 #' \emph{arXiv preprint} \emph{arXiv}:1412.6980.
@@ -1870,6 +1909,12 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #'       HNSW only supports the following arguments for \code{metric} and
 #'       \code{target_metric}: \code{"euclidean"}, \code{"cosine"} and
 #'       \code{"correlation"}.
+#'     \item \code{"nndescent"} Use approximate nearest neighbors with the
+#'       Nearest Neighbor Descent method (Dong et al., 2011) via the
+#'       \href{https://cran.r-project.org/package=rnndescent}{rnndescent}
+#'       package. \code{rnndescent} is not a dependency of this package: this
+#'       option is only available if you have installed \code{rnndescent}
+#'       yourself.
 #'    }
 #'   By default, if \code{X} has less than 4,096 vertices, the exact nearest
 #'   neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -2101,6 +2146,13 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #' all(iris30_lv_graph_nn == iris30_lv_graph$similarity_graph)
 #'
 #' @references
+#' Dong, W., Moses, C., & Li, K. (2011, March).
+#' Efficient k-nearest neighbor graph construction for generic similarity measures.
+#' In \emph{Proceedings of the 20th international conference on World Wide Web}
+#' (pp. 577-586).
+#' ACM.
+#' \doi{10.1145/1963405.1963487}.
+#'
 #' Malkov, Y. A., & Yashunin, D. A. (2018).
 #' Efficient and robust approximate nearest neighbor search using hierarchical
 #' navigable small world graphs.

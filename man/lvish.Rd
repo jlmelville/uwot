@@ -206,6 +206,12 @@ embedding.}
     only available if you have installed \code{RcppHNSW} yourself. Also,
     HNSW only supports the following arguments for \code{metric}:
     \code{"euclidean"}, \code{"cosine"} and \code{"correlation"}.
+  \item \code{"nndescent"} Use approximate nearest neighbors with the
+    Nearest Neighbor Descent method (Dong et al., 2011) via the
+    \href{https://cran.r-project.org/package=rnndescent}{rnndescent}
+    package. \code{rnndescent} is not a dependency of this package: this
+    option is only available if you have installed \code{rnndescent}
+    yourself.
  }
 By default, if \code{X} has less than 4,096 vertices, the exact nearest
 neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -500,6 +506,13 @@ Damrich, S., & Hamprecht, F. A. (2021).
 On UMAP's true loss function.
 \emph{Advances in Neural Information Processing Systems}, \emph{34}.
 \url{https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html}
+
+Dong, W., Moses, C., & Li, K. (2011, March).
+Efficient k-nearest neighbor graph construction for generic similarity measures.
+In \emph{Proceedings of the 20th international conference on World Wide Web}
+(pp. 577-586).
+ACM.
+\doi{10.1145/1963405.1963487}.
 
 Kingma, D. P., & Ba, J. (2014).
 Adam: A method for stochastic optimization.
