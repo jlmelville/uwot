@@ -109,7 +109,8 @@ get_nndescent_knn_args <- function(nn_args) {
 }
 
 get_nndescent_build_args <- function(nn_args) {
-  nn_build_args <- list()
+  # prune_reverse should probably always be TRUE
+  nn_build_args <- list(prune_reverse = TRUE)
   nnd_build_names <- c(
     "use_alt_metric",
     "init",

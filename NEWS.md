@@ -13,7 +13,20 @@ for details on these parameters. Although typically faster than Annoy (for a
 given accuracy), be aware that the only supported `metric` values are
 `"euclidean"`, `"cosine"` and `"correlation"`. Finally, RcppHNSW is only a
 suggested package, not a requirement, so you need to install it yourself (e.g.
-via `install.packages("RcppHNSW")`).
+via `install.packages("RcppHNSW")`). Also see the
+[article on HNSW in uwot](https://jlmelville.github.io/uwot/articles/hnsw-umap.html)
+in the documentation.
+* The nearest neighbor descent approximate nearest neighbor search algorithm is
+now supported via the
+[rnndescent](https://cran.r-project.org/package=rnndescent) package. Set
+`nn_method = "nndescent"` to use it. The behavior of the method can be
+controlled by the new `nn_args` parameter. There are many supported metrics and
+possible parameters that can be set in `nn_args`, so please see the 
+[article on nearest neighbor descent in uwot](https://jlmelville.github.io/uwot/articles/rnndescent-umap.html)
+in the documentation, and also the rnndescent package's
+[documentation](https://jlmelville.github.io/rnndescent/index.html) for details.
+`rnndescent` is only a suggested package, not a requirement, so you need to 
+install it yourself (e.g. via `install.packages("rnndescent")`).
 
 ## Bug fixes and minor improvements
 
