@@ -249,3 +249,92 @@ test_that("save-load hnsw", {
     transformed_after_reload$embedding
   )
 })
+
+test_that("save-load nndescent", {
+  testthat::skip_if_not_installed("rnndescent")
+  set.seed(1337)
+  model <- umap(iris10,
+                n_neighbors = 4, n_epochs = 2, init = "spca",
+                metric = "euclidean", verbose = FALSE, n_threads = 0,
+                ret_model = TRUE, ret_extra = c("nn"), nn_method = "nndescent"
+  )
+  expect_equal(model$nn_method, "nndescent")
+
+  set.seed(1337)
+  transformed_before_reload <-
+    umap_transform(iris10,
+                   model,
+                   n_epochs = 2,
+                   ret_extra = c("nn")
+    )
+
+  mod_fname <- tempfile(tmpdir = tempdir())
+  model <- save_uwot(model, file = mod_fname, unload = TRUE)
+
+  modelload <- load_uwot(file = mod_fname)
+
+  expect_equal(modelload$nn_method, "nndescent")
+
+  set.seed(1337)
+  transformed_after_reload <-
+    umap_transform(iris10,
+                   modelload,
+                   n_epochs = 2,
+                   ret_extra = c("nn")
+    )
+
+  if (file.exists(mod_fname)) {
+    unlink(mod_fname)
+  }
+  expect_true(file.exists(modelload$mod_dir))
+  unload_uwot(modelload)
+  expect_false(file.exists(modelload$mod_dir))
+
+  expect_equal(model$nn$euclidean$idx, modelload$nn$euclidean$idx)
+  expect_equal(model$nn$euclidean$dist, modelload$nn$euclidean$dist)
+
+  expect_equal(
+    transformed_before_reload$nn$euclidean$idx,
+    transformed_after_reload$nn$euclidean$idx,
+  )
+  expect_equal(
+    transformed_before_reload$nn$euclidean$dist,
+    transformed_after_reload$nn$euclidean$dist,
+    check.attributes = FALSE,
+    tol = 1e-7
+  )
+
+  expect_equal(
+    transformed_before_reload$embedding,
+    transformed_after_reload$embedding
+  )
+
+  mod_fname2 <- tempfile(tmpdir = tempdir())
+  saveRDS(modelload, mod_fname2)
+  modelload2 <- readRDS(mod_fname2)
+  expect_equal(modelload2$nn_method, "nndescent")
+  set.seed(1337)
+  transformed_after_reload2 <-
+    umap_transform(iris10,
+                   modelload2,
+                   n_epochs = 2,
+                   ret_extra = c("nn")
+    )
+  expect_equal(
+    transformed_after_reload$nn$euclidean$idx,
+    transformed_after_reload2$nn$euclidean$idx,
+  )
+  expect_equal(
+    transformed_after_reload$nn$euclidean$dist,
+    transformed_after_reload2$nn$euclidean$dist,
+    check.attributes = FALSE,
+    tol = 1e-7
+  )
+  expect_equal(
+    transformed_after_reload$embedding,
+    transformed_after_reload2$embedding
+  )
+  if (file.exists(mod_fname2)) {
+    unlink(mod_fname2)
+  }
+})

@@ -244,6 +244,13 @@ umap_transform <- function(X = NULL, model = NULL,
     )
   }
 
+  if (is.character(model$nn_method) &&
+      model$nn_method == "nndescent" && !is_installed("rnndescent")) {
+    stop(
+      "This model requires the rnndescent package to be installed."
+    )
+  }
+
   if (is.null(n_epochs)) {
     n_epochs <- model$n_epochs
     if (is.null(n_epochs)) {
@@ -561,6 +568,17 @@ umap_transform <- function(X = NULL, model = NULL,
         if (names(model$metric)[[1]] == "euclidean") {
           nn$dist <- sqrt(nn$dist)
         }
+      }
+      else if (startsWith(ann$type, "nndescent")) {
+        nn <-
+          nndescent_search(
+            X,
+            k = n_neighbors,
+            ann = ann,
+            nn_args = model$nn_args,
+            n_threads = n_threads,
+            verbose = verbose
+          )
       }
       else {
         stop("Unknown nn method: ", ann$type)

@@ -102,3 +102,8 @@ hnsw_load <- function(name, ndim, filename) {
   )
   methods::new(class_name, ndim, filename)
 }
+
+is_ok_hnsw_metric <- function(metric) {
+  hnsw_metrics <- c("euclidean", "cosine", "correlation")
+  metric %in% hnsw_metrics
+}

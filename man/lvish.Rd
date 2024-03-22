@@ -79,7 +79,19 @@ integer value in the range \code{2} to \code{100}.}
   \item \code{"categorical"} (see below)
 }
 Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-distance metric is always "euclidean").
+distance metric is always "euclidean"). If
+\href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} is installed
+and \code{nn_method = "hnsw"} is specified then only the following metrics
+are available:
+\itemize{
+  \item \code{"euclidean"}
+  \item \code{"cosine"}
+  \item \code{"correlation"}
+}
+If \href{https://cran.r-project.org/package=rnndescent}{rnndescent} is
+installed and \code{nn_method = "nndescent"} is specified then many more
+metrics are avaiable. For more details see the package documentation of
+\code{rnndescent}.
 
 If \code{X} is a data frame or matrix, then multiple metrics can be
 specified, by passing a list to this argument, where the name of each item in
@@ -198,13 +210,20 @@ embedding.}
     \href{https://cran.r-project.org/package=FNN}{FNN} package.
   \item \code{"annoy"} Use approximate nearest neighbors via the
     \href{https://cran.r-project.org/package=RcppAnnoy}{RcppAnnoy} package.
-  \item \code{"hnsw"} Use approximate nearest neighbors via the
+  \item \code{"hnsw"} Use approximate nearest neighbors with the
+    Hierarchical Navigable Small World (HNSW) method (Malkov and Yashunin,
+    2018) via the
     \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} package.
     \code{RcppHNSW} is not a dependency of this package: this option is
-    only available if you have installed \code{RcppHNSW} yourself.
-    Also, HNSW only supports the following arguments for \code{metric} and
-    \code{target_metric}: \code{"euclidean"}, \code{"cosine"} and
-    \code{"correlation"}.
+    only available if you have installed \code{RcppHNSW} yourself. Also,
+    HNSW only supports the following arguments for \code{metric}:
+    \code{"euclidean"}, \code{"cosine"} and \code{"correlation"}.
+  \item \code{"nndescent"} Use approximate nearest neighbors with the
+    Nearest Neighbor Descent method (Dong et al., 2011) via the
+    \href{https://cran.r-project.org/package=rnndescent}{rnndescent}
+    package. \code{rnndescent} is not a dependency of this package: this
+    option is only available if you have installed \code{rnndescent}
+    yourself.
  }
 By default, if \code{X} has less than 4,096 vertices, the exact nearest
 neighbors are found. Otherwise, approximate nearest neighbors are used.
@@ -425,6 +444,36 @@ Default is \code{200}.
 list used during search. This cannot be smaller than \code{n_neighbors}
 and cannot be higher than the number of items in the index. Default is
 \code{10}.
+}
+For \code{nn_method = "nndescent"}, you may specify the following
+arguments:
+\itemize{
+\item \code{n_trees} The number of trees to use in a random projection
+forest to initialize the search. A larger number will give more accurate
+results at the cost of a longer computation time. The default of
+\code{NULL} means that the number is chosen based on the number of
+observations in \code{X}.
+\item \code{max_candidates} The number of potential neighbors to explore
+per iteration. By default, this is set to \code{n_neighbors} or \code{60},
+whichever is smaller. A larger number will give more accurate results at
+the cost of a longer computation time.
+\item \code{n_iters} The number of iterations to run the search. A larger
+number will give more accurate results at the cost of a longer computation
+time. By default, this will be chosen based on the number of observations
+in \code{X}. You may also need to modify the convergence criterion
+\code{delta}.
+\item \code{delta} The minimum relative change in the neighbor graph
+allowed before early stopping. Should be a value between 0 and 1. The
+smaller the value, the smaller the amount of progress between iterations is
+allowed. Default value of \code{0.001} means that at least 0.1% of the
+neighbor graph must be updated at each iteration.
+\item \code{init} How to initialize the nearest neighbor descent. By
+default this is set to \code{"tree"} and uses a random project forest.
+If you set this to \code{"rand"}, then a random selection is used. Usually
+this is less accurate than using RP trees, but for high-dimensional cases,
+there may be little difference in the quality of the initialization and
+random initialization will be a lot faster. If you set this to
+\code{"rand"}, then the \code{n_trees} parameter is ignored.
 }}
 }
 \value{
@@ -481,8 +530,57 @@ iris_lvish <- lvish(iris,
   perplexity = 50, learning_rate = 0.5,
   init = "random", n_epochs = 20
 )
+
 }
 \references{
+Belkin, M., & Niyogi, P. (2002).
+Laplacian eigenmaps and spectral techniques for embedding and clustering.
+In \emph{Advances in neural information processing systems}
+(pp. 585-591).
+\url{http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf}
+
+Böhm, J. N., Berens, P., & Kobak, D. (2020).
+A unifying perspective on neighbor embeddings along the attraction-repulsion spectrum.
+\emph{arXiv preprint} \emph{arXiv:2007.08902}.
+\url{https://arxiv.org/abs/2007.08902}
+
+Damrich, S., & Hamprecht, F. A. (2021).
+On UMAP's true loss function.
+\emph{Advances in Neural Information Processing Systems}, \emph{34}.
+\url{https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html}
+
+Dong, W., Moses, C., & Li, K. (2011, March).
+Efficient k-nearest neighbor graph construction for generic similarity measures.
+In \emph{Proceedings of the 20th international conference on World Wide Web}
+(pp. 577-586).
+ACM.
+\doi{10.1145/1963405.1963487}.
+
+Kingma, D. P., & Ba, J. (2014).
+Adam: A method for stochastic optimization.
+\emph{arXiv preprint} \emph{arXiv}:1412.6980.
+\url{https://arxiv.org/abs/1412.6980}
+
+Lee, J. A., Peluffo-Ordóñez, D. H., & Verleysen, M. (2015).
+Multi-scale similarities in stochastic neighbour embedding: Reducing
+dimensionality while preserving both local and global structure.
+\emph{Neurocomputing}, \emph{169}, 246-261.
+
+Malkov, Y. A., & Yashunin, D. A. (2018).
+Efficient and robust approximate nearest neighbor search using hierarchical
+navigable small world graphs.
+\emph{IEEE transactions on pattern analysis and machine intelligence}, \emph{42}(4), 824-836.
+
+McInnes, L., Healy, J., & Melville, J. (2018).
+UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
+\emph{arXiv preprint} \emph{arXiv}:1802.03426.
+\url{https://arxiv.org/abs/1802.03426}
+
+O’Neill, M. E. (2014).
+\emph{PCG: A family of simple fast space-efficient statistically good
+algorithms for random number generation}
+(Report No. HMC-CS-2014-0905). Harvey Mudd College.
+
 Tang, J., Liu, J., Zhang, M., & Mei, Q. (2016, April).
 Visualizing large-scale and high-dimensional data.
 In \emph{Proceedings of the 25th International Conference on World Wide Web}
@@ -490,8 +588,13 @@ In \emph{Proceedings of the 25th International Conference on World Wide Web}
 International World Wide Web Conferences Steering Committee.
 \url{https://arxiv.org/abs/1602.00370}
 
-Lee, J. A., Peluffo-Ordóñez, D. H., & Verleysen, M. (2015).
-Multi-scale similarities in stochastic neighbour embedding: Reducing
-dimensionality while preserving both local and global structure.
-\emph{Neurocomputing}, \emph{169}, 246-261.
+Van der Maaten, L., & Hinton, G. (2008).
+Visualizing data using t-SNE.
+\emph{Journal of Machine Learning Research}, \emph{9} (2579-2605).
+\url{https://www.jmlr.org/papers/v9/vandermaaten08a.html}
+
+Wang, Y., Huang, H., Rudin, C., & Shaposhnik, Y. (2021).
+Understanding How Dimension Reduction Tools Work: An Empirical Approach to Deciphering t-SNE, UMAP, TriMap, and PaCMAP for Data Visualization.
+\emph{Journal of Machine Learning Research}, \emph{22}(201), 1-73.
+\url{https://www.jmlr.org/papers/v22/20-1061.html}
 }
