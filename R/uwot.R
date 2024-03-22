@@ -38,8 +38,19 @@
 #'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean").
-#'
+#' distance metric is always "euclidean"). If
+#' \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} is installed
+#' and \code{nn_method = "hnsw"} is specified then only the following metrics
+#' are available:
+#' \itemize{
+#'   \item \code{"euclidean"}
+#'   \item \code{"cosine"}
+#'   \item \code{"correlation"}
+#' }
+#' If \href{https://cran.r-project.org/package=rnndescent}{rnndescent} is
+#' installed and \code{nn_method = "nndescent"} is specified then many more
+#' metrics are avaiable. For more details see the package documentation of
+#' \code{rnndescent}.
 #' If \code{X} is a data frame or matrix, then multiple metrics can be
 #' specified, by passing a list to this argument, where the name of each item in
 #' the list is one of the metric names above. The value of each list item should
@@ -752,7 +763,19 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean").
+#' distance metric is always "euclidean"). If
+#' \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} is installed
+#' and \code{nn_method = "hnsw"} is specified then only the following metrics
+#' are available:
+#' \itemize{
+#'   \item \code{"euclidean"}
+#'   \item \code{"cosine"}
+#'   \item \code{"correlation"}
+#' }
+#' If \href{https://cran.r-project.org/package=rnndescent}{rnndescent} is
+#' installed and \code{nn_method = "nndescent"} is specified then many more
+#' metrics are avaiable. For more details see the package documentation of
+#' \code{rnndescent}.
 #'
 #' If \code{X} is a data frame or matrix, then multiple metrics can be
 #' specified, by passing a list to this argument, where the name of each item in
@@ -1471,7 +1494,19 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean").
+#' distance metric is always "euclidean"). If
+#' \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} is installed
+#' and \code{nn_method = "hnsw"} is specified then only the following metrics
+#' are available:
+#' \itemize{
+#'   \item \code{"euclidean"}
+#'   \item \code{"cosine"}
+#'   \item \code{"correlation"}
+#' }
+#' If \href{https://cran.r-project.org/package=rnndescent}{rnndescent} is
+#' installed and \code{nn_method = "nndescent"} is specified then many more
+#' metrics are avaiable. For more details see the package documentation of
+#' \code{rnndescent}.
 #'
 #' If \code{X} is a data frame or matrix, then multiple metrics can be
 #' specified, by passing a list to this argument, where the name of each item in
@@ -2016,7 +2051,19 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #'   \item \code{"categorical"} (see below)
 #' }
 #' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean").
+#' distance metric is always "euclidean"). If
+#' \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} is installed
+#' and \code{nn_method = "hnsw"} is specified then only the following metrics
+#' are available:
+#' \itemize{
+#'   \item \code{"euclidean"}
+#'   \item \code{"cosine"}
+#'   \item \code{"correlation"}
+#' }
+#' If \href{https://cran.r-project.org/package=rnndescent}{rnndescent} is
+#' installed and \code{nn_method = "nndescent"} is specified then many more
+#' metrics are avaiable. For more details see the package documentation of
+#' \code{rnndescent}.
 #'
 #' If \code{X} is a data frame or matrix, then multiple metrics can be
 #' specified, by passing a list to this argument, where the name of each item in
