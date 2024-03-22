@@ -137,7 +137,7 @@ slightly different results from me, but I am leaving the seed unset so
 that we must both live with the inherently random nature of the index
 building process.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fashion_index</span> <span class="op">&lt;-</span> <span class="fu">rnnd_build</span><span class="op">(</span><span class="va">fashion_train</span>, k <span class="op">=</span> <span class="fl">15</span>, n_threads <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">fashion_index</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/rnnd_build.html" class="external-link">rnnd_build</a></span><span class="op">(</span><span class="va">fashion_train</span>, k <span class="op">=</span> <span class="fl">15</span>, n_threads <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
 <p>What’s in the returned index? A bunch of stuff:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fashion_index</span><span class="op">)</span></span></code></pre></div>
@@ -177,7 +177,7 @@ sufficient for UMAP.</p>
 data:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fashion_test_query_neighbors</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">rnnd_query</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/rnnd_query.html" class="external-link">rnnd_query</a></span><span class="op">(</span></span>
 <span>    index <span class="op">=</span> <span class="va">fashion_index</span>,</span>
 <span>    query <span class="op">=</span> <span class="va">fashion_test</span>,</span>
 <span>    k <span class="op">=</span> <span class="fl">15</span>,</span>
@@ -337,7 +337,7 @@ the index or do any index preparation. This saves time and the nearest
 neighbor results are returned directly in the return result. Let’s use
 the full Fashion MNIST results as an example:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fashion_knn</span> <span class="op">&lt;-</span> <span class="fu">rnnd_knn</span><span class="op">(</span><span class="va">fashion</span>, k <span class="op">=</span> <span class="fl">15</span>, n_threads <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">fashion_knn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/rnnd_knn.html" class="external-link">rnnd_knn</a></span><span class="op">(</span><span class="va">fashion</span>, k <span class="op">=</span> <span class="fl">15</span>, n_threads <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fashion_knn</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"idx"</span>  <span class="st">"dist"</span></span></code></pre></div>
 <p>You can then pass <code>fashion_knn</code> to
@@ -386,14 +386,14 @@ restart the process, with <code>rnnd_build</code> and using
 <p>If you want to use <code>rnndescent</code> with <code>uwot</code>,
 then:</p>
 <ul>
-<li>Run <code>rnndescent::rnnd_build</code> on your training data.</li>
+<li>Run <code><a href="https://jlmelville.github.io/rnndescent/reference/rnnd_build.html" class="external-link">rnndescent::rnnd_build</a></code> on your training data.</li>
 <li>Run <code><a href="../reference/umap.html">uwot::umap</a></code> with <code>nn_method</code> set to the
 <code>graph</code> item in the result of <code>rnnd_build</code> and
 remember to set <code>ret_model = TRUE</code>.</li>
 </ul>
 <p>To transform new data:</p>
 <ul>
-<li>Run <code>rnndescent::rnnd_query</code> on your test data, using the
+<li>Run <code><a href="https://jlmelville.github.io/rnndescent/reference/rnnd_query.html" class="external-link">rnndescent::rnnd_query</a></code> on your test data, using the
 result of <code>rnnd_build</code> as the <code>index</code>
 parameter.</li>
 <li>Run <code><a href="../reference/umap_transform.html">uwot::umap_transform</a></code> with <code>nn_method</code>
@@ -401,7 +401,7 @@ set to the result of <code>rnnd_query</code>.</li>
 </ul>
 <p>If you don’t want to transform new data, then it’s even easier:</p>
 <ul>
-<li>Run <code>rnndescent::rnnd_knn</code> on your training data.</li>
+<li>Run <code><a href="https://jlmelville.github.io/rnndescent/reference/rnnd_knn.html" class="external-link">rnndescent::rnnd_knn</a></code> on your training data.</li>
 <li>Run <code><a href="../reference/umap.html">uwot::umap</a></code> with <code>nn_method</code> set to the
 result of <code>rnnd_knn</code>.</li>
 </ul>

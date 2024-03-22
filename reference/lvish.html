@@ -143,7 +143,16 @@ integer value in the range <code>2</code> to <code>100</code>.</p></dd>
 <li><p><code>"correlation"</code> (a distance based on the Pearson correlation)</p></li>
 <li><p><code>"categorical"</code> (see below)</p></li>
 </ul><p>Only applies if <code>nn_method = "annoy"</code> (for <code>nn_method = "fnn"</code>, the
-distance metric is always "euclidean").</p>
+distance metric is always "euclidean"). If
+<a href="https://cran.r-project.org/package=RcppHNSW" class="external-link">RcppHNSW</a> is installed
+and <code>nn_method = "hnsw"</code> is specified then only the following metrics
+are available:</p><ul><li><p><code>"euclidean"</code></p></li>
+<li><p><code>"cosine"</code></p></li>
+<li><p><code>"correlation"</code></p></li>
+</ul><p>If <a href="https://cran.r-project.org/package=rnndescent" class="external-link">rnndescent</a> is
+installed and <code>nn_method = "nndescent"</code> is specified then many more
+metrics are avaiable. For more details see the package documentation of
+<code>rnndescent</code>.</p>
 <p>If <code>X</code> is a data frame or matrix, then multiple metrics can be
 specified, by passing a list to this argument, where the name of each item in
 the list is one of the metric names above. The value of each list item should
@@ -266,13 +275,20 @@ embedding.</p></dd>
     <a href="https://cran.r-project.org/package=FNN" class="external-link">FNN</a> package.</p></li>
 <li><p><code>"annoy"</code> Use approximate nearest neighbors via the
     <a href="https://cran.r-project.org/package=RcppAnnoy" class="external-link">RcppAnnoy</a> package.</p></li>
-<li><p><code>"hnsw"</code> Use approximate nearest neighbors via the
+<li><p><code>"hnsw"</code> Use approximate nearest neighbors with the
+    Hierarchical Navigable Small World (HNSW) method (Malkov and Yashunin,
+    2018) via the
     <a href="https://cran.r-project.org/package=RcppHNSW" class="external-link">RcppHNSW</a> package.
     <code>RcppHNSW</code> is not a dependency of this package: this option is
-    only available if you have installed <code>RcppHNSW</code> yourself.
-    Also, HNSW only supports the following arguments for <code>metric</code> and
-    <code>target_metric</code>: <code>"euclidean"</code>, <code>"cosine"</code> and
-    <code>"correlation"</code>.</p></li>
+    only available if you have installed <code>RcppHNSW</code> yourself. Also,
+    HNSW only supports the following arguments for <code>metric</code>:
+    <code>"euclidean"</code>, <code>"cosine"</code> and <code>"correlation"</code>.</p></li>
+<li><p><code>"nndescent"</code> Use approximate nearest neighbors with the
+    Nearest Neighbor Descent method (Dong et al., 2011) via the
+    <a href="https://cran.r-project.org/package=rnndescent" class="external-link">rnndescent</a>
+    package. <code>rnndescent</code> is not a dependency of this package: this
+    option is only available if you have installed <code>rnndescent</code>
+    yourself.</p></li>
 </ul><p>By default, if <code>X</code> has less than 4,096 vertices, the exact nearest
 neighbors are found. Otherwise, approximate nearest neighbors are used.
 You may also pass precalculated nearest neighbor data to this argument. It
@@ -519,6 +535,33 @@ Default is <code>200</code>.</p></li>
 list used during search. This cannot be smaller than <code>n_neighbors</code>
 and cannot be higher than the number of items in the index. Default is
 <code>10</code>.</p></li>
+</ul><p>For <code>nn_method = "nndescent"</code>, you may specify the following
+arguments:</p><ul><li><p><code>n_trees</code> The number of trees to use in a random projection
+forest to initialize the search. A larger number will give more accurate
+results at the cost of a longer computation time. The default of
+<code>NULL</code> means that the number is chosen based on the number of
+observations in <code>X</code>.</p></li>
+<li><p><code>max_candidates</code> The number of potential neighbors to explore
+per iteration. By default, this is set to <code>n_neighbors</code> or <code>60</code>,
+whichever is smaller. A larger number will give more accurate results at
+the cost of a longer computation time.</p></li>
+<li><p><code>n_iters</code> The number of iterations to run the search. A larger
+number will give more accurate results at the cost of a longer computation
+time. By default, this will be chosen based on the number of observations
+in <code>X</code>. You may also need to modify the convergence criterion
+<code>delta</code>.</p></li>
+<li><p><code>delta</code> The minimum relative change in the neighbor graph
+allowed before early stopping. Should be a value between 0 and 1. The
+smaller the value, the smaller the amount of progress between iterations is
+allowed. Default value of <code>0.001</code> means that at least 0.1<!-- % of the -->
+neighbor graph must be updated at each iteration.</p></li>
+<li><p><code>init</code> How to initialize the nearest neighbor descent. By
+default this is set to <code>"tree"</code> and uses a random project forest.
+If you set this to <code>"rand"</code>, then a random selection is used. Usually
+this is less accurate than using RP trees, but for high-dimensional cases,
+there may be little difference in the quality of the initialization and
+random initialization will be a lot faster. If you set this to
+<code>"rand"</code>, then the <code>n_trees</code> parameter is ignored.</p></li>
 </ul></dd>
 
 </dl></div>
@@ -565,16 +608,60 @@ following:</p>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Tang, J., Liu, J., Zhang, M., &amp; Mei, Q. (2016, April).
+    <p>Belkin, M., &amp; Niyogi, P. (2002).
+Laplacian eigenmaps and spectral techniques for embedding and clustering.
+In <em>Advances in neural information processing systems</em>
+(pp. 585-591).
+<a href="http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf" class="external-link">http://papers.nips.cc/paper/1961-laplacian-eigenmaps-and-spectral-techniques-for-embedding-and-clustering.pdf</a></p>
+<p>Böhm, J. N., Berens, P., &amp; Kobak, D. (2020).
+A unifying perspective on neighbor embeddings along the attraction-repulsion spectrum.
+<em>arXiv preprint</em> <em>arXiv:2007.08902</em>.
+<a href="https://arxiv.org/abs/2007.08902" class="external-link">https://arxiv.org/abs/2007.08902</a></p>
+<p>Damrich, S., &amp; Hamprecht, F. A. (2021).
+On UMAP's true loss function.
+<em>Advances in Neural Information Processing Systems</em>, <em>34</em>.
+<a href="https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html" class="external-link">https://proceedings.neurips.cc/paper/2021/hash/2de5d16682c3c35007e4e92982f1a2ba-Abstract.html</a></p>
+<p>Dong, W., Moses, C., &amp; Li, K. (2011, March).
+Efficient k-nearest neighbor graph construction for generic similarity measures.
+In <em>Proceedings of the 20th international conference on World Wide Web</em>
+(pp. 577-586).
+ACM.
+<a href="https://doi.org/10.1145/1963405.1963487" class="external-link">doi:10.1145/1963405.1963487</a>
+.</p>
+<p>Kingma, D. P., &amp; Ba, J. (2014).
+Adam: A method for stochastic optimization.
+<em>arXiv preprint</em> <em>arXiv</em>:1412.6980.
+<a href="https://arxiv.org/abs/1412.6980" class="external-link">https://arxiv.org/abs/1412.6980</a></p>
+<p>Lee, J. A., Peluffo-Ordóñez, D. H., &amp; Verleysen, M. (2015).
+Multi-scale similarities in stochastic neighbour embedding: Reducing
+dimensionality while preserving both local and global structure.
+<em>Neurocomputing</em>, <em>169</em>, 246-261.</p>
+<p>Malkov, Y. A., &amp; Yashunin, D. A. (2018).
+Efficient and robust approximate nearest neighbor search using hierarchical
+navigable small world graphs.
+<em>IEEE transactions on pattern analysis and machine intelligence</em>, <em>42</em>(4), 824-836.</p>
+<p>McInnes, L., Healy, J., &amp; Melville, J. (2018).
+UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
+<em>arXiv preprint</em> <em>arXiv</em>:1802.03426.
+<a href="https://arxiv.org/abs/1802.03426" class="external-link">https://arxiv.org/abs/1802.03426</a></p>
+<p>O’Neill, M. E. (2014).
+<em>PCG: A family of simple fast space-efficient statistically good
+algorithms for random number generation</em>
+(Report No. HMC-CS-2014-0905). Harvey Mudd College.</p>
+<p>Tang, J., Liu, J., Zhang, M., &amp; Mei, Q. (2016, April).
 Visualizing large-scale and high-dimensional data.
 In <em>Proceedings of the 25th International Conference on World Wide Web</em>
 (pp. 287-297).
 International World Wide Web Conferences Steering Committee.
 <a href="https://arxiv.org/abs/1602.00370" class="external-link">https://arxiv.org/abs/1602.00370</a></p>
-<p>Lee, J. A., Peluffo-Ordóñez, D. H., &amp; Verleysen, M. (2015).
-Multi-scale similarities in stochastic neighbour embedding: Reducing
-dimensionality while preserving both local and global structure.
-<em>Neurocomputing</em>, <em>169</em>, 246-261.</p>
+<p>Van der Maaten, L., &amp; Hinton, G. (2008).
+Visualizing data using t-SNE.
+<em>Journal of Machine Learning Research</em>, <em>9</em> (2579-2605).
+<a href="https://www.jmlr.org/papers/v9/vandermaaten08a.html" class="external-link">https://www.jmlr.org/papers/v9/vandermaaten08a.html</a></p>
+<p>Wang, Y., Huang, H., Rudin, C., &amp; Shaposhnik, Y. (2021).
+Understanding How Dimension Reduction Tools Work: An Empirical Approach to Deciphering t-SNE, UMAP, TriMap, and PaCMAP for Data Visualization.
+<em>Journal of Machine Learning Research</em>, <em>22</em>(201), 1-73.
+<a href="https://www.jmlr.org/papers/v22/20-1061.html" class="external-link">https://www.jmlr.org/papers/v22/20-1061.html</a></p>
     </div>
 
     <div class="section level2">
@@ -587,6 +674,7 @@ dimensionality while preserving both local and global structure.
 <span class="r-in"><span>  perplexity <span class="op">=</span> <span class="fl">50</span>, learning_rate <span class="op">=</span> <span class="fl">0.5</span>,</span></span>
 <span class="r-in"><span>  init <span class="op">=</span> <span class="st">"random"</span>, n_epochs <span class="op">=</span> <span class="fl">20</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
