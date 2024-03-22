@@ -6,6 +6,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                     n_threads = NULL,
                     grain_size = 1,
                     ret_index = FALSE,
+                    sparse_is_distance = TRUE,
                     verbose = FALSE) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
@@ -13,7 +14,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
 
   if (methods::is(X, "dist")) {
     res <- dist_nn(X, k, include_self = include_self, verbose = verbose)
-  } else if (is_sparse_matrix(X)) {
+  } else if (sparse_is_distance && is_sparse_matrix(X)) {
     # sparse distance matrix
     if (Matrix::isTriangular(X)) {
       res <- sparse_tri_nn(X, k, include_self = include_self, verbose = verbose)
@@ -21,6 +22,9 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
       res <- sparse_nn(X, k, include_self = include_self, verbose = verbose)
     }
   } else {
+    if (is_sparse_matrix(X) && method != "nndescent") {
+      stop("Sparse matrix input only supported for nndescent method.")
+    }
     # normal matrix
     switch(method,
       "fnn" = {

@@ -370,7 +370,8 @@ umap_transform <- function(X = NULL, model = NULL,
   n_vertices <- NULL
   Xnames <- NULL
   if (!is.null(X)) {
-    if (!(methods::is(X, "data.frame") || methods::is(X, "matrix"))) {
+    if (!(methods::is(X, "data.frame") ||
+          methods::is(X, "matrix") || is_sparse_matrix(X))) {
       stop("Unknown input data format")
     }
     if (!is.null(norig_col) && ncol(X) != norig_col) {
