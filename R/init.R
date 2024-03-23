@@ -403,6 +403,11 @@ svd_scores <- function(X, ncol = min(dim(X)), center = TRUE, ret_extra = FALSE,
 
 # Get PCA scores via irlba
 irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FALSE) {
+  if (is.logical(X)) {
+    tsmessage("Converting logical input to numeric for PCA initialization")
+    # convert logical matrix to numeric
+    X <- X * 1
+  }
   res <- irlba::prcomp_irlba(X,
     n = ncol, retx = TRUE, center = center,
     scale = FALSE
