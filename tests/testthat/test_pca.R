@@ -56,3 +56,12 @@ test_that("PCA returns model data", {
     check.attributes = FALSE
   )
 })
+
+test_that("logical pca ok", {
+  set.seed(1337)
+  random_logical <- matrix(rnorm(1000), nrow = 100) > 0.5
+  random_int <- random_logical * 1
+
+  expect_equal(abs(irlba_scores(random_logical, ncol = 2)),
+               abs(irlba_scores(random_int, ncol = 2)))
+})
