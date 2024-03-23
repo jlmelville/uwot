@@ -499,3 +499,18 @@ sparse_tri_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
 
   list(idx = nn_idx, dist = nn_dist)
 }
+
+is_binary_metric <- function(metric) {
+  metric %in% c(
+    "dice",
+    "hamming",
+    "jaccard",
+    "kulsinski",
+    "matching",
+    "rogerstanimoto",
+    "russellrao",
+    "sokalmichener",
+    "sokalsneath",
+    "yule"
+  )
+}
