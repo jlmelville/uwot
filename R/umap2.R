@@ -28,12 +28,10 @@
 #'   Matrix and data frames should contain one observation per row. Data frames
 #'   will have any non-numeric columns removed, although factor columns will be
 #'   used if explicitly included via \code{metric} (see the help for
-#'   \code{metric} for details). A sparse matrix is interpreted as a distance
-#'   matrix, and is assumed to be symmetric, so you can also pass in an
-#'   explicitly upper or lower triangular sparse matrix to save storage. There
-#'   must be at least \code{n_neighbors} non-zero distances for each row. Both
-#'   implicit and explicit zero entries are ignored. Set zero distances you want
-#'   to keep to an arbitrarily small non-zero value (e.g. \code{1e-10}).
+#'   \code{metric} for details). Sparse matrices must be in the \code{dgCMatrix}
+#'   format, and you must also install
+#'   \href{https://cran.r-project.org/package=rnndescent}{rnndescent}
+#'   and set \code{nn_method = "nndescent}
 #'   \code{X} can also be \code{NULL} if pre-computed nearest neighbor data is
 #'   passed to \code{nn_method}, and \code{init} is not \code{"spca"} or
 #'   \code{"pca"}.
@@ -45,8 +43,8 @@
 #' @param n_components The dimension of the space to embed into. This defaults
 #'   to \code{2} to provide easy visualization, but can reasonably be set to any
 #'   integer value in the range \code{2} to \code{100}.
-#' @param metric Type of distance metric to use to find nearest neighbors. One
-#'   of:
+#' @param metric Type of distance metric to use to find nearest neighbors. For
+#'  \code{nn_method = "annoy"} this can be one of:
 #' \itemize{
 #'   \item \code{"euclidean"} (the default)
 #'   \item \code{"cosine"}
@@ -55,8 +53,36 @@
 #'   \item \code{"correlation"} (a distance based on the Pearson correlation)
 #'   \item \code{"categorical"} (see below)
 #' }
-#' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean").
+#' For \code{nn_method = "hnsw"} this can be one of:
+#' \itemize{
+#'   \item \code{"euclidean"}
+#'   \item \code{"cosine"}
+#'   \item \code{"correlation"}
+#' }
+#' If \href{https://cran.r-project.org/package=rnndescent}{rnndescent} is
+#' installed and \code{nn_method = "nndescent"} is specified then many more
+#' metrics are avaiable, including:
+#' \itemize{
+#' \item \code{"braycurtis"}
+#' \item \code{"canberra"}
+#' \item \code{"chebyshev"}
+#' \item \code{"dice"}
+#' \item \code{"hamming"}
+#' \item \code{"hellinger"}
+#' \item \code{"jaccard"}
+#' \item \code{"jensenshannon"}
+#' \item \code{"kulsinski"}
+#' \item \code{"rogerstanimoto"}
+#' \item \code{"russellrao"}
+#' \item \code{"sokalmichener"}
+#' \item \code{"sokalsneath"}
+#' \item \code{"spearmanr"}
+#' \item \code{"symmetrickl"}
+#' \item \code{"tsss"}
+#' \item \code{"yule"}
+#' }
+#' For more details see the package documentation of \code{rnndescent}.
+#' For \code{nn_method = "fnn"}, the distance metric is always "euclidean".
 #'
 #' If \code{X} is a data frame or matrix, then multiple metrics can be
 #' specified, by passing a list to this argument, where the name of each item in
@@ -138,8 +164,8 @@
 #'  \code{n_neighbors} may help.
 #' @param init_sdev If non-\code{NULL}, scales each dimension of the initialized
 #'   coordinates (including any user-supplied matrix) to this standard
-#'   deviation. By default no scaling is carried out, except when \code{init =
-#'   "spca"}, in which case the value is \code{0.0001}. Scaling the input may
+#'   deviation. By default, (\code{init_sdev = "range"}), each column of the
+#'   initial coordinates are range scaled between 0-10. Scaling the input may
 #'   help if the unscaled versions result in initial coordinates with large
 #'   inter-point distances or outliers. This usually results in small gradients
 #'   during optimization and very little progress being made to the layout.
@@ -148,12 +174,7 @@
 #'   recommended and \code{init = "spca"} as an alias for \code{init = "pca",
 #'   init_sdev = 1e-4} but for the spectral initializations the scaled versions
 #'   usually aren't necessary unless you are using a large value of
-#'   \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher). For
-#'   compatibility with recent versions of the Python UMAP package, if you are
-#'   using \code{init = "spectral"}, then you should also set
-#'   \code{init_sdev = "range"}, which will range scale each of the columns
-#'   containing the initial data between 0-10. This is not set by default to
-#'   maintain backwards compatibility with previous versions of uwot.
+#'   \code{n_neighbors} (e.g. \code{n_neighbors = 150} or higher).
 #' @param spread The effective scale of embedded points. In combination with
 #'   \code{min_dist}, this determines how clustered/clumped the embedded points
 #'   are.
@@ -472,7 +493,8 @@
 #'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
 #'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
 #'   fixed seed before running. Set to \code{"auto"} to use the same value as
-#'   \code{n_threads}.
+#'   \code{n_threads}. Default is to use only one thread, unless
+#'   \code{batch = TRUE} in which case \code{"auto"} used.
 #' @param grain_size The minimum amount of work to do on each thread. If this
 #'   value is set high enough, then less than \code{n_threads} or
 #'   \code{n_sgd_threads} will be used for processing, which might give a
@@ -574,27 +596,7 @@
 #'
 #' # Non-numeric columns are automatically removed so you can pass data frames
 #' # directly in a lot of cases without pre-processing
-#' iris_umap <- umap(iris30, n_neighbors = 5, learning_rate = 0.5, init = "random", n_epochs = 20)
-#'
-#' # Faster approximation to the gradient and return nearest neighbors
-#' iris_umap <- umap(iris30, n_neighbors = 5, approx_pow = TRUE, ret_nn = TRUE, n_epochs = 20)
-#'
-#' # Can specify min_dist and spread parameters to control separation and size
-#' # of clusters and reuse nearest neighbors for efficiency
-#' nn <- iris_umap$nn
-#' iris_umap <- umap(iris30, n_neighbors = 5, min_dist = 1, spread = 5, nn_method = nn, n_epochs = 20)
-#'
-#' # Supervised dimension reduction using the 'Species' factor column
-#' iris_sumap <- umap(iris30,
-#'   n_neighbors = 5, min_dist = 0.001, y = iris30$Species,
-#'   target_weight = 0.5, n_epochs = 20
-#' )
-#'
-#' # Calculate Petal and Sepal neighbors separately (uses intersection of the resulting sets):
-#' iris_umap <- umap(iris30, metric = list(
-#'   "euclidean" = c("Sepal.Length", "Sepal.Width"),
-#'   "euclidean" = c("Petal.Length", "Petal.Width")
-#' ))
+#' iris_umap <- umap2(iris30, n_neighbors = 5)
 #'
 #' @references
 #' Belkin, M., & Niyogi, P. (2002).
@@ -707,12 +709,28 @@ umap2 <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     }
   }
 
-  sparse_X_is_distance_matrix <- nn_method != "nndescent"
-
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
     if (batch) {
       n_sgd_threads <- n_threads
+    }
+  }
+
+  if (is_sparse_matrix(X)) {
+    if (!is(X, "dgCMatrix")) {
+      stop("sparse X must be a dgCMatrix object")
+    }
+    if (!is.list(nn_method)) {
+      if (!is_installed("rnndescent")) {
+        stop("nearest neighbor search for sparse matrices requires the ",
+             "'rnndescent' package, please install it")
+      }
+      if (!is.null(nn_method) && nn_method != "nndescent") {
+        stop("nearest neighbor search for sparse matrices only supports ",
+             "the 'nndescent' method")
+      }
+      tsmessage("Using nndescent for nearest neighbor search")
+      nn_method <- "nndescent"
     }
   }
 
@@ -752,6 +770,6 @@ umap2 <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     dens_scale = dens_scale,
     seed = seed,
     nn_args = nn_args,
-    sparse_X_is_distance_matrix = sparse_X_is_distance_matrix
+    sparse_X_is_distance_matrix = FALSE
   )
 }
