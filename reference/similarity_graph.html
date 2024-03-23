@@ -129,24 +129,37 @@ more local data being preserved. In general values should be in the range
 
 
 <dt>metric</dt>
-<dd><p>Type of distance metric to use to find nearest neighbors. One
-  of:</p><ul><li><p><code>"euclidean"</code> (the default)</p></li>
+<dd><p>Type of distance metric to use to find nearest neighbors. For
+ <code>nn_method = "annoy"</code> this can be one of:</p><ul><li><p><code>"euclidean"</code> (the default)</p></li>
 <li><p><code>"cosine"</code></p></li>
 <li><p><code>"manhattan"</code></p></li>
 <li><p><code>"hamming"</code></p></li>
 <li><p><code>"correlation"</code> (a distance based on the Pearson correlation)</p></li>
 <li><p><code>"categorical"</code> (see below)</p></li>
-</ul><p>Only applies if <code>nn_method = "annoy"</code> (for <code>nn_method = "fnn"</code>, the
-distance metric is always "euclidean"). If
-<a href="https://cran.r-project.org/package=RcppHNSW" class="external-link">RcppHNSW</a> is installed
-and <code>nn_method = "hnsw"</code> is specified then only the following metrics
-are available:</p><ul><li><p><code>"euclidean"</code></p></li>
+</ul><p>For <code>nn_method = "hnsw"</code> this can be one of:</p><ul><li><p><code>"euclidean"</code></p></li>
 <li><p><code>"cosine"</code></p></li>
 <li><p><code>"correlation"</code></p></li>
 </ul><p>If <a href="https://cran.r-project.org/package=rnndescent" class="external-link">rnndescent</a> is
 installed and <code>nn_method = "nndescent"</code> is specified then many more
-metrics are avaiable. For more details see the package documentation of
-<code>rnndescent</code>.</p>
+metrics are avaiable, including:</p><ul><li><p><code>"braycurtis"</code></p></li>
+<li><p><code>"canberra"</code></p></li>
+<li><p><code>"chebyshev"</code></p></li>
+<li><p><code>"dice"</code></p></li>
+<li><p><code>"hamming"</code></p></li>
+<li><p><code>"hellinger"</code></p></li>
+<li><p><code>"jaccard"</code></p></li>
+<li><p><code>"jensenshannon"</code></p></li>
+<li><p><code>"kulsinski"</code></p></li>
+<li><p><code>"rogerstanimoto"</code></p></li>
+<li><p><code>"russellrao"</code></p></li>
+<li><p><code>"sokalmichener"</code></p></li>
+<li><p><code>"sokalsneath"</code></p></li>
+<li><p><code>"spearmanr"</code></p></li>
+<li><p><code>"symmetrickl"</code></p></li>
+<li><p><code>"tsss"</code></p></li>
+<li><p><code>"yule"</code></p></li>
+</ul><p>For more details see the package documentation of <code>rnndescent</code>.
+For <code>nn_method = "fnn"</code>, the distance metric is always "euclidean".</p>
 <p>If <code>X</code> is a data frame or matrix, then multiple metrics can be
 specified, by passing a list to this argument, where the name of each item in
 the list is one of the metric names above. The value of each list item should
