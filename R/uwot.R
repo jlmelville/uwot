@@ -3170,7 +3170,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (is.character(nn_method) && nn_method == "nndescent") {
     if (!is_installed("rnndescent")) {
       stop("rnndescent is required for nn_method = 'nndescent',",
-           "please install it")
+           " please install it")
     }
   }
 
