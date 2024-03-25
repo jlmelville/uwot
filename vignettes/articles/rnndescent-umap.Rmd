@@ -20,8 +20,15 @@ The [rnndescent](https://cran.r-project.org/package=rnndescent) package can
 be used as an alternative to the internal Annoy-based nearest neighbor method
 used by `uwot`. It is based on the Python package
 [PyNNDescent](https://github.com/lmcinnes/pynndescent) and offers a wider range
-of metrics than other packages and the ability to work with sparse data.
-For an example of using `rnndescent` with sparse data see the [sparse UMAP article](https://jlmelville.github.io/uwot/articles/sparse-data-example.html).
+of metrics than other packages. See the
+[supported metrics](https://jlmelville.github.io/rnndescent/articles/metrics.html) article 
+in the `rnndescent` documentation for more details.
+
+`rnndescent` can also work with sparse data. `uwot` is not yet directly 
+compatible with sparse data input, but for an example of using `rnndescent` 
+with sparse data see and then using that externally generated nearest neighbor
+data with `uwot`, see the
+[sparse UMAP article](https://jlmelville.github.io/uwot/articles/sparse-data-example.html).
 Here we will use typical dense data and the typical Euclidean distance.
 
 First we need some data, which I will install via the `snedata` package from
@@ -49,7 +56,7 @@ This is structured just like the MNIST digits, but it uses images of 10
 different classes of fashion items (e.g. trousers, dress, bag). The name of
 the item is in the `Description` column.
 
-## Using rnndescent
+## Installing rnndescent
 
 Now install `rnndescent` from CRAN:
 
@@ -57,6 +64,235 @@ Now install `rnndescent` from CRAN:
 install.packages("rnndescent")
 library(rnndescent)
 ```
+
+## UMAP with nndescent
+
+```{uwot setup}
+library(uwot)
+```
+
+`uwot` can now use `rnndescent` for its nearest neighbor search if you  set 
+`nn_method = "nndescent"`. The other settings are used to give reasonable 
+results with batch mode (although feel free to change `n_sgd_threads` to however
+many threads you feel comfortable with your system using) and to return a model
+we can use to embed the test set data.
+
+```{r umap on training data}
+fashion_train_umap <-
+  umap(
+    X = fashion_train,
+    nn_method = "nndescent",
+    batch = TRUE,
+    n_epochs = 500,
+    n_sgd_threads = 6,
+    ret_model = TRUE,
+    verbose = TRUE
+  )
+```
+```R
+UMAP embedding parameters a = 1.896 b = 0.8006
+Converting dataframe to numerical matrix
+Read 60000 rows and found 784 numeric columns
+Using alt metric 'sqeuclidean' for 'euclidean'
+Initializing neighbors using 'tree' method
+Calculating rp tree k-nearest neighbors with k = 15 n_trees = 21 max leaf size = 15 margin = 'explicit' using 6 threads
+Using euclidean margin calculation
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Extracting leaf array from forest
+Creating knn using 164273 leaves
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Running nearest neighbor descent for 16 iterations using 6 threads
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Convergence: c = 132 tol = 900
+Finished
+Keeping 1 best search trees using 6 threads
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Min score: 2.41727
+Max score: 2.4626
+Mean score: 2.44337
+Using alt metric 'sqeuclidean' for 'euclidean'
+Converting graph to sparse format
+Diversifying forward graph
+Occlusion pruning with probability: 1
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Diversifying reduced # edges from 840000 to 240155 (0.02333% to 0.006671% sparse)
+Degree pruning reverse graph to max degree: 22
+Degree pruning to max 22 reduced # edges from 240155 to 239741 (0.006671% to 0.006659% sparse)
+Diversifying reverse graph
+Occlusion pruning with probability: 1
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Diversifying reduced # edges from 239741 to 214714 (0.006659% to 0.005964% sparse)
+Merging diversified forward and reverse graph
+Degree pruning merged graph to max degree: 22
+Degree pruning to max 22 reduced # edges from 302918 to 302882 (0.008414% to 0.008413% sparse)
+Finished preparing search graph
+Commencing smooth kNN distance calibration using 8 threads with target n_neighbors = 15
+Initializing from normalized Laplacian + noise (using irlba)
+Commencing optimization for 500 epochs, with 1359492 positive edges using 8 threads
+Using method 'umap'
+Optimizing with Adam alpha = 1 beta1 = 0.5 beta2 = 0.9 eps = 1e-07
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Optimization finished
+```
+
+I will grant you that `rnndescent` has a *lot* to say for itself as it goes
+about its business. But you can always set `verbose = FALSE`.
+
+### Transforming test data
+
+Now we have a UMAP model we can transform the test set data. Now notice that
+this looks exactly the same as the call we would make if we had used Annoy for
+nearest neighors: all the information needed for `uwot` to work out that it
+should use `rnndescent` for querying new neighbors is encapsulated in the
+`fashion_train_umap` model we generated.
+
+```{r transform fashion data}
+fashion_test_umap <-
+  umap_transform(
+    X = fashion_test,
+    model = fashion_train_umap,
+    n_sgd_threads = 6,
+    verbose = TRUE
+  )
+```
+```R
+Read 10000 rows and found 784 numeric columns
+Processing block 1 of 1
+Reading metric data from forest
+Using alt metric 'sqeuclidean' for 'euclidean'
+Querying rp forest for k = 15 with caching using 6 threads
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Finished
+Searching nearest neighbor graph with epsilon = 0.1 and max_search_fraction = 1 using 6 threads
+Graph contains missing data: filling with random neighbors
+Finished random fill
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+min distance calculation = 0 (0.00%) of reference data
+max distance calculation = 1810 (3.02%) of reference data
+avg distance calculation = 172 (0.29%) of reference data
+Finished
+Commencing smooth kNN distance calibration using 6 threads with target n_neighbors = 15
+Initializing by weighted average of neighbor coordinates using 6 threads
+Commencing optimization for 167 epochs, with 150000 positive edges using 6 threads
+Using method 'umap'
+Optimizing with Adam alpha = 1 beta1 = 0.5 beta2 = 0.9 eps = 1e-07
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Finished
+```
+
+Again `rnndescent` is a lot chattier than when using Annoy.
+
+### Plotting the results
+
+Now to take a look at the results, using `ggplot2` for plotting, and 
+`Polychrome` for a suitable categorical palette.
+
+```{r plot setup}
+install.packages(c("ggplot2", "Polychrome"))
+library(ggplot2)
+library(Polychrome)
+```
+
+The following code creates a palette of 10 (hopefully) visually distinct colors
+which will map each point to the type of fashion item it represents. This is
+found in the `Description` factor column of the original data.
+
+```{r create palette}
+palette <- as.vector(Polychrome::createPalette(
+  length(levels(fashion$Description)) + 2,
+  seedcolors = c("#ffffff", "#000000"),
+  range = c(10, 90)
+)[-(1:2)])
+```
+
+And here are the results:
+
+```{r plot training data}
+ggplot(
+  data.frame(fashion_train_umap$embedding, Description = fashion_train$Description),
+  aes(x = X1, y = X2, color = Description)
+) +
+  geom_point(alpha = 0.1, size = 1.0) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "Fashion MNIST training set UMAP",
+    x = "",
+    y = "",
+    color = "Description"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+```
+
+```{r plot test data}
+ggplot(
+  data.frame(fashion_test_umap, Description = fashion_test$Description),
+  aes(x = X1, y = X2, color = Description)
+) +
+  geom_point(alpha = 0.4, size = 1.0) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "Fashion MNIST test set UMAP",
+    x = "",
+    y = "",
+    color = "Description"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+```
+
+![Fashion training data](img/rnndescent-umap/fashion-train.png)
+![Fashion test set](img/rnndescent-umap/fashion-test.png)
+
+These results are typical for Fashion MNIST result with UMAP. For example, see
+the first image in
+[part of the Python UMAP documentation](https://umap-learn.readthedocs.io/en/latest/supervised.html#umap-on-fashion-mnist). So it looks like `rnndescent` with its default settings does a
+good job with this dataset.
+
+## A Minor Advantage of using `rnndescent`
+
+If you use `nn_method = "nndescent"` then the UMAP model returned with 
+`ret_model = TRUE` can be saved and loaded using the standard R functions
+`saveRDS` and `readRDS`. You don't need to the use `uwot`-specific `save_uwot`
+and `load_uwot`, nor do you need to worry about unloading the model with 
+`unload_uwot`, as you must with Annoy-based UMAP models. This is a consequence
+of `rnndescent` storing all its index-related data in pure R (no wrapping of
+existing C++ classes), but be aware zthat this can lead to much larger models
+on disk and in RAM.
+
+## Using `rnndescent` externally
+
+If you want more control over the behavior of `rnndescent` then you can use it
+directly to create a nearest neighbor graph and then pass that result to the 
+`nn_method` argument of `umap`. This isn't usually necessary and if you *do* 
+want more control I recommend using the `nn_args` argument of `umap`, which is
+a list of arguments to pass directly to `rnndescent`. If you decide to use
+`rnndescent` directly, the following section mainly uses default argument but
+demonstrates a workflow that can be customized for your own needs. The resulting
+UMAP plots will be essentially identical to those that are output when using
+`nn_mmethod = "nndescent"`.
 
 ### Build an index for the training data
 
@@ -162,10 +398,6 @@ UMAP.
 
 ## Using rnndescent nearest neighbors with UMAP
 
-```{r setup}
-library(uwot)
-```
-
 ### UMAP on training data
 
 To use pre-computed nearest neighbor data with `uwot` pass it as the `nn_method`
@@ -173,7 +405,7 @@ parameter. In this case, that is the `graph` item in `fashion_index`. See the
 HSNW article for more details on the other parameters, but this is designed to
 give pretty typical UMAP results.
 
-```{r umap on training data}
+```{r umap on training data with external nn}
 fashion_train_umap <-
   umap(
     X = NULL,
@@ -204,7 +436,7 @@ Note: model requested with precomputed neighbors. For transforming new data, dis
 Now we have a UMAP model we can transform the test set data. Once again we don't
 need to pass in any test set data except the neighbors as `nn_method`:
 
-```{r}
+```{r transform new data with external nn}
 fashion_test_umap <-
   umap_transform(
     X = NULL,
@@ -228,74 +460,7 @@ Optimizing with Adam alpha = 1 beta1 = 0.5 beta2 = 0.9 eps = 1e-07
 Finished
 ```
 
-### Plotting the results
-
-Now to take a look at the results, using `ggplot2` for plotting, and 
-`Polychrome` for a suitable categorical palette.
-
-```{r plot setup}
-install.packages(c("ggplot2", "Polychrome"))
-library(ggplot2)
-library(Polychrome)
-```
-
-The following code creates a palette of 10 (hopefully) visually distinct colors
-which will map each point to the type of fashion item it represents. This is
-found in the `Description` factor column of the original data.
-
-```{r create palette}
-palette <- as.vector(Polychrome::createPalette(
-  length(levels(fashion$Description)) + 2,
-  seedcolors = c("#ffffff", "#000000"),
-  range = c(10, 90)
-)[-(1:2)])
-```
-
-And here are the results:
-
-```{r plot training data}
-ggplot(
-  data.frame(fashion_train_umap$embedding, Description = fashion_train$Description),
-  aes(x = X1, y = X2, color = Description)
-) +
-  geom_point(alpha = 0.1, size = 1.0) +
-  scale_color_manual(values = palette) +
-  theme_minimal() +
-  labs(
-    title = "Fashion MNIST training set UMAP",
-    x = "",
-    y = "",
-    color = "Description"
-  ) +
-  theme(legend.position = "right") +
-  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
-```
-
-```{r plot test data}
-ggplot(
-  data.frame(fashion_test_umap, Description = fashion_test$Description),
-  aes(x = X1, y = X2, color = Description)
-) +
-  geom_point(alpha = 0.4, size = 1.0) +
-  scale_color_manual(values = palette) +
-  theme_minimal() +
-  labs(
-    title = "Fashion MNIST test set UMAP",
-    x = "",
-    y = "",
-    color = "Description"
-  ) +
-  theme(legend.position = "right") +
-  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
-```
-
-![Fashion training data](img/rnndescent-umap/fashion-train.png)
-![Fashion test set](img/rnndescent-umap/fashion-test.png)
-
-These results are typical for Fashion MNIST result with UMAP. For example, see
-the first image in
-[part of the Python UMAP documentation](https://umap-learn.readthedocs.io/en/latest/supervised.html#umap-on-fashion-mnist). So it looks like `rnndescent` with its default settings does a good job
-with this dataset.
+At this point you can plot the results, which will resemble those shown earlier.
 
 ### A potentially simpler workflow
 
