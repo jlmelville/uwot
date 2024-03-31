@@ -31,7 +31,7 @@
 #'   \code{metric} for details). Sparse matrices must be in the \code{dgCMatrix}
 #'   format, and you must also install
 #'   \href{https://cran.r-project.org/package=rnndescent}{rnndescent}
-#'   and set \code{nn_method = "nndescent}
+#'   and set \code{nn_method = "nndescent"}
 #'   \code{X} can also be \code{NULL} if pre-computed nearest neighbor data is
 #'   passed to \code{nn_method}, and \code{init} is not \code{"spca"} or
 #'   \code{"pca"}.
@@ -717,7 +717,7 @@ umap2 <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
 
   if (is_sparse_matrix(X)) {
-    if (!is(X, "dgCMatrix")) {
+    if (!methods::is(X, "dgCMatrix")) {
       stop("sparse X must be a dgCMatrix object")
     }
     if (!is.list(nn_method)) {
