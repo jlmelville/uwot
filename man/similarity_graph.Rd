@@ -54,8 +54,8 @@ result in more global views of the manifold, while smaller values result in
 more local data being preserved. In general values should be in the range
 \code{2} to \code{100}.}
 
-\item{metric}{Type of distance metric to use to find nearest neighbors. One
-  of:
+\item{metric}{Type of distance metric to use to find nearest neighbors. For
+ \code{nn_method = "annoy"} this can be one of:
 \itemize{
   \item \code{"euclidean"} (the default)
   \item \code{"cosine"}
@@ -64,11 +64,7 @@ more local data being preserved. In general values should be in the range
   \item \code{"correlation"} (a distance based on the Pearson correlation)
   \item \code{"categorical"} (see below)
 }
-Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-distance metric is always "euclidean"). If
-\href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} is installed
-and \code{nn_method = "hnsw"} is specified then only the following metrics
-are available:
+For \code{nn_method = "hnsw"} this can be one of:
 \itemize{
   \item \code{"euclidean"}
   \item \code{"cosine"}
@@ -76,8 +72,28 @@ are available:
 }
 If \href{https://cran.r-project.org/package=rnndescent}{rnndescent} is
 installed and \code{nn_method = "nndescent"} is specified then many more
-metrics are avaiable. For more details see the package documentation of
-\code{rnndescent}.
+metrics are avaiable, including:
+\itemize{
+\item \code{"braycurtis"}
+\item \code{"canberra"}
+\item \code{"chebyshev"}
+\item \code{"dice"}
+\item \code{"hamming"}
+\item \code{"hellinger"}
+\item \code{"jaccard"}
+\item \code{"jensenshannon"}
+\item \code{"kulsinski"}
+\item \code{"rogerstanimoto"}
+\item \code{"russellrao"}
+\item \code{"sokalmichener"}
+\item \code{"sokalsneath"}
+\item \code{"spearmanr"}
+\item \code{"symmetrickl"}
+\item \code{"tsss"}
+\item \code{"yule"}
+}
+For more details see the package documentation of \code{rnndescent}.
+For \code{nn_method = "fnn"}, the distance metric is always "euclidean".
 
 If \code{X} is a data frame or matrix, then multiple metrics can be
 specified, by passing a list to this argument, where the name of each item in

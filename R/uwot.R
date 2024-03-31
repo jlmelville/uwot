@@ -27,8 +27,8 @@
 #' @param n_components The dimension of the space to embed into. This defaults
 #'   to \code{2} to provide easy visualization, but can reasonably be set to any
 #'   integer value in the range \code{2} to \code{100}.
-#' @param metric Type of distance metric to use to find nearest neighbors. One
-#'   of:
+#' @param metric Type of distance metric to use to find nearest neighbors. For
+#'  \code{nn_method = "annoy"} this can be one of:
 #' \itemize{
 #'   \item \code{"euclidean"} (the default)
 #'   \item \code{"cosine"}
@@ -37,11 +37,7 @@
 #'   \item \code{"correlation"} (a distance based on the Pearson correlation)
 #'   \item \code{"categorical"} (see below)
 #' }
-#' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean"). If
-#' \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} is installed
-#' and \code{nn_method = "hnsw"} is specified then only the following metrics
-#' are available:
+#' For \code{nn_method = "hnsw"} this can be one of:
 #' \itemize{
 #'   \item \code{"euclidean"}
 #'   \item \code{"cosine"}
@@ -49,8 +45,29 @@
 #' }
 #' If \href{https://cran.r-project.org/package=rnndescent}{rnndescent} is
 #' installed and \code{nn_method = "nndescent"} is specified then many more
-#' metrics are avaiable. For more details see the package documentation of
-#' \code{rnndescent}.
+#' metrics are avaiable, including:
+#' \itemize{
+#' \item \code{"braycurtis"}
+#' \item \code{"canberra"}
+#' \item \code{"chebyshev"}
+#' \item \code{"dice"}
+#' \item \code{"hamming"}
+#' \item \code{"hellinger"}
+#' \item \code{"jaccard"}
+#' \item \code{"jensenshannon"}
+#' \item \code{"kulsinski"}
+#' \item \code{"rogerstanimoto"}
+#' \item \code{"russellrao"}
+#' \item \code{"sokalmichener"}
+#' \item \code{"sokalsneath"}
+#' \item \code{"spearmanr"}
+#' \item \code{"symmetrickl"}
+#' \item \code{"tsss"}
+#' \item \code{"yule"}
+#' }
+#' For more details see the package documentation of \code{rnndescent}.
+#' For \code{nn_method = "fnn"}, the distance metric is always "euclidean".
+#'
 #' If \code{X} is a data frame or matrix, then multiple metrics can be
 #' specified, by passing a list to this argument, where the name of each item in
 #' the list is one of the metric names above. The value of each list item should
@@ -752,8 +769,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param n_components The dimension of the space to embed into. This defaults
 #'   to \code{2} to provide easy visualization, but can reasonably be set to any
 #'   integer value in the range \code{2} to \code{100}.
-#' @param metric Type of distance metric to use to find nearest neighbors. One
-#'   of:
+#' @param metric Type of distance metric to use to find nearest neighbors. For
+#'  \code{nn_method = "annoy"} this can be one of:
 #' \itemize{
 #'   \item \code{"euclidean"} (the default)
 #'   \item \code{"cosine"}
@@ -762,11 +779,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"correlation"} (a distance based on the Pearson correlation)
 #'   \item \code{"categorical"} (see below)
 #' }
-#' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean"). If
-#' \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} is installed
-#' and \code{nn_method = "hnsw"} is specified then only the following metrics
-#' are available:
+#' For \code{nn_method = "hnsw"} this can be one of:
 #' \itemize{
 #'   \item \code{"euclidean"}
 #'   \item \code{"cosine"}
@@ -774,8 +787,28 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' }
 #' If \href{https://cran.r-project.org/package=rnndescent}{rnndescent} is
 #' installed and \code{nn_method = "nndescent"} is specified then many more
-#' metrics are avaiable. For more details see the package documentation of
-#' \code{rnndescent}.
+#' metrics are avaiable, including:
+#' \itemize{
+#' \item \code{"braycurtis"}
+#' \item \code{"canberra"}
+#' \item \code{"chebyshev"}
+#' \item \code{"dice"}
+#' \item \code{"hamming"}
+#' \item \code{"hellinger"}
+#' \item \code{"jaccard"}
+#' \item \code{"jensenshannon"}
+#' \item \code{"kulsinski"}
+#' \item \code{"rogerstanimoto"}
+#' \item \code{"russellrao"}
+#' \item \code{"sokalmichener"}
+#' \item \code{"sokalsneath"}
+#' \item \code{"spearmanr"}
+#' \item \code{"symmetrickl"}
+#' \item \code{"tsss"}
+#' \item \code{"yule"}
+#' }
+#' For more details see the package documentation of \code{rnndescent}.
+#' For \code{nn_method = "fnn"}, the distance metric is always "euclidean".
 #'
 #' If \code{X} is a data frame or matrix, then multiple metrics can be
 #' specified, by passing a list to this argument, where the name of each item in
@@ -1483,8 +1516,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param n_components The dimension of the space to embed into. This defaults
 #'   to \code{2} to provide easy visualization, but can reasonably be set to any
 #'   integer value in the range \code{2} to \code{100}.
-#' @param metric Type of distance metric to use to find nearest neighbors. One
-#'   of:
+#' @param metric Type of distance metric to use to find nearest neighbors. For
+#'  \code{nn_method = "annoy"} this can be one of:
 #' \itemize{
 #'   \item \code{"euclidean"} (the default)
 #'   \item \code{"cosine"}
@@ -1493,11 +1526,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   \item \code{"correlation"} (a distance based on the Pearson correlation)
 #'   \item \code{"categorical"} (see below)
 #' }
-#' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean"). If
-#' \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} is installed
-#' and \code{nn_method = "hnsw"} is specified then only the following metrics
-#' are available:
+#' For \code{nn_method = "hnsw"} this can be one of:
 #' \itemize{
 #'   \item \code{"euclidean"}
 #'   \item \code{"cosine"}
@@ -1505,8 +1534,28 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' }
 #' If \href{https://cran.r-project.org/package=rnndescent}{rnndescent} is
 #' installed and \code{nn_method = "nndescent"} is specified then many more
-#' metrics are avaiable. For more details see the package documentation of
-#' \code{rnndescent}.
+#' metrics are avaiable, including:
+#' \itemize{
+#' \item \code{"braycurtis"}
+#' \item \code{"canberra"}
+#' \item \code{"chebyshev"}
+#' \item \code{"dice"}
+#' \item \code{"hamming"}
+#' \item \code{"hellinger"}
+#' \item \code{"jaccard"}
+#' \item \code{"jensenshannon"}
+#' \item \code{"kulsinski"}
+#' \item \code{"rogerstanimoto"}
+#' \item \code{"russellrao"}
+#' \item \code{"sokalmichener"}
+#' \item \code{"sokalsneath"}
+#' \item \code{"spearmanr"}
+#' \item \code{"symmetrickl"}
+#' \item \code{"tsss"}
+#' \item \code{"yule"}
+#' }
+#' For more details see the package documentation of \code{rnndescent}.
+#' For \code{nn_method = "fnn"}, the distance metric is always "euclidean".
 #'
 #' If \code{X} is a data frame or matrix, then multiple metrics can be
 #' specified, by passing a list to this argument, where the name of each item in
@@ -2040,8 +2089,8 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #'   result in more global views of the manifold, while smaller values result in
 #'   more local data being preserved. In general values should be in the range
 #'   \code{2} to \code{100}.
-#' @param metric Type of distance metric to use to find nearest neighbors. One
-#'   of:
+#' @param metric Type of distance metric to use to find nearest neighbors. For
+#'  \code{nn_method = "annoy"} this can be one of:
 #' \itemize{
 #'   \item \code{"euclidean"} (the default)
 #'   \item \code{"cosine"}
@@ -2050,11 +2099,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #'   \item \code{"correlation"} (a distance based on the Pearson correlation)
 #'   \item \code{"categorical"} (see below)
 #' }
-#' Only applies if \code{nn_method = "annoy"} (for \code{nn_method = "fnn"}, the
-#' distance metric is always "euclidean"). If
-#' \href{https://cran.r-project.org/package=RcppHNSW}{RcppHNSW} is installed
-#' and \code{nn_method = "hnsw"} is specified then only the following metrics
-#' are available:
+#' For \code{nn_method = "hnsw"} this can be one of:
 #' \itemize{
 #'   \item \code{"euclidean"}
 #'   \item \code{"cosine"}
@@ -2062,8 +2107,28 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #' }
 #' If \href{https://cran.r-project.org/package=rnndescent}{rnndescent} is
 #' installed and \code{nn_method = "nndescent"} is specified then many more
-#' metrics are avaiable. For more details see the package documentation of
-#' \code{rnndescent}.
+#' metrics are avaiable, including:
+#' \itemize{
+#' \item \code{"braycurtis"}
+#' \item \code{"canberra"}
+#' \item \code{"chebyshev"}
+#' \item \code{"dice"}
+#' \item \code{"hamming"}
+#' \item \code{"hellinger"}
+#' \item \code{"jaccard"}
+#' \item \code{"jensenshannon"}
+#' \item \code{"kulsinski"}
+#' \item \code{"rogerstanimoto"}
+#' \item \code{"russellrao"}
+#' \item \code{"sokalmichener"}
+#' \item \code{"sokalsneath"}
+#' \item \code{"spearmanr"}
+#' \item \code{"symmetrickl"}
+#' \item \code{"tsss"}
+#' \item \code{"yule"}
+#' }
+#' For more details see the package documentation of \code{rnndescent}.
+#' For \code{nn_method = "fnn"}, the distance metric is always "euclidean".
 #'
 #' If \code{X} is a data frame or matrix, then multiple metrics can be
 #' specified, by passing a list to this argument, where the name of each item in
@@ -3106,7 +3171,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (is.character(nn_method) && nn_method == "nndescent") {
     if (!is_installed("rnndescent")) {
       stop("rnndescent is required for nn_method = 'nndescent',",
-           "please install it")
+           " please install it")
     }
   }
 
@@ -3251,11 +3316,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     metrics <- metric
   }
 
-  # For typical case of numeric matrix X and not using hamming distance, save
+  # For typical case of numeric matrix X and not using binary metric, save
   # PCA results here in case initialization uses PCA too
   pca_models <- NULL
   pca_shortcut <- FALSE
-  if (!is.null(pca) && length(metric) == 1 && metric != "hamming" &&
+  if (!is.null(pca) && length(metric) == 1 && !is_binary_metric(metric) &&
     is.matrix(X) && ncol(X) > pca) {
     tsmessage("Reducing X column dimension to ", pca, " via PCA")
     pca_res <- pca_init(X,
@@ -4300,10 +4365,12 @@ data2set <- function(X,
   pca_models <- list()
   for (i in 1:nblocks) {
     metric <- mnames[[i]]
-    metric <- match.arg(metric, c(
-      "euclidean", "cosine", "manhattan",
-      "hamming", "correlation", "precomputed"
-    ))
+    if (is.character(nn_method) && nn_method == "annoy") {
+      metric <- match.arg(metric, c(
+        "euclidean", "cosine", "manhattan",
+        "hamming", "correlation", "precomputed"
+      ))
+    }
     # Defaults for this block which can be overridden
     pca_i <- pca
     pca_center_i <- pca_center

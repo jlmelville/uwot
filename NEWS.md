@@ -42,6 +42,7 @@ work (<https://github.com/jlmelville/uwot/issues/117>).
 `ret_extra = c("fgraph")`), it was transposed when `batch = TRUE, n_epochs = 0`.
 Thank you [PedroMilanezAlmeida](https://github.com/PedroMilanezAlmeida) for 
 reporting (<https://github.com/jlmelville/uwot/issues/118>).
+* Setting `n_sgd_threads = "auto"` with `umap_transform` caused a crash.
 
 # uwot 0.1.16
 

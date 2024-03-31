@@ -217,6 +217,13 @@ umap_transform <- function(X = NULL, model = NULL,
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
+  if (is.character(n_sgd_threads) && n_sgd_threads == "auto") {
+    n_sgd_threads <- n_threads
+  }
+  if (!is.numeric(n_sgd_threads)) {
+    stop("Unknown n_sgd_threads value: ", n_sgd_threads, " should be a positive
+         integer or 'auto'")
+  }
   if (is.null(nn_method)) {
     if (is.null(X)) {
       stop('argument "X" is missing, with no default')
