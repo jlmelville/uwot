@@ -310,7 +310,7 @@ scale_coords <- function(X, sdev = 1e-4, verbose = FALSE) {
 # is returned also containing the eigenvalues
 pca_init <- function(X, ndim = min(dim(X)), center = TRUE, ret_extra = FALSE,
                      pca_method = "auto", verbose = FALSE) {
-  if (methods::is(X, "dist")) {
+  if (inherits(X, "dist")) {
     res_mds <- stats::cmdscale(X, x.ret = TRUE, eig = TRUE, k = ndim)
     if (ret_extra || verbose) {
       lambda <- res_mds$eig

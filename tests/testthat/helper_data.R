@@ -39,7 +39,7 @@ self_unn4 <- NULL
 create_data <- function() {
   iris10 <<- x2m(iris[1:10, ])
   iris10_Y <<- pca_init(iris10, ndim = 2)
-  diris10 <<- dist(iris10)
+  diris10 <<- stats::dist(iris10)
 
   # Sparse iris10 dist
   dmiris10 <<- as.matrix(diris10)

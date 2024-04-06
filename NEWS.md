@@ -43,6 +43,10 @@ work (<https://github.com/jlmelville/uwot/issues/117>).
 Thank you [PedroMilanezAlmeida](https://github.com/PedroMilanezAlmeida) for 
 reporting (<https://github.com/jlmelville/uwot/issues/118>).
 * Setting `n_sgd_threads = "auto"` with `umap_transform` caused a crash.
+* A warning was being emitted due to not being specific enough about what `dist`
+class was meant that may have been particularly affecting Seurat users. Thank 
+you [AndiMunteanu](https://github.com/AndiMunteanu) for reporting (and
+suggesting a solution) (<https://github.com/jlmelville/uwot/issues/121>).
 
 # uwot 0.1.16
 
