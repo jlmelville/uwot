@@ -66,6 +66,7 @@
 <code>umap_transform</code> could fail if the new data to be transformed had the <code>scaled:center</code> and <code>scaled:scale</code> attributes set (e.g. from applying the <code>scale</code> function).</li>
 <li>If you asked <code>umap_transform</code> to return the fuzzy graph ( <code>ret_extra = c("fgraph")</code>), it was transposed when <code>batch = TRUE, n_epochs = 0</code>. Thank you <a href="https://github.com/PedroMilanezAlmeida" class="external-link">PedroMilanezAlmeida</a> for reporting (<a href="https://github.com/jlmelville/uwot/issues/118" class="external-link uri">https://github.com/jlmelville/uwot/issues/118</a>).</li>
 <li>Setting <code>n_sgd_threads = "auto"</code> with <code>umap_transform</code> caused a crash.</li>
+<li>A warning was being emitted due to not being specific enough about what <code>dist</code> class was meant that may have been particularly affecting Seurat users. Thank you <a href="https://github.com/AndiMunteanu" class="external-link">AndiMunteanu</a> for reporting (and suggesting a solution) (<a href="https://github.com/jlmelville/uwot/issues/121" class="external-link uri">https://github.com/jlmelville/uwot/issues/121</a>).</li>
 </ul></div>
 </div>
     <div class="section level2">
