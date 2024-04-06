@@ -21,7 +21,7 @@ res2 <- umap(iris10,
 expect_equal(res2, res)
 
 # Distance matrix input
-res <- umap(dist(iris10),
+res <- umap(stats::dist(iris10),
   n_neighbors = 4, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
   init = "laplacian", verbose = FALSE, n_threads = 0
 )

@@ -12,7 +12,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
     n_threads <- default_num_threads()
   }
 
-  if (methods::is(X, "dist")) {
+  if (inherits(X, "dist")) {
     res <- dist_nn(X, k, include_self = include_self, verbose = verbose)
   } else if (sparse_is_distance && is_sparse_matrix(X)) {
     # sparse distance matrix

@@ -3202,7 +3202,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       bipartite = FALSE
     )
     Xnames <- nn_graph_row_names_list(nn_method)
-  } else if (methods::is(X, "dist")) {
+  } else if (inherits(X, "dist")) {
     if (ret_model) {
       stop("Can only create models with dense matrix or data frame input")
     }
@@ -4278,7 +4278,7 @@ x2nv <- function(X) {
         stop("Can't find n_vertices for list X")
       }
     }
-  } else if (methods::is(X, "dist")) {
+  } else if (inherits(X, "dist")) {
     n_vertices <- attr(X, "Size")
   } else if (is_sparse_matrix(X)) {
     # older code path where distance matrix was part of X rather than nn_method
