@@ -279,7 +279,7 @@ If you use `nn_method = "nndescent"` then the UMAP model returned with
 and `load_uwot`, nor do you need to worry about unloading the model with 
 `unload_uwot`, as you must with Annoy-based UMAP models. This is a consequence
 of `rnndescent` storing all its index-related data in pure R (no wrapping of
-existing C++ classes), but be aware zthat this can lead to much larger models
+existing C++ classes), but be aware that this can lead to much larger models
 on disk and in RAM.
 
 ## Using `rnndescent` externally
@@ -523,6 +523,10 @@ with `rnnd_build` and using `ret_model = TRUE`.
 ## Conclusions
 
 If you want to use `rnndescent` with `uwot`, then:
+
+* Install `rnndescent` and then use `nn_method = "nndescent"`.
+
+That handles most cases. If you want to use precomputed nearest neighbors, then:
 
 * Run `rnndescent::rnnd_build` on your training data.
 * Run `uwot::umap` with `nn_method` set to the `graph` item in the result of
