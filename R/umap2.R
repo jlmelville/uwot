@@ -738,6 +738,12 @@ umap2 <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_epochs <- 500
   }
 
+  if (is.numeric(a) && is.numeric(b) && a == 1 && b == 1) {
+    method <- "tumap"
+  }
+  else {
+    method <- "umap"
+  }
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
@@ -748,7 +754,7 @@ umap2 <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
     a = a, b = b, nn_method = nn_method, n_trees = n_trees,
     search_k = search_k,
-    method = "umap", approx_pow = approx_pow,
+    method = method, approx_pow = approx_pow,
     n_threads = n_threads, n_sgd_threads = n_sgd_threads,
     grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
