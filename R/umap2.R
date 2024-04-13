@@ -665,117 +665,159 @@
 #' \url{https://www.jmlr.org/papers/v22/20-1061.html}
 #'
 #' @export
-umap2 <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
-                 n_epochs = NULL, learning_rate = 1, scale = FALSE,
-                 init = "spectral", init_sdev = "range",
-                 spread = 1, min_dist = 0.1,
-                 set_op_mix_ratio = 1.0, local_connectivity = 1.0,
-                 bandwidth = 1.0, repulsion_strength = 1.0,
-                 negative_sample_rate = 5.0, a = NULL, b = NULL,
-                 nn_method = NULL, n_trees = 50,
-                 search_k = 2 * n_neighbors * n_trees,
-                 approx_pow = FALSE,
-                 y = NULL, target_n_neighbors = n_neighbors,
-                 target_metric = "euclidean",
-                 target_weight = 0.5,
-                 pca = NULL, pca_center = TRUE,
-                 pcg_rand = TRUE,
-                 fast_sgd = FALSE,
-                 ret_model = FALSE, ret_nn = FALSE, ret_extra = c(),
-                 n_threads = NULL,
-                 n_sgd_threads = 0,
-                 grain_size = 1,
-                 tmpdir = tempdir(),
-                 verbose = getOption("verbose", TRUE),
-                 batch = FALSE,
-                 opt_args = NULL, epoch_callback = NULL, pca_method = NULL,
-                 binary_edge_weights = FALSE,
-                 dens_scale = NULL,
-                 seed = NULL,
-                 nn_args = list()) {
-  if (is.null(nn_method)) {
-    if (is_installed("RcppHNSW") &&
+umap2 <-
+  function(X,
+           n_neighbors = 15,
+           n_components = 2,
+           metric = "euclidean",
+           n_epochs = NULL,
+           learning_rate = 1,
+           scale = FALSE,
+           init = "spectral",
+           init_sdev = "range",
+           spread = 1,
+           min_dist = 0.1,
+           set_op_mix_ratio = 1.0,
+           local_connectivity = 1.0,
+           bandwidth = 1.0,
+           repulsion_strength = 1.0,
+           negative_sample_rate = 5.0,
+           a = NULL,
+           b = NULL,
+           nn_method = NULL,
+           n_trees = 50,
+           search_k = 2 * n_neighbors * n_trees,
+           approx_pow = FALSE,
+           y = NULL,
+           target_n_neighbors = n_neighbors,
+           target_metric = "euclidean",
+           target_weight = 0.5,
+           pca = NULL,
+           pca_center = TRUE,
+           pcg_rand = TRUE,
+           fast_sgd = FALSE,
+           ret_model = FALSE,
+           ret_nn = FALSE,
+           ret_extra = c(),
+           n_threads = NULL,
+           n_sgd_threads = 0,
+           grain_size = 1,
+           tmpdir = tempdir(),
+           verbose = getOption("verbose", TRUE),
+           batch = FALSE,
+           opt_args = NULL,
+           epoch_callback = NULL,
+           pca_method = NULL,
+           binary_edge_weights = FALSE,
+           dens_scale = NULL,
+           seed = NULL,
+           nn_args = list()) {
+    if (is.null(nn_method)) {
+      if (is_installed("RcppHNSW") &&
         is.character(metric) &&
-        is_ok_hnsw_metric(metric) && is_ok_hnsw_metric(target_metric)) {
-      nn_method <- "hnsw"
-      tsmessage("Using HNSW for nearest neighbor search")
-    }
-  }
-
-  if (is.null(nn_method)) {
-    if (is_installed("rnndescent")) {
-      nn_method <- "nndescent"
-      tsmessage("Using NN-Descent for nearest neighbor search")
-    }
-  }
-
-  if (is.null(n_threads)) {
-    n_threads <- default_num_threads()
-    if (batch) {
-      n_sgd_threads <- n_threads
-    }
-  }
-
-  if (is_sparse_matrix(X)) {
-    if (!methods::is(X, "dgCMatrix")) {
-      stop("sparse X must be a dgCMatrix object")
-    }
-    if (!is.list(nn_method)) {
-      if (!is_installed("rnndescent")) {
-        stop("nearest neighbor search for sparse matrices requires the ",
-             "'rnndescent' package, please install it")
+        is_ok_hnsw_metric(metric) &&
+        is_ok_hnsw_metric(target_metric)) {
+        nn_method <- "hnsw"
+        tsmessage("Using HNSW for nearest neighbor search")
       }
-      if (!is.null(nn_method) && nn_method != "nndescent") {
-        stop("nearest neighbor search for sparse matrices only supports ",
-             "the 'nndescent' method")
-      }
-      tsmessage("Using nndescent for nearest neighbor search")
-      nn_method <- "nndescent"
     }
-  }
 
-  if (is.null(n_epochs)) {
-    n_epochs <- 500
-  }
+    if (is.null(nn_method)) {
+      if (is_installed("rnndescent")) {
+        nn_method <- "nndescent"
+        tsmessage("Using NN-Descent for nearest neighbor search")
+      }
+    }
 
-  if (is.numeric(a) && is.numeric(b) && a == 1 && b == 1) {
-    method <- "tumap"
+    if (is.null(n_threads)) {
+      n_threads <- default_num_threads()
+      if (batch) {
+        n_sgd_threads <- n_threads
+      }
+    }
+
+    if (is_sparse_matrix(X)) {
+      if (!methods::is(X, "dgCMatrix")) {
+        stop("sparse X must be a dgCMatrix object")
+      }
+      if (!is.list(nn_method)) {
+        if (!is_installed("rnndescent")) {
+          stop(
+            "nearest neighbor search for sparse matrices requires the ",
+            "'rnndescent' package, please install it"
+          )
+        }
+        if (!is.null(nn_method) && nn_method != "nndescent") {
+          stop(
+            "nearest neighbor search for sparse matrices only supports ",
+            "the 'nndescent' method"
+          )
+        }
+        tsmessage("Using nndescent for nearest neighbor search")
+        nn_method <- "nndescent"
+      }
+    }
+
+    if (is.null(n_epochs)) {
+      n_epochs <- 500
+    }
+
+    if (is.numeric(a) &&
+      is.numeric(b) && a == 1 && b == 1 && is.null(dens_scale)) {
+      method <- "tumap"
+    } else {
+      method <- "umap"
+    }
+    uwot(
+      X = X,
+      n_neighbors = n_neighbors,
+      n_components = n_components,
+      metric = metric,
+      n_epochs = n_epochs,
+      alpha = learning_rate,
+      scale = scale,
+      init = init,
+      init_sdev = init_sdev,
+      spread = spread,
+      min_dist = min_dist,
+      set_op_mix_ratio = set_op_mix_ratio,
+      local_connectivity = local_connectivity,
+      bandwidth = bandwidth,
+      gamma = repulsion_strength,
+      negative_sample_rate = negative_sample_rate,
+      a = a,
+      b = b,
+      nn_method = nn_method,
+      n_trees = n_trees,
+      search_k = search_k,
+      method = method,
+      approx_pow = approx_pow,
+      n_threads = n_threads,
+      n_sgd_threads = n_sgd_threads,
+      grain_size = grain_size,
+      y = y,
+      target_n_neighbors = target_n_neighbors,
+      target_weight = target_weight,
+      target_metric = target_metric,
+      pca = pca,
+      pca_center = pca_center,
+      pca_method = pca_method,
+      pcg_rand = pcg_rand,
+      fast_sgd = fast_sgd,
+      ret_model = ret_model || "model" %in% ret_extra,
+      ret_nn = ret_nn || "nn" %in% ret_extra,
+      ret_fgraph = "fgraph" %in% ret_extra,
+      ret_sigma = "sigma" %in% ret_extra,
+      ret_localr = "localr" %in% ret_extra,
+      batch = batch,
+      opt_args = opt_args,
+      epoch_callback = epoch_callback,
+      binary_edge_weights = binary_edge_weights,
+      tmpdir = tempdir(),
+      verbose = verbose,
+      dens_scale = dens_scale,
+      seed = seed,
+      nn_args = nn_args,
+      sparse_X_is_distance_matrix = FALSE
+    )
   }
-  else {
-    method <- "umap"
-  }
-  uwot(
-    X = X, n_neighbors = n_neighbors, n_components = n_components,
-    metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
-    init = init, init_sdev = init_sdev,
-    spread = spread, min_dist = min_dist,
-    set_op_mix_ratio = set_op_mix_ratio,
-    local_connectivity = local_connectivity, bandwidth = bandwidth,
-    gamma = repulsion_strength, negative_sample_rate = negative_sample_rate,
-    a = a, b = b, nn_method = nn_method, n_trees = n_trees,
-    search_k = search_k,
-    method = method, approx_pow = approx_pow,
-    n_threads = n_threads, n_sgd_threads = n_sgd_threads,
-    grain_size = grain_size,
-    y = y, target_n_neighbors = target_n_neighbors,
-    target_weight = target_weight, target_metric = target_metric,
-    pca = pca, pca_center = pca_center, pca_method = pca_method,
-    pcg_rand = pcg_rand,
-    fast_sgd = fast_sgd,
-    ret_model = ret_model || "model" %in% ret_extra,
-    ret_nn = ret_nn || "nn" %in% ret_extra,
-    ret_fgraph = "fgraph" %in% ret_extra,
-    ret_sigma = "sigma" %in% ret_extra,
-    ret_localr = "localr" %in% ret_extra,
-    batch = batch,
-    opt_args = opt_args,
-    epoch_callback = epoch_callback,
-    binary_edge_weights = binary_edge_weights,
-    tmpdir = tempdir(),
-    verbose = verbose,
-    dens_scale = dens_scale,
-    seed = seed,
-    nn_args = nn_args,
-    sparse_X_is_distance_matrix = FALSE
-  )
-}
