@@ -593,9 +593,6 @@
 #' @examples
 #'
 #' iris30 <- iris[c(1:10, 51:60, 101:110), ]
-#'
-#' # Non-numeric columns are automatically removed so you can pass data frames
-#' # directly in a lot of cases without pre-processing
 #' iris_umap <- umap2(iris30, n_neighbors = 5)
 #'
 #' @references

@@ -60,6 +60,11 @@ devtools::install_github("jlmelville/uwot")
 ```R
 library(uwot)
 
+# umap2 is a version of the umap() function with better defaults
+iris_umap <- umap2(iris)
+
+# but you can still use the umap function (which most of the existing 
+# documentation does)
 iris_umap <- umap(iris)
 
 # Load mnist from somewhere, e.g.

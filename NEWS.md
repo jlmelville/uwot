@@ -27,6 +27,10 @@ in the documentation, and also the rnndescent package's
 [documentation](https://jlmelville.github.io/rnndescent/index.html) for details.
 `rnndescent` is only a suggested package, not a requirement, so you need to 
 install it yourself (e.g. via `install.packages("rnndescent")`).
+* New function: `umap2`, which acts like `umap` but with modified defaults,
+reflecting my experience with UMAP and correcting some small mistakes. See the
+[umap2 article](https://jlmelville.github.io/uwot/articles/umap2.html) for more
+details.
 
 ## Bug fixes and minor improvements
 
