@@ -1,5 +1,5 @@
 pandoc: 3.1.11
-pkgdown: 2.0.7
+pkgdown: 2.0.8
 pkgdown_sha: ~
 articles:
   abparams: abparams.html
@@ -20,9 +20,10 @@ articles:
   umap-examples: umap-examples.html
   umap-for-tsne: umap-for-tsne.html
   umap-simple: umap-simple.html
-  whatsnew: whatsnew.html
+  umap2: umap2.html
   uwot: uwot.html
-last_built: 2024-04-06T06:20Z
+  whatsnew: whatsnew.html
+last_built: 2024-04-14T03:34Z
 urls:
   reference: https://jlmelville.github.io/uwot/reference
   article: https://jlmelville.github.io/uwot/articles

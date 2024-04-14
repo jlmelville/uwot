@@ -22,7 +22,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">uwot</a>
 
@@ -102,7 +102,9 @@ which I recently added a <code>download_twenty_newsgroups</code>
 function. That took up a large chunk of one afternoon and evening. The
 second problem is solved by replicating the PyNNDescent package in R.
 This took me a bit longer, but a mere 4 years later, the <a href="https://cran.r-project.org/package=rnndescent" class="external-link">rnndescent</a>
-package is finally in a usable state.</p>
+package is finally in a usable state. Consequently, the
+<code>uwot</code> package can now make use of <code>rnndescent</code>
+and support sparse input via the <code>umap2</code> function.</p>
 <p>So let’s get started. Apart from the Python example above, some other
 good resources for doing text analysis on this dataset can be found in
 chapter 9 of <a href="https://www.tidytextmining.com/usenet#usenet" class="external-link">text
@@ -226,7 +228,7 @@ Secrets” notebook linked above (don’t get too excited). There seems to
 be other binary data in some of the posts, so to try and catch more, I
 will end up filtering those out later.</p>
 <p>The tidy text example goes on to examine the word frequencies for
-each newsgroup as a whole, but we will go back to analysing on a per
+each newsgroup as a whole, but we will go back to analyzing on a per
 post basis. Now, having split the posts into lines, we need to unsplit
 them, and also re-associate the other columns from the original
 <code>ng20</code> data:</p>
@@ -309,7 +311,7 @@ words, but stop at 95% of the data to avoid the outliers:</p>
 <img src="img/sparse-data-example/word-dist.png" alt="0-95% word count distribution"><div class="figcaption">0-95% word count distribution</div>
 </div>
 <p>So 95% of the data contains 250 words or less.</p>
-<p>What is this massive document. Let’s (carefully) take a look:</p>
+<p>What is this massive document? Let’s (carefully) take a look:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="va">ng20</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">nwords</span><span class="op">)</span>, <span class="op">]</span><span class="op">$</span><span class="va">Text</span>, <span class="fl">0</span>, <span class="fl">80</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"From: jeh@cmkrnl.com</span><span class="sc">\n</span><span class="st">Subject: Electrical wiring FAQ (was: A question about 120VA"</span></span></code></pre></div>
@@ -420,13 +422,14 @@ into a dense representation with far fewer dimensions. However this is
 slow and takes up a lot of memory and you have to spend time working out
 how many dimensions to use, which slows things down even more if you
 don’t get it right the first time.</p>
-<p>So let’s use <code>rnndescent</code> to find nearest neighbors on the
-sparse data directly.</p>
+<p>Fortunately, now that <code>uwot</code> can use
+<code>rnndescent</code>, we can work on the sparse data directly.</p>
 </div>
 <div class="section level2">
-<h2 id="finding-nearest-neighbors">Finding Nearest Neighbors<a class="anchor" aria-label="anchor" href="#finding-nearest-neighbors"></a>
+<h2 id="umap-with-nn-descent">UMAP with NN-Descent<a class="anchor" aria-label="anchor" href="#umap-with-nn-descent"></a>
 </h2>
-<p>We need to convert the sparse matrix into a format from the <a href="https://cran.r-project.org/package=Matrix" class="external-link">Matrix</a> package that
+<p>To use <code>uwot</code> with sparse data we need to convert the
+TF-IDF matrix into a format from the <a href="https://cran.r-project.org/package=Matrix" class="external-link">Matrix</a> package that
 <code>rnndescent</code> can handle:</p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://Matrix.R-forge.R-project.org" class="external-link">Matrix</a></span><span class="op">)</span></span>
@@ -437,66 +440,72 @@ sparse data directly.</p>
 <span>    x <span class="op">=</span> <span class="va">tfidf</span><span class="op">$</span><span class="va">v</span>,</span>
 <span>    dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">tfidf</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p>and, following the example in the Python UMAP tutorial, we want to
-use the Hellinger distance. This show-cases another example of
-<code>rnndescent</code>, which is that it implements a lot more
-distances than most other methods. The Hellinger distance, being a
-divergence is designed to work on probability distributions, so I am
-going to L1-normalize each row of the sparse matrix:</p>
+<p>For historical reasons to do with not breaking backwards
+compatibility, we can’t use the <code>umap</code> function with sparse
+input data. Instead we will use the <code>umap2</code> function, which
+is a newer version of <code>umap</code> but with slightly better
+defaults and which can take sparse matrix input. We also need to load
+the <code>rnndescent</code> package.</p>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">l1_normalize</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">dgt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a></span><span class="op">(</span><span class="va">X</span>, <span class="st">"TsparseMatrix"</span><span class="op">)</span></span>
-<span>  <span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">dgt</span><span class="op">@</span><span class="va">x</span>, <span class="va">dgt</span><span class="op">@</span><span class="va">i</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">}</span><span class="op">)</span></span>
-<span>  <span class="va">res</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">tmp</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/Diagonal.html" class="external-link">Diagonal</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="va">res</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">X</span></span>
-<span><span class="op">}</span></span>
-<span><span class="va">tfidf_spl1</span> <span class="op">&lt;-</span> <span class="fu">l1_normalize</span><span class="op">(</span><span class="va">tfidf_sp</span><span class="op">)</span></span></code></pre></div>
-<p>Now we can find the neighbors.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"rnndescent"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jlmelville.github.io/rnndescent/" class="external-link">rnndescent</a></span><span class="op">)</span></span></code></pre></div>
-<p>I will use the brute-force search in <code>rnndescent</code> as the
-dataset is small enough for us to handle an exact search comfortably, at
-least if you have enough cores:</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tfidfl1_hell_bf</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/brute_force_knn.html" class="external-link">brute_force_knn</a></span><span class="op">(</span></span>
-<span>    <span class="va">tfidf_spl1</span>,</span>
-<span>    k <span class="op">=</span> <span class="fl">15</span>,</span>
-<span>    metric <span class="op">=</span> <span class="st">"hellinger"</span>,</span>
-<span>    n_threads <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-<p>This took under a minute on my laptop.</p>
-</div>
-<div class="section level2">
-<h2 id="umap">UMAP<a class="anchor" aria-label="anchor" href="#umap"></a>
-</h2>
-<p>At last we can run UMAP. As we have the nearest neighbors data
-already, that’s the only input data we need. The other settings ensure
-we do a slightly longer optimization than usual (as we save a bit of
-time from having already done the nearest neighbor search), and that we
-use <a href="https://jlmelville.github.io/uwot/articles/leopold.html">LEOPOLD</a>
-to model some of the original density differences in the data.</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<p>In terms of non-default options, I’m going to use the
+<code>batch = TRUE</code> setting, a longer than usual optimization, and
+a non-zero <code>dens_scale</code> to model some of the original density
+differences in the data (see the article on <a href="https://jlmelville.github.io/uwot/articles/leopold.html">LEOPOLD</a>
+for more details). I will also save the nearest neighbors with
+<code>ret_nn = TRUE</code> so I can compare them with the exact results
+we will calculate later.</p>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/uwot" class="external-link">uwot</a></span><span class="op">)</span></span>
 <span><span class="va">ng20_umap</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span></span>
-<span>    X <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>    nn_method <span class="op">=</span> <span class="va">tfidfl1_hell_bf</span>,</span>
-<span>    n_sgd_threads <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span></span>
+<span>    X <span class="op">=</span> <span class="va">tfidf_sp</span>,</span>
+<span>    nn_method <span class="op">=</span> <span class="st">"nndescent"</span>,</span>
+<span>    metric <span class="op">=</span> <span class="st">"hellinger"</span>,</span>
 <span>    n_epochs <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>    batch <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    init_sdev <span class="op">=</span> <span class="st">"range"</span>,</span>
 <span>    dens_scale <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>    ret_nn <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p>If you follow along with the code here, you will not get the same
-results as me when you plot them below, due to the stochastic nature of
-UMAP. But you should see something similar (if you don’t, please <a href="https://github.com/jlmelville/uwot/issues" class="external-link">file an issue</a>).</p>
+<pre><code>Using nndescent for nearest neighbor search
+UMAP embedding parameters a = 1.577 b = 0.8951
+Read 17666 rows and found 88894 numeric columns
+Using alt metric 'alternative-hellinger' for 'hellinger'
+Initializing neighbors using 'tree' method
+Calculating rp tree k-nearest neighbors with k = 15 n_trees = 17 max leaf size = 15 margin = 'explicit' using 6 threads
+Using angular margin calculation
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Extracting leaf array from forest
+Creating knn using 32172 leaves
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Running nearest neighbor descent for 14 iterations using 6 threads
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Convergence: c = 170 tol = 264.99
+Finished
+Commencing smooth kNN distance calibration using 6 threads with target n_neighbors = 15
+17 smooth knn distance failures
+Initializing from normalized Laplacian + noise (using irlba)
+Range-scaling initial input columns to 0-10
+Commencing optimization for 1000 epochs, with 389106 positive edges using 6 threads
+Using method 'leopold'
+Optimizing with Adam alpha = 1 beta1 = 0.5 beta2 = 0.9 eps = 1e-07
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Optimization finished</code></pre>
+<p>If you follow along with the code here, you will <em>not</em> get the
+exact same results as me when you plot them below, due to the stochastic
+nature of UMAP. But you should see something similar (if you don’t,
+please <a href="https://github.com/jlmelville/uwot/issues" class="external-link">file an
+issue</a>).</p>
 </div>
 <div class="section level2">
 <h2 id="plot-the-results">Plot the Results<a class="anchor" aria-label="anchor" href="#plot-the-results"></a>
@@ -507,8 +516,9 @@ of that size, so I am going to use the <a href="https://cran.r-project.org/packa
 package to generate a palette with 20 colors which are hopefully
 reasonably distinguishable. This is a similar approach to the Python
 package <a href="https://github.com/lmcinnes/glasbey" class="external-link">glasbey</a>.</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://oompa.r-forge.r-project.org/" class="external-link">Polychrome</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">palette</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu">Polychrome</span><span class="fu">::</span><span class="fu">createPalette</span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">text_unsplit</span><span class="op">$</span><span class="va">Newsgroup</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fl">2</span>,</span>
@@ -517,21 +527,21 @@ package <a href="https://github.com/lmcinnes/glasbey" class="external-link">glas
 <span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p>I will also rotate the coordinates so they align along the principal
 axes:</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ng20_umap_rotated</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">ng20_umap</span><span class="op">)</span><span class="op">$</span><span class="va">x</span></span></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ng20_umap_rotated</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">ng20_umap</span><span class="op">$</span><span class="va">embedding</span><span class="op">)</span><span class="op">$</span><span class="va">x</span></span></code></pre></div>
 <p>Ok, now to make the plot with <a href="https://ggplot2.tidyverse.org/" class="external-link">ggplot2</a>:</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">ng20_umap_rotated</span>, Newsgroup <span class="op">=</span> <span class="va">text_unsplit</span><span class="op">$</span><span class="va">Newsgroup</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">X1</span>, y <span class="op">=</span> <span class="va">X2</span>, color <span class="op">=</span> <span class="va">Newsgroup</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">PC1</span>, y <span class="op">=</span> <span class="va">PC2</span>, color <span class="op">=</span> <span class="va">Newsgroup</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.4</span>, size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">palette</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Sparse Hellinger 20Newsgroups UMAP"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Sparse Hellinger NN-Descent 20Newsgroups UMAP"</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">""</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">""</span>,</span>
 <span>    color <span class="op">=</span> <span class="st">"Newsgroup"</span></span>
@@ -539,12 +549,363 @@ axes:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
-<img src="img/sparse-data-example/ng20-umap.png" alt="UMAP"><div class="figcaption">UMAP</div>
+<img src="img/sparse-data-example/ng20-umap2.png" alt="UMAP"><div class="figcaption">UMAP</div>
 </div>
 <p>Although we can’t compare this result too easily with the Python
 example, as that one plots the training and test set separately, and
 there isn’t a legend, I think this has done a pretty good job of
 separating at least some of the 20 newsgroups.</p>
+</div>
+<div class="section level2">
+<h2 id="finding-exact-nearest-neighbors">Finding Exact Nearest Neighbors<a class="anchor" aria-label="anchor" href="#finding-exact-nearest-neighbors"></a>
+</h2>
+<p>Before <code>uwot</code> supported using <code>rnndescent</code>
+internally for sparse data, this article documented the process of using
+<code>rnndesent</code> directly with the 20 Newsgroups data and then
+integrating that with the <code>umap</code> function. This is still a
+perfectly viable approach, especially if you want to use exact nearest
+neighbors. <code>uwot</code> uses the nearest neighbor descent method to
+find approximate nearest neighbors, which is faster but not exact. In
+what follows we’ll use <code>rnndescent</code> to find exact nearest
+neighbors by a brute force method and then see what sort of difference
+that makes to the UMAP result.</p>
+<p>I’ll assume you’ve been following along so far, so that we have the
+L1-normalized TF-IDF matrix <code>tfidf_spl1</code> and
+<code>rnndescent</code> loaded. Now let’s use the brute-force search in
+<code>rnndescent</code>. This dataset is small enough for us to handle
+an exact search comfortably, at least if you have enough cores:</p>
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tfidfl1_hell_bf</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/brute_force_knn.html" class="external-link">brute_force_knn</a></span><span class="op">(</span></span>
+<span>    <span class="va">tfidf_sp</span>,</span>
+<span>    k <span class="op">=</span> <span class="fl">15</span>,</span>
+<span>    metric <span class="op">=</span> <span class="st">"hellinger"</span>,</span>
+<span>    n_threads <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<pre><code>Using alt metric 'alternative-hellinger' for 'hellinger'
+Calculating brute force k-nearest neighbors with k = 15 using 6 threads
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Finished</code></pre>
+<p>This took about 35 seconds on my machine, whereas nearest neighbor
+descent only took about 5 seconds. That said, in this case I am happy to
+pay the price of the extra 30 seconds to avoid any issues due to
+approximation.</p>
+</div>
+<div class="section level2">
+<h2 id="umap-with-exact-neighbors">UMAP with Exact Neighbors<a class="anchor" aria-label="anchor" href="#umap-with-exact-neighbors"></a>
+</h2>
+<p>We can now run UMAP with the exact neighbors. I will use the same
+parameters in conjunction with <code>umap2</code> as I did with the
+approximate nearest neighbors:</p>
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ng20_umap_exact</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span></span>
+<span>    X <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    nn_method <span class="op">=</span> <span class="va">tfidfl1_hell_bf</span>,</span>
+<span>    n_epochs <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>    batch <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    dens_scale <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<pre><code>UMAP embedding parameters a = 1.577 b = 0.8951
+Commencing smooth kNN distance calibration using 6 threads with target n_neighbors = 15
+16 smooth knn distance failures
+Initializing from normalized Laplacian + noise (using irlba)
+Range-scaling initial input columns to 0-10
+Commencing optimization for 1000 epochs, with 377272 positive edges using 6 threads
+Using method 'leopold'
+Optimizing with Adam alpha = 1 beta1 = 0.5 beta2 = 0.9 eps = 1e-07
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Optimization finished</code></pre>
+</div>
+<div class="section level2">
+<h2 id="plot-the-exact-neighbors-umap-results">Plot the Exact Neighbors UMAP Results<a class="anchor" aria-label="anchor" href="#plot-the-exact-neighbors-umap-results"></a>
+</h2>
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">ng20_umap_exact</span><span class="op">)</span><span class="op">$</span><span class="va">x</span>, Newsgroup <span class="op">=</span> <span class="va">text_unsplit</span><span class="op">$</span><span class="va">Newsgroup</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">PC1</span>, y <span class="op">=</span> <span class="va">PC2</span>, color <span class="op">=</span> <span class="va">Newsgroup</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.4</span>, size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">palette</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"Sparse Hellinger Exact Neighbors 20Newsgroups UMAP"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">""</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">""</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"Newsgroup"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="float">
+<img src="img/sparse-data-example/ng20-umap2-exact.png" alt="UMAP-exact-15"><div class="figcaption">UMAP-exact-15</div>
+</div>
+<p>Actually, although the plots share a lot of the same features there
+are some noticeable differences to some of the cluster placements.</p>
+</div>
+<div class="section level2">
+<h2 id="hubness">Hubness<a class="anchor" aria-label="anchor" href="#hubness"></a>
+</h2>
+<p>What’s going on here? If you want, you can re-run the UMAP with the
+exact nearest neighbors a few times, which will tell us how much the
+result varies due to the random selection during negative sampling. I
+will leave that as an exercise for you. Having tried it myself, the plot
+is pretty stable (the <code>sci.space</code> cluster moves between two
+locations). So the reason for the differences is going to be down to the
+performance of the approximate nearest neighbors. As we have gone to the
+trouble of generating the exact nearest neighbors we can answer the
+question of how well did we actually do in reproducing the exact
+neighbors? <code>rnndescent</code> has a <code>neighbor_overlap</code>
+function we can use which will return a value of 0 (no overlap between
+two sets of neighbors) and 1 (perfect overlap):</p>
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/neighbor_overlap.html" class="external-link">neighbor_overlap</a></span><span class="op">(</span><span class="va">ng20_umap</span><span class="op">$</span><span class="va">nn</span><span class="op">$</span><span class="va">hellinger</span>, <span class="va">tfidfl1_hell_bf</span><span class="op">)</span></span></code></pre></div>
+<pre><code>[1] 0.7484169</code></pre>
+<p>So about 75% accuracy, that’s less than the 90% that I would usually
+be happier with. I’m not totally surprised as high dimensional datasets
+tend to contain “hubs” (items which appear on the nearest neighbor lists
+of many other items) and these tend to make it hard for any approximate
+nearest neighbor method to do a good exploration. Does this combination
+of dataset, <code>n_neighbors</code> and <code>metric</code> result in
+the neighbors having a hub. Once again <code>rnndescent</code> can help
+us with its <code>k_occur</code> function which will count the
+k-occurrence for each item: the number of times an item appears in the
+nearest neighbor lists of other items (aka the number of reverse
+neighbors). The hubness for a dataset can be defined as the maximum
+number of times any item appears in the k-occurrence list, and I am
+going to normalize that with respect to <code>n_neighbors</code>:</p>
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tfidfl1_hell_bf</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/k_occur.html" class="external-link">k_occur</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="op">)</span> <span class="op">/</span> <span class="fl">15</span></span></code></pre></div>
+<pre><code><span><span class="fl">20.13333</span></span></code></pre>
+<p>A dataset where each item gets its fair share of reverse neighbors
+would result in a maximum k-occurrence of <code>n_neighbors</code>, or
+in this case a normalized hubness of 1. So we are at a much larger value
+than that. My own personal experience is that if the normalized hubness
+exceeds 10, then approximate nearest neighbors methods will struggle to
+do well, at least if you are looking for relatively low values of
+<code>n_neighbors</code> with default settings. Incidentally, you don’t
+need the exact nearest neighbors to detect hubness, the approximate
+results will also act as a good diagnostic:</p>
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ng20_umap</span><span class="op">$</span><span class="va">nn</span><span class="op">$</span><span class="va">hellinger</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/k_occur.html" class="external-link">k_occur</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="op">)</span> <span class="op">/</span> <span class="fl">15</span></span></code></pre></div>
+<pre><code><span><span class="fl">30.46667</span></span></code></pre>
+<p>Not necessarily good at reproducing the result from the exact
+neighbors, but it will certainly tell you that something is up.</p>
+</div>
+<div class="section level2">
+<h2 id="umap-with-more-neighbors">UMAP with More Neighbors<a class="anchor" aria-label="anchor" href="#umap-with-more-neighbors"></a>
+</h2>
+<p>So what are we going to do about this? In these cases, usually
+increasing <code>n_neighbors</code> helps. I’m going to look at
+<code>n_neighbors = 50</code>. We will also want the equivalent brute
+force results to see if it helped:</p>
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tfidfl1_hell_bf_50</span> <span class="op">&lt;-</span></span>
+<span>    <span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/brute_force_knn.html" class="external-link">brute_force_knn</a></span><span class="op">(</span></span>
+<span>        <span class="va">tfidf_sp</span>,</span>
+<span>        k <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>        metric <span class="op">=</span> <span class="st">"hellinger"</span>,</span>
+<span>        n_threads <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>        verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
+<p>Let’s see what’s up with the hubness:</p>
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tfidfl1_hell_bf_50</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/k_occur.html" class="external-link">k_occur</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="op">)</span> <span class="op">/</span> <span class="fl">50</span></span></code></pre></div>
+<pre><code>[1] 20.1</code></pre>
+<p>Not that different to the <code>n_neighbors = 15</code> result, but I
+have more confidence that nearest neighbor descent will be able to
+handle this level of hubness given the larger <code>n_neighbors</code>
+value. But let’s find out.</p>
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ng20_umap_50</span> <span class="op">&lt;-</span></span>
+<span>    <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span></span>
+<span>        X <span class="op">=</span> <span class="va">tfidf_sp</span>,</span>
+<span>        nn_method <span class="op">=</span> <span class="st">"nndescent"</span>,</span>
+<span>        metric <span class="op">=</span> <span class="st">"hellinger"</span>,</span>
+<span>        n_neighbors <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>        n_epochs <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>        batch <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>        dens_scale <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>        ret_nn <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>        verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ng20_umap_50</span><span class="op">$</span><span class="va">nn</span><span class="op">$</span><span class="va">hellinger</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/k_occur.html" class="external-link">k_occur</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="op">)</span> <span class="op">/</span> <span class="fl">50</span></span></code></pre></div>
+<pre><code>[1] 21.12</code></pre>
+<p>A similar level of hubness reported, but more importantly, what’s the
+accuracy like?</p>
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://jlmelville.github.io/rnndescent/reference/neighbor_overlap.html" class="external-link">neighbor_overlap</a></span><span class="op">(</span><span class="va">ng20_umap_50</span><span class="op">$</span><span class="va">nn</span><span class="op">$</span><span class="va">hellinger</span>, <span class="va">tfidfl1_hell_bf_50</span><span class="op">)</span></span></code></pre></div>
+<pre><code>[1] 0.9553753</code></pre>
+<p>96%! Much better. Let’s see how the UMAP plot looks:</p>
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">ng20_umap_50</span><span class="op">$</span><span class="va">embedding</span><span class="op">)</span><span class="op">$</span><span class="va">x</span>, Newsgroup <span class="op">=</span> <span class="va">text_unsplit</span><span class="op">$</span><span class="va">Newsgroup</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">PC1</span>, y <span class="op">=</span> <span class="va">PC2</span>, color <span class="op">=</span> <span class="va">Newsgroup</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.4</span>, size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">palette</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"Sparse Hellinger Approximate 50-Neighbors 20Newsgroups UMAP"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">""</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">""</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"Newsgroup"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="float">
+<img src="img/sparse-data-example/ng20-umap2-50.png" alt="UMAP-50"><div class="figcaption">UMAP-50</div>
+</div>
+<p>Well, the clusters have spread out a bit (expected due to the 3-fold
+increase in <code>n_neighbors</code>) but they have also continued to
+move around a bit compared to the <code>n_neighbors = 15</code> result.
+Hmm, let’s see if at least we have agreement with the exact case for
+<code>n_neighbors = 50</code>:</p>
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ng20_umap_exact_50</span> <span class="op">&lt;-</span></span>
+<span>    <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span></span>
+<span>        X <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>        nn_method <span class="op">=</span> <span class="va">tfidfl1_hell_bf_50</span>,</span>
+<span>        n_epochs <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>        batch <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>        dens_scale <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>        verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>    <span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">ng20_umap_exact_50</span><span class="op">)</span><span class="op">$</span><span class="va">x</span>, Newsgroup <span class="op">=</span> <span class="va">text_unsplit</span><span class="op">$</span><span class="va">Newsgroup</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">PC1</span>, y <span class="op">=</span> <span class="va">PC2</span>, color <span class="op">=</span> <span class="va">Newsgroup</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.4</span>, size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">palette</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>        title <span class="op">=</span> <span class="st">"Sparse Hellinger Exact 50-Neighbors 20Newsgroups UMAP"</span>,</span>
+<span>        x <span class="op">=</span> <span class="st">""</span>,</span>
+<span>        y <span class="op">=</span> <span class="st">""</span>,</span>
+<span>        color <span class="op">=</span> <span class="st">"Newsgroup"</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="float">
+<img src="img/sparse-data-example/ng20-umap2-exact-50.png" alt="UMAP-exact-50"><div class="figcaption">UMAP-exact-50</div>
+</div>
+<p>Again, some of the clusters are on the move compared to the
+approximate case. It seems that the locations of <code>sci.crypt</code>
+and the <code>rec.sports.baseball</code>/<code>rec.sports.hockey</code>
+pair are particularly sensitive.</p>
+</div>
+<div class="section level2">
+<h2 id="umap-with-even-more-neighbors">UMAP with Even More Neighbors<a class="anchor" aria-label="anchor" href="#umap-with-even-more-neighbors"></a>
+</h2>
+<p>The next step would be to increase <code>n_neighbors</code> even
+further and see if results are more stable. The maximum I usually
+consider is <code>n_neighbors = 150</code>: this is the sort of number
+that would be used by methods like t-SNE with a fairly large perplexity
+of 50. Fortunately, in my testing the results for this value of
+<code>n_neighbors</code> actually <em>are</em> stable so we don’t need
+to go higher this time. To get something that visually resembles the
+original <code>n_neighbors = 15</code> result, my strategy is to run
+UMAP with progressively smaller values of <code>n_neighbors</code> using
+the output of the previous run as the initialization. This isn’t as time
+consuming as it could be because we only need to do the nearest neighbor
+search once and the optimizations before the final step can use the
+faster t-UMAP gradient, which will be used by <code>umap2</code> if it
+detects <code>a = 1</code> and <code>b = 1</code> being passed. The
+following uses <code>n_neighbors = 150</code>,
+<code>n_neighbors = 50</code> and then finished off at
+<code>n_neighbors = 15</code>:</p>
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ng20_umap_150</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span></span>
+<span>  X <span class="op">=</span> <span class="va">tfidf_sp</span>,</span>
+<span>  nn_method <span class="op">=</span> <span class="st">"nndescent"</span>,</span>
+<span>  metric <span class="op">=</span> <span class="st">"hellinger"</span>,</span>
+<span>  n_epochs <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  batch <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  n_neighbors <span class="op">=</span> <span class="fl">150</span>,</span>
+<span>  a <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  b <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  ret_nn <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ng20_umap_150_50</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span></span>
+<span>  X <span class="op">=</span> <span class="va">tfidf_sp</span>,</span>
+<span>  nn_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    idx <span class="op">=</span> <span class="va">ng20_umap_150</span><span class="op">$</span><span class="va">nn</span><span class="op">$</span><span class="va">hellinger</span><span class="op">$</span><span class="va">idx</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">50</span><span class="op">]</span>,</span>
+<span>    dist <span class="op">=</span> <span class="va">ng20_umap_150</span><span class="op">$</span><span class="va">nn</span><span class="op">$</span><span class="va">hellinger</span><span class="op">$</span><span class="va">dist</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">50</span><span class="op">]</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  n_epochs <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  batch <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  a <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  b <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  init <span class="op">=</span> <span class="va">ng20_umap_150</span><span class="op">$</span><span class="va">embedding</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ng20_umap_150_50_15</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span></span>
+<span>  X <span class="op">=</span> <span class="va">tfidf_sp</span>,</span>
+<span>  nn_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    idx <span class="op">=</span> <span class="va">ng20_umap_150</span><span class="op">$</span><span class="va">nn</span><span class="op">$</span><span class="va">hellinger</span><span class="op">$</span><span class="va">idx</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span>,</span>
+<span>    dist <span class="op">=</span> <span class="va">ng20_umap_150</span><span class="op">$</span><span class="va">nn</span><span class="op">$</span><span class="va">hellinger</span><span class="op">$</span><span class="va">dist</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">]</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  n_epochs <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  batch <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  dens_scale <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  init <span class="op">=</span> <span class="va">ng20_umap_150_50</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="va">ng20_umap_150_50_15</span><span class="op">)</span><span class="op">$</span><span class="va">x</span>, Newsgroup <span class="op">=</span> <span class="va">text_unsplit</span><span class="op">$</span><span class="va">Newsgroup</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">PC1</span>, y <span class="op">=</span> <span class="va">PC2</span>, color <span class="op">=</span> <span class="va">Newsgroup</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.4</span>, size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">palette</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>        title <span class="op">=</span> <span class="st">"Sparse Hellinger Exact 150-to-15 20Newsgroups UMAP"</span>,</span>
+<span>        x <span class="op">=</span> <span class="st">""</span>,</span>
+<span>        y <span class="op">=</span> <span class="st">""</span>,</span>
+<span>        color <span class="op">=</span> <span class="st">"Newsgroup"</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"right"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>color <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>override.aes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="img/sparse-data-example/ng20-umap2-150-15.png" alt="UMAP-150-15"> This strategy can work well if you can find a
+suitable starting value for <code>n_neighbors</code> that isn’t too
+onerous. Bear in mind that quite apart from the computational cost of
+finding a large number of neighbors and the consequent increase in
+number of edges that need optimizing, a more “global” setting is not
+always better as you could be short-circuiting the manifold structure of
+the data. It seems to have worked out in this case, though, and repeated
+runs give a layout which is much more stable than the original
+<code>n_neighbors = 15</code> case.</p>
+</div>
+<div class="section level2">
+<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+</h2>
+<p>If you install <code>rnndescent</code> and use the <code>umap2</code>
+function, it’s possible to embed sparse high-dimensional datasets using
+UMAP and you can even use relatively exotic metrics like Hellinger
+divergence.</p>
+<p>Be aware that high-dimensional datasets can contain hubs. For low
+values of <code>n_neighbors</code>, you may not get as high nearest
+neighbor accuracies as you are used to. <code>rnndescent</code> has
+functions which can help detect hubness. Increasing
+<code>n_neighbors</code> can help, but you should still be wary of
+over-interpreting the relative positions of clusters in the output. Yes,
+I know everyone says this but it bears repeating because the temptation
+is always there. I recommend re-running your UMAP results multiple times
+with any given settings, even if you have exact nearest neighbors, and
+you should also repeat with different values of <code>n_neighbors</code>
+(e.g. <code>50</code> and/or <code>150</code>). “Annealing” the
+<code>n_neighbors</code> value down in a series of optimizations can
+work out well.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
@@ -559,7 +920,7 @@ separating at least some of the 20 newsgroups.</p>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
     </footer>
