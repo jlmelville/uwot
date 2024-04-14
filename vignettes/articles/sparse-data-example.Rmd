@@ -35,7 +35,8 @@ added a `download_twenty_newsgroups` function. That took up a large chunk of one
 afternoon and evening. The second problem is solved by replicating the
 PyNNDescent package in R. This took me a bit longer, but a mere 4 years later,
 the [rnndescent](https://cran.r-project.org/package=rnndescent) package is
-finally in a usable state.
+finally in a usable state. Consequently, the `uwot` package can now make use
+of `rnndescent` and support sparse input via the `umap2` function.
 
 So let's get started. Apart from the Python example above, some other good
 resources for doing text analysis on this dataset can be found in chapter 9 of
@@ -198,7 +199,7 @@ find out more about them in the "20 Newsgroups Secrets" notebook linked above
 posts, so to try and catch more, I will end up filtering those out later.
 
 The tidy text example goes on to examine the word frequencies for each newsgroup
-as a whole, but we will go back to analysing on a per post basis. Now, having
+as a whole, but we will go back to analyzing on a per post basis. Now, having
 split the posts into lines, we need to unsplit them, and also re-associate
 the other columns from the original `ng20` data:
 
@@ -297,7 +298,7 @@ hist(nwords[nwords <= quantile(nwords, 0.95)], main = "0-95% word count distribu
 
 So 95% of the data contains 250 words or less.
 
-What is this massive document. Let's (carefully) take a look:
+What is this massive document? Let's (carefully) take a look:
 
 ```{r longest document}
 substr(ng20[which.max(nwords), ]$Text, 0, 80)
@@ -449,13 +450,14 @@ and takes up a lot of memory and you have to spend time working out how many
 dimensions to use, which slows things down even more if you don't get it right
 the first time.
 
-So let's use `rnndescent` to find nearest neighbors on the sparse data directly.
+Fortunately, now that `uwot` can use `rnndescent`, we can work on the sparse
+data directly.
 
-## Finding Nearest Neighbors
+## UMAP with NN-Descent
 
-We need to convert the sparse matrix into a format from the
-[Matrix](https://cran.r-project.org/package=Matrix) package that `rnndescent`
-can handle:
+To use `uwot` with sparse data we need to convert the TF-IDF matrix into a 
+format from the [Matrix](https://cran.r-project.org/package=Matrix) package
+that `rnndescent` can handle:
 
 ```{r convert to rnndescent format}
 library(Matrix)
@@ -468,75 +470,76 @@ tfidf_sp <-
   )
 ```
 
-and, following the example in the Python UMAP tutorial, we want to use the 
-Hellinger distance. This show-cases another example of `rnndescent`, which is
-that it implements a lot more distances than most other methods. The Hellinger
-distance, being a divergence is designed to work on probability distributions,
-so I am going to L1-normalize each row of the sparse matrix:
-
-```{r normalize rows}
-l1_normalize <- function(X) {
-  res <- rep(0, nrow(X))
-  dgt <- as(X, "TsparseMatrix")
-  tmp <- tapply(dgt@x, dgt@i, function(x) {
-    sum(abs(x))
-  })
-  res[as.integer(names(tmp)) + 1] <- tmp
-  Diagonal(x = 1 / res) %*% X
-}
-tfidf_spl1 <- l1_normalize(tfidf_sp)
-```
-
-Now we can find the neighbors.
+For historical reasons to do with not breaking backwards compatibility, we can't
+use the `umap` function with sparse input data. Instead we will use the `umap2`
+function, which is a newer version of `umap` but with slightly better defaults
+and which can take sparse matrix input. We also need to load the `rnndescent`
+package.
 
 ```{r install rnndescent}
 install.packages("rnndescent")
 library(rnndescent)
 ```
 
-I will use the brute-force search in `rnndescent` as the dataset is small enough
-for us to handle an exact search comfortably, at least if you have enough cores:
+In terms of non-default options, I'm going to use the `batch = TRUE` setting, 
+a longer than usual optimization, and a non-zero `dens_scale` to model some of
+the original density differences in the data (see the article on
+[LEOPOLD](https://jlmelville.github.io/uwot/articles/leopold.html) for more
+details). I will also save the nearest neighbors with `ret_nn = TRUE` so I can
+compare them with the exact results we will calculate later.
 
-```{r nearest neighbors}
-tfidfl1_hell_bf <-
-  brute_force_knn(
-    tfidf_spl1,
-    k = 15,
-    metric = "hellinger",
-    n_threads = 6,
-    verbose = TRUE
-  )
-```
-
-This took under a minute on my laptop.
-
-## UMAP
-
-At last we can run UMAP. As we have the nearest neighbors data already, that's
-the only input data we need. The other settings ensure we do a slightly longer
-optimization than usual (as we save a bit of time from having already done the
-nearest neighbor search), and that we use
-[LEOPOLD](https://jlmelville.github.io/uwot/articles/leopold.html) to model some
-of the original density differences in the data.
-
-```{r setup}
+```{r umap on sparse}
 library(uwot)
 ng20_umap <-
-  umap(
-    X = NULL,
-    nn_method = tfidfl1_hell_bf,
-    n_sgd_threads = 6,
+  umap2(
+    X = tfidf_sp,
+    nn_method = "nndescent",
+    metric = "hellinger",
     n_epochs = 1000,
     batch = TRUE,
-    init_sdev = "range",
     dens_scale = 0.5,
+    ret_nn = TRUE,
     verbose = TRUE
   )
 ```
+```
+Using nndescent for nearest neighbor search
+UMAP embedding parameters a = 1.577 b = 0.8951
+Read 17666 rows and found 88894 numeric columns
+Using alt metric 'alternative-hellinger' for 'hellinger'
+Initializing neighbors using 'tree' method
+Calculating rp tree k-nearest neighbors with k = 15 n_trees = 17 max leaf size = 15 margin = 'explicit' using 6 threads
+Using angular margin calculation
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Extracting leaf array from forest
+Creating knn using 32172 leaves
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Running nearest neighbor descent for 14 iterations using 6 threads
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Convergence: c = 170 tol = 264.99
+Finished
+Commencing smooth kNN distance calibration using 6 threads with target n_neighbors = 15
+17 smooth knn distance failures
+Initializing from normalized Laplacian + noise (using irlba)
+Range-scaling initial input columns to 0-10
+Commencing optimization for 1000 epochs, with 389106 positive edges using 6 threads
+Using method 'leopold'
+Optimizing with Adam alpha = 1 beta1 = 0.5 beta2 = 0.9 eps = 1e-07
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Optimization finished
+```
 
-If you follow along with the code here, you will not get the same results as me
-when you plot them below, due to the stochastic nature of UMAP. But you should
-see something similar (if you don't, please 
+If you follow along with the code here, you will *not* get the exact same
+results as me when you plot them below, due to the stochastic nature of UMAP.
+But you should see something similar (if you don't, please
 [file an issue](https://github.com/jlmelville/uwot/issues)).
 
 ## Plot the Results
@@ -551,6 +554,7 @@ a similar approach to the Python package
 
 ```{r create palette}
 library(Polychrome)
+set.seed(42)
 
 palette <- as.vector(Polychrome::createPalette(
   length(levels(text_unsplit$Newsgroup)) + 2,
@@ -562,7 +566,7 @@ palette <- as.vector(Polychrome::createPalette(
 I will also rotate the coordinates so they align along the principal axes:
 
 ```{r rotate}
-ng20_umap_rotated <- prcomp(ng20_umap)$x
+ng20_umap_rotated <- prcomp(ng20_umap$embedding)$x
 ```
 
 Ok, now to make the plot with [ggplot2](https://ggplot2.tidyverse.org/):
@@ -572,13 +576,13 @@ library(ggplot2)
 
 ggplot(
   data.frame(ng20_umap_rotated, Newsgroup = text_unsplit$Newsgroup),
-  aes(x = X1, y = X2, color = Newsgroup)
+  aes(x = PC1, y = PC2, color = Newsgroup)
 ) +
   geom_point(alpha = 0.4, size = 0.5) +
   scale_color_manual(values = palette) +
   theme_minimal() +
   labs(
-    title = "Sparse Hellinger 20Newsgroups UMAP",
+    title = "Sparse Hellinger NN-Descent 20Newsgroups UMAP",
     x = "",
     y = "",
     color = "Newsgroup"
@@ -587,9 +591,385 @@ ggplot(
   guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
 ```
 
-![UMAP](img/sparse-data-example/ng20-umap.png)
+![UMAP](img/sparse-data-example/ng20-umap2.png)
 
 Although we can't compare this result too easily with the Python example, as
 that one plots the training and test set separately, and there isn't a legend, I
 think this has done a pretty good job of separating at least some of the 20
 newsgroups.
+
+## Finding Exact Nearest Neighbors
+
+Before `uwot` supported using `rnndescent` internally for sparse data, this
+article documented the process of using `rnndesent` directly with the 20
+Newsgroups data and then integrating that with the `umap` function. This is
+still a perfectly viable approach, especially if you want to use exact nearest
+neighbors. `uwot` uses the nearest neighbor descent method to find approximate
+nearest neighbors, which is faster but not exact. In what follows we'll use
+`rnndescent` to find exact nearest neighbors by a brute force method and then
+see what sort of difference that makes to the UMAP result.
+
+I'll assume you've been following along so far, so that we have the
+L1-normalized TF-IDF matrix `tfidf_spl1` and `rnndescent` loaded. Now let's use
+the brute-force search in `rnndescent`. This dataset is small enough for us to
+handle an exact search comfortably, at least if you have enough cores:
+
+```{r nearest neighbors}
+tfidfl1_hell_bf <-
+  brute_force_knn(
+    tfidf_sp,
+    k = 15,
+    metric = "hellinger",
+    n_threads = 6,
+    verbose = TRUE
+  )
+```
+```
+Using alt metric 'alternative-hellinger' for 'hellinger'
+Calculating brute force k-nearest neighbors with k = 15 using 6 threads
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----]
+***************************************************
+Finished
+```
+
+This took about 35 seconds on my machine, whereas nearest neighbor descent only
+took about 5 seconds. That said, in this case I am happy to pay the
+price of the extra 30 seconds to avoid any issues due to approximation.
+
+## UMAP with Exact Neighbors
+
+We can now run UMAP with the exact neighbors. I will use the same parameters
+in conjunction with `umap2` as I did with the approximate nearest neighbors:
+
+```{r umap with exact nearest neighbors}
+ng20_umap_exact <-
+  umap2(
+    X = NULL,
+    nn_method = tfidfl1_hell_bf,
+    n_epochs = 1000,
+    batch = TRUE,
+    dens_scale = 0.5,
+    verbose = TRUE
+  )
+```
+```
+UMAP embedding parameters a = 1.577 b = 0.8951
+Commencing smooth kNN distance calibration using 6 threads with target n_neighbors = 15
+16 smooth knn distance failures
+Initializing from normalized Laplacian + noise (using irlba)
+Range-scaling initial input columns to 0-10
+Commencing optimization for 1000 epochs, with 377272 positive edges using 6 threads
+Using method 'leopold'
+Optimizing with Adam alpha = 1 beta1 = 0.5 beta2 = 0.9 eps = 1e-07
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Optimization finished
+```
+
+## Plot the Exact Neighbors UMAP Results
+
+```{r plot exact neighbors UMAP}
+ggplot(
+  data.frame(prcomp(ng20_umap_exact)$x, Newsgroup = text_unsplit$Newsgroup),
+  aes(x = PC1, y = PC2, color = Newsgroup)
+) +
+  geom_point(alpha = 0.4, size = 0.5) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "Sparse Hellinger Exact Neighbors 20Newsgroups UMAP",
+    x = "",
+    y = "",
+    color = "Newsgroup"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+```
+
+![UMAP-exact-15](img/sparse-data-example/ng20-umap2-exact.png)
+
+Actually, although the plots share a lot of the same features there are some
+noticeable differences to some of the cluster placements. 
+
+## Hubness
+
+What's going on here? If you want, you can re-run the UMAP with the exact
+nearest neighbors a few times, which will tell us how much the result varies due
+to the random selection during negative sampling. I will leave that as an
+exercise for you. Having tried it myself, the plot is pretty stable (the
+`sci.space` cluster moves between two locations). So the reason for the
+differences is going to be down to the performance of the approximate nearest
+neighbors. As we have gone to the trouble of generating the exact nearest
+neighbors we can answer the question of how well did we actually do in
+reproducing the exact neighbors? `rnndescent` has a `neighbor_overlap` function
+we can use which will return a value of 0 (no overlap between two sets of
+neighbors) and 1 (perfect overlap):
+
+```{r compare overlap}
+neighbor_overlap(ng20_umap$nn$hellinger, tfidfl1_hell_bf)
+```
+```
+[1] 0.7484169
+```
+
+So about 75% accuracy, that's less than the 90% that I would usually be happier
+with. I'm not totally surprised as high dimensional datasets tend to contain
+"hubs" (items which appear on the nearest neighbor lists of many other items)
+and these tend to make it hard for any approximate nearest neighbor method to do
+a good exploration. Does this combination of dataset, `n_neighbors` and `metric`
+result in the neighbors having a hub. Once again `rnndescent` can help us with
+its `k_occur` function which will count the k-occurrence for each item: the
+number of times an item appears in the nearest neighbor lists of other items
+(aka the number of reverse neighbors). The hubness for a dataset can be defined
+as the maximum number of times any item appears in the k-occurrence list, and
+I am going to normalize that with respect to `n_neighbors`:
+
+```{r hubness}
+tfidfl1_hell_bf |> k_occur() |> max() / 15
+```
+```
+20.13333
+```
+
+A dataset where each item gets its fair share of reverse neighbors would result
+in a maximum k-occurrence of `n_neighbors`, or in this case a normalized hubness
+of 1. So we are at a much larger value than that. My own personal experience is
+that if the normalized hubness exceeds 10, then approximate nearest neighbors
+methods will struggle to do well, at least if you are looking for relatively low
+values of `n_neighbors` with default settings. Incidentally, you don't need the
+exact nearest neighbors to detect hubness, the approximate results will also act
+as a good diagnostic:
+
+```{r hubness with approximate}
+ng20_umap$nn$hellinger |> k_occur() |> max() / 15
+```
+```
+30.46667
+```
+
+Not necessarily good at reproducing the result from the exact neighbors, but it
+will certainly tell you that something is up.
+
+## UMAP with More Neighbors
+
+So what are we going to do about this? In these cases, usually increasing
+`n_neighbors` helps. I'm going to look at `n_neighbors = 50`. We will also want
+the equivalent brute force results to see if it helped:
+
+```{r more exact neighbors}
+tfidfl1_hell_bf_50 <-
+    brute_force_knn(
+        tfidf_sp,
+        k = 50,
+        metric = "hellinger",
+        n_threads = 6,
+        verbose = TRUE
+    )
+```
+
+Let's see what's up with the hubness:
+
+```{r hubness with more exact}
+tfidfl1_hell_bf_50 |> k_occur() |> max() / 50
+```
+```
+[1] 20.1
+```
+
+Not that different to the `n_neighbors = 15` result, but I have more confidence
+that nearest neighbor descent will be able to handle this level of hubness given
+the larger `n_neighbors` value. But let's find out.
+
+```{r umap with more approximate neighbors}
+ng20_umap_50 <-
+    umap2(
+        X = tfidf_sp,
+        nn_method = "nndescent",
+        metric = "hellinger",
+        n_neighbors = 50,
+        n_epochs = 1000,
+        batch = TRUE,
+        dens_scale = 0.5,
+        ret_nn = TRUE,
+        verbose = TRUE
+    )
+```
+
+```{r hubness with more approximate}
+ng20_umap_50$nn$hellinger |> k_occur() |> max() / 50
+```
+```
+[1] 21.12
+```
+
+A similar level of hubness reported, but more importantly, what's the accuracy
+like?
+
+```{r compare overlap with more}
+neighbor_overlap(ng20_umap_50$nn$hellinger, tfidfl1_hell_bf_50)
+```
+```
+[1] 0.9553753
+```
+
+96%! Much better. Let's see how the UMAP plot looks:
+
+```{r ggplot with more}
+ggplot(
+  data.frame(prcomp(ng20_umap_50$embedding)$x, Newsgroup = text_unsplit$Newsgroup),
+  aes(x = PC1, y = PC2, color = Newsgroup)
+) +
+  geom_point(alpha = 0.4, size = 0.5) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "Sparse Hellinger Approximate 50-Neighbors 20Newsgroups UMAP",
+    x = "",
+    y = "",
+    color = "Newsgroup"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+```
+
+![UMAP-50](img/sparse-data-example/ng20-umap2-50.png)
+
+Well, the clusters have spread out a bit (expected due to the 3-fold increase
+in `n_neighbors`) but they have also continued to move around a bit compared
+to the `n_neighbors = 15` result. Hmm, let's see if at least we have agreement
+with the exact case for `n_neighbors = 50`:
+
+```{r UMAP on exact 50}
+ng20_umap_exact_50 <-
+    umap2(
+        X = NULL,
+        nn_method = tfidfl1_hell_bf_50,
+        n_epochs = 1000,
+        batch = TRUE,
+        dens_scale = 0.5,
+        verbose = TRUE
+    )
+
+ggplot(
+    data.frame(prcomp(ng20_umap_exact_50)$x, Newsgroup = text_unsplit$Newsgroup),
+    aes(x = PC1, y = PC2, color = Newsgroup)
+) +
+    geom_point(alpha = 0.4, size = 0.5) +
+    scale_color_manual(values = palette) +
+    theme_minimal() +
+    labs(
+        title = "Sparse Hellinger Exact 50-Neighbors 20Newsgroups UMAP",
+        x = "",
+        y = "",
+        color = "Newsgroup"
+    ) +
+    theme(legend.position = "right") +
+    guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+```
+
+![UMAP-exact-50](img/sparse-data-example/ng20-umap2-exact-50.png)
+
+Again, some of the clusters are on the move compared to the approximate case.
+It seems that the locations of `sci.crypt` and the
+`rec.sports.baseball`/`rec.sports.hockey` pair are particularly sensitive.
+
+## UMAP with Even More Neighbors
+
+The next step would be to increase `n_neighbors` even further and see if results
+are more stable. The maximum I usually consider is `n_neighbors = 150`: this
+is the sort of number that would be used by methods like t-SNE with a fairly
+large perplexity of 50. Fortunately, in my testing the results for this
+value of `n_neighbors` actually *are* stable so we don't need to go higher this
+time. To get something that visually resembles the original `n_neighbors = 15`
+result, my strategy is to run UMAP with progressively smaller values of
+`n_neighbors` using the output of the previous run as the initialization. This
+isn't as time consuming as it could be because we only need to do the nearest
+neighbor search once and the optimizations before the final step can use the 
+faster t-UMAP gradient, which will be used by `umap2` if it detects `a = 1` 
+and `b = 1` being passed. The following uses `n_neighbors = 150`, 
+`n_neighbors = 50` and then finished off at `n_neighbors = 15`:
+
+```{r 150-to-15 UMAP}
+ng20_umap_150 <- umap2(
+  X = tfidf_sp,
+  nn_method = "nndescent",
+  metric = "hellinger",
+  n_epochs = 1000,
+  batch = TRUE,
+  verbose = TRUE,
+  n_neighbors = 150,
+  a = 1,
+  b = 1,
+  ret_nn = TRUE
+)
+
+ng20_umap_150_50 <- umap2(
+  X = tfidf_sp,
+  nn_method = list(
+    idx = ng20_umap_150$nn$hellinger$idx[, 1:50],
+    dist = ng20_umap_150$nn$hellinger$dist[, 1:50]
+  ),
+  n_epochs = 1000,
+  batch = TRUE,
+  verbose = TRUE,
+  a = 1,
+  b = 1,
+  init = ng20_umap_150$embedding
+)
+
+ng20_umap_150_50_15 <- umap2(
+  X = tfidf_sp,
+  nn_method = list(
+    idx = ng20_umap_150$nn$hellinger$idx[, 1:15],
+    dist = ng20_umap_150$nn$hellinger$dist[, 1:15]
+  ),
+  n_epochs = 1000,
+  batch = TRUE,
+  verbose = TRUE,
+  dens_scale = 0.5,
+  init = ng20_umap_150_50
+)
+ggplot(
+    data.frame(prcomp(ng20_umap_150_50_15)$x, Newsgroup = text_unsplit$Newsgroup),
+    aes(x = PC1, y = PC2, color = Newsgroup)
+) +
+    geom_point(alpha = 0.4, size = 0.5) +
+    scale_color_manual(values = palette) +
+    theme_minimal() +
+    labs(
+        title = "Sparse Hellinger Exact 150-to-15 20Newsgroups UMAP",
+        x = "",
+        y = "",
+        color = "Newsgroup"
+    ) +
+    theme(legend.position = "right") +
+    guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+```
+
+![UMAP-150-15](img/sparse-data-example/ng20-umap2-150-15.png)
+This strategy can work well if you can find a suitable starting value for
+`n_neighbors` that isn't too onerous. Bear in mind that quite apart from the
+computational cost of finding a large number of neighbors and the consequent
+increase in number of edges that need optimizing, a more "global" setting is not
+always better as you could be short-circuiting the manifold structure of the
+data. It seems to have worked out in this case, though, and repeated runs give
+a layout which is much more stable than the original `n_neighbors = 15` case.
+
+## Conclusion
+
+If you install `rnndescent` and use the `umap2` function, it's possible to embed
+sparse high-dimensional datasets using UMAP and you can even use relatively
+exotic metrics like Hellinger divergence.
+
+Be aware that high-dimensional datasets can contain hubs. For low values of
+`n_neighbors`, you may not get as high nearest neighbor accuracies as you are
+used to. `rnndescent` has functions which can help detect hubness. Increasing
+`n_neighbors` can help, but you should still be wary of over-interpreting
+the relative positions of clusters in the output. Yes, I know everyone says this
+but it bears repeating because the temptation is always there. I recommend
+re-running your UMAP results multiple times with any given settings, even if
+you have exact nearest neighbors, and you should also repeat with different
+values of `n_neighbors` (e.g. `50` and/or `150`). "Annealing" the `n_neighbors`
+value down in a series of optimizations can work out well.

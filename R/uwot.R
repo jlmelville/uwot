@@ -3057,7 +3057,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  dens_scale = NULL,
                  is_similarity_graph = FALSE,
                  seed = NULL,
-                 nn_args = list()) {
+                 nn_args = list(),
+                 sparse_X_is_distance_matrix = TRUE) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -3209,7 +3210,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_vertices <- attr(X, "Size")
     tsmessage("Read ", n_vertices, " rows")
     Xnames <- labels(X)
-  } else if (is_sparse_matrix(X)) {
+  } else if (is_sparse_matrix(X) && sparse_X_is_distance_matrix) {
     if (ret_model) {
       stop("Can only create models with dense matrix or data frame input")
     }
@@ -3223,7 +3224,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   } else {
     cat_ids <- NULL
     norig_col <- ncol(X)
-    if (methods::is(X, "data.frame") || methods::is(X, "matrix")) {
+    if (methods::is(X, "data.frame") || methods::is(X, "matrix") || is_sparse_matrix(X)) {
       cat_res <- find_categoricals(metric)
       metric <- cat_res$metrics
       cat_ids <- cat_res$categoricals
@@ -3348,17 +3349,31 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     need_sigma <- FALSE
   } else {
     need_sigma <- ret_sigma || ret_localr || !is.null(dens_scale)
-    d2sr <- data2set(X, Xcat, n_neighbors, metrics, nn_method,
-      n_trees, search_k,
+    d2sr <- data2set(
+      X,
+      Xcat,
+      n_neighbors,
+      metrics,
+      nn_method,
+      n_trees,
+      search_k,
       method,
-      set_op_mix_ratio, local_connectivity, bandwidth,
-      perplexity, kernel, need_sigma,
-      n_threads, grain_size,
+      set_op_mix_ratio,
+      local_connectivity,
+      bandwidth,
+      perplexity,
+      kernel,
+      need_sigma,
+      n_threads,
+      grain_size,
       ret_model,
-      pca = pca, pca_center = pca_center, pca_method = pca_method,
+      pca = pca,
+      pca_center = pca_center,
+      pca_method = pca_method,
       n_vertices = n_vertices,
       nn_args = nn_args,
       tmpdir = tmpdir,
+      sparse_is_distance = sparse_X_is_distance_matrix,
       verbose = verbose
     )
   }
@@ -4279,17 +4294,30 @@ x2nv <- function(X) {
   n_vertices
 }
 
-data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
-                     n_trees, search_k,
+data2set <- function(X,
+                     Xcat,
+                     n_neighbors,
+                     metrics,
+                     nn_method,
+                     n_trees,
+                     search_k,
                      method,
-                     set_op_mix_ratio, local_connectivity, bandwidth,
-                     perplexity, kernel, ret_sigma,
-                     n_threads, grain_size,
+                     set_op_mix_ratio,
+                     local_connectivity,
+                     bandwidth,
+                     perplexity,
+                     kernel,
+                     ret_sigma,
+                     n_threads,
+                     grain_size,
                      ret_model,
                      n_vertices = x2nv(X),
                      tmpdir = tempdir(),
-                     pca = NULL, pca_center = TRUE, pca_method = "irlba",
+                     pca = NULL,
+                     pca_center = TRUE,
+                     pca_method = "irlba",
                      nn_args = list(),
+                     sparse_is_distance = TRUE,
                      verbose = FALSE) {
   V <- NULL
   nns <- list()
@@ -4425,18 +4453,27 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
       n_neighbors <- NULL
     }
 
-    x2set_res <- x2set(Xsub, n_neighbors, metric,
+    x2set_res <- x2set(
+      Xsub,
+      n_neighbors,
+      metric,
       nn_method = nn_sub,
-      n_trees, search_k,
+      n_trees,
+      search_k,
       method,
-      set_op_mix_ratio, local_connectivity, bandwidth,
-      perplexity, kernel,
+      set_op_mix_ratio,
+      local_connectivity,
+      bandwidth,
+      perplexity,
+      kernel,
       ret_sigma,
-      n_threads, grain_size,
+      n_threads,
+      grain_size,
       ret_model,
       n_vertices = n_vertices,
       nn_args = nn_args,
       tmpdir = tmpdir,
+      sparse_is_distance = sparse_is_distance,
       verbose = verbose
     )
     Vblock <- x2set_res$V
@@ -4472,13 +4509,19 @@ data2set <- function(X, Xcat, n_neighbors, metrics, nn_method,
   res
 }
 
-x2nn <- function(X, n_neighbors, metric, nn_method,
-                 n_trees, search_k,
+x2nn <- function(X,
+                 n_neighbors,
+                 metric,
+                 nn_method,
+                 n_trees,
+                 search_k,
                  tmpdir = tempdir(),
-                 n_threads, grain_size,
+                 n_threads,
+                 grain_size,
                  ret_model,
                  n_vertices = x2nv(X),
                  nn_args = list(),
+                 sparse_is_distance = TRUE,
                  verbose = FALSE) {
   if (is.list(nn_method)) {
     validate_nn(nn_method, n_vertices)
@@ -4496,13 +4539,20 @@ x2nn <- function(X, n_neighbors, metric, nn_method,
     if (nn_method == "fnn" && ret_model) {
       stop("nn_method = 'FNN' is incompatible with ret_model = TRUE")
     }
-    nn <- find_nn(X, n_neighbors,
-      method = nn_method, metric = metric,
-      n_trees = n_trees, search_k = search_k,
+    nn <- find_nn(
+      X,
+      n_neighbors,
+      method = nn_method,
+      metric = metric,
+      n_trees = n_trees,
+      search_k = search_k,
       nn_args = nn_args,
       tmpdir = tmpdir,
-      n_threads = n_threads, grain_size = grain_size,
-      ret_index = ret_model, verbose = verbose
+      n_threads = n_threads,
+      grain_size = grain_size,
+      ret_index = ret_model,
+      sparse_is_distance = sparse_is_distance,
+      verbose = verbose
     )
   }
   nn
@@ -4580,17 +4630,26 @@ nn2set <- function(method, nn,
   res
 }
 
-x2set <- function(X, n_neighbors, metric, nn_method,
-                  n_trees, search_k,
+x2set <- function(X,
+                  n_neighbors,
+                  metric,
+                  nn_method,
+                  n_trees,
+                  search_k,
                   method,
-                  set_op_mix_ratio, local_connectivity, bandwidth,
-                  perplexity, kernel,
+                  set_op_mix_ratio,
+                  local_connectivity,
+                  bandwidth,
+                  perplexity,
+                  kernel,
                   ret_sigma,
-                  n_threads, grain_size,
+                  n_threads,
+                  grain_size,
                   ret_model,
                   n_vertices = x2nv(X),
                   tmpdir = tempdir(),
                   nn_args = list(),
+                  sparse_is_distance = TRUE,
                   verbose = FALSE) {
   if (is_sparse_matrix(nn_method)) {
     nn <- nn_method
@@ -4601,16 +4660,20 @@ x2set <- function(X, n_neighbors, metric, nn_method,
       stop("Sparse distance matrix must have same dimensions as input data")
     }
   } else {
-    nn <- x2nn(X,
+    nn <- x2nn(
+      X,
       n_neighbors = n_neighbors,
       metric = metric,
       nn_method = nn_method,
-      n_trees = n_trees, search_k = search_k,
+      n_trees = n_trees,
+      search_k = search_k,
       tmpdir = tmpdir,
-      n_threads = n_threads, grain_size = grain_size,
+      n_threads = n_threads,
+      grain_size = grain_size,
       ret_model = ret_model,
       nn_args = nn_args,
       n_vertices = n_vertices,
+      sparse_is_distance = sparse_is_distance,
       verbose = verbose
     )
     if (any(is.infinite(nn$dist))) {
@@ -4619,10 +4682,17 @@ x2set <- function(X, n_neighbors, metric, nn_method,
   }
   gc()
 
-  nn2set_res <- nn2set(method, nn,
-    set_op_mix_ratio, local_connectivity, bandwidth,
-    perplexity, kernel, ret_sigma,
-    n_threads, grain_size,
+  nn2set_res <- nn2set(
+    method,
+    nn,
+    set_op_mix_ratio,
+    local_connectivity,
+    bandwidth,
+    perplexity,
+    kernel,
+    ret_sigma,
+    n_threads,
+    grain_size,
     verbose = verbose
   )
   V <- nn2set_res$V
