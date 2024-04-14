@@ -704,7 +704,7 @@ umap2 <-
            grain_size = 1,
            tmpdir = tempdir(),
            verbose = getOption("verbose", TRUE),
-           batch = FALSE,
+           batch = TRUE,
            opt_args = NULL,
            epoch_callback = NULL,
            pca_method = NULL,
