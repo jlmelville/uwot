@@ -53,7 +53,8 @@ that feature, so this is a good trade-off.
 * If you set `a = 1, b = 1` (and you don't specify `dens_scale`), then the
 faster `tumap` gradient will be used.
 
-These are not big changes so don't expect large differences in behavior. I'll
+These are not big changes so don't expect large differences in behavior, but I
+do strongly recommend installing (and loading) `RcppHNSW` and `rnndescent`. I'll
 use the MNIST digits for a comparison. Use the `snedata` package from github for
 this:
 
@@ -74,11 +75,23 @@ Now let's run `umap` and `umap2` on the MNIST data using their defaults.
 
 ```{r umap}
 library(uwot)
+
 set.seed(42)
 mnist_umap <- umap(mnist)
 ```
 
+Install `RcppHNSW` and `rnndescent` if you haven't already.
+
+```{r install RcppHNSW and rnndescent}
+install.packages(c("RcppHNSW", "rnndescent"))
+```
+
+With these libraries installed `umap2` will use `RcppHNSW` by default.
+
 ```{r umap2}
+library(RcppHNSW)
+library(rnndescent)
+
 set.seed(42)
 mnist_umap2 <- umap2(mnist)
 ```
