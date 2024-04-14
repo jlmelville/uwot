@@ -28,6 +28,7 @@ articles:
 - title: Articles
   desc: More details on some of what `uwot` can do.
   contents:
+  - articles/umap2
   - articles/mixed-data-types
   - articles/fast-sgd
   - articles/init
