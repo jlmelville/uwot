@@ -1,4 +1,4 @@
-# uwot (development version)
+# uwot 0.2.0
 
 ## New features:
 
