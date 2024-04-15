@@ -1,6 +1,6 @@
-## New minor release
+## Resubmission
 
-This is a new minor release with new features and bug fixes.
+This is a resubmission to reformat arxiv links to doi format.
 
 ## Test environments
 
