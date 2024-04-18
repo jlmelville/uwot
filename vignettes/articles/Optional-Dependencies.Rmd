@@ -1,0 +1,60 @@
+---
+title: "Optional Dependencies"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+There are a variety of packages that `uwot` will make use of if you install them
+(and load them), but that you don't *need* so are optional. These include:
+
+* [RSpectra](https://cran.r-project.org/package=RSpectra) -- used for the 
+default spectral initialization. If not installed, then the
+[irlba](https://cran.r-project.org/package=irlba) package is used instead. In
+most cases `irlba` does a fine job, but it's not as fast as `RSpectra` for
+spectral initialization because `irlba` isn't designed for quite the same use
+case as `RSpectra`.
+* [RcppHNSW](https://cran.r-project.org/package=RcppHNSW) -- used for nearest 
+neighbor search. Once installed and loaded, you can specify `nn_method = "hnsw"`
+in `uwot::umap` as long as your `metric` is either `"euclidean"`, `"cosine"` or
+`"correlation"`. This should be a bit faster than the default of Annoy in most
+cases. If you use `uwot::umap2` then you will get HNSW by default without having
+to specify `nn_method`.
+* [rnndescent](https://cran.r-project.org/package=rnndescent)  -- used for 
+nearest neighbor search. Once installed and loaded, you can specify `nn_method =
+"nndescent"` in `uwot::umap`. `rnndescent` can handle many metrics, so see its
+[documentation](https://jlmelville.github.io/rnndescent/articles/metrics.html)
+for more information. If you use `uwot::umap2` and do not load `RcppHNSW`, then
+you will use this method by default without having to specify `nn_method`.
+You can also use sparse matrices as input to `uwot::umap2`. See the
+[sparse data article](https://jlmelville.github.io/uwot/articles/sparse-data-example.html)
+for more details.
+
+My recommendation would be to install all of these (or at least `RSpectra` and 
+`RcppHNSW`):
+
+
+```{r, install dependencies}
+install.packages(c("RSpectra", "RcppHNSW", "rnndescent"))
+```
+
+and then have them loaded whenever you are using `uwot`.
+
+```{r, load dependencies}
+library(RSpectra)
+library(RcppHNSW)
+library(rnndescent)
+library(uwot)
+```
+
+The following UMAP run will then use `RcppHNSW` and `RSpectra` (versus
+`RcppAnnoy` and `irlba`) without you having to specify anything:
+
+```{r, UMAP using optional dependencies}
+iris_umap <- umap2(iris, n_neighbors = 30)
+```
