@@ -19,11 +19,21 @@ method. Translated from the
 
 ## News
 
-*November 26 2023* Happy 1 million CRAN downloads to `uwot`. To celebrate 
-(actually it's just a coincidence) I have reorganized the horror-show that was
-the sprawling README into actual articles, via the fantastic
-[pkgdown](https://pkgdown.r-lib.org/) package. Find it at
-<https://jlmelville.github.io/uwot/>.
+*April 18 2024* Version 0.2.1 of `uwot` has been released to CRAN. Some features 
+to be aware of: [RcppHNSW](https://cran.r-project.org/package=rnndescent) and
+[rnndescent](https://cran.r-project.org/package=rnndescent) are now supported as
+optional dependencies. If you install and load them, you can use them as an
+alternative to RcppAnnoy in the nearest neighbor search and should be faster.
+Also, a new `umap2` function has been added, with updated defaults compared to
+`umap`. Please see the updated and new articles on
+[HNSW](https://jlmelville.github.io/uwot/articles/hnsw-umap.html), 
+[rnndescent](https://jlmelville.github.io/uwot/articles/rnndescent-umap.html),
+[working with sparse data](https://jlmelville.github.io/uwot/articles/sparse-data-example.html)
+and [umap2](https://jlmelville.github.io/uwot/articles/umap2.html). I consider
+this worthy of moving from `0.1.x` to `0.2.x`, but in the interests of full
+disclosure, on-going
+[irlba problems](https://github.com/jlmelville/uwot/issues/115) has caused a
+CRAN check failure, so we might be onto 0.2.2 sooner than I'd like.
 
 ## Installing
 
@@ -82,10 +92,20 @@ plot(
   ylab = ""
 )
 
+# I recommend the following optional packages
+# for faster or more flexible nearest neighbor search:
+install.packages(c("RcppHNSW", "rnndescent"))
+# for faster spectral initialization
+install.packages("RSpectra")
+
 # Installing RcppHNSW will allow the use of the usually faster HNSW method:
-# install.packages("RcppHNSW")
 mnist_umap_hnsw <- umap(mnist, n_neighbors = 15, min_dist = 0.001, 
                         nn_method = "hnsw")
+# nndescent is also available
+mnist_umap_nnd <- umap(mnist, n_neighbors = 15, min_dist = 0.001, 
+                       nn_method = "nndescent")
+# umap2 will choose HNSW by default if available
+mnist_umap2 <- umap2(mnist)
 ```
 
 ![MNIST UMAP](man/figures/mnist-r.png)
