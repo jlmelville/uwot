@@ -84,6 +84,20 @@
 the top of the <code>README.md</code> file for the package. When they
 aren’t new any more, they will get moved here. You should look at the <a href="https://jlmelville.github.io/uwot/news/index.html">Changelog</a>
 for fuller details.</p>
+<p><em>April 18 2024</em> Version 0.2.1 of <code>uwot</code> has been
+released to CRAN. Some features to be aware of: <a href="https://cran.r-project.org/package=rnndescent" class="external-link">RcppHNSW</a> and <a href="https://cran.r-project.org/package=rnndescent" class="external-link">rnndescent</a> are
+now supported as optional dependencies. If you install and load them,
+you can use them as an alternative to RcppAnnoy in the nearest neighbor
+search and should be faster. Also, a new <code>umap2</code> function has
+been added, with updated defaults compared to <code>umap</code>. Please
+see the updated and new articles on <a href="https://jlmelville.github.io/uwot/articles/hnsw-umap.html">HNSW</a>,
+<a href="https://jlmelville.github.io/uwot/articles/rnndescent-umap.html">rnndescent</a>,
+<a href="https://jlmelville.github.io/uwot/articles/sparse-data-example.html">working
+with sparse data</a> and <a href="https://jlmelville.github.io/uwot/articles/umap2.html">umap2</a>.
+I consider this worthy of moving from <code>0.1.x</code> to
+<code>0.2.x</code>, but in the interests of full disclosure, on-going <a href="https://github.com/jlmelville/uwot/issues/115" class="external-link">irlba problems</a>
+has caused a CRAN check failure, so we might be onto 0.2.2 sooner than
+I’d like.</p>
 <p><em>November 26 2023</em> Happy 1 million CRAN downloads to
 <code>uwot</code>. To celebrate (actually it’s just a coincidence) I
 have reorganized the horror-show that was the sprawling README into
