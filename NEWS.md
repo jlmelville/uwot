@@ -1,5 +1,18 @@
 # uwot (development version)
 
+## Bug fixes and minor improvements
+
+* `RSpectra` is now a required dependency (again). It was a required dependency
+up until version 0.1.12, when it became optional (`irlba` was used in its
+place). However, problems with interactions of the current version of `irlba`
+with an ABI change in the `Matrix` package means that it's hard for downstream
+packages and users to build `uwot` without re-installing `Matrix` and `irlba`
+from source, which may not be an option for some people. Also it was causing a
+CRAN check error. I have changed some tests, examples and vignettes to use
+`RSpectra` explicitly, and to only test `irlba` code-paths where necessary. See
+<https://github.com/jlmelville/uwot/issues/115> and links therein for more
+details.
+
 # uwot 0.2.1
 
 ## New features:
