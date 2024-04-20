@@ -1,4 +1,5 @@
 library(uwot)
+library(RSpectra)
 context("Spectral")
 
 test_that("1 dimensional output gives a matrix", {

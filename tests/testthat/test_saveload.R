@@ -1,4 +1,5 @@
 library(uwot)
+library(RSpectra)
 context("load/save model")
 
 test_that("can save and load simple model", {

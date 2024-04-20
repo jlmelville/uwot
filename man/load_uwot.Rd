@@ -22,6 +22,8 @@ The model saved at \code{file}, for use with
 Functions to write a UMAP model to a file, and to restore.
 }
 \examples{
+library(RSpectra)
+
 iris_train <- iris[c(1:10, 51:60), ]
 iris_test <- iris[100:110, ]
 

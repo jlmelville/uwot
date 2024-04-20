@@ -4000,6 +4000,8 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
 #'   used during loading of the model. This directory cannot be removed until
 #'   this model has been unloaded by using \code{\link{unload_uwot}}.
 #' @examples
+#' library(RSpectra)
+#'
 #' iris_train <- iris[c(1:10, 51:60), ]
 #' iris_test <- iris[100:110, ]
 #'

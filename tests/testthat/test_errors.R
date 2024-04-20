@@ -1,4 +1,5 @@
 library(uwot)
+library(RSpectra)
 context("Input validation")
 
 expect_error(umap(X = list(X = "bad", Y = "wrong", nn = "what")), "data format")

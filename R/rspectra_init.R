@@ -28,7 +28,17 @@ rspectra_eigs_sym <- function(L, ndim, verbose = FALSE) {
         tsmessage("RSpectra calculation failed, retrying with shifted")
       }
     ))
-  if (is.null(res) || ncol(res$vectors) < ndim) {
+  if (is.null(res) ||
+    !is.list(res) ||
+    !"vectors" %in% names(res) ||
+    is.null(res$vectors) ||
+    tryCatch(
+      is.na(ncol(res$vectors)),
+      error = function(e) {
+        TRUE
+      }
+    ) ||
+    ncol(res$vectors) < ndim) {
     suppressWarnings(res <- tryCatch(
       RSpectra::eigs_sym(
         L,

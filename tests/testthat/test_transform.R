@@ -1,4 +1,5 @@
 library(uwot)
+library(RSpectra)
 context("Transform")
 
 diagonal1s <- as(Matrix::drop0(diag(1, nrow(V_asymm), ncol(V_asymm))), "generalMatrix")

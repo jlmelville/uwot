@@ -1,4 +1,5 @@
 library(uwot)
+library(RSpectra)
 context("neighbors")
 
 i10nn4dist <- matrix(c(

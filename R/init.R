@@ -37,7 +37,17 @@ rspectra_laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
   # and because A is symmetric, they're equivalent
   M <- A / colSums(A)
   res <- rspectra_eigs_asym(M, ndim)
-  if (is.null(res) || ncol(res$vectors) < ndim) {
+  if (is.null(res) ||
+    !is.list(res) ||
+    !"vectors" %in% names(res) ||
+    is.null(res$vectors) ||
+    tryCatch(
+      is.na(ncol(res$vectors)),
+      error = function(e) {
+        TRUE
+      }
+    ) ||
+    ncol(res$vectors) < ndim) {
     message(
       "Laplacian Eigenmap failed to converge, ",
       "using random initialization instead"
@@ -125,7 +135,17 @@ rspectra_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   L <- form_normalized_laplacian(A)
   res <- rspectra_eigs_sym(L, ndim, verbose = verbose)
 
-  if (is.null(res) || ncol(res$vectors) < ndim) {
+  if (is.null(res) ||
+      !is.list(res) ||
+      !"vectors" %in% names(res) ||
+      is.null(res$vectors) ||
+      tryCatch(
+        is.na(ncol(res$vectors)),
+        error = function(e) {
+          TRUE
+        }
+      ) ||
+      ncol(res$vectors) < ndim) {
     message(
       "Spectral initialization failed to converge, ",
       "using random initialization instead"
@@ -215,9 +235,17 @@ irlba_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   # Laplacian and look for largest eigenvalues
   L <- form_modified_laplacian(A)
   res <- irlba_eigs_sym(L, ndim, smallest = FALSE)
-  # shift back the eigenvalues
-  res$values <- 2.0 - res$values
-  if (is.null(res) || ncol(res$vectors) < ndim) {
+  if (is.null(res) ||
+    !is.list(res) ||
+    !"vectors" %in% names(res) ||
+    is.null(res$vectors) ||
+    tryCatch(
+      is.na(ncol(res$vectors)),
+      error = function(e) {
+        TRUE
+      }
+    ) ||
+    ncol(res$vectors) < ndim) {
     message(
       "Spectral initialization failed to converge, ",
       "using random initialization instead"
@@ -225,6 +253,8 @@ irlba_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     n <- nrow(A)
     return(rand_init(n, ndim))
   }
+  # shift back the eigenvalues
+  res$values <- 2.0 - res$values
   sort_eigenvectors(res, ndim)
 }
 

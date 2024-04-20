@@ -1,4 +1,5 @@
 library(uwot)
+library(RSpectra)
 context("normalized laplacian")
 
 # this exists as a separate file only because it's easier to comment out as
@@ -29,12 +30,14 @@ test_that("normalized laplacian", {
   res <- normalized_laplacian_init(sparse_m)
   expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
 
-  # ensure irlba code path gets tested
-  res <- irlba_tsvd_normalized_laplacian_init(sparse_m)
-  expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
+  # 115: ensure irlba code path gets tested if we can avoid Matrix ABI issue
+  if (Matrix::Matrix.Version()$package >= "1.6.3") {
+    res <- irlba_tsvd_normalized_laplacian_init(sparse_m)
+    expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
 
-  res <- irlba_normalized_laplacian_init(sparse_m)
-  expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
+    res <- irlba_normalized_laplacian_init(sparse_m)
+    expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
+  }
 })
 
 test_that("laplacian eigenmap", {

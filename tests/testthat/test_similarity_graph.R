@@ -1,4 +1,5 @@
 library(uwot)
+library(RSpectra)
 context("similarity graph")
 
 # #96: more convenient way to just get the high dimensional similarity graph
