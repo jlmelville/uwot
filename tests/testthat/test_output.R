@@ -309,11 +309,15 @@ res <- umap(iris10,
 expect_ok_matrix(res, nc = 1)
 
 # enforce irlba for spectral initialization even if RSpectra is present
-res <- umap(iris10,
-  n_components = 1, n_neighbors = 4, n_epochs = 2,
-  n_threads = 1, verbose = FALSE, init = "irlba_spectral"
-)
-expect_ok_matrix(res, nc = 1)
+# 115: ensure irlba code path gets tested if we can avoid Matrix ABI issue
+if (exists("Matrix.Version", envir = asNamespace("Matrix")) &&
+  Matrix::Matrix.Version()$package >= "1.6.3") {
+  res <- umap(iris10,
+    n_components = 1, n_neighbors = 4, n_epochs = 2,
+    n_threads = 1, verbose = FALSE, init = "irlba_spectral"
+  )
+  expect_ok_matrix(res, nc = 1)
+}
 
 # Supervised
 set.seed(1337)
