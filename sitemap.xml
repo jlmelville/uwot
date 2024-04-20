@@ -7,9 +7,6 @@
     <loc>https://jlmelville.github.io/uwot/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>https://jlmelville.github.io/uwot/articles/Optional-Dependencies.html</loc>
-  </url>
-  <url>
     <loc>https://jlmelville.github.io/uwot/articles/abparams.html</loc>
   </url>
   <url>
@@ -38,6 +35,9 @@
   </url>
   <url>
     <loc>https://jlmelville.github.io/uwot/articles/nearest-neighbors-format.html</loc>
+  </url>
+  <url>
+    <loc>https://jlmelville.github.io/uwot/articles/optional-dependencies.html</loc>
   </url>
   <url>
     <loc>https://jlmelville.github.io/uwot/articles/performance.html</loc>

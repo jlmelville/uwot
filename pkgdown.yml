@@ -11,7 +11,7 @@ articles:
   metric-learning: metric-learning.html
   mixed-data-types: mixed-data-types.html
   nearest-neighbors-format: nearest-neighbors-format.html
-  Optional-Dependencies: Optional-Dependencies.html
+  optional-dependencies: optional-dependencies.html
   performance: performance.html
   pycompare: pycompare.html
   reproducibility: reproducibility.html
@@ -24,7 +24,7 @@ articles:
   umap2: umap2.html
   uwot: uwot.html
   whatsnew: whatsnew.html
-last_built: 2024-04-20T21:32Z
+last_built: 2024-04-20T21:48Z
 urls:
   reference: https://jlmelville.github.io/uwot/reference
   article: https://jlmelville.github.io/uwot/articles
