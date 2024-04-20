@@ -29,7 +29,8 @@ Imports:
     irlba,
     methods,
     Rcpp,
-    RcppAnnoy (>= 0.0.17)
+    RcppAnnoy (>= 0.0.17),
+    RSpectra
 Suggests: 
     bigstatsr,
     covr,
@@ -37,7 +38,6 @@ Suggests:
     RcppHNSW,
     rmarkdown,
     rnndescent,
-    RSpectra,
     testthat
 LinkingTo: 
     dqrng,
