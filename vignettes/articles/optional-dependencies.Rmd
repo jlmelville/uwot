@@ -13,12 +13,6 @@ knitr::opts_chunk$set(
 There are a variety of packages that `uwot` will make use of if you install them
 (and load them), but that you don't *need* so are optional. These include:
 
-* [RSpectra](https://cran.r-project.org/package=RSpectra) -- used for the 
-default spectral initialization. If not installed, then the
-[irlba](https://cran.r-project.org/package=irlba) package is used instead. In
-most cases `irlba` does a fine job, but it's not as fast as `RSpectra` for
-spectral initialization because `irlba` isn't designed for quite the same use
-case as `RSpectra`.
 * [RcppHNSW](https://cran.r-project.org/package=RcppHNSW) -- used for nearest 
 neighbor search. Once installed and loaded, you can specify `nn_method = "hnsw"`
 in `uwot::umap` as long as your `metric` is either `"euclidean"`, `"cosine"` or
@@ -35,15 +29,26 @@ You can also use sparse matrices as input to `uwot::umap2`. See the
 [sparse data article](https://jlmelville.github.io/uwot/articles/sparse-data-example.html)
 for more details.
 
-My recommendation would be to install all of these (or at least `RSpectra` and 
-`RcppHNSW`):
+There is one other dependency,
+[RSpectra](https://cran.r-project.org/package=RSpectra) -- used for the default
+spectral initialization. If not installed, then the
+[irlba](https://cran.r-project.org/package=irlba) package is used instead. In
+most cases `irlba` does a fine job, but it's not as fast as `RSpectra` for
+spectral initialization because `irlba` isn't designed for quite the same use
+case as `RSpectra`. This has been both a core dependency and an optional
+dependency at different times in the past. In general, I would like it to be an
+optional dependency, but currently, an interaction with the most recent release
+of `irlba` and an ABI change to the `Matrix` package is causing failures. By
+making `RSpectra` a required dependency, I can ensure tests, examples and
+vignettes build which unblocks various downstream packages.
 
+My recommendation would be to install all of these (or at least `RcppHNSW`):
 
 ```{r, install dependencies}
-install.packages(c("RSpectra", "RcppHNSW", "rnndescent"))
+install.packages(c("RcppHNSW", "rnndescent"))
 ```
 
-and then have them loaded whenever you are using `uwot`.
+and then have them (and `RSpectra`) loaded whenever you are using `uwot`.
 
 ```{r, load dependencies}
 library(RSpectra)
