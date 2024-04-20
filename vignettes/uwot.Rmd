@@ -19,6 +19,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(uwot)
+library(RSpectra)
 ```
 
 `uwot` is the a package for implementing the UMAP dimensionality reduction 
