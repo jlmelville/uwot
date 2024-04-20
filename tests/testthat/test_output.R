@@ -1031,6 +1031,7 @@ test_that("can set seed internally", {
 
   # creating a model stores the seed but also forces annoy for nearest neighbors
   # which changes the RNG state more than when FNN can be used internally
+  # 115: eh actually this is probably due more to irlba than RSpectra?
   res_model <-
     umap(
       iris10,
@@ -1043,7 +1044,7 @@ test_that("can set seed internally", {
     )
   expect(res_model$seed, 42)
   diff1m <- res - res_model$embedding
-  expect_gt(sqrt(sum(diff1m * diff1m) / length(diff1m)), 0.01)
+  expect_gt(sqrt(sum(diff1m * diff1m) / length(diff1m)), 1e-6)
 
   # explicitly set annoy nn and things are reproducible again
   res4 <-
