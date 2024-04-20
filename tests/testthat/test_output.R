@@ -1,4 +1,5 @@
 library(uwot)
+library(RSpectra)
 context("API output")
 
 set.seed(1337)
