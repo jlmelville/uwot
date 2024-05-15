@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">uwot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,6 +84,15 @@
 the top of the <code>README.md</code> file for the package. When they
 aren’t new any more, they will get moved here. You should look at the <a href="https://jlmelville.github.io/uwot/news/index.html">Changelog</a>
 for fuller details.</p>
+<p><em>April 21 2024</em> As ordained by prophecy, version 0.2.2 of
+<code>uwot</code> has been released to CRAN. <code>RSpectra</code> is
+back as a main dependency and I <em>thought</em> I had worked out a
+clever scheme to avoid the failures seen in some installations with the
+<code>irlba</code>/<code>Matrix</code> interactions. This releases fixes
+the problem on all the systems I have access to (including GitHub
+Actions CI) but some CRAN checks remain failing. How embarrassing. That
+said, if you have had issues, it’s possible this new release will help
+you too.</p>
 <p><em>April 18 2024</em> Version 0.2.1 of <code>uwot</code> has been
 released to CRAN. Some features to be aware of: <a href="https://cran.r-project.org/package=rnndescent" class="external-link">RcppHNSW</a> and <a href="https://cran.r-project.org/package=rnndescent" class="external-link">rnndescent</a> are
 now supported as optional dependencies. If you install and load them,

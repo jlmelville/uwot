@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">uwot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,12 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="uwot-development-version">uwot (development version)<a class="anchor" aria-label="anchor" href="#uwot-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.2" id="uwot-022">uwot 0.2.2<a class="anchor" aria-label="anchor" href="#uwot-022"></a></h2><p class="text-muted">CRAN release: 2024-04-21</p>
+<div class="section level3">
+<h3 id="bug-fixes-and-minor-improvements-0-2-2">Bug fixes and minor improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-minor-improvements-0-2-2"></a></h3>
+<ul><li>
+<code>RSpectra</code> is now a required dependency (again). It was a required dependency up until version 0.1.12, when it became optional (<code>irlba</code> was used in its place). However, problems with interactions of the current version of <code>irlba</code> with an ABI change in the <code>Matrix</code> package means that it’s hard for downstream packages and users to build <code>uwot</code> without re-installing <code>Matrix</code> and <code>irlba</code> from source, which may not be an option for some people. Also it was causing a CRAN check error. I have changed some tests, examples and vignettes to use <code>RSpectra</code> explicitly, and to only test <code>irlba</code> code-paths where necessary. See <a href="https://github.com/jlmelville/uwot/issues/115" class="external-link uri">https://github.com/jlmelville/uwot/issues/115</a> and links therein for more details.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.1" id="uwot-021">uwot 0.2.1<a class="anchor" aria-label="anchor" href="#uwot-021"></a></h2><p class="text-muted">CRAN release: 2024-04-15</p>

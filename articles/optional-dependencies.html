@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">uwot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,14 +85,6 @@ of if you install them (and load them), but that you don’t <em>need</em>
 so are optional. These include:</p>
 <ul>
 <li>
-<a href="https://cran.r-project.org/package=RSpectra" class="external-link">RSpectra</a> –
-used for the default spectral initialization. If not installed, then the
-<a href="https://cran.r-project.org/package=irlba" class="external-link">irlba</a> package is
-used instead. In most cases <code>irlba</code> does a fine job, but it’s
-not as fast as <code>RSpectra</code> for spectral initialization because
-<code>irlba</code> isn’t designed for quite the same use case as
-<code>RSpectra</code>.</li>
-<li>
 <a href="https://cran.r-project.org/package=RcppHNSW" class="external-link">RcppHNSW</a> –
 used for nearest neighbor search. Once installed and loaded, you can
 specify <code>nn_method = "hnsw"</code> in <code><a href="../reference/umap.html">uwot::umap</a></code> as
@@ -112,12 +104,25 @@ without having to specify <code>nn_method</code>. You can also use
 sparse matrices as input to <code><a href="../reference/umap2.html">uwot::umap2</a></code>. See the <a href="https://jlmelville.github.io/uwot/articles/sparse-data-example.html">sparse
 data article</a> for more details.</li>
 </ul>
+<p>There is one other dependency, <a href="https://cran.r-project.org/package=RSpectra" class="external-link">RSpectra</a> – used
+for the default spectral initialization. If not installed, then the <a href="https://cran.r-project.org/package=irlba" class="external-link">irlba</a> package is
+used instead. In most cases <code>irlba</code> does a fine job, but it’s
+not as fast as <code>RSpectra</code> for spectral initialization because
+<code>irlba</code> isn’t designed for quite the same use case as
+<code>RSpectra</code>. This has been both a core dependency and an
+optional dependency at different times in the past. In general, I would
+like it to be an optional dependency, but currently, an interaction with
+the most recent release of <code>irlba</code> and an ABI change to the
+<code>Matrix</code> package is causing failures. By making
+<code>RSpectra</code> a required dependency, I can ensure tests,
+examples and vignettes build which unblocks various downstream
+packages.</p>
 <p>My recommendation would be to install all of these (or at least
-<code>RSpectra</code> and <code>RcppHNSW</code>):</p>
+<code>RcppHNSW</code>):</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RSpectra"</span>, <span class="st">"RcppHNSW"</span>, <span class="st">"rnndescent"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>and then have them loaded whenever you are using
-<code>uwot</code>.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RcppHNSW"</span>, <span class="st">"rnndescent"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>and then have them (and <code>RSpectra</code>) loaded whenever you
+are using <code>uwot</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/yixuan/RSpectra" class="external-link">RSpectra</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/rcpphnsw" class="external-link">RcppHNSW</a></span><span class="op">)</span></span>

@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="index.html">uwot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,6 +75,7 @@
 <div class="section level2">
 <h2 id="news">News<a class="anchor" aria-label="anchor" href="#news"></a>
 </h2>
+<p><em>April 21 2024</em> As ordained by prophecy, version 0.2.2 of <code>uwot</code> has been released to CRAN. <code>RSpectra</code> is back as a main dependency and I <em>thought</em> I had worked out a clever scheme to avoid the failures seen in some installations with the <code>irlba</code>/<code>Matrix</code> interactions. This releases fixes the problem on all the systems I have access to (including GitHub Actions CI) but some CRAN checks remain failing. How embarrassing. That said, if you have had issues, it’s possible this new release will help you too.</p>
 <p><em>April 18 2024</em> Version 0.2.1 of <code>uwot</code> has been released to CRAN. Some features to be aware of: <a href="https://cran.r-project.org/package=rnndescent" class="external-link">RcppHNSW</a> and <a href="https://cran.r-project.org/package=rnndescent" class="external-link">rnndescent</a> are now supported as optional dependencies. If you install and load them, you can use them as an alternative to RcppAnnoy in the nearest neighbor search and should be faster. Also, a new <code>umap2</code> function has been added, with updated defaults compared to <code>umap</code>. Please see the updated and new articles on <a href="https://jlmelville.github.io/uwot/articles/hnsw-umap.html">HNSW</a>, <a href="https://jlmelville.github.io/uwot/articles/rnndescent-umap.html">rnndescent</a>, <a href="https://jlmelville.github.io/uwot/articles/sparse-data-example.html">working with sparse data</a> and <a href="https://jlmelville.github.io/uwot/articles/umap2.html">umap2</a>. I consider this worthy of moving from <code>0.1.x</code> to <code>0.2.x</code>, but in the interests of full disclosure, on-going <a href="https://github.com/jlmelville/uwot/issues/115" class="external-link">irlba problems</a> has caused a CRAN check failure, so we might be onto 0.2.2 sooner than I’d like.</p>
 </div>
 <div class="section level2">
@@ -128,8 +129,8 @@
 <span><span class="co"># I recommend the following optional packages</span></span>
 <span><span class="co"># for faster or more flexible nearest neighbor search:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RcppHNSW"</span>, <span class="st">"rnndescent"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># for faster spectral initialization</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"RSpectra"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/rcpphnsw" class="external-link">RcppHNSW</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jlmelville.github.io/rnndescent/" class="external-link">rnndescent</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Installing RcppHNSW will allow the use of the usually faster HNSW method:</span></span>
 <span><span class="va">mnist_umap_hnsw</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, min_dist <span class="op">=</span> <span class="fl">0.001</span>, </span>
@@ -211,7 +212,7 @@
 <li><a href="https://ci.appveyor.com/project/jlmelville/uwot" class="external-link"><img src="https://ci.appveyor.com/api/projects/status/github/jlmelville/uwot?branch=master&amp;svg=true" alt="AppVeyor Build Status"></a></li>
 <li><a href="https://app.codecov.io/github/jlmelville/uwot?branch=master" class="external-link"><img src="https://img.shields.io/codecov/c/github/jlmelville/uwot/master.svg" alt="Coverage Status"></a></li>
 <li><a href="https://cran.r-project.org/package=uwot" class="external-link"><img src="http://www.r-pkg.org/badges/version/uwot" alt="CRAN Status Badge"></a></li>
-<li><a href="https://cran.r-project.org/package=uwot" class="external-link"><img src="https://tinyverse.netlify.com/badge/uwot" alt="Dependencies"></a></li>
+<li><a href="https://cran.r-project.org/package=uwot" class="external-link"><img src="https://tinyverse.netlify.app/badge/uwot" alt="Dependencies"></a></li>
 <li><a href="https://cran.r-project.org/package=uwot" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/uwot" alt="CRAN Monthly Downloads"></a></li>
 <li><a href="https://github.com/jlmelville/uwot" class="external-link"><img src="https://img.shields.io/github/last-commit/jlmelville/uwot" alt="Last Commit"></a></li>
 </ul>
