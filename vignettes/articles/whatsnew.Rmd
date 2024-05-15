@@ -8,6 +8,14 @@ get moved here. You should look at the
 [Changelog](https://jlmelville.github.io/uwot/news/index.html) for fuller 
 details.
 
+*April 21 2024* As ordained by prophecy, version 0.2.2 of `uwot` has been
+released to CRAN. `RSpectra` is back as a main dependency and I *thought* I had
+worked out a clever scheme to avoid the failures seen in some installations with
+the `irlba`/`Matrix` interactions. This releases fixes the problem on all the
+systems I have access to (including GitHub Actions CI) but some CRAN checks
+remain failing. How embarrassing. That said, if you have had issues, it's
+possible this new release will help you too.
+
 *April 18 2024* Version 0.2.1 of `uwot` has been released to CRAN. Some features 
 to be aware of: [RcppHNSW](https://cran.r-project.org/package=rnndescent) and
 [rnndescent](https://cran.r-project.org/package=rnndescent) are now supported as
