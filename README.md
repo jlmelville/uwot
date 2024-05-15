@@ -105,8 +105,6 @@ plot(
 install.packages(c("RcppHNSW", "rnndescent"))
 library(RcppHNSW)
 library(rnndescent)
-# for faster spectral initialization
-library(RSpectra)
 
 # Installing RcppHNSW will allow the use of the usually faster HNSW method:
 mnist_umap_hnsw <- umap(mnist, n_neighbors = 15, min_dist = 0.001, 
