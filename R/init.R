@@ -178,14 +178,19 @@ irlba_tsvd_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
 }
 
 irlba_spectral_tsvd <- function(L, n, iters = 1000) {
-  suppressWarnings(res <- irlba::irlba(L, nv = n, nu = 0, maxit = iters))
+  suppressWarnings(res <- tryCatch(
+    irlba::irlba(L, nv = n, nu = 0, maxit = iters),
+    error = function(c) {
+      irlba::irlba(L, nv = n, nu = 0, maxit = iters, fastpath = FALSE)
+    }
+  ))
   list(vectors = res$v, values = 2.0 - res$d, converged = res$iter != iters)
 }
 
 irlba_eigs_asym <- function(L, ndim) {
   suppressWarnings(res <- tryCatch(
     {
-      res <- irlba::partial_eigen(
+      irlba::partial_eigen(
         L,
         n = ndim + 1,
         symmetric = FALSE,
@@ -194,19 +199,34 @@ irlba_eigs_asym <- function(L, ndim) {
         maxit = 1000,
         verbose = TRUE
       )
-      res$values <- sqrt(res$values)
-      res
     },
     error = function(c) {
-      NULL
+      tryCatch(
+        irlba::partial_eigen(
+          L,
+          n = ndim + 1,
+          symmetric = FALSE,
+          smallest = TRUE,
+          tol = 1e-3,
+          maxit = 1000,
+          verbose = TRUE,
+          fastpath = FALSE
+        ),
+        error = function(c) {
+          NULL
+        }
+      )
     }
   ))
+  if (!is.null(res)) {
+    res$values <- sqrt(res$values)
+  }
   res
 }
 
 irlba_eigs_sym <- function(L, ndim, smallest = TRUE) {
   suppressWarnings(res <- tryCatch(
-    res <- irlba::partial_eigen(
+    irlba::partial_eigen(
       L,
       n = ndim + 1,
       symmetric = TRUE,
@@ -216,7 +236,21 @@ irlba_eigs_sym <- function(L, ndim, smallest = TRUE) {
       verbose = FALSE
     ),
     error = function(c) {
-      NULL
+      tryCatch(
+        irlba::partial_eigen(
+          L,
+          n = ndim + 1,
+          symmetric = TRUE,
+          smallest = smallest,
+          tol = 1e-3,
+          maxit = 1000,
+          verbose = FALSE,
+          fastpath = FALSE
+        ),
+        error = function(c) {
+          NULL
+        }
+      )
     }
   ))
   res
@@ -439,8 +473,7 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
     X <- X * 1
   }
   res <- irlba::prcomp_irlba(X,
-    n = ncol, retx = TRUE, center = center,
-    scale = FALSE
+    n = ncol, retx = TRUE, center = center, scale = FALSE
   )
   report_varex(res, verbose)
   if (ret_extra) {

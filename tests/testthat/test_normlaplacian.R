@@ -7,38 +7,46 @@ context("normalized laplacian")
 # with sanitizers and valgrind (probably the extended compilation time with
 # eigen causes a preperror)
 
-test_that("normalized laplacian", {
-  # These numbers come from running UMAP Python code:
-  # spectral_layout(pairwise_distances(iris.data[0:10, :]))
-  # NB:
-  # 1. iris data in scikit-learn is currently from UCI repo, which has errors
-  #   (although this doesn't affect the first ten entries)
-  # 2. eigenvector calculation is not that converged and specifies a starting
-  #   vector that we can't supply with either RSpectra or eigen.
-  # 3. The eigenvectors are only identical up to a sign, so we take the absolute
-  #   values.
-  abs_expected_norm_lap <-
-    abs(
-      c2y(
-        0.7477, -0.1292, -0.03001, 0.02127, -0.563, -0.01149, 0.1402,
-        -0.2725, -0.01241, 0.1084, -0.106, -0.5723, 0.2024, -0.3082,
-        0.1642, -5.549e-05, -0.04843, -0.1747, 0.1684, 0.6611
-      )
+# These numbers come from running UMAP Python code:
+# spectral_layout(pairwise_distances(iris.data[0:10, :]))
+# NB:
+# 1. iris data in scikit-learn is currently from UCI repo, which has errors
+#   (although this doesn't affect the first ten entries)
+# 2. eigenvector calculation is not that converged and specifies a starting
+#   vector that we can't supply with either RSpectra or eigen.
+# 3. The eigenvectors are only identical up to a sign, so we take the absolute
+#   values.
+abs_expected_norm_lap <-
+  abs(
+    c2y(
+      0.7477, -0.1292, -0.03001, 0.02127, -0.563, -0.01149, 0.1402,
+      -0.2725, -0.01241, 0.1084, -0.106, -0.5723, 0.2024, -0.3082,
+      0.1642, -5.549e-05, -0.04843, -0.1747, 0.1684, 0.6611
     )
+  )
+sparse_m <- Matrix::drop0(x2d(iris[1:10, ]))
 
-  sparse_m <- Matrix::drop0(x2d(iris[1:10, ]))
+test_that("normalized laplacian", {
   res <- normalized_laplacian_init(sparse_m)
   expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
+})
 
+test_that("irlba tsvd normalized", {
   # 115: ensure irlba code path gets tested if we can avoid Matrix ABI issue
-  if (exists("Matrix.Version", envir = asNamespace("Matrix")) &&
-    Matrix::Matrix.Version()$package >= "1.7.0") {
+  # if (exists("Matrix.Version", envir = asNamespace("Matrix")) &&
+  #     Matrix::Matrix.Version()$package >= "1.7.0") {
     res <- irlba_tsvd_normalized_laplacian_init(sparse_m)
     expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
+  # }
+})
 
+test_that("irlba normalized", {
+  # 115: ensure irlba code path gets tested if we can avoid Matrix ABI issue
+  # if (exists("Matrix.Version", envir = asNamespace("Matrix")) &&
+  #     Matrix::Matrix.Version()$package >= "1.7.0") {
     res <- irlba_normalized_laplacian_init(sparse_m)
     expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
-  }
+  # }
 })
 
 test_that("laplacian eigenmap", {
