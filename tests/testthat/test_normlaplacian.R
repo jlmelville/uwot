@@ -30,15 +30,12 @@ test_that("normalized laplacian", {
   res <- normalized_laplacian_init(sparse_m)
   expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
 
-  # 115: ensure irlba code path gets tested if we can avoid Matrix ABI issue
-  if (exists("Matrix.Version", envir = asNamespace("Matrix")) &&
-    Matrix::Matrix.Version()$package >= "1.7.0") {
-    res <- irlba_tsvd_normalized_laplacian_init(sparse_m)
-    expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
+  # 115: by not having the C version of irlba hopefully we don't break
+  res <- irlba_tsvd_normalized_laplacian_init(sparse_m)
+  expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
 
-    res <- irlba_normalized_laplacian_init(sparse_m)
-    expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
-  }
+  res <- irlba_normalized_laplacian_init(sparse_m)
+  expect_equal(abs(res), abs_expected_norm_lap, tolerance = 0.2)
 })
 
 test_that("laplacian eigenmap", {

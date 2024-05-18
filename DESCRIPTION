@@ -26,7 +26,6 @@ Depends:
     Matrix
 Imports: 
     FNN,
-    irlba,
     methods,
     Rcpp,
     RcppAnnoy (>= 0.0.17),

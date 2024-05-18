@@ -178,14 +178,14 @@ irlba_tsvd_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
 }
 
 irlba_spectral_tsvd <- function(L, n, iters = 1000) {
-  suppressWarnings(res <- irlba::irlba(L, nv = n, nu = 0, maxit = iters))
+  suppressWarnings(res <- irlba__irlba(L, nv = n, nu = 0, maxit = iters))
   list(vectors = res$v, values = 2.0 - res$d, converged = res$iter != iters)
 }
 
 irlba_eigs_asym <- function(L, ndim) {
   suppressWarnings(res <- tryCatch(
     {
-      res <- irlba::partial_eigen(
+      res <- irlba__partial_eigen(
         L,
         n = ndim + 1,
         symmetric = FALSE,
@@ -206,7 +206,7 @@ irlba_eigs_asym <- function(L, ndim) {
 
 irlba_eigs_sym <- function(L, ndim, smallest = TRUE) {
   suppressWarnings(res <- tryCatch(
-    res <- irlba::partial_eigen(
+    res <- irlba__partial_eigen(
       L,
       n = ndim + 1,
       symmetric = TRUE,
@@ -438,9 +438,9 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
     # convert logical matrix to numeric
     X <- X * 1
   }
-  res <- irlba::prcomp_irlba(X,
+  res <- irlba__prcomp_irlba(X,
     n = ncol, retx = TRUE, center = center,
-    scale = FALSE
+    scale. = FALSE
   )
   report_varex(res, verbose)
   if (ret_extra) {
@@ -533,7 +533,7 @@ prcomp_rsvd <- function(x, n = 3, retx = TRUE, center = TRUE, scale. = FALSE,
     args <- c(args, list(...))
   }
 
-  s <- do.call(irlba::svdr, args = args)
+  s <- do.call(irlba__svdr, args = args)
   ans$sdev <- s$d / sqrt(max(1, nrow(x) - 1))
   ans$rotation <- s$v
   colnames(ans$rotation) <- paste("PC", seq(1, ncol(ans$rotation)),
