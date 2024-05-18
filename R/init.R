@@ -178,41 +178,42 @@ irlba_tsvd_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
 }
 
 irlba_spectral_tsvd <- function(L, n, iters = 1000) {
+  irlba_args <- list(
+    A = L,
+    nv = n,
+    nu = 0,
+    maxit = iters
+  )
   suppressWarnings(res <- tryCatch(
-    irlba::irlba(L, nv = n, nu = 0, maxit = iters),
+    do.call(irlba::irlba, irlba_args),
     error = function(c) {
-      irlba::irlba(L, nv = n, nu = 0, maxit = iters, fastpath = FALSE)
+      irlba_args$fastpath <- FALSE
+      do.call(irlba::irlba, irlba_args)
     }
   ))
-  list(vectors = res$v, values = 2.0 - res$d, converged = res$iter != iters)
+  list(
+    vectors = res$v,
+    values = 2.0 - res$d,
+    converged = res$iter != iters
+  )
 }
 
 irlba_eigs_asym <- function(L, ndim) {
+  irlba_args <- list(
+    x = L,
+    n = ndim + 1,
+    symmetric = FALSE,
+    smallest = TRUE,
+    tol = 1e-3,
+    maxit = 1000
+  )
   suppressWarnings(res <- tryCatch(
-    {
-      irlba::partial_eigen(
-        L,
-        n = ndim + 1,
-        symmetric = FALSE,
-        smallest = TRUE,
-        tol = 1e-3,
-        maxit = 1000,
-        verbose = TRUE
-      )
-    },
-    error = function(c) {
+    do.call(irlba::partial_eigen, irlba_args),
+    error = function(e) {
+      irlba_args$fastpath <- FALSE
       tryCatch(
-        irlba::partial_eigen(
-          L,
-          n = ndim + 1,
-          symmetric = FALSE,
-          smallest = TRUE,
-          tol = 1e-3,
-          maxit = 1000,
-          verbose = TRUE,
-          fastpath = FALSE
-        ),
-        error = function(c) {
+        do.call(irlba::partial_eigen, irlba_args),
+        error = function(e) {
           NULL
         }
       )
@@ -225,29 +226,21 @@ irlba_eigs_asym <- function(L, ndim) {
 }
 
 irlba_eigs_sym <- function(L, ndim, smallest = TRUE) {
+  irlba_args <- list(
+    x = L,
+    n = ndim + 1,
+    symmetric = TRUE,
+    smallest = smallest,
+    tol = 1e-3,
+    maxit = 1000
+  )
   suppressWarnings(res <- tryCatch(
-    irlba::partial_eigen(
-      L,
-      n = ndim + 1,
-      symmetric = TRUE,
-      smallest = smallest,
-      tol = 1e-3,
-      maxit = 1000,
-      verbose = FALSE
-    ),
-    error = function(c) {
+    do.call(irlba::partial_eigen, irlba_args),
+    error = function(e) {
+      irlba_args$fastpath <- FALSE
       tryCatch(
-        irlba::partial_eigen(
-          L,
-          n = ndim + 1,
-          symmetric = TRUE,
-          smallest = smallest,
-          tol = 1e-3,
-          maxit = 1000,
-          verbose = FALSE,
-          fastpath = FALSE
-        ),
-        error = function(c) {
+        do.call(irlba::partial_eigen, irlba_args),
+        error = function(e) {
           NULL
         }
       )
