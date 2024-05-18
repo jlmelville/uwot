@@ -728,9 +728,9 @@ umap2 <-
 
     if (is.null(n_threads)) {
       n_threads <- default_num_threads()
-      if (batch) {
-        n_sgd_threads <- n_threads
-      }
+    }
+    if (batch && is.numeric(n_sgd_threads) && n_sgd_threads == 0) {
+      n_sgd_threads <- n_threads
     }
 
     if (is_sparse_matrix(X)) {

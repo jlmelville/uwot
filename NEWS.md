@@ -1,5 +1,10 @@
 # uwot (development version)
 
+## Bug fixes and minor improvements
+
+* Setting `num_threads` directly in `umap2` did not result in the sgd threads
+being updated to that value when `batch = TRUE`, which it should have been.
+
 # uwot 0.2.2
 
 ## Bug fixes and minor improvements
