@@ -5,64 +5,44 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="uwot">
 <title>Leopold: Lightweight Estimate of Preservation of Local Density • uwot</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Leopold: Lightweight Estimate of Preservation of Local Density">
-<meta property="og:description" content="uwot">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Leopold: Lightweight Estimate of Preservation of Local Density">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">uwot</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2.9000</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../articles/uwot.html">Get started</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
-<li class="active nav-item">
-  <a class="nav-link" href="../articles/index.html">Articles</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../articles/uwot.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/jlmelville/uwot/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jlmelville/uwot/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -71,13 +51,14 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Leopold: Lightweight Estimate of Preservation of Local Density</h1>
+
+      <h1>Leopold: Lightweight Estimate of Preservation of Local Density</h1>
             <h3 data-toc-skip class="subtitle">Approximating
 densMAP</h3>
             
             <h4 data-toc-skip class="date">February 16 2022</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/jlmelville/uwot/blob/HEAD/vignettes/articles/leopold.Rmd" class="external-link"><code>vignettes/articles/leopold.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jlmelville/uwot/blob/master/vignettes/articles/leopold.Rmd" class="external-link"><code>vignettes/articles/leopold.Rmd</code></a></small>
       <div class="d-none name"><code>leopold.Rmd</code></div>
     </div>
 
@@ -99,18 +80,32 @@ which may be good enough. But first, a bit more about densMAP.</p>
 function in which the “local radius” of each observation in the input
 and output space is calculated and the Pearson correlation between the
 two is optimized.</p>
-<p>The radius of observation <span class="math inline">\(i\)</span>,
-<span class="math inline">\(R_i\)</span> is calculated as:</p>
-<p><span class="math display">\[
+<p>The radius of observation
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>i</mi></msub><annotation encoding="application/x-tex">R_i</annotation></semantics></math>
+is calculated as:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mfrac><mn>1</mn><mrow><munder><mo>∑</mo><mi>i</mi></munder><msub><mi>P</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow></mfrac><munder><mo>∑</mo><mi>i</mi></munder><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><msub><mi>P</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
 R_i = \frac{1}{\sum_i P_{ij}} \sum_i d_{ij}^2 P_{ij}
-\]</span></p>
-<p>where <span class="math inline">\(d_{ij}\)</span> is the distance
-between point <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> and <span class="math inline">\(P_{ij}\)</span> is the <em>symmetrized</em> edge
-weight between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, i.e. the radius is the edge-weighted
-average of the squared distances between each <span class="math inline">\(i\)</span> and each of its neighbors. Because the
-matrix has been symmetrized, <span class="math inline">\(i\)</span> may
-have a different number of neighbors than the <code>n_neighbors</code>
-parameter that the user specifies.</p>
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">d_{ij}</annotation></semantics></math>
+is the distance between point
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>P</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">P_{ij}</annotation></semantics></math>
+is the <em>symmetrized</em> edge weight between
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>,
+i.e. the radius is the edge-weighted average of the squared distances
+between each
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+and each of its neighbors. Because the matrix has been symmetrized,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+may have a different number of neighbors than the
+<code>n_neighbors</code> parameter that the user specifies.</p>
 <p>To get a feel for what densMAP does, below are some results from the
 Python UMAP (i.e. no <code>uwot</code> output here), with and without
 <code>densmap=True</code>. As recommended by the current UMAP README, I
@@ -792,46 +787,62 @@ adding lots of extra code, much of it in C++ and I am very lazy.</p>
 <p>Here’s my pitch for an approximation to densMAP, which I have named
 the Lightweight Estimate of Preservation of Local Density (Leopold).</p>
 <p>For the input radii, as part of the smooth k-nearest neighbor
-distances routine we already calculate <span class="math inline">\(\rho\)</span> which is the distance to the nearest
-neighbor of each item in the dataset (subject to the
-<code>local_connectivity</code> constraint). Additionally, we also
-calculate <span class="math inline">\(\sigma\)</span> which is a
-normalization factor used with the neighbors at distance greater than
-<span class="math inline">\(\rho\)</span>. It must have units of
-distance, and the larger the distances to the neighbors, the larger
-<span class="math inline">\(\sigma\)</span> gets. So I propose the
-following definition for the local radius:</p>
-<p><span class="math display">\[
+distances routine we already calculate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+which is the distance to the nearest neighbor of each item in the
+dataset (subject to the <code>local_connectivity</code> constraint).
+Additionally, we also calculate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+which is a normalization factor used with the neighbors at distance
+greater than
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>.
+It must have units of distance, and the larger the distances to the
+neighbors, the larger
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+gets. So I propose the following definition for the local radius:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mi>ρ</mi><mo>+</mo><mi>σ</mi></mrow><annotation encoding="application/x-tex">
 R_i = \rho + \sigma
-\]</span></p>
+</annotation></semantics></math></p>
 <p>The biggest difference between this definition of the local input
 radii is that I haven’t bothered to square the distances (it doesn’t
-make much difference for leopold) and that the values for <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(\rho\)</span> are calculated <em>before</em> the
-symmetrization of the UMAP input edge weights. So these values are
-missing the influence of observations outside the initial k-nearest
-neighborhood graph.</p>
+make much difference for leopold) and that the values for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+are calculated <em>before</em> the symmetrization of the UMAP input edge
+weights. So these values are missing the influence of observations
+outside the initial k-nearest neighborhood graph.</p>
 <p>For the output radii, I know from looking at the <a href="https://jlmelville.github.io/uwot/articles/umap-examples.html">output
 weight function parameters</a>, that increasing the <code>a</code>
 parameter makes the clusters in a UMAP plot shrink, and vice versa. So
 let’s use that as measure of the output density, i.e. the inverse of the
 local radius. As every point has its own radius, the value for a given
-weight between points <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> will be the geometric mean of the two
-radii:</p>
-<p><span class="math display">\[
+weight between points
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+will be the geometric mean of the two radii:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mn>1</mn><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mfrac><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><msqrt><mrow><msub><mi>r</mi><mi>i</mi></msub><msub><mi>r</mi><mi>j</mi></msub></mrow></msqrt></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 w_{ij} = 1 / \left(1 + \frac{d_{ij}^2}{\sqrt{r_i r_j}} \right)
-\]</span></p>
-<p>where <span class="math inline">\(r_i\)</span> is a scaled version of
-the input radius <span class="math inline">\(R_i\)</span> suitable for
-the lower dimensional space. This is a similar sort of scaling to that
-used by <a href="https://papers.nips.cc/paper/2004/hash/40173ea48d9567f1f393b20c855bb40b-Abstract.html" class="external-link">Zelnik-Manor
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mi>i</mi></msub><annotation encoding="application/x-tex">r_i</annotation></semantics></math>
+is a scaled version of the input radius
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>i</mi></msub><annotation encoding="application/x-tex">R_i</annotation></semantics></math>
+suitable for the lower dimensional space. This is a similar sort of
+scaling to that used by <a href="https://papers.nips.cc/paper/2004/hash/40173ea48d9567f1f393b20c855bb40b-Abstract.html" class="external-link">Zelnik-Manor
 and Perona</a> for “self-tuning” spectral clustering, and also
 recommended for local scaling to reduce hubness in high dimensional
 space by <a href="https://www.jmlr.org/papers/v13/schnitzer12a.html" class="external-link">Schnitzer and
 co-workers</a>.</p>
 <p>The scaling from input to output space is not sophisticated: I have
-observed that for typical values of <span class="math inline">\(b\)</span> used in UMAP, a usable range of <span class="math inline">\(a\)</span> values are between 0.01 (very diffuse
-clusters) and 100 (very tight clusters), so we will just map the inverse
-of the input local radii to that range.</p>
+observed that for typical values of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>
+used in UMAP, a usable range of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+values are between 0.01 (very diffuse clusters) and 100 (very tight
+clusters), so we will just map the inverse of the input local radii to
+that range.</p>
 <p>The final adjustment to this is that it would be good to introduce a
 parameter that controls how much of the range of <code>a</code> is used
 in the output and thus how big a disparity of the input radii is
@@ -845,31 +856,38 @@ results.</p>
 <p>In my mind this scaling of the radii is straightforward, but looking
 up at that description maybe it’s not. The procedure is:</p>
 <ol style="list-style-type: decimal">
-<li>Define the minimum log density as <span class="math inline">\(a
-\times 10^{-2s}\)</span> where <span class="math inline">\(a\)</span> is
-the UMAP <code>a</code> parameter for the output and <span class="math inline">\(s\)</span> is the <code>den_scale</code>
-parameter.</li>
-<li>Define the maximum log density as <span class="math inline">\(a
-\times 10^{2s}\)</span>.</li>
-<li>Range scale <span class="math inline">\(\log \left(1 / R_i
-\right)\)</span> between the minimum and maximum log density. Call that
-range scaled log density <span class="math inline">\(\Delta_i\)</span>
+<li>Define the minimum log density as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>×</mo><msup><mn>10</mn><mrow><mo>−</mo><mn>2</mn><mi>s</mi></mrow></msup></mrow><annotation encoding="application/x-tex">a \times 10^{-2s}</annotation></semantics></math>
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+is the UMAP <code>a</code> parameter for the output and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+is the <code>den_scale</code> parameter.</li>
+<li>Define the maximum log density as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>×</mo><msup><mn>10</mn><mrow><mn>2</mn><mi>s</mi></mrow></msup></mrow><annotation encoding="application/x-tex">a \times 10^{2s}</annotation></semantics></math>.</li>
+<li>Range scale
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mi>/</mi><msub><mi>R</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\log \left(1 / R_i \right)</annotation></semantics></math>
+between the minimum and maximum log density. Call that range scaled log
+density
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Δ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\Delta_i</annotation></semantics></math>
 </li>
 <li>
-<span class="math inline">\(a_i = \sqrt{ \exp \left( \Delta_i
-\right) }\)</span>.</li>
-<li>The leopold output weight function is <span class="math inline">\(w_{ij} = 1 / \left( 1 + a_i a_j d_{ij}^2
-\right)\)</span>.</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>i</mi></msub><mo>=</mo><msqrt><mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt></mrow><annotation encoding="application/x-tex">a_i = \sqrt{ \exp \left( \Delta_i \right) }</annotation></semantics></math>.</li>
+<li>The leopold output weight function is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mn>1</mn><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><msub><mi>a</mi><mi>i</mi></msub><msub><mi>a</mi><mi>j</mi></msub><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">w_{ij} = 1 / \left( 1 + a_i a_j d_{ij}^2 \right)</annotation></semantics></math>.</li>
 </ol>
 <div class="section level3">
 <h3 id="the-advantage-of-leopold">The Advantage of leopold<a class="anchor" aria-label="anchor" href="#the-advantage-of-leopold"></a>
 </h3>
 <p>The main advantage is for me: to implement this I don’t have to write
-much new code: <span class="math inline">\(\rho\)</span> and <span class="math inline">\(\sigma\)</span> are already calculated and
-implementing the per-observation value for <code>a</code> in the output
-function requires creating a new version of the umap gradient routine
-that expects a vector of values rather than a scalar. This is a lot less
-work than implementing densMAP.</p>
+much new code:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+are already calculated and implementing the per-observation value for
+<code>a</code> in the output function requires creating a new version of
+the umap gradient routine that expects a vector of values rather than a
+scalar. This is a lot less work than implementing densMAP.</p>
 </div>
 <div class="section level3">
 <h3 id="the-disadvantage-of-leopold">The Disadvantage of leopold<a class="anchor" aria-label="anchor" href="#the-disadvantage-of-leopold"></a>
@@ -879,11 +897,15 @@ is that it makes the dense clusters get smaller and the diffuse clusters
 get bigger. The exact changes seem less important to me as long as they
 are vaguely sensible. I don’t claim to have a good sense of what I
 expect to see when a blob of data with an intrinsic dimensionality of
-<span class="math inline">\(d\)</span> and a radius of <span class="math inline">\(r\)</span> is embedded into 2D versus one with an
-intrinsic dimensionality of <span class="math inline">\(d + 5\)</span>
-but a radius of <span class="math inline">\(r / 2\)</span>. Even if that
-was accurately embedded, would it even look sensible let alone
-helpful?</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
+and a radius of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+is embedded into 2D versus one with an intrinsic dimensionality of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>+</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">d + 5</annotation></semantics></math>
+but a radius of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">r / 2</annotation></semantics></math>.
+Even if that was accurately embedded, would it even look sensible let
+alone helpful?</p>
 </div>
 </div>
 <div class="section level2">
@@ -913,10 +935,11 @@ output radii and the Pearson correlation between them. When there were
 more than 1000 points, I used <code>smoothScatter</code> to plot the
 results.</li>
 <li>Bottom right: a plot of the log of the densmap input local radii
-against the leopold equivalent (<span class="math inline">\(\rho +
-\sigma\)</span>). The number in the title is Pearson correlation.
-There’s no particular reason for the two measures of local radius to be
-the same, but they should show a similar trend.</li>
+against the leopold equivalent
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>+</mo><mi>σ</mi></mrow><annotation encoding="application/x-tex">\rho + \sigma</annotation></semantics></math>).
+The number in the title is Pearson correlation. There’s no particular
+reason for the two measures of local radius to be the same, but they
+should show a similar trend.</li>
 </ul>
 <p>For a lot of these datasets, I won’t have anything to say unless
 there is an interesting contrast or similarity with densMAP.</p>
@@ -1440,8 +1463,14 @@ to the results here, so I am not showing them as there are already way
 too many images on this page.</li>
 <li>You can transform new data with models generated where
 <code>dens_scale</code> is set. When UMAP transforms new data, an
-adjusted local connectivity is used which affects both <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(\rho\)</span> so the estimated values of <span class="math inline">\(R_i\)</span> are not as precise as I would like,
-but the effect seems to be quite small.</li>
+adjusted local connectivity is used which affects both
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+so the estimated values of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>i</mi></msub><annotation encoding="application/x-tex">R_i</annotation></semantics></math>
+are not as precise as I would like, but the effect seems to be quite
+small.</li>
 <li>Even if you don’t use the local radii to generate the UMAP layout,
 coloring the results by the log of <code>localr</code> is quite
 informative as to which parts of the embedding you would expect to
@@ -1458,7 +1487,7 @@ hundred more epochs.</li>
 <span><span class="co"># and if you want the local radii values</span></span>
 <span><span class="va">iris_leopold</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, dens_scale <span class="op">=</span> <span class="fl">1</span>, ret_extra <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"localr"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
@@ -1469,15 +1498,15 @@ hundred more epochs.</li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>

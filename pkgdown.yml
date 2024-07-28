@@ -1,31 +1,30 @@
 pandoc: 3.1.11
-pkgdown: 2.0.9
+pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
-  abparams: abparams.html
-  fast-sgd: fast-sgd.html
-  hnsw-umap: hnsw-umap.html
-  init: init.html
-  leopold: leopold.html
-  lvish: lvish.html
-  metric-learning: metric-learning.html
-  mixed-data-types: mixed-data-types.html
-  nearest-neighbors-format: nearest-neighbors-format.html
-  optional-dependencies: optional-dependencies.html
-  performance: performance.html
-  pycompare: pycompare.html
-  reproducibility: reproducibility.html
-  rnndescent-umap: rnndescent-umap.html
-  sparse-data-example: sparse-data-example.html
-  tumap: tumap.html
-  umap-examples: umap-examples.html
-  umap-for-tsne: umap-for-tsne.html
-  umap-simple: umap-simple.html
-  umap2: umap2.html
+  articles/abparams: abparams.html
+  articles/fast-sgd: fast-sgd.html
+  articles/hnsw-umap: hnsw-umap.html
+  articles/init: init.html
+  articles/leopold: leopold.html
+  articles/lvish: lvish.html
+  articles/metric-learning: metric-learning.html
+  articles/mixed-data-types: mixed-data-types.html
+  articles/nearest-neighbors-format: nearest-neighbors-format.html
+  articles/optional-dependencies: optional-dependencies.html
+  articles/performance: performance.html
+  articles/pycompare: pycompare.html
+  articles/reproducibility: reproducibility.html
+  articles/rnndescent-umap: rnndescent-umap.html
+  articles/sparse-data-example: sparse-data-example.html
+  articles/tumap: tumap.html
+  articles/umap-examples: umap-examples.html
+  articles/umap-for-tsne: umap-for-tsne.html
+  articles/umap-simple: umap-simple.html
+  articles/umap2: umap2.html
   uwot: uwot.html
-  whatsnew: whatsnew.html
-last_built: 2024-05-18T18:00Z
+  articles/whatsnew: whatsnew.html
+last_built: 2024-07-28T17:02Z
 urls:
   reference: https://jlmelville.github.io/uwot/reference
   article: https://jlmelville.github.io/uwot/articles
-
