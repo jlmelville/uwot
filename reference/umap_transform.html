@@ -255,6 +255,15 @@ any combination of the following strings:</p><ul><li><p><code>"fgraph"</code> th
     non-zero elements in the matrix is dependent on <code>n_epochs</code>. If you
     are only interested in the fuzzy input graph (e.g. for clustering),
     setting <code>n_epochs = 0</code> will avoid any further sparsifying.</p></li>
+<li><p><code>"nn"</code> the nearest neighbor graph for <code>X</code> with respect to
+   the observations in the <code>model</code>. The graph will be returned as a
+   list of two items: <code>idx</code> a matrix of indices, with as many rows
+   as there are items in <code>X</code> and as many columns as there are nearest
+   neighbors to be computed (this value is determined by the <code>model</code>).
+   The indices are those of the rows of the data used to build the
+   <code>model</code>, so they're not necessarily of much use unless you have
+   access to that data. The second item, <code>dist</code> is a matrix of the
+   equivalent distances, with the same dimensions as <code>idx</code>.</p></li>
 </ul></dd>
 
 
