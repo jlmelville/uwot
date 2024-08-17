@@ -188,6 +188,15 @@ any combination of the following strings:
     non-zero elements in the matrix is dependent on \code{n_epochs}. If you
     are only interested in the fuzzy input graph (e.g. for clustering),
     setting \code{n_epochs = 0} will avoid any further sparsifying.
+ \item \code{"nn"} the nearest neighbor graph for \code{X} with respect to
+   the observations in the \code{model}. The graph will be returned as a
+   list of two items: \code{idx} a matrix of indices, with as many rows
+   as there are items in \code{X} and as many columns as there are nearest
+   neighbors to be computed (this value is determined by the \code{model}).
+   The indices are those of the rows of the data used to build the
+   \code{model}, so they're not necessarily of much use unless you have
+   access to that data. The second item, \code{dist} is a matrix of the
+   equivalent distances, with the same dimensions as \code{idx}.
 }}
 
 \item{seed}{Integer seed to use to initialize the random number generator
