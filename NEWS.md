@@ -2,8 +2,13 @@
 
 ## Bug fixes and minor improvements
 
-* Setting `num_threads` directly in `umap2` did not result in the sgd threads
-being updated to that value when `batch = TRUE`, which it should have been.
+* Setting `num_threads` directly in `umap2` did not result in the number of SGD
+threads being updated to that value when `batch = TRUE`, which it should have
+been.
+* Despite assertions to the contrary in version 0.2.1, `umap_transform`
+continued to return the fuzzy graph in transposed form. Thank you
+[PedroMilanezAlmeida](https://github.com/PedroMilanezAlmeida) for 
+reopening the issue (<https://github.com/jlmelville/uwot/issues/118>).
 
 # uwot 0.2.2
 

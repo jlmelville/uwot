@@ -406,5 +406,33 @@ test_that("graph dim is consistent when n_epochs = 0", {
     dim(iris_transform_10$fgraph),
     dim(iris_transform_0$fgraph)
   )
-  expect_equal(dim(iris_transform_10$fgraph), c(100, 50))
+  expect_equal(dim(iris_transform_10$fgraph), c(50, 100))
+
+
+  #118/129 and also without batch
+  iris_model_no_batch <-
+    umap(
+      iris_species_12,
+      ret_model = TRUE,
+      n_epochs = 0,
+      batch = FALSE
+    )
+
+  iris_transform_10_no_batch <- umap_transform(iris_species_3,
+                                      iris_model_no_batch,
+                                      n_epochs = 10,
+                                      ret_extra = "fgraph"
+  )
+
+  iris_transform_0_no_batch <- umap_transform(iris_species_3,
+                                     iris_model_no_batch,
+                                     n_epochs = 0,
+                                     ret_extra = "fgraph"
+  )
+
+  expect_equal(
+    dim(iris_transform_10_no_batch$fgraph),
+    dim(iris_transform_0_no_batch$fgraph)
+  )
+  expect_equal(dim(iris_transform_10_no_batch$fgraph), c(50, 100))
 })

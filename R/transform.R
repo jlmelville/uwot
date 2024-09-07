@@ -832,6 +832,11 @@ umap_transform <- function(X = NULL, model = NULL,
     res <- list(embedding = embedding)
     for (name in ret_extra) {
       if (name == "fgraph") {
+        if (batch) {
+          # #129: we transposed graph in the batch=TRUE case (#118) but need to
+          # transpose back for export
+          graph <- Matrix::t(graph)
+        }
         res$fgraph <- graph
       }
       if (name == "sigma") {
