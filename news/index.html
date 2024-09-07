@@ -38,7 +38,8 @@
 <h2 class="pkg-version" data-toc-text="development version" id="uwot-development-version">uwot (development version)<a class="anchor" aria-label="anchor" href="#uwot-development-version"></a></h2>
 <div class="section level3">
 <h3 id="bug-fixes-and-minor-improvements-development-version">Bug fixes and minor improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-minor-improvements-development-version"></a></h3>
-<ul><li>Setting <code>num_threads</code> directly in <code>umap2</code> did not result in the sgd threads being updated to that value when <code>batch = TRUE</code>, which it should have been.</li>
+<ul><li>Setting <code>num_threads</code> directly in <code>umap2</code> did not result in the number of SGD threads being updated to that value when <code>batch = TRUE</code>, which it should have been.</li>
+<li>Despite assertions to the contrary in version 0.2.1, <code>umap_transform</code> continued to return the fuzzy graph in transposed form. Thank you <a href="https://github.com/PedroMilanezAlmeida" class="external-link">PedroMilanezAlmeida</a> for reopening the issue (<a href="https://github.com/jlmelville/uwot/issues/118" class="external-link uri">https://github.com/jlmelville/uwot/issues/118</a>).</li>
 </ul></div>
 </div>
     <div class="section level2">
