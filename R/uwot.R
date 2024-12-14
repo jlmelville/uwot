@@ -3956,9 +3956,9 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
 
       # archive the files under the temp dir into the single target file
       # change directory so the archive only contains one directory
+      tmp_model_file <- abspath(file)
       tsmessage("Changing to ", mod_dir)
       setwd(mod_dir)
-      tmp_model_file <- abspath(file)
       tsmessage("Creating ", tmp_model_file)
 
       # #109: Windows 7 tar needs "--force-local" to avoid interpreting colon

@@ -339,3 +339,42 @@ test_that("save-load nndescent", {
     unlink(mod_fname2)
   }
 })
+
+# 131: can't use a relative path for saving
+test_that("save-load relative path", {
+  set.seed(1337)
+  model <- umap(iris10,
+                n_neighbors = 4, n_epochs = 2, init = "spca",
+                metric = "euclidean", verbose = FALSE, n_threads = 0,
+                ret_model = TRUE
+  )
+  # remember to go back to the original working directory
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+
+  # move to a temp directory for this test
+  test_dir <- tempfile("test_relative_path_")
+  dir.create(test_dir)
+  setwd(test_dir)
+
+  # Test 1: relative path no sub-folders
+  rel_path <- "model.uwot"
+  model <- save_uwot(model, file = rel_path)
+  expect_true(file.exists(rel_path))
+
+  modelload <- load_uwot(file = rel_path)
+  set.seed(1337)
+  resload_trans <- umap_transform(iris10, modelload)
+  expect_ok_matrix(resload_trans)
+
+  # Test 2: Relative path within a sub-folder
+  dir.create("my_folder")
+  rel_sub_path <- file.path("my_folder", "model.uwot")
+  model <- save_uwot(model, file = rel_sub_path)
+  expect_true(file.exists(rel_sub_path))
+
+  modelload <- load_uwot(file = rel_sub_path)
+  set.seed(1337)
+  resload_trans <- umap_transform(iris10, modelload)
+  expect_ok_matrix(resload_trans)
+})

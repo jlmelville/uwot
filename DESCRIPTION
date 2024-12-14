@@ -7,7 +7,8 @@ Authors@R: c(
     person("Aaron", "Lun", role = "ctb"),
     person("Mohamed Nadhir", "Djekidel", role = "ctb"),
     person("Yuhan", "Hao", role = "ctb"),
-    person("Dirk", "Eddelbuettel", role = "ctb")
+    person("Dirk", "Eddelbuettel", role = "ctb"),
+    person("Wouter", "van der Bijl", role = "ctb")
   )
 Description: An implementation of the Uniform Manifold Approximation and
     Projection dimensionality reduction by McInnes et al. (2018)

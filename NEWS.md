@@ -9,6 +9,9 @@ been.
 continued to return the fuzzy graph in transposed form. Thank you
 [PedroMilanezAlmeida](https://github.com/PedroMilanezAlmeida) for 
 reopening the issue (<https://github.com/jlmelville/uwot/issues/118>).
+* Relative paths could not be used to save a model. Thank you
+[Wouter van der Bijl](https://github.com/Ax3man) for the bug report
+(<https://github.com/jlmelville/uwot/issues/131>) and the suggested fix.
 
 # uwot 0.2.2
 
