@@ -12,6 +12,7 @@ articles:
   articles/mixed-data-types: mixed-data-types.html
   articles/nearest-neighbors-format: nearest-neighbors-format.html
   articles/optional-dependencies: optional-dependencies.html
+  articles/pacmap-comparison: pacmap-comparison.html
   articles/performance: performance.html
   articles/pycompare: pycompare.html
   articles/reproducibility: reproducibility.html
@@ -24,7 +25,7 @@ articles:
   articles/umap2: umap2.html
   uwot: uwot.html
   articles/whatsnew: whatsnew.html
-last_built: 2024-12-14T18:33Z
+last_built: 2024-12-18T05:33Z
 urls:
   reference: https://jlmelville.github.io/uwot/reference
   article: https://jlmelville.github.io/uwot/articles
