@@ -319,10 +319,19 @@ PaCMAP but it depends on the linear algebra library on your system.
 Due to some other internal differences, I would still anticipate that PaCMAP
 will be a bit faster than UMAP under these conditions. In practice, the
 difference isn't that large in my experience (a few seconds for `mnist`, for
-example). If speed matters to you than running `tumap` or `umap2` with 
-`a = 1, b = 1` and `negative_sample_rate = 4.0` will close the gap a bit. On the 
-other hand, if speed really matters, then PaCMAP will give you vital seconds
-back without having to fiddle with the UMAP defaults.
+example). If speed matters to you then I recommend using:
+
+* `a = 1, b = 1` with `umap2` if you don't mind a t-UMAP-like appearance.
+* Or use `approx_pow = TRUE` if you do want to control `min_dist` and `spread` 
+(or `a` and `b` directly).
+* `negative_sample_rate = 4` will reduce the amount of negative sampling in line
+with what PaCMAP effectively does and shouldn't affect things too much.
+* consider using `rng_type = "deterministic"`, which will not use a random
+number generator at all for the negative sampling. If you want pseudo-random
+sampling, then `rng_type = "tausworthe"` is faster than the default.
+
+On the other hand, if speed really matters, then PaCMAP will give you vital
+seconds back without having to fiddle with the UMAP defaults.
 
 
 ```{r, results='asis', echo=FALSE}
