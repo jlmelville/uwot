@@ -10,8 +10,8 @@ using namespace Rcpp;
 template <typename UwotAnnoyDistance>
 auto annoy_nns_impl(const std::string &index_name, NumericMatrix mat,
                     std::size_t n_neighbors, std::size_t search_k,
-                    std::size_t n_threads = 0, std::size_t grain_size = 1)
-    -> List {
+                    std::size_t n_threads = 0,
+                    std::size_t grain_size = 1) -> List {
 
   std::size_t nrow = mat.rows();
   std::size_t ncol = mat.cols();

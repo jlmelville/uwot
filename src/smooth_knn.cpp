@@ -85,10 +85,11 @@ List smooth_knn_distances_parallel(
 }
 
 // [[Rcpp::export]]
-List reset_local_metrics_parallel(
-    IntegerVector indptr, NumericVector probabilities, std::size_t n_iter = 32,
-    double tol = 1e-5, double num_local_metric_neighbors = 15.0,
-    std::size_t n_threads = 0) {
+List reset_local_metrics_parallel(IntegerVector indptr,
+                                  NumericVector probabilities,
+                                  std::size_t n_iter = 32, double tol = 1e-5,
+                                  double num_local_metric_neighbors = 15.0,
+                                  std::size_t n_threads = 0) {
 
   auto n_vertices = indptr.size() - 1;
   double target = std::log2(num_local_metric_neighbors);
@@ -96,14 +97,14 @@ List reset_local_metrics_parallel(
   auto prob_ptrv = as<std::vector<std::size_t>>(indptr);
   auto probabilitiesv = as<std::vector<double>>(probabilities);
   auto worker = [&](std::size_t begin, std::size_t end) {
-    uwot::reset_local_metric(begin, end, probabilitiesv, prob_ptrv, target,
-                             tol, n_iter, n_search_fails);
+    uwot::reset_local_metric(begin, end, probabilitiesv, prob_ptrv, target, tol,
+                             n_iter, n_search_fails);
   };
   RcppPerpendicular::parallel_for(n_vertices, worker, n_threads);
 
   auto res = List::create(
-    _("values") = NumericVector(probabilitiesv.begin(), probabilitiesv.end()),
-    _("n_failures") = static_cast<std::size_t>(n_search_fails));
+      _("values") = NumericVector(probabilitiesv.begin(), probabilitiesv.end()),
+      _("n_failures") = static_cast<std::size_t>(n_search_fails));
 
   return res;
 }

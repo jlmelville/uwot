@@ -57,8 +57,8 @@ auto mean_average(const std::vector<double> &v) -> double {
 // nzero_end points to one past the index of the last non-zero distance
 // (n_neighbors + 1)
 auto find_rho(const std::vector<double> &nn_dist, std::size_t nzero_begin,
-              std::size_t nzero_end, double local_connectivity, double tol)
-    -> double {
+              std::size_t nzero_end, double local_connectivity,
+              double tol) -> double {
   double rho = 0.0;
   auto nnzero = nzero_end - nzero_begin;
   if (nnzero >= local_connectivity) {
@@ -85,8 +85,8 @@ auto find_rho(const std::vector<double> &nn_dist, std::size_t nzero_begin,
 // Find the normalization factor for the smoothed distances
 auto find_sigma(const std::vector<double> &nn_dist, std::size_t i_begin,
                 std::size_t i_end, double target, double rho, double tol,
-                std::size_t n_iter, std::size_t &n_window_search_fails)
-    -> double {
+                std::size_t n_iter,
+                std::size_t &n_window_search_fails) -> double {
   constexpr auto double_max = (std::numeric_limits<double>::max)();
 
   // best value seen is used only if binary search fails

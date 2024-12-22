@@ -44,8 +44,8 @@ inline auto clamp(float v, float lo, float hi) -> float {
 // rather than recalculating it in the gradient step
 inline auto d2diff(const std::vector<float> &x, std::size_t px,
                    const std::vector<float> &y, std::size_t py,
-                   std::size_t ndim, float dist_eps, std::vector<float> &diffxy)
-    -> float {
+                   std::size_t ndim, float dist_eps,
+                   std::vector<float> &diffxy) -> float {
   float d2 = 0.0;
   for (std::size_t d = 0; d < ndim; d++) {
     float diff = x[px + d] - y[py + d];

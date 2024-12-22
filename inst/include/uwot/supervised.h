@@ -109,9 +109,9 @@ void general_sset_union(
     std::vector<double> &result_val, double mix_weight = 0.5) {
 
   double left_min =
-    (std::max)(*std::min_element(data1.begin(), data1.end()) / 2.0, 1.0e-8);
+      (std::max)(*std::min_element(data1.begin(), data1.end()) / 2.0, 1.0e-8);
   double right_min =
-    (std::max)(*std::min_element(data2.begin(), data2.end()) / 2.0, 1.0e-8);
+      (std::max)(*std::min_element(data2.begin(), data2.end()) / 2.0, 1.0e-8);
 
   for (std::size_t idx = 0; idx < result_row.size(); idx++) {
     auto i = result_col[idx];

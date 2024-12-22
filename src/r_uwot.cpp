@@ -139,17 +139,16 @@ struct UmapFactory {
       float beta2 = lget(opt_args, "beta2", 0.999);
       float eps = lget(opt_args, "eps", 1e-7);
       if (verbose) {
-        Rcerr << "Optimizing with Adam"
-              << " alpha = " << alpha << " beta1 = " << beta1
-              << " beta2 = " << beta2 << " eps = " << eps << std::endl;
+        Rcerr << "Optimizing with Adam" << " alpha = " << alpha
+              << " beta1 = " << beta1 << " beta2 = " << beta2
+              << " eps = " << eps << std::endl;
       }
       return std::make_unique<uwot::Adam>(alpha, beta1, beta2, eps,
                                           head_embedding.size());
     } else if (method == "sgd") {
       float alpha = lget(opt_args, "alpha", 1.0);
       if (verbose) {
-        Rcerr << "Optimizing with SGD"
-              << " alpha = " << alpha << std::endl;
+        Rcerr << "Optimizing with SGD" << " alpha = " << alpha << std::endl;
       }
       return std::make_unique<uwot::Sgd>(alpha);
     } else {

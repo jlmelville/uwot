@@ -35,8 +35,8 @@
 namespace uwot {
 
 auto find_beta(const std::vector<double> &d2, double target, double tol,
-               std::size_t n_iter, std::size_t &n_window_search_fails)
-    -> double {
+               std::size_t n_iter,
+               std::size_t &n_window_search_fails) -> double {
   constexpr auto double_max = (std::numeric_limits<double>::max)();
   double beta = 1.0;
   double lo = 0.0;

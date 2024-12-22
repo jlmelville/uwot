@@ -80,11 +80,12 @@ NumericVector general_sset_intersection_cpp(
 }
 
 // [[Rcpp::export]]
-NumericVector general_sset_union_cpp(
-    IntegerVector indptr1, IntegerVector indices1, NumericVector data1,
-    IntegerVector indptr2, IntegerVector indices2, NumericVector data2,
-    IntegerVector result_row, IntegerVector result_col,
-    NumericVector result_val) {
+NumericVector
+general_sset_union_cpp(IntegerVector indptr1, IntegerVector indices1,
+                       NumericVector data1, IntegerVector indptr2,
+                       IntegerVector indices2, NumericVector data2,
+                       IntegerVector result_row, IntegerVector result_col,
+                       NumericVector result_val) {
 
   double left_min = (std::max)(min(data1) / 2.0, 1.0e-8);
   double right_min = (std::max)(min(data2) / 2.0, 1.0e-8);
@@ -96,15 +97,15 @@ NumericVector general_sset_union_cpp(
     auto left_end = indices1.begin() + indptr1[i + 1];
     auto left_it = std::lower_bound(indices1.begin() + indptr1[i], left_end, j);
     double left_val = (left_it != left_end && *left_it == j
-                         ? data1[left_it - indices1.begin()]
-                         : left_min);
+                           ? data1[left_it - indices1.begin()]
+                           : left_min);
 
     auto right_end = indices2.begin() + indptr2[i + 1];
     auto right_it =
-      std::lower_bound(indices2.begin() + indptr2[i], right_end, j);
+        std::lower_bound(indices2.begin() + indptr2[i], right_end, j);
     double right_val = (right_it != right_end && *right_it == j
-                          ? data2[right_it - indices2.begin()]
-                          : right_min);
+                            ? data2[right_it - indices2.begin()]
+                            : right_min);
 
     result_val[idx] = left_val + right_val - left_val * right_val;
   }
