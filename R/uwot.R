@@ -401,7 +401,19 @@
 #' @param pcg_rand If \code{TRUE}, use the PCG random number generator (O'Neill,
 #'   2014) during optimization. Otherwise, use the faster (but probably less
 #'   statistically good) Tausworthe "taus88" generator. The default is
-#'   \code{TRUE}.
+#'   \code{TRUE}. This parameter has been superseded by \code{rng_type} -- if
+#'   both are set, \code{rng_type} takes precedence.
+#' @param rng_type The type of random number generator to use during
+#'   optimization. One of:
+#'   \itemize{
+#'    \item{\code{"pcg"}}. Use the PCG random number generator (O'Neill, 2014).
+#'    \item{\code{"tausworthe"}}. Use the Tausworthe "taus88" generator.
+#'    \item{\code{"deterministic"}}. Use a deterministic number generator. This
+#'    isn't actually random, but may provide enough variation in the negative
+#'    sampling to give a good embedding and can provide a noticeable speed-up.
+#'   }
+#'   For backwards compatibility, by default this is unset and the choice of
+#'   \code{pcg_rand} is used (making "pcg" the effective default).
 #' @param fast_sgd If \code{TRUE}, then the following combination of parameters
 #'   is set: \code{pcg_rand = TRUE}, \code{n_sgd_threads = "auto"} and
 #'   \code{approx_pow = TRUE}. The default is \code{FALSE}. Setting this to
@@ -1174,7 +1186,19 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param pcg_rand If \code{TRUE}, use the PCG random number generator (O'Neill,
 #'   2014) during optimization. Otherwise, use the faster (but probably less
 #'   statistically good) Tausworthe "taus88" generator. The default is
-#'   \code{TRUE}.
+#'   \code{TRUE}. This parameter has been superseded by \code{rng_type} -- if
+#'   both are set, \code{rng_type} takes precedence.
+#' @param rng_type The type of random number generator to use during
+#'   optimization. One of:
+#'   \itemize{
+#'    \item{\code{"pcg"}}. Use the PCG random number generator (O'Neill, 2014).
+#'    \item{\code{"tausworthe"}}. Use the Tausworthe "taus88" generator.
+#'    \item{\code{"deterministic"}}. Use a deterministic number generator. This
+#'    isn't actually random, but may provide enough variation in the negative
+#'    sampling to give a good embedding and can provide a noticeable speed-up.
+#'   }
+#'   For backwards compatibility, by default this is unset and the choice of
+#'   \code{pcg_rand} is used (making "pcg" the effective default).
 #' @param fast_sgd If \code{TRUE}, then the following combination of parameters
 #'   is set: \code{pcg_rand = TRUE} and \code{n_sgd_threads = "auto"}. The
 #'   default is \code{FALSE}. Setting this to \code{TRUE} will speed up the
@@ -1823,7 +1847,19 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' @param pcg_rand If \code{TRUE}, use the PCG random number generator (O'Neill,
 #'   2014) during optimization. Otherwise, use the faster (but probably less
 #'   statistically good) Tausworthe "taus88" generator. The default is
-#'   \code{TRUE}.
+#'   \code{TRUE}. This parameter has been superseded by \code{rng_type} -- if
+#'   both are set, \code{rng_type} takes precedence.
+#' @param rng_type The type of random number generator to use during
+#'   optimization. One of:
+#'   \itemize{
+#'    \item{\code{"pcg"}}. Use the PCG random number generator (O'Neill, 2014).
+#'    \item{\code{"tausworthe"}}. Use the Tausworthe "taus88" generator.
+#'    \item{\code{"deterministic"}}. Use a deterministic number generator. This
+#'    isn't actually random, but may provide enough variation in the negative
+#'    sampling to give a good embedding and can provide a noticeable speed-up.
+#'   }
+#'   For backwards compatibility, by default this is unset and the choice of
+#'   \code{pcg_rand} is used (making "pcg" the effective default).
 #' @param fast_sgd If \code{TRUE}, then the following combination of parameters
 #'   is set: \code{pcg_rand = TRUE} and \code{n_sgd_threads = "auto"}. The
 #'   default is \code{FALSE}. Setting this to \code{TRUE} will speed up the
@@ -2722,7 +2758,19 @@ similarity_graph <- function(X = NULL, n_neighbors = NULL, metric = "euclidean",
 #' @param pcg_rand If \code{TRUE}, use the PCG random number generator (O'Neill,
 #'   2014) during optimization. Otherwise, use the faster (but probably less
 #'   statistically good) Tausworthe "taus88" generator. The default is
-#'   \code{TRUE}.
+#'   \code{TRUE}. This parameter has been superseded by \code{rng_type} -- if
+#'   both are set, \code{rng_type} takes precedence.
+#' @param rng_type The type of random number generator to use during
+#'   optimization. One of:
+#'   \itemize{
+#'    \item{\code{"pcg"}}. Use the PCG random number generator (O'Neill, 2014).
+#'    \item{\code{"tausworthe"}}. Use the Tausworthe "taus88" generator.
+#'    \item{\code{"deterministic"}}. Use a deterministic number generator. This
+#'    isn't actually random, but may provide enough variation in the negative
+#'    sampling to give a good embedding and can provide a noticeable speed-up.
+#'   }
+#'   For backwards compatibility, by default this is unset and the choice of
+#'   \code{pcg_rand} is used (making "pcg" the effective default).
 #' @param fast_sgd If \code{TRUE}, then the following combination of parameters
 #'   is set: \code{pcg_rand = TRUE}, \code{n_sgd_threads = "auto"} and
 #'   \code{approx_pow = TRUE}. The default is \code{FALSE}. Setting this to
@@ -2857,7 +2905,8 @@ optimize_graph_layout <-
            opt_args = NULL,
            epoch_callback = NULL,
            pca_method = NULL,
-           binary_edge_weights = FALSE) {
+           binary_edge_weights = FALSE,
+           rng_type = NULL) {
     if (!is_sparse_matrix(graph)) {
       stop("graph should be a sparse matrix")
     }
@@ -2907,7 +2956,8 @@ optimize_graph_layout <-
       batch = batch,
       opt_args = opt_args,
       epoch_callback = epoch_callback,
-      pca_method = pca_method
+      pca_method = pca_method,
+      rng_type = rng_type
     )
   }
 

@@ -29,7 +29,8 @@ optimize_graph_layout(
   opt_args = NULL,
   epoch_callback = NULL,
   pca_method = NULL,
-  binary_edge_weights = FALSE
+  binary_edge_weights = FALSE,
+  rng_type = NULL
 )
 }
 \arguments{
@@ -149,7 +150,8 @@ in the UMAP gradient, from
 \item{pcg_rand}{If \code{TRUE}, use the PCG random number generator (O'Neill,
 2014) during optimization. Otherwise, use the faster (but probably less
 statistically good) Tausworthe "taus88" generator. The default is
-\code{TRUE}.}
+\code{TRUE}. This parameter has been superseded by \code{rng_type} -- if
+both are set, \code{rng_type} takes precedence.}
 
 \item{fast_sgd}{If \code{TRUE}, then the following combination of parameters
 is set: \code{pcg_rand = TRUE}, \code{n_sgd_threads = "auto"} and
@@ -251,6 +253,18 @@ the \code{pca} parameter is specified. Allowed values are:
 
 \item{binary_edge_weights}{If \code{TRUE} then edge weights in the input
 graph are treated as binary (0/1) rather than real valued.}
+
+\item{rng_type}{The type of random number generator to use during
+optimization. One of:
+\itemize{
+ \item{\code{"pcg"}}. Use the PCG random number generator (O'Neill, 2014).
+ \item{\code{"tausworthe"}}. Use the Tausworthe "taus88" generator.
+ \item{\code{"deterministic"}}. Use a deterministic number generator. This
+ isn't actually random, but may provide enough variation in the negative
+ sampling to give a good embedding and can provide a noticeable speed-up.
+}
+For backwards compatibility, by default this is unset and the choice of
+\code{pcg_rand} is used (making "pcg" the effective default).}
 }
 \value{
 A matrix of optimized coordinates.
