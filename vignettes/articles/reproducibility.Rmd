@@ -26,11 +26,20 @@ locking carried out on the underlying coordinate matrix, and work is partitioned
 by edge not vertex and a given vertex may be processed by different threads. The
 order in which reads and writes occur is of course at the whim of the thread
 scheduler. This is the same behavior as LargeVis.
+* Use `rng_type = "deterministic`, which will make vertex sampling during the
+optimization deterministic. Note that this will *not* affect the use of a random
+number generator in other parts of the algorithm, such as approximate nearest
+neighbor search and initialization. This may give slightly less accurate results
+due to the lack of random sampling but the trade-off may be worth it (and it's
+also a bit faster).
+* For random number generation, you can provide a `seed` parameter. This doesn't
+do anything other than call `set.seed` for you inside the routine, but you may
+find it convenient to fix the seed in the call to `umap`.
 
 In summary, your chances of reproducibility are increased by using:
 
 ```R
-mnist_umap <- umap(mnist, a = 1.8956, b = 0.8006, approx_pow = TRUE, init = "spca", batch = TRUE)
+mnist_umap <- umap(mnist, a = 1.8956, b = 0.8006, approx_pow = TRUE, init = "spca", batch = TRUE, rng_type = "deterministic", seed = 42)
 # or
-mnist_tumap <- tumap(mnist, init = "spca", batch = TRUE)
+mnist_tumap <- tumap(mnist, init = "spca", batch = TRUE, rng_type = "deterministic", seed = 42)
 ```
