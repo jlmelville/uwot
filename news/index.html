@@ -46,6 +46,8 @@
 <ul><li>Setting <code>num_threads</code> directly in <code>umap2</code> did not result in the number of SGD threads being updated to that value when <code>batch = TRUE</code>, which it should have been.</li>
 <li>Despite assertions to the contrary in version 0.2.1, <code>umap_transform</code> continued to return the fuzzy graph in transposed form. Thank you <a href="https://github.com/PedroMilanezAlmeida" class="external-link">PedroMilanezAlmeida</a> for reopening the issue (<a href="https://github.com/jlmelville/uwot/issues/118" class="external-link uri">https://github.com/jlmelville/uwot/issues/118</a>).</li>
 <li>Relative paths could not be used to save a model. Thank you <a href="https://github.com/Ax3man" class="external-link">Wouter van der Bijl</a> for the bug report (<a href="https://github.com/jlmelville/uwot/issues/131" class="external-link uri">https://github.com/jlmelville/uwot/issues/131</a>) and the suggested fix.</li>
+<li>
+<code>repulsion_strength</code> was silently ignored if used with <code>tumap</code> or <code>umap2</code> with <code>a = 1, b = 1</code>. Ignoring the setting was on purpose, but it was not documented anywhere. <code>repulsion_strength</code> is now compatible with these settings.</li>
 </ul></div>
 </div>
     <div class="section level2">
