@@ -144,3 +144,23 @@ biggest speed increase. However, you could still consider setting
 where the PCA and nearest neighbor search dominates, the gains are smaller:
 a 10-15% speedup for `tasic2018` and `macosko2015`, and only 5% for `norb`.
 If you need to set `n_epochs` higher, then these time savings will increase.
+
+### Update December 22 2024
+
+Since I wrote this document, there are some extra options available. As of uwot 
+0.2.3, the `rng_type` parameter is preferred over `pcg_rand`. The equivalent of
+`pcg_rand = FALSE` is `rng_type = "tausworthe"`, but you can also set 
+`rng_type = "deterministic"`, which will deterministically sample the vertices.
+This can give a bigger speed up than `rng_type = "tausworthe"`.
+
+Further, if you are using the `umap2` function and have
+[rnndescent](https://cran.r-project.org/package=rnndescent) installed, the
+following parameters can be used to speed up the nearest neighbor search:
+`nn_method = "nndescent", nn_args = list(n_trees = 8, max_candidates = 20)`.
+
+Finally, you can also consider setting `negative_sample_rate = 4`, which will
+give a slight speed up versus the default sample rate of 5.
+
+These suggestions are based on a comment by 
+[Leland McInnes on Reddit](https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy/).
+
