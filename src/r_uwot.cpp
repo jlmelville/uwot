@@ -243,8 +243,12 @@ void create_umap(UmapFactory &umap_factory, List method_args) {
   }
 }
 
-void create_tumap(UmapFactory &umap_factory, List) {
-  const uwot::tumap_gradient gradient;
+void create_tumap(UmapFactory &umap_factory, List method_args) {
+  std::vector<std::string> arg_names = {"gamma"};
+  validate_args(method_args, arg_names);
+  float gamma = method_args["gamma"];
+
+  const uwot::tumap_gradient gradient(gamma);
   umap_factory.create(gradient);
 }
 

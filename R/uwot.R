@@ -3721,7 +3721,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     method <- tolower(method)
     method_args <- switch(method,
       umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
-      tumap = list(),
+      tumap = list(gamma = gamma),
       # a = 1 b = 10 for final phase of PaCMAP optimization
       pacmap = list(a = a, b = b),
       largevis = list(gamma = gamma),

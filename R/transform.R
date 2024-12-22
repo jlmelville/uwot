@@ -803,6 +803,7 @@ umap_transform <- function(X = NULL, model = NULL,
 
     method_args <- switch(method,
       umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
+      tumap = list(gamma = gamma),
       leopold2 = list(ai = ai, aj = aj, b = b, ndim = ndim),
       list()
     )
