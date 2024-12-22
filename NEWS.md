@@ -1,5 +1,17 @@
 # uwot (development version)
 
+## New features:
+
+* New parameter: `rng_type`. This will be used in favor of the boolean 
+`pcg_rand` parameter, although `pcg_rand` will still work for backwards
+compatibility.
+* New negative sampling option: set `rng_type = "deterministic"` to use a
+deterministic sampling of vertices during the optimization phase. This should
+give qualitatively similar results to using a real PRNG, but has the advantage
+of being faster and giving more reproducible output. This feature was inspired
+by a comment by 
+[Leland McInnes on Reddit](https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy).
+
 ## Bug fixes and minor improvements
 
 * Setting `num_threads` directly in `umap2` did not result in the number of SGD
