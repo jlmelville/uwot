@@ -139,7 +139,7 @@ six threads, anyway).
 If reproducibility is important to you, then using multiple threads in the 
 optimization is out of the question, although that's what gives the 
 biggest speed increase. However, you could still consider setting 
-`approx_pow = TRUE, pcg_random = FALSE`. For MNIST-sized datasets (`mnist`, 
+`approx_pow = TRUE, pcg_rand = FALSE`. For MNIST-sized datasets (`mnist`, 
 `fashion`, `kuzushiji`) I saw a reasonable speed up of around 25%. For datasets
 where the PCA and nearest neighbor search dominates, the gains are smaller:
 a 10-15% speedup for `tasic2018` and `macosko2015`, and only 5% for `norb`.
