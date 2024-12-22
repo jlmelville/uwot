@@ -56,9 +56,22 @@ struct tau_prng {
   }
 
   // return a value in (0, n]
-  auto operator()(std::size_t n) -> std::size_t {
+  auto operator()(std::size_t n, std::size_t, std::size_t) -> std::size_t {
     std::size_t result = (*this)() % n;
     return result;
+  }
+};
+
+// A deterministic number generator, based on a comment from Leland McInnes at:
+// https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy/
+// "randomness doesn't really have to be that good, it just has to not select
+// the same things over and over. So simply computing something like
+// (edge_index * (epoch_number + 1)) % n_vertices can give "random enough"
+// results"
+struct deterministic_ng {
+  auto operator()(std::size_t n_vertices, std::size_t edge_index,
+                  std::size_t epoch) -> std::size_t {
+    return (edge_index * (epoch + 1)) % n_vertices;
   }
 };
 

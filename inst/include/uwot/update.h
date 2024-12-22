@@ -65,9 +65,10 @@ process_edge(Update &update, Gradient &gradient, Sampler &sampler, Prng &prng,
   update_attract(update, gradient, dj, dk, ndim, disp, thread_id);
 
   // Negative sampling step: assume any other point (dkn) is a -ve example
+  const std::size_t epoch = sampler.epoch;
   std::size_t n_neg_samples = sampler.get_num_neg_samples(edge);
   for (std::size_t p = 0; p < n_neg_samples; p++) {
-    const std::size_t dkn = prng(n_tail_vertices) * ndim;
+    const std::size_t dkn = prng(n_tail_vertices, edge, epoch) * ndim;
     if (dj == dkn) {
       continue;
     }

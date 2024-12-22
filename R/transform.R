@@ -371,10 +371,20 @@ umap_transform <- function(X = NULL, model = NULL,
   negative_sample_rate <- model$negative_sample_rate
   approx_pow <- model$approx_pow
   norig_col <- model$norig_col
-  pcg_rand <- model$pcg_rand
-  if (is.null(pcg_rand)) {
-    tsmessage("Using PCG for random number generation")
-    pcg_rand <- TRUE
+
+  rng_type <- model$rng_type
+  if (is.null(rng_type)) {
+    pcg_rand <- model$pcg_rand
+    if (is.null(pcg_rand)) {
+      rng_type <- "pcg"
+    }
+    else {
+      if (pcg_rand) {
+        rng_type <- "pcg"
+      } else {
+        rng_type <- "tausworthe"
+      }
+    }
   }
   num_precomputed_nns <- model$num_precomputed_nns
   binary_edge_weights <- model$binary_edge_weights
@@ -814,7 +824,7 @@ umap_transform <- function(X = NULL, model = NULL,
       initial_alpha = alpha / 4.0,
       opt_args = full_opt_args,
       negative_sample_rate = negative_sample_rate,
-      pcg_rand = pcg_rand,
+      rng_type = rng_type,
       batch = batch,
       n_threads = n_sgd_threads,
       grain_size = grain_size,

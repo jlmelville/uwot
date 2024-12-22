@@ -45,15 +45,17 @@ auto lget(List list, const std::string &name, T default_value) -> T {
 template <bool DoBatch = true> struct BatchRngFactory {
   using PcgFactoryType = batch_pcg_factory;
   using TauFactoryType = batch_tau_factory;
+  using DeterministicFactoryType = deterministic_factory;
 };
 template <> struct BatchRngFactory<false> {
   using PcgFactoryType = pcg_factory;
   using TauFactoryType = tau_factory;
+  using DeterministicFactoryType = deterministic_factory;
 };
 
 struct UmapFactory {
   bool move_other;
-  bool pcg_rand;
+  const std::string &rng_type;
   std::vector<float> &head_embedding;
   std::vector<float> &tail_embedding;
   const std::vector<unsigned int> &positive_head;
@@ -72,7 +74,7 @@ struct UmapFactory {
   uwot::EpochCallback *epoch_callback;
   bool verbose;
 
-  UmapFactory(bool move_other, bool pcg_rand,
+  UmapFactory(bool move_other, const std::string &rng_type,
               std::vector<float> &head_embedding,
               std::vector<float> &tail_embedding,
               const std::vector<unsigned int> &positive_head,
@@ -84,7 +86,7 @@ struct UmapFactory {
               List opt_args, float negative_sample_rate, bool batch,
               std::size_t n_threads, std::size_t grain_size,
               uwot::EpochCallback *epoch_callback, bool verbose)
-      : move_other(move_other), pcg_rand(pcg_rand),
+      : move_other(move_other), rng_type(rng_type),
         head_embedding(head_embedding), tail_embedding(tail_embedding),
         positive_head(positive_head), positive_tail(positive_tail),
         positive_ptr(positive_ptr), n_epochs(n_epochs),
@@ -96,29 +98,36 @@ struct UmapFactory {
 
   template <typename Gradient> void create(const Gradient &gradient) {
     if (move_other) {
-      create_impl<true>(gradient, pcg_rand, batch);
+      create_impl<true>(gradient, rng_type, batch);
     } else {
-      create_impl<false>(gradient, pcg_rand, batch);
+      create_impl<false>(gradient, rng_type, batch);
     }
   }
 
   template <bool DoMove, typename Gradient>
-  void create_impl(const Gradient &gradient, bool pcg_rand, bool batch) {
+  void create_impl(const Gradient &gradient, const std::string &rng_type,
+                   bool batch) {
     if (batch) {
-      create_impl<BatchRngFactory<true>, DoMove>(gradient, pcg_rand, batch);
+      create_impl<BatchRngFactory<true>, DoMove>(gradient, rng_type, batch);
     } else {
-      create_impl<BatchRngFactory<false>, DoMove>(gradient, pcg_rand, batch);
+      create_impl<BatchRngFactory<false>, DoMove>(gradient, rng_type, batch);
     }
   }
 
   template <typename BatchRngFactory, bool DoMove, typename Gradient>
-  void create_impl(const Gradient &gradient, bool pcg_rand, bool batch) {
-    if (pcg_rand) {
+  void create_impl(const Gradient &gradient, const std::string &rng_type,
+                   bool batch) {
+    if (rng_type == "pcg") {
       create_impl<typename BatchRngFactory::PcgFactoryType, DoMove>(gradient,
                                                                     batch);
-    } else {
+    } else if (rng_type == "tausworthe") {
       create_impl<typename BatchRngFactory::TauFactoryType, DoMove>(gradient,
                                                                     batch);
+    } else if (rng_type == "deterministic") {
+      create_impl<typename BatchRngFactory::DeterministicFactoryType, DoMove>(
+          gradient, batch);
+    } else {
+      stop("Invalid rng type: ", rng_type);
     }
   }
 
@@ -326,15 +335,16 @@ NumericMatrix optimize_layout_r(
     const std::vector<float> epochs_per_sample, const std::string &method,
     List method_args, float initial_alpha, List opt_args,
     Nullable<Function> epoch_callback, float negative_sample_rate,
-    bool pcg_rand = true, bool batch = false, std::size_t n_threads = 0,
-    std::size_t grain_size = 1, bool move_other = true, bool verbose = false) {
+    const std::string &rng_type = "tausworthe", bool batch = false,
+    std::size_t n_threads = 0, std::size_t grain_size = 1,
+    bool move_other = true, bool verbose = false) {
 
   auto coords = r_to_coords(head_embedding, tail_embedding);
   const std::size_t ndim = head_embedding.size() / n_head_vertices;
   uwot::EpochCallback *uwot_ecb =
       create_callback(epoch_callback, ndim, move_other);
 
-  UmapFactory umap_factory(move_other, pcg_rand, coords.get_head_embedding(),
+  UmapFactory umap_factory(move_other, rng_type, coords.get_head_embedding(),
                            coords.get_tail_embedding(), positive_head,
                            positive_tail, positive_ptr, n_epochs,
                            n_head_vertices, n_tail_vertices, epochs_per_sample,

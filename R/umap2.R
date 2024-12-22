@@ -708,7 +708,8 @@ umap2 <-
            binary_edge_weights = FALSE,
            dens_scale = NULL,
            seed = NULL,
-           nn_args = list()) {
+           nn_args = list(),
+           rng_type = NULL) {
     if (is.null(nn_method)) {
       if (is_installed("RcppHNSW") &&
         is.character(metric) &&
@@ -815,6 +816,7 @@ umap2 <-
       dens_scale = dens_scale,
       seed = seed,
       nn_args = nn_args,
-      sparse_X_is_distance_matrix = FALSE
+      sparse_X_is_distance_matrix = FALSE,
+      rng_type = rng_type
     )
   }

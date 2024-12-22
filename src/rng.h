@@ -70,7 +70,7 @@ struct pcg_prng {
   pcg_prng(uint64_t seed) { gen.seed(seed); }
 
   // return a value in (0, n]
-  inline std::size_t operator()(std::size_t n) {
+  inline std::size_t operator()(std::size_t n, std::size_t, std::size_t) {
     std::size_t result = gen(n);
     return result;
   }
@@ -126,6 +126,16 @@ struct pcg_factory {
   pcg_prng create(std::size_t seed) {
     uint32_t seeds[2] = {seed1, static_cast<uint32_t>(seed)};
     return pcg_prng(dqrng::convert_seed<uint64_t>(seeds, 2));
+  }
+};
+
+struct deterministic_factory {
+  deterministic_factory(std::size_t) {}
+
+  void reseed() {}
+
+  uwot::deterministic_ng create(std::size_t seed) {
+    return uwot::deterministic_ng();
   }
 };
 

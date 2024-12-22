@@ -13,8 +13,8 @@ calc_row_probabilities_parallel <- function(nn_dist, n_vertices, perplexity, n_i
     .Call(`_uwot_calc_row_probabilities_parallel`, nn_dist, n_vertices, perplexity, n_iter, tol, ret_sigma, n_threads, grain_size)
 }
 
-optimize_layout_r <- function(head_embedding, tail_embedding, positive_head, positive_tail, positive_ptr, n_epochs, n_head_vertices, n_tail_vertices, epochs_per_sample, method, method_args, initial_alpha, opt_args, epoch_callback, negative_sample_rate, pcg_rand = TRUE, batch = FALSE, n_threads = 0L, grain_size = 1L, move_other = TRUE, verbose = FALSE) {
-    .Call(`_uwot_optimize_layout_r`, head_embedding, tail_embedding, positive_head, positive_tail, positive_ptr, n_epochs, n_head_vertices, n_tail_vertices, epochs_per_sample, method, method_args, initial_alpha, opt_args, epoch_callback, negative_sample_rate, pcg_rand, batch, n_threads, grain_size, move_other, verbose)
+optimize_layout_r <- function(head_embedding, tail_embedding, positive_head, positive_tail, positive_ptr, n_epochs, n_head_vertices, n_tail_vertices, epochs_per_sample, method, method_args, initial_alpha, opt_args, epoch_callback, negative_sample_rate, rng_type = "tausworthe", batch = FALSE, n_threads = 0L, grain_size = 1L, move_other = TRUE, verbose = FALSE) {
+    .Call(`_uwot_optimize_layout_r`, head_embedding, tail_embedding, positive_head, positive_tail, positive_ptr, n_epochs, n_head_vertices, n_tail_vertices, epochs_per_sample, method, method_args, initial_alpha, opt_args, epoch_callback, negative_sample_rate, rng_type, batch, n_threads, grain_size, move_other, verbose)
 }
 
 smooth_knn_distances_parallel <- function(nn_dist, nn_ptr, skip_first, target, n_iter = 64L, local_connectivity = 1.0, tol = 1e-5, min_k_dist_scale = 1e-3, ret_sigma = FALSE, n_threads = 0L, grain_size = 1L) {

@@ -700,7 +700,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  binary_edge_weights = FALSE,
                  dens_scale = NULL,
                  seed = NULL,
-                 nn_args = list()) {
+                 nn_args = list(),
+                 rng_type = NULL) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric, n_epochs = n_epochs, alpha = learning_rate, scale = scale,
@@ -732,7 +733,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     verbose = verbose,
     dens_scale = dens_scale,
     seed = seed,
-    nn_args = nn_args
+    nn_args = nn_args,
+    rng_type = rng_type
   )
 }
 
@@ -1433,7 +1435,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   pca_method = NULL,
                   binary_edge_weights = FALSE,
                   seed = NULL,
-                  nn_args = list()) {
+                  nn_args = list(),
+                  rng_type = NULL) {
   uwot(
     X = X, n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -1464,7 +1467,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     seed = seed,
     tmpdir = tmpdir,
     verbose = verbose,
-    nn_args = nn_args
+    nn_args = nn_args,
+    rng_type = rng_type
   )
 }
 
@@ -2029,7 +2033,8 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   opt_args = NULL, epoch_callback = NULL,
                   pca_method = NULL,
                   binary_edge_weights = FALSE,
-                  nn_args = list()) {
+                  nn_args = list(),
+                  rng_type = NULL) {
   uwot(X,
     n_neighbors = n_neighbors, n_components = n_components,
     metric = metric,
@@ -2054,7 +2059,8 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     tmpdir = tmpdir,
     binary_edge_weights = binary_edge_weights,
     verbose = verbose,
-    nn_args = list()
+    nn_args = list(),
+    rng_type = rng_type
   )
 }
 
@@ -3058,7 +3064,8 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  is_similarity_graph = FALSE,
                  seed = NULL,
                  nn_args = list(),
-                 sparse_X_is_distance_matrix = TRUE) {
+                 sparse_X_is_distance_matrix = TRUE,
+                 rng_type = "pcg") {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -3149,6 +3156,11 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     tsmessage("Setting random seed ", seed)
     set.seed(seed)
   }
+
+  if (is.null(rng_type)) {
+    rng_type <- ifelse(pcg_rand, "pcg", "tausworthe")
+  }
+  rng_type <- match.arg(rng_type, c("pcg", "tausworthe", "deterministic"))
 
   if (is.character(nn_method) && nn_method == "hnsw") {
     if (!is_installed("RcppHNSW")) {
@@ -3666,6 +3678,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       leopold = list(ai = ai, b = b, ndim = n_components),
       stop("Unknown dimensionality reduction method '", method, "'")
     )
+    tsmessage("Using rng type: ", rng_type)
 
     embedding <- t(embedding)
     embedding <- optimize_layout_r(
@@ -3683,7 +3696,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       initial_alpha = alpha,
       opt_args = full_opt_args,
       negative_sample_rate = negative_sample_rate,
-      pcg_rand = pcg_rand,
+      rng_type = rng_type,
       batch = batch,
       n_threads = n_sgd_threads,
       grain_size = grain_size,
