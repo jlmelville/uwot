@@ -87,7 +87,8 @@ dimensional representation of the graph produced by
 <span>  opt_args <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  epoch_callback <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pca_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  binary_edge_weights <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  binary_edge_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  rng_type <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -237,7 +238,8 @@ in the UMAP gradient, from
 <dd><p>If <code>TRUE</code>, use the PCG random number generator (O'Neill,
 2014) during optimization. Otherwise, use the faster (but probably less
 statistically good) Tausworthe "taus88" generator. The default is
-<code>TRUE</code>.</p></dd>
+<code>TRUE</code>. This parameter has been superseded by <code>rng_type</code> – if
+both are set, <code>rng_type</code> takes precedence.</p></dd>
 
 
 <dt id="arg-fast-sgd">fast_sgd<a class="anchor" aria-label="anchor" href="#arg-fast-sgd"></a></dt>
@@ -351,6 +353,17 @@ the <code>pca</code> parameter is specified. Allowed values are:</p><ul><li><p><
 <dt id="arg-binary-edge-weights">binary_edge_weights<a class="anchor" aria-label="anchor" href="#arg-binary-edge-weights"></a></dt>
 <dd><p>If <code>TRUE</code> then edge weights in the input
 graph are treated as binary (0/1) rather than real valued.</p></dd>
+
+
+<dt id="arg-rng-type">rng_type<a class="anchor" aria-label="anchor" href="#arg-rng-type"></a></dt>
+<dd><p>The type of random number generator to use during
+optimization. One of:</p><ul><li><p><code>"pcg"</code>. Use the PCG random number generator (O'Neill, 2014).</p></li>
+<li><p><code>"tausworthe"</code>. Use the Tausworthe "taus88" generator.</p></li>
+<li><p><code>"deterministic"</code>. Use a deterministic number generator. This
+ isn't actually random, but may provide enough variation in the negative
+ sampling to give a good embedding and can provide a noticeable speed-up.</p></li>
+</ul><p>For backwards compatibility, by default this is unset and the choice of
+<code>pcg_rand</code> is used (making "pcg" the effective default).</p></dd>
 
 </dl></div>
     <div class="section level2">

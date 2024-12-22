@@ -92,13 +92,24 @@ the underlying coordinate matrix, and work is partitioned by edge not
 vertex and a given vertex may be processed by different threads. The
 order in which reads and writes occur is of course at the whim of the
 thread scheduler. This is the same behavior as LargeVis.</li>
+<li>Use <code>rng_type = "deterministic</code>, which will make vertex
+sampling during the optimization deterministic. Note that this will
+<em>not</em> affect the use of a random number generator in other parts
+of the algorithm, such as approximate nearest neighbor search and
+initialization. This may give slightly less accurate results due to the
+lack of random sampling but the trade-off may be worth it (and it’s also
+a bit faster).</li>
+<li>For random number generation, you can provide a <code>seed</code>
+parameter. This doesn’t do anything other than call
+<code>set.seed</code> for you inside the routine, but you may find it
+convenient to fix the seed in the call to <code>umap</code>.</li>
 </ul>
 <p>In summary, your chances of reproducibility are increased by
 using:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mnist_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, a <span class="op">=</span> <span class="fl">1.8956</span>, b <span class="op">=</span> <span class="fl">0.8006</span>, approx_pow <span class="op">=</span> <span class="cn">TRUE</span>, init <span class="op">=</span> <span class="st">"spca"</span>, batch <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">mnist_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, a <span class="op">=</span> <span class="fl">1.8956</span>, b <span class="op">=</span> <span class="fl">0.8006</span>, approx_pow <span class="op">=</span> <span class="cn">TRUE</span>, init <span class="op">=</span> <span class="st">"spca"</span>, batch <span class="op">=</span> <span class="cn">TRUE</span>, rng_type <span class="op">=</span> <span class="st">"deterministic"</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span><span class="co"># or</span></span>
-<span><span class="va">mnist_tumap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tumap.html">tumap</a></span><span class="op">(</span><span class="va">mnist</span>, init <span class="op">=</span> <span class="st">"spca"</span>, batch <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">mnist_tumap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tumap.html">tumap</a></span><span class="op">(</span><span class="va">mnist</span>, init <span class="op">=</span> <span class="st">"spca"</span>, batch <span class="op">=</span> <span class="cn">TRUE</span>, rng_type <span class="op">=</span> <span class="st">"deterministic"</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span></code></pre></div>
   </main>
 </div>
 

@@ -504,11 +504,25 @@ PaCMAP but it depends on the linear algebra library on your system.</p>
 PaCMAP will be a bit faster than UMAP under these conditions. In
 practice, the difference isn’t that large in my experience (a few
 seconds for <code>mnist</code>, for example). If speed matters to you
-than running <code>tumap</code> or <code>umap2</code> with
-<code>a = 1, b = 1</code> and <code>negative_sample_rate = 4.0</code>
-will close the gap a bit. On the other hand, if speed really matters,
-then PaCMAP will give you vital seconds back without having to fiddle
-with the UMAP defaults.</p>
+then I recommend using:</p>
+<ul>
+<li>
+<code>a = 1, b = 1</code> with <code>umap2</code> if you don’t mind
+a t-UMAP-like appearance.</li>
+<li>Or use <code>approx_pow = TRUE</code> if you do want to control
+<code>min_dist</code> and <code>spread</code> (or <code>a</code> and
+<code>b</code> directly).</li>
+<li>
+<code>negative_sample_rate = 4</code> will reduce the amount of
+negative sampling in line with what PaCMAP effectively does and
+shouldn’t affect things too much.</li>
+<li>consider using <code>rng_type = "deterministic"</code>, which will
+not use a random number generator at all for the negative sampling. If
+you want pseudo-random sampling, then
+<code>rng_type = "tausworthe"</code> is faster than the default.</li>
+</ul>
+<p>On the other hand, if speed really matters, then PaCMAP will give you
+vital seconds back without having to fiddle with the UMAP defaults.</p>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     var images = document.querySelectorAll("body img");

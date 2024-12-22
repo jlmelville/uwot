@@ -84,7 +84,8 @@ gradient. For more detail on UMAP, see the <code><a href="umap.html">umap</a></c
 <span>  pca_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  binary_edge_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  nn_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  nn_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  rng_type <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -448,7 +449,8 @@ carrying out PCA. For binary data, it's recommended to set this to
 <dd><p>If <code>TRUE</code>, use the PCG random number generator (O'Neill,
 2014) during optimization. Otherwise, use the faster (but probably less
 statistically good) Tausworthe "taus88" generator. The default is
-<code>TRUE</code>.</p></dd>
+<code>TRUE</code>. This parameter has been superseded by <code>rng_type</code> – if
+both are set, <code>rng_type</code> takes precedence.</p></dd>
 
 
 <dt id="arg-fast-sgd">fast_sgd<a class="anchor" aria-label="anchor" href="#arg-fast-sgd"></a></dt>
@@ -734,6 +736,17 @@ conjunction with <code>epsilon</code>) to avoid an inefficient exhaustive search
 of the data in <code>X</code>. This parameter only affects neighbor search when
 transforming new data with <code><a href="umap_transform.html">umap_transform</a></code>.</p></li>
 </ul></dd>
+
+
+<dt id="arg-rng-type">rng_type<a class="anchor" aria-label="anchor" href="#arg-rng-type"></a></dt>
+<dd><p>The type of random number generator to use during
+optimization. One of:</p><ul><li><p><code>"pcg"</code>. Use the PCG random number generator (O'Neill, 2014).</p></li>
+<li><p><code>"tausworthe"</code>. Use the Tausworthe "taus88" generator.</p></li>
+<li><p><code>"deterministic"</code>. Use a deterministic number generator. This
+ isn't actually random, but may provide enough variation in the negative
+ sampling to give a good embedding and can provide a noticeable speed-up.</p></li>
+</ul><p>For backwards compatibility, by default this is unset and the choice of
+<code>pcg_rand</code> is used (making "pcg" the effective default).</p></dd>
 
 </dl></div>
     <div class="section level2">

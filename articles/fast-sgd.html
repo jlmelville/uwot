@@ -260,7 +260,7 @@ saved. But for MNIST and Fashion, you can effectively halve the run time
 <p>If reproducibility is important to you, then using multiple threads
 in the optimization is out of the question, although that’s what gives
 the biggest speed increase. However, you could still consider setting
-<code>approx_pow = TRUE, pcg_random = FALSE</code>. For MNIST-sized
+<code>approx_pow = TRUE, pcg_rand = FALSE</code>. For MNIST-sized
 datasets (<code>mnist</code>, <code>fashion</code>,
 <code>kuzushiji</code>) I saw a reasonable speed up of around 25%. For
 datasets where the PCA and nearest neighbor search dominates, the gains
@@ -268,6 +268,26 @@ are smaller: a 10-15% speedup for <code>tasic2018</code> and
 <code>macosko2015</code>, and only 5% for <code>norb</code>. If you need
 to set <code>n_epochs</code> higher, then these time savings will
 increase.</p>
+<div class="section level3">
+<h3 id="update-december-22-2024">Update December 22 2024<a class="anchor" aria-label="anchor" href="#update-december-22-2024"></a>
+</h3>
+<p>Since I wrote this document, there are some extra options available.
+As of uwot 0.2.3, the <code>rng_type</code> parameter is preferred over
+<code>pcg_rand</code>. The equivalent of <code>pcg_rand = FALSE</code>
+is <code>rng_type = "tausworthe"</code>, but you can also set
+<code>rng_type = "deterministic"</code>, which will deterministically
+sample the vertices. This can give a bigger speed up than
+<code>rng_type = "tausworthe"</code>.</p>
+<p>Further, if you are using the <code>umap2</code> function and have <a href="https://cran.r-project.org/package=rnndescent" class="external-link">rnndescent</a>
+installed, the following parameters can be used to speed up the nearest
+neighbor search:
+<code>nn_method = "nndescent", nn_args = list(n_trees = 8, max_candidates = 20)</code>.</p>
+<p>Finally, you can also consider setting
+<code>negative_sample_rate = 4</code>, which will give a slight speed up
+versus the default sample rate of 5.</p>
+<p>These suggestions are based on a comment by <a href="https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy/" class="external-link">Leland
+McInnes on Reddit</a>.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
