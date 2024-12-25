@@ -750,14 +750,15 @@ umap2 <-
       if (!methods::is(X, "dgCMatrix")) {
         stop("sparse X must be a dgCMatrix object")
       }
-      if (!is.list(nn_method)) {
+      if (!is.list(nn_method) && !is_sparse_matrix(nn_method)) {
         if (!is_installed("rnndescent")) {
           stop(
             "nearest neighbor search for sparse matrices requires the ",
             "'rnndescent' package, please install it"
           )
         }
-        if (!is.null(nn_method) && nn_method != "nndescent") {
+        if (!is.null(nn_method) &&
+          is.character(nn_method) && nn_method != "nndescent") {
           stop(
             "nearest neighbor search for sparse matrices only supports ",
             "the 'nndescent' method"
