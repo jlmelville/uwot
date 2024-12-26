@@ -123,7 +123,8 @@ will be used for other symmetric values.</p>
 probability distributions:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><mfrac><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mrow><munderover><mo>∑</mo><mi>k</mi><mi>N</mi></munderover><msub><mi>v</mi><mrow><mi>k</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">
 p_{j|i} = \frac{v_{j|i}}{\sum_{k}^{N} v_{k|i}} 
-</annotation></semantics></math><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\beta_{i}</annotation></semantics></math>
+</annotation></semantics></math></p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\beta_{i}</annotation></semantics></math>
 is chosen by finding that value that results in the probability
 distribution having a specific perplexity. The perplexity has to be
 chosen by the user, but is interpreted as being a continuous version of
@@ -175,8 +176,9 @@ of the
 distributions:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>S</mi><mi>N</mi><mi>E</mi></mrow></msub><mo>=</mo><munderover><mo>∑</mo><mi>i</mi><mi>N</mi></munderover><munderover><mo>∑</mo><mi>j</mi><mi>N</mi></munderover><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>log</mo><mfrac><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><msub><mi>q</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub></mfrac></mrow><annotation encoding="application/x-tex">
 C_{SNE} = \sum_{i}^{N} \sum_{j}^{N} p_{j|i} \log \frac{p_{j|i}}{q_{j|i}} 
-</annotation></semantics></math> In all of the above (and in what
-follows), weights and probabilities when
+</annotation></semantics></math></p>
+<p>In all of the above (and in what follows), weights and probabilities
+when
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>=</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">i =
 j</annotation></semantics></math> are not defined. I don’t want to
 clutter the notation further, so assume they are excluded from any
@@ -300,7 +302,8 @@ likelihood function:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub><mo>=</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi></mrow></munder><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>log</mo><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><mi>γ</mi><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mover><mi>E</mi><mo accent="true">‾</mo></mover></mrow></munder><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 L_{LV} = \sum_{ \left(i, j\right) \in E} p_{ij} \log w_{ij} 
 +\gamma \sum_{\left(i, j\right) \in \bar{E}} \log \left(1 - w_{ij} \right)
-</annotation></semantics></math><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>
+</annotation></semantics></math></p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">w_{ij}</annotation></semantics></math>
 is the same as in t-SNE (the authors try some alternative
@@ -377,13 +380,14 @@ are then updated according to the gradients. This concludes one
 iteration of the SGD.</p>
 <p>The attractive and repulsive gradients for LargeVis are
 respectively:</p>
-<p><span class="math display">$$
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mo>−</mo><mn>2</mn></mrow><mrow><mn>1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup></mrow></mfrac><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^+ =
-\frac{-2}{1 + d_{ij}^2}p_{ij} \left(\mathbf{y_i - y_j}\right) \\
+\frac{-2}{1 + d_{ij}^2}p_{ij} \left(\mathbf{y_i - y_j}\right)
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>−</mo></msup><mo>=</mo><mfrac><mrow><mn>2</mn><mi>γ</mi></mrow><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^- =
-\frac{2\gamma}{\left(0.1 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}
-\left(\mathbf{y_i - y_j}\right)
-$$</span></p>
+\frac{2\gamma}{\left(0.1 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)} \left(\mathbf{y_i - y_j}\right)
+</annotation></semantics></math></p>
 <p>The value of 0.1 that appears in the repulsive gradient is there to
 prevent division by zero.</p>
 <p>Sampling of edges and vertices is not uniform. For the attractive
@@ -423,7 +427,8 @@ can be represented as symmetric weight matrices:</p>
 C_{UMAP} = 
 \sum_{ij} \left[ v_{ij} \log \left( \frac{v_{ij}}{w_{ij}} \right) + 
 (1 - v_{ij}) \log \left( \frac{1 - v_{ij}}{1 - w_{ij}} \right) \right]
-</annotation></semantics></math><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">v_{ij}</annotation></semantics></math>
+</annotation></semantics></math></p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">v_{ij}</annotation></semantics></math>
 are symmetrized input affinities, and are not probabilities. The graph
 interpretation of them as weights of edges in a graph still applies,
 though. These are arrived at differently to t-SNE and LargeVis. The
@@ -455,7 +460,8 @@ affinity graph is the default initialization method for UMAP.</p>
 SNE:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>+</mo><msub><mi>v</mi><mrow><mi>i</mi><mo stretchy="false" form="prefix">|</mo><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><msub><mi>v</mi><mrow><mi>i</mi><mo stretchy="false" form="prefix">|</mo><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
 v_{ij} = \left(v_{j|i} + v_{i|j}\right) - v_{j|i}v_{i|j}
-</annotation></semantics></math> or as a matrix operation:</p>
+</annotation></semantics></math></p>
+<p>or as a matrix operation:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>V</mi><mrow><mi>s</mi><mi>y</mi><mi>m</mi><mi>m</mi></mrow></msub><mo>=</mo><mi>V</mi><mo>+</mo><msup><mi>V</mi><mi>T</mi></msup><mo>−</mo><mi>V</mi><mo>∘</mo><msup><mi>V</mi><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">
 V_{symm} = V + V^{T} - V \circ V^{T}
 </annotation></semantics></math></p>
@@ -493,15 +499,14 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mn>0.7915</mn></mrow><annotation encoding="application/x-tex">b = 0.7915</annotation></semantics></math>.</p>
 <p>The attractive and repulsive UMAP gradient expressions are,
 respectively:</p>
-<p><span class="math display">$$
-\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ =
-\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}  v_{ij}
-\left(\mathbf{y_i - y_j}\right) \\
-\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- =
-\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 +
-ad_{ij}^{2b}\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i -
-y_j}\right)
-$$</span></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mo>−</mo><mn>2</mn><mi>a</mi><mi>b</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>b</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msubsup></mrow><mrow><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup></mrow></mfrac><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
+\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}  v_{ij} \left(\mathbf{y_i - y_j}\right)
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>−</mo></msup><mo>=</mo><mfrac><mrow><mn>2</mn><mi>b</mi></mrow><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.001</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
+\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + ad_{ij}^{2b}\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
+</annotation></semantics></math></p>
 <p>(<em>April 13 2020</em>: In previous versions of this document I had
 completely messed up this expression by omitting a factor of 2 in the
 repulsive gradient equation <em>and</em> missed out some important
