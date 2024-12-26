@@ -343,8 +343,8 @@ more "connected" embedding. You can click on any of the images to see a
 
 | Dataset | 15-NN | (15,2)-BMNN | (15,5)-BMNN |
 | :---: | --- | --- | --- |
-| MNIST | ![](img/bmnn/mnist-knn_15.png) | ![](img/bmnn/mnist-bmnn_15_2.png) | ![](img/bmnn/mnist-bmnn_15_5.png) |
-| fashion | ![](img/bmnn/fashion-knn_15.png) | ![](img/bmnn/fashion-bmnn_15_2.png) | ![](img/bmnn/fashion-bmnn_15_5.png) |
+| MNIST | ![mnist-knn_15](img/bmnn/mnist-knn_15.png) | ![mnist-bmnn_15_2](img/bmnn/mnist-bmnn_15_2.png) | ![mnist-bmnn_15_5](img/bmnn/mnist-bmnn_15_5.png) |
+| fashion | ![fashion-knn_15](img/bmnn/fashion-knn_15.png) | ![fashion-bmnn_15_2](img/bmnn/fashion-bmnn_15_2.png) | ![fashion-bmnn_15_5](img/bmnn/fashion-bmnn_15_5.png) |
 
 Although it's not that easy to see unless you click on the image, the
 (15,2)-BMNN results do show a sprinkling of outlier points throughout the
@@ -369,8 +369,8 @@ focusing on the mutual neighbors, it's these two.
 
 | Dataset | 15-NN | (15,5)-BMNN |
 | :---: | --- | --- |
-| coil20  | ![](img/bmnn/coil20-knn_15.png) | ![](img/bmnn/coil20-bmnn_15_5.png) | 
-| coil100  | ![](img/bmnn/coil100-knn_15.png) | ![](img/bmnn/coil100-bmnn_15_5.png) | 
+| coil20 | ![coil20-knn_15](img/bmnn/coil20-knn_15.png) | ![coil20-bmnn_15_5](img/bmnn/coil20-bmnn_15_5.png) | 
+| coil100 | ![coil100-knn_15](img/bmnn/coil100-knn_15.png) | ![coil100-bmnn_15_5](img/bmnn/coil100-bmnn_15_5.png) | 
 
 I no longer feel like I am lying to myself when I say I can see a difference
 between the two embeddings. The BMNN graph definitely seems to have untangled
@@ -413,11 +413,11 @@ and COIL-100?
 
 | Dataset | 15-NN | (15,5)-BMNN |
 | :---: | --- | --- |
-| norb  | ![](img/bmnn/norb-knn_15.png) | ![](img/bmnn/norb-bmnn_15_5.png) | 
-| macosko2015 | ![](img/bmnn/macosko2015-knn_15.png) | ![](img/bmnn/macosko2015-bmnn_15_5.png) |
-| macosko2015pca100 | ![](img/bmnn/macosko2015pca100-knn_15.png) | ![](img/bmnn/macosko2015pca100-bmnn_15_5.png) |
-| 20NG | ![](img/bmnn/ng20-knn_15.png) | ![](img/bmnn/ng20-bmnn_15_5.png) | 
-| cifar10 | ![](img/bmnn/cifar10-knn_15.png) | ![](img/bmnn/cifar10-bmnn_15_5.png) | 
+| norb  | ![norb-knn_15](img/bmnn/norb-knn_15.png) | ![norb-bmnn_15_5](img/bmnn/norb-bmnn_15_5.png) | 
+| macosko2015 | ![macosko2015-knn_15](img/bmnn/macosko2015-knn_15.png) | ![macosko2015-bmnn_15_5](img/bmnn/macosko2015-bmnn_15_5.png) |
+| macosko2015pca100 | ![macosko2015pca100-knn_15](img/bmnn/macosko2015pca100-knn_15.png) | ![macosko2015pca100-bmnn_15_5](img/bmnn/macosko2015pca100-bmnn_15_5.png) |
+| 20NG | ![ng20-knn_15](img/bmnn/ng20-knn_15.png) | ![ng20-bmnn_15_5](img/bmnn/ng20-bmnn_15_5.png) | 
+| cifar10 | ![cifar10-knn_15](img/bmnn/cifar10-knn_15.png) | ![cifar10-bmnn_15_5](img/bmnn/cifar10-bmnn_15_5.png) | 
 
 Ok, so it turns out that the BMNN graph doesn't really help in any of these
 cases. `norb` is particularly disappointing in that it noticeably makes things
@@ -434,7 +434,7 @@ least often in the kNN graph. This reduces the maximum edge count in the BMNN
 to around 200 (a nearly 20-fold drop), but the embedding looks very similar to
 the vanilla UMAP result:
 
-![](img/bmnn/macosko2015-kbmnn_15_5.png)
+![macosko2015-kbmnn_15_5](img/bmnn/macosko2015-kbmnn_15_5.png)
 
 I include this image only because this is evidence against my long-held belief
 that hubs in the kNN graph are a problem for UMAP, so this is a good

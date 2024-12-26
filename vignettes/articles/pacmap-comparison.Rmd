@@ -165,20 +165,20 @@ the results are representative of the methods' performance.
 
 If you have javascript enabled, you can click on any image to embiggen it.
 
-| Dataset | UMAP | UMAP PCA | UMAP-PCA100 | PaCMAP |
+| Dataset | UMAP | UMAP PCA | UMAP PCA100 | PaCMAP |
 | :---: | --- | --- | --- | --- |
-| curve2d | ![](img/pacmap-comparison/umap/curve2d.png) | ![](img/pacmap-comparison/umap-pca/curve2d.png) | ![](img/pacmap-comparison/umap-pca100/curve2d.png) | ![](img/pacmap-comparison/pacmap/curve2d.png) |
-| mammoth | ![](img/pacmap-comparison/umap/mammoth.png) | ![](img/pacmap-comparison/umap-pca/mammoth.png) | ![](img/pacmap-comparison/umap-pca100/mammoth.png) | ![](img/pacmap-comparison/pacmap/mammoth.png) |
-| scurvehole | ![](img/pacmap-comparison/umap/scurvehole.png) | ![](img/pacmap-comparison/umap-pca/scurvehole.png) | ![](img/pacmap-comparison/umap-pca100/scurvehole.png) | ![](img/pacmap-comparison/pacmap/scurvehole.png) |
-| isoswiss | ![](img/pacmap-comparison/umap/isoswiss.png) | ![](img/pacmap-comparison/umap-pca/isoswiss.png) | ![](img/pacmap-comparison/umap-pca100/isoswiss.png) | ![](img/pacmap-comparison/pacmap/isoswiss.png) |
-| hierarchical | ![](img/pacmap-comparison/umap/hierarchical.png) | ![](img/pacmap-comparison/umap-pca/hierarchical.png) | ![](img/pacmap-comparison/umap-pca100/hierarchical.png) | ![](img/pacmap-comparison/pacmap/hierarchical.png) |
-| spheres | ![](img/pacmap-comparison/umap/spheres.png) | ![](img/pacmap-comparison/umap-pca/spheres.png) | ![](img/pacmap-comparison/umap-pca100/spheres.png) | ![](img/pacmap-comparison/pacmap/spheres.png) |
-| coil20 | ![](img/pacmap-comparison/umap/coil20.png) | ![](img/pacmap-comparison/umap-pca/coil20.png) | ![](img/pacmap-comparison/umap-pca100/coil20.png) | ![](img/pacmap-comparison/pacmap/coil20.png) |
-| coil100 | ![](img/pacmap-comparison/umap/coil100.png) | ![](img/pacmap-comparison/umap-pca/coil100.png) | ![](img/pacmap-comparison/umap-pca100/coil100.png) | ![](img/pacmap-comparison/pacmap/coil100.png) |
-| macosko2015 | ![](img/pacmap-comparison/umap/macosko2015.png) | ![](img/pacmap-comparison/umap-pca/macosko2015.png) | ![](img/pacmap-comparison/umap-pca100/macosko2015.png) | ![](img/pacmap-comparison/pacmap/macosko2015.png) |
-| mnist | ![](img/pacmap-comparison/umap/mnist.png) | ![](img/pacmap-comparison/umap-pca/mnist.png) | ![](img/pacmap-comparison/umap-pca100/mnist.png) | ![](img/pacmap-comparison/pacmap/mnist.png) |
-| fashion | ![](img/pacmap-comparison/umap/fashion.png) | ![](img/pacmap-comparison/umap-pca/fashion.png) | ![](img/pacmap-comparison/umap-pca100/fashion.png) | ![](img/pacmap-comparison/pacmap/fashion.png) |
-| ng20pacmap | ![](img/pacmap-comparison/umap/ng20pacmap.png) | ![](img/pacmap-comparison/umap-pca/ng20pacmap.png) | ![](img/pacmap-comparison/umap-pca100/ng20pacmap.png) | ![](img/pacmap-comparison/pacmap/ng20pacmap.png) |
+| curve2d | ![curve2d-umap](img/pacmap-comparison/umap/curve2d.png) | ![curve2d-umap-pca](img/pacmap-comparison/umap-pca/curve2d.png) | ![curve2d-umap-pca100](img/pacmap-comparison/umap-pca100/curve2d.png) | ![curve2d-pacmap](img/pacmap-comparison/pacmap/curve2d.png) |
+| mammoth | ![mammoth-umap](img/pacmap-comparison/umap/mammoth.png) | ![mammoth-umap-pca](img/pacmap-comparison/umap-pca/mammoth.png) | ![mammoth-umap-pca100](img/pacmap-comparison/umap-pca100/mammoth.png) | ![mammoth-pacmap](img/pacmap-comparison/pacmap/mammoth.png) |
+| scurvehole | ![scurvehole-umap](img/pacmap-comparison/umap/scurvehole.png) | ![scurvehole-umap-pca](img/pacmap-comparison/umap-pca/scurvehole.png) | ![scurvehole-umap-pca100](img/pacmap-comparison/umap-pca100/scurvehole.png) | ![scurvehole-pacmap](img/pacmap-comparison/pacmap/scurvehole.png) |
+| isoswiss | ![isoswiss-umap](img/pacmap-comparison/umap/isoswiss.png) | ![isoswiss-umap-pca](img/pacmap-comparison/umap-pca/isoswiss.png) | ![isoswiss-umap-pca100](img/pacmap-comparison/umap-pca100/isoswiss.png) | ![isoswiss-pacmap](img/pacmap-comparison/pacmap/isoswiss.png) |
+| hierarchical | ![hierarchical-umap](img/pacmap-comparison/umap/hierarchical.png) | ![hierarchical-umap-pca](img/pacmap-comparison/umap-pca/hierarchical.png) | ![hierarchical-umap-pca100](img/pacmap-comparison/umap-pca100/hierarchical.png) | ![hierarchical-pacmap](img/pacmap-comparison/pacmap/hierarchical.png) |
+| spheres | ![spheres-umap](img/pacmap-comparison/umap/spheres.png) | ![spheres-umap-pca](img/pacmap-comparison/umap-pca/spheres.png) | ![spheres-umap-pca100](img/pacmap-comparison/umap-pca100/spheres.png) | ![spheres-pacmap](img/pacmap-comparison/pacmap/spheres.png) |
+| coil20 | ![coil20-umap](img/pacmap-comparison/umap/coil20.png) | ![coil20-umap-pca](img/pacmap-comparison/umap-pca/coil20.png) | ![coil20-umap-pca100](img/pacmap-comparison/umap-pca100/coil20.png) | ![coil20-pacmap](img/pacmap-comparison/pacmap/coil20.png) |
+| coil100 | ![coil100-umap](img/pacmap-comparison/umap/coil100.png) | ![coil100-umap-pca](img/pacmap-comparison/umap-pca/coil100.png) | ![coil100-umap-pca100](img/pacmap-comparison/umap-pca100/coil100.png) | ![coil100-pacmap](img/pacmap-comparison/pacmap/coil100.png) |
+| macosko2015 | ![macosko2015-umap](img/pacmap-comparison/umap/macosko2015.png) | ![macosko2015-umap-pca](img/pacmap-comparison/umap-pca/macosko2015.png) | ![macosko2015-umap-pca100](img/pacmap-comparison/umap-pca100/macosko2015.png) | ![macosko2015-pacmap](img/pacmap-comparison/pacmap/macosko2015.png) |
+| mnist | ![mnist-umap](img/pacmap-comparison/umap/mnist.png) | ![mnist-umap-pca](img/pacmap-comparison/umap-pca/mnist.png) | ![mnist-umap-pca100](img/pacmap-comparison/umap-pca100/mnist.png) | ![mnist-pacmap](img/pacmap-comparison/pacmap/mnist.png) |
+| fashion | ![fashion-umap](img/pacmap-comparison/umap/fashion.png) | ![fashion-umap-pca](img/pacmap-comparison/umap-pca/fashion.png) | ![fashion-umap-pca100](img/pacmap-comparison/umap-pca100/fashion.png) | ![fashion-pacmap](img/pacmap-comparison/pacmap/fashion.png) |
+| ng20pacmap | ![ng20pacmap-umap](img/pacmap-comparison/umap/ng20pacmap.png) | ![ng20pacmap-umap-pca](img/pacmap-comparison/umap-pca/ng20pacmap.png) | ![ng20pacmap-umap-pca100](img/pacmap-comparison/umap-pca100/ng20pacmap.png) | ![ng20pacmap-pacmap](img/pacmap-comparison/pacmap/ng20pacmap.png) |
 
 Headline results from my point of view are that going from left to right, UMAP
 results get more like PaCMAP. But in *many* cases the default UMAP results don't
