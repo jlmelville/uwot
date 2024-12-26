@@ -16,3 +16,4 @@
 ^_pkgdown\.yml$
 ^pkgdown$
 ^vignettes/articles$
+^pkgdown$

@@ -224,6 +224,7 @@ $$
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^- =
 \frac{2\gamma}{\left(0.1 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)} \left(\mathbf{y_i - y_j}\right)
 $$
+
 The value of 0.1 that appears in the repulsive gradient is there to prevent
 division by zero.
 
