@@ -54,6 +54,7 @@ The weights are normalized to form $N$ probability distributions:
 $$
 p_{j|i} = \frac{v_{j|i}}{\sum_{k}^{N} v_{k|i}} 
 $$
+
 $\beta_{i}$ is chosen by finding that value that results in the probability
 distribution having a specific perplexity. The perplexity has to be chosen by
 the user, but is interpreted as being a continuous version of the number of
@@ -83,6 +84,7 @@ distributions:
 $$
 C_{SNE} = \sum_{i}^{N} \sum_{j}^{N} p_{j|i} \log \frac{p_{j|i}}{q_{j|i}} 
 $$
+
 In all of the above (and in what follows), weights and probabilities when $i =
 j$ are not defined. I don't want to clutter the notation further, so assume they
 are excluded from any sums.
@@ -173,6 +175,7 @@ $$
 L_{LV} = \sum_{ \left(i, j\right) \in E} p_{ij} \log w_{ij} 
 +\gamma \sum_{\left(i, j\right) \in \bar{E}} \log \left(1 - w_{ij} \right)
 $$
+
 $p_{ij}$ and $w_{ij}$ is the same as in t-SNE (the authors try some alternative
 $w_{ij}$ definitions, but they aren't as effective).
 
@@ -220,7 +223,10 @@ The attractive and repulsive gradients for LargeVis are respectively:
 
 $$
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^+ =
-\frac{-2}{1 + d_{ij}^2}p_{ij} \left(\mathbf{y_i - y_j}\right) \\
+\frac{-2}{1 + d_{ij}^2}p_{ij} \left(\mathbf{y_i - y_j}\right)
+$$
+
+$$
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^- =
 \frac{2\gamma}{\left(0.1 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)} \left(\mathbf{y_i - y_j}\right)
 $$
@@ -264,6 +270,7 @@ C_{UMAP} =
 \sum_{ij} \left[ v_{ij} \log \left( \frac{v_{ij}}{w_{ij}} \right) + 
 (1 - v_{ij}) \log \left( \frac{1 - v_{ij}}{1 - w_{ij}} \right) \right]
 $$
+
 $v_{ij}$ are symmetrized input affinities, and are not probabilities. The graph
 interpretation of them as weights of edges in a graph still applies, though. 
 These are arrived at differently to t-SNE and LargeVis. The unsymmetrized UMAP 
@@ -290,6 +297,7 @@ These weights are symmetrized by a slightly different method to SNE:
 $$
 v_{ij} = \left(v_{j|i} + v_{i|j}\right) - v_{j|i}v_{i|j}
 $$
+
 or as a matrix operation:
 
 $$
@@ -318,7 +326,10 @@ The attractive and repulsive UMAP gradient expressions are, respectively:
 
 $$
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
-\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}  v_{ij} \left(\mathbf{y_i - y_j}\right) \\
+\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}  v_{ij} \left(\mathbf{y_i - y_j}\right)
+$$
+
+$$
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
 \frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + ad_{ij}^{2b}\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
 $$
