@@ -27,6 +27,7 @@ articles:
   - articles/hnsw-umap
   - articles/rnndescent-umap
   - articles/mutual-nearest-neighbors
+  - articles/locally-scaled-neighbors
 - title: Articles
   desc: More details on some of what `uwot` can do.
   contents:
