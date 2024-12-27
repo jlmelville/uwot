@@ -61,6 +61,14 @@
 
     
     
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
+<p><em>December 26 2024</em>: Images have been (mainly) reworked so that
+they make better use of the space in the tables and are aligned more
+consistently allowing an easier comparison of how UMAP and t-SNE differ.
+The t-SNE output is also improved. I also use more default settings.
+Plus more datasets.</p>
 <p><em>December 29 2018</em> New, better settings for t-SNE, better
 plots and a couple of new datasets. Removed neighborhood preservation
 values until I’ve double checked they are working correctly.</p>
@@ -68,9 +76,9 @@ values until I’ve double checked they are working correctly.</p>
 implementation of UMAP, compared to t-SNE output. As you will see,
 UMAP’s output results in more compact, separated clusters compared to
 t-SNE.</p>
-<div class="section level2">
-<h2 id="data-preparation">Data preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a>
-</h2>
+<div class="section level3">
+<h3 id="data-preparation">Data preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a>
+</h3>
 <p>For details on the datasets, follow their links. Somewhat more detail
 is also given in the <a href="https://jlmelville.github.io/smallvis/datasets.htm" class="external-link">smallvis
 documentation</a>. <code>iris</code> you already have if you are using
@@ -104,119 +112,48 @@ routines I ran were:</p>
 <span><span class="co"># Remove duplicate images (https://github.com/rois-codh/kmnist/issues/5)</span></span>
 <span><span class="va">kuzushiji</span> <span class="op">&lt;-</span> <span class="va">kuzushiji</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="fu">x2m</span><span class="op">(</span><span class="va">kuzushiji</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="op">]</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="umap-settings">UMAP settings<a class="anchor" aria-label="anchor" href="#umap-settings"></a>
-</h2>
-<p>For UMAP, I stick with the defaults, with the exception of
-<code>iris</code>, <code>coil20</code>, and <code>coil100</code> and
-<code>norb</code>. The spectral initialization with the default
-<code>n_neighbors</code> leads to disconnected components, which can
-lead to a poor global picture of the data. The Python UMAP
-implementation goes to fairly involved lengths to ameliorate theses
-issues, but <code>uwot</code> does not.</p>
-<p>For these datasets, a perfectly good alternative that provides a
-global initialization is to use the first two components from PCA,
-scaled so their standard deviations are initially 1e-4 (via
-<code>init = "spca"</code>). This usually results in an embedding which
-isn’t too different from starting via the raw PCA but is more compact,
-i.e. less space between clusters. For visualizations, as long as the
-relative orientation and rough distances between clusters are
-maintained, the exact distances between them are not that interesting to
-me.</p>
-<p>Dimensionality was reduced to 100 by applying PCA to the data. It’s
-commonly applied to data before or as part of t-SNE, so to avoid any
-differences from this pre-processing, I applied PCA to the UMAP data. I
-used 100 components, rather than the usual 50 just to be on the safe
-side. This seemed to have no major effect on the resulting
-visualizations.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># For iris </span></span>
-<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, init <span class="op">=</span> <span class="st">"spca"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Small datasets (s1k, oli, frey)</span></span>
-<span><span class="va">s1k_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">s1k</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Big datasets (mnist, fashion, kuzushiji)</span></span>
-<span><span class="va">mnist_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, pca <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># norb, coil20 and coil100, tasic2018</span></span>
-<span><span class="va">coil20_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">coil20</span>, pca <span class="op">=</span> <span class="fl">100</span>, init <span class="op">=</span> <span class="st">"spca"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="t-sne-settings">t-SNE settings<a class="anchor" aria-label="anchor" href="#t-sne-settings"></a>
-</h2>
-<p>The <a href="https://cran.r-project.org/package=Rtsne" class="external-link">Rtsne</a>
-package was used for the t-SNE calculations, except for the
-<code>iris</code> dataset, proving troublesome once again. This time
-it’s because <code>Rtsne</code> doesn’t allow for duplicates. For
-<code>iris</code> only, I used the <a href="https://github.com/jlmelville/smallvis" class="external-link">smallvis</a> package.</p>
-<p>For t-SNE, I also employ the following non-defaults:</p>
-<ul>
-<li>
-<code>perplexity = 15</code>, which is closer to the neighborhood
-size used by UMAP</li>
-<li>as mentioned in the UMAP settings section, for large datasets,
-<code>initial_dims = 100</code>, which applies PCA to the input, keeping
-the first 100 components, rather than the usual <code>50</code> to
-minmize distortion from the initial PCA.</li>
-<li>As <code>uwot</code> also makes use of <code>irlba</code>, there is
-no reason not to use <code>partial_pca</code>.</li>
-</ul>
-<p>It would be nice to use the same initial coordinates for both
-methods, but unfortunately <code>Rtsne</code> doesn’t apply early
-exaggeration with user-supplied input. Without early exaggeration, t-SNE
-results aren’t as good, especially with larger datasets. Therefore the
-t-SNE plots use a random initialization.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># For iris only</span></span>
-<span><span class="va">iris_tsne</span> <span class="op">&lt;-</span> <span class="fu">smallvis</span><span class="fu">::</span><span class="fu">smallvis</span><span class="op">(</span><span class="va">iris</span>, perplexity <span class="op">=</span> <span class="fl">15</span>, Y_init <span class="op">=</span> <span class="st">"rand"</span>, exaggeration_factor <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Small datasets (s1k, oli, frey)</span></span>
-<span><span class="va">s1k_tsne</span> <span class="op">&lt;-</span> <span class="fu">Rtsne</span><span class="fu">::</span><span class="fu">Rtsne</span><span class="op">(</span><span class="fu">x2m</span><span class="op">(</span><span class="va">s1k</span><span class="op">)</span>, perplexity <span class="op">=</span> <span class="fl">15</span>, initial_dims <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>                       partial_pca <span class="op">=</span> <span class="cn">TRUE</span>, exaggeration_factor <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Big datasets (coil20, coil100, mnist, fashion, kuzushiji etc.)</span></span>
-<span><span class="va">mnist_tsne</span> <span class="op">&lt;-</span> <span class="fu">Rtsne</span><span class="fu">::</span><span class="fu">Rtsne</span><span class="op">(</span><span class="fu">x2m</span><span class="op">(</span><span class="va">mnist</span><span class="op">)</span>, perplexity <span class="op">=</span> <span class="fl">15</span>, initial_dims <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>                       partial_pca <span class="op">=</span> <span class="cn">TRUE</span>, exaggeration_factor <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="visualization">Visualization<a class="anchor" aria-label="anchor" href="#visualization"></a>
+<h3 id="settings">Settings<a class="anchor" aria-label="anchor" href="#settings"></a>
 </h3>
-<p>For visualization, I used the <a href="https://github.com/jlmelville/vizier" class="external-link">vizier</a> package. The
-plots are colored by class membership (there’s an obvious choice for
-every dataset considered), except for <code>frey</code>, where the
-points are colored according to their position in the sequence of
-images.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">embed_img</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, <span class="va">k</span> <span class="op">=</span> <span class="fl">15</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">args</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
-<span>  <span class="va">args</span><span class="op">$</span><span class="va">coords</span> <span class="op">&lt;-</span> <span class="va">Y</span></span>
-<span>  <span class="va">args</span><span class="op">$</span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">X</span></span>
-<span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="fu">vizier</span><span class="fu">::</span><span class="va">embed_plot</span>, <span class="va">args</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="fu">embed_img</span><span class="op">(</span><span class="va">iris</span>, <span class="va">iris_umap</span>, pc_axes <span class="op">=</span> <span class="cn">TRUE</span>, equal_axes <span class="op">=</span> <span class="cn">TRUE</span>, alpha_scale <span class="op">=</span> <span class="fl">0.5</span>, title <span class="op">=</span> <span class="st">"iris UMAP"</span>, cex <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p>For UMAP, where non-default initialization was used, it’s noted in
-the title of the plot (e.g. “(spca)”).</p>
+<p>For UMAP I used default settings with the <code>umap2</code> function
+with one exception: I have the pre-calculated exact nearest neighbors
+for these datasets to hand, so I used those rather than approximate
+nearest neighbors. For more on <code>umap2</code> see the <a href="https://jlmelville.github.io/uwot/articles/umap2.html">umap2
+article</a>.</p>
+<p>For t-SNE, I used the Python package <a href="https://github.com/pavlin-policar/openTSNE" class="external-link">openTSNE</a> (version
+1.0.2) with its default settings.</p>
+<div class="section level4">
+<h4 id="visualization">Visualization<a class="anchor" aria-label="anchor" href="#visualization"></a>
+</h4>
+<p>For visualization, I used the <a href="https://github.com/jlmelville/vizier" class="external-link">vizier</a> package.</p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="iris">iris<a class="anchor" aria-label="anchor" href="#iris"></a>
-</h2>
+<div class="section level3">
+<h3 id="results">Results<a class="anchor" aria-label="anchor" href="#results"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="iris">iris<a class="anchor" aria-label="anchor" href="#iris"></a>
+</h3>
 <p>The standard <code>iris</code> dataset, known and loved by all.</p>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Firis_umap.png" alt="iris UMAP (spca)"></td>
-<td align="center"><img src="img%2Fexamples%2Firis_tsne.png" alt="iris t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Firis-umap.png" alt="iris UMAP (spca)"></td>
+<td align="center"><img src="img%2Fexamples%2Firis-tsne.png" alt="iris t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="s1k">s1k<a class="anchor" aria-label="anchor" href="#s1k"></a>
-</h2>
+<div class="section level3">
+<h3 id="s1k">s1k<a class="anchor" aria-label="anchor" href="#s1k"></a>
+</h3>
 <p>A 9-dimensional fuzzy simplex, which I created for testing t-SNE and
 related methods, original in the <a href="https://github.com/jlmelville/sneer" class="external-link">sneer</a> package.</p>
 <table class="table">
@@ -224,15 +161,19 @@ related methods, original in the <a href="https://github.com/jlmelville/sneer" c
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fs1k_umap.png" alt="s1k UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Fs1k_tsne.png" alt="s1k t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Fs1k-umap.png" alt="s1k UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fs1k-tsne.png" alt="s1k t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="oli">oli<a class="anchor" aria-label="anchor" href="#oli"></a>
-</h2>
+<div class="section level3">
+<h3 id="oli-or-olivetti">oli (or olivetti)<a class="anchor" aria-label="anchor" href="#oli-or-olivetti"></a>
+</h3>
 <p>The <a href="https://cam-orl.co.uk/facedatabase.html" class="external-link">ORL database of
 faces</a>.</p>
 <table class="table">
@@ -240,15 +181,19 @@ faces</a>.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Foli_umap.png" alt="oli UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Foli_tsne.png" alt="oli t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Folivetti-umap.png" alt="oli UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Folivetti-tsne.png" alt="oli t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="frey">frey<a class="anchor" aria-label="anchor" href="#frey"></a>
-</h2>
+<div class="section level3">
+<h3 id="frey">frey<a class="anchor" aria-label="anchor" href="#frey"></a>
+</h3>
 <p>Images of Brendan Frey’s face, as far as I know originating from a
 page belonging to <a href="https://cs.nyu.edu/~roweis/data.html" class="external-link">Saul
 Roweis</a>.</p>
@@ -257,37 +202,45 @@ Roweis</a>.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Ffrey_umap.png" alt="frey UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Ffrey_tsne.png" alt="frey t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Ffrey-umap.png" alt="frey UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Ffrey-tsne.png" alt="frey t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="isofaces">isofaces<a class="anchor" aria-label="anchor" href="#isofaces"></a>
-</h2>
+<div class="section level3">
+<h3 id="isofaces">isofaces<a class="anchor" aria-label="anchor" href="#isofaces"></a>
+</h3>
 <p>Yet more faces, this time the dataset used in <a href="http://web.mit.edu/cocosci/isomap/datasets.html" class="external-link">Isomap</a>,
 consisting of images of the same face under different rotations and
 lighting conditions. Unfortunately, it’s no longer available at the MIT
 website, but it can be found via <a href="https://web.archive.org/web/20160913051505/http://isomap.stanford.edu/face_data.mat.Z" class="external-link">the
-Wayback Machine</a>. I wrote <a href="https://gist.github.com/jlmelville/339dfeb80c3e836e887d70a37679b244" class="external-link">a
-gist for processing the data in R</a>.</p>
-<p>In the images below the points are colored by the first pose
+Wayback Machine</a>. I wrote a <a href="https://gist.github.com/jlmelville/339dfeb80c3e836e887d70a37679b244" class="external-link">gist
+for processing the data in R</a>.</p>
+<p>In the images below the points are colored by the left-to-right pose
 angle.</p>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fisofaces_umap.png" alt="isofaces UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Fisofaces_tsne.png" alt="isofaces t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Fisofaces-umap.png" alt="isofaces UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fisofaces-tsne.png" alt="isofaces t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="coil20">coil20<a class="anchor" aria-label="anchor" href="#coil20"></a>
-</h2>
+<div class="section level3">
+<h3 id="coil20">coil20<a class="anchor" aria-label="anchor" href="#coil20"></a>
+</h3>
 <p>The <a href="http://www.cs.columbia.edu/CAVE/software/softlib/coil-20.php" class="external-link">COIL-20
 Columbia Object Image Library</a>.</p>
 <table class="table">
@@ -295,15 +248,19 @@ Columbia Object Image Library</a>.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fcoil20_umap.png" alt="coil20 UMAP (spca)"></td>
-<td align="center"><img src="img%2Fexamples%2Fcoil20_tsne.png" alt="coil20 t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Fcoil20-umap.png" alt="coil20 UMAP (spca)"></td>
+<td align="center"><img src="img%2Fexamples%2Fcoil20-tsne.png" alt="coil20 t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="coil100">coil100<a class="anchor" aria-label="anchor" href="#coil100"></a>
-</h2>
+<div class="section level3">
+<h3 id="coil100">coil100<a class="anchor" aria-label="anchor" href="#coil100"></a>
+</h3>
 <p>The <a href="http://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php" class="external-link">COIL-100
 Columbia Object Image Library</a>.</p>
 <table class="table">
@@ -311,54 +268,41 @@ Columbia Object Image Library</a>.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fcoil100_umap.png" alt="coil100 UMAP (spca)"></td>
-<td align="center"><img src="img%2Fexamples%2Fcoil100_tsne.png" alt="coil100 t-SNE"></td>
-</tr></tbody>
-</table>
-<p>The UMAP results are rather hard to visualize on a static plot. If
-you could pan and zoom around, you would see that the rather indistinct
-blobs are mainly correctly preserved loops. This is an example where
-choosing a different value of the <code>a</code> and <code>b</code>
-parameters would be a good idea. The t-UMAP variant, available as
-<code>tumap</code> uses <code>a = 1</code>, <code>b = 1</code>
-(effectively using the same Cauchy kernel as t-SNE) does a better job
-here and is shown below on the left. The correct choice of parameters is
-also important for t-SNE. On the right is the t-SNE result with a
-default <code>perplexity = 50</code>, which does not retain as much of
-the loop structure as the lower perplexity:</p>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fcoil100_tumap.png" alt="coil100 t-UMAP (spca)"></td>
-<td align="center"><img src="img%2Fexamples%2Fcoil100_tsne_perp50.png" alt="coil100 t-SNE (perplexity 50)"></td>
+<td align="center"><img src="img%2Fexamples%2Fcoil100-umap.png" alt="coil100 UMAP (spca)"></td>
+<td align="center"><img src="img%2Fexamples%2Fcoil100-tsne.png" alt="coil100 t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="swiss-roll">swiss roll<a class="anchor" aria-label="anchor" href="#swiss-roll"></a>
-</h2>
+<div class="section level3">
+<h3 id="swiss-roll-isoswiss">swiss roll (isoswiss)<a class="anchor" aria-label="anchor" href="#swiss-roll-isoswiss"></a>
+</h3>
 <p>The <a href="http://web.mit.edu/cocosci/isomap/datasets.html" class="external-link">Swiss
 Roll</a> data used in Isomap. A famous dataset, but perhaps not that
-representative of typical real world datasets. t-SNE is know to not
+representative of typical real world datasets. t-SNE is known to not
 handle this well, but UMAP makes an impressive go at unfolding it.</p>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fswiss_umap.png" alt="swiss UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Fswiss_tsne.png" alt="swiss t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Fisoswiss-umap.png" alt="swiss UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fisoswiss-tsne.png" alt="swiss t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="mnist">mnist<a class="anchor" aria-label="anchor" href="#mnist"></a>
-</h2>
+<div class="section level3">
+<h3 id="mnist">mnist<a class="anchor" aria-label="anchor" href="#mnist"></a>
+</h3>
 <p>The <a href="http://yann.lecun.com/exdb/mnist/" class="external-link">MNIST database of
 handwritten digits</a>.</p>
 <table class="table">
@@ -366,15 +310,19 @@ handwritten digits</a>.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fmnist_umap.png" alt="mnist UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Fmnist_tsne.png" alt="mnist t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Fmnist-umap.png" alt="mnist UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fmnist-tsne.png" alt="mnist t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="fashion">fashion<a class="anchor" aria-label="anchor" href="#fashion"></a>
-</h2>
+<div class="section level3">
+<h3 id="fashion">fashion<a class="anchor" aria-label="anchor" href="#fashion"></a>
+</h3>
 <p>The <a href="https://github.com/zalandoresearch/fashion-mnist" class="external-link">Fashion MNIST
 database</a>, images of fashion objects.</p>
 <table class="table">
@@ -382,15 +330,19 @@ database</a>, images of fashion objects.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Ffashion_umap.png" alt="fashion UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Ffashion_tsne.png" alt="fashion t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Ffashion-umap.png" alt="fashion UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Ffashion-tsne.png" alt="fashion t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="kuzushiji-kmnist">kuzushiji (KMNIST)<a class="anchor" aria-label="anchor" href="#kuzushiji-kmnist"></a>
-</h2>
+<div class="section level3">
+<h3 id="kuzushiji-kmnist">kuzushiji (KMNIST)<a class="anchor" aria-label="anchor" href="#kuzushiji-kmnist"></a>
+</h3>
 <p>The <a href="https://github.com/rois-codh/kmnist" class="external-link">Kuzushiji MNIST
 database</a>, images of cursive Japanese handwriting.</p>
 <table class="table">
@@ -398,15 +350,19 @@ database</a>, images of cursive Japanese handwriting.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fkmnist_umap.png" alt="kuzushiji UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Fkmnist_tsne.png" alt="kuzushiji t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Fkuzushiji-umap.png" alt="kuzushiji UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fkuzushiji-tsne.png" alt="kuzushiji t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="norb">norb<a class="anchor" aria-label="anchor" href="#norb"></a>
-</h2>
+<div class="section level3">
+<h3 id="norb">norb<a class="anchor" aria-label="anchor" href="#norb"></a>
+</h3>
 <p>The <a href="https://cs.nyu.edu/~ylclab/data/norb-v1.0-small/" class="external-link">small
 NORB dataset</a>, pairs of images of 50 toys photographed at different
 angles and under different lighting conditions.</p>
@@ -415,15 +371,19 @@ angles and under different lighting conditions.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fnorb_umap.png" alt="norb UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Fnorb_tsne.png" alt="norb t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Fnorb-umap.png" alt="norb UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fnorb-tsne.png" alt="norb t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="cifar10">cifar10<a class="anchor" aria-label="anchor" href="#cifar10"></a>
-</h2>
+<div class="section level3">
+<h3 id="cifar10">cifar10<a class="anchor" aria-label="anchor" href="#cifar10"></a>
+</h3>
 <p>The <a href="https://www.cs.toronto.edu/~kriz/cifar.html" class="external-link">CIFAR-10
 dataset</a>, consisting of 60000 32 x 32 color images evenly divided
 across 10 classes (e.g. airplane, cat, truck, bird). t-SNE was applied
@@ -439,13 +399,17 @@ t-SNE</a>.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fcifar10_umap.png" alt="cifar10 UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Fcifar10_tsne.png" alt="cifar10 t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Fcifar10-umap.png" alt="cifar10 UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fcifar10-tsne.png" alt="cifar10 t-SNE"></td>
 </tr></tbody>
 </table>
-<p>There is an outlying orange cluster (which isn’t easy to see) in the
-top right of the UMAP plot. I see the same thing in the Python
+<p>There is an outlying purple cluster (which isn’t easy to see) in the
+center bottom of the UMAP plot. I see the same thing in the Python
 implementation, so I don’t think this is a bug in <code>uwot</code>
 (although I also said that in a previous version of this page, and it
 turned out there <em>was</em> a bug in <code>uwot</code>. The current
@@ -462,21 +426,6 @@ the practice of data augmentation that is popular in deep learning, but
 you would need to be aware of it to avoid the test set results being
 contaminated. These images seem like a good argument for applying UMAP
 or t-SNE to your dataset as a way to spot this sort of thing.</p>
-<p>We can get better results with UMAP by using the scaled PCA
-initialization (below on the left) and by using the t-UMAP settings
-(below, right):</p>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fcifar10_umaps.png" alt="cifar10 UMAP (spca)"></td>
-<td align="center"><img src="img%2Fexamples%2Fcifar10_tumaps.png" alt="cifar10 t-UMAP (spca)"></td>
-</tr></tbody>
-</table>
-<p>That rogue cluster is still present (off to the lower right now), but
-either image is more comparable to the t-SNE result.</p>
 <p>As the visualization of CIFAR-10 isn’t very successful with UMAP or
 t-SNE, here are some results using the activations of a convnet, similar
 to that used in the BH t-SNE paper. For the convnet, I used a <a href="https://keras.io/" class="external-link">keras</a> implementation, taken from the <a href="https://appliedmachinelearning.blog/2018/03/24/achieving-90-accuracy-in-object-recognition-task-on-cifar-10-dataset-with-keras-convolutional-neural-networks/" class="external-link">Machine
@@ -510,9 +459,9 @@ as an outlier, even in the activation space. You can also see it in the
 BH t-SNE paper in the lower image in Figure 5 (orange cluster at the
 bottom, slightly left of center).</p>
 </div>
-<div class="section level2">
-<h2 id="tasic2018">tasic2018<a class="anchor" aria-label="anchor" href="#tasic2018"></a>
-</h2>
+<div class="section level3">
+<h3 id="tasic2018">tasic2018<a class="anchor" aria-label="anchor" href="#tasic2018"></a>
+</h3>
 <p>The <code>tasic2018</code> dataset is a transcriptomics dataset of
 mouse brain cell RNA-seq data from the <a href="http://celltypes.brain-map.org/rnaseq/mouse" class="external-link">Allen Brain Atlas</a>
 (originally reported by <a href="http://dx.doi.org/10.1038/s41586-018-0654-5" class="external-link">Tasic and
@@ -528,40 +477,30 @@ processed in Python by following the instructions in this <a href="https://githu
 lab notebook</a>. I output the data to CSV format for reading into R and
 assembling into a data frame with the following extra exporting
 code:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-log3k.csv"</span>, logCPM, delimiter<span class="op">=</span><span class="st">","</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-areas.csv"</span>, tasic2018.areas, delimiter<span class="op">=</span><span class="st">","</span>, fmt <span class="op">=</span> <span class="st">"</span><span class="sc">%d</span><span class="st">"</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-genes.csv"</span>, tasic2018.genes[selectedGenes], delimiter<span class="op">=</span><span class="st">","</span>, fmt<span class="op">=</span><span class="st">'</span><span class="sc">%s</span><span class="st">'</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-clusters.csv"</span>, tasic2018.clusters, delimiter<span class="op">=</span><span class="st">","</span>, fmt<span class="op">=</span><span class="st">'</span><span class="sc">%d</span><span class="st">'</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-cluster-names.csv"</span>, tasic2018.clusterNames, delimiter<span class="op">=</span><span class="st">","</span>, fmt<span class="op">=</span><span class="st">'</span><span class="sc">%s</span><span class="st">'</span>)</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-cluster-colors.csv"</span>, tasic2018.clusterColors, delimiter<span class="op">=</span><span class="st">","</span>, fmt<span class="op">=</span><span class="st">'</span><span class="sc">%s</span><span class="st">'</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-log3k.csv"</span>, logCPM, delimiter<span class="op">=</span><span class="st">","</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-areas.csv"</span>, tasic2018.areas, delimiter<span class="op">=</span><span class="st">","</span>, fmt <span class="op">=</span> <span class="st">"</span><span class="sc">%d</span><span class="st">"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-genes.csv"</span>, tasic2018.genes[selectedGenes], delimiter<span class="op">=</span><span class="st">","</span>, fmt<span class="op">=</span><span class="st">'</span><span class="sc">%s</span><span class="st">'</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-clusters.csv"</span>, tasic2018.clusters, delimiter<span class="op">=</span><span class="st">","</span>, fmt<span class="op">=</span><span class="st">'</span><span class="sc">%d</span><span class="st">'</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-cluster-names.csv"</span>, tasic2018.clusterNames, delimiter<span class="op">=</span><span class="st">","</span>, fmt<span class="op">=</span><span class="st">'</span><span class="sc">%s</span><span class="st">'</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>np.savetxt(<span class="st">"path/to/allen-visp-alm/tasic2018-cluster-colors.csv"</span>, tasic2018.clusterColors, delimiter<span class="op">=</span><span class="st">","</span>, fmt<span class="op">=</span><span class="st">'</span><span class="sc">%s</span><span class="st">'</span>)</span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Ftasic2018_umap.png" alt="tasic2018 UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Ftasic2018_tsne.png" alt="tasic2018 t-SNE"></td>
-</tr></tbody>
-</table>
-<p>Again, the default UMAP settings produce clusters that are bit too
-well-separated to clearly see in these images. So here are the results
-from using t-UMAP (the same as setting <code>a = 1, b = 1</code>), on
-the left, and then using <code>a = 2, b = 2</code> on the right:</p>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Ftasic2018_tumap.png" alt="tasic2018 t-UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Ftasic2018_umap2.png" alt="tasic2018 UMAP (a = 2, b = 2)"></td>
+<td align="center"><img src="img%2Fexamples%2Ftasic2018-umap.png" alt="tasic2018 UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Ftasic2018-tsne.png" alt="tasic2018 t-SNE"></td>
 </tr></tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="macosko2015">macosko2015<a class="anchor" aria-label="anchor" href="#macosko2015"></a>
-</h2>
+<div class="section level3">
+<h3 id="macosko2015">macosko2015<a class="anchor" aria-label="anchor" href="#macosko2015"></a>
+</h3>
 <p>Another <a href="https://doi.org/10.1016/j.cell.2015.05.002" class="external-link">transcriptomics data
 set</a>, used as an example in <a href="https://github.com/pavlin-policar/openTSNE" class="external-link">openTSNE</a>. This
 contains data for 44,808 cells from the mouse retina.</p>
@@ -573,36 +512,196 @@ dataset, data was log normalized and the 3,000 most variable genes were
 retained.</p>
 <p>I exported the data (without the Z-scaling and PCA dimensionality
 reduction), as a CSV file, e.g.:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>np.savetxt(<span class="st">"/path/to/macosko2015/macosko2015-log3k.csv"</span>, x, delimiter<span class="op">=</span><span class="st">","</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co"># Use these as column names</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>np.savetxt(<span class="st">"/path/to/macosko2015/macosko2015-genenames.csv"</span>, data.T.columns.values[gene_mask].astype(<span class="bu">str</span>), delimiter<span class="op">=</span><span class="st">","</span>, fmt <span class="op">=</span> <span class="st">"</span><span class="sc">%s</span><span class="st">"</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>np.savetxt(<span class="st">"/path/to/macosko2015/macosko2015-clusterids.csv"</span>, cluster_ids.values.astype(<span class="bu">int</span>), delimiter<span class="op">=</span><span class="st">","</span>, fmt <span class="op">=</span> <span class="st">"</span><span class="sc">%d</span><span class="st">"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>np.savetxt(<span class="st">"/path/to/macosko2015/macosko2015-log3k.csv"</span>, x, delimiter<span class="op">=</span><span class="st">","</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co"># Use these as column names</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>np.savetxt(<span class="st">"/path/to/macosko2015/macosko2015-genenames.csv"</span>, data.T.columns.values[gene_mask].astype(<span class="bu">str</span>), delimiter<span class="op">=</span><span class="st">","</span>, fmt <span class="op">=</span> <span class="st">"</span><span class="sc">%s</span><span class="st">"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>np.savetxt(<span class="st">"/path/to/macosko2015/macosko2015-clusterids.csv"</span>, cluster_ids.values.astype(<span class="bu">int</span>), delimiter<span class="op">=</span><span class="st">","</span>, fmt <span class="op">=</span> <span class="st">"</span><span class="sc">%d</span><span class="st">"</span>)</span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fmacosko2015_umap.png" alt="macosko2015 UMAP"></td>
-<td align="center"><img src="img%2Fexamples%2Fmacosko2015_tsne.png" alt="macosko2015 t-SNE"></td>
+<td align="center"><img src="img%2Fexamples%2Fmacosko2015-umap.png" alt="macosko2015 UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fmacosko2015-tsne.png" alt="macosko2015 t-SNE"></td>
 </tr></tbody>
 </table>
-<p>This is another result where the UMAP defaults might need a bit of
-fiddling with if you don’t like how separated the clusters are.</p>
-<p>The openTSNE results use Z-scaling of the inputs before applying
-t-SNE, so below are the results for UMAP and t-SNE with Z-scaling
-applied (for <code>umap</code>, pass <code>scale = "Z"</code> as an
-argument so you don’t have to do it manually):</p>
+<p>Results are not that impressive looking (especially for UMAP). I
+include this example because it’s very common in scRNA-seq packages to
+apply PCA to the gene expression data before UMAP. In this case, I have
+reduced the dimensionality down to 100. After that transformation,
+results look very different (with much better separation of
+clusters):</p>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fexamples%2Fmacosko2015_tumapz.png" alt="macosko2015 t-UMAP, Z-scaled"></td>
-<td align="center"><img src="img%2Fexamples%2Fmacosko2015_tsnez.png" alt="macosko2015 t-SNE Z-scaled"></td>
+<td align="center"><img src="img%2Fexamples%2Fmacosko2015pca100-umap.png" alt="macosko2015pca100 UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fmacosko2015pca100-tsne.png" alt="macosko2015pca100 t-SNE"></td>
 </tr></tbody>
 </table>
+<p>The good news is that results look better and the nearest neighbor
+search step in both t-SNE and UMAP will go faster, which is often why
+this is carried out. The bad news is that you now have to justify the
+biological basis for the PCA pre-processing, which has clearly changed
+the relationship between the different measurements. And why 100
+dimensions?</p>
+<p>In most datasets I’ve seen PCA pre-processing doesn’t have such a
+noticeable effect, which is why I like this dataset.</p>
+</div>
+<div class="section level3">
+<h3 id="s-curve-with-a-hole-scurvehole">S-curve With a Hole (scurvehole)<a class="anchor" aria-label="anchor" href="#s-curve-with-a-hole-scurvehole"></a>
+</h3>
+<p>Used by the dimensionality reduction method <a href="https://github.com/YingfanWang/PaCMAP" class="external-link">PaCMAP</a>. It is generated
+by the script at <a href="https://github.com/YingfanWang/PaCMAP/blob/master/experiments/run_experiments.py" class="external-link uri">https://github.com/YingfanWang/PaCMAP/blob/master/experiments/run_experiments.py</a>.
+script mentioned It’s an S-curve with a hole in the middle, and so
+should be amenable to being unfolded into 2D. Similar to
+<code>isowiss</code>.</p>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fexamples%2Fscurvehole-umap.png" alt="scurvehole UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fscurvehole-tsne.png" alt="scurvehole t-SNE"></td>
+</tr></tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="mammoth">mammoth<a class="anchor" aria-label="anchor" href="#mammoth"></a>
+</h3>
+<p>A 3D point cloud of a <a href="https://3d.si.edu/object/3d/mammuthus-primigenius-blumbach:341c96cd-f967-4540-8ed1-d3fc56d31f12" class="external-link">mammoth
+at the Smithsonian</a>. A 50,000 point sample was used used in <a href="https://pair-code.github.io/understanding-umap/" class="external-link">Understanding
+UMAP</a> and is available for download from the <a href="https://github.com/PAIR-code/understanding-umap" class="external-link">github repo</a>.
+There is also a 10,000 point sample available in the same repo, but I
+use the 50,000 point version.</p>
+<p>As far as I can tell, it was first used for dimensionality reduction
+by Max Noichl at <a href="https://github.com/MNoichl/UMAP-examples-mammoth-/blob/9e82eb3ee5b99020d74e99d2060856d49e8b9f85/umammoth.ipynb" class="external-link uri">https://github.com/MNoichl/UMAP-examples-mammoth-/blob/9e82eb3ee5b99020d74e99d2060856d49e8b9f85/umammoth.ipynb</a>.
+Following the example in that notebook, the colors in this dataset were
+generated by assigning 12 clusters to the 3D data via the <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html" class="external-link">Agglomerative
+Clustering</a> method in <code>sklearn</code>.</p>
+<p><code>mammoth</code> is highly associated (at least in my mind) with
+the <a href="https://github.com/YingfanWang/PaCMAP" class="external-link">PaCMAP</a> method.
+The [PaCMAP paper](<a href="https://jmlr.org/papers/v22/20-1061.html" class="external-link">paper</a> makes
+extensive use of it.</p>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fexamples%2Fmammoth-umap.png" alt="mammoth UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fmammoth-tsne.png" alt="mammoth t-SNE"></td>
+</tr></tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="hierarchical">hierarchical<a class="anchor" aria-label="anchor" href="#hierarchical"></a>
+</h3>
+<p>Another dataset used in the <a href="https://jmlr.org/papers/v22/20-1061.html" class="external-link">PaCMAP paper</a>, but
+for which I was unable to find the code to generate it in the PaCMAP
+repo. The paper describes it thusly: ’consists of 5 “macro clusters”
+that each have 5 “meso clusters,” and each of the meso subclusters has 5
+“micro clusters.” Thus, there are 5x5x5 = 125 micro clusters total. We
+colored each point based on its true macro clusters, shading each meso
+cluster.”. Get all of that? There’s more detail in Appendix B of the
+paper and I think I was able to turn that into some Python that probably
+generated the correct data. I think it’s correct. I will find somewhere
+to upload this code eventually.</p>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fexamples%2Fhierarchical-umap.png" alt="hierarchical UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fhierarchical-tsne.png" alt="hierarchical t-SNE"></td>
+</tr></tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="spheres">spheres<a class="anchor" aria-label="anchor" href="#spheres"></a>
+</h3>
+<p>A dataset from the <a href="https://arxiv.org/abs/1906.00722" class="external-link">topological autoencoders</a>
+paper. Another synthetic hierarchical dataset, with 10 high-dimensional
+spheres embedded in a larger sphere. Most dimensionality reduction
+methods that focus on local measures like nearest neighbors have trouble
+with these sorts of datasets, where representing the global structure
+and scale is challenging.</p>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fexamples%2Fspheres-umap.png" alt="spheres UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fspheres-tsne.png" alt="spheres t-SNE"></td>
+</tr></tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="newsgroups-ng20">20 Newsgroups (ng20)<a class="anchor" aria-label="anchor" href="#newsgroups-ng20"></a>
+</h3>
+<p>The <a href="http://qwone.com/~jason/20Newsgroups/" class="external-link">20 Newsgroups</a>
+dataset, containing a sample of Usenet posts (ask your parents or maybe
+grandparents at this point) from 20 different newsgroups. For more
+details see the <a href="https://jlmelville.github.io/uwot/articles/sparse-data-example.html">Sparse
+Data Article</a>.</p>
+<p>I refer to this as <code>ng20</code> a lot due to being unable to
+begin any variables with a number.</p>
+<p>As many dimensionality reduction methods are unable to handle sparse
+data, I also sometimes use the dense version of this dataset,
+<code>ng20pacmap</code> which can be found in numpy format at the PaCMAP
+repo at <a href="https://github.com/YingfanWang/PaCMAP/tree/master/data" class="external-link uri">https://github.com/YingfanWang/PaCMAP/tree/master/data</a>
+as <code>20NG.npy</code> (i.e. in numpy format). Labels are also
+available there at <code>20NG_labels.npy</code> If I had to guess I
+would say that the initial data was subjected to TF-IDF followed by PCA
+down to 100 dimensions to convert it from sparse to dense format, but I
+don’t know for sure, nor do I know what pre-processing or normalization
+was carried out.</p>
+<p>The image below is for <code>ng20pacmap</code>.</p>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fexamples%2Fng20pacmap-umap.png" alt="ng20pacmap UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Fng20pacmap-tsne.png" alt="ng20pacmap t-SNE"></td>
+</tr></tbody>
+</table>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -7,6 +7,7 @@ articles:
   articles/hnsw-umap: hnsw-umap.html
   articles/init: init.html
   articles/leopold: leopold.html
+  articles/locally-scaled-neighbors: locally-scaled-neighbors.html
   articles/lvish: lvish.html
   articles/metric-learning: metric-learning.html
   articles/mixed-data-types: mixed-data-types.html
@@ -26,7 +27,7 @@ articles:
   articles/umap2: umap2.html
   uwot: uwot.html
   articles/whatsnew: whatsnew.html
-last_built: 2024-12-26T22:16Z
+last_built: 2024-12-27T07:17Z
 urls:
   reference: https://jlmelville.github.io/uwot/reference
   article: https://jlmelville.github.io/uwot/articles
