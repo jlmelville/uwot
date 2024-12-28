@@ -138,12 +138,12 @@ than one component in the graph, and therefore both `init = "spectral"` and
 :----------------------------:|:--------------------------:
 ![s1k spectral](img/init/s1k-spectral.png)|![s1k laplacian](img/init/s1k-laplacian.png)
 
-### oli
+### olivetti
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![oli spca](img/init/oli-spca.png)|![oli agspectral](img/init/oli-agspectral.png)
-![oli spectral](img/init/oli-spectral.png)|![oli laplacian](img/init/oli-laplacian.png)
+![olivetti spca](img/init/olivetti-spca.png)|![olivetti agspectral](img/init/olivetti-agspectral.png)
+![olivetti spectral](img/init/olivetti-spectral.png)|![olivetti laplacian](img/init/olivetti-laplacian.png)
 
 ### frey
 
@@ -243,11 +243,11 @@ iris_umap <- umap(iris, init = "spca", init_sdev = 1)
 :----------------------------:|:--------------------------:
 ![s1k spca1e-2](img/init/s1k_spca1e-2.png)|![s1k spca1](img/init/s1k-spca1.png)
 
-### oli
+### olivetti
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![oli spca1e-2](img/init/oli_spca1e-2.png)|![oli spca1](img/init/oli-spca1.png)
+![olivetti spca1e-2](img/init/oli_spca1e-2.png)|![olivetti spca1](img/init/olivetti-spca1.png)
 
 ### frey
 
@@ -333,11 +333,11 @@ iris_umap <- umap(iris, init = "rand")
 :----------------------------:|:--------------------------:
 ![s1k rand1](img/init/s1k-rand1.png)|![s1k rand2](img/init/s1k-rand2.png)
 
-### oli
+### olivetti
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![oli rand1](img/init/oli-rand1.png)|![oli rand2](img/init/oli-rand2.png)
+![olivetti rand1](img/init/olivetti-rand1.png)|![olivetti rand2](img/init/olivetti-rand2.png)
 
 ### frey
 
@@ -422,11 +422,11 @@ iris_umap <- umap(iris, init = "lvrand")
 :----------------------------:|:--------------------------:
 ![s1k lvrand1](img/init/s1k-lvrand1.png)|![s1k lvrand2](img/init/s1k-lvrand2.png)
 
-### oli
+### olivetti
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![oli lvrand1](img/init/oli-lvrand1.png)|![oli lvrand2](img/init/oli-lvrand2.png)
+![olivetti lvrand1](img/init/olivetti-lvrand1.png)|![olivetti lvrand2](img/init/olivetti-lvrand2.png)
 
 ### frey
 
