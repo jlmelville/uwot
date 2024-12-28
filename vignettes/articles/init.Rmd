@@ -325,73 +325,73 @@ iris_umap <- umap(iris, init = "rand")
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![iris rand1](img/init/iris-rand1.png)|![iris rand2](img/init/iris-rand2.png)
+![iris rand1337](img/init/iris-rand1337.png)|![iris rand2](img/init/iris-rand2.png)
 
 ### s1k
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![s1k rand1](img/init/s1k-rand1.png)|![s1k rand2](img/init/s1k-rand2.png)
+![s1k rand1337](img/init/s1k-rand1337.png)|![s1k rand2](img/init/s1k-rand2.png)
 
 ### olivetti
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![olivetti rand1](img/init/olivetti-rand1.png)|![olivetti rand2](img/init/olivetti-rand2.png)
+![olivetti rand1337](img/init/olivetti-rand1337.png)|![olivetti rand2](img/init/olivetti-rand2.png)
 
 ### frey
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![frey rand1](img/init/frey-rand1.png)|![frey rand2](img/init/frey-rand2.png)
+![frey rand1337](img/init/frey-rand1337.png)|![frey rand2](img/init/frey-rand2.png)
 
 ### coil20
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil20 rand1](img/init/coil20-rand1.png)|![coil20 rand2](img/init/coil20-rand2.png)
+![coil20 rand1337](img/init/coil20-rand1337.png)|![coil20 rand2](img/init/coil20-rand2.png)
 
 ### coil100
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil100 rand1](img/init/coil100-rand1.png)|![coil100 rand2](img/init/coil100-rand2.png)
+![coil100 rand1337](img/init/coil100-rand1337.png)|![coil100 rand2](img/init/coil100-rand2.png)
 
 ### mnist
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![mnist rand1](img/init/mnist-rand1.png)|![mnist rand2](img/init/mnist-rand2.png)
+![mnist rand1337](img/init/mnist-rand1337.png)|![mnist rand2](img/init/mnist-rand2.png)
 
 ### fashion
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![fashion rand1](img/init/fashion-rand1.png)|![fashion rand2](img/init/fashion-rand2.png)
+![fashion rand1337](img/init/fashion-rand1337.png)|![fashion rand2](img/init/fashion-rand2.png)
 
 ### kuzushiji
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![kuzushiji rand1](img/init/kuzushiji-rand1.png)|![kuzushiji rand2](img/init/kuzushiji-rand2.png)
+![kuzushiji rand1337](img/init/kuzushiji-rand1337.png)|![kuzushiji rand2](img/init/kuzushiji-rand2.png)
 
 ### norb
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![norb rand1](img/init/norb-rand1.png)|![norb rand2](img/init/norb-rand2.png)
+![norb rand1337](img/init/norb-rand1337.png)|![norb rand2](img/init/norb-rand2.png)
 
 ### tasic2018
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![tasic2018 rand1](img/init/tasic2018-rand1.png)|![tasic2018 rand2](img/init/tasic2018-rand2.png)
+![tasic2018 rand1337](img/init/tasic2018-rand1337.png)|![tasic2018 rand2](img/init/tasic2018-rand2.png)
 
 ### macosko2015
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![macosko2015 rand1](img/init/macosko2015-rand1.png)|![macosko2015 rand2](img/init/macosko2015-rand2.png)
+![macosko2015 rand1337](img/init/macosko2015-rand1337.png)|![macosko2015 rand2](img/init/macosko2015-rand2.png)
 
 Broken-up clusters are again observed, although the prevalence is increased.
 I tried repeating these embeddings with `init_sdev = 1`, but that didn't help.
@@ -414,73 +414,73 @@ iris_umap <- umap(iris, init = "lvrand")
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![iris lvrand1](img/init/iris-lvrand1.png)|![iris lvrand2](img/init/iris-lvrand2.png)
+![iris lvrand1337](img/init/iris-lvrand1337.png)|![iris lvrand2](img/init/iris-lvrand2.png)
 
 ### s1k
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![s1k lvrand1](img/init/s1k-lvrand1.png)|![s1k lvrand2](img/init/s1k-lvrand2.png)
+![s1k lvrand1337](img/init/s1k-lvrand1337.png)|![s1k lvrand2](img/init/s1k-lvrand2.png)
 
 ### olivetti
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![olivetti lvrand1](img/init/olivetti-lvrand1.png)|![olivetti lvrand2](img/init/olivetti-lvrand2.png)
+![olivetti lvrand1337](img/init/olivetti-lvrand1337.png)|![olivetti lvrand2](img/init/olivetti-lvrand2.png)
 
 ### frey
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![frey lvrand1](img/init/frey-lvrand1.png)|![frey lvrand2](img/init/frey-lvrand2.png)
+![frey lvrand1337](img/init/frey-lvrand1337.png)|![frey lvrand2](img/init/frey-lvrand2.png)
 
 ### coil20
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil20 lvrand1](img/init/coil20-lvrand1.png)|![coil20 lvrand2](img/init/coil20-lvrand2.png)
+![coil20 lvrand1337](img/init/coil20-lvrand1337.png)|![coil20 lvrand2](img/init/coil20-lvrand2.png)
 
 ### coil100
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil100 lvrand1](img/init/coil100-lvrand1.png)|![coil100 lvrand2](img/init/coil100-lvrand2.png)
+![coil100 lvrand1337](img/init/coil100-lvrand1337.png)|![coil100 lvrand2](img/init/coil100-lvrand2.png)
 
 ### mnist
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![mnist lvrand1](img/init/mnist-lvrand1.png)|![mnist lvrand2](img/init/mnist-lvrand2.png)
+![mnist lvrand1337](img/init/mnist-lvrand1337.png)|![mnist lvrand2](img/init/mnist-lvrand2.png)
 
 ### fashion
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![fashion lvrand1](img/init/fashion-lvrand1.png)|![fashion lvrand2](img/init/fashion-lvrand2.png)
+![fashion lvrand1337](img/init/fashion-lvrand1337.png)|![fashion lvrand2](img/init/fashion-lvrand2.png)
 
 ### kuzushiji
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![kuzushiji lvrand1](img/init/kuzushiji-lvrand1.png)|![kuzushiji lvrand2](img/init/kuzushiji-lvrand2.png)
+![kuzushiji lvrand1337](img/init/kuzushiji-lvrand1337.png)|![kuzushiji lvrand2](img/init/kuzushiji-lvrand2.png)
 
 ### norb
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![norb lvrand1](img/init/norb-lvrand1.png)|![norb lvrand2](img/init/norb-lvrand2.png)
+![norb lvrand1337](img/init/norb-lvrand1337.png)|![norb lvrand2](img/init/norb-lvrand2.png)
 
 ### tasic2018
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![tasic2018 lvrand1](img/init/tasic2018-lvrand1.png)|![tasic2018 lvrand2](img/init/tasic2018-lvrand2.png)
+![tasic2018 lvrand1337](img/init/tasic2018-lvrand1337.png)|![tasic2018 lvrand2](img/init/tasic2018-lvrand2.png)
 
 ### macosko2015
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![macosko2015 lvrand1](img/init/macosko2015-lvrand1.png)|![macosko2015 lvrand2](img/init/macosko2015-lvrand2.png)
+![macosko2015 lvrand1337](img/init/macosko2015-lvrand1337.png)|![macosko2015 lvrand2](img/init/macosko2015-lvrand2.png)
 
 No, it doesn't make a huge difference. MNIST still has an issue with split
 clusters. And increasing the `init_sdev` value doesn't really help. What did
