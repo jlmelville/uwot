@@ -61,6 +61,11 @@
 
     
     
+<p><em>December 27 2024</em>: Updated to use <code>umap2</code> and with
+better images.</p>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
 <p>The default initialization for UMAP uses the eigenvectors of a
 normalized graph Laplacian of the sparse affinity matrix. This normally
 works well except when:</p>
@@ -75,26 +80,58 @@ of a very long initialization, and possibly a hang. Unfortunately,
 interrupting RSpectra can result in requiring the entire R session to be
 lost.</li>
 </ul>
+<div class="section level3">
+<h3 id="pca-initialization">PCA Initialization<a class="anchor" aria-label="anchor" href="#pca-initialization"></a>
+</h3>
 <p>An alternative to using the spectral initialization is to use PCA,
 although depending on the scaling of your input variables, this could
 lead to a quite spread-out initial set of coordinates, which can be hard
 to optimize. For the related technique t-SNE, <a href="https://www.biorxiv.org/content/10.1101/453449v1" class="external-link">Kobak and
 Berens</a> recommend scaling the PCA results so that the standard
 deviation for each dimension is <code>1e-4</code>. You can get that
-behavior in <code>uwot</code> by using <code>init = "spca"</code>.</p>
-<p>You don’t need to worry about disconnected components when attempting
-to use spectral initialization: if <code>uwot</code> detects more than
-one component in the affinity graph, it will fall back to using the
-<code>"spca"</code> initialization automatically.</p>
-<p>However, using PCA ignores the information in the affinity matrix
-that might be useful for initialization: for example, when using
-supervised UMAP or mixing different types of distance metrics. And
-conceptually, using the affinity matrix has a lot of appeal. Dzwinel and
-co-workers describe a very fast multi-dimensional scaling-like method
-called <a href="https://arxiv.org/abs/1902.01108" class="external-link">ivhd</a> which
-generates a connected graph, by only knowing only a few neighbor and
-non-neighbor points and pretending the target distances are 0 and 1,
-respectively. Similar theoretical support for this is given by <a href="https://arxiv.org/abs/1711.04712" class="external-link">Linderman and co-workers</a>. On
+behavior in <code>uwot</code> by using the <code>umap</code> function
+with <code>init = "spca"</code> or <code>umap2</code> with
+<code>init = "spca", init_sdev = 1e-4</code>.</p>
+</div>
+<div class="section level3">
+<h3 id="changes-with-umap2">Changes with <code>umap2</code><a class="anchor" aria-label="anchor" href="#changes-with-umap2"></a>
+</h3>
+<p>Based on some years of experience, the <code>umap2</code> function
+has some slightly different defaults which I recommend over
+<code>umap</code>. For more on the <code>umap2</code> function, see the
+<a href="https://jlmelville.github.io/uwot/articles/umap2.html">umap2
+article</a>. But I recommend using <code>init = "pca"</code>. At some
+point after I wrote <code>uwot</code> (or I just never noticed), the
+Python UMAP package added an extra scaling of coordinates so that they
+are contained in a bounding box of side length 10. This is now the
+default with <code>umap2</code> and seems to work pretty well.</p>
+<p>All the results shown on this page now use <code>umap2</code>.</p>
+</div>
+<div class="section level3">
+<h3 id="if-you-are-still-using-umap">If you are still using <code>umap</code><a class="anchor" aria-label="anchor" href="#if-you-are-still-using-umap"></a>
+</h3>
+<p>If you are still using <code>umap</code>, then the
+<code>init = "spca"</code> option there works ok, but the standard
+deviation of <code>1e-4</code> may be too small for some datasets. If
+you see results where you are suspicious that clusters are being broken
+up, I recommend trying with value of <code>init_sdev</code> of
+<code>1e-2</code>, <code>1</code> or <code>2.5</code>. If you want to
+use the Python UMAP-style scaling with <code>umap</code>, you can get it
+by setting <code>init_sdev = "range"</code>, and is probably the best
+choice.</p>
+</div>
+<div class="section level3">
+<h3 id="the-approximate-global-spectral-initialization">The Approximate Global Spectral Initialization<a class="anchor" aria-label="anchor" href="#the-approximate-global-spectral-initialization"></a>
+</h3>
+<p>PCA is a solid choice for initialization when spectral embedding
+fails. But using PCA ignores the information in the affinity matrix that
+might be useful for initialization: for example, when using supervised
+UMAP or mixing different types of distance metrics. And conceptually,
+using the affinity matrix has a lot of appeal. Dzwinel and co-workers
+describe a very fast multi-dimensional scaling-like method called <a href="https://arxiv.org/abs/1902.01108" class="external-link">ivhd</a> which generates a
+connected graph, by only knowing only a few neighbor and non-neighbor
+points and pretending the target distances are 0 and 1, respectively.
+Similar theoretical support for this is given by <a href="https://arxiv.org/abs/1711.04712" class="external-link">Linderman and co-workers</a>. On
 the basis of this work, I have implemented an “approximate global”
 spectral method of initialization: which is a very minor modification of
 the standard spectral initialization:</p>
@@ -114,12 +151,21 @@ optimization.</li>
 </ul>
 <p>You can get this behavior in uwot with
 <code>init = "agspectral"</code>.</p>
+</div>
+<div class="section level3">
+<h3 id="laplacian-eigenmap">Laplacian Eigenmap<a class="anchor" aria-label="anchor" href="#laplacian-eigenmap"></a>
+</h3>
 <p>Another option for a connected graph is to use a variation on the
 normalization used in the graph Laplacian to get something close to <a href="https://doi.org/10.1162/089976603321780317" class="external-link">Laplacian Eigenmap</a>
 with <code>init = "laplacian"</code>. In <a href="http://www.kyb.mpg.de/fileadmin/user_upload/files/publications/attachments/luxburg06_TR_v2_4139%5b1%5d.pdf" class="external-link">Luxburg’s
 spectral clustering tutorial (PDF)</a> this form of normalization is
 recommended over that used in the <code>init = "spectral"</code>
-normalization.</p>
+normalization. So we’ll try it here and see if it makes any
+difference.</p>
+</div>
+<div class="section level3">
+<h3 id="random-initialization">Random Initialization<a class="anchor" aria-label="anchor" href="#random-initialization"></a>
+</h3>
 <p>If all else fails, you can use random initialization. In the spirit
 of generosity, <code>uwot</code> offers two types of random
 initialization. The first is that used by UMAP, which uses a random
@@ -133,52 +179,70 @@ This is also the method used by t-SNE. You can get this by setting
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Default initialization: use spectral initialization if possible</span></span>
 <span><span class="co"># falling back to scaled PCA if multiple components are found in the graph</span></span>
-<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
+<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># same as the above</span></span>
-<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"spectral"</span><span class="op">)</span></span>
+<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"spectral"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># use scaled PCA</span></span>
+<span><span class="co"># use (scaled) PCA: defaults are different between umap and umap2</span></span>
+<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"pca"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># If you want to use `umap` then you can use the following:</span></span>
+<span><span class="co"># umap with default scaled PCA</span></span>
 <span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"spca"</span><span class="op">)</span></span>
+<span><span class="co"># equivalent to:</span></span>
+<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"pca"</span>, init_sdev <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span></span>
+<span><span class="co"># but this might be a better choice of settings</span></span>
+<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"pca"</span>, init_sdev <span class="op">=</span> <span class="st">"range"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># use an "approximate global" spectral initialization that should be applicable</span></span>
 <span><span class="co"># even under conditions where "spectral" fails and has to use spca</span></span>
-<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"agspectral"</span><span class="op">)</span></span>
+<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"agspectral"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># use a Laplacian Eigenmap style initialization, which will also fall back to</span></span>
 <span><span class="co"># spca if it has to</span></span>
-<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"laplacian"</span><span class="op">)</span></span>
+<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"laplacian"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># use random initialization, UMAP style</span></span>
-<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"rand"</span><span class="op">)</span></span>
+<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"rand"</span><span class="op">)</span></span>
 <span><span class="co"># use random initialization, t-SNE/LargeVis style</span></span>
-<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"lvrand"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">embedding</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span><span class="va">data</span>, init <span class="op">=</span> <span class="st">"lvrand"</span><span class="op">)</span></span></code></pre></div>
 <p>Below, we’ll explore the effect of these settings. For more details
 on the datasets, see the <a href="https://jlmelville.github.io/uwot/articles/umap-examples.html">examples</a>
 page.</p>
 <p>Apart from changing <code>init</code>, mainly default settings where
-used, except using <code>pca = 100</code>, which is necessary with high
-dimensional datasets for the Annoy-based nearest neighbor search to
-complete in a reasonable time. An exemplary command using the
-<code>iris</code> dataset and <code>"agspectral"</code>
-initialization:</p>
+used. To save a bit of time, I used pre-calculated exact nearest
+neighbors, but I don’t expect that to have a major effect on the
+results. Some typical commands using the <code>iris</code> dataset would
+be:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1337</span><span class="op">)</span></span>
-<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, pca <span class="op">=</span> <span class="fl">100</span>, init <span class="op">=</span> <span class="st">"agspectral"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Using the `umap` function with spca initialization</span></span>
+<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, init <span class="op">=</span> <span class="st">"spca"</span><span class="op">)</span></span>
+<span><span class="co"># Using the `umap2` with agspectral with slightly different (and hopefully</span></span>
+<span><span class="co"># better) defaults</span></span>
+<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap2.html">umap2</a></span><span class="op">(</span><span class="va">iris</span>, init <span class="op">=</span> <span class="st">"agspectral"</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
 <div class="section level2">
-<h2 id="spectral-vs-spca">Spectral vs SPCA<a class="anchor" aria-label="anchor" href="#spectral-vs-spca"></a>
+<h2 id="datasets">Datasets<a class="anchor" aria-label="anchor" href="#datasets"></a>
 </h2>
-<p>Below are some examples of using either the scaled PCA initialization
-or a spectral approach. On the first row, the left-hand image is the
-result of using <code>init = "spca"</code>, and the right-hand image is
+<p>For details see the <a href="https://jlmelville.github.io/uwot/articles/umap-examples.html">examples
+article</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="spectral-vs-pca">Spectral vs PCA<a class="anchor" aria-label="anchor" href="#spectral-vs-pca"></a>
+</h2>
+<p>Below are some examples of using either the PCA initialization or a
+spectral approach. On the first row, the left-hand image is the result
+of using <code>init = "pca"</code>, and the right-hand image is
 <code>init = "agspectral"</code>. On the second row, the left-hand image
 is for <code>init = "spectral"</code>. and the right-hand image is
 <code>init = "laplacian"</code>. Some datasets don’t have the second row
 of images, because with the settings used here, they generate more than
 one component in the graph, and therefore both
 <code>init = "spectral"</code> and <code>init = "laplacian"</code> would
-fall back to the same results as seen with
-<code>init = "spca"</code>.</p>
+fall back to similar results as seen with <code>init = "pca"</code>.</p>
 <div class="section level3">
 <h3 id="iris">iris<a class="anchor" aria-label="anchor" href="#iris"></a>
 </h3>
@@ -187,9 +251,13 @@ fall back to the same results as seen with
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Firis_spca.png" alt="iris spca"></td>
-<td align="center"><img src="img%2Finit%2Firis_agspectral.png" alt="iris agspectral"></td>
+<td align="center"><img src="img%2Finit%2Firis-pca.png" alt="iris pca"></td>
+<td align="center"><img src="img%2Finit%2Firis-agspectral.png" alt="iris agspectral"></td>
 </tr></tbody>
 </table>
 </div>
@@ -201,36 +269,60 @@ fall back to the same results as seen with
 <col width="51%">
 <col width="48%">
 </colgroup>
-<tbody>
-<tr class="odd">
-<td align="center"><img src="img%2Finit%2Fs1k_spca.png" alt="s1k spca"></td>
-<td align="center"><img src="img%2Finit%2Fs1k_agspectral.png" alt="s1k agspectral"></td>
-</tr>
-<tr class="even">
-<td align="center"><img src="img%2Finit%2Fs1k_spectral.png" alt="s1k spectral"></td>
-<td align="center"><img src="img%2Finit%2Fs1k_laplacian.png" alt="s1k laplacian"></td>
-</tr>
-</tbody>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Fs1k-pca.png" alt="s1k pca"></td>
+<td align="center"><img src="img%2Finit%2Fs1k-agspectral.png" alt="s1k agspectral"></td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">spectral</th>
+<th align="center">laplacian</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Fs1k-spectral.png" alt="s1k spectral"></td>
+<td align="center"><img src="img%2Finit%2Fs1k-laplacian.png" alt="s1k laplacian"></td>
+</tr></tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="oli">oli<a class="anchor" aria-label="anchor" href="#oli"></a>
+<h3 id="olivetti">olivetti<a class="anchor" aria-label="anchor" href="#olivetti"></a>
 </h3>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
-<tbody>
-<tr class="odd">
-<td align="center"><img src="img%2Finit%2Foli_spca.png" alt="oli spca"></td>
-<td align="center"><img src="img%2Finit%2Foli_agspectral.png" alt="oli agspectral"></td>
-</tr>
-<tr class="even">
-<td align="center"><img src="img%2Finit%2Foli_spectral.png" alt="oli spectral"></td>
-<td align="center"><img src="img%2Finit%2Foli_laplacian.png" alt="oli laplacian"></td>
-</tr>
-</tbody>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Folivetti-pca.png" alt="olivetti pca"></td>
+<td align="center"><img src="img%2Finit%2Folivetti-agspectral.png" alt="olivetti agspectral"></td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">spectral</th>
+<th align="center">laplacian</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Folivetti-spectral.png" alt="olivetti spectral"></td>
+<td align="center"><img src="img%2Finit%2Folivetti-laplacian.png" alt="olivetti laplacian"></td>
+</tr></tbody>
 </table>
 </div>
 <div class="section level3">
@@ -241,16 +333,28 @@ fall back to the same results as seen with
 <col width="51%">
 <col width="48%">
 </colgroup>
-<tbody>
-<tr class="odd">
-<td align="center"><img src="img%2Finit%2Ffrey_spca.png" alt="frey spca"></td>
-<td align="center"><img src="img%2Finit%2Ffrey_agspectral.png" alt="frey agspectral"></td>
-</tr>
-<tr class="even">
-<td align="center"><img src="img%2Finit%2Ffrey_spectral.png" alt="frey spectral"></td>
-<td align="center"><img src="img%2Finit%2Ffrey_laplacian.png" alt="frey laplacian"></td>
-</tr>
-</tbody>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Ffrey-pca.png" alt="frey pca"></td>
+<td align="center"><img src="img%2Finit%2Ffrey-agspectral.png" alt="frey agspectral"></td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">spectral</th>
+<th align="center">laplacian</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Ffrey-spectral.png" alt="frey spectral"></td>
+<td align="center"><img src="img%2Finit%2Ffrey-laplacian.png" alt="frey laplacian"></td>
+</tr></tbody>
 </table>
 </div>
 <div class="section level3">
@@ -261,9 +365,13 @@ fall back to the same results as seen with
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fcoil20_spca.png" alt="coil20 spca"></td>
-<td align="center"><img src="img%2Finit%2Fcoil20_agspectral.png" alt="coil20 agspectral"></td>
+<td align="center"><img src="img%2Finit%2Fcoil20-pca.png" alt="coil20 pca"></td>
+<td align="center"><img src="img%2Finit%2Fcoil20-agspectral.png" alt="coil20 agspectral"></td>
 </tr></tbody>
 </table>
 </div>
@@ -275,9 +383,13 @@ fall back to the same results as seen with
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fcoil100_spca.png" alt="coil100 spca"></td>
-<td align="center"><img src="img%2Finit%2Fcoil100_agspectral.png" alt="coil100 agspectral"></td>
+<td align="center"><img src="img%2Finit%2Fcoil100-pca.png" alt="coil100 pca"></td>
+<td align="center"><img src="img%2Finit%2Fcoil100-agspectral.png" alt="coil100 agspectral"></td>
 </tr></tbody>
 </table>
 </div>
@@ -289,16 +401,28 @@ fall back to the same results as seen with
 <col width="51%">
 <col width="48%">
 </colgroup>
-<tbody>
-<tr class="odd">
-<td align="center"><img src="img%2Finit%2Fmnist_spca.png" alt="mnist spca"></td>
-<td align="center"><img src="img%2Finit%2Fmnist_agspectral.png" alt="mnist agspectral"></td>
-</tr>
-<tr class="even">
-<td align="center"><img src="img%2Finit%2Fmnist_spectral.png" alt="mnist spectral"></td>
-<td align="center"><img src="img%2Finit%2Fmnist_laplacian.png" alt="mnist laplacian"></td>
-</tr>
-</tbody>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Fmnist-pca.png" alt="mnist pca"></td>
+<td align="center"><img src="img%2Finit%2Fmnist-agspectral.png" alt="mnist agspectral"></td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">spectral</th>
+<th align="center">laplacian</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Fmnist-spectral.png" alt="mnist spectral"></td>
+<td align="center"><img src="img%2Finit%2Fmnist-laplacian.png" alt="mnist laplacian"></td>
+</tr></tbody>
 </table>
 </div>
 <div class="section level3">
@@ -309,16 +433,28 @@ fall back to the same results as seen with
 <col width="51%">
 <col width="48%">
 </colgroup>
-<tbody>
-<tr class="odd">
-<td align="center"><img src="img%2Finit%2Ffashion_spca.png" alt="fashion spca"></td>
-<td align="center"><img src="img%2Finit%2Ffashion_agspectral.png" alt="fashion agspectral"></td>
-</tr>
-<tr class="even">
-<td align="center"><img src="img%2Finit%2Ffashion_spectral.png" alt="fashion spectral"></td>
-<td align="center"><img src="img%2Finit%2Ffashion_laplacian.png" alt="fashion laplacian"></td>
-</tr>
-</tbody>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Ffashion-pca.png" alt="fashion pca"></td>
+<td align="center"><img src="img%2Finit%2Ffashion-agspectral.png" alt="fashion agspectral"></td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">spectral</th>
+<th align="center">laplacian</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Ffashion-spectral.png" alt="fashion spectral"></td>
+<td align="center"><img src="img%2Finit%2Ffashion-laplacian.png" alt="fashion laplacian"></td>
+</tr></tbody>
 </table>
 </div>
 <div class="section level3">
@@ -329,16 +465,28 @@ fall back to the same results as seen with
 <col width="51%">
 <col width="48%">
 </colgroup>
-<tbody>
-<tr class="odd">
-<td align="center"><img src="img%2Finit%2Fkuzushiji_spca.png" alt="kuzushiji spca"></td>
-<td align="center"><img src="img%2Finit%2Fkuzushiji_agspectral.png" alt="kuzushiji agspectral"></td>
-</tr>
-<tr class="even">
-<td align="center"><img src="img%2Finit%2Fkuzushiji_spectral.png" alt="kuzushiji spectral"></td>
-<td align="center"><img src="img%2Finit%2Fkuzushiji_laplacian.png" alt="kuzushiji laplacian"></td>
-</tr>
-</tbody>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Fkuzushiji-pca.png" alt="kuzushiji pca"></td>
+<td align="center"><img src="img%2Finit%2Fkuzushiji-agspectral.png" alt="kuzushiji agspectral"></td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">spectral</th>
+<th align="center">laplacian</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Fkuzushiji-spectral.png" alt="kuzushiji spectral"></td>
+<td align="center"><img src="img%2Finit%2Fkuzushiji-laplacian.png" alt="kuzushiji laplacian"></td>
+</tr></tbody>
 </table>
 </div>
 <div class="section level3">
@@ -349,9 +497,13 @@ fall back to the same results as seen with
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fnorb_spca.png" alt="norb spca"></td>
-<td align="center"><img src="img%2Finit%2Fnorb_agspectral.png" alt="norb agspectral"></td>
+<td align="center"><img src="img%2Finit%2Fnorb-pca.png" alt="norb pca"></td>
+<td align="center"><img src="img%2Finit%2Fnorb-agspectral.png" alt="norb agspectral"></td>
 </tr></tbody>
 </table>
 </div>
@@ -363,55 +515,114 @@ fall back to the same results as seen with
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Ftasic2018_spca.png" alt="tasic2018 spca"></td>
-<td align="center"><img src="img%2Finit%2Ftasic2018_agspectral.png" alt="tasic2018 agspectral"></td>
+<td align="center"><img src="img%2Finit%2Ftasic2018-pca.png" alt="tasic2018 pca"></td>
+<td align="center"><img src="img%2Finit%2Ftasic2018-agspectral.png" alt="tasic2018 agspectral"></td>
 </tr></tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="macosko2015">macosko2015<a class="anchor" aria-label="anchor" href="#macosko2015"></a>
+<h3 id="macosko2015pca100">macosko2015pca100<a class="anchor" aria-label="anchor" href="#macosko2015pca100"></a>
 </h3>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
-<tbody>
-<tr class="odd">
-<td align="center"><img src="img%2Finit%2Fmacosko2015_spca.png" alt="macosko2015 spca"></td>
-<td align="center"><img src="img%2Finit%2Fmacosko2015_agspectral.png" alt="macosko2015 agspectral"></td>
-</tr>
-<tr class="even">
-<td align="center"><img src="img%2Finit%2Fmacosko2015_spectral.png" alt="macosko2015 spectral"></td>
-<td align="center"><img src="img%2Finit%2Fmacosko2015_laplacian.png" alt="macosko2015 laplacian"></td>
-</tr>
-</tbody>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Fmacosko2015pca100-pca.png" alt="macosko2015pca100 pca"></td>
+<td align="center"><img src="img%2Finit%2Fmacosko2015pca100-agspectral.png" alt="macosko2015pca100 agspectral"></td>
+</tr></tbody>
 </table>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">spectral</th>
+<th align="center">laplacian</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Fmacosko2015pca100-spectral.png" alt="macosko2015pca100 spectral"></td>
+<td align="center"><img src="img%2Finit%2Fmacosko2015pca100-laplacian.png" alt="macosko2015pca100 laplacian"></td>
+</tr></tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="isoswiss">isoswiss<a class="anchor" aria-label="anchor" href="#isoswiss"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">agspectral</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Fisoswiss-pca.png" alt="isoswiss pca"></td>
+<td align="center"><img src="img%2Finit%2Fisoswiss-agspectral.png" alt="isoswiss agspectral"></td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">spectral</th>
+<th align="center">laplacian</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Fisoswiss-spectral.png" alt="isoswiss spectral"></td>
+<td align="center"><img src="img%2Finit%2Fisoswiss-laplacian.png" alt="isoswiss laplacian"></td>
+</tr></tbody>
+</table>
+<p>There are really only minor differences between the PCA results and
+the spectral results in <em>most</em> cases.</p>
+<p>The big difference occurs with <code>isoswiss</code>. This shows the
+Achilles heel of PCA for initialization: it does not have any respect
+for manifolds. Where spectral initialization is able to “unfold” the
+structure, PCA leaves it folded up and the projection onto 2D leaves it
+broken up into three pieces.</p>
+<p>In most (but not all) cases, the <code>agspectral</code> results are
+very similar to the <code>spectral</code> results. Again
+<code>isoswiss</code> shows the limitations of the method. Like with
+PCA, the manifold has not been initialized properly and some unpleasant
+breakage occurs. There are certainly worse ways to initialize this
+dataset though, as we shall see below. I don’t think the results here
+are a fundamental limitation of the <code>agspectral</code> approach,
+but the balance of the random vs near neighbor affinities may not be
+ideal for this dataset.</p>
+<p>The <code>laplacian</code> results also strongly resemble the
+spectral initialization, and where they differ it’s not obvious to me if
+one is strictly better than the other, so in terms of initialization for
+UMAP, there doesn’t seem to be a strong advantage for using one type of
+graph Laplacian over the other.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="spca-init_sdev">SPCA init_sdev<a class="anchor" aria-label="anchor" href="#spca-init_sdev"></a>
+<h2 id="random-initialization-rand">Random Initialization: <code>rand</code><a class="anchor" aria-label="anchor" href="#random-initialization-rand"></a>
 </h2>
-<p>As mentioned earlier, the <code>init = "spca"</code> settings scales
-the PCA initialization to have a standard deviation of
-<code>1e-4</code>, as recommended by Kobak and Berens. This value is
-taken from the t-SNE initialization, so if it seems arbitrary, at least
-it has a history of being quite successful on its side. But for MNIST,
-one of the clusters has been broken up, and this wasn’t seen with the
-spectral initialization. I repeated the embedding with a different seed
-(results not shown) and again saw a split cluster, so probably this
-wasn’t due to bad luck with the random number generator.</p>
-<p>Could the standard deviation of the input be to blame? Although this
-setting works well with t-SNE, the normalization involved in that method
-may mean that the sort of gradients seen at those distances are quite
-different from those used with UMAP. To test this, below are results
-using a larger standard deviation. Results on the left use:</p>
+<p>Below are two results each from using random initialization, so you
+can get a sense for how much variation you can expect from getting lucky
+or not with the initialization.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, init <span class="op">=</span> <span class="st">"spca"</span>, init_sdev <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p>and those on the right:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, init <span class="op">=</span> <span class="st">"spca"</span>, init_sdev <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># left-hand plots used this seed</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1337</span><span class="op">)</span></span>
+<span><span class="co"># right-hand plots used this seed</span></span>
+<span><span class="co"># set.seed(42)</span></span>
+<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, init <span class="op">=</span> <span class="st">"rand"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="iris-1">iris<a class="anchor" aria-label="anchor" href="#iris-1"></a>
 </h3>
@@ -420,9 +631,13 @@ using a larger standard deviation. Results on the left use:</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Firis_spca1e-2.png" alt="iris spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Firis_spca1.png" alt="iris spca1"></td>
+<td align="center"><img src="img%2Finit%2Firis-rand1337.png" alt="iris rand1337"></td>
+<td align="center"><img src="img%2Finit%2Firis-rand42.png" alt="iris rand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -434,23 +649,31 @@ using a larger standard deviation. Results on the left use:</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fs1k_spca1e-2.png" alt="s1k spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Fs1k_spca1.png" alt="s1k spca1"></td>
+<td align="center"><img src="img%2Finit%2Fs1k-rand1337.png" alt="s1k rand1337"></td>
+<td align="center"><img src="img%2Finit%2Fs1k-rand42.png" alt="s1k rand42"></td>
 </tr></tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="oli-1">oli<a class="anchor" aria-label="anchor" href="#oli-1"></a>
+<h3 id="olivetti-1">olivetti<a class="anchor" aria-label="anchor" href="#olivetti-1"></a>
 </h3>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Foli_spca1e-2.png" alt="oli spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Foli_spca1.png" alt="oli spca1"></td>
+<td align="center"><img src="img%2Finit%2Folivetti-rand1337.png" alt="olivetti rand1337"></td>
+<td align="center"><img src="img%2Finit%2Folivetti-rand42.png" alt="olivetti rand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -462,9 +685,13 @@ using a larger standard deviation. Results on the left use:</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Ffrey_spca1e-2.png" alt="frey spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Ffrey_spca1.png" alt="frey spca1"></td>
+<td align="center"><img src="img%2Finit%2Ffrey-rand1337.png" alt="frey rand1337"></td>
+<td align="center"><img src="img%2Finit%2Ffrey-rand42.png" alt="frey rand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -476,9 +703,13 @@ using a larger standard deviation. Results on the left use:</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fcoil20_spca1e-2.png" alt="coil20 spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Fcoil20_spca1.png" alt="coil20 spca1"></td>
+<td align="center"><img src="img%2Finit%2Fcoil20-rand1337.png" alt="coil20 rand1337"></td>
+<td align="center"><img src="img%2Finit%2Fcoil20-rand42.png" alt="coil20 rand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -490,9 +721,13 @@ using a larger standard deviation. Results on the left use:</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fcoil100_spca1e-2.png" alt="coil100 spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Fcoil100_spca1.png" alt="coil100 spca1"></td>
+<td align="center"><img src="img%2Finit%2Fcoil100-rand1337.png" alt="coil100 rand1337"></td>
+<td align="center"><img src="img%2Finit%2Fcoil100-rand42.png" alt="coil100 rand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -504,9 +739,13 @@ using a larger standard deviation. Results on the left use:</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fmnist_spca1e-2.png" alt="mnist spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Fmnist_spca1.png" alt="mnist spca1"></td>
+<td align="center"><img src="img%2Finit%2Fmnist-rand1337.png" alt="mnist rand1337"></td>
+<td align="center"><img src="img%2Finit%2Fmnist-rand42.png" alt="mnist rand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -518,9 +757,13 @@ using a larger standard deviation. Results on the left use:</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Ffashion_spca1e-2.png" alt="fashion spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Ffashion_spca1.png" alt="fashion spca1"></td>
+<td align="center"><img src="img%2Finit%2Ffashion-rand1337.png" alt="fashion rand1337"></td>
+<td align="center"><img src="img%2Finit%2Ffashion-rand42.png" alt="fashion rand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -532,9 +775,13 @@ using a larger standard deviation. Results on the left use:</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fkuzushiji_spca1e-2.png" alt="kuzushiji spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Fkuzushiji_spca1.png" alt="kuzushiji spca1"></td>
+<td align="center"><img src="img%2Finit%2Fkuzushiji-rand1337.png" alt="kuzushiji rand1337"></td>
+<td align="center"><img src="img%2Finit%2Fkuzushiji-rand42.png" alt="kuzushiji rand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -546,9 +793,13 @@ using a larger standard deviation. Results on the left use:</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fnorb_spca1e-2.png" alt="norb spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Fnorb_spca1.png" alt="norb spca1"></td>
+<td align="center"><img src="img%2Finit%2Fnorb-rand1337.png" alt="norb rand1337"></td>
+<td align="center"><img src="img%2Finit%2Fnorb-rand42.png" alt="norb rand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -560,43 +811,69 @@ using a larger standard deviation. Results on the left use:</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Ftasic2018_spca1e-2.png" alt="tasic2018 spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Ftasic2018_spca1.png" alt="tasic2018 spca1"></td>
+<td align="center"><img src="img%2Finit%2Ftasic2018-rand1337.png" alt="tasic2018 rand1337"></td>
+<td align="center"><img src="img%2Finit%2Ftasic2018-rand42.png" alt="tasic2018 rand42"></td>
 </tr></tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="macosko2015-1">macosko2015<a class="anchor" aria-label="anchor" href="#macosko2015-1"></a>
+<h3 id="macosko2015pca100-1">macosko2015pca100<a class="anchor" aria-label="anchor" href="#macosko2015pca100-1"></a>
 </h3>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fmacosko2015_spca1e-2.png" alt="macosko2015 spca1e-2"></td>
-<td align="center"><img src="img%2Finit%2Fmacosko2015_spca1.png" alt="macosko2015 spca1"></td>
+<td align="center"><img src="img%2Finit%2Fmacosko2015pca100-rand1337.png" alt="macosko2015pca100 rand1337"></td>
+<td align="center"><img src="img%2Finit%2Fmacosko2015pca100-rand42.png" alt="macosko2015pca100 rand42"></td>
 </tr></tbody>
 </table>
-<p>Results are much better with a larger value for
-<code>init_sdev</code>. As the typical standard deviation of a spectral
-initialization for these datasets is in the range of 1-5, using
-<code>init_sdev = 1</code>, seems like a good place to start.</p>
+</div>
+<div class="section level3">
+<h3 id="isoswiss-1">isoswiss<a class="anchor" aria-label="anchor" href="#isoswiss-1"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Finit%2Fisoswiss-rand1337.png" alt="isoswiss rand1337"></td>
+<td align="center"><img src="img%2Finit%2Fisoswiss-rand42.png" alt="isoswiss rand42"></td>
+</tr></tbody>
+</table>
+<p>Results are not terrible for the smaller datasets, but for anything
+<code>mnist</code>-sized, we start to see broken-up clusters. And oof,
+<code>isoswiss</code> is a disaster.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="random-initialization-rand">Random Initialization: <code>rand</code><a class="anchor" aria-label="anchor" href="#random-initialization-rand"></a>
+<h2 id="random-initialization-lvrand">Random Initialization: <code>lvrand</code><a class="anchor" aria-label="anchor" href="#random-initialization-lvrand"></a>
 </h2>
-<p>Below are two results each from using random initialization, so you
-can get a sense for how much variation you can expect from getting lucky
-or not with the initialization.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>And here is the result of using random initialization in the
+t-SNE/LargeVis style, which use a Gaussian distribution over a much
+smaller initial range of coordinate values. Will it make much
+difference?</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># left-hand plots used this seed</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1337</span><span class="op">)</span></span>
 <span><span class="co"># right-hand plots used this seed</span></span>
 <span><span class="co"># set.seed(42)</span></span>
-<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, init <span class="op">=</span> <span class="st">"rand"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, init <span class="op">=</span> <span class="st">"lvrand"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="iris-2">iris<a class="anchor" aria-label="anchor" href="#iris-2"></a>
 </h3>
@@ -605,9 +882,13 @@ or not with the initialization.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Firis_rand1.png" alt="iris rand1"></td>
-<td align="center"><img src="img%2Finit%2Firis_rand2.png" alt="iris rand2"></td>
+<td align="center"><img src="img%2Finit%2Firis-lvrand1337.png" alt="iris lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Firis-lvrand42.png" alt="iris lvrand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -619,23 +900,31 @@ or not with the initialization.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fs1k_rand1.png" alt="s1k rand1"></td>
-<td align="center"><img src="img%2Finit%2Fs1k_rand2.png" alt="s1k rand2"></td>
+<td align="center"><img src="img%2Finit%2Fs1k-lvrand1337.png" alt="s1k lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Fs1k-lvrand42.png" alt="s1k lvrand42"></td>
 </tr></tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="oli-2">oli<a class="anchor" aria-label="anchor" href="#oli-2"></a>
+<h3 id="olivetti-2">olivetti<a class="anchor" aria-label="anchor" href="#olivetti-2"></a>
 </h3>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Foli_rand1.png" alt="oli rand1"></td>
-<td align="center"><img src="img%2Finit%2Foli_rand2.png" alt="oli rand2"></td>
+<td align="center"><img src="img%2Finit%2Folivetti-lvrand1337.png" alt="olivetti lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Folivetti-lvrand42.png" alt="olivetti lvrand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -647,9 +936,13 @@ or not with the initialization.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Ffrey_rand1.png" alt="frey rand1"></td>
-<td align="center"><img src="img%2Finit%2Ffrey_rand2.png" alt="frey rand2"></td>
+<td align="center"><img src="img%2Finit%2Ffrey-lvrand1337.png" alt="frey lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Ffrey-lvrand42.png" alt="frey lvrand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -661,9 +954,13 @@ or not with the initialization.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fcoil20_rand1.png" alt="coil20 rand1"></td>
-<td align="center"><img src="img%2Finit%2Fcoil20_rand2.png" alt="coil20 rand2"></td>
+<td align="center"><img src="img%2Finit%2Fcoil20-lvrand1337.png" alt="coil20 lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Fcoil20-lvrand42.png" alt="coil20 lvrand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -675,9 +972,13 @@ or not with the initialization.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fcoil100_rand1.png" alt="coil100 rand1"></td>
-<td align="center"><img src="img%2Finit%2Fcoil100_rand2.png" alt="coil100 rand2"></td>
+<td align="center"><img src="img%2Finit%2Fcoil100-lvrand1337.png" alt="coil100 lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Fcoil100-lvrand42.png" alt="coil100 lvrand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -689,9 +990,13 @@ or not with the initialization.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fmnist_rand1.png" alt="mnist rand1"></td>
-<td align="center"><img src="img%2Finit%2Fmnist_rand2.png" alt="mnist rand2"></td>
+<td align="center"><img src="img%2Finit%2Fmnist-lvrand1337.png" alt="mnist lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Fmnist-lvrand42.png" alt="mnist lvrand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -703,9 +1008,13 @@ or not with the initialization.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Ffashion_rand1.png" alt="fashion rand1"></td>
-<td align="center"><img src="img%2Finit%2Ffashion_rand2.png" alt="fashion rand2"></td>
+<td align="center"><img src="img%2Finit%2Ffashion-lvrand1337.png" alt="fashion lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Ffashion-lvrand42.png" alt="fashion lvrand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -717,9 +1026,13 @@ or not with the initialization.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fkuzushiji_rand1.png" alt="kuzushiji rand1"></td>
-<td align="center"><img src="img%2Finit%2Fkuzushiji_rand2.png" alt="kuzushiji rand2"></td>
+<td align="center"><img src="img%2Finit%2Fkuzushiji-lvrand1337.png" alt="kuzushiji lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Fkuzushiji-lvrand42.png" alt="kuzushiji lvrand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -731,9 +1044,13 @@ or not with the initialization.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fnorb_rand1.png" alt="norb rand1"></td>
-<td align="center"><img src="img%2Finit%2Fnorb_rand2.png" alt="norb rand2"></td>
+<td align="center"><img src="img%2Finit%2Fnorb-lvrand1337.png" alt="norb lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Fnorb-lvrand42.png" alt="norb lvrand42"></td>
 </tr></tbody>
 </table>
 </div>
@@ -745,244 +1062,74 @@ or not with the initialization.</p>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Ftasic2018_rand1.png" alt="tasic2018 rand1"></td>
-<td align="center"><img src="img%2Finit%2Ftasic2018_rand2.png" alt="tasic2018 rand2"></td>
+<td align="center"><img src="img%2Finit%2Ftasic2018-lvrand1337.png" alt="tasic2018 lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Ftasic2018-lvrand42.png" alt="tasic2018 lvrand42"></td>
 </tr></tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="macosko2015-2">macosko2015<a class="anchor" aria-label="anchor" href="#macosko2015-2"></a>
+<h3 id="macosko2015pca100-2">macosko2015pca100<a class="anchor" aria-label="anchor" href="#macosko2015pca100-2"></a>
 </h3>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fmacosko2015_rand1.png" alt="macosko2015 rand1"></td>
-<td align="center"><img src="img%2Finit%2Fmacosko2015_rand2.png" alt="macosko2015 rand2"></td>
+<td align="center"><img src="img%2Finit%2Fmacosko2015pca100-lvrand1337.png" alt="macosko2015pca100 lvrand1337"></td>
+<td align="center"><img src="img%2Finit%2Fmacosko2015pca100-lvrand42.png" alt="macosko2015pca100 lvrand42"></td>
 </tr></tbody>
 </table>
-<p>Broken-up clusters are again observed, although the prevalence is
-increased. I tried repeating these embeddings with
-<code>init_sdev = 1</code>, but that didn’t help.</p>
 </div>
-</div>
-<div class="section level2">
-<h2 id="random-initialization-lvrand">Random Initialization: <code>lvrand</code><a class="anchor" aria-label="anchor" href="#random-initialization-lvrand"></a>
-</h2>
-<p>And here is the result of using random initialization in the
-t-SNE/LargeVis style, which use a Gaussian distribution over a much
-smaller initial range of coordinate values. Will it make much
-difference?</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># left-hand plots used this seed</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1337</span><span class="op">)</span></span>
-<span><span class="co"># right-hand plots used this seed</span></span>
-<span><span class="co"># set.seed(42)</span></span>
-<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, init <span class="op">=</span> <span class="st">"lvrand"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="iris-3">iris<a class="anchor" aria-label="anchor" href="#iris-3"></a>
+<h3 id="isoswiss-2">isoswiss<a class="anchor" aria-label="anchor" href="#isoswiss-2"></a>
 </h3>
 <table class="table">
 <colgroup>
 <col width="51%">
 <col width="48%">
 </colgroup>
+<thead><tr class="header">
+<th align="center">seed = 1337</th>
+<th align="center">seed = 42</th>
+</tr></thead>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Firis_lvrand1.png" alt="iris lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Firis_lvrand2.png" alt="iris lvrand2"></td>
+<td align="center"><img src="img%2Finit%2Fisoswiss-rand1337.png" alt="isoswiss rand1337"></td>
+<td align="center"><img src="img%2Finit%2Fisoswiss-rand42.png" alt="isoswiss rand42"></td>
 </tr></tbody>
 </table>
-</div>
-<div class="section level3">
-<h3 id="s1k-3">s1k<a class="anchor" aria-label="anchor" href="#s1k-3"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fs1k_lvrand1.png" alt="s1k lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Fs1k_lvrand2.png" alt="s1k lvrand2"></td>
-</tr></tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="oli-3">oli<a class="anchor" aria-label="anchor" href="#oli-3"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Foli_lvrand1.png" alt="oli lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Foli_lvrand2.png" alt="oli lvrand2"></td>
-</tr></tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="frey-3">frey<a class="anchor" aria-label="anchor" href="#frey-3"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Ffrey_lvrand1.png" alt="frey lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Ffrey_lvrand2.png" alt="frey lvrand2"></td>
-</tr></tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="coil20-3">coil20<a class="anchor" aria-label="anchor" href="#coil20-3"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fcoil20_lvrand1.png" alt="coil20 lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Fcoil20_lvrand2.png" alt="coil20 lvrand2"></td>
-</tr></tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="coil100-3">coil100<a class="anchor" aria-label="anchor" href="#coil100-3"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fcoil100_lvrand1.png" alt="coil100 lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Fcoil100_lvrand2.png" alt="coil100 lvrand2"></td>
-</tr></tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="mnist-3">mnist<a class="anchor" aria-label="anchor" href="#mnist-3"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fmnist_lvrand1.png" alt="mnist lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Fmnist_lvrand2.png" alt="mnist lvrand2"></td>
-</tr></tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="fashion-3">fashion<a class="anchor" aria-label="anchor" href="#fashion-3"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Ffashion_lvrand1.png" alt="fashion lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Ffashion_lvrand2.png" alt="fashion lvrand2"></td>
-</tr></tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="kuzushiji-3">kuzushiji<a class="anchor" aria-label="anchor" href="#kuzushiji-3"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fkuzushiji_lvrand1.png" alt="kuzushiji lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Fkuzushiji_lvrand2.png" alt="kuzushiji lvrand2"></td>
-</tr></tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="norb-3">norb<a class="anchor" aria-label="anchor" href="#norb-3"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fnorb_lvrand1.png" alt="norb lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Fnorb_lvrand2.png" alt="norb lvrand2"></td>
-</tr></tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="tasic2018-3">tasic2018<a class="anchor" aria-label="anchor" href="#tasic2018-3"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Ftasic2018_lvrand1.png" alt="tasic2018 lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Ftasic2018_lvrand2.png" alt="tasic2018 lvrand2"></td>
-</tr></tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="macosko2015-3">macosko2015<a class="anchor" aria-label="anchor" href="#macosko2015-3"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="51%">
-<col width="48%">
-</colgroup>
-<tbody><tr class="odd">
-<td align="center"><img src="img%2Finit%2Fmacosko2015_lvrand1.png" alt="macosko2015 lvrand1"></td>
-<td align="center"><img src="img%2Finit%2Fmacosko2015_lvrand2.png" alt="macosko2015 lvrand2"></td>
-</tr></tbody>
-</table>
-<p>No, it doesn’t make a huge difference. MNIST still has an issue with
-split clusters. And increasing the <code>init_sdev</code> value doesn’t
-really help. What did help was increasing the <code>n_neighbors</code>
-parameter. With <code>n_neighbors = 150</code>, the MNIST clusters were
-correctly reconstituted.</p>
+<p>No, it doesn’t make a huge difference.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="recommendations">Recommendations<a class="anchor" aria-label="anchor" href="#recommendations"></a>
 </h2>
-<p>The default spectral initialization does a good job, and the fallback
-to scaled PCA is also fine, as long as you set the
-<code>init_sdev = 1</code>. From <code>uwot</code> version 0.0.0.9010,
-these are the default initialization settings.</p>
-<p>As far as I can see, the <code>init = "agspectral"</code> settings
-also work well. There’s not much difference between them and the
-<code>init = "spectral"</code> results when spectral initialization
-succeeds, and it has the added advantage that it shouldn’t ever have to
-fall back to the scaled PCA approach. That means it might give a more
-relevant initialization than PCA (e.g. with supervised UMAP). The
-Laplacian Eigenmap initialization gives results that are very similar to
-the spectral initialization. If spectral initialization is causing
-problems (e.g. suffering from numeric issues that cause it to take too
-long), I would probably look at the <code>agspectral</code> settings
-before Laplacian Eigenmaps, as it is more likely to converge easily and
-it doesn’t need a single-component graph to work. That said, the
-<code>agspectral</code> approach is entirely my own invention, whereas a
-Laplacian Eigenmaps is a published technique, so you may have more
-confidence in the latter (I don’t blame you).</p>
-<p>The random initializations are probably the least good choice. With
-default settings, you run a sizable risk of splitting up clusters. This
-can be ameliorated by increasing the <code>n_neighbors</code> parameter,
-but this increases the run time and other methods don’t seem as
-sensitive to these issues.</p>
+<p>The default spectral initialization does a good job. If for some
+reason you can’t use it, for example due to disconnections, then
+<code>init = "pca"</code> is a good choice. The one exception is with
+data where you think you have a manifold structure. In that case, you
+would hope that you have a connected graph, in which case you won’t need
+to use PCA.</p>
+<p>I would love to say that <code>agspectral</code> can help you out if
+you are having difficulty with a slow spectral initialization, and in
+general it seems useful, but it may not work well with manifold data.
+The <code>laplacian</code> initialization does not provide a meaningful
+difference to the spectral initialization based on the results shown
+here.</p>
+<p>Random initialization should be used only as a last resort.
+Increasing <code>n_neighbors</code> can sometimes help a bit, but you
+may need to set it to a very high value (e.g. 150) and that may
+introduce long-distance interactions that doesn’t represent your
+data.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
