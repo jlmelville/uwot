@@ -3574,7 +3574,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       "agspectral", "irlba_spectral", "irlba_laplacian", "pacpca"
     ))
 
-    if (init_is_spectral(init)) {
+    if (init_is_spectral(init) && init != "agspectral") {
       connected <- connected_components(V)
       if (connected$n_components > 1) {
         tsmessage("Found ", connected$n_components, " connected components, ", appendLF = FALSE)
