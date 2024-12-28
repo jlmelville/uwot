@@ -124,82 +124,85 @@ than one component in the graph, and therefore both `init = "spectral"` and
 
 ### iris
 
-|                             |                           |
+| spca                        | agspectral                |
 :----------------------------:|:--------------------------:
-![iris spca](img/init/iris_spca.png)|![iris agspectral](img/init/iris_agspectral.png)
+![iris spca](img/init/iris-spca.png)|![iris agspectral](img/init/iris-agspectral.png)
 
 ### s1k
 
-|                             |                           |
+| spca                        | agspectral                |
 :----------------------------:|:--------------------------:
-![s1k spca](img/init/s1k_spca.png)|![s1k agspectral](img/init/s1k_agspectral.png)
-![s1k spectral](img/init/s1k_spectral.png)|![s1k laplacian](img/init/s1k_laplacian.png)
+![s1k spca](img/init/s1k-spca.png)|![s1k agspectral](img/init/s1k-agspectral.png)
+
+| spectral                    | laplacian                 |
+:----------------------------:|:--------------------------:
+![s1k spectral](img/init/s1k-spectral.png)|![s1k laplacian](img/init/s1k-laplacian.png)
 
 ### oli
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![oli spca](img/init/oli_spca.png)|![oli agspectral](img/init/oli_agspectral.png)
-![oli spectral](img/init/oli_spectral.png)|![oli laplacian](img/init/oli_laplacian.png)
+![oli spca](img/init/oli-spca.png)|![oli agspectral](img/init/oli-agspectral.png)
+![oli spectral](img/init/oli-spectral.png)|![oli laplacian](img/init/oli-laplacian.png)
 
 ### frey
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![frey spca](img/init/frey_spca.png)|![frey agspectral](img/init/frey_agspectral.png)
-![frey spectral](img/init/frey_spectral.png)|![frey laplacian](img/init/frey_laplacian.png)
+![frey spca](img/init/frey-spca.png)|![frey agspectral](img/init/frey-agspectral.png)
+![frey spectral](img/init/frey-spectral.png)|![frey laplacian](img/init/frey-laplacian.png)
 
 ### coil20
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil20 spca](img/init/coil20_spca.png)|![coil20 agspectral](img/init/coil20_agspectral.png)
+![coil20 spca](img/init/coil20-spca.png)|![coil20 agspectral](img/init/coil20-agspectral.png)
 
 ### coil100
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil100 spca](img/init/coil100_spca.png)|![coil100 agspectral](img/init/coil100_agspectral.png)
+![coil100 spca](img/init/coil100-spca.png)|![coil100 agspectral](img/init/coil100-agspectral.png)
 
 ### mnist
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![mnist spca](img/init/mnist_spca.png)|![mnist agspectral](img/init/mnist_agspectral.png)
-![mnist spectral](img/init/mnist_spectral.png)|![mnist laplacian](img/init/mnist_laplacian.png)
+![mnist spca](img/init/mnist-spca.png)|![mnist agspectral](img/init/mnist-agspectral.png)
+![mnist spectral](img/init/mnist-spectral.png)|![mnist laplacian](img/init/mnist-laplacian.png)
 
 ### fashion
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![fashion spca](img/init/fashion_spca.png)|![fashion agspectral](img/init/fashion_agspectral.png)
-![fashion spectral](img/init/fashion_spectral.png)|![fashion laplacian](img/init/fashion_laplacian.png)
+![fashion spca](img/init/fashion-spca.png)|![fashion agspectral](img/init/fashion-agspectral.png)
+![fashion spectral](img/init/fashion-spectral.png)|![fashion laplacian](img/init/fashion-laplacian.png)
 
 ### kuzushiji
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![kuzushiji spca](img/init/kuzushiji_spca.png)|![kuzushiji agspectral](img/init/kuzushiji_agspectral.png)
-![kuzushiji spectral](img/init/kuzushiji_spectral.png)|![kuzushiji laplacian](img/init/kuzushiji_laplacian.png)
+![kuzushiji spca](img/init/kuzushiji-spca.png)|![kuzushiji agspectral](img/init/kuzushiji-agspectral.png)
+![kuzushiji spectral](img/init/kuzushiji-spectral.png)|![kuzushiji laplacian](img/init/kuzushiji-laplacian.png)
 
 ### norb
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![norb spca](img/init/norb_spca.png)|![norb agspectral](img/init/norb_agspectral.png)
+![norb spca](img/init/norb-spca.png)|![norb agspectral](img/init/norb-agspectral.png)
 
 ### tasic2018
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![tasic2018 spca](img/init/tasic2018_spca.png)|![tasic2018 agspectral](img/init/tasic2018_agspectral.png)
+![tasic2018 spca](img/init/tasic2018-spca.png)|![tasic2018 agspectral](img/init/tasic2018-agspectral.png)
 
 ### macosko2015
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![macosko2015 spca](img/init/macosko2015_spca.png)|![macosko2015 agspectral](img/init/macosko2015_agspectral.png)
-![macosko2015 spectral](img/init/macosko2015_spectral.png)|![macosko2015 laplacian](img/init/macosko2015_laplacian.png)
+![macosko2015 spca](img/init/macosko2015-spca.png)|![macosko2015 agspectral](img/init/macosko2015-agspectral.png)
+![macosko2015 spectral](img/init/macosko2015-spectral.png)|![macosko2015 laplacian](img/init/macosko2015-laplacian.png)
 
 ## SPCA init_sdev
 
@@ -232,73 +235,73 @@ iris_umap <- umap(iris, init = "spca", init_sdev = 1)
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![iris spca1e-2](img/init/iris_spca1e-2.png)|![iris spca1](img/init/iris_spca1.png)
+![iris spca1e-2](img/init/iris_spca1e-2.png)|![iris spca1](img/init/iris-spca1.png)
 
 ### s1k
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![s1k spca1e-2](img/init/s1k_spca1e-2.png)|![s1k spca1](img/init/s1k_spca1.png)
+![s1k spca1e-2](img/init/s1k_spca1e-2.png)|![s1k spca1](img/init/s1k-spca1.png)
 
 ### oli
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![oli spca1e-2](img/init/oli_spca1e-2.png)|![oli spca1](img/init/oli_spca1.png)
+![oli spca1e-2](img/init/oli_spca1e-2.png)|![oli spca1](img/init/oli-spca1.png)
 
 ### frey
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![frey spca1e-2](img/init/frey_spca1e-2.png)|![frey spca1](img/init/frey_spca1.png)
+![frey spca1e-2](img/init/frey_spca1e-2.png)|![frey spca1](img/init/frey-spca1.png)
 
 ### coil20
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil20 spca1e-2](img/init/coil20_spca1e-2.png)|![coil20 spca1](img/init/coil20_spca1.png)
+![coil20 spca1e-2](img/init/coil20_spca1e-2.png)|![coil20 spca1](img/init/coil20-spca1.png)
 
 ### coil100
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil100 spca1e-2](img/init/coil100_spca1e-2.png)|![coil100 spca1](img/init/coil100_spca1.png)
+![coil100 spca1e-2](img/init/coil100_spca1e-2.png)|![coil100 spca1](img/init/coil100-spca1.png)
 
 ### mnist
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![mnist spca1e-2](img/init/mnist_spca1e-2.png)|![mnist spca1](img/init/mnist_spca1.png)
+![mnist spca1e-2](img/init/mnist_spca1e-2.png)|![mnist spca1](img/init/mnist-spca1.png)
 
 ### fashion
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![fashion spca1e-2](img/init/fashion_spca1e-2.png)|![fashion spca1](img/init/fashion_spca1.png)
+![fashion spca1e-2](img/init/fashion_spca1e-2.png)|![fashion spca1](img/init/fashion-spca1.png)
 
 ### kuzushiji
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![kuzushiji spca1e-2](img/init/kuzushiji_spca1e-2.png)|![kuzushiji spca1](img/init/kuzushiji_spca1.png)
+![kuzushiji spca1e-2](img/init/kuzushiji_spca1e-2.png)|![kuzushiji spca1](img/init/kuzushiji-spca1.png)
 
 ### norb
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![norb spca1e-2](img/init/norb_spca1e-2.png)|![norb spca1](img/init/norb_spca1.png)
+![norb spca1e-2](img/init/norb_spca1e-2.png)|![norb spca1](img/init/norb-spca1.png)
 
 ### tasic2018
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![tasic2018 spca1e-2](img/init/tasic2018_spca1e-2.png)|![tasic2018 spca1](img/init/tasic2018_spca1.png)
+![tasic2018 spca1e-2](img/init/tasic2018_spca1e-2.png)|![tasic2018 spca1](img/init/tasic2018-spca1.png)
 
 ### macosko2015
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![macosko2015 spca1e-2](img/init/macosko2015_spca1e-2.png)|![macosko2015 spca1](img/init/macosko2015_spca1.png)
+![macosko2015 spca1e-2](img/init/macosko2015_spca1e-2.png)|![macosko2015 spca1](img/init/macosko2015-spca1.png)
 
 Results are much better with a larger value for `init_sdev`. As the typical 
 standard deviation of a spectral initialization for these datasets is in the 
@@ -322,73 +325,73 @@ iris_umap <- umap(iris, init = "rand")
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![iris rand1](img/init/iris_rand1.png)|![iris rand2](img/init/iris_rand2.png)
+![iris rand1](img/init/iris-rand1.png)|![iris rand2](img/init/iris-rand2.png)
 
 ### s1k
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![s1k rand1](img/init/s1k_rand1.png)|![s1k rand2](img/init/s1k_rand2.png)
+![s1k rand1](img/init/s1k-rand1.png)|![s1k rand2](img/init/s1k-rand2.png)
 
 ### oli
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![oli rand1](img/init/oli_rand1.png)|![oli rand2](img/init/oli_rand2.png)
+![oli rand1](img/init/oli-rand1.png)|![oli rand2](img/init/oli-rand2.png)
 
 ### frey
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![frey rand1](img/init/frey_rand1.png)|![frey rand2](img/init/frey_rand2.png)
+![frey rand1](img/init/frey-rand1.png)|![frey rand2](img/init/frey-rand2.png)
 
 ### coil20
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil20 rand1](img/init/coil20_rand1.png)|![coil20 rand2](img/init/coil20_rand2.png)
+![coil20 rand1](img/init/coil20-rand1.png)|![coil20 rand2](img/init/coil20-rand2.png)
 
 ### coil100
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil100 rand1](img/init/coil100_rand1.png)|![coil100 rand2](img/init/coil100_rand2.png)
+![coil100 rand1](img/init/coil100-rand1.png)|![coil100 rand2](img/init/coil100-rand2.png)
 
 ### mnist
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![mnist rand1](img/init/mnist_rand1.png)|![mnist rand2](img/init/mnist_rand2.png)
+![mnist rand1](img/init/mnist-rand1.png)|![mnist rand2](img/init/mnist-rand2.png)
 
 ### fashion
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![fashion rand1](img/init/fashion_rand1.png)|![fashion rand2](img/init/fashion_rand2.png)
+![fashion rand1](img/init/fashion-rand1.png)|![fashion rand2](img/init/fashion-rand2.png)
 
 ### kuzushiji
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![kuzushiji rand1](img/init/kuzushiji_rand1.png)|![kuzushiji rand2](img/init/kuzushiji_rand2.png)
+![kuzushiji rand1](img/init/kuzushiji-rand1.png)|![kuzushiji rand2](img/init/kuzushiji-rand2.png)
 
 ### norb
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![norb rand1](img/init/norb_rand1.png)|![norb rand2](img/init/norb_rand2.png)
+![norb rand1](img/init/norb-rand1.png)|![norb rand2](img/init/norb-rand2.png)
 
 ### tasic2018
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![tasic2018 rand1](img/init/tasic2018_rand1.png)|![tasic2018 rand2](img/init/tasic2018_rand2.png)
+![tasic2018 rand1](img/init/tasic2018-rand1.png)|![tasic2018 rand2](img/init/tasic2018-rand2.png)
 
 ### macosko2015
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![macosko2015 rand1](img/init/macosko2015_rand1.png)|![macosko2015 rand2](img/init/macosko2015_rand2.png)
+![macosko2015 rand1](img/init/macosko2015-rand1.png)|![macosko2015 rand2](img/init/macosko2015-rand2.png)
 
 Broken-up clusters are again observed, although the prevalence is increased.
 I tried repeating these embeddings with `init_sdev = 1`, but that didn't help.
@@ -411,73 +414,73 @@ iris_umap <- umap(iris, init = "lvrand")
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![iris lvrand1](img/init/iris_lvrand1.png)|![iris lvrand2](img/init/iris_lvrand2.png)
+![iris lvrand1](img/init/iris-lvrand1.png)|![iris lvrand2](img/init/iris-lvrand2.png)
 
 ### s1k
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![s1k lvrand1](img/init/s1k_lvrand1.png)|![s1k lvrand2](img/init/s1k_lvrand2.png)
+![s1k lvrand1](img/init/s1k-lvrand1.png)|![s1k lvrand2](img/init/s1k-lvrand2.png)
 
 ### oli
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![oli lvrand1](img/init/oli_lvrand1.png)|![oli lvrand2](img/init/oli_lvrand2.png)
+![oli lvrand1](img/init/oli-lvrand1.png)|![oli lvrand2](img/init/oli-lvrand2.png)
 
 ### frey
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![frey lvrand1](img/init/frey_lvrand1.png)|![frey lvrand2](img/init/frey_lvrand2.png)
+![frey lvrand1](img/init/frey-lvrand1.png)|![frey lvrand2](img/init/frey-lvrand2.png)
 
 ### coil20
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil20 lvrand1](img/init/coil20_lvrand1.png)|![coil20 lvrand2](img/init/coil20_lvrand2.png)
+![coil20 lvrand1](img/init/coil20-lvrand1.png)|![coil20 lvrand2](img/init/coil20-lvrand2.png)
 
 ### coil100
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![coil100 lvrand1](img/init/coil100_lvrand1.png)|![coil100 lvrand2](img/init/coil100_lvrand2.png)
+![coil100 lvrand1](img/init/coil100-lvrand1.png)|![coil100 lvrand2](img/init/coil100-lvrand2.png)
 
 ### mnist
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![mnist lvrand1](img/init/mnist_lvrand1.png)|![mnist lvrand2](img/init/mnist_lvrand2.png)
+![mnist lvrand1](img/init/mnist-lvrand1.png)|![mnist lvrand2](img/init/mnist-lvrand2.png)
 
 ### fashion
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![fashion lvrand1](img/init/fashion_lvrand1.png)|![fashion lvrand2](img/init/fashion_lvrand2.png)
+![fashion lvrand1](img/init/fashion-lvrand1.png)|![fashion lvrand2](img/init/fashion-lvrand2.png)
 
 ### kuzushiji
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![kuzushiji lvrand1](img/init/kuzushiji_lvrand1.png)|![kuzushiji lvrand2](img/init/kuzushiji_lvrand2.png)
+![kuzushiji lvrand1](img/init/kuzushiji-lvrand1.png)|![kuzushiji lvrand2](img/init/kuzushiji-lvrand2.png)
 
 ### norb
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![norb lvrand1](img/init/norb_lvrand1.png)|![norb lvrand2](img/init/norb_lvrand2.png)
+![norb lvrand1](img/init/norb-lvrand1.png)|![norb lvrand2](img/init/norb-lvrand2.png)
 
 ### tasic2018
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![tasic2018 lvrand1](img/init/tasic2018_lvrand1.png)|![tasic2018 lvrand2](img/init/tasic2018_lvrand2.png)
+![tasic2018 lvrand1](img/init/tasic2018-lvrand1.png)|![tasic2018 lvrand2](img/init/tasic2018-lvrand2.png)
 
 ### macosko2015
 
 |                             |                           |
 :----------------------------:|:--------------------------:
-![macosko2015 lvrand1](img/init/macosko2015_lvrand1.png)|![macosko2015 lvrand2](img/init/macosko2015_lvrand2.png)
+![macosko2015 lvrand1](img/init/macosko2015-lvrand1.png)|![macosko2015 lvrand2](img/init/macosko2015-lvrand2.png)
 
 No, it doesn't make a huge difference. MNIST still has an issue with split
 clusters. And increasing the `init_sdev` value doesn't really help. What did
