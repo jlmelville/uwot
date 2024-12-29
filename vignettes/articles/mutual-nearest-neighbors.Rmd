@@ -434,7 +434,9 @@ least often in the kNN graph. This reduces the maximum edge count in the BMNN
 to around 200 (a nearly 20-fold drop), but the embedding looks very similar to
 the vanilla UMAP result:
 
-![macosko2015-kbmnn_15_5](img/bmnn/macosko2015-kbmnn_15_5.png)
+| macosko2015 (15, 5)-koBMNN |
+| :---: |
+| ![macosko2015-kbmnn_15_5](img/bmnn/macosko2015-kbmnn_15_5.png) |
 
 I include this image only because this is evidence against my long-held belief
 that hubs in the kNN graph are a problem for UMAP, so this is a good
@@ -447,6 +449,25 @@ located at the edges. While not attractive, this could be indicating some
 anomalous clustering in these small subsets, which might be worth investigating
 further. For example, these could be duplicates or close duplicates. I haven't
 actually *done* that investigation though so I can't say if that's the case.
+
+### norb revisited
+
+*December 29 2024*: Looking further at the `norb` results, I couldn't shake the
+feeling that the way the results were broken up when going to the BMNN result
+indicated that the `n_neighbors` was set too low. So let's try with 
+`n_neighbors = 50`. I will set the BMNN to `(50,5)`. Possilbly, a larger
+values of `k` means we also need a larger value of `m` to get a good result but
+let's see if we can get away with just changing one parameter.
+
+| Dataset | 50-NN | (50,5)-BMNN |
+| :---: | --- | --- |
+| norb  | ![norb-knn_50](img/bmnn/norb-knn_50.png) | ![norb-bmnn_50_5](img/bmnn/norb-bmnn_50_5.png) |
+
+Ok, I am back to not hating BMNN for `norb`. Results are a bit messy, but it's
+definitely doing something: the BMNN separates out the objects based on their
+class (the colors) to a much greater extent than the kNN version, which has the
+results in more cleanly separated clusters but with the classes more
+intertwined.
 
 ## Conclusions
 
@@ -473,4 +494,7 @@ than `uwot` itself.
 Certainly the BMNN is no panacea to datasets that don't show much structure, but
 that was a pretty forlorn hope. My advice would be that if your UMAP result
 does show some kind of structure, then it's worth trying the BMNN as it's not
-difficult or time-consuming to generate.
+difficult or time-consuming to generate. As the `norb` example shows, if the
+BMNN destroys the clustering, that could be a sign to try again with a larger
+values of `n_neighbors`.
+
