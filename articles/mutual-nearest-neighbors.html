@@ -616,9 +616,14 @@ smallest k-occurrence, i.e. items that appear the least often in the kNN
 graph. This reduces the maximum edge count in the BMNN to around 200 (a
 nearly 20-fold drop), but the embedding looks very similar to the
 vanilla UMAP result:</p>
-<div class="float">
-<img src="img%2Fbmnn%2Fmacosko2015-kbmnn_15_5.png" alt="macosko2015-kbmnn_15_5"><div class="figcaption">macosko2015-kbmnn_15_5</div>
-</div>
+<table class="table">
+<thead><tr class="header">
+<th align="center">macosko2015 (15, 5)-koBMNN</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fbmnn%2Fmacosko2015-kbmnn_15_5.png" alt="macosko2015-kbmnn_15_5"></td>
+</tr></tbody>
+</table>
 <p>I include this image only because this is evidence against my
 long-held belief that hubs in the kNN graph are a problem for UMAP, so
 this is a good visualization for me to stare at the next time I start
@@ -632,6 +637,40 @@ small subsets, which might be worth investigating further. For example,
 these could be duplicates or close duplicates. I haven’t actually
 <em>done</em> that investigation though so I can’t say if that’s the
 case.</p>
+<div class="section level3">
+<h3 id="norb-revisited">norb revisited<a class="anchor" aria-label="anchor" href="#norb-revisited"></a>
+</h3>
+<p><em>December 29 2024</em>: Looking further at the <code>norb</code>
+results, I couldn’t shake the feeling that the way the results were
+broken up when going to the BMNN result indicated that the
+<code>n_neighbors</code> was set too low. So let’s try with
+<code>n_neighbors = 50</code>. I will set the BMNN to
+<code>(50,5)</code>. Possilbly, a larger values of <code>k</code> means
+we also need a larger value of <code>m</code> to get a good result but
+let’s see if we can get away with just changing one parameter.</p>
+<table class="table">
+<colgroup>
+<col width="45%">
+<col width="27%">
+<col width="27%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">Dataset</th>
+<th>50-NN</th>
+<th>(50,5)-BMNN</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center">norb</td>
+<td><img src="img%2Fbmnn%2Fnorb-knn_50.png" alt="norb-knn_50"></td>
+<td><img src="img%2Fbmnn%2Fnorb-bmnn_50_5.png" alt="norb-bmnn_50_5"></td>
+</tr></tbody>
+</table>
+<p>Ok, I am back to not hating BMNN for <code>norb</code>. Results are a
+bit messy, but it’s definitely doing something: the BMNN separates out
+the objects based on their class (the colors) to a much greater extent
+than the kNN version, which has the results in more cleanly separated
+clusters but with the classes more intertwined.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="conclusions">Conclusions<a class="anchor" aria-label="anchor" href="#conclusions"></a>
@@ -658,7 +697,10 @@ more suited to a graph or nearest neighbor package (like
 <p>Certainly the BMNN is no panacea to datasets that don’t show much
 structure, but that was a pretty forlorn hope. My advice would be that
 if your UMAP result does show some kind of structure, then it’s worth
-trying the BMNN as it’s not difficult or time-consuming to generate.</p>
+trying the BMNN as it’s not difficult or time-consuming to generate. As
+the <code>norb</code> example shows, if the BMNN destroys the
+clustering, that could be a sign to try again with a larger values of
+<code>n_neighbors</code>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
