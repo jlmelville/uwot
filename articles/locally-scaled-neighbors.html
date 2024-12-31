@@ -300,80 +300,144 @@ article</a>.</p>
 <div class="section level2">
 <h2 id="results">Results<a class="anchor" aria-label="anchor" href="#results"></a>
 </h2>
-<p>Normal UMAP results on the left, LSNN results on the right.</p>
+<p>Let’s compare default UMAP (with <code>n_neighbors = 15</code>) to
+LSNN with <code>n_neighbors = 15</code> picked from the 66-nearest
+neighbors. As we are going to the effort of generating the 66-nearest
+neighbors, let’s also see what UMAP with <code>n_neighbors = 66</code>
+looks like.</p>
+<p>UMAP results with <code>n_neighbors = 15</code> on the left
+(<code>UMAP-15</code>), LSNN results are in the middle and UMAP with 66
+neighbors (<code>UMAP-66</code>) is on the right. The number in
+parentheses after the dataset name is the degree of overlap of the
+15-nearest neighbors between the two methods (0 means no overlap, 1
+means all neighbors are the same).</p>
 <table class="table">
 <colgroup>
-<col width="45%">
-<col width="27%">
-<col width="27%">
+<col width="35%">
+<col width="21%">
+<col width="21%">
+<col width="21%">
 </colgroup>
 <thead><tr class="header">
 <th align="center">Dataset</th>
-<th>UMAP</th>
+<th>UMAP-15</th>
 <th>LSNN</th>
+<th>UMAP-66</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="center">mammoth50k</td>
-<td><img src="img%2Flsnn%2Fumap%2Fmammoth50k.png" alt="mammoth50k-umap"></td>
-<td><img src="img%2Flsnn%2Flsnn%2Fmammoth50k.png" alt="mammoth50k-lsnn"></td>
+<td align="center">mammoth (0.90)</td>
+<td><img src="img%2Flsnn%2Fumap%2Fmammoth.png" alt="mammoth-umap"></td>
+<td><img src="img%2Flsnn%2Flsnn%2Fmammoth.png" alt="mammoth-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fmammoth.png" alt="mammoth-umap66"></td>
 </tr>
 <tr class="even">
-<td align="center">scurvehole</td>
+<td align="center">scurvehole (0.92)</td>
 <td><img src="img%2Flsnn%2Fumap%2Fscurvehole.png" alt="scurvehole-umap"></td>
 <td><img src="img%2Flsnn%2Flsnn%2Fscurvehole.png" alt="scurvehole-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fscurvehole.png" alt="scurvehole-umap66"></td>
 </tr>
 <tr class="odd">
-<td align="center">isoswiss</td>
+<td align="center">isoswiss (0.92)</td>
 <td><img src="img%2Flsnn%2Fumap%2Fisoswiss.png" alt="isoswiss-umap"></td>
 <td><img src="img%2Flsnn%2Flsnn%2Fisoswiss.png" alt="isoswiss-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fisoswiss.png" alt="isoswiss-umap66"></td>
 </tr>
 <tr class="even">
-<td align="center">hierarchical</td>
+<td align="center">hierarchical (0.76)</td>
 <td><img src="img%2Flsnn%2Fumap%2Fhierarchical.png" alt="hierarchical-umap"></td>
 <td><img src="img%2Flsnn%2Flsnn%2Fhierarchical.png" alt="hierarchical-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fhierarchical.png" alt="hierarchical-umap66"></td>
 </tr>
 <tr class="odd">
-<td align="center">spheres</td>
+<td align="center">spheres (0.84)</td>
 <td><img src="img%2Flsnn%2Fumap%2Fspheres.png" alt="spheres-umap"></td>
 <td><img src="img%2Flsnn%2Flsnn%2Fspheres.png" alt="spheres-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fspheres.png" alt="spheres-umap66"></td>
 </tr>
 <tr class="even">
-<td align="center">coil20</td>
+<td align="center">coil20 (0.84)</td>
 <td><img src="img%2Flsnn%2Fumap%2Fcoil20.png" alt="coil20-umap"></td>
 <td><img src="img%2Flsnn%2Flsnn%2Fcoil20.png" alt="coil20-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fcoil20.png" alt="coil20-umap66"></td>
 </tr>
 <tr class="odd">
-<td align="center">coil100</td>
+<td align="center">coil100 (0.85)</td>
 <td><img src="img%2Flsnn%2Fumap%2Fcoil100.png" alt="coil100-umap"></td>
 <td><img src="img%2Flsnn%2Flsnn%2Fcoil100.png" alt="coil100-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fcoil100.png" alt="coil100-umap66"></td>
 </tr>
 <tr class="even">
-<td align="center">macosko2015</td>
+<td align="center">macosko2015 (0.40)</td>
 <td><img src="img%2Flsnn%2Fumap%2Fmacosko2015.png" alt="macosko2015-umap"></td>
 <td><img src="img%2Flsnn%2Flsnn%2Fmacosko2015.png" alt="macosko2015-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fmacosko2015.png" alt="macosko2015-umap66"></td>
 </tr>
 <tr class="odd">
-<td align="center">mnist</td>
-<td><img src="img%2Flsnn%2Fumap%2Fmnist.png" alt="mnist-umap"></td>
-<td><img src="img%2Flsnn%2Flsnn%2Fmnist.png" alt="mnist-lsnn"></td>
+<td align="center">macosko2015pca100 (0.66)</td>
+<td><img src="img%2Flsnn%2Fumap%2Fmacosko2015pca100.png" alt="macosko2015pca100-umap"></td>
+<td><img src="img%2Flsnn%2Flsnn%2Fmacosko2015pca100.png" alt="macosko2015pca100-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fmacosko2015pca100.png" alt="macosko2015pca100-umap66"></td>
 </tr>
 <tr class="even">
-<td align="center">fashion</td>
-<td><img src="img%2Flsnn%2Fumap%2Ffashion.png" alt="fashion-umap"></td>
-<td><img src="img%2Flsnn%2Flsnn%2Ffashion.png" alt="fashion-lsnn"></td>
+<td align="center">mnist (0.76)</td>
+<td><img src="img%2Flsnn%2Fumap%2Fmnist.png" alt="mnist-umap"></td>
+<td><img src="img%2Flsnn%2Flsnn%2Fmnist.png" alt="mnist-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fmnist.png" alt="mnist-umap66"></td>
 </tr>
 <tr class="odd">
-<td align="center">ng20</td>
+<td align="center">fashion (0.69)</td>
+<td><img src="img%2Flsnn%2Fumap%2Ffashion.png" alt="fashion-umap"></td>
+<td><img src="img%2Flsnn%2Flsnn%2Ffashion.png" alt="fashion-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Ffashion.png" alt="fashion-umap66"></td>
+</tr>
+<tr class="even">
+<td align="center">norb (0.78)</td>
+<td><img src="img%2Flsnn%2Fumap%2Fnorb.png" alt="norb-umap"></td>
+<td><img src="img%2Flsnn%2Flsnn%2Fnorb.png" alt="norb-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fnorb.png" alt="norb-umap66"></td>
+</tr>
+<tr class="odd">
+<td align="center">ng20 (0.67)</td>
 <td><img src="img%2Flsnn%2Fumap%2Fng20.png" alt="ng20-umap"></td>
 <td><img src="img%2Flsnn%2Flsnn%2Fng20.png" alt="ng20-lsnn"></td>
+<td><img src="img%2Flsnn%2Fumap66%2Fng20.png" alt="ng20-umap66"></td>
 </tr>
 </tbody>
 </table>
-<p>I don’t see a huge difference between the two results Maybe the
+<p>The average overlap is in the 77-78% range. Clearly, low-dimensional
+datasets show the smallest difference in overlap, but higher
+dimensionality doesn’t necessarily mean the lowest overlap:
+<code>coil100</code> has nearly 50,000 features, but has quite a high
+overlap (0.84). <code>macosko2015</code> (with 3,000 features) has an
+anomalously low overlap at 0.40. Applying PCA to reduce the
+dimensionality to 100 brings the overlap up to 0.66.</p>
+<p>For all that, I don’t see a huge difference between the two results.
+The clusters in <code>mnist</code>, <code>fashion</code> and
+<code>macosko2015pca100</code> are moved about a bit but not in a way
+that would be the source of any revelations. Maybe the
 <code>mammoth</code> and <code>scurvehole</code> results are a bit
-better with LSNN. <code>fashion</code> and <code>ng20</code> have some
-outliers.</p>
+better with LSNN?</p>
+<p><code>fashion</code> and <code>ng20</code> have some outliers which
+compresses the main body of the embedding into the center of the plot a
+bit.</p>
+<p>There are some intriguing signs in <code>norb</code> of better
+clustering. I suspect this is related to the fact that
+<code>n_neighbors = 15</code> is probably a bit too low for this dataset
+(see the <a href="https://jlmelville.github.io/uwot/articles/mutual-nearest-neighbors.html#norb-revisited">norb
+revisited section</a> of the mutual nearest neighbors article for more).
+The <code>UMAP-66</code> results look the best here.</p>
+<p><code>macosko2015</code> might also have something going on. The
+smaller clusters are a bit more separated from the big cyan blob. The
+effect is definitely much larger compared to the PCA-reduced version.
+And the result is distinct from the <code>UMAP-66</code> result.</p>
+<p>Would you better off using <code>n_neighbors = 66</code> for
+everything? For some datasets it looks better (<code>mammoth</code>,
+<code>scurvehole</code>, <code>isoswiss</code> a little bit,
+<code>norb</code> as previously mentioned), but for <code>coil20</code>
+and <code>coil100</code> it looks worse, with less of the images being
+separated into their circular clusters. For everything else, it’s pretty
+much the same result as with <code>n_neighbors = 15</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
