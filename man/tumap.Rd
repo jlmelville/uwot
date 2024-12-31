@@ -753,7 +753,7 @@ UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction
 \emph{arXiv preprint} \emph{arXiv}:1802.03426.
 \url{https://arxiv.org/abs/1802.03426}
 
-O’Neill, M. E. (2014).
+O'Neill, M. E. (2014).
 \emph{PCG: A family of simple fast space-efficient statistically good
 algorithms for random number generation}
 (Report No. HMC-CS-2014-0905). Harvey Mudd College.

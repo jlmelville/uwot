@@ -662,7 +662,7 @@
 #' \emph{Nature biotechnology}, \emph{39}(6), 765-774.
 #' \doi{10.1038/s41587-020-00801-7}
 #'
-#' O’Neill, M. E. (2014).
+#' O'Neill, M. E. (2014).
 #' \emph{PCG: A family of simple fast space-efficient statistically good
 #' algorithms for random number generation}
 #' (Report No. HMC-CS-2014-0905). Harvey Mudd College.
@@ -1410,7 +1410,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' \emph{arXiv preprint} \emph{arXiv}:1802.03426.
 #' \url{https://arxiv.org/abs/1802.03426}
 #'
-#' O’Neill, M. E. (2014).
+#' O'Neill, M. E. (2014).
 #' \emph{PCG: A family of simple fast space-efficient statistically good
 #' algorithms for random number generation}
 #' (Report No. HMC-CS-2014-0905). Harvey Mudd College.
@@ -2024,7 +2024,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #' \emph{arXiv preprint} \emph{arXiv}:1802.03426.
 #' \url{https://arxiv.org/abs/1802.03426}
 #'
-#' O’Neill, M. E. (2014).
+#' O'Neill, M. E. (2014).
 #' \emph{PCG: A family of simple fast space-efficient statistically good
 #' algorithms for random number generation}
 #' (Report No. HMC-CS-2014-0905). Harvey Mudd College.
@@ -2867,7 +2867,7 @@ similarity_graph <- function(X = NULL, n_neighbors = NULL, metric = "euclidean",
 #' \emph{arXiv preprint} \emph{arXiv}:1802.03426.
 #' \url{https://arxiv.org/abs/1802.03426}
 #'
-#' O’Neill, M. E. (2014).
+#' O'Neill, M. E. (2014).
 #' \emph{PCG: A family of simple fast space-efficient statistically good
 #' algorithms for random number generation}
 #' (Report No. HMC-CS-2014-0905). Harvey Mudd College.
