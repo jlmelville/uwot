@@ -203,6 +203,53 @@ locally_scaled_distances <- function(idx,
   d2_scaled
 }
 
+# if enforce_self_first = TRUE then we ensure that the first column of the
+# returned graph is the self-neighbor, even if it ought to sort to a different
+# position. knn graphs usually assume that the first column is the
+# self-neighbor.
+sort_knn_graph <- function(knn_graph, sort_values = NULL, decreasing = FALSE,
+                           enforce_self_first = TRUE) {
+  dist_matrix <- knn_graph$dist
+  idx_matrix <- knn_graph$idx
+
+  if (is.null(sort_values)) {
+    sort_values <- dist_matrix
+  }
+
+  if (enforce_self_first) {
+    dist_col1 <- dist_matrix[, 1, drop = FALSE]
+    idx_col1 <- idx_matrix[, 1, drop = FALSE]
+
+    idx_matrix <- idx_matrix[, -1]
+    dist_matrix <- dist_matrix[, -1]
+    sort_values <- sort_values[, -1]
+  }
+
+  n <- nrow(dist_matrix)
+  k <- ncol(dist_matrix)
+
+  if (n != nrow(sort_values) || k != ncol(sort_values)) {
+    stop("dist_matrix and sort_values must have the same dimensions")
+  }
+
+  sorted_dist <- matrix(NA, nrow = n, ncol = k)
+  sorted_idx <- matrix(NA, nrow = n, ncol = k)
+
+  for (i in 1:n) {
+    ord <- order(sort_values[i, ], decreasing = decreasing)
+
+    sorted_dist[i, ] <- dist_matrix[i, ord]
+    sorted_idx[i, ] <- idx_matrix[i, ord]
+  }
+
+  if (enforce_self_first) {
+    sorted_dist <- cbind(dist_col1, sorted_dist)
+    sorted_idx <- cbind(idx_col1, sorted_idx)
+  }
+
+  list(dist = sorted_dist, idx = sorted_idx)
+}
+
 truncate_graph <- function(graph, k = NULL) {
   if (is.null(k)) {
     return(graph)
