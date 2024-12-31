@@ -221,25 +221,65 @@ See the
 
 ## Results
 
-Normal UMAP results on the left, LSNN results on the right.
+Let's compare default UMAP (with `n_neighbors = 15`) to LSNN with 
+`n_neighbors = 15` picked from the 66-nearest neighbors. As we are going to the
+effort of generating the 66-nearest neighbors, let's also see what UMAP with 
+`n_neighbors = 66` looks like.
 
-| Dataset | UMAP | LSNN |
-| :---: | --- | --- |
-| mammoth50k | ![mammoth50k-umap](img/lsnn/umap/mammoth50k.png) | ![mammoth50k-lsnn](img/lsnn/lsnn/mammoth50k.png) |
-| scurvehole | ![scurvehole-umap](img/lsnn/umap/scurvehole.png) | ![scurvehole-lsnn](img/lsnn/lsnn/scurvehole.png) |
-| isoswiss | ![isoswiss-umap](img/lsnn/umap/isoswiss.png) | ![isoswiss-lsnn](img/lsnn/lsnn/isoswiss.png) |
-| hierarchical | ![hierarchical-umap](img/lsnn/umap/hierarchical.png) | ![hierarchical-lsnn](img/lsnn/lsnn/hierarchical.png) |
-| spheres | ![spheres-umap](img/lsnn/umap/spheres.png) | ![spheres-lsnn](img/lsnn/lsnn/spheres.png) |
-| coil20 | ![coil20-umap](img/lsnn/umap/coil20.png) | ![coil20-lsnn](img/lsnn/lsnn/coil20.png) |
-| coil100 | ![coil100-umap](img/lsnn/umap/coil100.png) | ![coil100-lsnn](img/lsnn/lsnn/coil100.png) |
-| macosko2015 | ![macosko2015-umap](img/lsnn/umap/macosko2015.png) | ![macosko2015-lsnn](img/lsnn/lsnn/macosko2015.png) |
-| mnist | ![mnist-umap](img/lsnn/umap/mnist.png) | ![mnist-lsnn](img/lsnn/lsnn/mnist.png) |
-| fashion | ![fashion-umap](img/lsnn/umap/fashion.png) | ![fashion-lsnn](img/lsnn/lsnn/fashion.png) |
-| ng20 | ![ng20-umap](img/lsnn/umap/ng20.png) | ![ng20-lsnn](img/lsnn/lsnn/ng20.png) |
+UMAP results with `n_neighbors = 15` on the left (`UMAP-15`), LSNN results are
+in the middle and UMAP with 66 neighbors (`UMAP-66`) is on the right. The number
+in parentheses after the dataset name is the degree of overlap of the 15-nearest
+neighbors between the two methods (0 means no overlap, 1 means all neighbors are
+the same).
 
-I don't see a huge difference between the two results Maybe the `mammoth` and
-`scurvehole` results are a bit better with LSNN. `fashion` and `ng20` have some
-outliers.
+| Dataset | UMAP-15 | LSNN | UMAP-66 |
+| :---: | --- | --- | --- |
+| mammoth (0.90) | ![mammoth-umap](img/lsnn/umap/mammoth.png) | ![mammoth-lsnn](img/lsnn/lsnn/mammoth.png) | ![mammoth-umap66](img/lsnn/umap66/mammoth.png) |
+| scurvehole (0.92) | ![scurvehole-umap](img/lsnn/umap/scurvehole.png) | ![scurvehole-lsnn](img/lsnn/lsnn/scurvehole.png) | ![scurvehole-umap66](img/lsnn/umap66/scurvehole.png) |
+| isoswiss (0.92) | ![isoswiss-umap](img/lsnn/umap/isoswiss.png) | ![isoswiss-lsnn](img/lsnn/lsnn/isoswiss.png) | ![isoswiss-umap66](img/lsnn/umap66/isoswiss.png) |
+| hierarchical (0.76) | ![hierarchical-umap](img/lsnn/umap/hierarchical.png) | ![hierarchical-lsnn](img/lsnn/lsnn/hierarchical.png) | ![hierarchical-umap66](img/lsnn/umap66/hierarchical.png) |
+| spheres (0.84) | ![spheres-umap](img/lsnn/umap/spheres.png) | ![spheres-lsnn](img/lsnn/lsnn/spheres.png) | ![spheres-umap66](img/lsnn/umap66/spheres.png) |
+| coil20 (0.84) | ![coil20-umap](img/lsnn/umap/coil20.png) | ![coil20-lsnn](img/lsnn/lsnn/coil20.png) | ![coil20-umap66](img/lsnn/umap66/coil20.png) |
+| coil100 (0.85) | ![coil100-umap](img/lsnn/umap/coil100.png) | ![coil100-lsnn](img/lsnn/lsnn/coil100.png) | ![coil100-umap66](img/lsnn/umap66/coil100.png) |
+| macosko2015 (0.40) | ![macosko2015-umap](img/lsnn/umap/macosko2015.png) | ![macosko2015-lsnn](img/lsnn/lsnn/macosko2015.png) | ![macosko2015-umap66](img/lsnn/umap66/macosko2015.png) |
+| macosko2015pca100 (0.66) | ![macosko2015pca100-umap](img/lsnn/umap/macosko2015pca100.png) | ![macosko2015pca100-lsnn](img/lsnn/lsnn/macosko2015pca100.png) | ![macosko2015pca100-umap66](img/lsnn/umap66/macosko2015pca100.png) |
+| mnist (0.76) | ![mnist-umap](img/lsnn/umap/mnist.png) | ![mnist-lsnn](img/lsnn/lsnn/mnist.png) | ![mnist-umap66](img/lsnn/umap66/mnist.png) |
+| fashion (0.69) | ![fashion-umap](img/lsnn/umap/fashion.png) | ![fashion-lsnn](img/lsnn/lsnn/fashion.png) | ![fashion-umap66](img/lsnn/umap66/fashion.png) |
+| norb (0.78) | ![norb-umap](img/lsnn/umap/norb.png) | ![norb-lsnn](img/lsnn/lsnn/norb.png) | ![norb-umap66](img/lsnn/umap66/norb.png) |
+| ng20 (0.67) | ![ng20-umap](img/lsnn/umap/ng20.png) | ![ng20-lsnn](img/lsnn/lsnn/ng20.png) | ![ng20-umap66](img/lsnn/umap66/ng20.png) |
+
+The average overlap is in the 77-78% range. Clearly, low-dimensional datasets
+show the smallest difference in overlap, but higher dimensionality doesn't
+necessarily mean the lowest overlap: `coil100` has nearly 50,000 features, but
+has quite a high overlap (0.84). `macosko2015` (with 3,000 features) has an
+anomalously low overlap at 0.40. Applying PCA to reduce the dimensionality to
+100 brings the overlap up to 0.66.
+
+For all that, I don't see a huge difference between the two results. The
+clusters in `mnist`, `fashion` and `macosko2015pca100` are moved about a bit but
+not in a way that would be the source of any revelations. Maybe the `mammoth`
+and `scurvehole` results are a bit better with LSNN?
+
+`fashion` and `ng20` have some outliers which compresses the main body of the
+embedding into the center of the plot a bit.
+
+There are some intriguing signs in `norb` of better clustering. I suspect this
+is related to the fact that `n_neighbors = 15` is probably a bit too low for
+this dataset (see the
+[norb revisited section](https://jlmelville.github.io/uwot/articles/mutual-nearest-neighbors.html#norb-revisited)
+of the mutual nearest neighbors article for more). The `UMAP-66` results look
+the best here.
+
+`macosko2015` might also have something going on. The smaller clusters are a
+bit more separated from the big cyan blob. The effect is definitely much larger
+compared to the PCA-reduced version. And the result is distinct from the 
+`UMAP-66` result.
+
+Would you better off using `n_neighbors = 66` for everything? For some datasets
+it looks better (`mammoth`, `scurvehole`, `isoswiss` a little bit, `norb` as
+previously mentioned), but for `coil20` and `coil100` it looks worse, with less
+of the images being separated into their circular clusters. For everything
+else, it's pretty much the same result as with `n_neighbors = 15`.
 
 ## Conclusion
 
