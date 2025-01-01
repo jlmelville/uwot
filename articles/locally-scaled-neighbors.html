@@ -281,6 +281,53 @@ neighbor graph of size <code>n_neighbors</code>, e.g.</p>
 <span>  <span class="va">d2_scaled</span></span>
 <span><span class="op">}</span></span>
 <span></span>
+<span><span class="co"># if enforce_self_first = TRUE then we ensure that the first column of the</span></span>
+<span><span class="co"># returned graph is the self-neighbor, even if it ought to sort to a different</span></span>
+<span><span class="co"># position. knn graphs usually assume that the first column is the</span></span>
+<span><span class="co"># self-neighbor.</span></span>
+<span><span class="va">sort_knn_graph</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">knn_graph</span>, <span class="va">sort_values</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">decreasing</span> <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                           <span class="va">enforce_self_first</span> <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">dist_matrix</span> <span class="op">&lt;-</span> <span class="va">knn_graph</span><span class="op">$</span><span class="va">dist</span></span>
+<span>  <span class="va">idx_matrix</span> <span class="op">&lt;-</span> <span class="va">knn_graph</span><span class="op">$</span><span class="va">idx</span></span>
+<span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">sort_values</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">sort_values</span> <span class="op">&lt;-</span> <span class="va">dist_matrix</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">enforce_self_first</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">dist_col1</span> <span class="op">&lt;-</span> <span class="va">dist_matrix</span><span class="op">[</span>, <span class="fl">1</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span>    <span class="va">idx_col1</span> <span class="op">&lt;-</span> <span class="va">idx_matrix</span><span class="op">[</span>, <span class="fl">1</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span></span>
+<span>    <span class="va">idx_matrix</span> <span class="op">&lt;-</span> <span class="va">idx_matrix</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
+<span>    <span class="va">dist_matrix</span> <span class="op">&lt;-</span> <span class="va">dist_matrix</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
+<span>    <span class="va">sort_values</span> <span class="op">&lt;-</span> <span class="va">sort_values</span><span class="op">[</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">dist_matrix</span><span class="op">)</span></span>
+<span>  <span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">dist_matrix</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">n</span> <span class="op">!=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sort_values</span><span class="op">)</span> <span class="op">||</span> <span class="va">k</span> <span class="op">!=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">sort_values</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"dist_matrix and sort_values must have the same dimensions"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="va">sorted_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="va">n</span>, ncol <span class="op">=</span> <span class="va">k</span><span class="op">)</span></span>
+<span>  <span class="va">sorted_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="cn">NA</span>, nrow <span class="op">=</span> <span class="va">n</span>, ncol <span class="op">=</span> <span class="va">k</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">sort_values</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span>, decreasing <span class="op">=</span> <span class="va">decreasing</span><span class="op">)</span></span>
+<span></span>
+<span>    <span class="va">sorted_dist</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">dist_matrix</span><span class="op">[</span><span class="va">i</span>, <span class="va">ord</span><span class="op">]</span></span>
+<span>    <span class="va">sorted_idx</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">idx_matrix</span><span class="op">[</span><span class="va">i</span>, <span class="va">ord</span><span class="op">]</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">enforce_self_first</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">sorted_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">dist_col1</span>, <span class="va">sorted_dist</span><span class="op">)</span></span>
+<span>    <span class="va">sorted_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">idx_col1</span>, <span class="va">sorted_idx</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>dist <span class="op">=</span> <span class="va">sorted_dist</span>, idx <span class="op">=</span> <span class="va">sorted_idx</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
 <span><span class="va">truncate_graph</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">graph</span>, <span class="va">k</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">k</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">graph</span><span class="op">)</span></span>

@@ -10,6 +10,7 @@ articles:
   articles/locally-scaled-neighbors: locally-scaled-neighbors.html
   articles/lvish: lvish.html
   articles/metric-learning: metric-learning.html
+  articles/mid-spectral-initialization: mid-spectral-initialization.html
   articles/mixed-data-types: mixed-data-types.html
   articles/mutual-nearest-neighbors: mutual-nearest-neighbors.html
   articles/nearest-neighbors-format: nearest-neighbors-format.html
@@ -27,7 +28,7 @@ articles:
   articles/umap2: umap2.html
   uwot: uwot.html
   articles/whatsnew: whatsnew.html
-last_built: 2024-12-31T01:41Z
+last_built: 2025-01-01T16:45Z
 urls:
   reference: https://jlmelville.github.io/uwot/reference
   article: https://jlmelville.github.io/uwot/articles
