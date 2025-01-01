@@ -367,6 +367,32 @@ Let's try one more high-dimensional dataset:
 
 Sort of the same deal here as with `mnist`.
 
+Another dataset I want to check is `tomoradar`. With the Python UMAP package
+and this data, I have found this dataset will take several minutes to converge.
+In `uwot` it can take over a minute (the difference is due to the implementation
+of the spectral decomposition). So like `mammoth`, this would be a good test
+of whether convergence can be sped up. For this dataset, we use
+`n_neighbors = 50`, because otherwise there is a disconnected component. I want
+to compare the results here with a successful spectral initialization because
+of the slow convergence.
+
+### tomoradar
+
+| pca | 0 | 0.25 |
+:---:|:---:|:---:|
+| ![tomoradar-pca](img/mid-spectral-initialization/init/tomoradar-pca.png) | ![tomoradar-0](img/mid-spectral-initialization/init/tomoradar-0.png) | ![tomoradar-0.25](img/mid-spectral-initialization/init/tomoradar-0.25.png) |
+
+| 0.5 | 0.75 | 0.9 |
+:---:|:---:|:---:|
+| ![tomoradar-0.5](img/mid-spectral-initialization/init/tomoradar-0.5.png) | ![tomoradar-0.75](img/mid-spectral-initialization/init/tomoradar-0.75.png) | ![tomoradar-0.9](img/mid-spectral-initialization/init/tomoradar-0.9.png) |
+
+| 0.99 | 0.999 | 1 |
+:---:|:---:|:---:|
+| ![tomoradar-0.99](img/mid-spectral-initialization/init/tomoradar-0.99.png) | ![tomoradar-0.999](img/mid-spectral-initialization/init/tomoradar-0.999.png) | ![tomoradar-1](img/mid-spectral-initialization/init/tomoradar-1.png) |
+
+Even with a high `graph_weight`, the results resemble the PCA results more than
+the spectral results. It seems like a situation like with `mammoth`.
+
 The next set of results are for datasets where you can't do a spectral
 initialization. `uwot` detects disconnected components in the graph, steps in
 and makes you do PCA instead. So I won't try to go to `graph_weight = 1`. Also,
@@ -537,6 +563,26 @@ of the clusters, so everything is an improvement on that.
 | 0.99 | 0.999 | 1 |
 :---:|:---:|:---:|
 | ![fashion-0.99](img/mid-spectral-initialization/umap/fashion-0.99.png) | ![fashion-0.999](img/mid-spectral-initialization/umap/fashion-0.999.png) | ![fashion-1](img/mid-spectral-initialization/umap/fashion-1.png) |
+
+### tomoradar
+
+| pca | 0 | 0.25 |
+:---:|:---:|:---:|
+| ![tomoradar-pca](img/mid-spectral-initialization/umap/tomoradar-pca.png) | ![tomoradar-0](img/mid-spectral-initialization/umap/tomoradar-0.png) | ![tomoradar-0.25](img/mid-spectral-initialization/umap/tomoradar-0.25.png) |
+
+| 0.5 | 0.75 | 0.9 |
+:---:|:---:|:---:|
+| ![tomoradar-0.5](img/mid-spectral-initialization/umap/tomoradar-0.5.png) | ![tomoradar-0.75](img/mid-spectral-initialization/umap/tomoradar-0.75.png) | ![tomoradar-0.9](img/mid-spectral-initialization/umap/tomoradar-0.9.png) |
+
+| 0.99 | 0.999 | 1 |
+:---:|:---:|:---:|
+| ![tomoradar-0.99](img/mid-spectral-initialization/umap/tomoradar-0.99.png) | ![tomoradar-0.999](img/mid-spectral-initialization/umap/tomoradar-0.999.png) | ![tomoradar-1](img/mid-spectral-initialization/umap/tomoradar-1.png) |
+
+With the usual caveat that UMAP results for this dataset don't look like much
+of anything, at least with a `graph_weight = 0.999`, you can get a result which
+resembles what you get from spectral initialization. But it still takes around
+20-30 seconds on my machine. That's still somewhere around 2-3 times faster than
+the pure spectral initialization, so a bit of a win.
 
 ### coil20
 
