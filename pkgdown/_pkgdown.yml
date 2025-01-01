@@ -36,6 +36,7 @@ articles:
   - articles/mixed-data-types
   - articles/fast-sgd
   - articles/init
+  - articles/mid-spectral-initialization
   - articles/leopold
   - articles/reproducibility
   - articles/performance
