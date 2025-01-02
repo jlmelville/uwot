@@ -632,6 +632,73 @@ PCA and spectral result. That’s more like it.</p>
 </tr></tbody>
 </table>
 <p>Sort of the same deal here as with <code>mnist</code>.</p>
+<p>Another dataset I want to check is <code>tomoradar</code>. With the
+Python UMAP package and this data, I have found this dataset will take
+several minutes to converge. In <code>uwot</code> it can take over a
+minute (the difference is due to the implementation of the spectral
+decomposition). So like <code>mammoth</code>, this would be a good test
+of whether convergence can be sped up. For this dataset, we use
+<code>n_neighbors = 50</code>, because otherwise there is a disconnected
+component. I want to compare the results here with a successful spectral
+initialization because of the slow convergence.</p>
+</div>
+<div class="section level3">
+<h3 id="tomoradar">tomoradar<a class="anchor" aria-label="anchor" href="#tomoradar"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">0</th>
+<th align="center">0.25</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Finit%2Ftomoradar-pca.png" alt="tomoradar-pca"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Finit%2Ftomoradar-0.png" alt="tomoradar-0"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Finit%2Ftomoradar-0.25.png" alt="tomoradar-0.25"></td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">0.5</th>
+<th align="center">0.75</th>
+<th align="center">0.9</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Finit%2Ftomoradar-0.5.png" alt="tomoradar-0.5"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Finit%2Ftomoradar-0.75.png" alt="tomoradar-0.75"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Finit%2Ftomoradar-0.9.png" alt="tomoradar-0.9"></td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">0.99</th>
+<th align="center">0.999</th>
+<th align="center">1</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Finit%2Ftomoradar-0.99.png" alt="tomoradar-0.99"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Finit%2Ftomoradar-0.999.png" alt="tomoradar-0.999"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Finit%2Ftomoradar-1.png" alt="tomoradar-1"></td>
+</tr></tbody>
+</table>
+<p>Even with a high <code>graph_weight</code>, the results resemble the
+PCA results more than the spectral results. It seems like a situation
+like with <code>mammoth</code>.</p>
 <p>The next set of results are for datasets where you can’t do a
 spectral initialization. <code>uwot</code> detects disconnected
 components in the graph, steps in and makes you do PCA instead. So I
@@ -1179,6 +1246,67 @@ that.</p>
 <td align="center"><img src="img%2Fmid-spectral-initialization%2Fumap%2Ffashion-1.png" alt="fashion-1"></td>
 </tr></tbody>
 </table>
+</div>
+<div class="section level3">
+<h3 id="tomoradar-1">tomoradar<a class="anchor" aria-label="anchor" href="#tomoradar-1"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">pca</th>
+<th align="center">0</th>
+<th align="center">0.25</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Fumap%2Ftomoradar-pca.png" alt="tomoradar-pca"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Fumap%2Ftomoradar-0.png" alt="tomoradar-0"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Fumap%2Ftomoradar-0.25.png" alt="tomoradar-0.25"></td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">0.5</th>
+<th align="center">0.75</th>
+<th align="center">0.9</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Fumap%2Ftomoradar-0.5.png" alt="tomoradar-0.5"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Fumap%2Ftomoradar-0.75.png" alt="tomoradar-0.75"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Fumap%2Ftomoradar-0.9.png" alt="tomoradar-0.9"></td>
+</tr></tbody>
+</table>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">0.99</th>
+<th align="center">0.999</th>
+<th align="center">1</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Fumap%2Ftomoradar-0.99.png" alt="tomoradar-0.99"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Fumap%2Ftomoradar-0.999.png" alt="tomoradar-0.999"></td>
+<td align="center"><img src="img%2Fmid-spectral-initialization%2Fumap%2Ftomoradar-1.png" alt="tomoradar-1"></td>
+</tr></tbody>
+</table>
+<p>With the usual caveat that UMAP results for this dataset don’t look
+like much of anything, at least with a
+<code>graph_weight = 0.999</code>, you can get a result which resembles
+what you get from spectral initialization. But it still takes around
+20-30 seconds on my machine. That’s still somewhere around 2-3 times
+faster than the pure spectral initialization, so a bit of a win.</p>
 </div>
 <div class="section level3">
 <h3 id="coil20-1">coil20<a class="anchor" aria-label="anchor" href="#coil20-1"></a>

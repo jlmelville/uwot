@@ -702,6 +702,35 @@ was carried out.</p>
 </tr></tbody>
 </table>
 </div>
+<div class="section level3">
+<h3 id="tomoradar">Tomoradar<a class="anchor" aria-label="anchor" href="#tomoradar"></a>
+</h3>
+<p>Used in the related papers <a href="https://arxiv.org/abs/2110.02573" class="external-link">T-SNE Is Not Optimized to Reveal
+Clusters in Data</a> and <a href="https://arxiv.org/abs/2108.08003" class="external-link">Stochastic Cluster Embedding</a>
+and originally from <a href="https://www.mdpi.com/2072-4292/9/1/58" class="external-link">UAV-Borne Profiling Radar
+for Forest Research</a>. A link to the data can be found via the <a href="https://github.com/rozyangno/sce" class="external-link">SCE repo</a>. This is a dataset
+of microwave radar data from forest canopy. This is a large dataset in
+terms of number of items (~120,000) and number of features (~8,000).
+This makes it a pain to process, and neither UMAP nor t-SNE do a good
+job of separating out the three main classes, but both <code>uwot</code>
+and the Python UMAP package take a surprisingly long time to carry out
+the spectral initialization, so this could be a good example dataset
+when timing and evaluating initialization methods.</p>
+<table class="table">
+<colgroup>
+<col width="51%">
+<col width="48%">
+</colgroup>
+<thead><tr class="header">
+<th align="center">UMAP</th>
+<th align="center">t-SNE</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="center"><img src="img%2Fexamples%2Ftomoradar-umap.png" alt="tomoradar UMAP"></td>
+<td align="center"><img src="img%2Fexamples%2Ftomoradar-tsne.png" alt="tomoradar t-SNE"></td>
+</tr></tbody>
+</table>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
