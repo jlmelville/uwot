@@ -421,3 +421,24 @@ The image below is for `ng20pacmap`.
 | UMAP                        | t-SNE                     |
 :----------------------------:|:--------------------------:
 ![ng20pacmap UMAP](img/examples/ng20pacmap-umap.png)|![ng20pacmap t-SNE](img/examples/ng20pacmap-tsne.png)
+
+## Tomoradar
+
+Used in the related papers [T-SNE Is Not Optimized to Reveal Clusters in Data](https://arxiv.org/abs/2110.02573) 
+and 
+[Stochastic Cluster Embedding](https://arxiv.org/abs/2108.08003) and originally
+from
+[UAV-Borne Profiling Radar for Forest Research](https://www.mdpi.com/2072-4292/9/1/58).
+A link to the data can be found via the 
+[SCE repo](https://github.com/rozyangno/sce).
+This is a dataset of microwave radar data from forest canopy. This is a large
+dataset in terms of number of items (~120,000) and number of features (~8,000).
+This makes it a pain to process, and neither UMAP nor t-SNE do a good job of
+separating out the three main classes, but both `uwot` and the Python UMAP
+package take a surprisingly long time to carry out the spectral initialization,
+so this could be a good example dataset when timing and evaluating
+initialization methods.
+
+| UMAP                        | t-SNE                     |
+:----------------------------:|:--------------------------:
+![tomoradar UMAP](img/examples/tomoradar-umap.png)|![tomoradar t-SNE](img/examples/tomoradar-tsne.png)
