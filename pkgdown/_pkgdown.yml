@@ -13,6 +13,7 @@ articles:
   - articles/umap-examples
   - articles/pycompare
   - articles/pacmap-comparison
+  - articles/embedding-new-data
   - articles/metric-learning
 - title: Theory
   desc: Exploring the theory and algorithm driving UMAP and its parameters.
