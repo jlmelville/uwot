@@ -3,6 +3,7 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   articles/abparams: abparams.html
+  articles/embedding-new-data: embedding-new-data.html
   articles/fast-sgd: fast-sgd.html
   articles/hnsw-umap: hnsw-umap.html
   articles/init: init.html
@@ -28,7 +29,7 @@ articles:
   articles/umap2: umap2.html
   uwot: uwot.html
   articles/whatsnew: whatsnew.html
-last_built: 2025-01-12T21:48Z
+last_built: 2025-02-16T05:17Z
 urls:
   reference: https://jlmelville.github.io/uwot/reference
   article: https://jlmelville.github.io/uwot/articles
