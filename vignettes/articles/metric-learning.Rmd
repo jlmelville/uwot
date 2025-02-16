@@ -1,5 +1,6 @@
 ---
 title: "Metric Learning with UMAP"
+subtitle: "Supervised UMAP"
 ---
 
 Among other things, UMAP provides two interesting extensions to its basic
