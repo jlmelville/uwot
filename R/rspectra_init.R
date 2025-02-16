@@ -60,3 +60,20 @@ rspectra_eigs_sym <- function(L, ndim, verbose = FALSE, ...) {
   }
   res
 }
+
+rspectra_eigs_shift_sym <- function(L, ndim, verbose = FALSE, ...) {
+  k <- ndim + 1
+  opts <- lmerge(list(tol = 1e-4), list(...))
+  suppressWarnings(res <- tryCatch(
+    RSpectra::eigs_sym(
+      L,
+      k = k,
+      which = "LM",
+      opts = opts
+    ),
+    error = function(c) {
+      NULL
+    }
+  ))
+  res
+}

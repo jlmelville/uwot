@@ -99,6 +99,7 @@ form_normalized_laplacian <- function(A) {
 # this matrix (hence can be used with truncated SVD), and the eigenvalues
 # are all positive, so we don't lose sign and hence correct eigenvector ordering
 # when using the singular values (lambda = 2 - d)
+# effectively we form 2I - Lsym = D^-1/2 W D^-1/2 + I
 form_modified_laplacian <- function(A, ret_d = FALSE) {
   Dsq <- sqrt(Matrix::colSums(A))
   L <- Matrix::t(A / Dsq) / Dsq
@@ -111,8 +112,8 @@ form_modified_laplacian <- function(A, ret_d = FALSE) {
 }
 
 # Return the ndim eigenvectors associated with the ndim largest eigenvalues
-sort_eigenvectors <- function(eig_res, ndim) {
-  vec_indices <- rev(order(eig_res$values, decreasing = TRUE)[1:ndim])
+sort_eigenvectors <- function(eig_res, ndim, decreasing = TRUE) {
+  vec_indices <- rev(order(eig_res$values, decreasing = decreasing)[1:ndim])
   as.matrix(Re(eig_res$vectors[, vec_indices]))
 }
 
@@ -154,6 +155,53 @@ rspectra_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
     return(rand_init(n, ndim))
   }
   sort_eigenvectors(res, ndim)
+}
+
+# maybe this should become an option one day
+# reminder to me for the next time I experiment: Shift-invert just doesn't work
+# in all cases: causes MNIST (k = 15) to hang forever even with a guess for
+# initvec of D^1/2, no matter which shift value (or maxitr or tol value) is
+# used. But we can form the shifted Laplacian like we do for tsvd approaches
+# and look for the LM eigenvalues (plus initialize with D^1/2 as a guess)
+# However the tolerance needs to be lower for similar quality of output
+# and most initializations are < 1 second anyway, so we don't gain much from
+# speeding them up. For slower initializations (e.g. `tomoradar`, `mammoth`)
+# there is a small speed up, but not down to a few seconds
+rspectra_normalized_laplacian_init_shift_inv <- function(A, ndim = 2, verbose = FALSE) {
+  if (nrow(A) < 3) {
+    tsmessage("Graph too small, using random initialization instead")
+    return(rand_init(nrow(A), ndim))
+  }
+  tsmessage("Initializing from normalized Laplacian")
+
+  L <- form_modified_laplacian(A)
+  initvec <- sqrt(Matrix::colSums(A))
+  res <- rspectra_eigs_shift_sym(L,
+    ndim,
+    verbose = verbose,
+    initvec = initvec,
+    tol = 1e-6
+  )
+  norm_initvec <- initvec / sqrt(sum(initvec * initvec))
+  if (is.null(res) ||
+    !is.list(res) ||
+    !"vectors" %in% names(res) ||
+    is.null(res$vectors) ||
+    tryCatch(
+      is.na(ncol(res$vectors)),
+      error = function(e) {
+        TRUE
+      }
+    ) ||
+    ncol(res$vectors) < ndim) {
+    message(
+      "Spectral initialization failed to converge, ",
+      "using random initialization instead"
+    )
+    n <- nrow(A)
+    return(rand_init(n, ndim))
+  }
+  sort_eigenvectors(res, ndim, decreasing = FALSE)
 }
 
 # Use a normalized Laplacian and use truncated SVD
