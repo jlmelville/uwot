@@ -27,6 +27,8 @@ reopening the issue (<https://github.com/jlmelville/uwot/issues/118>).
 * `repulsion_strength` was silently ignored if used with `tumap` or `umap2` with
 `a = 1, b = 1`. Ignoring the setting was on purpose, but it was not documented
 anywhere. `repulsion_strength` is now compatible with these settings.
+* Fixed an error when validating if the `pca` value is compatible with the
+maximum possible rank of the input data, surfaced by R-devel.
 
 # uwot 0.2.2
 
