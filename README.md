@@ -143,7 +143,7 @@ If you want to cite the use of uwot, then use the output of running
 `uwot`'s arrival on CRAN.
 * Another R package is [umapr](https://github.com/ropensci-archive/umapr), but
 it is no longer being maintained.
-* [umappp](https://github.com/LTLA/umappp) is a full C++ implementation, and
+* [umappp](https://github.com/libscran/umappp) is a full C++ implementation, and
 [yaumap](https://github.com/LTLA/yaumap) provides an R wrapper. The batch
 implementation in umappp are the basis for uwot's attempt at the same.
 * `uwot` uses the [RcppProgress](https://cran.r-project.org/package=RcppProgress)

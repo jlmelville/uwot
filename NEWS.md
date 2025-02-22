@@ -10,7 +10,7 @@ deterministic sampling of vertices during the optimization phase. This should
 give qualitatively similar results to using a real PRNG, but has the advantage
 of being faster and giving more reproducible output. This feature was inspired
 by a comment by 
-[Leland McInnes on Reddit](https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy).
+[Leland McInnes on Reddit](https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy/).
 
 ## Bug fixes and minor improvements
 
@@ -326,7 +326,7 @@ updated as quickly and hence gradients are staler for longer), so it is highly
 recommended to set `n_epochs = 500` or higher. Thank you to 
 [Aaron Lun](https://github.com/LTLA) who not only came up with a way to
 implement this feature, but also wrote an entire 
-[C++ implementation of UMAP](https://github.com/LTLA/umappp) which does it 
+[C++ implementation of UMAP](https://github.com/libscran/umappp) which does it 
 (<https://github.com/jlmelville/uwot/issues/83>).
 * New parameter: `opt_args`. The default optimization method when `batch = TRUE`
 is [Adam](https://arxiv.org/abs/1412.6980). You can control its parameters by
@@ -337,7 +337,7 @@ gradient descent method like that used when `batch = FALSE`.
 * New parameter: `epoch_callback`. You may now pass a function which will be
 invoked at the end of each epoch. Mainly useful for producing an image of the
 state of the embedding at different points during the optimization. This is
-another feature taken from [umappp](https://github.com/LTLA/umappp).
+another feature taken from [umappp](https://github.com/libscran/umappp).
 * New parameter: `pca_method`, used when the `pca` parameter is supplied to
 reduce the initial dimensionality of the data. This controls which method is
 used to carry out the PCA and can be set to one of:

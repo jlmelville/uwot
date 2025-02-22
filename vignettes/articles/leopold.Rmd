@@ -276,7 +276,7 @@ The [COIL-20](https://www.cs.columbia.edu/CAVE/software/softlib/coil-20.php) ima
 
 ### coil100
 
-The [COIL-100](https://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php) 
+The [COIL-100](https://cave.cs.columbia.edu/repository/COIL-100) 
 images.
 
 |                             |                           |

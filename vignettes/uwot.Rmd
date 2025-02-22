@@ -353,7 +353,7 @@ For larger distance matrices, you can pass in a
 package).
 
 Experience with
-[COIL-100](https://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php),
+[COIL-100](https://cave.cs.columbia.edu/repository/COIL-100),
 which has 49,152 features, suggests that Annoy will *definitely* struggle with
 datasets of this dimensionality. Even 3000 dimensions can cause problems,
 although this is not a difficulty specific to Annoy. Reducing the dimensionality
