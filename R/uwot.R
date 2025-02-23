@@ -3163,7 +3163,10 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       stop("'pca' must be >= n_components")
     }
     if (pca > min(nrow(X), ncol(X))) {
-      stop("'pca' must be <= min(nrow(X), ncol(X))")
+      tsmessage("pca = ",
+                pca,
+                " is greater than the number of rows or columns in X, ",
+                "ignoring pca")
     }
   }
   if (is.null(pca_method)) {
