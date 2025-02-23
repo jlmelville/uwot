@@ -48,7 +48,7 @@
 <li>Relative paths could not be used to save a model. Thank you <a href="https://github.com/Ax3man" class="external-link">Wouter van der Bijl</a> for the bug report (<a href="https://github.com/jlmelville/uwot/issues/131" class="external-link uri">https://github.com/jlmelville/uwot/issues/131</a>) and the suggested fix.</li>
 <li>
 <code>repulsion_strength</code> was silently ignored if used with <code>tumap</code> or <code>umap2</code> with <code>a = 1, b = 1</code>. Ignoring the setting was on purpose, but it was not documented anywhere. <code>repulsion_strength</code> is now compatible with these settings.</li>
-<li>Fixed an error when validating if the <code>pca</code> value is compatible with the maximum possible rank of the input data, surfaced by R-devel.</li>
+<li>It’s no longer an error to provide a <code>pca</code> argument if the input data has a maximum rank smaller than the value of <code>pca</code>. No PCA is applied in this case. If <code>verbose = TRUE</code>, a message will be printed to inform the user.</li>
 </ul></div>
 </div>
     <div class="section level2">
