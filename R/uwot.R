@@ -3167,6 +3167,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                 pca,
                 " is greater than the number of rows or columns in X, ",
                 "ignoring pca")
+      pca <- NULL
     }
   }
   if (is.null(pca_method)) {
