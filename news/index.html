@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">uwot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,14 +35,14 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="uwot-development-version">uwot (development version)<a class="anchor" aria-label="anchor" href="#uwot-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.3" id="uwot-023">uwot 0.2.3<a class="anchor" aria-label="anchor" href="#uwot-023"></a></h2><p class="text-muted">CRAN release: 2025-02-24</p>
 <div class="section level3">
-<h3 id="new-features-development-version">New features:<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<h3 id="new-features-0-2-3">New features:<a class="anchor" aria-label="anchor" href="#new-features-0-2-3"></a></h3>
 <ul><li>New parameter: <code>rng_type</code>. This will be used in favor of the boolean <code>pcg_rand</code> parameter, although <code>pcg_rand</code> will still work for backwards compatibility.</li>
 <li>New negative sampling option: set <code>rng_type = "deterministic"</code> to use a deterministic sampling of vertices during the optimization phase. This should give qualitatively similar results to using a real PRNG, but has the advantage of being faster and giving more reproducible output. This feature was inspired by a comment by <a href="https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy/" class="external-link">Leland McInnes on Reddit</a>.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-and-minor-improvements-development-version">Bug fixes and minor improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-minor-improvements-development-version"></a></h3>
+<h3 id="bug-fixes-and-minor-improvements-0-2-3">Bug fixes and minor improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-minor-improvements-0-2-3"></a></h3>
 <ul><li>Setting <code>num_threads</code> directly in <code>umap2</code> did not result in the number of SGD threads being updated to that value when <code>batch = TRUE</code>, which it should have been.</li>
 <li>Despite assertions to the contrary in version 0.2.1, <code>umap_transform</code> continued to return the fuzzy graph in transposed form. Thank you <a href="https://github.com/PedroMilanezAlmeida" class="external-link">PedroMilanezAlmeida</a> for reopening the issue (<a href="https://github.com/jlmelville/uwot/issues/118" class="external-link uri">https://github.com/jlmelville/uwot/issues/118</a>).</li>
 <li>Relative paths could not be used to save a model. Thank you <a href="https://github.com/Ax3man" class="external-link">Wouter van der Bijl</a> for the bug report (<a href="https://github.com/jlmelville/uwot/issues/131" class="external-link uri">https://github.com/jlmelville/uwot/issues/131</a>) and the suggested fix.</li>
