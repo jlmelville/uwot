@@ -19,6 +19,14 @@ method. Translated from the
 
 ## News
 
+*February 24 2025* `uwot` version 0.2.3 has been released to CRAN. This release
+mainly fixes some bugs, including one that was causing an error with an upcoming
+version of R-devel. One new feature: set `rng_type = "deterministic"` to use a
+deterministic sampling of vertices during the optimization phase which will give
+faster and more reproducible output at the cost of accuracy. The idea for this
+came straight from
+[Leland McInnes via Reddit](https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy/).
+
 *April 21 2024* As ordained by prophecy, version 0.2.2 of `uwot` has been
 released to CRAN. `RSpectra` is back as a main dependency and I *thought* I had
 worked out a clever scheme to avoid the failures seen in some installations with
@@ -26,22 +34,6 @@ the `irlba`/`Matrix` interactions. This releases fixes the problem on all the
 systems I have access to (including GitHub Actions CI) but some CRAN checks
 remain failing. How embarrassing. That said, if you have had issues, it's
 possible this new release will help you too.
-
-*April 18 2024* Version 0.2.1 of `uwot` has been released to CRAN. Some features 
-to be aware of: [RcppHNSW](https://cran.r-project.org/package=rnndescent) and
-[rnndescent](https://cran.r-project.org/package=rnndescent) are now supported as
-optional dependencies. If you install and load them, you can use them as an
-alternative to RcppAnnoy in the nearest neighbor search and should be faster.
-Also, a new `umap2` function has been added, with updated defaults compared to
-`umap`. Please see the updated and new articles on
-[HNSW](https://jlmelville.github.io/uwot/articles/hnsw-umap.html), 
-[rnndescent](https://jlmelville.github.io/uwot/articles/rnndescent-umap.html),
-[working with sparse data](https://jlmelville.github.io/uwot/articles/sparse-data-example.html)
-and [umap2](https://jlmelville.github.io/uwot/articles/umap2.html). I consider
-this worthy of moving from `0.1.x` to `0.2.x`, but in the interests of full
-disclosure, on-going
-[irlba problems](https://github.com/jlmelville/uwot/issues/115) has caused a
-CRAN check failure, so we might be onto 0.2.2 sooner than I'd like.
 
 ## Installing
 
