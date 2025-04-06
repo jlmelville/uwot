@@ -1,5 +1,13 @@
 # uwot (development version)
 
+## Bug fixes and minor improvements
+
+* The installation status of optional dependencies were not being detected
+correctly. This meant that different packages could be used for initialization
+in unpredictable ways depending on whether they had been explicitly loaded or
+not. Thank you [hsuknowledge](https://github.com/hsuknowledge) for the report
+(<https://github.com/jlmelville/uwot/issues/134>).
+
 # uwot 0.2.3
 
 ## New features:
