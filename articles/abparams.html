@@ -157,7 +157,7 @@ using the Python UMAP defaults of <code>spread = 1</code>,
 <span><span class="fu">graphics</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/graphics/mtext.html" class="external-link">mtext</a></span><span class="op">(</span><span class="va">sub</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">xv</span>, <span class="fl">1</span> <span class="op">/</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">a</span> <span class="op">*</span> <span class="va">xv</span><span class="op">^</span><span class="op">(</span><span class="fl">2.0</span> <span class="op">*</span> <span class="va">b</span><span class="op">)</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"#1B9E77FF"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
-<img src="img%2Fabparams%2Fumap_ab_curve.png" alt="UMAP a,b curve"><div class="figcaption">UMAP a,b curve</div>
+<img src="img/abparams/umap_ab_curve.png" alt="UMAP a,b curve"><div class="figcaption">UMAP a,b curve</div>
 </div>
 <p>As the title indicates, this curve leads to the default parameters of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>1.577</mn></mrow><annotation encoding="application/x-tex">a = 1.577</annotation></semantics></math>,
@@ -180,7 +180,7 @@ Close enough. Here is the <code>uwot</code> default results in orange
 and the Cauchy results in blue overlaid with the UMAP defaults (green,
 same as in the previous plot):</p>
 <div class="float">
-<img src="img%2Fabparams%2Fumap_ab_curve_other.png" alt="Other UMAP a,b curve"><div class="figcaption">Other UMAP a,b curve</div>
+<img src="img/abparams/umap_ab_curve_other.png" alt="Other UMAP a,b curve"><div class="figcaption">Other UMAP a,b curve</div>
 </div>
 <p>This still leaves open the question of how changing
 <code>spread</code> and <code>min_dist</code>, or <code>a</code> and
@@ -218,19 +218,19 @@ and top to bottom.</p>
 </colgroup>
 <tbody>
 <tr class="odd">
-<td align="center"><img src="img%2Fabparams%2Fmnist_s0.1d0.1.png" alt="spread = 0.1"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s0.5d0.1.png" alt="spread = 0.5"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s0.75d0.1.png" alt="spread = 0.75"></td>
+<td align="center"><img src="img/abparams/mnist_s0.1d0.1.png" alt="spread = 0.1"></td>
+<td align="center"><img src="img/abparams/mnist_s0.5d0.1.png" alt="spread = 0.5"></td>
+<td align="center"><img src="img/abparams/mnist_s0.75d0.1.png" alt="spread = 0.75"></td>
 </tr>
 <tr class="even">
-<td align="center"><img src="img%2Fabparams%2Fmnist_s1d0.1.png" alt="spread = 1"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s1.5d0.1.png" alt="spread = 1.5"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s2d0.1.png" alt="spread = 2"></td>
+<td align="center"><img src="img/abparams/mnist_s1d0.1.png" alt="spread = 1"></td>
+<td align="center"><img src="img/abparams/mnist_s1.5d0.1.png" alt="spread = 1.5"></td>
+<td align="center"><img src="img/abparams/mnist_s2d0.1.png" alt="spread = 2"></td>
 </tr>
 <tr class="odd">
-<td align="center"><img src="img%2Fabparams%2Fmnist_s3d0.1.png" alt="spread = 3"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s5d0.1.png" alt="spread = 5"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s10d0.1.png" alt="spread = 10"></td>
+<td align="center"><img src="img/abparams/mnist_s3d0.1.png" alt="spread = 3"></td>
+<td align="center"><img src="img/abparams/mnist_s5d0.1.png" alt="spread = 5"></td>
+<td align="center"><img src="img/abparams/mnist_s10d0.1.png" alt="spread = 10"></td>
 </tr>
 </tbody>
 </table>
@@ -322,19 +322,19 @@ the highest of these values will also show some eccentric results.</p>
 </colgroup>
 <tbody>
 <tr class="odd">
-<td align="center"><img src="img%2Fabparams%2Fmnist_s1d0.0001.png" alt="min_dist = 0.0001"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s1d0.001.png" alt="min_dist = 0.001"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s1d0.01.png" alt="min_dist = 0.01"></td>
+<td align="center"><img src="img/abparams/mnist_s1d0.0001.png" alt="min_dist = 0.0001"></td>
+<td align="center"><img src="img/abparams/mnist_s1d0.001.png" alt="min_dist = 0.001"></td>
+<td align="center"><img src="img/abparams/mnist_s1d0.01.png" alt="min_dist = 0.01"></td>
 </tr>
 <tr class="even">
-<td align="center"><img src="img%2Fabparams%2Fmnist_s1d0.05.png" alt="min_dist = 0.05"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s1d0.1.png" alt="min_dist = 0.1"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s1d0.5.png" alt="min_dist = 0.5"></td>
+<td align="center"><img src="img/abparams/mnist_s1d0.05.png" alt="min_dist = 0.05"></td>
+<td align="center"><img src="img/abparams/mnist_s1d0.1.png" alt="min_dist = 0.1"></td>
+<td align="center"><img src="img/abparams/mnist_s1d0.5.png" alt="min_dist = 0.5"></td>
 </tr>
 <tr class="odd">
-<td align="center"><img src="img%2Fabparams%2Fmnist_s1d1.png" alt="min_dist = 1"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s1d1.5.png" alt="min_dist = 1.5"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_s1d2.png" alt="min_dist = 2"></td>
+<td align="center"><img src="img/abparams/mnist_s1d1.png" alt="min_dist = 1"></td>
+<td align="center"><img src="img/abparams/mnist_s1d1.5.png" alt="min_dist = 1.5"></td>
+<td align="center"><img src="img/abparams/mnist_s1d2.png" alt="min_dist = 2"></td>
 </tr>
 </tbody>
 </table>
@@ -447,19 +447,19 @@ and <code>a = 100</code>.</p>
 </colgroup>
 <tbody>
 <tr class="odd">
-<td align="center"><img src="img%2Fabparams%2Fmnist_a0.0001b0.9.png" alt="a = 0.0001"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a0.001b0.9.png" alt="a = 0.001"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a0.01b0.9.png" alt="a = 0.01"></td>
+<td align="center"><img src="img/abparams/mnist_a0.0001b0.9.png" alt="a = 0.0001"></td>
+<td align="center"><img src="img/abparams/mnist_a0.001b0.9.png" alt="a = 0.001"></td>
+<td align="center"><img src="img/abparams/mnist_a0.01b0.9.png" alt="a = 0.01"></td>
 </tr>
 <tr class="even">
-<td align="center"><img src="img%2Fabparams%2Fmnist_a0.1b0.9.png" alt="a = 0.1"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a1b0.9.png" alt="a = 1"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a2b0.9.png" alt="a = 2"></td>
+<td align="center"><img src="img/abparams/mnist_a0.1b0.9.png" alt="a = 0.1"></td>
+<td align="center"><img src="img/abparams/mnist_a1b0.9.png" alt="a = 1"></td>
+<td align="center"><img src="img/abparams/mnist_a2b0.9.png" alt="a = 2"></td>
 </tr>
 <tr class="odd">
-<td align="center"><img src="img%2Fabparams%2Fmnist_a10b0.9.png" alt="a = 10"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a50b0.9.png" alt="a = 50"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a100b0.9.png" alt="a = 100"></td>
+<td align="center"><img src="img/abparams/mnist_a10b0.9.png" alt="a = 10"></td>
+<td align="center"><img src="img/abparams/mnist_a50b0.9.png" alt="a = 50"></td>
+<td align="center"><img src="img/abparams/mnist_a100b0.9.png" alt="a = 100"></td>
 </tr>
 </tbody>
 </table>
@@ -484,19 +484,19 @@ values compared to <code>a</code>, so I looked at values between
 </colgroup>
 <tbody>
 <tr class="odd">
-<td align="center"><img src="img%2Fabparams%2Fmnist_a1.58b0.1.png" alt="b = 0.1"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a1.58b0.25.png" alt="b = 0.25"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a1.58b0.5.png" alt="b = 0.5"></td>
+<td align="center"><img src="img/abparams/mnist_a1.58b0.1.png" alt="b = 0.1"></td>
+<td align="center"><img src="img/abparams/mnist_a1.58b0.25.png" alt="b = 0.25"></td>
+<td align="center"><img src="img/abparams/mnist_a1.58b0.5.png" alt="b = 0.5"></td>
 </tr>
 <tr class="even">
-<td align="center"><img src="img%2Fabparams%2Fmnist_a1.58b0.75.png" alt="b = 0.75"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a1.58b1.png" alt="b = 1"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a1.58b1.25.png" alt="b = 1.25"></td>
+<td align="center"><img src="img/abparams/mnist_a1.58b0.75.png" alt="b = 0.75"></td>
+<td align="center"><img src="img/abparams/mnist_a1.58b1.png" alt="b = 1"></td>
+<td align="center"><img src="img/abparams/mnist_a1.58b1.25.png" alt="b = 1.25"></td>
 </tr>
 <tr class="odd">
-<td align="center"><img src="img%2Fabparams%2Fmnist_a1.58b1.5.png" alt="b = 1.5"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a1.58b2.png" alt="b = 2"></td>
-<td align="center"><img src="img%2Fabparams%2Fmnist_a1.58b2.5.png" alt="b = 2.5"></td>
+<td align="center"><img src="img/abparams/mnist_a1.58b1.5.png" alt="b = 1.5"></td>
+<td align="center"><img src="img/abparams/mnist_a1.58b2.png" alt="b = 2"></td>
+<td align="center"><img src="img/abparams/mnist_a1.58b2.5.png" alt="b = 2.5"></td>
 </tr>
 </tbody>
 </table>
@@ -545,12 +545,12 @@ opinion), which you can see in the lower right.</p>
 </colgroup>
 <tbody>
 <tr class="odd">
-<td align="center"><img src="img%2Fabparams%2Ftasic2018_a1.58b0.9.png" alt="a = 1.58 b = 0.9"></td>
-<td align="center"><img src="img%2Fabparams%2Ftasic2018_a1b0.9.png" alt="a = 1 b = 0.9"></td>
+<td align="center"><img src="img/abparams/tasic2018_a1.58b0.9.png" alt="a = 1.58 b = 0.9"></td>
+<td align="center"><img src="img/abparams/tasic2018_a1b0.9.png" alt="a = 1 b = 0.9"></td>
 </tr>
 <tr class="even">
-<td align="center"><img src="img%2Fabparams%2Ftasic2018_a1b1.5.png" alt="a = 1 b = 1.5"></td>
-<td align="center"><img src="img%2Fabparams%2Ftasic2018_a0.5b1.5.png" alt="a = 0.5 b = 1.5"></td>
+<td align="center"><img src="img/abparams/tasic2018_a1b1.5.png" alt="a = 1 b = 1.5"></td>
+<td align="center"><img src="img/abparams/tasic2018_a0.5b1.5.png" alt="a = 0.5 b = 1.5"></td>
 </tr>
 </tbody>
 </table>
@@ -568,12 +568,12 @@ based on controlling <code>a</code> and <code>b</code>.</p>
 </colgroup>
 <tbody>
 <tr class="odd">
-<td align="center"><img src="img%2Fabparams%2Fcoil20_a1.58b0.9.png" alt="a = 1.58 b = 0.9"></td>
-<td align="center"><img src="img%2Fabparams%2Fcoil20_a0.1b0.9.png" alt="a = 0.1 b = 0.9"></td>
+<td align="center"><img src="img/abparams/coil20_a1.58b0.9.png" alt="a = 1.58 b = 0.9"></td>
+<td align="center"><img src="img/abparams/coil20_a0.1b0.9.png" alt="a = 0.1 b = 0.9"></td>
 </tr>
 <tr class="even">
-<td align="center"><img src="img%2Fabparams%2Fcoil20_a0.5b0.9.png" alt="a = 0.5 b = 0.9"></td>
-<td align="center"><img src="img%2Fabparams%2Fcoil20_a0.5b1.1.png" alt="a = 0.5 b = 1.1"></td>
+<td align="center"><img src="img/abparams/coil20_a0.5b0.9.png" alt="a = 0.5 b = 0.9"></td>
+<td align="center"><img src="img/abparams/coil20_a0.5b1.1.png" alt="a = 0.5 b = 1.1"></td>
 </tr>
 </tbody>
 </table>
@@ -626,7 +626,7 @@ of <code>a</code> and <code>b</code> a lot more tolerable.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>

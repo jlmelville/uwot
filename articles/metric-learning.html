@@ -118,8 +118,8 @@ left, and the supervised version on the right:</p>
 <col width="48%">
 </colgroup>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fmetric-learning%2Fumap_fashion_all.png" alt="Fashion UMAP"></td>
-<td align="center"><img src="img%2Fmetric-learning%2Fsumap_fashion_all.png" alt="Fashion Supervised UMAP"></td>
+<td align="center"><img src="img/metric-learning/umap_fashion_all.png" alt="Fashion UMAP"></td>
+<td align="center"><img src="img/metric-learning/sumap_fashion_all.png" alt="Fashion Supervised UMAP"></td>
 </tr></tbody>
 </table>
 <p>Clearly, the supervised UMAP has done a much better job of separating
@@ -163,8 +163,8 @@ embeddings, but let’s take a look anyway:</p>
 <col width="48%">
 </colgroup>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fmetric-learning%2Fumap_fashion_train.png" alt="Fashion UMAP Train"></td>
-<td align="center"><img src="img%2Fmetric-learning%2Fsumap_fashion_train.png" alt="Fashion Supervised UMAP Train"></td>
+<td align="center"><img src="img/metric-learning/umap_fashion_train.png" alt="Fashion UMAP Train"></td>
+<td align="center"><img src="img/metric-learning/sumap_fashion_train.png" alt="Fashion Supervised UMAP Train"></td>
 </tr></tbody>
 </table>
 <p>Everything looks in order here. The standard UMAP training plot is
@@ -194,8 +194,8 @@ using a standard UMAP model:</p>
 <col width="48%">
 </colgroup>
 <tbody><tr class="odd">
-<td align="center"><img src="img%2Fmetric-learning%2Fumap_fashion_test.png" alt="Fashion UMAP Test"></td>
-<td align="center"><img src="img%2Fmetric-learning%2Fsumap_fashion_test.png" alt="Fashion Supervised UMAP Train"></td>
+<td align="center"><img src="img/metric-learning/umap_fashion_test.png" alt="Fashion UMAP Test"></td>
+<td align="center"><img src="img/metric-learning/sumap_fashion_test.png" alt="Fashion Supervised UMAP Train"></td>
 </tr></tbody>
 </table>
 <p>The test data results are very obviously embedded in a similar way to
@@ -288,7 +288,7 @@ package:</p>
 <code class="sourceCode R"><span><span class="va">dia_pca</span> <span class="op">&lt;-</span> <span class="fu">irlba</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/irlba/man/prcomp_irlba.html" class="external-link">prcomp_irlba</a></span><span class="op">(</span><span class="va">dia</span>, n <span class="op">=</span> <span class="fl">2</span>, scale. <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu">vizier</span><span class="fu">::</span><span class="fu">embed_plot</span><span class="op">(</span><span class="va">dia_pca</span><span class="op">$</span><span class="va">x</span>, <span class="va">diamonds</span><span class="op">$</span><span class="va">price</span>, title <span class="op">=</span> <span class="st">"Diamonds PCA"</span>, color_scheme <span class="op">=</span> <span class="st">"RColorBrewer::Spectral"</span>, alpha_scale <span class="op">=</span> <span class="fl">0.1</span>, cex <span class="op">=</span> <span class="fl">0.5</span>, pc_axes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
-<img src="img%2Fmetric-learning%2Fdia_pca.png" alt="Diamonds PCA"><div class="figcaption">Diamonds PCA</div>
+<img src="img/metric-learning/dia_pca.png" alt="Diamonds PCA"><div class="figcaption">Diamonds PCA</div>
 </div>
 <p>Because the different columns have different units and meaning, I set
 <code>scale. = TRUE</code> to equalize their variances. The color scheme
@@ -303,7 +303,7 @@ are all scaled to have equal variance (<code>scale = TRUE</code>):</p>
 <code class="sourceCode R"><span><span class="va">dia_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">dia</span>, scale <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu">vizier</span><span class="fu">::</span><span class="fu">embed_plot</span><span class="op">(</span><span class="va">dia_umap</span>, <span class="va">diamonds</span><span class="op">$</span><span class="va">price</span>, title <span class="op">=</span> <span class="st">"Diamonds UMAP"</span>, color_scheme <span class="op">=</span> <span class="st">"RColorBrewer::Spectral"</span>, alpha_scale <span class="op">=</span> <span class="fl">0.1</span>, cex <span class="op">=</span> <span class="fl">0.5</span>, pc_axes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
-<img src="img%2Fmetric-learning%2Fdia_umap.png" alt="Diamonds UMAP"><div class="figcaption">Diamonds UMAP</div>
+<img src="img/metric-learning/dia_umap.png" alt="Diamonds UMAP"><div class="figcaption">Diamonds UMAP</div>
 </div>
 <p>Not bad. The high price diamonds are clumped together in their own
 little clusters in the middle of the plot. On this occasion, I prefer
@@ -312,7 +312,7 @@ the layout that’s initialized from the PCA results, though:</p>
 <code class="sourceCode R"><span><span class="va">dia_umap_from_pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">dia</span>, scale <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, init <span class="op">=</span> <span class="va">dia_pca</span><span class="op">$</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="fu">vizier</span><span class="fu">::</span><span class="fu">embed_plot</span><span class="op">(</span><span class="va">dia_umap_from_pca</span>, <span class="va">diamonds</span><span class="op">$</span><span class="va">price</span>, title <span class="op">=</span> <span class="st">"Diamonds UMAP (PCA init)"</span>, color_scheme <span class="op">=</span> <span class="st">"RColorBrewer::Spectral"</span>, alpha_scale <span class="op">=</span> <span class="fl">0.1</span>, cex <span class="op">=</span> <span class="fl">0.5</span>, pc_axes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
-<img src="img%2Fmetric-learning%2Fdia_umap_from_pca.png" alt="Diamonds UMAP from PCA"><div class="figcaption">Diamonds UMAP from PCA</div>
+<img src="img/metric-learning/dia_umap_from_pca.png" alt="Diamonds UMAP from PCA"><div class="figcaption">Diamonds UMAP from PCA</div>
 </div>
 <p>This maintains the global structure of the PCA result. Rather than
 have to separately create the PCA, you can also use
@@ -326,7 +326,7 @@ standard spectral initialization:</p>
 <code class="sourceCode R"><span><span class="va">dia_sumap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">dia</span>, scale <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, y <span class="op">=</span> <span class="va">diamonds</span><span class="op">$</span><span class="va">price</span><span class="op">)</span></span>
 <span><span class="fu">vizier</span><span class="fu">::</span><span class="fu">embed_plot</span><span class="op">(</span><span class="va">dia_sumap</span>, <span class="va">diamonds</span><span class="op">$</span><span class="va">price</span>, title <span class="op">=</span> <span class="st">"Diamonds Supervised UMAP"</span>, color_scheme <span class="op">=</span> <span class="st">"RColorBrewer::Spectral"</span>, alpha_scale <span class="op">=</span> <span class="fl">0.1</span>, cex <span class="op">=</span> <span class="fl">0.5</span>, pc_axes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
-<img src="img%2Fmetric-learning%2Fdia_sumap.png" alt="Diamonds Supervised UMAP"><div class="figcaption">Diamonds Supervised UMAP</div>
+<img src="img/metric-learning/dia_sumap.png" alt="Diamonds Supervised UMAP"><div class="figcaption">Diamonds Supervised UMAP</div>
 </div>
 <p>As expected, the embedding is now even more well-organized along the
 price of the diamonds.</p>
@@ -352,7 +352,7 @@ provide a lot of sage wisdom on this matter.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
