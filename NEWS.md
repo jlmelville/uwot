@@ -1,12 +1,17 @@
 # uwot (development version)
 
 ## Bug fixes and minor improvements
-
+ 
 * The installation status of optional dependencies were not being detected
 correctly. This meant that different packages could be used for initialization
 in unpredictable ways depending on whether they had been explicitly loaded or
 not. Thank you [hsuknowledge](https://github.com/hsuknowledge) for the report
 (<https://github.com/jlmelville/uwot/issues/134>).
+* Users of the [bbknnR](https://github.com/ycli1995/bbknnR/issues/3) package 
+were suffering from a not-helpful error message when the custom neighbor data
+contained missing values. An explicit check has been added and although this is
+still a fatal error, the message should be more informative
+(<https://github.com/jlmelville/uwot/issues/135>). 
 
 # uwot 0.2.3
 
