@@ -242,7 +242,7 @@ nng_to_sp <- function(graph, nbrs = NULL) {
   j <- j[keep_indices]
   x <- x[keep_indices]
   res <- Matrix::sparseMatrix(i = i, j = j, x = x, dims = c(n_row, 
-      n_ref), repr = repr)
+      n_ref), repr = "C")
   Matrix::drop0(res)
 }
 
