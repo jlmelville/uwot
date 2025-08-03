@@ -153,6 +153,11 @@ check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL,
       stop("idx matrix has unexpected number of columns")
     }
   }
+  # graph should not contain missing data
+  if (any(is.na(idx)) || any(is.na(dist))) {
+    stop("neighbor graph contains missing data")
+  }
+
   # if looking at neighbors within one graph there can't be more neighbors
   # than observations
   if (!bipartite) {
