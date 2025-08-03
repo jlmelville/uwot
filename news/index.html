@@ -39,6 +39,7 @@
 <div class="section level3">
 <h3 id="bug-fixes-and-minor-improvements-development-version">Bug fixes and minor improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-minor-improvements-development-version"></a></h3>
 <ul><li>The installation status of optional dependencies were not being detected correctly. This meant that different packages could be used for initialization in unpredictable ways depending on whether they had been explicitly loaded or not. Thank you <a href="https://github.com/hsuknowledge" class="external-link">hsuknowledge</a> for the report (<a href="https://github.com/jlmelville/uwot/issues/134" class="external-link uri">https://github.com/jlmelville/uwot/issues/134</a>).</li>
+<li>Users of the <a href="https://github.com/ycli1995/bbknnR/issues/3" class="external-link">bbknnR</a> package were suffering from a not-helpful error message when the custom neighbor data contained missing values. An explicit check has been added and although this is still a fatal error, the message should be more informative (<a href="https://github.com/jlmelville/uwot/issues/135" class="external-link uri">https://github.com/jlmelville/uwot/issues/135</a>).</li>
 </ul></div>
 </div>
     <div class="section level2">
