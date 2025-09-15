@@ -514,7 +514,7 @@ irlba_scores <- function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FA
     X <- X * 1
   }
   res <- irlba::prcomp_irlba(X,
-    n = ncol, retx = TRUE, center = center, scale = FALSE
+    n = ncol, retx = TRUE, center = center, scale. = FALSE
   )
   report_varex(res, verbose)
   if (ret_extra) {
