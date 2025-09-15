@@ -302,7 +302,7 @@ Here's an example workflow:
 ```R
 # PCA to 50 dimensions first
 mnist_pca <- irlba::prcomp_irlba(mnist, n = 50, retx = TRUE, center = center,
-                             scale = FALSE)$x
+                             scale. = FALSE)$x
 
 # t-UMAP is equivalent to a = 1, b = 1
 # remember to get the nearest neighbor data back too

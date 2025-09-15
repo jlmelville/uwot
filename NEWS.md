@@ -11,7 +11,10 @@ not. Thank you [hsuknowledge](https://github.com/hsuknowledge) for the report
 were suffering from a not-helpful error message when the custom neighbor data
 contained missing values. An explicit check has been added and although this is
 still a fatal error, the message should be more informative
-(<https://github.com/jlmelville/uwot/issues/135>). 
+(<https://github.com/jlmelville/uwot/issues/135>).
+* Fixed a partially-specified parameter name being passed to irlba. Thank you
+[Hugo Gruson](https://github.com/Bisaloo) for the fix 
+(<https://github.com/jlmelville/uwot/pull/136>).
 
 # uwot 0.2.3
 
