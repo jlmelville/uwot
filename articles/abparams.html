@@ -602,7 +602,7 @@ of <code>a</code> and <code>b</code> a lot more tolerable.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># PCA to 50 dimensions first</span></span>
 <span><span class="va">mnist_pca</span> <span class="op">&lt;-</span> <span class="fu">irlba</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/irlba/man/prcomp_irlba.html" class="external-link">prcomp_irlba</a></span><span class="op">(</span><span class="va">mnist</span>, n <span class="op">=</span> <span class="fl">50</span>, retx <span class="op">=</span> <span class="cn">TRUE</span>, center <span class="op">=</span> <span class="va">center</span>,</span>
-<span>                             scale <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">x</span></span>
+<span>                             scale. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">$</span><span class="va">x</span></span>
 <span></span>
 <span><span class="co"># t-UMAP is equivalent to a = 1, b = 1</span></span>
 <span><span class="co"># remember to get the nearest neighbor data back too</span></span>
