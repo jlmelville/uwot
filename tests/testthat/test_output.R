@@ -1043,7 +1043,7 @@ test_that("can set seed internally", {
       seed = 42,
       ret_model = TRUE
     )
-  expect(res_model$seed, 42)
+  expect_equal(res_model$seed, 42)
   diff1m <- res - res_model$embedding
   expect_gt(sqrt(sum(diff1m * diff1m) / length(diff1m)), 1e-6)
 
