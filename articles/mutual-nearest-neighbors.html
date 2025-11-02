@@ -80,7 +80,7 @@ the embedded points.</p>
 in the UMAP docs</a>) consider the mutual nearest neighbors (augmented
 with some extra neighbors).</p>
 <p>The way PaCMAP uses its neighbors is beyond the architecture of
-<code>uwot</code> to handle easilt, but the mutual nearest neighbors
+<code>uwot</code> to handle easily, but the mutual nearest neighbors
 graph is something that <code>uwot</code> can deal with. As detailed in
 the article on <code>uwot</code>’s <a href="https://jlmelville.github.io/uwot/articles/nearest-neighbors-format.html">nearest
 neighbors format</a>, we can provide as input a sparse distance matrix
@@ -95,7 +95,7 @@ graph and see if it has any effect on UMAP.</p>
 <p>Although in a kNN graph each item only has k neighbors, any workable
 dimensionality reduction working on the kNN graph as input will
 symmetrize that graph, otherwise optimization is difficult. The outcome
-of symmetrizing the knn graph is that if
+of symmetrizing the kNN graph is that if
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
 is a neighbor of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
@@ -113,9 +113,8 @@ likely to show up in most queries) but because for a given
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
 there are a limited number of edges to distribute over the dataset, some
 items are not getting their fair share. This is more likely to lead to
-outliers points that get embedded far away from the main body of the
-data as they have no particularly strong bonds to the rest of the
-data.</p>
+outlier points that get embedded far away from the main body of the data
+as they have no particularly strong bonds to the rest of the data.</p>
 </div>
 <div class="section level2">
 <h2 id="mutual-k-nearest-neighbors">Mutual k-Nearest Neighbors<a class="anchor" aria-label="anchor" href="#mutual-k-nearest-neighbors"></a>
@@ -152,7 +151,7 @@ local connectivity, so it cannot handle a use case where we have such
 Billy no-mates items.</p>
 <p>As a result, the Dalmia and Sia paper has to go to some extra lengths
 to augment the MNN graph with some extra nodes which you can see at <a href="https://github.com/adalmia96/umap-mnn" class="external-link">their repo</a>. This
-involves minimum spanning trees and Djikstra’s algorithm to add new
+involves minimum spanning trees and Dijkstra’s algorithm to add new
 nodes (and distances via the path length).</p>
 <p>One alternative they consider is to take any fully disconnected nodes
 and re-add the first nearest neighbor. They cite a paper by <a href="https://link.springer.com/chapter/10.1007/978-3-642-40994-3_11" class="external-link">de
@@ -160,7 +159,7 @@ Souza, Rezende and Batista</a> for this, but there’s no extra detail in
 that paper, the authors just note that they do this to avoid the
 disconnected nodes.</p>
 <p>It should be said that this “adjacent neighbor” approach to MNN
-augmentation does not work very well, leading to a lot of disconnect
+augmentation does not work very well, leading to a lot of disconnected
 components and small clusters of points scattered over the embedding.
 This is not very surprising.</p>
 </div>
@@ -274,7 +273,7 @@ reproduce the “adjacent neighbor” method you must specify
 <code>m = 2</code> anyway.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># create an m-balanced k-mutual nearest neighbors graph from the dense k-nearest</span></span>
-<span><span class="co"># neighbors graph `nn-graph`. m must be less than or equal to k. If `k` is not</span></span>
+<span><span class="co"># neighbors graph `nn_graph`. m must be less than or equal to k. If `k` is not</span></span>
 <span><span class="co"># specified then all of the neighbors are used.</span></span>
 <span><span class="va">balance_mnn</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">nn_graph</span>, <span class="va">m</span>, <span class="va">k</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">m</span> <span class="op">&lt;</span> <span class="fl">2</span><span class="op">)</span> <span class="op">{</span></span>
@@ -296,7 +295,7 @@ reproduce the “adjacent neighbor” method you must specify
 <span>  <span class="va">bmnn_edges</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">bmnn_adj</span><span class="op">)</span></span>
 <span>  <span class="va">too_few_edges_mask</span> <span class="op">&lt;-</span> <span class="va">bmnn_edges</span> <span class="op">&lt;</span> <span class="op">(</span><span class="va">m</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="co"># add edges back from the knn graph to "fill up" any items with too few edges</span></span>
+<span>  <span class="co"># add edges back from the kNN graph to "fill up" any items with too few edges</span></span>
 <span>  <span class="co"># do it one column at a time to avoid over-filling any one item</span></span>
 <span>  <span class="kw">for</span> <span class="op">(</span><span class="va">l</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span>from <span class="op">=</span> <span class="fl">2</span>, to <span class="op">=</span> <span class="va">m</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">too_few_edges_mask</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
@@ -444,8 +443,8 @@ Let’s compare the UMAP embeddings of the <a href="https://yann.lecun.com/exdb/
 MNIST</a> datasets using the kNN graph and the BMNN graph. From left to
 right we have the original UMAP embedding, the embedding using the (15,
 2)-BMNN graph which should give similar results to the MNN+adjacent
-neighbors approach used by Dalmia and Sia, and the an embedding using
-the (15, 5)-BMNN graph which (I hope) should give a more “connected”
+neighbors approach used by Dalmia and Sia, and an embedding using the
+(15, 5)-BMNN graph which (I hope) should give a more “connected”
 embedding. You can click on any of the images to see a (slightly) larger
 version.</p>
 <table class="table">
@@ -486,13 +485,13 @@ to you that it doesn’t look very different from the normal UMAP results”
 I would have to agree with you. But there is perhaps slightly more
 separation of the clusters and some finer detail? Possibly that’s
 entirely within the expected variation of a given UMAP run.</p>
-<p>Fortunately there are some datasets where we do see more a
+<p>Fortunately there are some datasets where we do see more of a
 difference.</p>
 </div>
 <div class="section level2">
 <h2 id="coil-20-and-coil-100">COIL-20 and COIL-100<a class="anchor" aria-label="anchor" href="#coil-20-and-coil-100"></a>
 </h2>
-<p>Embedding <a href="http://www.cs.columbia.edu/CAVE/software/softlib/coil-20.php" class="external-link">COIL-20</a>.
+<p>Embeddings of <a href="http://www.cs.columbia.edu/CAVE/software/softlib/coil-20.php" class="external-link">COIL-20</a>.
 and <a href="http://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php" class="external-link">COIL-100</a>
 show a series of loops, but some of which typically get a bit tangled up
 together or mangled. If ever there were some datasets that might benefit
@@ -554,7 +553,7 @@ associated with it (around 20% of the dataset). The BMNN graph with
 <li>
 <code>macosko2015</code> visualizes more nicely with some PCA as the
 hubness is greatly reduced (I am agnostic on if this representation more
-faithfully represents the biological reality). so I also include the
+faithfully represents the biological reality). So I also include the
 same dataset after reducing to 100 dimensions with PCA.</li>
 <li>The <a href="https://cs.nyu.edu/~yann/data/norb-v1.0-small/" class="external-link">Small
 NORB</a> image dataset of objects, is not as challenging as the other
