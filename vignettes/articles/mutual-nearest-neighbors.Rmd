@@ -22,7 +22,7 @@ For the purposes of producing better-separated clusters,
 consider the mutual nearest neighbors (augmented with some extra neighbors).
 
 The way PaCMAP uses its neighbors is beyond the architecture of `uwot` to handle
-easilt, but the mutual nearest neighbors graph is something that `uwot` can 
+easily, but the mutual nearest neighbors graph is something that `uwot` can 
 deal with. As detailed in the article on `uwot`'s 
 [nearest neighbors format](https://jlmelville.github.io/uwot/articles/nearest-neighbors-format.html), 
 we can provide as input a sparse distance matrix to represent nearest neighbors,
@@ -34,7 +34,7 @@ nearest neighbors graph and see if it has any effect on UMAP.
 
 Although in a kNN graph each item only has k neighbors, any workable
 dimensionality reduction working on the kNN graph as input will symmetrize that
-graph, otherwise optimization is difficult. The outcome of symmetrizing the knn
+graph, otherwise optimization is difficult. The outcome of symmetrizing the kNN
 graph is that if $j$ is a neighbor of $i$ in the kNN graph, $i$ is also
 guaranteed to be a neighbor of $j$ in the symmetrized graph and *vice versa*.
 If one item tends to show up in a lot of the kNN lists of multiple items, the
@@ -43,7 +43,7 @@ popular item. These are called hubs and not only do they make search on the
 graph more difficult (that item will be likely to show up in most queries) but
 because for a given $k$ there are a limited number of edges to distribute over
 the dataset, some items are not getting their fair share. This is more likely to
-lead to outliers points that get embedded far away from the main body of the
+lead to outlier points that get embedded far away from the main body of the
 data as they have no particularly strong bonds to the rest of the data.
 
 ## Mutual k-Nearest Neighbors
@@ -66,7 +66,7 @@ no-mates items.
 As a result, the Dalmia and Sia paper has to go to some extra lengths to augment
 the MNN graph with some extra nodes which you can see at 
 [their repo](https://github.com/adalmia96/umap-mnn). This involves minimum 
-spanning trees and Djikstra's algorithm to add new nodes (and distances via
+spanning trees and Dijkstra's algorithm to add new nodes (and distances via
 the path length).
 
 One alternative they consider is to take any fully disconnected nodes and
@@ -76,7 +76,7 @@ for this, but there's no extra detail in that paper, the authors just note that
 they do this to avoid the disconnected nodes.
 
 It should be said that this "adjacent neighbor" approach to MNN augmentation
-does not work very well, leading to a lot of disconnect components and small
+does not work very well, leading to a lot of disconnected components and small
 clusters of points scattered over the embedding. This is not very surprising.
 
 ## Adding Back Extra Neighbors: The Balanced Mutual Nearest Neighbors Graph
@@ -166,7 +166,7 @@ won't let you go lower than `m = 2` anyway.
 
 ```r
 # create an m-balanced k-mutual nearest neighbors graph from the dense k-nearest
-# neighbors graph `nn-graph`. m must be less than or equal to k. If `k` is not
+# neighbors graph `nn_graph`. m must be less than or equal to k. If `k` is not
 # specified then all of the neighbors are used.
 balance_mnn <- function(nn_graph, m, k = NULL) {
   if (m < 2) {
@@ -188,7 +188,7 @@ balance_mnn <- function(nn_graph, m, k = NULL) {
   bmnn_edges <- colSums(bmnn_adj)
   too_few_edges_mask <- bmnn_edges < (m - 1)
 
-  # add edges back from the knn graph to "fill up" any items with too few edges
+  # add edges back from the kNN graph to "fill up" any items with too few edges
   # do it one column at a time to avoid over-filling any one item
   for (l in seq(from = 2, to = m)) {
     if (sum(too_few_edges_mask) == 0) {
@@ -337,7 +337,7 @@ compare the UMAP embeddings of the
 using the kNN graph and the BMNN graph. From left to right we have the original
 UMAP embedding, the embedding using the (15, 2)-BMNN graph which should give
 similar results to the MNN+adjacent neighbors approach used by Dalmia and Sia,
-and the an embedding using the (15, 5)-BMNN graph which (I hope) should give a
+and an embedding using the (15, 5)-BMNN graph which (I hope) should give a
 more "connected" embedding. You can click on any of the images to see a
 (slightly) larger version.
 
@@ -356,11 +356,11 @@ different from the normal UMAP results" I would have to agree with you. But
 there is perhaps slightly more separation of the clusters and some finer detail?
 Possibly that's entirely within the expected variation of a given UMAP run.
 
-Fortunately there are some datasets where we do see more a difference.
+Fortunately there are some datasets where we do see more of a difference.
 
 ## COIL-20 and COIL-100
 
-Embedding 
+Embeddings of 
 [COIL-20](http://www.cs.columbia.edu/CAVE/software/softlib/coil-20.php).
 and [COIL-100](http://www.cs.columbia.edu/CAVE/software/softlib/coil-100.php)
 show a series of loops, but some of which typically get a bit tangled up
@@ -403,7 +403,7 @@ edges associated with it (around 20% of the dataset). The BMNN graph with
 `m = 5` reduces that, but the hub still has 4,000 edges.
 * `macosko2015` visualizes more nicely with some PCA as the hubness is greatly
 reduced (I am agnostic on if this representation more faithfully represents the
-biological reality). so I also include the same dataset after reducing to 100
+biological reality). So I also include the same dataset after reducing to 100
 dimensions with PCA. 
 * The [Small NORB](https://cs.nyu.edu/~yann/data/norb-v1.0-small/) image dataset
 of objects, is not as challenging as the other datasets listed here. In fact, it
