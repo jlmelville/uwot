@@ -1,4 +1,4 @@
-# uwot (development version)
+# uwot 0.2.4
 
 ## Bug fixes and minor improvements
  
@@ -15,6 +15,9 @@ still a fatal error, the message should be more informative
 * Fixed a partially-specified parameter name being passed to irlba. Thank you
 [Hugo Gruson](https://github.com/Bisaloo) for the fix 
 (<https://github.com/jlmelville/uwot/pull/136>).
+* Development-only: fixed an incorrect use of `testthat::expect` in a unit test.
+Thank you [Hadley Wickham](https://github.com/hadley) for the fix
+(<https://github.com/jlmelville/uwot/pull/138>).
 
 # uwot 0.2.3
 
