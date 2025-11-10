@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">uwot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,6 +65,13 @@
 the top of the <code>README.md</code> file for the package. When they
 aren’t new any more, they will get moved here. You should look at the <a href="https://jlmelville.github.io/uwot/news/index.html">Changelog</a>
 for fuller details.</p>
+<p><em>November 10 2025</em> <code>uwot</code> version 0.2.4 has been
+released to CRAN. This was mainly to avoid a test potentially starting
+to fail due to an incorrect use of <code>testthat</code>. However, as
+part of some other small fixes, optional dependencies (e.g. RSpectra)
+will now be correctly detected and used if installed even if not loaded.
+This could have an effect on output (but the old behavior was a
+bug).</p>
 <p><em>February 24 2025</em> <code>uwot</code> version 0.2.3 has been
 released to CRAN. This release mainly fixes some bugs, including one
 that was causing an error with an upcoming version of R-devel. One new
@@ -194,7 +201,7 @@ sets these options for you.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

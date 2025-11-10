@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">uwot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -127,7 +127,7 @@ are ignored:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span>
 <span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umap</span><span class="op">)</span></span></code></pre></div>
-<p><img src="uwot_files/figure-html/basic%20UMAP-1.png" width="700"></p>
+<p><img src="uwot_files/figure-html/basic%20UMAP-1.png" class="r-plt" width="700"></p>
 <div class="section level3">
 <h3 id="parameters">Parameters<a class="anchor" aria-label="anchor" href="#parameters"></a>
 </h3>
@@ -148,7 +148,7 @@ seems like it’s a bit small for <code>iris</code>. Let’s crank up
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">iris_umap_md05</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, min_dist <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
 <span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umap_md05</span><span class="op">)</span></span></code></pre></div>
-<p><img src="uwot_files/figure-html/min_dist%200.5-1.png" width="700"></p>
+<p><img src="uwot_files/figure-html/min_dist%200.5-1.png" class="r-plt" width="700"></p>
 <p>This has made the clusters bigger and closer together, so we’ll use
 <code>min_dist = 0.3</code> for the other examples with
 <code>iris</code>.</p>
@@ -166,7 +166,7 @@ miss a lot of local structure.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">iris_umap_nbrs5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, n_neighbors <span class="op">=</span> <span class="fl">5</span>, min_dist <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
 <span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umap_nbrs5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="uwot_files/figure-html/5%20neighbors-1.png" width="700"></p>
+<p><img src="uwot_files/figure-html/5%20neighbors-1.png" class="r-plt" width="700"></p>
 <p>It’s not hugely different from the default of 15 neighbors, but the
 clusters are a bit more broken up.</p>
 <p>There should be a more pronounced difference going the other way and
@@ -175,7 +175,7 @@ looking at 100 neighbors:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">iris_umap_nbrs100</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, n_neighbors <span class="op">=</span> <span class="fl">100</span>, min_dist <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
 <span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umap_nbrs100</span><span class="op">)</span></span></code></pre></div>
-<p><img src="uwot_files/figure-html/100%20neighbors-1.png" width="700"></p>
+<p><img src="uwot_files/figure-html/100%20neighbors-1.png" class="r-plt" width="700"></p>
 <p>Here there is a much more uniform appearance to the results. It’s
 always worth trying a few different values of <code>n_neighbors</code>,
 especially larger values, although larger values of
@@ -221,7 +221,7 @@ stick to the default of <code>"range"</code>.</p>
 <span>    min_dist <span class="op">=</span> <span class="fl">0.3</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umap_spca</span><span class="op">)</span></span></code></pre></div>
-<p><img src="uwot_files/figure-html/spca%20init-1.png" width="700"></p>
+<p><img src="uwot_files/figure-html/spca%20init-1.png" class="r-plt" width="700"></p>
 <p>This doesn’t have a big effect on <code>iris</code>, but it’s good to
 know about this as an option: and it can also smooth out the effect of
 changing <code>n_neighbors</code> on the initial coordinates with the
@@ -255,7 +255,7 @@ preserved in the output.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">iris_umapds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span>, min_dist <span class="op">=</span> <span class="fl">0.3</span>, dens_scale <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span><span class="fu">plot_umap</span><span class="op">(</span><span class="va">iris_umapds</span><span class="op">)</span></span></code></pre></div>
-<p><img src="uwot_files/figure-html/UMAP%20with%20density%20scaling-1.png" width="700"></p>
+<p><img src="uwot_files/figure-html/UMAP%20with%20density%20scaling-1.png" class="r-plt" width="700"></p>
 <p>This has shrunk the black cluster on the left of the plot (those are
 of species <code>setosa</code>), which reflect that the density of the
 <code>setosa</code> points is less spread out in the input data than the
@@ -288,7 +288,7 @@ component.</p>
 <span>  ylab <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"UMAP setosa + versicolor"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="uwot_files/figure-html/create%20a%20UMAP%20model-1.png" width="700"></p>
+<p><img src="uwot_files/figure-html/create%20a%20UMAP%20model-1.png" class="r-plt" width="700"></p>
 <p>Next, you can use <code>umap_transform</code> to embed the new
 points:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -302,7 +302,7 @@ points:</p>
 <span>  ylab <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"UMAP transform virginica"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="uwot_files/figure-html/embed%20new%20coordinates-1.png" width="700"></p>
+<p><img src="uwot_files/figure-html/embed%20new%20coordinates-1.png" class="r-plt" width="700"></p>
 <p>The green points in the top-right show the embedded data. Note that
 the original (black and red) clusters do not get optimized any further.
 While we haven’t perfectly reproduced the full UMAP, the
@@ -366,12 +366,12 @@ Below, is the result of using the official Python UMAP implementation
 (via the <a href="https://cran.r-project.org/package=reticulate" class="external-link">reticulate</a>
 package). Under that is the result of using <code>uwot</code>.</p>
 <div class="figure">
-<img src="mnist-py.png" alt="MNIST UMAP (Python)" width="75%"><p class="caption">
+<img src="mnist-py.png" class="r-plt" alt="MNIST UMAP (Python)" width="75%"><p class="caption">
 MNIST UMAP (Python)
 </p>
 </div>
 <div class="figure">
-<img src="mnist-r.png" alt="MNIST UMAP (R)" width="75%"><p class="caption">
+<img src="mnist-r.png" class="r-plt" alt="MNIST UMAP (R)" width="75%"><p class="caption">
 MNIST UMAP (R)
 </p>
 </div>
@@ -450,7 +450,7 @@ Python code as closely as possible.</li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

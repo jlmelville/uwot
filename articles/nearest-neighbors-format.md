@@ -1,0 +1,196 @@
+# Nearest Neighbor Format
+
+The Python implementation of UMAP supports lots of distance metrics;
+`uwot` does not, because it depends on the distance metrics supported by
+`RcppAnnoy`, which in turn depends on those supported by `Annoy`. For
+more flexibility, at the cost of convenience, you can generate nearest
+neighbor data for `X` by some other means and pass that to `umap` (or
+`tumap` or `lvish`) directly via the `nn_method` parameter.
+
+## Nearest Neighbor Graph Format
+
+The format expected by `nn_method` is a `list` containing the following
+two entries:
+
+- `idx`: a matrix of dimension `n_vertices x n_neighbors`, where each
+  row contains the indexes (starting at `1`) of the nearest neighbors of
+  each item (vertex) in the dataset. Each item is always the nearest
+  neighbor of itself, so the first element in row `i` should always be
+  `i`. If it isn’t then either you are using a really weird non-metric
+  distance or your approximate nearest neighbor method is returning way
+  too approximate results. In either case, you should expect bad
+  results.
+- `dist`: a matrix of dimension `n_vertices x n_neighbors`, where each
+  row contains the distances of the nearest neighbors of each item
+  (vertex) in the dataset, in Each item is always the nearest neighbor
+  of itself, so the first element in row `i` should always be `0.0`.
+
+## Sparse Distance Matrix Format
+
+Alternatively, you can pass a sparse distance matrix where:
+
+- the format should be `dgCMatrix` (the typical sparse matrix format).
+- non-zero entries are the distances.
+- dimensions are of `n_vertices x n_vertices` for `umap` and
+  `n_model_vertices x n_vertices` for `umap_transform`
+  - to put it another way: the neighbor distances should be arranged so
+    that the non-zero entries in the `i`th column of the matrix contains
+    the distances between observation `i` and its nearest neighbors.
+- An advantage of using a sparse distance matrix: you are not restricted
+  to a fixed value of `n_neighbors` for each observation. Each column
+  can contain a different number of non-zero distances. See the paper by
+  [Dalmia and Sia](https://arxiv.org/abs/2108.05525) for why you might
+  want to do this. The graph edge weight calculation will be adjusted to
+  account for the different number of neighbors of each observation.
+  There must be at least one neighbor for each observation.
+- Explicit zero distances will be removed from the matrix. This is in
+  contrast to the use of the nearest neighbor list matrix format where
+  typically the zero distance between an observation and itself is found
+  as part of the nearest neighbor search routine. The sparse distance
+  matrix approach will account for the zero self-distance being
+  implicit. To keep explicit zero distances between other observations
+  set them to a small but non-zero value, e.g. `1e-10`.
+- A slight disadvantage with using a distance matrix is that the
+  distances need to be sorted.
+- Sparse distance matrix input is not currently supported for the
+  `lvish` method.
+
+If you use pre-computed nearest neighbor data, be aware that:
+
+- You can’t use pre-computed nearest neighbor data and also use
+  `metric`.
+- You can explicitly set `X` to NULL, as long as you don’t try and use
+  an initialization method that makes use of `X` (`init = "pca"` or
+  `init = "spca"`).
+- You *can* transform new data by setting `ret_model = TRUE`. You must
+  provide `umap_transform` with the distances between new data and the
+  original data via its `nn_method` parameter.
+
+Here’s an example of using pre-computed nearest neighbor data using the
+even-numbered observations in `iris` to build an initial model and then
+transforming the odd-numbered observations. This relies on some internal
+`uwot` functions which I do not promise have a stable API (i.e. this may
+example may be broken when you read this), but it gives you the general
+idea:
+
+``` r
+iris_even <- iris[seq(2, nrow(iris), 2), ]
+iris_odd <- iris[seq(1, nrow(iris), 2), ]
+
+iris_even_nn <- uwot:::annoy_nn(
+  X = uwot:::x2m(iris_even),
+  k = 15,
+  metric = "euclidean",
+  ret_index = TRUE
+)
+
+iris_odd_nn <- annoy_search(
+  X = uwot:::x2m(iris_odd),
+  k = 15,
+  ann = iris_even_nn$index
+)
+
+# Delete the Annoy index, force the transform method to use the nn distances 
+# directly
+iris_even_nn$index <- NULL
+
+iris_even_umap <-
+  umap(
+    X = NULL,
+    nn_method = iris_even_nn,
+    ret_model = TRUE
+  )
+
+iris_odd_transform <-
+  umap_transform(X = NULL, iris_even_umap, nn_method = iris_odd_nn)
+```
+
+## Exporting nearest neighbor data from `uwot`
+
+If you set `ret_nn = TRUE`, the return value of `umap` will be a list,
+and the `nn` item contains the nearest neighbor data in a format that
+can be used with `nn_method`. This is handy if you are going to be
+running UMAP multiple times with the same data and `n_neighbors` and
+`scale` settings, because the nearest neighbor calculation can be the
+most time-consuming part of the calculation.
+
+Normally the contents of `nn` is itself a list, the value of which is
+the nearest neighbor data. The name is the type of metric that generated
+the data. As an example, here’s what the first few items of the `iris`
+5-NN data should look like:
+
+``` r
+lapply(umap(iris, ret_nn = TRUE, n_neighbors = 5)$nn$euclidean, head)
+
+$`idx`
+     [,1] [,2] [,3] [,4] [,5]
+[1,]    1   18    5   40   29
+[2,]    2   35   46   13   10
+[3,]    3   48    4    7   13
+[4,]    4   48   30   31    3
+[5,]    5   38    1   18   41
+[6,]    6   19   11   49   45
+
+$dist
+     [,1]      [,2]      [,3]      [,4]      [,5]
+[1,]    0 0.1000000 0.1414214 0.1414214 0.1414214
+[2,]    0 0.1414214 0.1414214 0.1414214 0.1732051
+[3,]    0 0.1414214 0.2449490 0.2645751 0.2645751
+[4,]    0 0.1414214 0.1732051 0.2236068 0.2449490
+[5,]    0 0.1414214 0.1414214 0.1732051 0.1732051
+[6,]    0 0.3316625 0.3464102 0.3605551 0.3741657
+```
+
+If for some reason you specify `ret_nn` while supplying precomputed
+nearest neighbor data to `nn_method`, the returned data should be
+identical to what you passed in, and the list item names will be
+`precomputed`.
+
+## Multiple neighbor data
+
+As discussed under the [Mixed Data
+Types](https://jlmelville.github.io/uwot/articles/mixed-data-types.html)
+article, you can apply multiple distance metrics to different parts of
+matrix or data frame input data. if you do this, then `ret_nn` will
+return all the neighbor data. The list under `nn` will now contain as
+many items as metrics, in the order they were specified. For instance,
+if the `metric` argument is:
+
+``` r
+metric = list("euclidean" = c("Petal.Width", "Petal.Length"),
+              "cosine" = c("Sepal.Width", "Sepal.Length"))
+```
+
+The `nn` list will contain two list entries. The first will be called
+`euclidean` and the second `cosine`.
+
+If you have access to multiple distance metrics, you may also provide
+multiple precomputed neighbor data to `nn_method` in the same format: a
+list of lists, where each sublist has the same format as described above
+(i.e. the two matrices, `idx` and `dist`). The names of the list items
+are ignored, so you don’t need to set them. Roughly, do something like
+this:
+
+``` r
+nn_metric1 <- list(idx = matrix(...), dist = matrix(...))
+nn_metric2 <- list(idx = matrix(...), dist = matrix(...))
+umap_res <- umap(nn_method = list(nn_metric1, nn_metric2), ...)
+```
+
+The different neighbor data must all have the same number of neighbors,
+i.e. the number of columns in all the matrices must be the same.
+
+## Numeric `y`
+
+If you are using supervised UMAP with a numeric `y`, then you can also
+pass nearest neighbor data to `y`, using the same format as above. In
+this case the nearest neighbors should be with respect to the data in
+`y`.
+
+Note that you *cannot* pass categorical `y` as nearest neighbor data.
+This is because the processing of the data goes through a different code
+path that doesn’t directly calculate nearest neighbors: if `y` is a
+factor, when there are only a small number of levels, the number of
+neighbors of an item can be vastly larger than `n_neighbors`.
+
+Nearest neighbor data for `y` is not returned from `umap` for re-use.

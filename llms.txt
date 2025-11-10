@@ -1,0 +1,239 @@
+# uwot
+
+An R implementation of the [Uniform Manifold Approximation and
+Projection (UMAP)](https://arxiv.org/abs/1802.03426) method for
+dimensionality reduction of McInnes et al. (2018). Also included are the
+supervised and metric (out-of-sample) learning extensions to the basic
+method. Translated from the [Python
+implementation](https://github.com/lmcinnes/umap).
+
+## News
+
+*November 10 2025* `uwot` version 0.2.4 has been released to CRAN. This
+was mainly to avoid a test potentially starting to fail due to an
+incorrect use of `testthat`. However, as part of some other small fixes,
+optional dependencies (e.g. RSpectra) will now be correctly detected and
+used if installed even if not loaded. This could have an effect on
+output (but the old behavior was a bug).
+
+*February 24 2025* `uwot` version 0.2.3 has been released to CRAN. This
+release mainly fixes some bugs, including one that was causing an error
+with an upcoming version of R-devel. One new feature: set
+`rng_type = "deterministic"` to use a deterministic sampling of vertices
+during the optimization phase which will give faster and more
+reproducible output at the cost of accuracy. The idea for this came
+straight from [Leland McInnes via
+Reddit](https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy/).
+
+## Installing
+
+### From CRAN
+
+``` r
+install.packages("uwot")
+```
+
+### From github
+
+`uwot` makes use of C++ code which must be compiled. You may have to
+carry out a few extra steps before being able to build this package:
+
+**Windows**: install
+[Rtools](https://cran.r-project.org/bin/windows/Rtools/) and ensure
+`C:\Rtools\bin` is on your path.
+
+**Mac OS X**: using a custom `~/.R/Makevars` [may cause linking
+errors](https://github.com/jlmelville/uwot/issues/1). This sort of thing
+is a potential problem on all platforms but seems to bite Mac owners
+more. [The R for Mac OS X
+FAQ](https://cran.r-project.org/bin/macosx/RMacOSX-FAQ.html#Installation-of-source-packages)
+may be helpful here to work out what you can get away with. To be on the
+safe side, I would advise building `uwot` without a custom `Makevars`.
+
+``` r
+install.packages("devtools")
+devtools::install_github("jlmelville/uwot")
+```
+
+## Example
+
+``` r
+library(uwot)
+
+# umap2 is a version of the umap() function with better defaults
+iris_umap <- umap2(iris)
+
+# but you can still use the umap function (which most of the existing 
+# documentation does)
+iris_umap <- umap(iris)
+
+# Load mnist from somewhere, e.g.
+# devtools::install_github("jlmelville/snedata")
+# mnist <- snedata::download_mnist()
+
+mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
+plot(
+  mnist_umap,
+  cex = 0.1,
+  col = grDevices::rainbow(n = length(levels(mnist$Label)))[as.integer(mnist$Label)] |>
+    grDevices::adjustcolor(alpha.f = 0.1),
+  main = "R uwot::umap",
+  xlab = "",
+  ylab = ""
+)
+
+# I recommend the following optional packages
+# for faster or more flexible nearest neighbor search:
+install.packages(c("RcppHNSW", "rnndescent"))
+library(RcppHNSW)
+library(rnndescent)
+
+# Installing RcppHNSW will allow the use of the usually faster HNSW method:
+mnist_umap_hnsw <- umap(mnist, n_neighbors = 15, min_dist = 0.001, 
+                        nn_method = "hnsw")
+# nndescent is also available
+mnist_umap_nnd <- umap(mnist, n_neighbors = 15, min_dist = 0.001, 
+                       nn_method = "nndescent")
+# umap2 will choose HNSW by default if available
+mnist_umap2 <- umap2(mnist)
+```
+
+![MNIST UMAP](reference/figures/mnist-r.png)
+
+MNIST UMAP
+
+## Documentation
+
+<https://jlmelville.github.io/uwot/>. For more examples see the [get
+started](https://jlmelville.github.io/uwot/articles/uwot.html) doc.
+There are plenty of
+[articles](https://jlmelville.github.io/uwot/articles/index.html)
+describing various aspects of the package.
+
+## License
+
+[GPLv3 or later](https://www.gnu.org/licenses/gpl-3.0.txt).
+
+## Citation
+
+If you want to cite the use of uwot, then use the output of running
+`citation("uwot")` (you can do this with any R package).
+
+## See Also
+
+- The [UMAP reference implementation](https://github.com/lmcinnes/umap)
+  and [publication](https://arxiv.org/abs/1802.03426).
+- The [UMAP R package](https://cran.r-project.org/package=umap) (see
+  also its [github repo](https://github.com/tkonopka/umap)), predates
+  `uwot`’s arrival on CRAN.
+- Another R package is
+  [umapr](https://github.com/ropensci-archive/umapr), but it is no
+  longer being maintained.
+- [umappp](https://github.com/libscran/umappp) is a full C++
+  implementation, and [yaumap](https://github.com/LTLA/yaumap) provides
+  an R wrapper. The batch implementation in umappp are the basis for
+  uwot’s attempt at the same.
+- `uwot` uses the
+  [RcppProgress](https://cran.r-project.org/package=RcppProgress)
+  package to show a text-based progress bar when `verbose = TRUE`.
+
+# Package index
+
+## All functions
+
+- [`load_uwot()`](https://jlmelville.github.io/uwot/reference/load_uwot.md)
+  : Save or Load a Model
+- [`lvish()`](https://jlmelville.github.io/uwot/reference/lvish.md) :
+  Dimensionality Reduction with a LargeVis-like method
+- [`optimize_graph_layout()`](https://jlmelville.github.io/uwot/reference/optimize_graph_layout.md)
+  : Optimize Graph Layout
+- [`save_uwot()`](https://jlmelville.github.io/uwot/reference/save_uwot.md)
+  : Save or Load a Model
+- [`similarity_graph()`](https://jlmelville.github.io/uwot/reference/similarity_graph.md)
+  : Similarity Graph
+- [`simplicial_set_intersect()`](https://jlmelville.github.io/uwot/reference/simplicial_set_intersect.md)
+  : Merge Similarity Graph by Simplicial Set Intersection
+- [`simplicial_set_union()`](https://jlmelville.github.io/uwot/reference/simplicial_set_union.md)
+  : Merge Similarity Graph by Simplicial Set Union
+- [`tumap()`](https://jlmelville.github.io/uwot/reference/tumap.md) :
+  Dimensionality Reduction Using t-Distributed UMAP (t-UMAP)
+- [`umap()`](https://jlmelville.github.io/uwot/reference/umap.md) :
+  Dimensionality Reduction with UMAP
+- [`umap2()`](https://jlmelville.github.io/uwot/reference/umap2.md) :
+  Dimensionality Reduction with UMAP
+- [`umap_transform()`](https://jlmelville.github.io/uwot/reference/umap_transform.md)
+  : Add New Points to an Existing Embedding
+- [`unload_uwot()`](https://jlmelville.github.io/uwot/reference/unload_uwot.md)
+  : Unload a Model
+
+# Articles
+
+### What’s New
+
+A summary of the latest changes to `uwot`.
+
+- [What's New](https://jlmelville.github.io/uwot/articles/whatsnew.md):
+
+### Examples
+
+Lots of example output of UMAP in its various modes.
+
+- [UMAP
+  Examples](https://jlmelville.github.io/uwot/articles/umap-examples.md):
+- [Python
+  Comparison](https://jlmelville.github.io/uwot/articles/pycompare.md):
+- [PaCMAP
+  Comparison](https://jlmelville.github.io/uwot/articles/pacmap-comparison.md):
+- [Embedding New
+  Data](https://jlmelville.github.io/uwot/articles/embedding-new-data.md):
+- [Metric Learning with
+  UMAP](https://jlmelville.github.io/uwot/articles/metric-learning.md):
+
+### Theory
+
+Exploring the theory and algorithm driving UMAP and its parameters.
+
+- [UMAP for
+  t-SNE](https://jlmelville.github.io/uwot/articles/umap-for-tsne.md):
+- [UMAP on some simple
+  datasets](https://jlmelville.github.io/uwot/articles/umap-simple.md):
+- [Fine-tuning UMAP
+  Visualizations](https://jlmelville.github.io/uwot/articles/abparams.md):
+
+### Nearest Neighbors Methods
+
+Using external nearest neighbor data with `uwot`.
+
+- [Nearest Neighbor
+  Format](https://jlmelville.github.io/uwot/articles/nearest-neighbors-format.md):
+- [Using HNSW for nearest
+  neighbors](https://jlmelville.github.io/uwot/articles/hnsw-umap.md):
+- [Using rnndescent for nearest
+  neighbors](https://jlmelville.github.io/uwot/articles/rnndescent-umap.md):
+- [UMAP with Mutual Nearest
+  Neighbors](https://jlmelville.github.io/uwot/articles/mutual-nearest-neighbors.md):
+- [Locally Scaled
+  Neighbors](https://jlmelville.github.io/uwot/articles/locally-scaled-neighbors.md):
+
+### Articles
+
+More details on some of what `uwot` can do.
+
+- [umap2](https://jlmelville.github.io/uwot/articles/umap2.md):
+- [Optional
+  Dependencies](https://jlmelville.github.io/uwot/articles/optional-dependencies.md):
+- [Mixed Data
+  Types](https://jlmelville.github.io/uwot/articles/mixed-data-types.md):
+- [Fast SGD
+  settings](https://jlmelville.github.io/uwot/articles/fast-sgd.md):
+- [Initialization](https://jlmelville.github.io/uwot/articles/init.md):
+- [Mid-Spectral
+  Initialization](https://jlmelville.github.io/uwot/articles/mid-spectral-initialization.md):
+- [Leopold: Lightweight Estimate of Preservation of Local
+  Density](https://jlmelville.github.io/uwot/articles/leopold.md):
+- [Reproducibility](https://jlmelville.github.io/uwot/articles/reproducibility.md):
+- [Performance](https://jlmelville.github.io/uwot/articles/performance.md):
+- [lvish](https://jlmelville.github.io/uwot/articles/lvish.md):
+- [t-UMAP](https://jlmelville.github.io/uwot/articles/tumap.md):
+- [Working with Sparse
+  Data](https://jlmelville.github.io/uwot/articles/sparse-data-example.md):

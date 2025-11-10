@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">uwot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,8 +57,8 @@
 <div class="section level2">
 <h2 id="news">News<a class="anchor" aria-label="anchor" href="#news"></a>
 </h2>
+<p><em>November 10 2025</em> <code>uwot</code> version 0.2.4 has been released to CRAN. This was mainly to avoid a test potentially starting to fail due to an incorrect use of <code>testthat</code>. However, as part of some other small fixes, optional dependencies (e.g. RSpectra) will now be correctly detected and used if installed even if not loaded. This could have an effect on output (but the old behavior was a bug).</p>
 <p><em>February 24 2025</em> <code>uwot</code> version 0.2.3 has been released to CRAN. This release mainly fixes some bugs, including one that was causing an error with an upcoming version of R-devel. One new feature: set <code>rng_type = "deterministic"</code> to use a deterministic sampling of vertices during the optimization phase which will give faster and more reproducible output at the cost of accuracy. The idea for this came straight from <a href="https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy/" class="external-link">Leland McInnes via Reddit</a>.</p>
-<p><em>April 21 2024</em> As ordained by prophecy, version 0.2.2 of <code>uwot</code> has been released to CRAN. <code>RSpectra</code> is back as a main dependency and I <em>thought</em> I had worked out a clever scheme to avoid the failures seen in some installations with the <code>irlba</code>/<code>Matrix</code> interactions. This releases fixes the problem on all the systems I have access to (including GitHub Actions CI) but some CRAN checks remain failing. How embarrassing. That said, if you have had issues, it’s possible this new release will help you too.</p>
 </div>
 <div class="section level2">
 <h2 id="installing">Installing<a class="anchor" aria-label="anchor" href="#installing"></a>
@@ -210,7 +210,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

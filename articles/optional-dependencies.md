@@ -1,0 +1,69 @@
+# Optional Dependencies
+
+There are a variety of packages that `uwot` will make use of if you
+install them (and load them), but that you don’t *need* so are optional.
+These include:
+
+- [RcppHNSW](https://cran.r-project.org/package=RcppHNSW) – used for
+  nearest neighbor search. Once installed and loaded, you can specify
+  `nn_method = "hnsw"` in
+  [`uwot::umap`](https://jlmelville.github.io/uwot/reference/umap.md) as
+  long as your `metric` is either `"euclidean"`, `"cosine"` or
+  `"correlation"`. This should be a bit faster than the default of Annoy
+  in most cases. If you use
+  [`uwot::umap2`](https://jlmelville.github.io/uwot/reference/umap2.md)
+  then you will get HNSW by default without having to specify
+  `nn_method`.
+- [rnndescent](https://cran.r-project.org/package=rnndescent) – used for
+  nearest neighbor search. Once installed and loaded, you can specify
+  `nn_method = "nndescent"` in
+  [`uwot::umap`](https://jlmelville.github.io/uwot/reference/umap.md).
+  `rnndescent` can handle many metrics, so see its
+  [documentation](https://jlmelville.github.io/rnndescent/articles/metrics.html)
+  for more information. If you use
+  [`uwot::umap2`](https://jlmelville.github.io/uwot/reference/umap2.md)
+  and do not load `RcppHNSW`, then you will use this method by default
+  without having to specify `nn_method`. You can also use sparse
+  matrices as input to
+  [`uwot::umap2`](https://jlmelville.github.io/uwot/reference/umap2.md).
+  See the [sparse data
+  article](https://jlmelville.github.io/uwot/articles/sparse-data-example.html)
+  for more details.
+
+There is one other dependency,
+[RSpectra](https://cran.r-project.org/package=RSpectra) – used for the
+default spectral initialization. If not installed, then the
+[irlba](https://cran.r-project.org/package=irlba) package is used
+instead. In most cases `irlba` does a fine job, but it’s not as fast as
+`RSpectra` for spectral initialization because `irlba` isn’t designed
+for quite the same use case as `RSpectra`. This has been both a core
+dependency and an optional dependency at different times in the past. In
+general, I would like it to be an optional dependency, but currently, an
+interaction with the most recent release of `irlba` and an ABI change to
+the `Matrix` package is causing failures. By making `RSpectra` a
+required dependency, I can ensure tests, examples and vignettes build
+which unblocks various downstream packages.
+
+My recommendation would be to install all of these (or at least
+`RcppHNSW`):
+
+``` r
+install.packages(c("RcppHNSW", "rnndescent"))
+```
+
+and then have them (and `RSpectra`) loaded whenever you are using
+`uwot`.
+
+``` r
+library(RSpectra)
+library(RcppHNSW)
+library(rnndescent)
+library(uwot)
+```
+
+The following UMAP run will then use `RcppHNSW` and `RSpectra` (versus
+`RcppAnnoy` and `irlba`) without you having to specify anything:
+
+``` r
+iris_umap <- umap2(iris, n_neighbors = 30)
+```

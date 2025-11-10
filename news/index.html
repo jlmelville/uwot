@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">uwot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,12 +35,13 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="uwot-development-version">uwot (development version)<a class="anchor" aria-label="anchor" href="#uwot-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.4" id="uwot-024">uwot 0.2.4<a class="anchor" aria-label="anchor" href="#uwot-024"></a></h2><p class="text-muted">CRAN release: 2025-11-10</p>
 <div class="section level3">
-<h3 id="bug-fixes-and-minor-improvements-development-version">Bug fixes and minor improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-minor-improvements-development-version"></a></h3>
+<h3 id="bug-fixes-and-minor-improvements-0-2-4">Bug fixes and minor improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-minor-improvements-0-2-4"></a></h3>
 <ul><li>The installation status of optional dependencies were not being detected correctly. This meant that different packages could be used for initialization in unpredictable ways depending on whether they had been explicitly loaded or not. Thank you <a href="https://github.com/hsuknowledge" class="external-link">hsuknowledge</a> for the report (<a href="https://github.com/jlmelville/uwot/issues/134" class="external-link uri">https://github.com/jlmelville/uwot/issues/134</a>).</li>
 <li>Users of the <a href="https://github.com/ycli1995/bbknnR/issues/3" class="external-link">bbknnR</a> package were suffering from a not-helpful error message when the custom neighbor data contained missing values. An explicit check has been added and although this is still a fatal error, the message should be more informative (<a href="https://github.com/jlmelville/uwot/issues/135" class="external-link uri">https://github.com/jlmelville/uwot/issues/135</a>).</li>
 <li>Fixed a partially-specified parameter name being passed to irlba. Thank you <a href="https://github.com/Bisaloo" class="external-link">Hugo Gruson</a> for the fix (<a href="https://github.com/jlmelville/uwot/pull/136" class="external-link uri">https://github.com/jlmelville/uwot/pull/136</a>).</li>
+<li>Development-only: fixed an incorrect use of <code><a href="https://testthat.r-lib.org/reference/expect.html" class="external-link">testthat::expect</a></code> in a unit test. Thank you <a href="https://github.com/hadley" class="external-link">Hadley Wickham</a> for the fix (<a href="https://github.com/jlmelville/uwot/pull/138" class="external-link uri">https://github.com/jlmelville/uwot/pull/138</a>).</li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -448,7 +449,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
