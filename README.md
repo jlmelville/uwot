@@ -19,6 +19,12 @@ method. Translated from the
 
 ## News
 
+*November 10 2025* `uwot` version 0.2.4 has been released to CRAN. This was
+mainly to avoid a test potentially starting to fail due to an incorrect use of
+`testthat`. However, as part of some other small fixes, optional dependencies
+(e.g. RSpectra) will now be correctly detected and used if installed even if not
+loaded. This could have an effect on output (but the old behavior was a bug).
+
 *February 24 2025* `uwot` version 0.2.3 has been released to CRAN. This release
 mainly fixes some bugs, including one that was causing an error with an upcoming
 version of R-devel. One new feature: set `rng_type = "deterministic"` to use a
@@ -27,13 +33,7 @@ faster and more reproducible output at the cost of accuracy. The idea for this
 came straight from
 [Leland McInnes via Reddit](https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy/).
 
-*April 21 2024* As ordained by prophecy, version 0.2.2 of `uwot` has been
-released to CRAN. `RSpectra` is back as a main dependency and I *thought* I had
-worked out a clever scheme to avoid the failures seen in some installations with
-the `irlba`/`Matrix` interactions. This releases fixes the problem on all the
-systems I have access to (including GitHub Actions CI) but some CRAN checks
-remain failing. How embarrassing. That said, if you have had issues, it's
-possible this new release will help you too.
+
 
 ## Installing
 

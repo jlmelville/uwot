@@ -8,6 +8,12 @@ get moved here. You should look at the
 [Changelog](https://jlmelville.github.io/uwot/news/index.html) for fuller 
 details.
 
+*November 10 2025* `uwot` version 0.2.4 has been released to CRAN. This was
+mainly to avoid a test potentially starting to fail due to an incorrect use of
+`testthat`. However, as part of some other small fixes, optional dependencies
+(e.g. RSpectra) will now be correctly detected and used if installed even if not
+loaded. This could have an effect on output (but the old behavior was a bug).
+
 *February 24 2025* `uwot` version 0.2.3 has been released to CRAN. This release
 mainly fixes some bugs, including one that was causing an error with an upcoming
 version of R-devel. One new feature: set `rng_type = "deterministic"` to use a
