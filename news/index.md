@@ -1,5 +1,7 @@
 # Changelog
 
+## uwot (development version)
+
 ## uwot 0.2.4
 
 CRAN release: 2025-11-10

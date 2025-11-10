@@ -23,12 +23,12 @@ Source:
 
 Melville J (2025). *uwot: The Uniform Manifold Approximation and
 Projection (UMAP) Method for Dimensionality Reduction*. R package
-version 0.2.4, <https://github.com/jlmelville/uwot>.
+version 0.2.4.9000, <https://github.com/jlmelville/uwot>.
 
     @Manual{,
       title = {uwot: The Uniform Manifold Approximation and Projection (UMAP) Method for Dimensionality Reduction},
       author = {James Melville},
       year = {2025},
-      note = {R package version 0.2.4},
+      note = {R package version 0.2.4.9000},
       url = {https://github.com/jlmelville/uwot},
     }
