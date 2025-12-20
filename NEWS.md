@@ -1,5 +1,14 @@
 # uwot (development version)
 
+## Bug fixes and minor improvements
+
+* When passing a list of two matrices to `nn_method` to represent a pre-computed
+k-nearest neighbor graph, you may specify the indices and distances as `index`
+and `distance` respectively. This improves compatibility with the
+`BiocNeighbors` package. Thank you [hsuknowledge](https://github.com/hsuknowledge)
+for pointing out the mismatch in naming convention
+(<https://github.com/jlmelville/uwot/issues/140>).
+
 # uwot 0.2.4
 
 ## Bug fixes and minor improvements

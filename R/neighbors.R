@@ -80,6 +80,43 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
   res
 }
 
+# allow (idx, dist) or (index, distance): convert the latter to the former
+normalize_nn_graph <- function(graph) {
+  if (is.null(graph$idx) && is.matrix(graph$index)) {
+    graph$idx <- graph$index
+    graph$index <- NULL
+  }
+  if (is.null(graph$dist) && is.matrix(graph$distance)) {
+    graph$dist <- graph$distance
+    graph$distance <- NULL
+  }
+  graph
+}
+
+# in the knn graph case we will allow (idx, dist) or (index, distance)
+# for compatibility with BiocNeighbors
+normalize_nn_method <- function(nn_method) {
+  if (is.null(nn_method) || !is.list(nn_method) || !is.null(nn_method$type)) {
+    return(nn_method)
+  }
+
+  # the case where we have a single list with (idx, dist) or (index, distance)
+  if (!is.null(nn_method$idx) || !is.null(nn_method$dist) ||
+      !is.null(nn_method$index) || !is.null(nn_method$distance)) {
+    nn_method <- normalize_nn_graph(nn_method)
+    return(nn_method)
+  }
+
+  # the case where we have a list of knn graphs
+  for (i in seq_along(nn_method)) {
+    graph <- nn_method[[i]]
+    if (is.list(graph) && is.null(graph$type)) {
+      nn_method[[i]] <- normalize_nn_graph(graph)
+    }
+  }
+  nn_method
+}
+
 # an nn graph not in a list
 nn_is_single <- function(nn) {
   (is.list(nn) && !is.null(nn$idx)) || is_sparse_matrix(nn)

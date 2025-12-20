@@ -233,6 +233,7 @@ umap_transform <- function(X = NULL, model = NULL,
     stop("Unknown n_sgd_threads value: ", n_sgd_threads, " should be a positive
          integer or 'auto'")
   }
+  nn_method <- normalize_nn_method(nn_method)
   if (is.null(nn_method)) {
     if (is.null(X)) {
       stop('argument "X" is missing, with no default')

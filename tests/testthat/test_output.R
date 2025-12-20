@@ -95,6 +95,15 @@ res_nn <- umap(iris10,
 expect_ok_matrix(res_nn)
 expect_equal(res_nn, res$embedding)
 
+nn_index <- list(index = res$nn[[1]]$idx, distance = res$nn[[1]]$dist)
+set.seed(1337)
+res_nn_index <- umap(iris10,
+  nn_method = nn_index, n_epochs = 2, learning_rate = 0.5, min_dist = 0.001,
+  init = "spca", verbose = FALSE, n_threads = 0
+)
+expect_ok_matrix(res_nn_index)
+expect_equal(res_nn_index, res$embedding)
+
 # X = NULL is ok if passing nn data and rand init
 set.seed(1337)
 res_nnxn <- umap(
