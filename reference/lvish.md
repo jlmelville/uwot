@@ -317,12 +317,13 @@ lvish(
   used. You may also pass precalculated nearest neighbor data to this
   argument. It must be a list consisting of two elements:
 
-  - `"idx"`. A `n_vertices x n_neighbors` matrix containing the integer
-    indexes of the nearest neighbors in `X`. Each vertex is considered
-    to be its own nearest neighbor, i.e. `idx[, 1] == 1:n_vertices`.
+  - `"idx"` (or `"index"`). A `n_vertices x n_neighbors` matrix
+    containing the integer indexes of the nearest neighbors in `X`.
+    *Each vertex is considered to be its own nearest neighbor, i.e.
+    `idx[, 1] == 1:n_vertices`*.
 
-  - `"dist"`. A `n_vertices x n_neighbors` matrix containing the
-    distances of the nearest neighbors.
+  - `"dist"` (or `"distance"`). A `n_vertices x n_neighbors` matrix
+    containing the distances of the nearest neighbors.
 
   Multiple nearest neighbor data (e.g. from two different precomputed
   metrics) can be passed by passing a list containing the nearest

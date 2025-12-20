@@ -319,12 +319,14 @@ embedding.</p></dd>
 </ul><p>By default, if <code>X</code> has less than 4,096 vertices, the exact nearest
 neighbors are found. Otherwise, approximate nearest neighbors are used.
 You may also pass pre-calculated nearest neighbor data to this argument. It
-must be one of two formats, either a list consisting of two elements:</p><ul><li><p><code>"idx"</code>. A <code>n_vertices x n_neighbors</code> matrix
-  containing the integer indexes of the nearest neighbors in <code>X</code>. Each
-  vertex is considered to be its own nearest neighbor, i.e.
-  <code>idx[, 1] == 1:n_vertices</code>.</p></li>
-<li><p><code>"dist"</code>. A <code>n_vertices x n_neighbors</code> matrix
-  containing the distances of the nearest neighbors.</p></li>
+must be one of two formats, either a list consisting of two elements:</p><ul><li><p><code>"idx"</code> (or <code>"index"</code>). A <code>n_vertices x n_neighbors</code>
+  matrix containing the integer indexes of the nearest neighbors in
+  <code>X</code>.
+  <em>Each vertex is considered to be its own nearest neighbor, i.e.
+  <code>idx[, 1] == 1:n_vertices</code></em>.</p></li>
+<li><p><code>"dist"</code> (or <code>"distance"</code>). A
+  <code>n_vertices x n_neighbors</code> matrix containing the distances of the
+  nearest neighbors.</p></li>
 </ul><p>or a sparse distance matrix of type <code>dgCMatrix</code>, with dimensions
 <code>n_vertices x n_vertices</code>. Distances should be arranged by column,
 i.e. a non-zero entry in row <code>j</code> of the <code>i</code>th column indicates

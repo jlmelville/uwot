@@ -231,12 +231,13 @@ similarity_graph(
   argument. It must be one of two formats, either a list consisting of
   two elements:
 
-  - `"idx"`. A `n_vertices x n_neighbors` matrix containing the integer
-    indexes of the nearest neighbors in `X`. Each vertex is considered
-    to be its own nearest neighbor, i.e. `idx[, 1] == 1:n_vertices`.
+  - `"idx"` (or `"index"`). A `n_vertices x n_neighbors` matrix
+    containing the integer indexes of the nearest neighbors in `X`.
+    *Each vertex is considered to be its own nearest neighbor, i.e.
+    `idx[, 1] == 1:n_vertices`*.
 
-  - `"dist"`. A `n_vertices x n_neighbors` matrix containing the
-    distances of the nearest neighbors.
+  - `"dist"` (or `"distance"`). A `n_vertices x n_neighbors` matrix
+    containing the distances of the nearest neighbors.
 
   or a sparse distance matrix of type `dgCMatrix`, with dimensions
   `n_vertices x n_vertices`. Distances should be arranged by column,
