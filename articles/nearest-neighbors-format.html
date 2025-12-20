@@ -76,7 +76,7 @@ by some other means and pass that to <code>umap</code> (or
 containing the following two entries:</p>
 <ul>
 <li>
-<code>idx</code>: a matrix of dimension
+<code>idx</code> or <code>index</code>: a matrix of dimension
 <code>n_vertices x n_neighbors</code>, where each row contains the
 indexes (starting at <code>1</code>) of the nearest neighbors of each
 item (vertex) in the dataset. Each item is always the nearest neighbor
@@ -86,12 +86,18 @@ non-metric distance or your approximate nearest neighbor method is
 returning way too approximate results. In either case, you should expect
 bad results.</li>
 <li>
-<code>dist</code>: a matrix of dimension
+<code>dist</code> or <code>distance</code>: a matrix of dimension
 <code>n_vertices x n_neighbors</code>, where each row contains the
 distances of the nearest neighbors of each item (vertex) in the dataset,
-in Each item is always the nearest neighbor of itself, so the first
-element in row <code>i</code> should always be <code>0.0</code>.</li>
+in ascending order. Each item is always the nearest neighbor of itself,
+so the first element in row <code>i</code> should always be
+<code>0.0</code>.</li>
 </ul>
+<p>Internally, <code>uwot</code> will convert the <code>index</code> and
+<code>distance</code> matrices to the <code>idx</code> and
+<code>dist</code> matrices, so you can use either format. Support for
+<code>index</code> and <code>distance</code> is for compatibility with
+<a href="https://bioconductor.org/packages/BiocNeighbors" class="external-link">BiocNeighbors</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="sparse-distance-matrix-format">Sparse Distance Matrix Format<a class="anchor" aria-label="anchor" href="#sparse-distance-matrix-format"></a>

@@ -12,18 +12,24 @@ neighbor data for `X` by some other means and pass that to `umap` (or
 The format expected by `nn_method` is a `list` containing the following
 two entries:
 
-- `idx`: a matrix of dimension `n_vertices x n_neighbors`, where each
-  row contains the indexes (starting at `1`) of the nearest neighbors of
-  each item (vertex) in the dataset. Each item is always the nearest
-  neighbor of itself, so the first element in row `i` should always be
-  `i`. If it isn’t then either you are using a really weird non-metric
-  distance or your approximate nearest neighbor method is returning way
-  too approximate results. In either case, you should expect bad
-  results.
-- `dist`: a matrix of dimension `n_vertices x n_neighbors`, where each
-  row contains the distances of the nearest neighbors of each item
-  (vertex) in the dataset, in Each item is always the nearest neighbor
-  of itself, so the first element in row `i` should always be `0.0`.
+- `idx` or `index`: a matrix of dimension `n_vertices x n_neighbors`,
+  where each row contains the indexes (starting at `1`) of the nearest
+  neighbors of each item (vertex) in the dataset. Each item is always
+  the nearest neighbor of itself, so the first element in row `i` should
+  always be `i`. If it isn’t then either you are using a really weird
+  non-metric distance or your approximate nearest neighbor method is
+  returning way too approximate results. In either case, you should
+  expect bad results.
+- `dist` or `distance`: a matrix of dimension
+  `n_vertices x n_neighbors`, where each row contains the distances of
+  the nearest neighbors of each item (vertex) in the dataset, in
+  ascending order. Each item is always the nearest neighbor of itself,
+  so the first element in row `i` should always be `0.0`.
+
+Internally, `uwot` will convert the `index` and `distance` matrices to
+the `idx` and `dist` matrices, so you can use either format. Support for
+`index` and `distance` is for compatibility with
+[BiocNeighbors](https://bioconductor.org/packages/BiocNeighbors).
 
 ## Sparse Distance Matrix Format
 
