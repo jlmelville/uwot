@@ -231,7 +231,7 @@
 #'     matrix containing the integer indexes of the nearest neighbors in
 #'     \code{X}.
 #'     \emph{Each vertex is considered to be its own nearest neighbor, i.e.
-#'     \code{idx[, 1] == 1:n_vertices}.
+#'     \code{idx[, 1] == 1:n_vertices}}.
 #'     \item \code{"dist"} (or \code{"distance"}). A
 #'     \code{n_vertices x n_neighbors} matrix containing the distances of the
 #'     nearest neighbors.
@@ -974,7 +974,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     matrix containing the integer indexes of the nearest neighbors in
 #'     \code{X}.
 #'     \emph{Each vertex is considered to be its own nearest neighbor, i.e.
-#'     \code{idx[, 1] == 1:n_vertices}.
+#'     \code{idx[, 1] == 1:n_vertices}}.
 #'     \item \code{"dist"} (or \code{"distance"}). A
 #'     \code{n_vertices x n_neighbors} matrix containing the distances of the
 #'     nearest neighbors.
@@ -1722,7 +1722,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'     matrix containing the integer indexes of the nearest neighbors in
 #'     \code{X}.
 #'     \emph{Each vertex is considered to be its own nearest neighbor, i.e.
-#'     \code{idx[, 1] == 1:n_vertices}.
+#'     \code{idx[, 1] == 1:n_vertices}}.
 #'     \item \code{"dist"} (or \code{"distance"}). A
 #'     \code{n_vertices x n_neighbors} matrix containing the distances of the
 #'     nearest neighbors.
@@ -2259,7 +2259,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #'     matrix containing the integer indexes of the nearest neighbors in
 #'     \code{X}.
 #'     \emph{Each vertex is considered to be its own nearest neighbor, i.e.
-#'     \code{idx[, 1] == 1:n_vertices}.
+#'     \code{idx[, 1] == 1:n_vertices}}.
 #'     \item \code{"dist"} (or \code{"distance"}). A
 #'     \code{n_vertices x n_neighbors} matrix containing the distances of the
 #'     nearest neighbors.
