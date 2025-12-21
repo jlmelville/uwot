@@ -43,6 +43,7 @@ umap(
   ret_nn = FALSE,
   ret_extra = c(),
   n_threads = NULL,
+  n_build_threads = NULL,
   n_sgd_threads = 0,
   grain_size = 1,
   tmpdir = tempdir(),
@@ -574,10 +575,18 @@ umap(
 
   Number of threads to use (except during stochastic gradient descent).
   Default is half the number of concurrent threads supported by the
-  system. For nearest neighbor search, only applies if
-  `nn_method = "annoy"`. If `n_threads > 1`, then the Annoy index will
-  be temporarily written to disk in the location determined by
+  system. For nearest neighbor search, this controls the search phase.
+  For `nn_method = "annoy"`, if `n_threads > 1`, then the Annoy index
+  will be temporarily written to disk in the location determined by
   [`tempfile`](https://rdrr.io/r/base/tempfile.html).
+
+- n_build_threads:
+
+  Number of threads to use when building nearest neighbor indexes.
+  Default is `NULL`, which uses `n_threads`. To improve determinism, use
+  `n_build_threads = 1`. Only applies for `nn_method = "hnsw"` or
+  `nn_method = "nndescent"`. The Annoy-based index always use a single
+  thread.
 
 - n_sgd_threads:
 

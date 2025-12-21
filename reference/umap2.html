@@ -79,6 +79,7 @@ Approximation and Projection (UMAP) method (McInnes et al., 2018).</p>
 <span>  ret_nn <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  ret_extra <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  n_threads <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_build_threads <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_sgd_threads <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  grain_size <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  tmpdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -535,10 +536,18 @@ any combination of the following strings:</p><ul><li><p><code>"model"</code> Sam
 <dt id="arg-n-threads">n_threads<a class="anchor" aria-label="anchor" href="#arg-n-threads"></a></dt>
 <dd><p>Number of threads to use (except during stochastic gradient
 descent). Default is half the number of concurrent threads supported by the
-system. For nearest neighbor search, only applies if
-<code>nn_method = "annoy"</code>. If <code>n_threads &gt; 1</code>, then the Annoy index
+system. For nearest neighbor search, this controls the search phase. For
+<code>nn_method = "annoy"</code>, if <code>n_threads &gt; 1</code>, then the Annoy index
 will be temporarily written to disk in the location determined by
 <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></code>.</p></dd>
+
+
+<dt id="arg-n-build-threads">n_build_threads<a class="anchor" aria-label="anchor" href="#arg-n-build-threads"></a></dt>
+<dd><p>Number of threads to use when building nearest
+neighbor indexes. Default is <code>NULL</code>, which uses <code>n_threads</code>. To
+improve determinism, use <code>n_build_threads = 1</code>. Only
+applies for <code>nn_method = "hnsw"</code> or <code>nn_method = "nndescent"</code>.
+The Annoy-based index always use a single thread.</p></dd>
 
 
 <dt id="arg-n-sgd-threads">n_sgd_threads<a class="anchor" aria-label="anchor" href="#arg-n-sgd-threads"></a></dt>

@@ -103,6 +103,13 @@ a bit faster).</li>
 parameter. This doesn’t do anything other than call
 <code>set.seed</code> for you inside the routine, but you may find it
 convenient to fix the seed in the call to <code>umap</code>.</li>
+<li>If you use <code>nn_method = "hnsw"</code> or
+<code>nn_method = "nndescent"</code>, then by default these use multiple
+threads for index building. This can lead to non-determinism in the
+nearest neighbor calculation. Set <code>n_build_threads = 1</code> to
+avoid this. Note that the default nearest neighbor method using Annoy is
+unaffected by this parameter, because it always uses one thread to build
+the index.</li>
 </ul>
 <p>In summary, your chances of reproducibility are increased by
 using:</p>
@@ -110,6 +117,9 @@ using:</p>
 <code class="sourceCode R"><span><span class="va">mnist_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, a <span class="op">=</span> <span class="fl">1.8956</span>, b <span class="op">=</span> <span class="fl">0.8006</span>, approx_pow <span class="op">=</span> <span class="cn">TRUE</span>, init <span class="op">=</span> <span class="st">"spca"</span>, batch <span class="op">=</span> <span class="cn">TRUE</span>, rng_type <span class="op">=</span> <span class="st">"deterministic"</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
 <span><span class="co"># or</span></span>
 <span><span class="va">mnist_tumap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tumap.html">tumap</a></span><span class="op">(</span><span class="va">mnist</span>, init <span class="op">=</span> <span class="st">"spca"</span>, batch <span class="op">=</span> <span class="cn">TRUE</span>, rng_type <span class="op">=</span> <span class="st">"deterministic"</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span></code></pre></div>
+<p>If you use <code>nn_method = "hnsw"</code> (or
+<code>"nndescent"</code>) then also add <code>n_build_threads = 1</code>
+to the above calls.</p>
   </main>
 </div>
 
