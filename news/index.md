@@ -4,6 +4,16 @@
 
 ### Bug fixes and minor improvements
 
+- New parameter: `n_build_threads`. Controls the number of threads used
+  to build the nearest neighbor index when using `nn_method = "hnsw"` or
+  `nn_method = "nndescent"`. With a given seed, setting
+  `n_build_threads = 1` will give deterministic nearest neighbor results
+  when using either of those methods (at the cost of some speed). If you
+  are using the default Annoy-based method, this parameter does nothing:
+  it has always used one thread to build the index. Thank you
+  [hsuknowledge](https://github.com/hsuknowledge) for pointing out the
+  issue around determinism.
+  (<https://github.com/jlmelville/uwot/issues/139>).
 - When passing a list of two matrices to `nn_method` to represent a
   pre-computed k-nearest neighbor graph, you may specify the indices and
   distances as `index` and `distance` respectively. This improves
