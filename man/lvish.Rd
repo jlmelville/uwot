@@ -247,12 +247,14 @@ neighbors are found. Otherwise, approximate nearest neighbors are used.
 You may also pass precalculated nearest neighbor data to this argument. It
 must be a list consisting of two elements:
 \itemize{
-  \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
-  containing the integer indexes of the nearest neighbors in \code{X}. Each
-  vertex is considered to be its own nearest neighbor, i.e.
-  \code{idx[, 1] == 1:n_vertices}.
-  \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
-  containing the distances of the nearest neighbors.
+  \item \code{"idx"} (or \code{"index"}). A \code{n_vertices x n_neighbors}
+  matrix containing the integer indexes of the nearest neighbors in
+  \code{X}.
+  \emph{Each vertex is considered to be its own nearest neighbor, i.e.
+  \code{idx[, 1] == 1:n_vertices}}.
+  \item \code{"dist"} (or \code{"distance"}). A
+  \code{n_vertices x n_neighbors} matrix containing the distances of the
+  nearest neighbors.
 }
 Multiple nearest neighbor data (e.g. from two different precomputed
 metrics) can be passed by passing a list containing the nearest neighbor

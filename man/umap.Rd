@@ -295,12 +295,14 @@ neighbors are found. Otherwise, approximate nearest neighbors are used.
 You may also pass pre-calculated nearest neighbor data to this argument. It
 must be one of two formats, either a list consisting of two elements:
 \itemize{
-  \item \code{"idx"}. A \code{n_vertices x n_neighbors} matrix
-  containing the integer indexes of the nearest neighbors in \code{X}. Each
-  vertex is considered to be its own nearest neighbor, i.e.
-  \code{idx[, 1] == 1:n_vertices}.
-  \item \code{"dist"}. A \code{n_vertices x n_neighbors} matrix
-  containing the distances of the nearest neighbors.
+  \item \code{"idx"} (or \code{"index"}). A \code{n_vertices x n_neighbors}
+  matrix containing the integer indexes of the nearest neighbors in
+  \code{X}.
+  \emph{Each vertex is considered to be its own nearest neighbor, i.e.
+  \code{idx[, 1] == 1:n_vertices}}.
+  \item \code{"dist"} (or \code{"distance"}). A
+  \code{n_vertices x n_neighbors} matrix containing the distances of the
+  nearest neighbors.
 }
 or a sparse distance matrix of type \code{dgCMatrix}, with dimensions
 \code{n_vertices x n_vertices}. Distances should be arranged by column,
