@@ -24,6 +24,7 @@ similarity_graph(
   pca_center = TRUE,
   ret_extra = c(),
   n_threads = NULL,
+  n_build_threads = NULL,
   grain_size = 1,
   kernel = "gauss",
   tmpdir = tempdir(),
@@ -298,9 +299,15 @@ any combination of the following strings:
 
 \item{n_threads}{Number of threads to use. Default is half the number of
 concurrent threads supported by the system. For nearest neighbor search,
-only applies if \code{nn_method = "annoy"}. If \code{n_threads > 1}, then
-the Annoy index will be temporarily written to disk in the location
-determined by \code{\link[base]{tempfile}}.}
+this controls the search phase. For \code{nn_method = "annoy"}, if
+\code{n_threads > 1}, then the Annoy index will be temporarily written to
+disk in the location determined by \code{\link[base]{tempfile}}.}
+
+\item{n_build_threads}{Number of threads to use when building nearest
+neighbor indexes. Default is \code{NULL}, which uses \code{n_threads}. To
+improve determinism, use \code{n_build_threads = 1}. Only
+applies for \code{nn_method = "hnsw"} or \code{nn_method = "nndescent"}.
+The Annoy-based index always use a single thread.}
 
 \item{grain_size}{The minimum amount of work to do on each thread. If this
 value is set high enough, then less than \code{n_threads} will be used for
