@@ -5,17 +5,21 @@ hnsw_nn <- function(X,
                     ef_construction = 200,
                     ef = 10,
                     n_threads = NULL,
+                    n_build_threads = NULL,
                     ret_index = FALSE,
                     verbose = FALSE) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
+  }
+  if (is.null(n_build_threads)) {
+    n_build_threads <- n_threads
   }
   ann <-
     hnsw_build(X,
       metric = metric,
       M = M,
       ef_construction = ef_construction,
-      n_threads = n_threads,
+      n_build_threads = n_build_threads,
       verbose = verbose
     )
   res <-
@@ -34,7 +38,7 @@ hnsw_nn <- function(X,
   res
 }
 
-hnsw_build <- function(X, metric, M, ef_construction, n_threads, verbose) {
+hnsw_build <- function(X, metric, M, ef_construction, n_build_threads, verbose) {
   hnsw_distance <- metric
   if (metric == "correlation") {
     tsmessage("Annoy build: subtracting row means for correlation")
@@ -54,7 +58,7 @@ hnsw_build <- function(X, metric, M, ef_construction, n_threads, verbose) {
       M = M,
       ef = ef_construction,
       verbose = verbose,
-      n_threads = n_threads
+      n_threads = n_build_threads
     )
   list(
     ann = index,

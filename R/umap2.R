@@ -497,10 +497,15 @@
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
-#'   system. For nearest neighbor search, only applies if
-#'   \code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index
+#'   system. For nearest neighbor search, this controls the search phase. For
+#'   \code{nn_method = "annoy"}, if \code{n_threads > 1}, then the Annoy index
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
+#' @param n_build_threads Number of threads to use when building nearest
+#'   neighbor indexes. Default is \code{NULL}, which uses \code{n_threads}. To
+#'   improve determinism, use \code{n_build_threads = 1}. Only
+#'   applies for \code{nn_method = "hnsw"} or \code{nn_method = "nndescent"}.
+#'   The Annoy-based index always use a single thread.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
 #'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
 #'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
@@ -709,6 +714,7 @@ umap2 <-
            ret_nn = FALSE,
            ret_extra = c(),
            n_threads = NULL,
+           n_build_threads = NULL,
            n_sgd_threads = 0,
            grain_size = 1,
            tmpdir = tempdir(),
@@ -804,6 +810,7 @@ umap2 <-
       method = method,
       approx_pow = approx_pow,
       n_threads = n_threads,
+      n_build_threads = n_build_threads,
       n_sgd_threads = n_sgd_threads,
       grain_size = grain_size,
       y = y,

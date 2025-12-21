@@ -488,10 +488,15 @@
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
-#'   system. For nearest neighbor search, only applies if
-#'   \code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index
+#'   system. For nearest neighbor search, this controls the search phase. For
+#'   \code{nn_method = "annoy"}, if \code{n_threads > 1}, then the Annoy index
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
+#' @param n_build_threads Number of threads to use when building nearest
+#'   neighbor indexes. Default is \code{NULL}, which uses \code{n_threads}. To
+#'   improve determinism, use \code{n_build_threads = 1}. Only
+#'   applies for \code{nn_method = "hnsw"} or \code{nn_method = "nndescent"}.
+#'   The Annoy-based index always use a single thread.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
 #'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
 #'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
@@ -705,6 +710,7 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  fast_sgd = FALSE,
                  ret_model = FALSE, ret_nn = FALSE, ret_extra = c(),
                  n_threads = NULL,
+                 n_build_threads = NULL,
                  n_sgd_threads = 0,
                  grain_size = 1,
                  tmpdir = tempdir(),
@@ -727,7 +733,8 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     a = a, b = b, nn_method = nn_method, n_trees = n_trees,
     search_k = search_k,
     method = "umap", approx_pow = approx_pow,
-    n_threads = n_threads, n_sgd_threads = n_sgd_threads,
+    n_threads = n_threads, n_build_threads = n_build_threads,
+    n_sgd_threads = n_sgd_threads,
     grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight, target_metric = target_metric,
@@ -1274,10 +1281,15 @@ umap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
-#'   system. For nearest neighbor search, only applies if
-#'   \code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index
+#'   system. For nearest neighbor search, this controls the search phase. For
+#'   \code{nn_method = "annoy"}, if \code{n_threads > 1}, then the Annoy index
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
+#' @param n_build_threads Number of threads to use when building nearest
+#'   neighbor indexes. Default is \code{NULL}, which uses \code{n_threads}. To
+#'   improve determinism, use \code{n_build_threads = 1}. Only
+#'   applies for \code{nn_method = "hnsw"} or \code{nn_method = "nndescent"}.
+#'   The Annoy-based index always use a single thread.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
 #'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
 #'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
@@ -1447,6 +1459,7 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
                   n_threads = NULL,
+                  n_build_threads = NULL,
                   n_sgd_threads = 0,
                   grain_size = 1,
                   y = NULL, target_n_neighbors = n_neighbors,
@@ -1476,7 +1489,8 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     a = NULL, b = NULL, nn_method = nn_method, n_trees = n_trees,
     search_k = search_k,
     method = "tumap",
-    n_threads = n_threads, n_sgd_threads = n_sgd_threads,
+    n_threads = n_threads, n_build_threads = n_build_threads,
+    n_sgd_threads = n_sgd_threads,
     grain_size = grain_size,
     y = y, target_n_neighbors = target_n_neighbors,
     target_weight = target_weight, target_metric = target_metric,
@@ -1791,10 +1805,15 @@ tumap <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
 #'   }
 #' @param n_threads Number of threads to use (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
-#'   system. For nearest neighbor search, only applies if
-#'   \code{nn_method = "annoy"}. If \code{n_threads > 1}, then the Annoy index
+#'   system. For nearest neighbor search, this controls the search phase. For
+#'   \code{nn_method = "annoy"}, if \code{n_threads > 1}, then the Annoy index
 #'   will be temporarily written to disk in the location determined by
 #'   \code{\link[base]{tempfile}}.
+#' @param n_build_threads Number of threads to use when building nearest
+#'   neighbor indexes. Default is \code{NULL}, which uses \code{n_threads}. To
+#'   improve determinism, use \code{n_build_threads = 1}. Only
+#'   applies for \code{nn_method = "hnsw"} or \code{nn_method = "nndescent"}.
+#'   The Annoy-based index always use a single thread.
 #' @param n_sgd_threads Number of threads to use during stochastic gradient
 #'   descent. If set to > 1, then be aware that if \code{batch = FALSE}, results
 #'   will \emph{not} be reproducible, even if \code{set.seed} is called with a
@@ -2062,6 +2081,7 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
                   nn_method = NULL, n_trees = 50,
                   search_k = 2 * n_neighbors * n_trees,
                   n_threads = NULL,
+                  n_build_threads = NULL,
                   n_sgd_threads = 0,
                   grain_size = 1,
                   kernel = "gauss",
@@ -2087,7 +2107,8 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
     n_trees = n_trees, search_k = search_k,
     method = "largevis", perplexity = perplexity,
     pca = pca, pca_center = pca_center, pca_method = pca_method,
-    n_threads = n_threads, n_sgd_threads = n_sgd_threads,
+    n_threads = n_threads, n_build_threads = n_build_threads,
+    n_sgd_threads = n_sgd_threads,
     grain_size = grain_size,
     kernel = kernel,
     ret_nn = ret_nn || "nn" %in% ret_extra,
@@ -2461,9 +2482,14 @@ lvish <- function(X, perplexity = 50, n_neighbors = perplexity * 3,
 #'   }
 #' @param n_threads Number of threads to use. Default is half the number of
 #'   concurrent threads supported by the system. For nearest neighbor search,
-#'   only applies if \code{nn_method = "annoy"}. If \code{n_threads > 1}, then
-#'   the Annoy index will be temporarily written to disk in the location
-#'   determined by \code{\link[base]{tempfile}}.
+#'   this controls the search phase. For \code{nn_method = "annoy"}, if
+#'   \code{n_threads > 1}, then the Annoy index will be temporarily written to
+#'   disk in the location determined by \code{\link[base]{tempfile}}.
+#' @param n_build_threads Number of threads to use when building nearest
+#'   neighbor indexes. Default is \code{NULL}, which uses \code{n_threads}. To
+#'   improve determinism, use \code{n_build_threads = 1}. Only
+#'   applies for \code{nn_method = "hnsw"} or \code{nn_method = "nndescent"}.
+#'   The Annoy-based index always use a single thread.
 #' @param grain_size The minimum amount of work to do on each thread. If this
 #'   value is set high enough, then less than \code{n_threads} will be used for
 #'   processing, which might give a performance improvement if the overhead of
@@ -2568,6 +2594,7 @@ similarity_graph <- function(X = NULL, n_neighbors = NULL, metric = "euclidean",
                              pca = NULL, pca_center = TRUE,
                              ret_extra = c(),
                              n_threads = NULL,
+                             n_build_threads = NULL,
                              grain_size = 1,
                              kernel = "gauss",
                              tmpdir = tempdir(),
@@ -2595,6 +2622,7 @@ similarity_graph <- function(X = NULL, n_neighbors = NULL, metric = "euclidean",
     search_k = search_k,
     method = method,
     n_threads = n_threads,
+    n_build_threads = n_build_threads,
     grain_size = grain_size,
     kernel = kernel, perplexity = perplexity,
     y = y, target_n_neighbors = target_n_neighbors,
@@ -3104,6 +3132,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
                  target_metric = "euclidean",
                  target_weight = 0.5,
                  n_threads = NULL,
+                 n_build_threads = NULL,
                  n_sgd_threads = 0,
                  grain_size = 1,
                  kernel = "gauss",
@@ -3199,6 +3228,19 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   if (n_threads %% 1 != 0) {
     n_threads <- round(n_threads)
     tsmessage("Non-integer 'n_threads' provided. Setting to ", n_threads)
+  }
+  if (is.null(n_build_threads)) {
+    n_build_threads <- n_threads
+  }
+  if (n_build_threads < 0) {
+    stop("n_build_threads cannot be < 0")
+  }
+  if (n_build_threads %% 1 != 0) {
+    n_build_threads <- round(n_build_threads)
+    tsmessage(
+      "Non-integer 'n_build_threads' provided. Setting to ",
+      n_build_threads
+    )
   }
   if (n_sgd_threads == "auto") {
     n_sgd_threads <- n_threads
@@ -3440,6 +3482,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       kernel,
       need_sigma,
       n_threads,
+      n_build_threads,
       grain_size,
       ret_model,
       pca = pca,
@@ -3522,7 +3565,9 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
         bandwidth = 1.0,
         perplexity = perplexity, kernel = kernel,
         ret_sigma = FALSE,
-        n_threads = n_threads, grain_size = grain_size,
+        n_threads = n_threads, 
+        n_build_threads = n_build_threads,
+        grain_size = grain_size,
         ret_model = FALSE,
         pca = pca, pca_center = TRUE, pca_method = pca_method,
         n_vertices = n_vertices,
@@ -4387,6 +4432,7 @@ data2set <- function(X,
                      kernel,
                      ret_sigma,
                      n_threads,
+                     n_build_threads,
                      grain_size,
                      ret_model,
                      n_vertices = x2nv(X),
@@ -4546,6 +4592,7 @@ data2set <- function(X,
       kernel,
       ret_sigma,
       n_threads,
+      n_build_threads,
       grain_size,
       ret_model,
       n_vertices = n_vertices,
@@ -4595,6 +4642,7 @@ x2nn <- function(X,
                  search_k,
                  tmpdir = tempdir(),
                  n_threads,
+                 n_build_threads,
                  grain_size,
                  ret_model,
                  n_vertices = x2nv(X),
@@ -4627,6 +4675,7 @@ x2nn <- function(X,
       nn_args = nn_args,
       tmpdir = tmpdir,
       n_threads = n_threads,
+      n_build_threads = n_build_threads,
       grain_size = grain_size,
       ret_index = ret_model,
       sparse_is_distance = sparse_is_distance,
@@ -4722,6 +4771,7 @@ x2set <- function(X,
                   kernel,
                   ret_sigma,
                   n_threads,
+                  n_build_threads,
                   grain_size,
                   ret_model,
                   n_vertices = x2nv(X),
@@ -4747,6 +4797,7 @@ x2set <- function(X,
       search_k = search_k,
       tmpdir = tmpdir,
       n_threads = n_threads,
+      n_build_threads = n_build_threads,
       grain_size = grain_size,
       ret_model = ret_model,
       nn_args = nn_args,

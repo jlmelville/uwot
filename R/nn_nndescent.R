@@ -3,10 +3,14 @@ nndescent_nn <- function(X,
                          metric = "euclidean",
                          nn_args = list(),
                          n_threads = NULL,
+                         n_build_threads = NULL,
                          ret_index = FALSE,
                          verbose = FALSE) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
+  }
+  if (is.null(n_build_threads)) {
+    n_build_threads <- n_threads
   }
 
   if (!ret_index) {
@@ -17,7 +21,7 @@ nndescent_nn <- function(X,
         data = X,
         k = k,
         metric = metric,
-        n_threads = n_threads,
+        n_threads = n_build_threads,
         verbose = verbose
       )
     )
@@ -29,7 +33,7 @@ nndescent_nn <- function(X,
     k,
     metric,
     nn_args = nn_args,
-    n_threads = n_threads,
+    n_build_threads = n_build_threads,
     verbose = verbose
   )
   res <-
@@ -46,7 +50,7 @@ nndescent_build <- function(X,
                             k,
                             metric,
                             nn_args = list(),
-                            n_threads = NULL,
+                            n_build_threads = NULL,
                             verbose = FALSE) {
   nn_build_args <- get_nndescent_build_args(nn_args)
   nn_build_args <- lmerge(
@@ -55,7 +59,7 @@ nndescent_build <- function(X,
       data = X,
       k = k,
       metric = metric,
-      n_threads = n_threads,
+      n_threads = n_build_threads,
       verbose = verbose
     )
   )

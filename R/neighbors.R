@@ -4,12 +4,16 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
                     nn_args = nn_args,
                     tmpdir = tempdir(),
                     n_threads = NULL,
+                    n_build_threads = NULL,
                     grain_size = 1,
                     ret_index = FALSE,
                     sparse_is_distance = TRUE,
                     verbose = FALSE) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
+  }
+  if (is.null(n_build_threads)) {
+    n_build_threads <- n_threads
   }
 
   if (inherits(X, "dist")) {
@@ -58,6 +62,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
         nn_args$k <- k
         nn_args$metric <- metric
         nn_args$n_threads <- n_threads
+        nn_args$n_build_threads <- n_build_threads
         nn_args$verbose <- verbose
         nn_args$ret_index <- ret_index
 
@@ -70,6 +75,7 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
           metric = metric,
           nn_args = nn_args,
           n_threads = n_threads,
+          n_build_threads = n_build_threads,
           ret_index = ret_index,
           verbose = verbose
         )
