@@ -3158,7 +3158,6 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
   }
   method <- match.arg(tolower(method), c("umap", "tumap", "largevis"))
   nn_method <- normalize_nn_method(nn_method)
-
   if (method == "umap") {
     if (is.null(a) || is.null(b)) {
       ab_res <- find_ab_params(spread = spread, min_dist = min_dist)
