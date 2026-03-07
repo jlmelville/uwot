@@ -167,15 +167,15 @@ struct UmapFactory {
       uwot::BatchUpdate<DoMove> update(head_embedding, tail_embedding,
                                        std::move(opt), epoch_callback);
       uwot::NodeWorker<Gradient, decltype(update), RandFactory> worker(
-          gradient, update, positive_head, positive_tail, positive_ptr, sampler,
-          ndim, n_tail_vertices);
+          gradient, update, positive_head, positive_tail, positive_ptr,
+          std::move(sampler), ndim, n_tail_vertices);
       create_impl(worker, gradient);
     } else {
       uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
                                          initial_alpha, epoch_callback);
       uwot::EdgeWorker<Gradient, decltype(update), RandFactory> worker(
-          gradient, update, positive_head, positive_tail, sampler, ndim,
-          n_tail_vertices, n_threads);
+          gradient, update, positive_head, positive_tail, std::move(sampler),
+          ndim, n_tail_vertices, n_threads);
       create_impl(worker, gradient);
     }
   }

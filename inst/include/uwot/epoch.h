@@ -27,6 +27,8 @@
 #ifndef UWOT_EPOCH_H
 #define UWOT_EPOCH_H
 
+#include <utility>
+
 #include "sampler.h"
 #include "update.h"
 
@@ -70,10 +72,10 @@ struct EdgeWorker {
   EdgeWorker(const Gradient &gradient, Update &update,
              const std::vector<unsigned int> &positive_head,
              const std::vector<unsigned int> &positive_tail,
-             uwot::Sampler &sampler, std::size_t ndim,
+             uwot::Sampler &&sampler, std::size_t ndim,
              std::size_t n_tail_vertices, std::size_t n_threads)
       : gradient(gradient), update(update), positive_head(positive_head),
-        positive_tail(positive_tail), sampler(sampler), ndim(ndim),
+        positive_tail(positive_tail), sampler(std::move(sampler)), ndim(ndim),
         n_tail_vertices(n_tail_vertices), n_items(positive_head.size()),
         n_threads(std::max(n_threads, std::size_t{1})),
         rng_factory(this->n_threads) {}
@@ -120,11 +122,12 @@ struct NodeWorker {
              const std::vector<unsigned int> &positive_head,
              const std::vector<unsigned int> &positive_tail,
              const std::vector<unsigned int> &positive_ptr,
-             uwot::Sampler &sampler, std::size_t ndim,
+             uwot::Sampler &&sampler, std::size_t ndim,
              std::size_t n_tail_vertices)
       : gradient(gradient), update(update), positive_head(positive_head),
         positive_tail(positive_tail), positive_ptr(positive_ptr),
-        sampler(sampler), ndim(ndim), n_tail_vertices(n_tail_vertices),
+        sampler(std::move(sampler)), ndim(ndim),
+        n_tail_vertices(n_tail_vertices),
         n_items(positive_ptr.size() - 1), rng_factory(n_items) {}
 
   void epoch_begin(std::size_t epoch, std::size_t n_epochs) {
