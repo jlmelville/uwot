@@ -30,15 +30,15 @@ i10nn4idx <- matrix(c(
 
 ## Test specialized functions
 res <- FNN_nn(iris10, k = 4, include_self = TRUE)
-expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
 res <- dist_nn(diris10, k = 4, include_self = TRUE)
-expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
 res <- sparse_nn(dmiris10z, k = 4, include_self = TRUE)
-expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
 
@@ -55,49 +55,49 @@ sparse_to_tri <- function(m, lower = TRUE) {
 
 dmiris10zu <- sparse_to_tri(dmiris10z, lower = FALSE)
 res <- sparse_tri_nn(dmiris10zu, k = 4, include_self = TRUE)
-expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
 dmiris10zl <- sparse_to_tri(dmiris10z, lower = TRUE)
 res <- sparse_tri_nn(dmiris10zl, k = 4, include_self = TRUE)
-expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
 
 # Test overall function
 res <- find_nn(iris10, k = 4, include_self = TRUE)
-expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
 res <- find_nn(diris10, k = 4, include_self = TRUE)
-expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
 res <- find_nn(dmiris10z, k = 4, include_self = TRUE)
-expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
 res <- find_nn(dmiris10z, k = 4, include_self = TRUE)
-expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
 res <- find_nn(dmiris10zu, k = 4, include_self = TRUE)
-expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
 res <- find_nn(dmiris10zl, k = 4, include_self = TRUE)
-expect_equal(res$dist, i10nn4dist, tol = 1e-6)
+expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
 expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
 
 # Test Annoy
 res <- annoy_nn(ui10, k = 4, n_threads = 0)
 expect_equal(res$idx, self_unn4$idx, check.attributes = FALSE)
-expect_equal(res$dist, self_unn4$dist, check.attributes = FALSE, tol = 1e-6)
+expect_equal(res$dist, self_unn4$dist, check.attributes = FALSE, tolerance = 1e-6)
 
 res <- annoy_nn(ui10, k = 4, n_threads = 0, ret_index = TRUE)
 expect_equal(res$idx, self_unn4$idx, check.attributes = FALSE)
-expect_equal(res$dist, self_unn4$dist, check.attributes = FALSE, tol = 1e-6)
+expect_equal(res$dist, self_unn4$dist, check.attributes = FALSE, tolerance = 1e-6)
 expect_true(!is.null(res$index))
 expect_is(res$index, "list")
 expect_is(res$index$ann, "Rcpp_AnnoyEuclidean")
@@ -106,11 +106,11 @@ expect_equal(res$index$metric, "euclidean")
 
 res <- annoy_nn(ui10, k = 4, n_threads = 1)
 expect_equal(res$idx, self_unn4$idx, check.attributes = FALSE)
-expect_equal(res$dist, self_unn4$dist, check.attributes = FALSE, tol = 1e-6)
+expect_equal(res$dist, self_unn4$dist, check.attributes = FALSE, tolerance = 1e-6)
 
 res <- annoy_nn(ui10, k = 4, n_threads = 1, ret_index = TRUE)
 expect_equal(res$idx, self_unn4$idx, check.attributes = FALSE)
-expect_equal(res$dist, self_unn4$dist, check.attributes = FALSE, tol = 1e-6)
+expect_equal(res$dist, self_unn4$dist, check.attributes = FALSE, tolerance = 1e-6)
 expect_true(!is.null(res$index))
 expect_is(res$index, "list")
 expect_is(res$index$ann, "Rcpp_AnnoyEuclidean")
@@ -152,7 +152,7 @@ cos_dist <- matrix(
 
 res <- annoy_nn(ui10, k = 4, n_threads = 0, ret_index = TRUE, metric = "cosine")
 expect_equal(res$idx, cos_index, check.attributes = FALSE)
-expect_equal(res$dist, cos_dist, check.attributes = FALSE, tol = 1e-6)
+expect_equal(res$dist, cos_dist, check.attributes = FALSE, tolerance = 1e-6)
 expect_true(!is.null(res$index))
 expect_is(res$index, "list")
 expect_is(res$index$ann, "Rcpp_AnnoyAngular")
@@ -214,7 +214,7 @@ cor_dist <- matrix(
 
 res <- annoy_nn(iris10, k = 10, n_threads = 0, ret_index = TRUE, metric = "correlation")
 expect_equal(res$idx, cor_index, check.attributes = FALSE)
-expect_equal(res$dist, cor_dist, check.attributes = FALSE, tol = 1e-6)
+expect_equal(res$dist, cor_dist, check.attributes = FALSE, tolerance = 1e-6)
 expect_true(!is.null(res$index))
 expect_is(res$index, "list")
 expect_is(res$index$ann, "Rcpp_AnnoyAngular")
@@ -247,7 +247,7 @@ test_that("hnsw gives correct euclidean neighbor results", {
   expect_equal(iris10_annoy$nn$euclidean$dist,
                iris10_hnsw$nn$euclidean$dist,
                check.attributes = FALSE,
-               tol = 1e-7)
+               tolerance = 1e-7)
 
   iris10_transform_hnsw <-
     umap_transform(iris10,
@@ -279,7 +279,7 @@ test_that("hnsw gives correct euclidean neighbor results", {
     iris10_transform_annoy$nn$euclidean$dist,
     iris10_transform_hnsw$nn$euclidean$dist,
     check.attributes = FALSE,
-    tol = 1e-6
+    tolerance = 1e-6
   )
 })
 
@@ -311,7 +311,7 @@ test_that("hnsw gives correct cosine neighbor results", {
   expect_equal(iris10_annoy$nn$cosine$dist,
                iris10_hnsw$nn$cosine$dist,
                check.attributes = FALSE,
-               tol = 1e-6)
+               tolerance = 1e-6)
 
   iris10_transform_hnsw <-
     umap_transform(iris10,
@@ -343,7 +343,7 @@ test_that("hnsw gives correct cosine neighbor results", {
     iris10_transform_annoy$nn$cosine$dist,
     iris10_transform_hnsw$nn$cosine$dist,
     check.attributes = FALSE,
-    tol = 1e-6
+    tolerance = 1e-6
   )
 })
 
@@ -375,7 +375,7 @@ test_that("hnsw gives correct correlation neighbor results", {
   expect_equal(iris10_annoy$nn$correlation$dist,
                iris10_hnsw$nn$correlation$dist,
                check.attributes = FALSE,
-               tol = 1e-6)
+               tolerance = 1e-6)
 
   iris10_transform_hnsw <-
     umap_transform(iris10,
@@ -407,7 +407,7 @@ test_that("hnsw gives correct correlation neighbor results", {
     iris10_transform_annoy$nn$correlation$dist,
     iris10_transform_hnsw$nn$correlation$dist,
     check.attributes = FALSE,
-    tol = 1e-6
+    tolerance = 1e-6
   )
 })
 
@@ -440,7 +440,7 @@ test_that("hnsw gives correct correlation neighbor results and multiple threads"
   expect_equal(iris10_annoy$nn$correlation$dist,
                iris10_hnsw$nn$correlation$dist,
                check.attributes = FALSE,
-               tol = 1e-6)
+               tolerance = 1e-6)
 
   iris10_transform_hnsw <-
     umap_transform(iris10,
@@ -473,7 +473,7 @@ test_that("hnsw gives correct correlation neighbor results and multiple threads"
     iris10_transform_annoy$nn$correlation$dist,
     iris10_transform_hnsw$nn$correlation$dist,
     check.attributes = FALSE,
-    tol = 1e-6
+    tolerance = 1e-6
   )
 })
 
@@ -505,7 +505,7 @@ test_that("nndescent gives correct euclidean neighbor results", {
   expect_equal(iris10_annoy$nn$euclidean$dist,
                iris10_nnd_no_model$nn$euclidean$dist,
                check.attributes = FALSE,
-               tol = 1e-7)
+               tolerance = 1e-7)
 
   iris10_nnd <-
     umap(
@@ -522,7 +522,7 @@ test_that("nndescent gives correct euclidean neighbor results", {
   expect_equal(iris10_annoy$nn$euclidean$dist,
                iris10_nnd$nn$euclidean$dist,
                check.attributes = FALSE,
-               tol = 1e-7)
+               tolerance = 1e-7)
 
   iris10_transform_nnd <-
     umap_transform(iris10,
@@ -554,7 +554,7 @@ test_that("nndescent gives correct euclidean neighbor results", {
     iris10_transform_annoy$nn$euclidean$dist,
     iris10_transform_nnd$nn$euclidean$dist,
     check.attributes = FALSE,
-    tol = 1e-6
+    tolerance = 1e-6
   )
 })
 
@@ -586,7 +586,7 @@ test_that("nndescent gives correct cosine neighbor results", {
   expect_equal(iris10_annoy$nn$cosine$dist,
                iris10_nnd$nn$cosine$dist,
                check.attributes = FALSE,
-               tol = 1e-6)
+               tolerance = 1e-6)
 
   iris10_transform_nnd <-
     umap_transform(iris10,
@@ -618,7 +618,7 @@ test_that("nndescent gives correct cosine neighbor results", {
     iris10_transform_annoy$nn$cosine$dist,
     iris10_transform_nnd$nn$cosine$dist,
     check.attributes = FALSE,
-    tol = 1e-6
+    tolerance = 1e-6
   )
 })
 
@@ -650,7 +650,7 @@ test_that("nndescent gives correct correlation neighbor results", {
   expect_equal(iris10_annoy$nn$correlation$dist,
                iris10_nnd$nn$correlation$dist,
                check.attributes = FALSE,
-               tol = 1e-6)
+               tolerance = 1e-6)
 
   iris10_transform_nnd <-
     umap_transform(iris10,
@@ -682,7 +682,7 @@ test_that("nndescent gives correct correlation neighbor results", {
     iris10_transform_annoy$nn$correlation$dist,
     iris10_transform_nnd$nn$correlation$dist,
     check.attributes = FALSE,
-    tol = 1e-6
+    tolerance = 1e-6
   )
 })
 
@@ -715,7 +715,7 @@ test_that("nndescent gives correct correlation neighbor results and multiple thr
   expect_equal(iris10_annoy$nn$correlation$dist,
                iris10_nnd$nn$correlation$dist,
                check.attributes = FALSE,
-               tol = 1e-6)
+               tolerance = 1e-6)
 
   iris10_transform_nnd <-
     umap_transform(iris10,
@@ -748,7 +748,7 @@ test_that("nndescent gives correct correlation neighbor results and multiple thr
     iris10_transform_annoy$nn$correlation$dist,
     iris10_transform_nnd$nn$correlation$dist,
     check.attributes = FALSE,
-    tol = 1e-6
+    tolerance = 1e-6
   )
 
   model_with_args <- umap(

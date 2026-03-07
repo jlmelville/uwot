@@ -104,19 +104,19 @@ expect_equal(res$rho, expected_rho4)
 ### Various fuzzy set matrices are defined in helper_fuzzy_sets.R
 # unsymmetrized fuzzy set
 res <- nng_to_sparse(t(nn_4$idx), res$matrix, self_nbr = TRUE, by_row = FALSE)
-expect_equal(res, V_asymm, tol = 1e-4)
+expect_equal(res, V_asymm, tolerance = 1e-4)
 
 # Fuzzy Set Union
-expect_equal(fuzzy_set_union(res), V_union, tol = 1e-4)
+expect_equal(fuzzy_set_union(res), V_union, tolerance = 1e-4)
 
 # mix intersection with union
 expect_equal(fuzzy_set_union(res, set_op_mix_ratio = 0.5), V_mix,
-  tol = 1e-4
+  tolerance = 1e-4
 )
 
 # intersection
 expect_equal(fuzzy_set_union(res, set_op_mix_ratio = 0), V_intersect,
-  tol = 1e-4
+  tolerance = 1e-4
 )
 
 res_cpp_conn1 <- smooth_knn_distances_parallel(
@@ -136,7 +136,7 @@ expect_equal(
     self_nbr = TRUE
   ),
   V_asymm,
-  tol = 1e-4
+  tolerance = 1e-4
 )
 
 res_cpp_conn1.5 <-
@@ -156,7 +156,7 @@ expect_equal(
     self_nbr = TRUE, by_row = FALSE
   ),
   V_asymm_local,
-  tol = 1e-4
+  tolerance = 1e-4
 )
 
 
@@ -178,7 +178,7 @@ expect_equal(
     self_nbr = TRUE, by_row = FALSE
   ),
   V_asymm,
-  tol = 1e-4
+  tolerance = 1e-4
 )
 
 res_cpp_conn1.5 <-
@@ -199,7 +199,7 @@ expect_equal(
     self_nbr = TRUE, by_row = FALSE
   ),
   V_asymm_local,
-  tol = 1e-4
+  tolerance = 1e-4
 )
 
 
@@ -232,7 +232,7 @@ expect_equal(
     max_nbr_id = 12
   ),
   V_asymm_local_cross,
-  tol = 1e-4
+  tolerance = 1e-4
 )
 
 res_cpp_conn1.5_cross <-
@@ -256,7 +256,7 @@ expect_equal(
     max_nbr_id = 12
   ),
   V_asymm_local_cross,
-  tol = 1e-4
+  tolerance = 1e-4
 )
 
 # smooth_knn_matrix
@@ -278,7 +278,7 @@ expected_sknn4m <- Matrix::drop0(matrix(
 ))
 
 sknn4m <- smooth_knn_matrix(nn_4)$matrix
-expect_equal(sknn4m@x, expected_sknn4m@x, tol = 1e-7)
+expect_equal(sknn4m@x, expected_sknn4m@x, tolerance = 1e-7)
 expect_equal(sknn4m@i, expected_sknn4m@i)
 
 nn4sp <- Matrix::drop0(matrix(
@@ -298,7 +298,7 @@ nn4sp <- Matrix::drop0(matrix(
 ))
 
 sknn4msp <- smooth_knn_matrix(nn4sp)$matrix
-expect_equal(sknn4msp@x, expected_sknn4m@x, tol = 1e-6)
+expect_equal(sknn4msp@x, expected_sknn4m@x, tolerance = 1e-6)
 expect_equal(sknn4msp@i, expected_sknn4m@i)
 
 nn3sp <- Matrix::drop0(matrix(c(
@@ -327,7 +327,7 @@ expected_sknn3m <- Matrix::drop0(matrix(c(
   0, 1, 0,         0.5849544, 0,         0, 0,         0,         0,         0
 ), nrow = 10, byrow = TRUE))
 sknn3msp <- smooth_knn_matrix(nn3sp)$matrix
-expect_equal(sknn3msp@x, expected_sknn3m@x, tol = 1e-6)
+expect_equal(sknn3msp@x, expected_sknn3m@x, tolerance = 1e-6)
 expect_equal(sknn3msp@i, expected_sknn3m@i)
 
 nn34sp <- nn4sp
@@ -346,11 +346,11 @@ expected_sknn34m <-
     0, 1.0000000, 0.4999980, 0.4999980, 0,         0, 0,         0,         0,        0
   ), nrow = 10, byrow = TRUE))
 sknn34msp <- smooth_knn_matrix(nn34sp, ret_sigma = TRUE)
-expect_equal(sknn34msp$matrix@x, expected_sknn34m@x, tol = 1e-6)
+expect_equal(sknn34msp$matrix@x, expected_sknn34m@x, tolerance = 1e-6)
 expect_equal(sknn34msp$matrix@i, expected_sknn34m@i)
 expect_equal(sknn34msp$n_failures, 1)
 expect_equal(sknn34msp$sigma,
   c(0.1799393, 0.2364655, 0.0493803, 0.1026688, 0.2494049, 1.0000000, 0.1536713, 0.1355171, 0.2454262, 0.2063370),
-  tol = 1e-7
+  tolerance = 1e-7
 )
-expect_equal(sknn34msp$rho, expected_rho, tol = 1e-6)
+expect_equal(sknn34msp$rho, expected_rho, tolerance = 1e-6)

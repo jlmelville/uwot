@@ -45,5 +45,5 @@ expect_equal(sum(res), 10)
 expect_true(Matrix::isSymmetric(res))
 expect_equal(as.matrix(res), expected_sym_nn_graph,
   check.attributes = FALSE,
-  tol = 1e-7
+  tolerance = 1e-7
 )

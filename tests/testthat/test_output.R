@@ -167,7 +167,7 @@ res <- lvish(iris10,
   init = "lvrand", verbose = FALSE, n_threads = 1, ret_extra = c("sigma")
 )
 expect_ok_matrix(res$embedding)
-expect_equal(res$sigma, sqrt(c(0.3039, 0.2063, 0.09489, 0.08811, 0.3091, 0.6789, 0.1743, 0.1686, 0.3445, 0.1671)), tol = 1e-4)
+expect_equal(res$sigma, sqrt(c(0.3039, 0.2063, 0.09489, 0.08811, 0.3091, 0.6789, 0.1743, 0.1686, 0.3445, 0.1671)), tolerance = 1e-4)
 
 # lvish with knn
 res <- lvish(iris10,
@@ -954,7 +954,7 @@ test_that("intersect and union", {
 
   expect_equal(as.matrix(simplicial_set_intersect(iris10_12, iris10_34)),
     expected_intersect,
-    tol = 1e-7,
+    tolerance = 1e-7,
     check.attributes = FALSE
   )
 
@@ -976,7 +976,7 @@ test_that("intersect and union", {
 
   expect_equal(as.matrix(simplicial_set_union(iris10_12, iris10_34)),
     expected_union,
-    tol = 1e-7,
+    tolerance = 1e-7,
     check.attributes = FALSE
   )
 
@@ -998,7 +998,7 @@ test_that("intersect and union", {
 
   expect_equal(as.matrix(simplicial_set_intersect(iris10_12, iris10_34, weight = 0.25)),
     expected_intersect_weighted,
-    tol = 1e-7,
+    tolerance = 1e-7,
     check.attributes = FALSE
   )
 })

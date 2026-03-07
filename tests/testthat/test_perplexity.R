@@ -27,7 +27,7 @@ res <- perplexity_similarities(
   )
 )$matrix
 expect_true(Matrix::isSymmetric(res))
-expect_equal(as.matrix(res), P_symm, tol = 1e-5, check.attributes = FALSE)
+expect_equal(as.matrix(res), P_symm, tolerance = 1e-5, check.attributes = FALSE)
 
 Psymm9 <- matrix(
   c(
@@ -54,7 +54,7 @@ res <- perplexity_similarities(
   )
 )$matrix
 expect_true(Matrix::isSymmetric(res))
-expect_equal(as.matrix(res), Psymm9, tol = 1e-4, check.attributes = FALSE)
+expect_equal(as.matrix(res), Psymm9, tolerance = 1e-4, check.attributes = FALSE)
 
 
 P_symm_6nn <- matrix(c(
@@ -78,7 +78,7 @@ res <- perplexity_similarities(
   )
 )$matrix
 expect_true(Matrix::isSymmetric(res))
-expect_equal(as.matrix(res), P_symm_6nn, tol = 1e-5, check.attributes = FALSE)
+expect_equal(as.matrix(res), P_symm_6nn, tolerance = 1e-5, check.attributes = FALSE)
 
 # x2aff(stats::dist(iris10), perplexity = 4)
 P_row <- matrix(c(
@@ -111,8 +111,8 @@ res <- resp$matrix
 res <- nng_to_sparse(iris10_nn10$idx, as.vector(t(res)),
   self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx)
 )
-expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
-expect_equal(resp$sigma, expected_sigmas, tol = 1e-5)
+expect_equal(as.matrix(res), P_row, tolerance = 1e-5, check.attributes = FALSE)
+expect_equal(resp$sigma, expected_sigmas, tolerance = 1e-5)
 
 res <- calc_row_probabilities_parallel(iris10nn10d,
   n_vertices = nrow(iris10_nn10$dist),
@@ -121,7 +121,7 @@ res <- calc_row_probabilities_parallel(iris10nn10d,
 res <- nng_to_sparse(iris10_nn10$idx, as.vector(t(res)),
   self_nbr = TRUE, max_nbr_id = nrow(iris10_nn10$idx)
 )
-expect_equal(as.matrix(res), P_row, tol = 1e-5, check.attributes = FALSE)
+expect_equal(as.matrix(res), P_row, tolerance = 1e-5, check.attributes = FALSE)
 
 iris_dup <- duplicated(x2m(iris))
 uiris <- iris[!iris_dup, ]
@@ -129,7 +129,7 @@ uiris <- iris[!iris_dup, ]
 normiris <- scale(x2m(uiris), center = TRUE, scale = FALSE)
 normiris <- normiris / max(abs(normiris))
 # niris10_nn149 <- dist_nn(stats::dist(normiris), k = 149)
-# expect_equal(1 / res$sigma ^ 2, Prow_niris_p150_k50_betas, tol = 1e-5)
+# expect_equal(1 / res$sigma ^ 2, Prow_niris_p150_k50_betas, tolerance = 1e-5)
 
 # Taken from the LargeVis C++ implementation
 Prow_iris_p150_k50_rowSums <- c(
@@ -176,8 +176,8 @@ res <- perplexity_similarities(
     verbose = FALSE
   )
 )
-expect_equal(Matrix::rowSums(res$matrix), Prow_iris_p150_k50_rowSums, tol = 1e-6)
-expect_equal(1 / res$sigma^2, Prow_niris_p150_k50_betas, tol = 1e-6)
+expect_equal(Matrix::rowSums(res$matrix), Prow_iris_p150_k50_rowSums, tolerance = 1e-6)
+expect_equal(1 / res$sigma^2, Prow_niris_p150_k50_betas, tolerance = 1e-6)
 
 res <- perplexity_similarities(
   perplexity = 50, n_threads = 1, verbose = FALSE,
@@ -187,4 +187,4 @@ res <- perplexity_similarities(
     verbose = FALSE
   )
 )$matrix
-expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tol = 1e-6)
+expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tolerance = 1e-6)

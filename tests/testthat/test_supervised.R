@@ -73,7 +73,7 @@ expected <- matrix(c(
 
 # checked against python version
 expect_equal(as.matrix(reset_local_connectivity(sms)), expected,
-  tol = 1e-7,
+  tolerance = 1e-7,
   check.attributes = FALSE
 )
 
@@ -89,7 +89,7 @@ expect_equal(
     reset_local_connectivity(sms, reset_local_metric = TRUE, num_local_metric_neighbors = 3)
   ),
   expected_reset_local_metric,
-  tol = 1e-7,
+  tolerance = 1e-7,
   check.attributes = FALSE
 )
 
@@ -98,7 +98,7 @@ expect_equal(
     reset_local_connectivity(sms, reset_local_metric = TRUE, num_local_metric_neighbors = 3, n_threads = 2)
   ),
   expected_reset_local_metric,
-  tol = 1e-7,
+  tolerance = 1e-7,
   check.attributes = FALSE
 )
 
@@ -135,7 +135,7 @@ res09 <- matrix(
   ),
   nrow = 3, byrow = TRUE
 )
-expect_equal(as.matrix(int09), res09, check.attributes = FALSE, tol = 1e-6)
+expect_equal(as.matrix(int09), res09, check.attributes = FALSE, tolerance = 1e-6)
 
 
 int01 <- general_simplicial_set_intersection(sparr, sparr2, 0.1)
@@ -147,7 +147,7 @@ res01 <- matrix(
   ),
   nrow = 3, byrow = TRUE
 )
-expect_equal(as.matrix(int01), res01, check.attributes = FALSE, tol = 1e-6)
+expect_equal(as.matrix(int01), res01, check.attributes = FALSE, tolerance = 1e-6)
 
 sp34 <- Matrix::drop0(matrix(nrow = 3, byrow = TRUE, c(
   0, 0.7403984, 0, 0.6574427,

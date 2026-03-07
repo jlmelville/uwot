@@ -54,7 +54,7 @@ embedding <- init_new_embedding(train_embedding, as.vector(nnt$idx), ncol(nnt$id
   n_threads = 0,
   verbose = FALSE
 )
-expect_equal(embedding, wav, check.attributes = FALSE, tol = 1e-5)
+expect_equal(embedding, wav, check.attributes = FALSE, tolerance = 1e-5)
 
 
 # Check threaded code
@@ -72,7 +72,7 @@ embedding <- init_new_embedding(train_embedding, as.vector(nnt$idx), ncol(nnt$id
   n_threads = 1,
   verbose = FALSE
 )
-expect_equal(embedding, wav, check.attributes = FALSE, tol = 1e-5)
+expect_equal(embedding, wav, check.attributes = FALSE, tolerance = 1e-5)
 
 
 iris10_range <- scale_input(iris10, scale_type = "range", ret_model = TRUE)
