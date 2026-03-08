@@ -33,12 +33,12 @@
 
 namespace uwot {
 
-float linear_decay(double val, std::size_t epoch, std::size_t n_epochs) {
+inline float linear_decay(double val, std::size_t epoch, std::size_t n_epochs) {
   return val *
          (1.0 - (static_cast<float>(epoch) / static_cast<float>(n_epochs)));
 }
 
-float linear_grow(double val, std::size_t epoch, std::size_t n_epochs) {
+inline float linear_grow(double val, std::size_t epoch, std::size_t n_epochs) {
   return val * (static_cast<float>(epoch) / static_cast<float>(n_epochs));
 }
 
