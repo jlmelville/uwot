@@ -101,17 +101,13 @@ inline void update_repel(Update &update, const Gradient &gradient,
 }
 
 // Function to decide whether to move both vertices in an edge
-// Default empty version does nothing: used in umap_transform when
-// some of the vertices should be held fixed
+// The untaken branch is discarded at compile time.
 template <bool DoMoveVertex = false>
-inline void update_vec(std::vector<float> &, float, std::size_t, std::size_t) {}
-
-// Specialization to move vertex/update gradient: used in umap when both
-// vertices in an edge should be moved
-template <>
-inline void update_vec<true>(std::vector<float> &vec, float val, std::size_t i,
-                             std::size_t j) {
-  vec[i + j] += val;
+inline void update_vec(std::vector<float> &vec, float val, std::size_t i,
+                       std::size_t j) {
+  if constexpr (DoMoveVertex) {
+    vec[i + j] += val;
+  }
 }
 
 // If DoMoveTailVertex = true, graph is symmetric and head and tail point to the
@@ -121,16 +117,13 @@ inline void update_vec<true>(std::vector<float> &vec, float val, std::size_t i,
 template <bool DoMoveTailVertex = true>
 inline void update_head_grad_vec(std::vector<float> &vec, std::size_t i,
                                  float val) {
-  vec[i] += 2.0 * val;
-}
-
-// Specialization for DoMoveTailVertex = true. In this case the edges are not
-// symmetric and the tail embedding should be held fixed, so the head node only
-// get one lot of gradient updating
-template <>
-inline void update_head_grad_vec<false>(std::vector<float> &vec, std::size_t i,
-                                        float val) {
-  vec[i] += val;
+  if constexpr (DoMoveTailVertex) {
+    vec[i] += 2.0 * val;
+  } else {
+    // The tail embedding is fixed, so only the head vertex accumulates
+    // a single update.
+    vec[i] += val;
+  }
 }
 
 // DoMoveVertex: true if both ends of a positive edge should be updated
