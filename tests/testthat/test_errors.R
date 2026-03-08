@@ -42,6 +42,42 @@ expect_error(umap(iris10, n_threads = 0, pca = 0), "positive integer")
 expect_error(umap(iris10, n_threads = -1), "n_threads")
 expect_error(umap(iris10, n_sgd_threads = -1), "n_sgd_threads")
 
+test_that("callback setup remains safe on method validation errors", {
+  callback_called <- FALSE
+  callback <- function(...) {
+    callback_called <<- TRUE
+  }
+
+  expect_error(
+    uwot:::optimize_layout_r(
+      head_embedding = matrix(c(0, 1, 0, 1), ncol = 2),
+      tail_embedding = NULL,
+      positive_head = integer(),
+      positive_tail = integer(),
+      positive_ptr = c(0L, 0L, 0L),
+      n_epochs = 1L,
+      n_head_vertices = 2L,
+      n_tail_vertices = 2L,
+      epochs_per_sample = numeric(),
+      method = "umap",
+      method_args = list(),
+      initial_alpha = 1,
+      opt_args = list(method = "sgd"),
+      epoch_callback = callback,
+      negative_sample_rate = 5,
+      rng_type = "tausworthe",
+      batch = FALSE,
+      n_threads = 0L,
+      grain_size = 1L,
+      move_other = TRUE,
+      verbose = FALSE
+    ),
+    "Missing embedding method argument: a"
+  )
+
+  expect_false(callback_called)
+})
+
 model <- umap(iris10, n_neighbors = 2, ret_model = TRUE, n_epochs = 2)
 expect_error(umap_transform(iris10[, 1:2], model), "Incorrect dimensions")
 
