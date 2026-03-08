@@ -27,17 +27,13 @@
 #ifndef UWOT_GRADIENT_H
 #define UWOT_GRADIENT_H
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <utility>
 #include <vector>
 
 namespace uwot {
-
-inline auto clamp(float v, float lo, float hi) -> float {
-  float t = v < lo ? lo : v;
-  return t > hi ? hi : t;
-}
 
 // return the squared euclidean distance between two points x[px] and y[py]
 // also store the displacement between x[px] and y[py] in diffxy
@@ -60,8 +56,9 @@ inline auto d2diff(const std::vector<float> &x, std::size_t px,
 // which for Euclidean distance in the output is invariably grad_coeff * (X - Y)
 // Different methods clamp the magnitude of the gradient to different values
 template <typename Gradient>
-auto grad_d(const Gradient &gradient, const std::vector<float> &disp,
-            std::size_t d, float grad_coeff) -> float {
+[[nodiscard]] auto grad_d(const Gradient &gradient,
+                          const std::vector<float> &disp, std::size_t d,
+                          float grad_coeff) -> float {
   return gradient.clamp_grad(grad_coeff * disp[d]);
 }
 
@@ -89,7 +86,7 @@ auto grad_rep(const Gradient &gradient,
 
 // https://martin.ankerl.com/2012/01/25/optimized-approximative-pow-in-c-and-cpp/
 // an approximation to pow
-inline auto fastPrecisePow(float a, float b) -> float {
+[[nodiscard]] inline auto fastPrecisePow(float a, float b) -> float {
   // calculate approximation with fraction of the exponent
   int e = static_cast<int>(b);
   union {
@@ -130,7 +127,7 @@ public:
     return gamma_b_2 / ((0.001 + d2) * (a * powfun(d2, b) + 1.0));
   }
   auto clamp_grad(float grad_d) const -> float {
-    return clamp(grad_d, clamp_lo, clamp_hi);
+    return std::clamp(grad_d, clamp_lo, clamp_hi);
   }
   static const constexpr float clamp_hi = 4.0;
   static const constexpr float clamp_lo = -4.0;
@@ -162,7 +159,7 @@ public:
     return gamma_2 / ((0.001 + d2) * (d2 + 1.0));
   }
   auto clamp_grad(float grad_d) const -> float {
-    return clamp(grad_d, clamp_lo, clamp_hi);
+    return std::clamp(grad_d, clamp_lo, clamp_hi);
   }
   static const constexpr float clamp_hi = 4.0;
   static const constexpr float clamp_lo = -4.0;
@@ -178,7 +175,7 @@ public:
       : ai(std::move(ai)), b(b), ndim(ndim), b_m2(-2.0 * b), b_2(2.0 * b) {}
 
   auto clamp_grad(float grad_d) const -> float {
-    return clamp(grad_d, clamp_lo, clamp_hi);
+    return std::clamp(grad_d, clamp_lo, clamp_hi);
   }
   static const constexpr float clamp_hi = 4.0;
   static const constexpr float clamp_lo = -4.0;
@@ -209,7 +206,7 @@ public:
         b_m2(-2.0 * b), b_2(2.0 * b) {}
 
   auto clamp_grad(float grad_d) const -> float {
-    return clamp(grad_d, clamp_lo, clamp_hi);
+    return std::clamp(grad_d, clamp_lo, clamp_hi);
   }
   static const constexpr float clamp_hi = 4.0;
   static const constexpr float clamp_lo = -4.0;
@@ -243,7 +240,7 @@ public:
     return gamma_2 / ((0.1 + d2) * (d2 + 1.0));
   }
   auto clamp_grad(float grad_d) const -> float {
-    return clamp(grad_d, clamp_lo, clamp_hi);
+    return std::clamp(grad_d, clamp_lo, clamp_hi);
   }
   static const constexpr float clamp_hi = 5.0;
   static const constexpr float clamp_lo = -5.0;
