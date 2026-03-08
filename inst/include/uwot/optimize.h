@@ -27,6 +27,8 @@
 #ifndef UWOT_OPTIMIZE_H
 #define UWOT_OPTIMIZE_H
 
+#include <cmath>
+#include <cstddef>
 #include <vector>
 
 namespace uwot {
@@ -94,8 +96,9 @@ struct Adam : public Optimizer {
   Adam(float alpha, float beta1, float beta2, float eps, std::size_t vec_size)
       : initial_alpha(alpha), alpha(alpha), beta1(beta1), beta2(beta2),
         beta11(1.0 - beta1), beta1t(beta1), beta21(1.0 - beta2), beta2t(beta2),
-        eps(eps), epsc(eps * sqrt(beta21)),
-        ad_scale(alpha * sqrt(beta21) / beta11), mt(vec_size), vt(vec_size) {}
+        eps(eps), epsc(eps * std::sqrt(beta21)),
+        ad_scale(alpha * std::sqrt(beta21) / beta11), mt(vec_size),
+        vt(vec_size) {}
 
   virtual ~Adam() = default;
 
@@ -108,7 +111,7 @@ struct Adam : public Optimizer {
       mt[i] += beta11 * (grad[i] - mt[i]);
 
       // ad_scale and epsc handle the debiasing
-      v[i] += ad_scale * mt[i] / (sqrt(vt[i]) + epsc);
+      v[i] += ad_scale * mt[i] / (std::sqrt(vt[i]) + epsc);
     }
   }
 
@@ -118,7 +121,7 @@ struct Adam : public Optimizer {
     // update debiasing factors
     beta1t *= beta1;
     beta2t *= beta2;
-    float sqrt_b2t1 = sqrt(1.0 - beta2t);
+    float sqrt_b2t1 = std::sqrt(1.0 - beta2t);
 
     // rescale alpha and eps to take account of debiasing
     ad_scale = alpha * sqrt_b2t1 / (1.0 - beta1t);

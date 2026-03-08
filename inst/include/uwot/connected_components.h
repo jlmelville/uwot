@@ -32,6 +32,10 @@
 #ifndef UWOT_CONNECTED_COMPONENTS_H
 #define UWOT_CONNECTED_COMPONENTS_H
 
+#include <cstddef>
+#include <utility>
+#include <vector>
+
 namespace uwot {
 
 auto connected_components_undirected(std::size_t N,

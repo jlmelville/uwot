@@ -27,6 +27,10 @@
 #ifndef UWOT_TRANSFORM_H
 #define UWOT_TRANSFORM_H
 
+#include <algorithm>
+#include <cstddef>
+#include <vector>
+
 namespace uwot {
 
 inline auto sum_nbrs(std::size_t i, const std::vector<float> &train_embedding,

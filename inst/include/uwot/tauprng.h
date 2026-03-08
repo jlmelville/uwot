@@ -29,6 +29,9 @@
 #ifndef UWOT_TAUPRNG_H
 #define UWOT_TAUPRNG_H
 
+#include <cstddef>
+#include <cstdint>
+
 namespace uwot {
 
 struct tau_prng {
