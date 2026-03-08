@@ -17,6 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <memory>
 #include <vector>
 
 #include "uwot/coords.h"
@@ -71,7 +72,7 @@ struct UmapFactory {
   bool batch;
   std::size_t n_threads;
   std::size_t grain_size;
-  uwot::EpochCallback *epoch_callback;
+  std::unique_ptr<uwot::EpochCallback> epoch_callback;
   bool verbose;
 
   UmapFactory(bool move_other, const std::string &rng_type,
@@ -85,7 +86,7 @@ struct UmapFactory {
               const std::vector<float> &epochs_per_sample, float initial_alpha,
               List opt_args, float negative_sample_rate, bool batch,
               std::size_t n_threads, std::size_t grain_size,
-              uwot::EpochCallback *epoch_callback, bool verbose)
+              std::unique_ptr<uwot::EpochCallback> epoch_callback, bool verbose)
       : move_other(move_other), rng_type(rng_type),
         head_embedding(head_embedding), tail_embedding(tail_embedding),
         positive_head(positive_head), positive_tail(positive_tail),
@@ -94,7 +95,7 @@ struct UmapFactory {
         epochs_per_sample(epochs_per_sample), initial_alpha(initial_alpha),
         opt_args(opt_args), negative_sample_rate(negative_sample_rate),
         batch(batch), n_threads(n_threads), grain_size(grain_size),
-        epoch_callback(epoch_callback), verbose(verbose) {}
+        epoch_callback(std::move(epoch_callback)), verbose(verbose) {}
 
   template <typename Gradient> void create(const Gradient &gradient) {
     if (move_other) {
@@ -165,14 +166,16 @@ struct UmapFactory {
       std::string opt_name = opt_args["method"];
       auto opt = create_optimizer(opt_args);
       uwot::BatchUpdate<DoMove> update(head_embedding, tail_embedding,
-                                       std::move(opt), epoch_callback);
+                                       std::move(opt),
+                                       std::move(epoch_callback));
       uwot::NodeWorker<Gradient, decltype(update), RandFactory> worker(
           gradient, update, positive_head, positive_tail, positive_ptr,
           std::move(sampler), ndim, n_tail_vertices);
       create_impl(worker, gradient);
     } else {
       uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
-                                         initial_alpha, epoch_callback);
+                                         initial_alpha,
+                                         std::move(epoch_callback));
       uwot::EdgeWorker<Gradient, decltype(update), RandFactory> worker(
           gradient, update, positive_head, positive_tail, std::move(sampler),
           ndim, n_tail_vertices, n_threads);
@@ -316,14 +319,16 @@ template <> struct REpochCallback<true> : uwot::EpochCallback {
 };
 
 auto create_callback(Nullable<Function> epoch_callback, std::size_t ndim,
-                     bool move_other) -> uwot::EpochCallback * {
+                     bool move_other) -> std::unique_ptr<uwot::EpochCallback> {
   if (epoch_callback.isNull()) {
-    return new uwot::DoNothingCallback();
+    return std::make_unique<uwot::DoNothingCallback>();
   } else {
     if (move_other) {
-      return new REpochCallback<true>(as<Function>(epoch_callback), ndim);
+      return std::make_unique<REpochCallback<true>>(
+          as<Function>(epoch_callback), ndim);
     } else {
-      return new REpochCallback<false>(as<Function>(epoch_callback), ndim);
+      return std::make_unique<REpochCallback<false>>(
+          as<Function>(epoch_callback), ndim);
     }
   }
 }
@@ -344,15 +349,14 @@ NumericMatrix optimize_layout_r(
 
   auto coords = r_to_coords(head_embedding, tail_embedding);
   const std::size_t ndim = head_embedding.size() / n_head_vertices;
-  uwot::EpochCallback *uwot_ecb =
-      create_callback(epoch_callback, ndim, move_other);
+  auto uwot_ecb = create_callback(epoch_callback, ndim, move_other);
 
   UmapFactory umap_factory(move_other, rng_type, coords.get_head_embedding(),
                            coords.get_tail_embedding(), positive_head,
                            positive_tail, positive_ptr, n_epochs,
                            n_head_vertices, n_tail_vertices, epochs_per_sample,
                            initial_alpha, opt_args, negative_sample_rate, batch,
-                           n_threads, grain_size, uwot_ecb, verbose);
+                           n_threads, grain_size, std::move(uwot_ecb), verbose);
   if (verbose) {
     Rcerr << "Using method '" << method << "'" << std::endl;
   }

@@ -41,7 +41,7 @@ struct EpochCallback {
   virtual void operator()(std::size_t epoch, std::size_t n_epochs,
                           const std::vector<float> &head_embedding,
                           const std::vector<float> &tail_embedding) = 0;
-  virtual ~EpochCallback() {}
+  virtual ~EpochCallback() = default;
 };
 
 struct DoNothingCallback : EpochCallback {
@@ -143,7 +143,7 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
 
   InPlaceUpdate(std::vector<float> &head_embedding,
                 std::vector<float> &tail_embedding, float alpha,
-                EpochCallback *epoch_callback)
+                std::unique_ptr<EpochCallback> epoch_callback)
       : head_embedding(head_embedding), tail_embedding(tail_embedding),
         opt(alpha), epoch_callback(std::move(epoch_callback)) {}
 
@@ -191,7 +191,8 @@ template <bool DoMoveVertex> struct BatchUpdate {
 
   BatchUpdate(std::vector<float> &head_embedding,
               std::vector<float> &tail_embedding,
-              std::unique_ptr<Optimizer> opt, EpochCallback *epoch_callback)
+              std::unique_ptr<Optimizer> opt,
+              std::unique_ptr<EpochCallback> epoch_callback)
       : head_embedding(head_embedding), tail_embedding(tail_embedding),
         opt(std::move(opt)), gradient(head_embedding.size()),
         epoch_callback(std::move(epoch_callback)) {}
