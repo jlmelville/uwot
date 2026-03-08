@@ -58,7 +58,7 @@ void run_epoch(Worker &worker, std::size_t epoch, std::size_t n_epochs,
 // Update: type of update to the embedding coordinates
 template <typename Gradient, typename Update, typename RngFactory>
 struct EdgeWorker {
-  const Gradient gradient;
+  const Gradient &gradient;
   Update &update;
   const std::vector<unsigned int> &positive_head;
   const std::vector<unsigned int> &positive_tail;
@@ -107,7 +107,7 @@ struct EdgeWorker {
 
 template <typename Gradient, typename Update, typename RngFactory>
 struct NodeWorker {
-  const Gradient gradient;
+  const Gradient &gradient;
   Update &update;
   const std::vector<unsigned int> &positive_head;
   const std::vector<unsigned int> &positive_tail;

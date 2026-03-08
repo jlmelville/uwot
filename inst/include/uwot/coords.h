@@ -27,33 +27,28 @@
 #ifndef UWOT_COORDS_H
 #define UWOT_COORDS_H
 
-#include <memory>
+#include <optional>
 #include <utility>
 #include <vector>
 
 namespace uwot {
 
-// For normal UMAP, tail_embedding is NULL and we want to pass
-// a shallow copy of head_embedding as tail_embedding.
-// When updating new values, tail_embedding is the new coordinate to optimize
-// and gets passed as normal.
+// For normal UMAP there is no separate tail embedding, so the head embedding
+// is used anywhere a tail embedding is requested.
+// When updating new values, tail_embedding stores the coordinates to optimize.
 struct Coords {
   std::vector<float> head_embedding;
-  std::unique_ptr<std::vector<float>> tail_vec_ptr;
+  std::optional<std::vector<float>> tail_embedding;
 
-  Coords(std::vector<float> &head_embedding)
-      : head_embedding(head_embedding), tail_vec_ptr(nullptr) {}
+  explicit Coords(std::vector<float> head_embedding)
+      : head_embedding(std::move(head_embedding)), tail_embedding(std::nullopt) {}
 
-  Coords(std::vector<float> &head_embedding, std::vector<float> &tail_embedding)
-      : head_embedding(head_embedding),
-        tail_vec_ptr(new std::vector<float>(tail_embedding)) {}
+  Coords(std::vector<float> head_embedding, std::vector<float> tail_embedding)
+      : head_embedding(std::move(head_embedding)),
+        tail_embedding(std::move(tail_embedding)) {}
 
   auto get_tail_embedding() -> std::vector<float> & {
-    if (tail_vec_ptr) {
-      return *tail_vec_ptr;
-    } else {
-      return head_embedding;
-    }
+    return tail_embedding ? *tail_embedding : head_embedding;
   }
 
   auto get_head_embedding() -> std::vector<float> & { return head_embedding; }

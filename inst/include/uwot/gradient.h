@@ -29,6 +29,7 @@
 
 #include <cmath>
 #include <limits>
+#include <utility>
 #include <vector>
 
 namespace uwot {
@@ -173,8 +174,8 @@ private:
 // UMAP where a varies for each observation
 class umapai_gradient {
 public:
-  umapai_gradient(const std::vector<float> &ai, float b, std::size_t ndim)
-      : ai(ai), b(b), ndim(ndim), b_m2(-2.0 * b), b_2(2.0 * b) {}
+  umapai_gradient(std::vector<float> ai, float b, std::size_t ndim)
+      : ai(std::move(ai)), b(b), ndim(ndim), b_m2(-2.0 * b), b_2(2.0 * b) {}
 
   auto clamp_grad(float grad_d) const -> float {
     return clamp(grad_d, clamp_lo, clamp_hi);
@@ -202,9 +203,10 @@ private:
 
 class umapai2_gradient {
 public:
-  umapai2_gradient(const std::vector<float> &ai, const std::vector<float> &aj,
+  umapai2_gradient(std::vector<float> ai, std::vector<float> aj,
                    float b, std::size_t ndim)
-      : ai(ai), aj(aj), b(b), ndim(ndim), b_m2(-2.0 * b), b_2(2.0 * b) {}
+      : ai(std::move(ai)), aj(std::move(aj)), b(b), ndim(ndim),
+        b_m2(-2.0 * b), b_2(2.0 * b) {}
 
   auto clamp_grad(float grad_d) const -> float {
     return clamp(grad_d, clamp_lo, clamp_hi);

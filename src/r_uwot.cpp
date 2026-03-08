@@ -208,16 +208,16 @@ auto r_to_coords(NumericMatrix head_embedding,
                  Nullable<NumericMatrix> tail_embedding) -> uwot::Coords {
   auto head_vec = as<std::vector<float>>(head_embedding);
   if (tail_embedding.isNull()) {
-    return uwot::Coords(head_vec);
+    return uwot::Coords(std::move(head_vec));
   } else {
     auto tail_vec = as<std::vector<float>>(tail_embedding);
-    return uwot::Coords(head_vec, tail_vec);
+    return uwot::Coords(std::move(head_vec), std::move(tail_vec));
   }
 }
 
 auto r_to_coords(NumericMatrix head_embedding) -> uwot::Coords {
   auto head_vec = as<std::vector<float>>(head_embedding);
-  return uwot::Coords(head_vec);
+  return uwot::Coords(std::move(head_vec));
 }
 
 void validate_args(List method_args,
@@ -262,7 +262,7 @@ void create_umapai(UmapFactory &umap_factory, List method_args) {
   std::vector<float> ai = method_args["ai"];
   float b = method_args["b"];
   std::size_t ndim = method_args["ndim"];
-  const uwot::umapai_gradient gradient(ai, b, ndim);
+  const uwot::umapai_gradient gradient(std::move(ai), b, ndim);
   umap_factory.create(gradient);
 }
 
@@ -274,7 +274,7 @@ void create_umapai2(UmapFactory &umap_factory, List method_args) {
   std::vector<float> aj = method_args["aj"];
   float b = method_args["b"];
   std::size_t ndim = method_args["ndim"];
-  const uwot::umapai2_gradient gradient(ai, aj, b, ndim);
+  const uwot::umapai2_gradient gradient(std::move(ai), std::move(aj), b, ndim);
   umap_factory.create(gradient);
 }
 
