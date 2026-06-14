@@ -11,37 +11,76 @@ on:
 
 name: pkgdown
 
+permissions:
+  contents: read
+
+# Only restrict concurrency for non-PR jobs
+concurrency:
+  group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
+
 jobs:
-  pkgdown:
+  build-site:
+    name: Build pkgdown site
     runs-on: ubuntu-latest
-    # Only restrict concurrency for non-PR jobs
-    concurrency:
-      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v3
+      # Pinned to a full-length commit SHA for immutability.
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
 
-      - uses: r-lib/actions/setup-pandoc@v2
+      # Pinned to a full-length commit SHA for immutability.
+      - uses: r-lib/actions/setup-pandoc@a51a8012b0aab7c32ef9d19bf54da93f3254335e
 
-      - uses: r-lib/actions/setup-r@v2
+      # Pinned to a full-length commit SHA for immutability.
+      - uses: r-lib/actions/setup-r@a51a8012b0aab7c32ef9d19bf54da93f3254335e
         with:
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
+      # Pinned to a full-length commit SHA for immutability.
+      - uses: r-lib/actions/setup-r-dependencies@a51a8012b0aab7c32ef9d19bf54da93f3254335e
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
-        shell: Rscript {0}
+        run: Rscript -e 'pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)'
 
-      - name: Deploy to GitHub pages 🚀
+      - name: Upload site artifact
         if: github.event_name != 'pull_request'
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        # Pinned to a full-length commit SHA for immutability.
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pkgdown-site
+          path: docs
+          if-no-files-found: error
+
+  deploy-site:
+    name: Deploy pkgdown site
+    if: github.event_name != 'pull_request'
+    needs: build-site
+    runs-on: ubuntu-latest
+    # This deploy job needs contents: write to push the built pkgdown site
+    # to the gh-pages branch.
+    permissions:
+      contents: write # zizmor: ignore[undocumented-permissions] required to publish docs
+    steps:
+      # Pinned to a full-length commit SHA for immutability.
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+
+      - name: Download site artifact
+        # Pinned to a full-length commit SHA for immutability.
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: pkgdown-site
+          path: docs
+
+      - name: Deploy to GitHub pages
+        # Pinned to a full-length commit SHA for immutability.
+        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f
         with:
           clean: false
           branch: gh-pages
