@@ -300,6 +300,7 @@ possible, but factor columns in the new data are ignored.
 ## Examples
 
 ``` r
+
 iris_train <- iris[1:100, ]
 iris_test <- iris[101:150, ]
 

@@ -17,31 +17,36 @@ subtle.
 
 ## Theory
 
-The output weight between two points $i$ and $j$ are given by:
+The output weight between two points $`i`$ and $`j`$ are given by:
 
-$$w_{ij} = 1/\left( 1 + ad_{ij}^{2b} \right)$$
+``` math
+w_{ij} = 1 / \left(1 + ad_{ij}^{2b}\right)
+```
 
-with $d_{ij}$ being the Euclidean distance in the embedding between the
-two points. Below I drop the $ij$ subscript for clarity’s sake. $a$ and
-$b$ are two hyper-parameters. Usually they are determined by a
-non-linear least squares fit based on an exponential decay curve
+with $`d_{ij}`$ being the Euclidean distance in the embedding between
+the two points. Below I drop the $`ij`$ subscript for clarity’s sake.
+$`a`$ and $`b`$ are two hyper-parameters. Usually they are determined by
+a non-linear least squares fit based on an exponential decay curve
 parameterized by `min_dist` and `spread`:
 
-$$w = \exp\left\lbrack - \max(0,d - \rho)/\sigma \right\rbrack$$
+``` math
+w = \exp\left[-\max \left(0, d - \rho \right) / \sigma \right]
+```
 
-where `min_dist` is $\rho$ and `spread` is $\sigma$. I have used those
-symbols to make it more obvious that this equation has the same form as
-UMAP’s weighting function for its edge weights in the input space. As a
-reminder, the presence of the `max` operation and shifting the distances
-by $\rho$ is to enforce the local connectivity constraint: there is
-always an edge weight of 1 between a point and its nearest neighbor.
-`spread` determines the x-value range over which the y-value decays to
-zero, and is set to `spread` multiplied by 3.
+where `min_dist` is $`\rho`$ and `spread` is $`\sigma`$. I have used
+those symbols to make it more obvious that this equation has the same
+form as UMAP’s weighting function for its edge weights in the input
+space. As a reminder, the presence of the `max` operation and shifting
+the distances by $`\rho`$ is to enforce the local connectivity
+constraint: there is always an edge weight of 1 between a point and its
+nearest neighbor. `spread` determines the x-value range over which the
+y-value decays to zero, and is set to `spread` multiplied by 3.
 
 Here’s some R code that works through this and then plots the results
 using the Python UMAP defaults of `spread = 1`, `min_dist = 0.1`:
 
 ``` r
+
 spread <- 1
 min_dist <- 0.1
 
@@ -89,17 +94,18 @@ lines(xv, 1 / (1 + a * xv^(2.0 * b)), col = "#1B9E77FF", lwd = 2)
 UMAP a,b curve
 
 As the title indicates, this curve leads to the default parameters of
-$a = 1.577$, $b = 0.895$. `uwot` uses a slightly different default
-`min_dist = 0.001`, which leads to $a = 1.93,b = 0.79$. I don’t know why
-I used a different default `min_dist` – probably I made a mistake. This
-is likely to change in a later version of `uwot`, but it doesn’t make
-much of a difference to the results, fortunately. Setting $a = 1,b = 1$
-gives the Cauchy distribution used in t-SNE (and the `tumap` function in
-`uwot`), which corresponds roughly to `spread = 1.12` and
-`min_dist = 0.23`: putting those values back into the curve-fitting
-routine will give you back $a = 0.99$, $b = 1.01$. Close enough. Here is
-the `uwot` default results in orange and the Cauchy results in blue
-overlaid with the UMAP defaults (green, same as in the previous plot):
+$`a = 1.577`$, $`b = 0.895`$. `uwot` uses a slightly different default
+`min_dist = 0.001`, which leads to $`a = 1.93, b = 0.79`$. I don’t know
+why I used a different default `min_dist` – probably I made a mistake.
+This is likely to change in a later version of `uwot`, but it doesn’t
+make much of a difference to the results, fortunately. Setting
+$`a = 1, b = 1`$ gives the Cauchy distribution used in t-SNE (and the
+`tumap` function in `uwot`), which corresponds roughly to
+`spread = 1.12` and `min_dist = 0.23`: putting those values back into
+the curve-fitting routine will give you back $`a = 0.99`$, $`b = 1.01`$.
+Close enough. Here is the `uwot` default results in orange and the
+Cauchy results in blue overlaid with the UMAP defaults (green, same as
+in the previous plot):
 
 ![Other UMAP a,b curve](img/abparams/umap_ab_curve_other.png)
 
@@ -129,11 +135,11 @@ title, along with the values of `a` and `b` that they give rise to. The
 value of `spread` increases from 0.1 to 10 as we go from left to right
 and top to bottom.
 
-|                                                  |                                                  |                                                    |
-|:------------------------------------------------:|:------------------------------------------------:|:--------------------------------------------------:|
+|  |  |  |
+|:--:|:--:|:--:|
 | ![spread = 0.1](img/abparams/mnist_s0.1d0.1.png) | ![spread = 0.5](img/abparams/mnist_s0.5d0.1.png) | ![spread = 0.75](img/abparams/mnist_s0.75d0.1.png) |
-|   ![spread = 1](img/abparams/mnist_s1d0.1.png)   | ![spread = 1.5](img/abparams/mnist_s1.5d0.1.png) |    ![spread = 2](img/abparams/mnist_s2d0.1.png)    |
-|   ![spread = 3](img/abparams/mnist_s3d0.1.png)   |   ![spread = 5](img/abparams/mnist_s5d0.1.png)   |   ![spread = 10](img/abparams/mnist_s10d0.1.png)   |
+| ![spread = 1](img/abparams/mnist_s1d0.1.png) | ![spread = 1.5](img/abparams/mnist_s1.5d0.1.png) | ![spread = 2](img/abparams/mnist_s2d0.1.png) |
+| ![spread = 3](img/abparams/mnist_s3d0.1.png) | ![spread = 5](img/abparams/mnist_s5d0.1.png) | ![spread = 10](img/abparams/mnist_s10d0.1.png) |
 
 The top-left result, with `spread = min_dist = 0.1` gives a clear
 indication that you want `spread` to be larger than `min_dist`. Then,
@@ -162,11 +168,11 @@ show some eccentric results.
 
 ### min_dist
 
-|                                                        |                                                      |                                                    |
-|:------------------------------------------------------:|:----------------------------------------------------:|:--------------------------------------------------:|
+|  |  |  |
+|:--:|:--:|:--:|
 | ![min_dist = 0.0001](img/abparams/mnist_s1d0.0001.png) | ![min_dist = 0.001](img/abparams/mnist_s1d0.001.png) | ![min_dist = 0.01](img/abparams/mnist_s1d0.01.png) |
-|   ![min_dist = 0.05](img/abparams/mnist_s1d0.05.png)   |   ![min_dist = 0.1](img/abparams/mnist_s1d0.1.png)   |  ![min_dist = 0.5](img/abparams/mnist_s1d0.5.png)  |
-|      ![min_dist = 1](img/abparams/mnist_s1d1.png)      |   ![min_dist = 1.5](img/abparams/mnist_s1d1.5.png)   |    ![min_dist = 2](img/abparams/mnist_s1d2.png)    |
+| ![min_dist = 0.05](img/abparams/mnist_s1d0.05.png) | ![min_dist = 0.1](img/abparams/mnist_s1d0.1.png) | ![min_dist = 0.5](img/abparams/mnist_s1d0.5.png) |
+| ![min_dist = 1](img/abparams/mnist_s1d1.png) | ![min_dist = 1.5](img/abparams/mnist_s1d1.5.png) | ![min_dist = 2](img/abparams/mnist_s1d2.png) |
 
 Again, there is a range of `min_dist` values, from 0.0001 to 0.1 where
 not much happens to the plot. Above this value, the clusters begin to
@@ -213,11 +219,11 @@ reduction (see Proposition 1 and 2 in their PaCMAP paper).
 `a` seemed to have a wider range of values than `b`, so I looked at
 values between `a = 0.0001` and `a = 100`.
 
-|                                                   |                                                 |                                               |
-|:-------------------------------------------------:|:-----------------------------------------------:|:---------------------------------------------:|
+|  |  |  |
+|:--:|:--:|:--:|
 | ![a = 0.0001](img/abparams/mnist_a0.0001b0.9.png) | ![a = 0.001](img/abparams/mnist_a0.001b0.9.png) | ![a = 0.01](img/abparams/mnist_a0.01b0.9.png) |
-|    ![a = 0.1](img/abparams/mnist_a0.1b0.9.png)    |     ![a = 1](img/abparams/mnist_a1b0.9.png)     |    ![a = 2](img/abparams/mnist_a2b0.9.png)    |
-|     ![a = 10](img/abparams/mnist_a10b0.9.png)     |    ![a = 50](img/abparams/mnist_a50b0.9.png)    |  ![a = 100](img/abparams/mnist_a100b0.9.png)  |
+| ![a = 0.1](img/abparams/mnist_a0.1b0.9.png) | ![a = 1](img/abparams/mnist_a1b0.9.png) | ![a = 2](img/abparams/mnist_a2b0.9.png) |
+| ![a = 10](img/abparams/mnist_a10b0.9.png) | ![a = 50](img/abparams/mnist_a50b0.9.png) | ![a = 100](img/abparams/mnist_a100b0.9.png) |
 
 `a` seems to control the spread of the clusters for most of its range.
 Low values of `a` certainly result in a diffuse round cloud. Above
@@ -230,11 +236,11 @@ reasonable, with higher values leading to smaller clusters.
 `b` definitely seems to have a smaller range of useful values compared
 to `a`, so I looked at values between `b = 0.1` to `b = 2.5`.
 
-|                                                |                                                |                                                |
-|:----------------------------------------------:|:----------------------------------------------:|:----------------------------------------------:|
-|  ![b = 0.1](img/abparams/mnist_a1.58b0.1.png)  | ![b = 0.25](img/abparams/mnist_a1.58b0.25.png) |  ![b = 0.5](img/abparams/mnist_a1.58b0.5.png)  |
-| ![b = 0.75](img/abparams/mnist_a1.58b0.75.png) |    ![b = 1](img/abparams/mnist_a1.58b1.png)    | ![b = 1.25](img/abparams/mnist_a1.58b1.25.png) |
-|  ![b = 1.5](img/abparams/mnist_a1.58b1.5.png)  |    ![b = 2](img/abparams/mnist_a1.58b2.png)    |  ![b = 2.5](img/abparams/mnist_a1.58b2.5.png)  |
+|  |  |  |
+|:--:|:--:|:--:|
+| ![b = 0.1](img/abparams/mnist_a1.58b0.1.png) | ![b = 0.25](img/abparams/mnist_a1.58b0.25.png) | ![b = 0.5](img/abparams/mnist_a1.58b0.5.png) |
+| ![b = 0.75](img/abparams/mnist_a1.58b0.75.png) | ![b = 1](img/abparams/mnist_a1.58b1.png) | ![b = 1.25](img/abparams/mnist_a1.58b1.25.png) |
+| ![b = 1.5](img/abparams/mnist_a1.58b1.5.png) | ![b = 2](img/abparams/mnist_a1.58b2.png) | ![b = 2.5](img/abparams/mnist_a1.58b2.5.png) |
 
 `b` seems to work like the heavy-tail parameter sometimes used in
 [t-SNE](https://arxiv.org/abs/1902.05804): low values increase the
@@ -248,7 +254,8 @@ sticking with `min_dist` and `spread` I prefer `a` and `b` myself, as it
 reminds me more of the approach used in [ABSNE
 (PDF)](https://people.eecs.berkeley.edu/~pabbeel/papers/2015-ICML-absne.pdf),
 although I don’t claim there is any equivalence between the `a` and `b`
-parameters in UMAP and the $\alpha$ and $\beta$ parameters in that work.
+parameters in UMAP and the $`\alpha`$ and $`\beta`$ parameters in that
+work.
 
 ## Examples
 
@@ -267,10 +274,10 @@ fiddling with `a` and `b` in response to it. I eventually fumble my way
 to a setting with a lower `a` and a higher `b` that provides a better
 visualization (in my opinion), which you can see in the lower right.
 
-|                                                           |                                                         |
-|:---------------------------------------------------------:|:-------------------------------------------------------:|
-| ![a = 1.58 b = 0.9](img/abparams/tasic2018_a1.58b0.9.png) |   ![a = 1 b = 0.9](img/abparams/tasic2018_a1b0.9.png)   |
-|    ![a = 1 b = 1.5](img/abparams/tasic2018_a1b1.5.png)    | ![a = 0.5 b = 1.5](img/abparams/tasic2018_a0.5b1.5.png) |
+|  |  |
+|:--:|:--:|
+| ![a = 1.58 b = 0.9](img/abparams/tasic2018_a1.58b0.9.png) | ![a = 1 b = 0.9](img/abparams/tasic2018_a1b0.9.png) |
+| ![a = 1 b = 1.5](img/abparams/tasic2018_a1b1.5.png) | ![a = 0.5 b = 1.5](img/abparams/tasic2018_a0.5b1.5.png) |
 
 ### Example 2: COIL-20
 
@@ -278,10 +285,10 @@ And here’s another example where arguably the default UMAP results
 spread the clusters out a bit too much. Here are three alternatives
 based on controlling `a` and `b`.
 
-|                                                        |                                                      |
-|:------------------------------------------------------:|:----------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![a = 1.58 b = 0.9](img/abparams/coil20_a1.58b0.9.png) | ![a = 0.1 b = 0.9](img/abparams/coil20_a0.1b0.9.png) |
-|  ![a = 0.5 b = 0.9](img/abparams/coil20_a0.5b0.9.png)  | ![a = 0.5 b = 1.1](img/abparams/coil20_a0.5b1.1.png) |
+| ![a = 0.5 b = 0.9](img/abparams/coil20_a0.5b0.9.png) | ![a = 0.5 b = 1.1](img/abparams/coil20_a0.5b1.1.png) |
 
 ## My recommendation
 
@@ -306,6 +313,7 @@ tolerable.
 Here’s an example workflow:
 
 ``` r
+
 # PCA to 50 dimensions first
 mnist_pca <- irlba::prcomp_irlba(mnist, n = 50, retx = TRUE, center = center,
                              scale. = FALSE)$x

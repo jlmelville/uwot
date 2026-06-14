@@ -8,6 +8,7 @@ bridge between t-SNE and UMAP. It’s sufficiently close to UMAP that
 `uwot` also offers a LargeVis-like method, `lvish`:
 
 ``` r
+
 # perplexity, init and n_epoch values shown are the defaults
 # use perplexity instead of n_neighbors to control local neighborhood size
 mnist_lv <- lvish(mnist, perplexity = 50, init = "lvrand", n_epochs = 5000,
@@ -49,8 +50,8 @@ Given they were both initialized from different random configurations,
 there’s no reason to believe they would be identical, but they look
 pretty similar:
 
-|                                                  |                                            |
-|--------------------------------------------------|--------------------------------------------|
+|  |  |
+|----|----|
 | ![mnist-largevis.png](img/lv/mnist-largevis.png) | ![mnist-lvish.png](img/lv/mnist-lvish.png) |
 
 Because the default number of neighbors is 3 times the `perplexity`, and
@@ -81,6 +82,7 @@ epochs than UMAP, but you can still expect to see a big improvement.
 Something like the following works for MNIST:
 
 ``` r
+
 mnist_lv <- lvish(mnist, kernel = "knn", perplexity = 15, n_epochs = 1500,
                   init = "lvrand", verbose = TRUE)
 ```
@@ -106,6 +108,7 @@ The only other non-default settings was to use `pca = 100`, which
 reduces the input dimensionality to 100.
 
 ``` r
+
 iris_lv15 <- lvish(iris, pca = 100, perplexity = 15)
 iris_lv50 <- lvish(iris, pca = 100, perplexity = 50)
 ```
@@ -119,6 +122,7 @@ multi-threaded performance like LargeVis, add the option,
 `n_sgd_threads = "auto"`, e.g.:
 
 ``` r
+
 iris_lv15 <- lvish(iris, pca = 100, perplexity = 15, n_sgd_threads = "auto")
 ```
 
@@ -126,6 +130,7 @@ I would also suggest that you fix the number of epochs to a smaller
 value initially and see if that provides an adequate visualization.
 
 ``` r
+
 iris_lv15 <- lvish(iris, pca = 100, perplexity = 15, n_sgd_threads = "auto", n_epochs = 500)
 ```
 
@@ -161,8 +166,8 @@ iris_lv15 <- lvish(iris, pca = 100, perplexity = 15, n_sgd_threads = "auto", n_e
 
 #### coil100
 
-|                                        |                                        |
-|:--------------------------------------:|:--------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![coil100 p15](img/lv/coil100_p15.png) | ![coil100 p50](img/lv/coil100_p50.png) |
 
 #### mnist
@@ -173,14 +178,14 @@ iris_lv15 <- lvish(iris, pca = 100, perplexity = 15, n_sgd_threads = "auto", n_e
 
 #### fashion
 
-|                                        |                                        |
-|:--------------------------------------:|:--------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![fashion p15](img/lv/fashion_p15.png) | ![fashion p50](img/lv/fashion_p50.png) |
 
 #### kuzushiji
 
-|                                            |                                            |
-|:------------------------------------------:|:------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![kuzushiji p15](img/lv/kuzushiji_p15.png) | ![kuzushiji p50](img/lv/kuzushiji_p50.png) |
 
 #### norb
@@ -191,14 +196,14 @@ iris_lv15 <- lvish(iris, pca = 100, perplexity = 15, n_sgd_threads = "auto", n_e
 
 #### tasic2018
 
-|                                            |                                            |
-|:------------------------------------------:|:------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![tasic2018 p15](img/lv/tasic2018_p15.png) | ![tasic2018 p50](img/lv/tasic2018_p50.png) |
 
 #### macosko2015
 
-|                                                |                                                |
-|:----------------------------------------------:|:----------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![macosko2015 p15](img/lv/macosko2015_p15.png) | ![macosko2015 p50](img/lv/macosko2015_p50.png) |
 
 Default initialization in `lvish`, as with LargeVis and t-SNE, is from a
@@ -244,8 +249,8 @@ empiricially. Here are results for `coil20` and `perplexity = 50` with
 the repulsion reduced to `repulsion_strength = 0.7` in the left image,
 and `repulsion_strength = 0.07` on the right:
 
-|                                             |                                               |
-|:-------------------------------------------:|:---------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![coil20 p50 r0.7](img/lv/coil20_p50lr.png) | ![coil20 p50 r0.07](img/lv/coil20_p50vlr.png) |
 
 This helps a bit, but there are limits: the blue cluster on the right
@@ -257,9 +262,9 @@ black clusters for the right-hand plot.
 
 As an alternative to using the Gaussian perplexities, you could use the
 k-nearest neighbor graph directly, which involves setting the similarity
-of $i$ with $j$ to 1 if $i$ is in the k-nearest neighbors of $j$, and 0
-otherwise. The usual t-SNE procedure of symmetrizing (but not the
-normalization step) is then carried out. There are some t-SNE
+of $`i`$ with $`j`$ to 1 if $`i`$ is in the k-nearest neighbors of
+$`j`$, and 0 otherwise. The usual t-SNE procedure of symmetrizing (but
+not the normalization step) is then carried out. There are some t-SNE
 implementations which use kNN-derived perplexities, e.g. [the
 majorization-minimization approach of Yang and
 co-workers](http://proceedings.mlr.press/v38/yang15a.md).
@@ -272,6 +277,7 @@ For the results below the kNN perplexities were used by setting
 `kernel = "knn"`
 
 ``` r
+
 iris_lv15k <- lvish(iris, pca = 100, perplexity = 15, kernel = "knn")
 iris_lv50k <- lvish(iris, pca = 100, perplexity = 50, kernel = "knn")
 ```
@@ -311,15 +317,15 @@ given in the image. I used version 0.1.3 of `uwot` from CRAN.
 
 #### coil20
 
-|                                        |                                        |
-|:--------------------------------------:|:--------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![coil20 p15g](img/lv/coil20_p15g.png) | ![coil20 p50g](img/lv/coil20_p50g.png) |
 | ![coil20 p15k](img/lv/coil20_p15k.png) | ![coil20 p50k](img/lv/coil20_p50k.png) |
 
 #### coil100
 
-|                                          |                                          |
-|:----------------------------------------:|:----------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![coil100 p15g](img/lv/coil100_p15g.png) | ![coil100 p50g](img/lv/coil100_p50g.png) |
 | ![coil100 p15k](img/lv/coil100_p15k.png) | ![coil100 p50k](img/lv/coil100_p50k.png) |
 
@@ -332,15 +338,15 @@ given in the image. I used version 0.1.3 of `uwot` from CRAN.
 
 #### fashion
 
-|                                          |                                          |
-|:----------------------------------------:|:----------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![fashion p15g](img/lv/fashion_p15g.png) | ![fashion p50g](img/lv/fashion_p50g.png) |
 | ![fashion p15k](img/lv/fashion_p15k.png) | ![fashion p50k](img/lv/fashion_p50k.png) |
 
 #### kuzushiji
 
-|                                              |                                              |
-|:--------------------------------------------:|:--------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![kuzushiji p15g](img/lv/kuzushiji_p15g.png) | ![kuzushiji p50g](img/lv/kuzushiji_p50g.png) |
 | ![kuzushiji p15k](img/lv/kuzushiji_p15k.png) | ![kuzushiji p50k](img/lv/kuzushiji_p50k.png) |
 
@@ -353,15 +359,15 @@ given in the image. I used version 0.1.3 of `uwot` from CRAN.
 
 #### tasic2018
 
-|                                              |                                              |
-|:--------------------------------------------:|:--------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![tasic2018 p15g](img/lv/tasic2018_p15g.png) | ![tasic2018 p50g](img/lv/tasic2018_p50g.png) |
 | ![tasic2018 p15k](img/lv/tasic2018_p15k.png) | ![tasic2018 p50k](img/lv/tasic2018_p50k.png) |
 
 #### macosko2015
 
-|                                                  |                                                  |
-|:------------------------------------------------:|:------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![macosko2015 p15g](img/lv/macosko2015_p15g.png) | ![macosko2015 p50g](img/lv/macosko2015_p50g.png) |
 | ![macosko2015 p15k](img/lv/macosko2015_p15k.png) | ![macosko2015 p50k](img/lv/macosko2015_p50k.png) |
 

@@ -27,6 +27,7 @@ First we need some data, which I will install via the `snedata` package
 from GitHub:
 
 ``` r
+
 # install.packages("pak")
 pak::pkg_install("jlmelville/snedata")
 
@@ -40,6 +41,7 @@ I’ll use the [Fashion MNIST
 data](https://github.com/zalandoresearch/fashion-mnist):
 
 ``` r
+
 fashion <- snedata::download_fashion_mnist()
 fashion_train <- head(fashion, 60000)
 fashion_test <- tail(fashion, 10000)
@@ -54,6 +56,7 @@ of the item is in the `Description` column.
 Now install `rnndescent` from CRAN:
 
 ``` r
+
 install.packages("rnndescent")
 library(rnndescent)
 ```
@@ -72,6 +75,7 @@ system using) and to return a model we can use to embed the test set
 data.
 
 ``` r
+
 fashion_train_umap <-
   umap(
     X = fashion_train,
@@ -156,6 +160,7 @@ to work out that it should use `rnndescent` for querying new neighbors
 is encapsulated in the `fashion_train_umap` model we generated.
 
 ``` r
+
 fashion_test_umap <-
   umap_transform(
     X = fashion_test,
@@ -204,6 +209,7 @@ Now to take a look at the results, using `ggplot2` for plotting, and
 `Polychrome` for a suitable categorical palette.
 
 ``` r
+
 install.packages(c("ggplot2", "Polychrome"))
 library(ggplot2)
 library(Polychrome)
@@ -215,6 +221,7 @@ represents. This is found in the `Description` factor column of the
 original data.
 
 ``` r
+
 palette <- as.vector(Polychrome::createPalette(
   length(levels(fashion$Description)) + 2,
   seedcolors = c("#ffffff", "#000000"),
@@ -225,6 +232,7 @@ palette <- as.vector(Polychrome::createPalette(
 And here are the results:
 
 ``` r
+
 ggplot(
   data.frame(fashion_train_umap$embedding, Description = fashion_train$Description),
   aes(x = X1, y = X2, color = Description)
@@ -243,6 +251,7 @@ ggplot(
 ```
 
 ``` r
+
 ggplot(
   data.frame(fashion_test_umap, Description = fashion_test$Description),
   aes(x = X1, y = X2, color = Description)
@@ -309,12 +318,14 @@ leaving the seed unset so that we must both live with the inherently
 random nature of the index building process.
 
 ``` r
+
 fashion_index <- rnnd_build(fashion_train, k = 15, n_threads = 6)
 ```
 
 What’s in the returned index? A bunch of stuff:
 
 ``` r
+
 names(fashion_index)
 ```
 
@@ -330,6 +341,7 @@ of `idx` to be the sequence 1, 2, 3, … and the first column of `dist` to
 be all zeros.
 
 ``` r
+
 fashion_index$graph$idx[1:3, 1:3]
 ```
 
@@ -341,6 +353,7 @@ fashion_index$graph$idx[1:3, 1:3]
 ```
 
 ``` r
+
 fashion_index$graph$dist[1:3, 1:3]
 ```
 
@@ -364,6 +377,7 @@ the results from the index are sufficient for UMAP.
 To get the test set neighbors, query the index with the test data:
 
 ``` r
+
 fashion_test_query_neighbors <-
   rnnd_query(
     index = fashion_index,
@@ -375,6 +389,7 @@ fashion_test_query_neighbors <-
 ```
 
 ``` r
+
 fashion_test_query_neighbors$idx[1:3, 1:3]
 ```
 
@@ -386,6 +401,7 @@ fashion_test_query_neighbors$idx[1:3, 1:3]
 ```
 
 ``` r
+
 fashion_test_query_neighbors$dist[1:3, 1:3]
 ```
 
@@ -413,6 +429,7 @@ To use pre-computed nearest neighbor data with `uwot` pass it as the
 parameters, but this is designed to give pretty typical UMAP results.
 
 ``` r
+
 fashion_train_umap <-
   umap(
     X = NULL,
@@ -446,6 +463,7 @@ we don’t need to pass in any test set data except the neighbors as
 `nn_method`:
 
 ``` r
+
 fashion_test_umap <-
   umap_transform(
     X = NULL,
@@ -483,6 +501,7 @@ in the return result. Let’s use the full Fashion MNIST results as an
 example:
 
 ``` r
+
 fashion_knn <- rnnd_knn(fashion, k = 15, n_threads = 6)
 names(fashion_knn)
 ```
@@ -494,6 +513,7 @@ names(fashion_knn)
 You can then pass `fashion_knn` to `nn_method`:
 
 ``` r
+
 fashion_umap <-
   umap(
     X = NULL,
@@ -510,6 +530,7 @@ fashion_umap <-
 UMAP plot for the full Fashion MNIST dataset:
 
 ``` r
+
 ggplot(
   data.frame(fashion_umap, Description = fashion$Description),
   aes(x = X1, y = X2, color = Description)

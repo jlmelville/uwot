@@ -48,6 +48,7 @@ standard deviation of 1 for each axis). This affects the following
 datasets: `iris`, `coil20`, `coil100`, `norb` and `tasic2018`.
 
 ``` r
+
 set.seed(42)
 iris_umap <- umap(iris, pca = 100, min_dist = 0.1)
 ```
@@ -92,32 +93,32 @@ section.
 
 ### coil20
 
-|                                         |                                           |
-|:---------------------------------------:|:-----------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![coil20 r](img/pycompare/coil20_r.png) | ![coil20 py](img/pycompare/coil20_py.png) |
 
 ### coil100
 
-|                                           |                                             |
-|:-----------------------------------------:|:-------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![coil100 r](img/pycompare/coil100_r.png) | ![coil100 py](img/pycompare/coil100_py.png) |
 
 ### mnist
 
-|                                       |                                         |
-|:-------------------------------------:|:---------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![mnist r](img/pycompare/mnist_r.png) | ![mnist py](img/pycompare/mnist_py.png) |
 
 ### fashion
 
-|                                           |                                             |
-|:-----------------------------------------:|:-------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![fashion r](img/pycompare/fashion_r.png) | ![fashion py](img/pycompare/fashion_py.png) |
 
 ### kuzushiji
 
-|                                               |                                                 |
-|:---------------------------------------------:|:-----------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![kuzushiji r](img/pycompare/kuzushiji_r.png) | ![kuzushiji py](img/pycompare/kuzushiji_py.png) |
 
 ### norb
@@ -139,8 +140,8 @@ results. This is the image below, on the left. Meanwhile, if you use the
 PCA results as input to `UMAP`, the output now looks a bit more like the
 `uwot` results. That’s the image on the lower right.
 
-|                                               |                                              |
-|:---------------------------------------------:|:--------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![norb r nopca](img/pycompare/norb_nopca.png) | ![norb py pca](img/pycompare/norb_pypca.png) |
 
 Unfortunately, the very high dimensionality of `norb` makes running
@@ -155,14 +156,14 @@ approach better at retaining local structure.
 
 ### tasic2018
 
-|                                               |                                                 |
-|:---------------------------------------------:|:-----------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![tasic2018 r](img/pycompare/tasic2018_r.png) | ![tasic2018 py](img/pycompare/tasic2018_py.png) |
 
 ### macosko2015
 
-|                                                   |                                                     |
-|:-------------------------------------------------:|:---------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![macosko2015 r](img/pycompare/macosko2015_r.png) | ![macosko2015 py](img/pycompare/macosko2015_py.png) |
 
 This result shows the largest deviation of `uwot` from `UMAP`. That big
@@ -178,8 +179,8 @@ when it uses the more accurate nearest neighbor data calculated by
 reassuring. The right hand plot uses exact nearest neighbor results
 calculated via the `FNN`.
 
-|                                                            |                                                                          |
-|:----------------------------------------------------------:|:------------------------------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![macosko2015 r pynn](img/pycompare/macosko2015_rpynn.png) | ![macosko2015 uwot exact nn](img/pycompare/macosko2015_uwot_exactnn.png) |
 
 Even though the `UMAP` nearest neighbor data is better than that which
@@ -189,8 +190,8 @@ approximate nearest neighbor methods considered here.
 
 ### cifar10
 
-|                                           |                                             |
-|:-----------------------------------------:|:-------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![cifar10 r](img/pycompare/cifar10_r.png) | ![cifar10 py](img/pycompare/cifar10_py.png) |
 
 Based on results with this dataset in the [UMAP examples
@@ -272,10 +273,10 @@ nearest neighbor distances for `macosko2015` and `tasic2018` (top row),
 which misbehave with Annoy, and on the bottom row are the histograms for
 `mnist` and `fashion`, which are better behaved:
 
-|                                                              |                                                          |
-|:------------------------------------------------------------:|:--------------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![macosko2015 NN hist](img/pycompare/macosko2015_nnhist.png) | ![tasic2018 NN hist](img/pycompare/tasic2018_nnhist.png) |
-|       ![MNIST NN hist](img/pycompare/mnist_nnhist.png)       |   ![fashion NN hist](img/pycompare/fashion_nnhist.png)   |
+| ![MNIST NN hist](img/pycompare/mnist_nnhist.png) | ![fashion NN hist](img/pycompare/fashion_nnhist.png) |
 
 The biomodal distribution of `macosko2015` and `tasic2018` do seem more
 similar to each other than they do to `mnist` or `fashion`. That said,
@@ -308,8 +309,8 @@ random features (i.e. 1/16th the pixels in`norb`), visual results aren’t
 *that* much worse with this approach and the nearest neighbor search
 runs 100 times faster (50 minutes vs 20 seconds):
 
-|                                                       |                                                   |
-|:-----------------------------------------------------:|:-------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![norb 18432 features](img/pycompare/norb_nopca2.png) | ![norb 1152 features](img/pycompare/norb1152.png) |
 
 Otherwise, if you have a high-dimensional dataset, you should consider
@@ -343,9 +344,9 @@ using `perplexity = 15`. The images on the left use PCA to reduce the
 initial dimensionality down to 100, while the ones on the right use the
 raw input data.
 
-|                                                            |                                                                      |
-|:----------------------------------------------------------:|:--------------------------------------------------------------------:|
-|        ![norb tsne pca](img/examples/norb_tsne.png)        |        ![norb tsne no pca](img/pycompare/norb_tsne_nopca.png)        |
+|  |  |
+|:--:|:--:|
+| ![norb tsne pca](img/examples/norb_tsne.png) | ![norb tsne no pca](img/pycompare/norb_tsne_nopca.png) |
 | ![macosko2015 tsne pca](img/examples/macosko2015_tsne.png) | ![macosko2015 tsne no pca](img/pycompare/macosko2015_tsne_nopca.png) |
 
 `norb` results seem fairly unaffected, but we also see for `macosko2015`
@@ -357,9 +358,9 @@ t-SNE plots repeated with `perplexity = 50` and either
 `pca = TRUE, partial_pca = TRUE, initial_dims = 50` on the left, and
 `pca = FALSE` on the right:
 
-|                                                                                  |                                                                                  |
-|:--------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|
-|        ![norb tsne perp 50 pca 50](img/pycompare/norb_tsne_p50_pca50.png)        |        ![norb tsne perp 50 no pca](img/pycompare/norb_tsne_p50_nopca.png)        |
+|  |  |
+|:--:|:--:|
+| ![norb tsne perp 50 pca 50](img/pycompare/norb_tsne_p50_pca50.png) | ![norb tsne perp 50 no pca](img/pycompare/norb_tsne_p50_nopca.png) |
 | ![macosko2015 tsne perp 50 pca 50](img/pycompare/macosko2015_tsne_p50_pca50.png) | ![macosko2015 tsne perp 50 no pca](img/pycompare/macosko2015_tsne_p50_nopca.png) |
 
 Again, the `norb` dataset is less affected than `macosko2015` but for

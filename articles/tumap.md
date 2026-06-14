@@ -9,6 +9,7 @@ significantly simplify the gradient leading to a noticeable speed-up.
 For MNIST:
 
 ``` r
+
 library(uwot)
 # install snedata package from github
 # pak::pkg_install("jlmelville/snedata")
@@ -18,6 +19,7 @@ mnist <- snedata::download_mnist()
 I saw the optimization time drop from 66 seconds with UMAP:
 
 ``` r
+
 mnist_umap <- umap(mnist, n_neighbors = 15)
 ```
 
@@ -28,6 +30,7 @@ MNIST UMAP
 to 18 seconds with t-UMAP:
 
 ``` r
+
 mnist_tumap <- tumap(mnist, n_neighbors = 15)
 ```
 

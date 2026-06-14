@@ -45,6 +45,7 @@ data’s provenance and structure. We can use
 `snedata::download_twenty_newsgroups` to download it:
 
 ``` r
+
 devtools::install_github("jlmelville/snedata")
 
 ng20 <- snedata::download_twenty_newsgroups(subset = "all", verbose = TRUE)
@@ -60,6 +61,7 @@ up afterwards. If something goes wrong it should log the directory it
 downloaded to.
 
 ``` r
+
 dim(ng20)
 ```
 
@@ -70,6 +72,7 @@ dim(ng20)
 The data is returned as a data frame with 6 columns:
 
 ``` r
+
 names(ng20)
 ```
 
@@ -88,6 +91,7 @@ we can keep track of the rows. Here’s the first row without the `Text`
 column (we can safely ignore the row id):
 
 ``` r
+
 ng20[1, -3]
 ```
 
@@ -99,6 +103,7 @@ alt.atheism.1 train_1  49960  train     0 alt.atheism
 And here’s the first few characters of the text:
 
 ``` r
+
 substr(ng20[1, ]$Text, 1, 72)
 ```
 
@@ -122,6 +127,7 @@ start with. We’ll need to install [dplyr](https://dplyr.tidyverse.org/),
 [stringr](https://stringr.tidyverse.org/), for this:
 
 ``` r
+
 install.packages(c("dplyr", "tidyr", "stringr"))
 library(dplyr)
 library(tidyr)
@@ -135,6 +141,7 @@ the dataset by splitting the text on new lines like in the tidy text
 mining example so that each row is a line in the original post:
 
 ``` r
+
 ng20spl <- ng20 |> separate_longer_delim(`Text`, delim = "\n")
 dim(ng20spl)
 ```
@@ -146,6 +153,7 @@ dim(ng20spl)
 Now the first row looks like:
 
 ``` r
+
 ng20spl[1, ]
 ```
 
@@ -159,6 +167,7 @@ blank line) and footers (assumed to be anything after the first line of
 repeated hyphens):
 
 ``` r
+
 cleaned_text <- ng20spl |>
   group_by(`Newsgroup`, `Id`) |>
   filter(
@@ -176,6 +185,7 @@ dim(cleaned_text)
 And this attempts to removed quoted text:
 
 ``` r
+
 cleaned_text <- cleaned_text |>
   filter(
     str_detect(`Text`, "^[^>]+[A-Za-z\\d]") |
@@ -210,6 +220,7 @@ basis. Now, having split the posts into lines, we need to unsplit them,
 and also re-associate the other columns from the original `ng20` data:
 
 ``` r
+
 text_unsplit <-
   cleaned_text |>
   group_by(`Id`) |>
@@ -235,6 +246,7 @@ I’m going to use the [tm](https://cran.r-project.org/package=tm) package
 for the text mining:
 
 ``` r
+
 install.packages("tm")
 library(tm)
 ```
@@ -250,6 +262,7 @@ There are still a few documents with odd formatting characters but `tm`
 seems to deal with them without issue.
 
 ``` r
+
 corpus <-
   Corpus(VectorSource(iconv(text_unsplit$Text, "latin1", "UTF-8"))) |>
   tm_map(content_transformer(tolower)) |>
@@ -278,6 +291,7 @@ well see if we can come up with some reasonable filter values using some
 simple methods.
 
 ``` r
+
 count_words <- function(doc) {
   doc |>
     strsplit(" ") |>
@@ -289,6 +303,7 @@ nwords <- sapply(corpus, count_words)
 ```
 
 ``` r
+
 summary(nwords)
 ```
 
@@ -303,6 +318,7 @@ less than 50 words. Let’s look at the distribution of the number of
 words, but stop at 95% of the data to avoid the outliers:
 
 ``` r
+
 hist(nwords[nwords <= quantile(nwords, 0.95)], main = "0-95% word count distribution")
 ```
 
@@ -315,6 +331,7 @@ So 95% of the data contains 250 words or less.
 What is this massive document? Let’s (carefully) take a look:
 
 ``` r
+
 substr(ng20[which.max(nwords), ]$Text, 0, 80)
 ```
 
@@ -326,6 +343,7 @@ Ah, it’s a FAQ. Ok that makes sense. Now let’s look at the distribution
 of the raw length of the documents in terms of number of characters:
 
 ``` r
+
 nchars <- sapply(corpus, function(doc) {
   doc |> str_length()
 })
@@ -341,6 +359,7 @@ Seems reminiscent of the word count distribution. So let’s see how
 related they are (you’d assume very related but you never know):
 
 ``` r
+
 plot(nwords, nchars, main = "Number of words vs number of characters")
 ```
 
@@ -354,6 +373,7 @@ appear on the main trendline all the more suspicious. The easy way to
 deal with this is to define an average word length:
 
 ``` r
+
 avg_word_lengths <- nchars / nwords
 summary(avg_word_lengths)
 ```
@@ -367,6 +387,7 @@ Those `NA`’s are the documents with zero words. This looks like another
 rather skewed distribution:
 
 ``` r
+
 hist(avg_word_lengths[avg_word_lengths <= quantile(avg_word_lengths, 0.95, na.rm = TRUE)],
   main = "0-95% average word length distribution"
 )
@@ -389,6 +410,7 @@ To avoid making this even longer than it needs to be, I won’t be
 investigating the suspicious documents in this article.
 
 ``` r
+
 is_suspiciously_short <- function(doc) {
   doc |> count_words() <= 9
 }
@@ -403,6 +425,7 @@ length(corpus)
 ```
 
 ``` r
+
 is_suspiciously_long <- function(doc) {
   doc |> count_words() >= 2000
 }
@@ -417,6 +440,7 @@ length(corpus)
 ```
 
 ``` r
+
 avg_word_len <- function(doc) {
   (doc |> str_length()) / (doc |> count_words())
 }
@@ -435,6 +459,7 @@ length(corpus)
 ```
 
 ``` r
+
 has_suspiciously_long_words <- function(doc) {
   doc |> avg_word_len() > 15
 }
@@ -455,6 +480,7 @@ Ok, I think we’ve done enough to move on.
 The next step is to convert the corpus into a matrix of TF-IDF values:
 
 ``` r
+
 tfidf <- weightTfIdf(DocumentTermMatrix(corpus))
 dim(tfidf)
 ```
@@ -467,10 +493,12 @@ Nearly 90,000 dimensions, each one a weighted word frequency. How sparse
 is it:
 
 ``` r
+
 Matrix::nnzero(tfidf) / prod(dim(tfidf))
 ```
 
 ``` r
+
 0.0006920568
 ```
 
@@ -494,6 +522,7 @@ a format from the [Matrix](https://cran.r-project.org/package=Matrix)
 package that `rnndescent` can handle:
 
 ``` r
+
 library(Matrix)
 tfidf_sp <-
   sparseMatrix(
@@ -511,6 +540,7 @@ slightly better defaults and which can take sparse matrix input. We also
 need to load the `rnndescent` package.
 
 ``` r
+
 install.packages("rnndescent")
 library(rnndescent)
 ```
@@ -525,6 +555,7 @@ more details). I will also save the nearest neighbors with
 calculate later.
 
 ``` r
+
 library(uwot)
 ng20_umap <-
   umap2(
@@ -588,6 +619,7 @@ distinguishable. This is a similar approach to the Python package
 [glasbey](https://github.com/lmcinnes/glasbey).
 
 ``` r
+
 library(Polychrome)
 set.seed(42)
 
@@ -602,12 +634,14 @@ I will also rotate the coordinates so they align along the principal
 axes:
 
 ``` r
+
 ng20_umap_rotated <- prcomp(ng20_umap$embedding)$x
 ```
 
 Ok, now to make the plot with [ggplot2](https://ggplot2.tidyverse.org/):
 
 ``` r
+
 library(ggplot2)
 
 ggplot(
@@ -655,6 +689,7 @@ enough for us to handle an exact search comfortably, at least if you
 have enough cores:
 
 ``` r
+
 tfidfl1_hell_bf <-
   brute_force_knn(
     tfidf_sp,
@@ -684,6 +719,7 @@ parameters in conjunction with `umap2` as I did with the approximate
 nearest neighbors:
 
 ``` r
+
 ng20_umap_exact <-
   umap2(
     X = NULL,
@@ -711,6 +747,7 @@ ng20_umap_exact <-
 ## Plot the Exact Neighbors UMAP Results
 
 ``` r
+
 ggplot(
   data.frame(prcomp(ng20_umap_exact)$x, Newsgroup = text_unsplit$Newsgroup),
   aes(x = PC1, y = PC2, color = Newsgroup)
@@ -750,6 +787,7 @@ has a `neighbor_overlap` function we can use which will return a value
 of 0 (no overlap between two sets of neighbors) and 1 (perfect overlap):
 
 ``` r
+
 neighbor_overlap(ng20_umap$nn$hellinger, tfidfl1_hell_bf)
 ```
 
@@ -769,6 +807,7 @@ as the maximum number of times any item appears in the k-occurrence
 list, and I am going to normalize that with respect to `n_neighbors`:
 
 ``` r
+
 tfidfl1_hell_bf |> k_occur() |> max() / 15
 ```
 
@@ -785,6 +824,7 @@ neighbors to detect hubness, the approximate results will also act as a
 good diagnostic:
 
 ``` r
+
 ng20_umap$nn$hellinger |> k_occur() |> max() / 15
 ```
 
@@ -801,6 +841,7 @@ We will also want the equivalent brute force results to see if it
 helped:
 
 ``` r
+
 tfidfl1_hell_bf_50 <-
     brute_force_knn(
         tfidf_sp,
@@ -814,6 +855,7 @@ tfidfl1_hell_bf_50 <-
 Let’s see what’s up with the hubness:
 
 ``` r
+
 tfidfl1_hell_bf_50 |> k_occur() |> max() / 50
 ```
 
@@ -825,6 +867,7 @@ level of hubness given the larger `n_neighbors` value. But let’s find
 out.
 
 ``` r
+
 ng20_umap_50 <-
     umap2(
         X = tfidf_sp,
@@ -840,6 +883,7 @@ ng20_umap_50 <-
 ```
 
 ``` r
+
 ng20_umap_50$nn$hellinger |> k_occur() |> max() / 50
 ```
 
@@ -849,6 +893,7 @@ A similar level of hubness reported, but more importantly, what’s the
 accuracy like?
 
 ``` r
+
 neighbor_overlap(ng20_umap_50$nn$hellinger, tfidfl1_hell_bf_50)
 ```
 
@@ -857,6 +902,7 @@ neighbor_overlap(ng20_umap_50$nn$hellinger, tfidfl1_hell_bf_50)
 96%! Much better. Let’s see how the UMAP plot looks:
 
 ``` r
+
 ggplot(
   data.frame(prcomp(ng20_umap_50$embedding)$x, Newsgroup = text_unsplit$Newsgroup),
   aes(x = PC1, y = PC2, color = Newsgroup)
@@ -884,6 +930,7 @@ bit compared to the `n_neighbors = 15` result. Hmm, let’s see if at
 least we have agreement with the exact case for `n_neighbors = 50`:
 
 ``` r
+
 ng20_umap_exact_50 <-
     umap2(
         X = NULL,
@@ -939,6 +986,7 @@ faster t-UMAP gradient, which will be used by `umap2` if it detects
 `n_neighbors = 15`:
 
 ``` r
+
 ng20_umap_150 <- umap2(
   X = tfidf_sp,
   nn_method = "nndescent",

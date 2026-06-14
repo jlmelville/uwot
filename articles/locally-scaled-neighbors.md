@@ -8,12 +8,14 @@ Zelnik-Manor and Perona describe a method of local scaling to
 determining the affinity (similarity) between two data points. This is
 defined as:
 
-$${\widehat{A}}_{ij} = \exp\left( - \frac{d_{ij}^{2}}{\sigma_{i}\sigma_{j}} \right)$$
+``` math
+\hat{A}_{ij} = \exp\left(-\frac{d^2_{ij}}{\sigma_{i} \sigma_{j}}\right)
+```
 
-where $d_{ij}$ is the distance between points $i$ and $j$, and
-$\sigma_{i}$ and $\sigma_{j}$ are local scaling factors for points $i$
-and $j$ respectively. Previous methods had suggested empirically
-selecting a fixed value of $\sigma$ for the entire dataset, whereas
+where $`d_{ij}`$ is the distance between points $`i`$ and $`j`$, and
+$`\sigma_i`$ and $`\sigma_j`$ are local scaling factors for points $`i`$
+and $`j`$ respectively. Previous methods had suggested empirically
+selecting a fixed value of $`\sigma`$ for the entire dataset, whereas
 Zelnik-Manor and Perona suggest that there should be a per-point scaling
 factor, based on the local density around each point. To choose the
 local scaling factor, the authors suggest “studying the local statistics
@@ -39,24 +41,23 @@ different magnitudes”.
 
 Here’s how you do it:
 
-1.  Select a number of neighbors $k$. By default, this is determined
+1.  Select a number of neighbors $`k`$. By default, this is determined
     based on the number of points in the dataset, but is on the order of
     the UMAP default of `n_neighbors = 15`.
-2.  Select a number of “extended” neighbors, $k\prime$. This is set to
-    50.
-3.  Find the $k + k\prime + 1$ nearest neighbors for each point. The
-    `+ 1` bit is to account for the fact that the self-neighbor is
-    included in the nearest neighbor list (this is an implementation
-    detail of the PaCMAP code and not explicitly mentioned in the paper
-    but makes sense).
+2.  Select a number of “extended” neighbors, $`k'`$. This is set to 50.
+3.  Find the $`k + k' + 1`$ nearest neighbors for each point. The `+ 1`
+    bit is to account for the fact that the self-neighbor is included in
+    the nearest neighbor list (this is an implementation detail of the
+    PaCMAP code and not explicitly mentioned in the paper but makes
+    sense).
 4.  For each of the extended nearest neighbors, calculate the
-    locally-scaled distances as $d_{ij}^{2}/\sigma_{i}\sigma_{j}$ with
-    the same definition for $\sigma_{i}$ as in TriMap. Once again,
+    locally-scaled distances as $`d^2_{ij}/\sigma_{i} \sigma_{j}`$ with
+    the same definition for $`\sigma_i`$ as in TriMap. Once again,
     because of the self-neighbor, we need to use one more neighbor than
     mentioned in the paper, so in terms of UMAP, we actually use the
     average distance of the fifth-to-seventh nearest neighbors to define
-    $\sigma_{i}$.
-5.  Return the $k$ nearest neighbors based on the locally-scaled
+    $`\sigma_i`$.
+5.  Return the $`k`$ nearest neighbors based on the locally-scaled
     distances.
 
 PaCMAP does not actually make use of the distances from the near
@@ -79,6 +80,7 @@ Below is some code to generate a LSNN graph for use with `uwot`. Use
 `locally_scaled_knn` to create it from an input dataframe, e.g.
 
 ``` r
+
 lsnn15 <- locally_scaled_knn(data, n_neighbors = 15, n_extra = 50, n_threads = 6)
 ```
 
@@ -91,16 +93,19 @@ convert it to a locally scaled nearest neighbor graph of size
 `n_neighbors`, e.g.
 
 ``` r
+
 lsnn15 <- enn_to_lsnn(enn, n_neighbors = 15)
 ```
 
 You can then use it with UMAP like so:
 
 ``` r
+
 umap_res <- umap2(data, nn_method = lsnn15)
 ```
 
 ``` r
+
 locally_scaled_knn <- function(X,
                                n_neighbors = 15,
                                n_extra = 50,
@@ -284,21 +289,21 @@ the right. The number in parentheses after the dataset name is the
 degree of overlap of the 15-nearest neighbors between the two methods (0
 means no overlap, 1 means all neighbors are the same).
 
-|         Dataset          | UMAP-15                                                        | LSNN                                                           | UMAP-66                                                            |
-|:------------------------:|----------------------------------------------------------------|----------------------------------------------------------------|--------------------------------------------------------------------|
-|      mammoth (0.90)      | ![mammoth-umap](img/lsnn/umap/mammoth.png)                     | ![mammoth-lsnn](img/lsnn/lsnn/mammoth.png)                     | ![mammoth-umap66](img/lsnn/umap66/mammoth.png)                     |
-|    scurvehole (0.92)     | ![scurvehole-umap](img/lsnn/umap/scurvehole.png)               | ![scurvehole-lsnn](img/lsnn/lsnn/scurvehole.png)               | ![scurvehole-umap66](img/lsnn/umap66/scurvehole.png)               |
-|     isoswiss (0.92)      | ![isoswiss-umap](img/lsnn/umap/isoswiss.png)                   | ![isoswiss-lsnn](img/lsnn/lsnn/isoswiss.png)                   | ![isoswiss-umap66](img/lsnn/umap66/isoswiss.png)                   |
-|   hierarchical (0.76)    | ![hierarchical-umap](img/lsnn/umap/hierarchical.png)           | ![hierarchical-lsnn](img/lsnn/lsnn/hierarchical.png)           | ![hierarchical-umap66](img/lsnn/umap66/hierarchical.png)           |
-|      spheres (0.84)      | ![spheres-umap](img/lsnn/umap/spheres.png)                     | ![spheres-lsnn](img/lsnn/lsnn/spheres.png)                     | ![spheres-umap66](img/lsnn/umap66/spheres.png)                     |
-|      coil20 (0.84)       | ![coil20-umap](img/lsnn/umap/coil20.png)                       | ![coil20-lsnn](img/lsnn/lsnn/coil20.png)                       | ![coil20-umap66](img/lsnn/umap66/coil20.png)                       |
-|      coil100 (0.85)      | ![coil100-umap](img/lsnn/umap/coil100.png)                     | ![coil100-lsnn](img/lsnn/lsnn/coil100.png)                     | ![coil100-umap66](img/lsnn/umap66/coil100.png)                     |
-|    macosko2015 (0.40)    | ![macosko2015-umap](img/lsnn/umap/macosko2015.png)             | ![macosko2015-lsnn](img/lsnn/lsnn/macosko2015.png)             | ![macosko2015-umap66](img/lsnn/umap66/macosko2015.png)             |
+| Dataset | UMAP-15 | LSNN | UMAP-66 |
+|:--:|----|----|----|
+| mammoth (0.90) | ![mammoth-umap](img/lsnn/umap/mammoth.png) | ![mammoth-lsnn](img/lsnn/lsnn/mammoth.png) | ![mammoth-umap66](img/lsnn/umap66/mammoth.png) |
+| scurvehole (0.92) | ![scurvehole-umap](img/lsnn/umap/scurvehole.png) | ![scurvehole-lsnn](img/lsnn/lsnn/scurvehole.png) | ![scurvehole-umap66](img/lsnn/umap66/scurvehole.png) |
+| isoswiss (0.92) | ![isoswiss-umap](img/lsnn/umap/isoswiss.png) | ![isoswiss-lsnn](img/lsnn/lsnn/isoswiss.png) | ![isoswiss-umap66](img/lsnn/umap66/isoswiss.png) |
+| hierarchical (0.76) | ![hierarchical-umap](img/lsnn/umap/hierarchical.png) | ![hierarchical-lsnn](img/lsnn/lsnn/hierarchical.png) | ![hierarchical-umap66](img/lsnn/umap66/hierarchical.png) |
+| spheres (0.84) | ![spheres-umap](img/lsnn/umap/spheres.png) | ![spheres-lsnn](img/lsnn/lsnn/spheres.png) | ![spheres-umap66](img/lsnn/umap66/spheres.png) |
+| coil20 (0.84) | ![coil20-umap](img/lsnn/umap/coil20.png) | ![coil20-lsnn](img/lsnn/lsnn/coil20.png) | ![coil20-umap66](img/lsnn/umap66/coil20.png) |
+| coil100 (0.85) | ![coil100-umap](img/lsnn/umap/coil100.png) | ![coil100-lsnn](img/lsnn/lsnn/coil100.png) | ![coil100-umap66](img/lsnn/umap66/coil100.png) |
+| macosko2015 (0.40) | ![macosko2015-umap](img/lsnn/umap/macosko2015.png) | ![macosko2015-lsnn](img/lsnn/lsnn/macosko2015.png) | ![macosko2015-umap66](img/lsnn/umap66/macosko2015.png) |
 | macosko2015pca100 (0.66) | ![macosko2015pca100-umap](img/lsnn/umap/macosko2015pca100.png) | ![macosko2015pca100-lsnn](img/lsnn/lsnn/macosko2015pca100.png) | ![macosko2015pca100-umap66](img/lsnn/umap66/macosko2015pca100.png) |
-|       mnist (0.76)       | ![mnist-umap](img/lsnn/umap/mnist.png)                         | ![mnist-lsnn](img/lsnn/lsnn/mnist.png)                         | ![mnist-umap66](img/lsnn/umap66/mnist.png)                         |
-|      fashion (0.69)      | ![fashion-umap](img/lsnn/umap/fashion.png)                     | ![fashion-lsnn](img/lsnn/lsnn/fashion.png)                     | ![fashion-umap66](img/lsnn/umap66/fashion.png)                     |
-|       norb (0.78)        | ![norb-umap](img/lsnn/umap/norb.png)                           | ![norb-lsnn](img/lsnn/lsnn/norb.png)                           | ![norb-umap66](img/lsnn/umap66/norb.png)                           |
-|       ng20 (0.67)        | ![ng20-umap](img/lsnn/umap/ng20.png)                           | ![ng20-lsnn](img/lsnn/lsnn/ng20.png)                           | ![ng20-umap66](img/lsnn/umap66/ng20.png)                           |
+| mnist (0.76) | ![mnist-umap](img/lsnn/umap/mnist.png) | ![mnist-lsnn](img/lsnn/lsnn/mnist.png) | ![mnist-umap66](img/lsnn/umap66/mnist.png) |
+| fashion (0.69) | ![fashion-umap](img/lsnn/umap/fashion.png) | ![fashion-lsnn](img/lsnn/lsnn/fashion.png) | ![fashion-umap66](img/lsnn/umap66/fashion.png) |
+| norb (0.78) | ![norb-umap](img/lsnn/umap/norb.png) | ![norb-lsnn](img/lsnn/lsnn/norb.png) | ![norb-umap66](img/lsnn/umap66/norb.png) |
+| ng20 (0.67) | ![ng20-umap](img/lsnn/umap/ng20.png) | ![ng20-lsnn](img/lsnn/lsnn/ng20.png) | ![ng20-umap66](img/lsnn/umap66/ng20.png) |
 
 The average overlap is in the 77-78% range. Clearly, low-dimensional
 datasets show the smallest difference in overlap, but higher

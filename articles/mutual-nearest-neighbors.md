@@ -37,33 +37,34 @@ effect on UMAP.
 Although in a kNN graph each item only has k neighbors, any workable
 dimensionality reduction working on the kNN graph as input will
 symmetrize that graph, otherwise optimization is difficult. The outcome
-of symmetrizing the kNN graph is that if $j$ is a neighbor of $i$ in the
-kNN graph, $i$ is also guaranteed to be a neighbor of $j$ in the
+of symmetrizing the kNN graph is that if $`j`$ is a neighbor of $`i`$ in
+the kNN graph, $`i`$ is also guaranteed to be a neighbor of $`j`$ in the
 symmetrized graph and *vice versa*. If one item tends to show up in a
 lot of the kNN lists of multiple items, the symmetrization means that
-there can be up to $N$ edges involving that very popular item. These are
-called hubs and not only do they make search on the graph more difficult
-(that item will be likely to show up in most queries) but because for a
-given $k$ there are a limited number of edges to distribute over the
-dataset, some items are not getting their fair share. This is more
-likely to lead to outlier points that get embedded far away from the
-main body of the data as they have no particularly strong bonds to the
-rest of the data.
+there can be up to $`N`$ edges involving that very popular item. These
+are called hubs and not only do they make search on the graph more
+difficult (that item will be likely to show up in most queries) but
+because for a given $`k`$ there are a limited number of edges to
+distribute over the dataset, some items are not getting their fair
+share. This is more likely to lead to outlier points that get embedded
+far away from the main body of the data as they have no particularly
+strong bonds to the rest of the data.
 
 ## Mutual k-Nearest Neighbors
 
 You can think of the mutual k-nearest neighbors graph (the MNN graph) as
-being a symmetrized kNN graph where edges only appear if item $i$ was a
-neighbor of $j$*and* $j$ was a neighbor of $i$: in the symmetrized kNN
-graph described above the requirement is only that $i$ be a neighbor of
-$j$*or* $j$ be a neighbor of $i$. This means that an item can have no
-more than $k$ mutual neighbors. Hub problem solved.
+being a symmetrized kNN graph where edges only appear if item $`i`$ was
+a neighbor of $`j`$*and* $`j`$ was a neighbor of $`i`$: in the
+symmetrized kNN graph described above the requirement is only that $`i`$
+be a neighbor of $`j`$*or* $`j`$ be a neighbor of $`i`$. This means that
+an item can have no more than $`k`$ mutual neighbors. Hub problem
+solved.
 
 ## The Problem with Mutual k-Nearest Neighbors
 
 The downside of the MNN graph is that even in very well-behaved kNN
 graphs, the MNN will contain several items with no edges to any other
-item: while they have $k$ nearest neighbors, none of those neighbors
+item: while they have $`k`$ nearest neighbors, none of those neighbors
 reciprocate. UMAP requires local connectivity, so it cannot handle a use
 case where we have such Billy no-mates items.
 
@@ -90,18 +91,18 @@ This is not very surprising.
 As I don’t currently fancy implementing any of the path neighbor
 approach, I propose the following strategy: just add back more than one
 neighbor to disconnected nodes. In fact, we would probably do well to
-ensure every item in the dataset has at least $m$ neighbors where
-$m < k$, not just items which are completely disconnected, as we can
+ensure every item in the dataset has at least $`m`$ neighbors where
+$`m \lt k`$, not just items which are completely disconnected, as we can
 already see that items with only one neighbor don’t do a good job.
 Obviously adding back all the neighbors would recreate the original
-symmetrized kNN graph, so we want to keep $m$ small, but bigger than
+symmetrized kNN graph, so we want to keep $`m`$ small, but bigger than
 one.
 
 To name this concept I am going with the “Balanced MNN graph” where
 “balanced” is meant to suggest that we are trying to ensure that no node
 is left too isolated in the MNN graph. To be specific with numbers I
-will refer to a ($k$, $m$)-BMNN graph. I would welcome hearing if there
-is existing literature with a different (probably better) name.
+will refer to a ($`k`$, $`m`$)-BMNN graph. I would welcome hearing if
+there is existing literature with a different (probably better) name.
 
 ## Creating the BMNN
 
@@ -109,24 +110,25 @@ The basic formula for creating the BMNN graph is as follows:
 
 1.  Create the kNN graph.
 2.  Form the equivalent MNN graph.
-3.  Are there any nodes with fewer than $m$ neighbors? If not, we stop.
-    Otherwise:
-4.  Add back the $m$th-nearest neighbor from the kNN graph to each of
+3.  Are there any nodes with fewer than $`m`$ neighbors? If not, we
+    stop. Otherwise:
+4.  Add back the $`m`$th-nearest neighbor from the kNN graph to each of
     those nodes.
 5.  Go to step 3.
 
-The loop in steps 3-5 must terminate in $m$ steps: at worst, for items
-with 0 neighbors, we add all the $m$-th nearest neighbors. For items
-with 1-($m$-1) neighbors, we don’t know if the $m$-th nearest neighbor
-is already a neighbor. If it isn’t we are one step closer to
+The loop in steps 3-5 must terminate in $`m`$ steps: at worst, for items
+with 0 neighbors, we add all the $`m`$-th nearest neighbors. For items
+with 1-($`m`$-1) neighbors, we don’t know if the $`m`$-th nearest
+neighbor is already a neighbor. If it isn’t we are one step closer to
 termination. If it is, then adding the edge will do nothing. So we can’t
-add more than $m$ edges to any node and none of these nodes will get too
-many edges added.
+add more than $`m`$ edges to any node and none of these nodes will get
+too many edges added.
 
 Creating the MNN from the sparse kNN representation is easy, assuming
 your distances are symmetrical:
 
 ``` r
+
 sp_mutual <- function(sp) {
   sp_t <- Matrix::t(sp)
   res <- sqrt(sp * sp_t)
@@ -169,7 +171,7 @@ One slightly weird thing about specifying `m` is that you will actually
 get back one less edge than the value you ask for. This is because in
 the dense format every item’s nearest neighbor is itself with a distance
 of zero. This disappears when we convert to the sparse format. As a
-result your dense k-nearest neighbor graph only contains $k - 1$
+result your dense k-nearest neighbor graph only contains $`k-1`$
 different neighbors for each item. The self-neighbor thing counting as
 one of the neighbors is always how UMAP has done it, so we won’t be
 changing the habit of a lifetime. You will just have to remember to
@@ -177,6 +179,7 @@ reproduce the “adjacent neighbor” method you must specify `m = 2`. The
 function won’t let you go lower than `m = 2` anyway.
 
 ``` r
+
 # create an m-balanced k-mutual nearest neighbors graph from the dense k-nearest
 # neighbors graph `nn_graph`. m must be less than or equal to k. If `k` is not
 # specified then all of the neighbors are used.
@@ -318,6 +321,7 @@ case anyway.
 Putting this together, my recommended workflow is:
 
 ``` r
+
 library(rnndescent)
 librart(uwot)
 # get the approximate knn: use as many threads as you want
@@ -354,9 +358,9 @@ used by Dalmia and Sia, and an embedding using the (15, 5)-BMNN graph
 which (I hope) should give a more “connected” embedding. You can click
 on any of the images to see a (slightly) larger version.
 
-| Dataset | 15-NN                                          | (15,2)-BMNN                                          | (15,5)-BMNN                                          |
-|:-------:|------------------------------------------------|------------------------------------------------------|------------------------------------------------------|
-|  MNIST  | ![mnist-knn_15](img/bmnn/mnist-knn_15.png)     | ![mnist-bmnn_15_2](img/bmnn/mnist-bmnn_15_2.png)     | ![mnist-bmnn_15_5](img/bmnn/mnist-bmnn_15_5.png)     |
+| Dataset | 15-NN | (15,2)-BMNN | (15,5)-BMNN |
+|:--:|----|----|----|
+| MNIST | ![mnist-knn_15](img/bmnn/mnist-knn_15.png) | ![mnist-bmnn_15_2](img/bmnn/mnist-bmnn_15_2.png) | ![mnist-bmnn_15_5](img/bmnn/mnist-bmnn_15_5.png) |
 | fashion | ![fashion-knn_15](img/bmnn/fashion-knn_15.png) | ![fashion-bmnn_15_2](img/bmnn/fashion-bmnn_15_2.png) | ![fashion-bmnn_15_5](img/bmnn/fashion-bmnn_15_5.png) |
 
 Although it’s not that easy to see unless you click on the image, the
@@ -383,9 +387,9 @@ show a series of loops, but some of which typically get a bit tangled up
 together or mangled. If ever there were some datasets that might benefit
 from focusing on the mutual neighbors, it’s these two.
 
-| Dataset | 15-NN                                          | (15,5)-BMNN                                          |
-|:-------:|------------------------------------------------|------------------------------------------------------|
-| coil20  | ![coil20-knn_15](img/bmnn/coil20-knn_15.png)   | ![coil20-bmnn_15_5](img/bmnn/coil20-bmnn_15_5.png)   |
+| Dataset | 15-NN | (15,5)-BMNN |
+|:--:|----|----|
+| coil20 | ![coil20-knn_15](img/bmnn/coil20-knn_15.png) | ![coil20-bmnn_15_5](img/bmnn/coil20-bmnn_15_5.png) |
 | coil100 | ![coil100-knn_15](img/bmnn/coil100-knn_15.png) | ![coil100-bmnn_15_5](img/bmnn/coil100-bmnn_15_5.png) |
 
 I no longer feel like I am lying to myself when I say I can see a
@@ -430,13 +434,13 @@ for. These include:
   loops and other structure in UMAP. So could using the MNN graph
   improve matters further as it has for COIL-20 and COIL-100?
 
-|      Dataset      | 15-NN                                                              | (15,5)-BMNN                                                              |
-|:-----------------:|--------------------------------------------------------------------|--------------------------------------------------------------------------|
-|       norb        | ![norb-knn_15](img/bmnn/norb-knn_15.png)                           | ![norb-bmnn_15_5](img/bmnn/norb-bmnn_15_5.png)                           |
-|    macosko2015    | ![macosko2015-knn_15](img/bmnn/macosko2015-knn_15.png)             | ![macosko2015-bmnn_15_5](img/bmnn/macosko2015-bmnn_15_5.png)             |
+| Dataset | 15-NN | (15,5)-BMNN |
+|:--:|----|----|
+| norb | ![norb-knn_15](img/bmnn/norb-knn_15.png) | ![norb-bmnn_15_5](img/bmnn/norb-bmnn_15_5.png) |
+| macosko2015 | ![macosko2015-knn_15](img/bmnn/macosko2015-knn_15.png) | ![macosko2015-bmnn_15_5](img/bmnn/macosko2015-bmnn_15_5.png) |
 | macosko2015pca100 | ![macosko2015pca100-knn_15](img/bmnn/macosko2015pca100-knn_15.png) | ![macosko2015pca100-bmnn_15_5](img/bmnn/macosko2015pca100-bmnn_15_5.png) |
-|       20NG        | ![ng20-knn_15](img/bmnn/ng20-knn_15.png)                           | ![ng20-bmnn_15_5](img/bmnn/ng20-bmnn_15_5.png)                           |
-|      cifar10      | ![cifar10-knn_15](img/bmnn/cifar10-knn_15.png)                     | ![cifar10-bmnn_15_5](img/bmnn/cifar10-bmnn_15_5.png)                     |
+| 20NG | ![ng20-knn_15](img/bmnn/ng20-knn_15.png) | ![ng20-bmnn_15_5](img/bmnn/ng20-bmnn_15_5.png) |
+| cifar10 | ![cifar10-knn_15](img/bmnn/cifar10-knn_15.png) | ![cifar10-bmnn_15_5](img/bmnn/cifar10-bmnn_15_5.png) |
 
 Ok, so it turns out that the BMNN graph doesn’t really help in any of
 these cases. `norb` is particularly disappointing in that it noticeably
@@ -481,9 +485,9 @@ Possilbly, a larger values of `k` means we also need a larger value of
 `m` to get a good result but let’s see if we can get away with just
 changing one parameter.
 
-| Dataset | 50-NN                                    | (50,5)-BMNN                                    |
-|:-------:|------------------------------------------|------------------------------------------------|
-|  norb   | ![norb-knn_50](img/bmnn/norb-knn_50.png) | ![norb-bmnn_50_5](img/bmnn/norb-bmnn_50_5.png) |
+| Dataset | 50-NN | (50,5)-BMNN |
+|:--:|----|----|
+| norb | ![norb-knn_50](img/bmnn/norb-knn_50.png) | ![norb-bmnn_50_5](img/bmnn/norb-bmnn_50_5.png) |
 
 Ok, I am back to not hating BMNN for `norb`. Results are a bit messy,
 but it’s definitely doing something: the BMNN separates out the objects

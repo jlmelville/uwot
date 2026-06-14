@@ -598,6 +598,7 @@ World Wide Web Conferences Steering Committee.
 ## Examples
 
 ``` r
+
 iris30 <- iris[c(1:10, 51:60, 101:110), ]
 
 # return a 30 x 30 sparse matrix with similarity data based on 10 nearest

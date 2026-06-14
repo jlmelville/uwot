@@ -109,6 +109,7 @@ get this by setting `init = "lvrand"`.
 To summarize your options:
 
 ``` r
+
 # Default initialization: use spectral initialization if possible
 # falling back to scaled PCA if multiple components are found in the graph
 embedding <- umap2(data)
@@ -152,6 +153,7 @@ don’t expect that to have a major effect on the results. Some typical
 commands using the `iris` dataset would be:
 
 ``` r
+
 set.seed(1337)
 # Using the `umap` function with spca initialization
 iris_umap <- umap(iris, init = "spca")
@@ -179,112 +181,112 @@ fall back to similar results as seen with `init = "pca"`.
 
 ### iris
 
-|                pca                 |                    agspectral                    |
-|:----------------------------------:|:------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![iris pca](img/init/iris-pca.png) | ![iris agspectral](img/init/iris-agspectral.png) |
 
 ### s1k
 
-|               pca                |                   agspectral                   |
-|:--------------------------------:|:----------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![s1k pca](img/init/s1k-pca.png) | ![s1k agspectral](img/init/s1k-agspectral.png) |
 
-|                  spectral                  |                  laplacian                   |
-|:------------------------------------------:|:--------------------------------------------:|
+| spectral | laplacian |
+|:--:|:--:|
 | ![s1k spectral](img/init/s1k-spectral.png) | ![s1k laplacian](img/init/s1k-laplacian.png) |
 
 ### olivetti
 
-|                    pca                     |                        agspectral                        |
-|:------------------------------------------:|:--------------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![olivetti pca](img/init/olivetti-pca.png) | ![olivetti agspectral](img/init/olivetti-agspectral.png) |
 
-|                       spectral                       |                       laplacian                        |
-|:----------------------------------------------------:|:------------------------------------------------------:|
+| spectral | laplacian |
+|:--:|:--:|
 | ![olivetti spectral](img/init/olivetti-spectral.png) | ![olivetti laplacian](img/init/olivetti-laplacian.png) |
 
 ### frey
 
-|                pca                 |                    agspectral                    |
-|:----------------------------------:|:------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![frey pca](img/init/frey-pca.png) | ![frey agspectral](img/init/frey-agspectral.png) |
 
-|                   spectral                   |                   laplacian                    |
-|:--------------------------------------------:|:----------------------------------------------:|
+| spectral | laplacian |
+|:--:|:--:|
 | ![frey spectral](img/init/frey-spectral.png) | ![frey laplacian](img/init/frey-laplacian.png) |
 
 ### coil20
 
-|                  pca                   |                      agspectral                      |
-|:--------------------------------------:|:----------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![coil20 pca](img/init/coil20-pca.png) | ![coil20 agspectral](img/init/coil20-agspectral.png) |
 
 ### coil100
 
-|                   pca                    |                       agspectral                       |
-|:----------------------------------------:|:------------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![coil100 pca](img/init/coil100-pca.png) | ![coil100 agspectral](img/init/coil100-agspectral.png) |
 
 ### mnist
 
-|                 pca                  |                     agspectral                     |
-|:------------------------------------:|:--------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![mnist pca](img/init/mnist-pca.png) | ![mnist agspectral](img/init/mnist-agspectral.png) |
 
-|                    spectral                    |                    laplacian                     |
-|:----------------------------------------------:|:------------------------------------------------:|
+| spectral | laplacian |
+|:--:|:--:|
 | ![mnist spectral](img/init/mnist-spectral.png) | ![mnist laplacian](img/init/mnist-laplacian.png) |
 
 ### fashion
 
-|                   pca                    |                       agspectral                       |
-|:----------------------------------------:|:------------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![fashion pca](img/init/fashion-pca.png) | ![fashion agspectral](img/init/fashion-agspectral.png) |
 
-|                      spectral                      |                      laplacian                       |
-|:--------------------------------------------------:|:----------------------------------------------------:|
+| spectral | laplacian |
+|:--:|:--:|
 | ![fashion spectral](img/init/fashion-spectral.png) | ![fashion laplacian](img/init/fashion-laplacian.png) |
 
 ### kuzushiji
 
-|                     pca                      |                         agspectral                         |
-|:--------------------------------------------:|:----------------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![kuzushiji pca](img/init/kuzushiji-pca.png) | ![kuzushiji agspectral](img/init/kuzushiji-agspectral.png) |
 
-|                        spectral                        |                        laplacian                         |
-|:------------------------------------------------------:|:--------------------------------------------------------:|
+| spectral | laplacian |
+|:--:|:--:|
 | ![kuzushiji spectral](img/init/kuzushiji-spectral.png) | ![kuzushiji laplacian](img/init/kuzushiji-laplacian.png) |
 
 ### norb
 
-|                pca                 |                    agspectral                    |
-|:----------------------------------:|:------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![norb pca](img/init/norb-pca.png) | ![norb agspectral](img/init/norb-agspectral.png) |
 
 ### tasic2018
 
-|                     pca                      |                         agspectral                         |
-|:--------------------------------------------:|:----------------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![tasic2018 pca](img/init/tasic2018-pca.png) | ![tasic2018 agspectral](img/init/tasic2018-agspectral.png) |
 
 ### macosko2015pca100
 
-|                             pca                              |                                 agspectral                                 |
-|:------------------------------------------------------------:|:--------------------------------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![macosko2015pca100 pca](img/init/macosko2015pca100-pca.png) | ![macosko2015pca100 agspectral](img/init/macosko2015pca100-agspectral.png) |
 
-|                                spectral                                |                                laplacian                                 |
-|:----------------------------------------------------------------------:|:------------------------------------------------------------------------:|
+| spectral | laplacian |
+|:--:|:--:|
 | ![macosko2015pca100 spectral](img/init/macosko2015pca100-spectral.png) | ![macosko2015pca100 laplacian](img/init/macosko2015pca100-laplacian.png) |
 
 ### isoswiss
 
-|                    pca                     |                        agspectral                        |
-|:------------------------------------------:|:--------------------------------------------------------:|
+| pca | agspectral |
+|:--:|:--:|
 | ![isoswiss pca](img/init/isoswiss-pca.png) | ![isoswiss agspectral](img/init/isoswiss-agspectral.png) |
 
-|                       spectral                       |                       laplacian                        |
-|:----------------------------------------------------:|:------------------------------------------------------:|
+| spectral | laplacian |
+|:--:|:--:|
 | ![isoswiss spectral](img/init/isoswiss-spectral.png) | ![isoswiss laplacian](img/init/isoswiss-laplacian.png) |
 
 There are really only minor differences between the PCA results and the
@@ -318,6 +320,7 @@ get a sense for how much variation you can expect from getting lucky or
 not with the initialization.
 
 ``` r
+
 # left-hand plots used this seed
 set.seed(1337)
 # right-hand plots used this seed
@@ -327,80 +330,80 @@ iris_umap <- umap(iris, init = "rand")
 
 ### iris
 
-|                 seed = 1337                  |                seed = 42                 |
-|:--------------------------------------------:|:----------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![iris rand1337](img/init/iris-rand1337.png) | ![iris rand42](img/init/iris-rand42.png) |
 
 ### s1k
 
-|                seed = 1337                 |               seed = 42                |
-|:------------------------------------------:|:--------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![s1k rand1337](img/init/s1k-rand1337.png) | ![s1k rand42](img/init/s1k-rand42.png) |
 
 ### olivetti
 
-|                     seed = 1337                      |                    seed = 42                     |
-|:----------------------------------------------------:|:------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![olivetti rand1337](img/init/olivetti-rand1337.png) | ![olivetti rand42](img/init/olivetti-rand42.png) |
 
 ### frey
 
-|                 seed = 1337                  |                seed = 42                 |
-|:--------------------------------------------:|:----------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![frey rand1337](img/init/frey-rand1337.png) | ![frey rand42](img/init/frey-rand42.png) |
 
 ### coil20
 
-|                   seed = 1337                    |                  seed = 42                   |
-|:------------------------------------------------:|:--------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![coil20 rand1337](img/init/coil20-rand1337.png) | ![coil20 rand42](img/init/coil20-rand42.png) |
 
 ### coil100
 
-|                    seed = 1337                     |                   seed = 42                    |
-|:--------------------------------------------------:|:----------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![coil100 rand1337](img/init/coil100-rand1337.png) | ![coil100 rand42](img/init/coil100-rand42.png) |
 
 ### mnist
 
-|                  seed = 1337                   |                 seed = 42                  |
-|:----------------------------------------------:|:------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![mnist rand1337](img/init/mnist-rand1337.png) | ![mnist rand42](img/init/mnist-rand42.png) |
 
 ### fashion
 
-|                    seed = 1337                     |                   seed = 42                    |
-|:--------------------------------------------------:|:----------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![fashion rand1337](img/init/fashion-rand1337.png) | ![fashion rand42](img/init/fashion-rand42.png) |
 
 ### kuzushiji
 
-|                      seed = 1337                       |                     seed = 42                      |
-|:------------------------------------------------------:|:--------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![kuzushiji rand1337](img/init/kuzushiji-rand1337.png) | ![kuzushiji rand42](img/init/kuzushiji-rand42.png) |
 
 ### norb
 
-|                 seed = 1337                  |                seed = 42                 |
-|:--------------------------------------------:|:----------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![norb rand1337](img/init/norb-rand1337.png) | ![norb rand42](img/init/norb-rand42.png) |
 
 ### tasic2018
 
-|                      seed = 1337                       |                     seed = 42                      |
-|:------------------------------------------------------:|:--------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![tasic2018 rand1337](img/init/tasic2018-rand1337.png) | ![tasic2018 rand42](img/init/tasic2018-rand42.png) |
 
 ### macosko2015pca100
 
-|                              seed = 1337                               |                             seed = 42                              |
-|:----------------------------------------------------------------------:|:------------------------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![macosko2015pca100 rand1337](img/init/macosko2015pca100-rand1337.png) | ![macosko2015pca100 rand42](img/init/macosko2015pca100-rand42.png) |
 
 ### isoswiss
 
-|                     seed = 1337                      |                    seed = 42                     |
-|:----------------------------------------------------:|:------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![isoswiss rand1337](img/init/isoswiss-rand1337.png) | ![isoswiss rand42](img/init/isoswiss-rand42.png) |
 
 Results are not terrible for the smaller datasets, but for anything
@@ -415,6 +418,7 @@ smaller initial range of coordinate values. Will it make much
 difference?
 
 ``` r
+
 # left-hand plots used this seed
 set.seed(1337)
 # right-hand plots used this seed
@@ -424,80 +428,80 @@ iris_umap <- umap(iris, init = "lvrand")
 
 ### iris
 
-|                   seed = 1337                    |                  seed = 42                   |
-|:------------------------------------------------:|:--------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![iris lvrand1337](img/init/iris-lvrand1337.png) | ![iris lvrand42](img/init/iris-lvrand42.png) |
 
 ### s1k
 
-|                  seed = 1337                   |                 seed = 42                  |
-|:----------------------------------------------:|:------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![s1k lvrand1337](img/init/s1k-lvrand1337.png) | ![s1k lvrand42](img/init/s1k-lvrand42.png) |
 
 ### olivetti
 
-|                       seed = 1337                        |                      seed = 42                       |
-|:--------------------------------------------------------:|:----------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![olivetti lvrand1337](img/init/olivetti-lvrand1337.png) | ![olivetti lvrand42](img/init/olivetti-lvrand42.png) |
 
 ### frey
 
-|                   seed = 1337                    |                  seed = 42                   |
-|:------------------------------------------------:|:--------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![frey lvrand1337](img/init/frey-lvrand1337.png) | ![frey lvrand42](img/init/frey-lvrand42.png) |
 
 ### coil20
 
-|                     seed = 1337                      |                    seed = 42                     |
-|:----------------------------------------------------:|:------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![coil20 lvrand1337](img/init/coil20-lvrand1337.png) | ![coil20 lvrand42](img/init/coil20-lvrand42.png) |
 
 ### coil100
 
-|                      seed = 1337                       |                     seed = 42                      |
-|:------------------------------------------------------:|:--------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![coil100 lvrand1337](img/init/coil100-lvrand1337.png) | ![coil100 lvrand42](img/init/coil100-lvrand42.png) |
 
 ### mnist
 
-|                    seed = 1337                     |                   seed = 42                    |
-|:--------------------------------------------------:|:----------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![mnist lvrand1337](img/init/mnist-lvrand1337.png) | ![mnist lvrand42](img/init/mnist-lvrand42.png) |
 
 ### fashion
 
-|                      seed = 1337                       |                     seed = 42                      |
-|:------------------------------------------------------:|:--------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![fashion lvrand1337](img/init/fashion-lvrand1337.png) | ![fashion lvrand42](img/init/fashion-lvrand42.png) |
 
 ### kuzushiji
 
-|                        seed = 1337                         |                       seed = 42                        |
-|:----------------------------------------------------------:|:------------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![kuzushiji lvrand1337](img/init/kuzushiji-lvrand1337.png) | ![kuzushiji lvrand42](img/init/kuzushiji-lvrand42.png) |
 
 ### norb
 
-|                   seed = 1337                    |                  seed = 42                   |
-|:------------------------------------------------:|:--------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![norb lvrand1337](img/init/norb-lvrand1337.png) | ![norb lvrand42](img/init/norb-lvrand42.png) |
 
 ### tasic2018
 
-|                        seed = 1337                         |                       seed = 42                        |
-|:----------------------------------------------------------:|:------------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![tasic2018 lvrand1337](img/init/tasic2018-lvrand1337.png) | ![tasic2018 lvrand42](img/init/tasic2018-lvrand42.png) |
 
 ### macosko2015pca100
 
-|                                seed = 1337                                 |                               seed = 42                                |
-|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![macosko2015pca100 lvrand1337](img/init/macosko2015pca100-lvrand1337.png) | ![macosko2015pca100 lvrand42](img/init/macosko2015pca100-lvrand42.png) |
 
 ### isoswiss
 
-|                     seed = 1337                      |                    seed = 42                     |
-|:----------------------------------------------------:|:------------------------------------------------:|
+| seed = 1337 | seed = 42 |
+|:--:|:--:|
 | ![isoswiss rand1337](img/init/isoswiss-rand1337.png) | ![isoswiss rand42](img/init/isoswiss-rand42.png) |
 
 No, it doesn’t make a huge difference.

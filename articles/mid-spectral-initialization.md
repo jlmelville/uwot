@@ -78,6 +78,7 @@ Below are some functions to make this work. Note that:
 To use this code do something like:
 
 ``` r
+
 nn_graph <- rnndescent::rnnd_knn(X, k = 15)
 init_coords <- mid_spectral_init(X, nn_graph, mid_nnbrs = 4, graph_weight = 0.9)
 umap_res <- umap2(X, nn_method = nn_graph, init = init_coords)
@@ -90,6 +91,7 @@ the nearest neighbor graph in the combined graph. The higher the value,
 the more like the typical spectral initialization you will get.
 
 ``` r
+
 pacmap_mid_nbrs <- function(X,
                             k = 10,
                             n_rand = 6,
@@ -239,16 +241,16 @@ initialization). I’ve also included the PCA results for comparison.
 
 ### mammoth
 
-|                                 pca                                  |                                0                                 |                                  0.25                                  |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![mammoth-pca](img/mid-spectral-initialization/init/mammoth-pca.png) | ![mammoth-0](img/mid-spectral-initialization/init/mammoth-0.png) | ![mammoth-0.25](img/mid-spectral-initialization/init/mammoth-0.25.png) |
 
-|                                 0.5                                  |                                  0.75                                  |                                 0.9                                  |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------------:|:--------------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![mammoth-0.5](img/mid-spectral-initialization/init/mammoth-0.5.png) | ![mammoth-0.75](img/mid-spectral-initialization/init/mammoth-0.75.png) | ![mammoth-0.9](img/mid-spectral-initialization/init/mammoth-0.9.png) |
 
-|                                  0.99                                  |                                  0.999                                   |                                1                                 |
-|:----------------------------------------------------------------------:|:------------------------------------------------------------------------:|:----------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![mammoth-0.99](img/mid-spectral-initialization/init/mammoth-0.99.png) | ![mammoth-0.999](img/mid-spectral-initialization/init/mammoth-0.999.png) | ![mammoth-1](img/mid-spectral-initialization/init/mammoth-1.png) |
 
 First of all, sorry about the odd orientation of the mammoth, but them’s
@@ -289,16 +291,16 @@ optimization helps fix that). What you certainly won’t want to do is to
 use PCA in this case. Given that PCA-ness seems to creep into the
 `mammoth` results with `graph_weight` \< 1, let’s see what happens.
 
-|                                  pca                                   |                                 0                                  |                                   0.25                                   |
-|:----------------------------------------------------------------------:|:------------------------------------------------------------------:|:------------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![isoswiss-pca](img/mid-spectral-initialization/init/isoswiss-pca.png) | ![isoswiss-0](img/mid-spectral-initialization/init/isoswiss-0.png) | ![isoswiss-0.25](img/mid-spectral-initialization/init/isoswiss-0.25.png) |
 
-|                                  0.5                                   |                                   0.75                                   |                                  0.9                                   |
-|:----------------------------------------------------------------------:|:------------------------------------------------------------------------:|:----------------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![isoswiss-0.5](img/mid-spectral-initialization/init/isoswiss-0.5.png) | ![isoswiss-0.75](img/mid-spectral-initialization/init/isoswiss-0.75.png) | ![isoswiss-0.9](img/mid-spectral-initialization/init/isoswiss-0.9.png) |
 
-|                                   0.99                                   |                                   0.999                                    |                                 1                                  |
-|:------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:------------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![isoswiss-0.99](img/mid-spectral-initialization/init/isoswiss-0.99.png) | ![isoswiss-0.999](img/mid-spectral-initialization/init/isoswiss-0.999.png) | ![isoswiss-1](img/mid-spectral-initialization/init/isoswiss-1.png) |
 
 Hard to really see here, but in the `pca` case you are basically looking
@@ -315,16 +317,16 @@ One more low-dimensional and manifold-based dataset:
 
 ### scurvehole
 
-|                                    pca                                     |                                   0                                    |                                     0.25                                     |
-|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------:|:----------------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![scurvehole-pca](img/mid-spectral-initialization/init/scurvehole-pca.png) | ![scurvehole-0](img/mid-spectral-initialization/init/scurvehole-0.png) | ![scurvehole-0.25](img/mid-spectral-initialization/init/scurvehole-0.25.png) |
 
-|                                    0.5                                     |                                     0.75                                     |                                    0.9                                     |
-|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![scurvehole-0.5](img/mid-spectral-initialization/init/scurvehole-0.5.png) | ![scurvehole-0.75](img/mid-spectral-initialization/init/scurvehole-0.75.png) | ![scurvehole-0.9](img/mid-spectral-initialization/init/scurvehole-0.9.png) |
 
-|                                     0.99                                     |                                     0.999                                      |                                   1                                    |
-|:----------------------------------------------------------------------------:|:------------------------------------------------------------------------------:|:----------------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![scurvehole-0.99](img/mid-spectral-initialization/init/scurvehole-0.99.png) | ![scurvehole-0.999](img/mid-spectral-initialization/init/scurvehole-0.999.png) | ![scurvehole-1](img/mid-spectral-initialization/init/scurvehole-1.png) |
 
 No real sign of the PCA result here. The “horseshoe” shape is apparent
@@ -340,16 +342,16 @@ dimensional more “blobby” dataset. Like `mnist`:
 
 ### mnist
 
-|                               pca                                |                              0                               |                                0.25                                |
-|:----------------------------------------------------------------:|:------------------------------------------------------------:|:------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![mnist-pca](img/mid-spectral-initialization/init/mnist-pca.png) | ![mnist-0](img/mid-spectral-initialization/init/mnist-0.png) | ![mnist-0.25](img/mid-spectral-initialization/init/mnist-0.25.png) |
 
-|                               0.5                                |                                0.75                                |                               0.9                                |
-|:----------------------------------------------------------------:|:------------------------------------------------------------------:|:----------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![mnist-0.5](img/mid-spectral-initialization/init/mnist-0.5.png) | ![mnist-0.75](img/mid-spectral-initialization/init/mnist-0.75.png) | ![mnist-0.9](img/mid-spectral-initialization/init/mnist-0.9.png) |
 
-|                                0.99                                |                                0.999                                 |                              1                               |
-|:------------------------------------------------------------------:|:--------------------------------------------------------------------:|:------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![mnist-0.99](img/mid-spectral-initialization/init/mnist-0.99.png) | ![mnist-0.999](img/mid-spectral-initialization/init/mnist-0.999.png) | ![mnist-1](img/mid-spectral-initialization/init/mnist-1.png) |
 
 You can also get to something that looks very spectral-like with with a
@@ -361,16 +363,16 @@ Let’s try one more high-dimensional dataset:
 
 ### fashion
 
-|                                 pca                                  |                                0                                 |                                  0.25                                  |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![fashion-pca](img/mid-spectral-initialization/init/fashion-pca.png) | ![fashion-0](img/mid-spectral-initialization/init/fashion-0.png) | ![fashion-0.25](img/mid-spectral-initialization/init/fashion-0.25.png) |
 
-|                                 0.5                                  |                                  0.75                                  |                                 0.9                                  |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------------:|:--------------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![fashion-0.5](img/mid-spectral-initialization/init/fashion-0.5.png) | ![fashion-0.75](img/mid-spectral-initialization/init/fashion-0.75.png) | ![fashion-0.9](img/mid-spectral-initialization/init/fashion-0.9.png) |
 
-|                                  0.99                                  |                                  0.999                                   |                                1                                 |
-|:----------------------------------------------------------------------:|:------------------------------------------------------------------------:|:----------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![fashion-0.99](img/mid-spectral-initialization/init/fashion-0.99.png) | ![fashion-0.999](img/mid-spectral-initialization/init/fashion-0.999.png) | ![fashion-1](img/mid-spectral-initialization/init/fashion-1.png) |
 
 Sort of the same deal here as with `mnist`.
@@ -386,16 +388,16 @@ successful spectral initialization because of the slow convergence.
 
 ### tomoradar
 
-|                                   pca                                    |                                  0                                   |                                    0.25                                    |
-|:------------------------------------------------------------------------:|:--------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![tomoradar-pca](img/mid-spectral-initialization/init/tomoradar-pca.png) | ![tomoradar-0](img/mid-spectral-initialization/init/tomoradar-0.png) | ![tomoradar-0.25](img/mid-spectral-initialization/init/tomoradar-0.25.png) |
 
-|                                   0.5                                    |                                    0.75                                    |                                   0.9                                    |
-|:------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:------------------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![tomoradar-0.5](img/mid-spectral-initialization/init/tomoradar-0.5.png) | ![tomoradar-0.75](img/mid-spectral-initialization/init/tomoradar-0.75.png) | ![tomoradar-0.9](img/mid-spectral-initialization/init/tomoradar-0.9.png) |
 
-|                                    0.99                                    |                                    0.999                                     |                                  1                                   |
-|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:--------------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![tomoradar-0.99](img/mid-spectral-initialization/init/tomoradar-0.99.png) | ![tomoradar-0.999](img/mid-spectral-initialization/init/tomoradar-0.999.png) | ![tomoradar-1](img/mid-spectral-initialization/init/tomoradar-1.png) |
 
 Even with a high `graph_weight`, the results resemble the PCA results
@@ -414,42 +416,42 @@ results.
 
 ### coil20
 
-|                                pca                                 |                               0                                |                                0.5                                 |
-|:------------------------------------------------------------------:|:--------------------------------------------------------------:|:------------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![coil20-pca](img/mid-spectral-initialization/init/coil20-pca.png) | ![coil20-0](img/mid-spectral-initialization/init/coil20-0.png) | ![coil20-0.5](img/mid-spectral-initialization/init/coil20-0.5.png) |
 
-|                                0.9                                 |                                 0.99                                 |                                 0.999                                  |
-|:------------------------------------------------------------------:|:--------------------------------------------------------------------:|:----------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![coil20-0.9](img/mid-spectral-initialization/init/coil20-0.9.png) | ![coil20-0.99](img/mid-spectral-initialization/init/coil20-0.99.png) | ![coil20-0.999](img/mid-spectral-initialization/init/coil20-0.999.png) |
 
 ### coil100
 
-|                                 pca                                  |                                0                                 |                                 0.5                                  |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------:|:--------------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![coil100-pca](img/mid-spectral-initialization/init/coil100-pca.png) | ![coil100-0](img/mid-spectral-initialization/init/coil100-0.png) | ![coil100-0.5](img/mid-spectral-initialization/init/coil100-0.5.png) |
 
-|                                 0.9                                  |                                  0.99                                  |                                  0.999                                   |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------------:|:------------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![coil100-0.9](img/mid-spectral-initialization/init/coil100-0.9.png) | ![coil100-0.99](img/mid-spectral-initialization/init/coil100-0.99.png) | ![coil100-0.999](img/mid-spectral-initialization/init/coil100-0.999.png) |
 
 ### norb
 
-|                              pca                               |                             0                              |                              0.5                               |
-|:--------------------------------------------------------------:|:----------------------------------------------------------:|:--------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![norb-pca](img/mid-spectral-initialization/init/norb-pca.png) | ![norb-0](img/mid-spectral-initialization/init/norb-0.png) | ![norb-0.5](img/mid-spectral-initialization/init/norb-0.5.png) |
 
-|                              0.9                               |                               0.99                               |                               0.999                                |
-|:--------------------------------------------------------------:|:----------------------------------------------------------------:|:------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![norb-0.9](img/mid-spectral-initialization/init/norb-0.9.png) | ![norb-0.99](img/mid-spectral-initialization/init/norb-0.99.png) | ![norb-0.999](img/mid-spectral-initialization/init/norb-0.999.png) |
 
 ### tasic2018
 
-|                                   pca                                    |                                  0                                   |                                   0.5                                    |
-|:------------------------------------------------------------------------:|:--------------------------------------------------------------------:|:------------------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![tasic2018-pca](img/mid-spectral-initialization/init/tasic2018-pca.png) | ![tasic2018-0](img/mid-spectral-initialization/init/tasic2018-0.png) | ![tasic2018-0.5](img/mid-spectral-initialization/init/tasic2018-0.5.png) |
 
-|                                   0.9                                    |                                    0.99                                    |                                    0.999                                     |
-|:------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![tasic2018-0.9](img/mid-spectral-initialization/init/tasic2018-0.9.png) | ![tasic2018-0.99](img/mid-spectral-initialization/init/tasic2018-0.99.png) | ![tasic2018-0.999](img/mid-spectral-initialization/init/tasic2018-0.999.png) |
 
 Ok, similar pattern emerges. We do have a successful enough looking
@@ -462,22 +464,22 @@ am including them here because they are transcriptomics datasets like
 
 ### macosko2015
 
-|                                     pca                                      |                                    0                                     |                                     0.5                                      |
-|:----------------------------------------------------------------------------:|:------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![macosko2015-pca](img/mid-spectral-initialization/init/macosko2015-pca.png) | ![macosko2015-0](img/mid-spectral-initialization/init/macosko2015-0.png) | ![macosko2015-0.5](img/mid-spectral-initialization/init/macosko2015-0.5.png) |
 
-|                                     0.9                                      |                                      0.99                                      |                                      0.999                                       |
-|:----------------------------------------------------------------------------:|:------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![macosko2015-0.9](img/mid-spectral-initialization/init/macosko2015-0.9.png) | ![macosko2015-0.99](img/mid-spectral-initialization/init/macosko2015-0.99.png) | ![macosko2015-0.999](img/mid-spectral-initialization/init/macosko2015-0.999.png) |
 
 ### macosko2015pca100
 
-|                                           pca                                            |                                          0                                           |                                           0.5                                            |
-|:----------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![macosko2015pca100-pca](img/mid-spectral-initialization/init/macosko2015pca100-pca.png) | ![macosko2015pca100-0](img/mid-spectral-initialization/init/macosko2015pca100-0.png) | ![macosko2015pca100-0.5](img/mid-spectral-initialization/init/macosko2015pca100-0.5.png) |
 
-|                                           0.9                                            |                                            0.99                                            |                                            0.999                                             |
-|:----------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![macosko2015pca100-0.9](img/mid-spectral-initialization/init/macosko2015pca100-0.9.png) | ![macosko2015pca100-0.99](img/mid-spectral-initialization/init/macosko2015pca100-0.99.png) | ![macosko2015pca100-0.999](img/mid-spectral-initialization/init/macosko2015pca100-0.999.png) |
 
 `macosko2015` looking reliably terrible even in spectral form, but
@@ -507,58 +509,58 @@ know how the initializations look.
 
 ### mammoth
 
-|                                 pca                                  |                                0                                 |                                  0.25                                  |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![mammoth-pca](img/mid-spectral-initialization/umap/mammoth-pca.png) | ![mammoth-0](img/mid-spectral-initialization/umap/mammoth-0.png) | ![mammoth-0.25](img/mid-spectral-initialization/umap/mammoth-0.25.png) |
 
-|                                 0.5                                  |                                  0.75                                  |                                 0.9                                  |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------------:|:--------------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![mammoth-0.5](img/mid-spectral-initialization/umap/mammoth-0.5.png) | ![mammoth-0.75](img/mid-spectral-initialization/umap/mammoth-0.75.png) | ![mammoth-0.9](img/mid-spectral-initialization/umap/mammoth-0.9.png) |
 
-|                                  0.99                                  |                                  0.999                                   |                                1                                 |
-|:----------------------------------------------------------------------:|:------------------------------------------------------------------------:|:----------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![mammoth-0.99](img/mid-spectral-initialization/umap/mammoth-0.99.png) | ![mammoth-0.999](img/mid-spectral-initialization/umap/mammoth-0.999.png) | ![mammoth-1](img/mid-spectral-initialization/umap/mammoth-1.png) |
 
 ### scurvehole
 
-|                                    pca                                     |                                   0                                    |                                     0.25                                     |
-|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------:|:----------------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![scurvehole-pca](img/mid-spectral-initialization/umap/scurvehole-pca.png) | ![scurvehole-0](img/mid-spectral-initialization/umap/scurvehole-0.png) | ![scurvehole-0.25](img/mid-spectral-initialization/umap/scurvehole-0.25.png) |
 
-|                                    0.5                                     |                                     0.75                                     |                                    0.9                                     |
-|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![scurvehole-0.5](img/mid-spectral-initialization/umap/scurvehole-0.5.png) | ![scurvehole-0.75](img/mid-spectral-initialization/umap/scurvehole-0.75.png) | ![scurvehole-0.9](img/mid-spectral-initialization/umap/scurvehole-0.9.png) |
 
-|                                     0.99                                     |                                     0.999                                      |                                   1                                    |
-|:----------------------------------------------------------------------------:|:------------------------------------------------------------------------------:|:----------------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![scurvehole-0.99](img/mid-spectral-initialization/umap/scurvehole-0.99.png) | ![scurvehole-0.999](img/mid-spectral-initialization/umap/scurvehole-0.999.png) | ![scurvehole-1](img/mid-spectral-initialization/umap/scurvehole-1.png) |
 
 ### isoswiss
 
-|                                  pca                                   |                                 0                                  |                                   0.25                                   |
-|:----------------------------------------------------------------------:|:------------------------------------------------------------------:|:------------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![isoswiss-pca](img/mid-spectral-initialization/umap/isoswiss-pca.png) | ![isoswiss-0](img/mid-spectral-initialization/umap/isoswiss-0.png) | ![isoswiss-0.25](img/mid-spectral-initialization/umap/isoswiss-0.25.png) |
 
-|                                  0.5                                   |                                   0.75                                   |                                  0.9                                   |
-|:----------------------------------------------------------------------:|:------------------------------------------------------------------------:|:----------------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![isoswiss-0.5](img/mid-spectral-initialization/umap/isoswiss-0.5.png) | ![isoswiss-0.75](img/mid-spectral-initialization/umap/isoswiss-0.75.png) | ![isoswiss-0.9](img/mid-spectral-initialization/umap/isoswiss-0.9.png) |
 
-|                                   0.99                                   |                                   0.999                                    |                                 1                                  |
-|:------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:------------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![isoswiss-0.99](img/mid-spectral-initialization/umap/isoswiss-0.99.png) | ![isoswiss-0.999](img/mid-spectral-initialization/umap/isoswiss-0.999.png) | ![isoswiss-1](img/mid-spectral-initialization/umap/isoswiss-1.png) |
 
 ### mnist
 
-|                               pca                                |                              0                               |                                0.25                                |
-|:----------------------------------------------------------------:|:------------------------------------------------------------:|:------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![mnist-pca](img/mid-spectral-initialization/umap/mnist-pca.png) | ![mnist-0](img/mid-spectral-initialization/umap/mnist-0.png) | ![mnist-0.25](img/mid-spectral-initialization/umap/mnist-0.25.png) |
 
-|                               0.5                                |                                0.75                                |                               0.9                                |
-|:----------------------------------------------------------------:|:------------------------------------------------------------------:|:----------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![mnist-0.5](img/mid-spectral-initialization/umap/mnist-0.5.png) | ![mnist-0.75](img/mid-spectral-initialization/umap/mnist-0.75.png) | ![mnist-0.9](img/mid-spectral-initialization/umap/mnist-0.9.png) |
 
-|                                0.99                                |                                0.999                                 |                              1                               |
-|:------------------------------------------------------------------:|:--------------------------------------------------------------------:|:------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![mnist-0.99](img/mid-spectral-initialization/umap/mnist-0.99.png) | ![mnist-0.999](img/mid-spectral-initialization/umap/mnist-0.999.png) | ![mnist-1](img/mid-spectral-initialization/umap/mnist-1.png) |
 
 In this case the PCA result has some unfortunate overlapping and
@@ -566,30 +568,30 @@ breaking up of the clusters, so everything is an improvement on that.
 
 ### fashion
 
-|                                 pca                                  |                                0                                 |                                  0.25                                  |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------:|:----------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![fashion-pca](img/mid-spectral-initialization/umap/fashion-pca.png) | ![fashion-0](img/mid-spectral-initialization/umap/fashion-0.png) | ![fashion-0.25](img/mid-spectral-initialization/umap/fashion-0.25.png) |
 
-|                                 0.5                                  |                                  0.75                                  |                                 0.9                                  |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------------:|:--------------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![fashion-0.5](img/mid-spectral-initialization/umap/fashion-0.5.png) | ![fashion-0.75](img/mid-spectral-initialization/umap/fashion-0.75.png) | ![fashion-0.9](img/mid-spectral-initialization/umap/fashion-0.9.png) |
 
-|                                  0.99                                  |                                  0.999                                   |                                1                                 |
-|:----------------------------------------------------------------------:|:------------------------------------------------------------------------:|:----------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![fashion-0.99](img/mid-spectral-initialization/umap/fashion-0.99.png) | ![fashion-0.999](img/mid-spectral-initialization/umap/fashion-0.999.png) | ![fashion-1](img/mid-spectral-initialization/umap/fashion-1.png) |
 
 ### tomoradar
 
-|                                   pca                                    |                                  0                                   |                                    0.25                                    |
-|:------------------------------------------------------------------------:|:--------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
+| pca | 0 | 0.25 |
+|:--:|:--:|:--:|
 | ![tomoradar-pca](img/mid-spectral-initialization/umap/tomoradar-pca.png) | ![tomoradar-0](img/mid-spectral-initialization/umap/tomoradar-0.png) | ![tomoradar-0.25](img/mid-spectral-initialization/umap/tomoradar-0.25.png) |
 
-|                                   0.5                                    |                                    0.75                                    |                                   0.9                                    |
-|:------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:------------------------------------------------------------------------:|
+| 0.5 | 0.75 | 0.9 |
+|:--:|:--:|:--:|
 | ![tomoradar-0.5](img/mid-spectral-initialization/umap/tomoradar-0.5.png) | ![tomoradar-0.75](img/mid-spectral-initialization/umap/tomoradar-0.75.png) | ![tomoradar-0.9](img/mid-spectral-initialization/umap/tomoradar-0.9.png) |
 
-|                                    0.99                                    |                                    0.999                                     |                                  1                                   |
-|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:--------------------------------------------------------------------:|
+| 0.99 | 0.999 | 1 |
+|:--:|:--:|:--:|
 | ![tomoradar-0.99](img/mid-spectral-initialization/umap/tomoradar-0.99.png) | ![tomoradar-0.999](img/mid-spectral-initialization/umap/tomoradar-0.999.png) | ![tomoradar-1](img/mid-spectral-initialization/umap/tomoradar-1.png) |
 
 With the usual caveat that UMAP results for this dataset don’t look like
@@ -601,12 +603,12 @@ of a win.
 
 ### coil20
 
-|                                pca                                 |                               0                                |                                0.5                                 |
-|:------------------------------------------------------------------:|:--------------------------------------------------------------:|:------------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![coil20-pca](img/mid-spectral-initialization/umap/coil20-pca.png) | ![coil20-0](img/mid-spectral-initialization/umap/coil20-0.png) | ![coil20-0.5](img/mid-spectral-initialization/umap/coil20-0.5.png) |
 
-|                                0.9                                 |                                 0.99                                 |                                 0.999                                  |
-|:------------------------------------------------------------------:|:--------------------------------------------------------------------:|:----------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![coil20-0.9](img/mid-spectral-initialization/umap/coil20-0.9.png) | ![coil20-0.99](img/mid-spectral-initialization/umap/coil20-0.99.png) | ![coil20-0.999](img/mid-spectral-initialization/umap/coil20-0.999.png) |
 
 The downside of having disconnected components is that the clusters are
@@ -615,22 +617,22 @@ an obvious transition as `graph_weight` incraeses as can be seen here.
 
 ### coil100
 
-|                                 pca                                  |                                0                                 |                                 0.5                                  |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------:|:--------------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![coil100-pca](img/mid-spectral-initialization/umap/coil100-pca.png) | ![coil100-0](img/mid-spectral-initialization/umap/coil100-0.png) | ![coil100-0.5](img/mid-spectral-initialization/umap/coil100-0.5.png) |
 
-|                                 0.9                                  |                                  0.99                                  |                                  0.999                                   |
-|:--------------------------------------------------------------------:|:----------------------------------------------------------------------:|:------------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![coil100-0.9](img/mid-spectral-initialization/umap/coil100-0.9.png) | ![coil100-0.99](img/mid-spectral-initialization/umap/coil100-0.99.png) | ![coil100-0.999](img/mid-spectral-initialization/umap/coil100-0.999.png) |
 
 ### norb
 
-|                              pca                               |                             0                              |                              0.5                               |
-|:--------------------------------------------------------------:|:----------------------------------------------------------:|:--------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![norb-pca](img/mid-spectral-initialization/umap/norb-pca.png) | ![norb-0](img/mid-spectral-initialization/umap/norb-0.png) | ![norb-0.5](img/mid-spectral-initialization/umap/norb-0.5.png) |
 
-|                              0.9                               |                               0.99                               |                               0.999                                |
-|:--------------------------------------------------------------:|:----------------------------------------------------------------:|:------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![norb-0.9](img/mid-spectral-initialization/umap/norb-0.9.png) | ![norb-0.99](img/mid-spectral-initialization/umap/norb-0.99.png) | ![norb-0.999](img/mid-spectral-initialization/umap/norb-0.999.png) |
 
 At least in the `norb` case, I think the mid-spectral initialization
@@ -639,32 +641,32 @@ cluster in the top center.
 
 ### macosko2015
 
-|                                     pca                                      |                                    0                                     |                                     0.5                                      |
-|:----------------------------------------------------------------------------:|:------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![macosko2015-pca](img/mid-spectral-initialization/umap/macosko2015-pca.png) | ![macosko2015-0](img/mid-spectral-initialization/umap/macosko2015-0.png) | ![macosko2015-0.5](img/mid-spectral-initialization/umap/macosko2015-0.5.png) |
 
-|                                     0.9                                      |                                      0.99                                      |                                      0.999                                       |
-|:----------------------------------------------------------------------------:|:------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![macosko2015-0.9](img/mid-spectral-initialization/umap/macosko2015-0.9.png) | ![macosko2015-0.99](img/mid-spectral-initialization/umap/macosko2015-0.99.png) | ![macosko2015-0.999](img/mid-spectral-initialization/umap/macosko2015-0.999.png) |
 
 ### macosko2015pca100
 
-|                                           pca                                            |                                          0                                           |                                           0.5                                            |
-|:----------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![macosko2015pca100-pca](img/mid-spectral-initialization/umap/macosko2015pca100-pca.png) | ![macosko2015pca100-0](img/mid-spectral-initialization/umap/macosko2015pca100-0.png) | ![macosko2015pca100-0.5](img/mid-spectral-initialization/umap/macosko2015pca100-0.5.png) |
 
-|                                           0.9                                            |                                            0.99                                            |                                            0.999                                             |
-|:----------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![macosko2015pca100-0.9](img/mid-spectral-initialization/umap/macosko2015pca100-0.9.png) | ![macosko2015pca100-0.99](img/mid-spectral-initialization/umap/macosko2015pca100-0.99.png) | ![macosko2015pca100-0.999](img/mid-spectral-initialization/umap/macosko2015pca100-0.999.png) |
 
 ### tasic2018
 
-|                                   pca                                    |                                  0                                   |                                   0.5                                    |
-|:------------------------------------------------------------------------:|:--------------------------------------------------------------------:|:------------------------------------------------------------------------:|
+| pca | 0 | 0.5 |
+|:--:|:--:|:--:|
 | ![tasic2018-pca](img/mid-spectral-initialization/umap/tasic2018-pca.png) | ![tasic2018-0](img/mid-spectral-initialization/umap/tasic2018-0.png) | ![tasic2018-0.5](img/mid-spectral-initialization/umap/tasic2018-0.5.png) |
 
-|                                   0.9                                    |                                    0.99                                    |                                    0.999                                     |
-|:------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|
+| 0.9 | 0.99 | 0.999 |
+|:--:|:--:|:--:|
 | ![tasic2018-0.9](img/mid-spectral-initialization/umap/tasic2018-0.9.png) | ![tasic2018-0.99](img/mid-spectral-initialization/umap/tasic2018-0.99.png) | ![tasic2018-0.999](img/mid-spectral-initialization/umap/tasic2018-0.999.png) |
 
 Cluster arrangement seems to be more consistently different in the
@@ -717,30 +719,30 @@ using the neighbor graph better or at least different from using PCA?
 
 ### tasic2018
 
-|           |                                        pca                                         |                                      0.999                                       |
-|:---------:|:----------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|
-|   knn50   |  ![tasic2018-knn_pca](img/mid-spectral-initialization/bmnn/tasic2018-knn_pca.png)  |  ![tasic2018-knn_ms](img/mid-spectral-initialization/bmnn/tasic2018-knn_ms.png)  |
+|  | pca | 0.999 |
+|:--:|:--:|:--:|
+| knn50 | ![tasic2018-knn_pca](img/mid-spectral-initialization/bmnn/tasic2018-knn_pca.png) | ![tasic2018-knn_ms](img/mid-spectral-initialization/bmnn/tasic2018-knn_ms.png) |
 | bmnn-50-5 | ![tasic2018-bmnn_pca](img/mid-spectral-initialization/bmnn/tasic2018-bmnn_pca.png) | ![tasic2018-bmnn_ms](img/mid-spectral-initialization/bmnn/tasic2018-bmnn_ms.png) |
 
 ### norb
 
-|           |                                   pca                                    |                                 0.999                                  |
-|:---------:|:------------------------------------------------------------------------:|:----------------------------------------------------------------------:|
-|   knn50   |  ![norb-knn_pca](img/mid-spectral-initialization/bmnn/norb-knn_pca.png)  |  ![norb-knn_ms](img/mid-spectral-initialization/bmnn/norb-knn_ms.png)  |
+|  | pca | 0.999 |
+|:--:|:--:|:--:|
+| knn50 | ![norb-knn_pca](img/mid-spectral-initialization/bmnn/norb-knn_pca.png) | ![norb-knn_ms](img/mid-spectral-initialization/bmnn/norb-knn_ms.png) |
 | bmnn-50-5 | ![norb-bmnn_pca](img/mid-spectral-initialization/bmnn/norb-bmnn_pca.png) | ![norb-bmnn_ms](img/mid-spectral-initialization/bmnn/norb-bmnn_ms.png) |
 
 ### coil20
 
-|           |                                     pca                                      |                                   0.999                                    |
-|:---------:|:----------------------------------------------------------------------------:|:--------------------------------------------------------------------------:|
-|   knn15   |  ![coil20-knn_pca](img/mid-spectral-initialization/bmnn/coil20-knn_pca.png)  |  ![coil20-knn_ms](img/mid-spectral-initialization/bmnn/coil20-knn_ms.png)  |
+|  | pca | 0.999 |
+|:--:|:--:|:--:|
+| knn15 | ![coil20-knn_pca](img/mid-spectral-initialization/bmnn/coil20-knn_pca.png) | ![coil20-knn_ms](img/mid-spectral-initialization/bmnn/coil20-knn_ms.png) |
 | bmnn-15-5 | ![coil20-bmnn_pca](img/mid-spectral-initialization/bmnn/coil20-bmnn_pca.png) | ![coil20-bmnn_ms](img/mid-spectral-initialization/bmnn/coil20-bmnn_ms.png) |
 
 ### coil100
 
-|           |                                      pca                                       |                                    0.999                                     |
-|:---------:|:------------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|
-|   knn15   |  ![coil100-knn_pca](img/mid-spectral-initialization/bmnn/coil100-knn_pca.png)  |  ![coil100-knn_ms](img/mid-spectral-initialization/bmnn/coil100-knn_ms.png)  |
+|  | pca | 0.999 |
+|:--:|:--:|:--:|
+| knn15 | ![coil100-knn_pca](img/mid-spectral-initialization/bmnn/coil100-knn_pca.png) | ![coil100-knn_ms](img/mid-spectral-initialization/bmnn/coil100-knn_ms.png) |
 | bmnn-15-5 | ![coil100-bmnn_pca](img/mid-spectral-initialization/bmnn/coil100-bmnn_pca.png) | ![coil100-bmnn_ms](img/mid-spectral-initialization/bmnn/coil100-bmnn_ms.png) |
 
 With `coil20` and `coil100` it would be hard to say whether PCA or the

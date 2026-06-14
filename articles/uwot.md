@@ -1,6 +1,7 @@
 # uwot
 
 ``` r
+
 library(uwot)
 #> Loading required package: Matrix
 library(RSpectra)
@@ -21,6 +22,7 @@ it’s amenable for visualization, but you can set a larger value with
 will need a function to make plotting easier:
 
 ``` r
+
 kabsch <- function(pm, qm) {
   pm_dims <- dim(pm)
   if (!all(dim(qm) == pm_dims)) {
@@ -71,6 +73,7 @@ The defaults of the `umap` function should work for most datasets. No
 scaling of the input data is done, but non-numeric columns are ignored:
 
 ``` r
+
 set.seed(42)
 iris_umap <- umap(iris)
 plot_umap(iris_umap)
@@ -93,6 +96,7 @@ the output more compact. You should experiment with values between 0 and
 like it’s a bit small for `iris`. Let’s crank up `min_dist` to `0.3`:
 
 ``` r
+
 set.seed(42)
 iris_umap_md05 <- umap(iris, min_dist = 0.3)
 plot_umap(iris_umap_md05)
@@ -113,6 +117,7 @@ miss a lot of local structure.
 Here’s a result with 5 neighbors:
 
 ``` r
+
 set.seed(42)
 iris_umap_nbrs5 <- umap(iris, n_neighbors = 5, min_dist = 0.3)
 plot_umap(iris_umap_nbrs5)
@@ -127,6 +132,7 @@ There should be a more pronounced difference going the other way and
 looking at 100 neighbors:
 
 ``` r
+
 set.seed(42)
 iris_umap_nbrs100 <- umap(iris, n_neighbors = 100, min_dist = 0.3)
 plot_umap(iris_umap_nbrs100)
@@ -168,6 +174,7 @@ Values from `1e-4` to `10` are reasonable, but I recommend you stick to
 the default of `"range"`.
 
 ``` r
+
 set.seed(42)
 iris_umap_spca <-
   umap(iris,
@@ -208,6 +215,7 @@ the relative densities of the input data is attempted to be preserved in
 the output.
 
 ``` r
+
 set.seed(42)
 iris_umapds <- umap(iris, min_dist = 0.3, dens_scale = 0.5)
 plot_umap(iris_umapds)
@@ -233,6 +241,7 @@ Let’s try building a UMAP with just the `setosa` and `versicolor` iris
 species:
 
 ``` r
+
 set.seed(42)
 
 iris_train <- iris[iris$Species %in% c("setosa", "versicolor"), ]
@@ -252,6 +261,7 @@ plot(
 Next, you can use `umap_transform` to embed the new points:
 
 ``` r
+
 iris_test <- iris[iris$Species == "virginica", ]
 set.seed(42)
 iris_test_umap <- umap_transform(iris_test, iris_train_umap)

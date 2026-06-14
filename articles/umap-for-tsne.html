@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>UMAP for t-SNE • uwot</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><script src="../extra.js"></script><meta property="og:title" content="UMAP for t-SNE">
 </head>
@@ -94,7 +94,7 @@ and
 SNE defines the similarity (aka an affinity or weight) between them,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">v_{j|i}</annotation></semantics></math>,
 using a Gaussian kernel function:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><msub><mi>β</mi><mi>i</mi></msub><msubsup><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><msub><mi>β</mi><mi>i</mi></msub><msubsup><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
 v_{j|i} = \exp(-\beta_{i} r_{ij}^2)
 </annotation></semantics></math></p>
 <p>where
@@ -144,7 +144,7 @@ between the points
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐲</mi><mi>𝐣</mi></msub><annotation encoding="application/x-tex">\mathbf{y_j}</annotation></semantics></math>
 is also defined as a Gaussian:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
 w_{ij} = \exp(-d_{ij}^2)
 </annotation></semantics></math></p>
 <p>where
@@ -174,7 +174,7 @@ from.</p>
 of the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
 distributions:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>S</mi><mi>N</mi><mi>E</mi></mrow></msub><mo>=</mo><munderover><mo>∑</mo><mi>i</mi><mi>N</mi></munderover><munderover><mo>∑</mo><mi>j</mi><mi>N</mi></munderover><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>log</mo><mfrac><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><msub><mi>q</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub></mfrac></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>S</mi><mi>N</mi><mi>E</mi></mrow></msub><mo>=</mo><munderover><mo>∑</mo><mi>i</mi><mi>N</mi></munderover><munderover><mo>∑</mo><mi>j</mi><mi>N</mi></munderover><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mfrac><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><msub><mi>q</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub></mfrac></mrow><annotation encoding="application/x-tex">
 C_{SNE} = \sum_{i}^{N} \sum_{j}^{N} p_{j|i} \log \frac{p_{j|i}}{q_{j|i}} 
 </annotation></semantics></math></p>
 <p>In all of the above (and in what follows), weights and probabilities
@@ -206,7 +206,7 @@ creating a single probability distribution:</p>
 q_{ij} = \frac{w_{ij}}{\sum_{k}^N \sum_{l}^N w_{kl}} 
 </annotation></semantics></math></p>
 <p>The cost function for SSNE is then:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>S</mi><mi>S</mi><mi>N</mi><mi>E</mi></mrow></msub><mo>=</mo><munderover><mo>∑</mo><mi>i</mi><mi>N</mi></munderover><munderover><mo>∑</mo><mi>j</mi><mi>N</mi></munderover><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>log</mo><mfrac><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mfrac></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>S</mi><mi>S</mi><mi>N</mi><mi>E</mi></mrow></msub><mo>=</mo><munderover><mo>∑</mo><mi>i</mi><mi>N</mi></munderover><munderover><mo>∑</mo><mi>j</mi><mi>N</mi></munderover><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mfrac><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mfrac></mrow><annotation encoding="application/x-tex">
 C_{SSNE} = \sum_{i}^{N} \sum_{j}^{N} p_{ij} \log \frac{p_{ij}}{q_{ij}} 
 </annotation></semantics></math></p>
 </div>
@@ -249,7 +249,7 @@ and
 </li>
 </ul>
 <p>This is fundamentally
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>N</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(N^2)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>N</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(N^2)</annotation></semantics></math>
 because of the need to calculate pairwise distances: the t-SNE gradient
 requires the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">q_{ij}</annotation></semantics></math>
@@ -299,7 +299,7 @@ talking about elements in a matrix, but I will start slipping into the
 language of “edges” and “vertices”.</p>
 <p>The key change is the cost function, which is now a maximum
 likelihood function:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub><mo>=</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi></mrow></munder><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>log</mo><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><mi>γ</mi><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mover><mi>E</mi><mo accent="true">‾</mo></mover></mrow></munder><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub><mo>=</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi></mrow></munder><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><mi>γ</mi><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mover><mi>E</mi><mo accent="true">‾</mo></mover></mrow></munder><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 L_{LV} = \sum_{ \left(i, j\right) \in E} p_{ij} \log w_{ij} 
 +\gamma \sum_{\left(i, j\right) \in \bar{E}} \log \left(1 - w_{ij} \right)
 </annotation></semantics></math></p>
@@ -380,7 +380,7 @@ are then updated according to the gradients. This concludes one
 iteration of the SGD.</p>
 <p>The attractive and repulsive gradients for LargeVis are
 respectively:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mo>−</mo><mn>2</mn></mrow><mrow><mn>1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup></mrow></mfrac><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mi>−</mi><mn>2</mn></mrow><mrow><mn>1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup></mrow></mfrac><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^+ =
 \frac{-2}{1 + d_{ij}^2}p_{ij} \left(\mathbf{y_i - y_j}\right)
 </annotation></semantics></math></p>
@@ -400,7 +400,7 @@ can be difficult. Instead they sample the edges proportionally to
 and then for the gradient calculation, treat each edge as if the weights
 were all equal. The attractive gradient used as part of LargeVis SGD is
 therefore:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mo>−</mo><mn>2</mn></mrow><mrow><mn>1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mi>−</mi><mn>2</mn></mrow><mrow><mn>1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^+ =
 \frac{-2}{1 + d_{ij}^2} \left(\mathbf{y_i - y_j}\right)
 </annotation></semantics></math></p>
@@ -423,7 +423,7 @@ it doesn’t seem to cause any problems.</p>
 </h2>
 <p>The UMAP cost function is the cross-entropy of two fuzzy sets, which
 can be represented as symmetric weight matrices:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub><mo>=</mo><munder><mo>∑</mo><mrow><mi>i</mi><mi>j</mi></mrow></munder><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><mn>1</mn><mo>−</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><mrow><mn>1</mn><mo>−</mo><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub><mo>=</mo><munder><mo>∑</mo><mrow><mi>i</mi><mi>j</mi></mrow></munder><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi mathvariant="normal">log</mi><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mi mathvariant="normal">log</mi><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><mn>1</mn><mo>−</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><mrow><mn>1</mn><mo>−</mo><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
 C_{UMAP} = 
 \sum_{ij} \left[ v_{ij} \log \left( \frac{v_{ij}}{w_{ij}} \right) + 
 (1 - v_{ij}) \log \left( \frac{1 - v_{ij}}{1 - w_{ij}} \right) \right]
@@ -433,7 +433,7 @@ are symmetrized input affinities, and are not probabilities. The graph
 interpretation of them as weights of edges in a graph still applies,
 though. These are arrived at differently to t-SNE and LargeVis. The
 unsymmetrized UMAP input weights are given by:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">[</mo><mo>−</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>ρ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">[</mo><mi>−</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>ρ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
 v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \sigma_{i} \right]
 </annotation></semantics></math></p>
 <p>where
@@ -448,7 +448,7 @@ is analogous to
 in the perplexity calibration used in SNE. In this case,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_{i}</annotation></semantics></math>
 is determined such that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>j</mi></msub><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><msub><mo>log</mo><mn>2</mn></msub><mi>k</mi></mrow><annotation encoding="application/x-tex">\sum_{j} v_{j|i} = \log_{2} k</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>j</mi></msub><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>2</mn></msub><mi>k</mi></mrow><annotation encoding="application/x-tex">\sum_{j} v_{j|i} = \log_{2} k</annotation></semantics></math>
 where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
 is the number of nearest neighbors.</p>
@@ -468,7 +468,7 @@ V_{symm} = V + V^{T} - V \circ V^{T}
 <p>where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
 indicates the transpose and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>∘</mo><annotation encoding="application/x-tex">\circ</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>∘</mi><annotation encoding="application/x-tex">\circ</annotation></semantics></math>
 is the Hadamard (i.e. entry-wise) product. This effectively carries out
 a fuzzy set union.</p>
 <p>The output weights are given by:</p>
@@ -499,7 +499,7 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mn>0.7915</mn></mrow><annotation encoding="application/x-tex">b = 0.7915</annotation></semantics></math>.</p>
 <p>The attractive and repulsive UMAP gradient expressions are,
 respectively:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mo>−</mo><mn>2</mn><mi>a</mi><mi>b</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>b</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msubsup></mrow><mrow><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup></mrow></mfrac><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mi>−</mi><mn>2</mn><mi>a</mi><mi>b</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>b</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msubsup></mrow><mrow><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup></mrow></mfrac><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
 \frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}  v_{ij} \left(\mathbf{y_i - y_j}\right)
 </annotation></semantics></math></p>
@@ -530,7 +530,7 @@ and then the value of the gradient is calculated by assuming that
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">v_{ij} = 1</annotation></semantics></math>
 for all edges. So for SGD purposes, the attractive gradient for UMAP
 is:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mo>−</mo><mn>2</mn><mi>a</mi><mi>b</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>b</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msubsup></mrow><mrow><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mo>−</mo><mn>2</mn><mi>a</mi><mi>b</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup></mrow><mrow><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mi>−</mi><mn>2</mn><mi>a</mi><mi>b</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>b</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msubsup></mrow><mrow><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mi>−</mi><mn>2</mn><mi>a</mi><mi>b</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup></mrow><mrow><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 \frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
 \frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}\left(\mathbf{y_i - y_j}\right) =
 \frac{-2abd_{ij}^{2b}}{d_{ij}^2 \left(1 + ad_{ij}^{2b}\right)}\left(\mathbf{y_i - y_j}\right)
@@ -599,7 +599,7 @@ reference UMAP implementation:</p>
 by multiplying the value of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_{i}</annotation></semantics></math>:</li>
 </ul>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">[</mo><mo>−</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>ρ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mi>β</mi><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">[</mo><mi>−</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>ρ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mi>β</mi><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
 v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \beta \sigma_{i} \right]
 </annotation></semantics></math></p>
 <p>where <code>bandwidth</code> is represented as

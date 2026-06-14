@@ -14,12 +14,14 @@ integrates with `RcppHNSW` as an optional dependency. You just need to
 install the `RcppHNSW` package:
 
 ``` r
+
 install.packages("RcppHNSW")
 ```
 
 `uwot` will now be able to use it if you set `nn_method = "hnsw"`, e.g.
 
 ``` r
+
 library(uwot)
 # doesn't use HNSW
 iris_umap <- umap(iris)
@@ -35,6 +37,7 @@ article, for which you will need to install the `snedata` package from
 GitHub:
 
 ``` r
+
 # install.packages("pak")
 pak::pkg_install("jlmelville/snedata")
 
@@ -48,6 +51,7 @@ and we will split the data into the traditional training/test split used
 with this dataset.
 
 ``` r
+
 mnist <- snedata::download_mnist()
 mnist_train <- head(mnist, 60000)
 mnist_test <- tail(mnist, 10000)
@@ -76,6 +80,7 @@ But I am going to also set some other non-default parameters:
   model so that we can transform new data later.
 
 ``` r
+
 mnist_train_umap <-
   umap(
     mnist_train,
@@ -114,6 +119,7 @@ model contains the necessary information. So we can just use the
 `umap_transform` as normal:
 
 ``` r
+
 mnist_test_umap <-
   umap_transform(
     X = mnist_test,
@@ -145,6 +151,7 @@ results. I will use `ggplot2`, and the `Polychrome` package to create a
 set of distinct colors for each digit.
 
 ``` r
+
 install.packages(c("ggplot2", "Polychrome"))
 library(ggplot2)
 library(Polychrome)
@@ -155,6 +162,7 @@ that in the Python [glasbey](https://github.com/lmcinnes/glasbey)
 package:
 
 ``` r
+
 palette <- as.vector(Polychrome::createPalette(
   length(levels(mnist$Label)) + 2,
   seedcolors = c("#ffffff", "#000000"),
@@ -166,6 +174,7 @@ Now we can plot the training and test data, which I will do in two
 separate plots.
 
 ``` r
+
 ggplot(
   data.frame(mnist_train_umap$embedding, Digit = mnist_train$Label),
   aes(x = X1, y = X2, color = Digit)
@@ -184,6 +193,7 @@ ggplot(
 ```
 
 ``` r
+
 ggplot(
   data.frame(mnist_test_umap, Digit = mnist_test$Label),
   aes(x = X1, y = X2, color = Digit)
@@ -236,6 +246,7 @@ you can set:
 For example you could do something like:
 
 ``` r
+
 iris_umap <- umap(iris, nn_method = "hnsw", 
                   nn_args = list(M = 12, ef_construction = 64, ef = 20))
 ```
@@ -262,6 +273,7 @@ dataframe to a matrix containing only the numerical data and then
 generate the matrices we need.
 
 ``` r
+
 df2m <- function(X) {
   as.matrix(X[, which(vapply(X, is.numeric, logical(1)))])
 }
@@ -275,6 +287,7 @@ mnist_test_data <- df2m(mnist_test)
 Now load RcppHNSW:
 
 ``` r
+
 library(RcppHNSW)
 ```
 
@@ -284,6 +297,7 @@ recommend using as many threads as you can for this stage. Here I use 6
 threads:
 
 ``` r
+
 mnist_index <- hnsw_build(mnist_train_data, n_threads = 6)
 ```
 
@@ -301,6 +315,7 @@ of neighbors we want. In `uwot`, the default number of neighbors is 15,
 so we shall use that for the `k` parameter:
 
 ``` r
+
 mnist_train_knn <-
   hnsw_search(
     mnist_train_data,
@@ -318,6 +333,7 @@ maintain the RcppHNSW package). Nonetheless, let’s take a look at the
 output, which is a list of two matrices:
 
 ``` r
+
 names(mnist_train_knn)
 ```
 
@@ -331,6 +347,7 @@ the distances to the nearest neighbors. Let’s take a look at the
 dimensions of these matrices:
 
 ``` r
+
 lapply(mnist_train_knn, `dim`)
 ```
 
@@ -347,6 +364,7 @@ columns, one for each nearest neighbor. Let’s take a look at the first
 few rows and columns of each matrix:
 
 ``` r
+
 mnist_train_knn$idx[1:3, 1:3]
 ```
 
@@ -358,6 +376,7 @@ mnist_train_knn$idx[1:3, 1:3]
 ```
 
 ``` r
+
 mnist_train_knn$dist[1:3, 1:3]
 ```
 
@@ -381,6 +400,7 @@ not going to build an index with the test set, but instead we will query
 each test set item against the training set index:
 
 ``` r
+
 mnist_test_query_neighbors <-
   hnsw_search(
     mnist_test_data,
@@ -395,6 +415,7 @@ The output is the same format as for the training set neighbors, so
 there should be no surprises here:
 
 ``` r
+
 lapply(mnist_test_query_neighbors, `dim`)
 ```
 
@@ -409,6 +430,7 @@ $dist
 Here are the first few indices and distances for the test set:
 
 ``` r
+
 mnist_test_query_neighbors$idx[1:3, 1:3]
 ```
 
@@ -420,6 +442,7 @@ mnist_test_query_neighbors$idx[1:3, 1:3]
 ```
 
 ``` r
+
 mnist_test_query_neighbors$dist[1:3, 1:3]
 ```
 
@@ -451,6 +474,7 @@ The other parameters are the same as those we used before with
 `nn_method = "hnsw"`, so see above for a description.
 
 ``` r
+
 mnist_train_umap <-
   umap(
     X = NULL,
@@ -491,6 +515,7 @@ neighbor data as the `nn_method` parameter. We also need to pass the
 UMAP model we just created.
 
 ``` r
+
 mnist_test_umap <-
   umap_transform(
     X = NULL,

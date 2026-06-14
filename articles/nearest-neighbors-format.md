@@ -80,6 +80,7 @@ example may be broken when you read this), but it gives you the general
 idea:
 
 ``` r
+
 iris_even <- iris[seq(2, nrow(iris), 2), ]
 iris_odd <- iris[seq(1, nrow(iris), 2), ]
 
@@ -163,6 +164,7 @@ many items as metrics, in the order they were specified. For instance,
 if the `metric` argument is:
 
 ``` r
+
 metric = list("euclidean" = c("Petal.Width", "Petal.Length"),
               "cosine" = c("Sepal.Width", "Sepal.Length"))
 ```
@@ -178,6 +180,7 @@ are ignored, so you don’t need to set them. Roughly, do something like
 this:
 
 ``` r
+
 nn_metric1 <- list(idx = matrix(...), dist = matrix(...))
 nn_metric2 <- list(idx = matrix(...), dist = matrix(...))
 umap_res <- umap(nn_method = list(nn_metric1, nn_metric2), ...)

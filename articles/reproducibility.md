@@ -49,6 +49,7 @@ help:
 In summary, your chances of reproducibility are increased by using:
 
 ``` r
+
 mnist_umap <- umap(mnist, a = 1.8956, b = 0.8006, approx_pow = TRUE, init = "spca", batch = TRUE, rng_type = "deterministic", seed = 42)
 # or
 mnist_tumap <- tumap(mnist, init = "spca", batch = TRUE, rng_type = "deterministic", seed = 42)

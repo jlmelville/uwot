@@ -30,6 +30,7 @@ Reddit](https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9w
 ### From CRAN
 
 ``` r
+
 install.packages("uwot")
 ```
 
@@ -51,6 +52,7 @@ may be helpful here to work out what you can get away with. To be on the
 safe side, I would advise building `uwot` without a custom `Makevars`.
 
 ``` r
+
 install.packages("devtools")
 devtools::install_github("jlmelville/uwot")
 ```
@@ -58,6 +60,7 @@ devtools::install_github("jlmelville/uwot")
 ## Example
 
 ``` r
+
 library(uwot)
 
 # umap2 is a version of the umap() function with better defaults

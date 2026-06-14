@@ -37,6 +37,7 @@ A sparse matrix containing the union of `x` and `y`.
 ## Examples
 
 ``` r
+
 # Form two different "views" of the same data
 iris30 <- iris[c(1:10, 51:60, 101:110), ]
 iris_sg12 <- similarity_graph(iris30[, 1:2], n_neighbors = 5)

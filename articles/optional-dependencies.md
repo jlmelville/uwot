@@ -48,6 +48,7 @@ My recommendation would be to install all of these (or at least
 `RcppHNSW`):
 
 ``` r
+
 install.packages(c("RcppHNSW", "rnndescent"))
 ```
 
@@ -55,6 +56,7 @@ and then have them (and `RSpectra`) loaded whenever you are using
 `uwot`.
 
 ``` r
+
 library(RSpectra)
 library(RcppHNSW)
 library(rnndescent)
@@ -65,5 +67,6 @@ The following UMAP run will then use `RcppHNSW` and `RSpectra` (versus
 `RcppAnnoy` and `irlba`) without you having to specify anything:
 
 ``` r
+
 iris_umap <- umap2(iris, n_neighbors = 30)
 ```

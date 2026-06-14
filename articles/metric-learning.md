@@ -16,6 +16,7 @@ MNIST](https://github.com/zalandoresearch/fashion-mnist). One way to
 download it in uwot-ready form is:
 
 ``` r
+
 devtools::install_github("jlmelville/snedata")
 fashion <- snedata::download_fashion_mnist()
 ```
@@ -35,6 +36,7 @@ package](https://github.com/jlmelville/vizier), which can be installed
 using:
 
 ``` r
+
 devtools::install_github("jlmelville/vizier")
 ```
 
@@ -45,6 +47,7 @@ I’ll show the commands to produce the plots before they are displayed.
 We’ll compare the supervised result with a standard run of UMAP:
 
 ``` r
+
 set.seed(1337)
 fashion_umap <- umap(fashion)
 ```
@@ -53,6 +56,7 @@ For supervised learning, provide a suitable vector of labels as the `y`
 argument to `umap` (or `tumap`):
 
 ``` r
+
 set.seed(1337)
 fashion_sumap <- umap(fashion, y = fashion$Description)
 ```
@@ -61,12 +65,13 @@ Let’s take a look at the results, the unsupervised embedding on the
 left, and the supervised version on the right:
 
 ``` r
+
 vizier::embed_plot(fashion_umap, fashion, cex = 0.5, title = "Fashion UMAP", alpha_scale = 0.075)
 vizier::embed_plot(fashion_sumap, fashion, cex = 0.5, title = "Fashion Supervised UMAP", alpha_scale = 0.075)
 ```
 
-|                                                           |                                                                       |
-|:---------------------------------------------------------:|:---------------------------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![Fashion UMAP](img/metric-learning/umap_fashion_all.png) | ![Fashion Supervised UMAP](img/metric-learning/sumap_fashion_all.png) |
 
 Clearly, the supervised UMAP has done a much better job of separating
@@ -81,6 +86,7 @@ first 60,000 images) and test (the remaining 10,000 images) sets, so
 we’ll use that:
 
 ``` r
+
 fashion_train <- head(fashion, 60000)
 fashion_test <- tail(fashion, 10000)
 ```
@@ -96,6 +102,7 @@ This will return a list. The embedded coordinates can be found as the
 For training, we shall continue to use both standard UMAP:
 
 ``` r
+
 set.seed(1337)
 fashion_umap_train <- umap(fashion_train, ret_model = TRUE)
 ```
@@ -103,6 +110,7 @@ fashion_umap_train <- umap(fashion_train, ret_model = TRUE)
 and supervised UMAP:
 
 ``` r
+
 set.seed(1337)
 fashion_sumap_train <- umap(fashion_train, ret_model = TRUE, y = fashion_train$Description)
 ```
@@ -111,12 +119,13 @@ These results shouldn’t be that different from the full-dataset
 embeddings, but let’s take a look anyway:
 
 ``` r
+
 vizier::embed_plot(fashion_umap_train$embedding, fashion_train, cex = 0.5, title = "Fashion Train UMAP", alpha_scale = 0.075)
 vizier::embed_plot(fashion_sumap_train$embedding, fashion_train, cex = 0.5, title = "Fashion Train Supervised UMAP", alpha_scale = 0.075)
 ```
 
-|                                                                   |                                                                               |
-|:-----------------------------------------------------------------:|:-----------------------------------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![Fashion UMAP Train](img/metric-learning/umap_fashion_train.png) | ![Fashion Supervised UMAP Train](img/metric-learning/sumap_fashion_train.png) |
 
 Everything looks in order here. The standard UMAP training plot is
@@ -130,6 +139,7 @@ and the trained UMAP model. There’s no difference between using a
 standard UMAP model:
 
 ``` r
+
 set.seed(1337)
 fashion_umap_test <- umap_transform(fashion_test, fashion_umap_train)
 ```
@@ -137,6 +147,7 @@ fashion_umap_test <- umap_transform(fashion_test, fashion_umap_train)
 or a supervised UMAP model:
 
 ``` r
+
 set.seed(1337)
 fashion_sumap_test <- umap_transform(fashion_test, fashion_sumap_train)
 ```
@@ -144,12 +155,13 @@ fashion_sumap_test <- umap_transform(fashion_test, fashion_sumap_train)
 Here are the results:
 
 ``` r
+
 vizier::embed_plot(fashion_umap_test, fashion_test, cex = 0.5, title = "Fashion Test UMAP", alpha_scale = 0.075)
 vizier::embed_plot(fashion_sumap_test, fashion_test, cex = 0.5, title = "Fashion Test Supervised UMAP", alpha_scale = 0.075)
 ```
 
-|                                                                 |                                                                              |
-|:---------------------------------------------------------------:|:----------------------------------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![Fashion UMAP Test](img/metric-learning/umap_fashion_test.png) | ![Fashion Supervised UMAP Train](img/metric-learning/sumap_fashion_test.png) |
 
 The test data results are very obviously embedded in a similar way to
@@ -204,6 +216,7 @@ vector. We shall use the `diamonds` dataset that comes with the
 of a similar size to MNIST.
 
 ``` r
+
 library(ggplot2)
 ?diamonds
 ```
@@ -222,6 +235,7 @@ non-supervised part of UMAP, let’s create a new data frame, initially
 with the geometric data:
 
 ``` r
+
 dia <- diamonds[, c("carat", "x", "y", "z", "table")]
 ```
 
@@ -233,6 +247,7 @@ variables, i.e. their categories can be ordered, so we can convert these
 to a numeric scale and include them as well:
 
 ``` r
+
 dia$cut <- as.numeric(diamonds$cut)
 dia$color <- as.numeric(diamonds$color)
 dia$clarity <- as.numeric(diamonds$clarity)
@@ -247,6 +262,7 @@ For starters, here’s a plot of the first two principal components, using
 the [irlba](https://cran.r-project.org/package=irlba) package:
 
 ``` r
+
 dia_pca <- irlba::prcomp_irlba(dia, n = 2, scale. = TRUE)
 vizier::embed_plot(dia_pca$x, diamonds$price, title = "Diamonds PCA", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
 ```
@@ -267,6 +283,7 @@ Anyway, let’s see what UMAP does with it. Like with PCA, the columns are
 all scaled to have equal variance (`scale = TRUE`):
 
 ``` r
+
 dia_umap <- umap(dia, scale = TRUE, verbose = TRUE)
 vizier::embed_plot(dia_umap, diamonds$price, title = "Diamonds UMAP", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
 ```
@@ -280,6 +297,7 @@ little clusters in the middle of the plot. On this occasion, I prefer
 the layout that’s initialized from the PCA results, though:
 
 ``` r
+
 dia_umap_from_pca <- umap(dia, scale = TRUE, verbose = TRUE, init = dia_pca$x)
 vizier::embed_plot(dia_umap_from_pca, diamonds$price, title = "Diamonds UMAP (PCA init)", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
 ```
@@ -298,6 +316,7 @@ choice of initialization, so for simplicity we’ll just use the standard
 spectral initialization:
 
 ``` r
+
 dia_sumap <- umap(dia, scale = TRUE, verbose = TRUE, y = diamonds$price)
 vizier::embed_plot(dia_sumap, diamonds$price, title = "Diamonds Supervised UMAP", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
 ```

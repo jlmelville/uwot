@@ -53,6 +53,7 @@ but I do strongly recommend installing (and loading) `RcppHNSW` and
 `snedata` package from github for this:
 
 ``` r
+
 # install.packages("pak")
 pak::pkg_install("jlmelville/snedata")
 
@@ -62,12 +63,14 @@ pak::pkg_install("jlmelville/snedata")
 ```
 
 ``` r
+
 mnist <- snedata::download_mnist()
 ```
 
 Now let’s run `umap` and `umap2` on the MNIST data using their defaults.
 
 ``` r
+
 library(uwot)
 
 set.seed(42)
@@ -77,12 +80,14 @@ mnist_umap <- umap(mnist)
 Install `RcppHNSW` and `rnndescent` if you haven’t already.
 
 ``` r
+
 install.packages(c("RcppHNSW", "rnndescent"))
 ```
 
 With these libraries installed `umap2` will use `RcppHNSW` by default.
 
 ``` r
+
 library(RcppHNSW)
 library(rnndescent)
 
@@ -91,6 +96,7 @@ mnist_umap2 <- umap2(mnist)
 ```
 
 ``` r
+
 #install.packages(c("ggplot2", "Polychrome"))
 library(ggplot2)
 library(Polychrome)
@@ -104,6 +110,7 @@ palette <- as.vector(Polychrome::createPalette(
 ```
 
 ``` r
+
 ggplot(
     data.frame(mnist_umap, Digit = mnist$Label),
     aes(x = X1, y = X2, color = Digit)
@@ -126,6 +133,7 @@ ggplot(
 umap on MNIST
 
 ``` r
+
 ggplot(
   data.frame(mnist_umap2, Digit = mnist$Label),
   aes(x = X1, y = X2, color = Digit)
@@ -153,6 +161,7 @@ re-run with `min_dist = 0.01` you will get a plot that is very similar
 to the `umap` plot.
 
 ``` r
+
 set.seed(42)
 mnist_umap2 <- umap2(mnist, min_dist = 0.01)
 ```

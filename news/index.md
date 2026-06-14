@@ -21,6 +21,8 @@
   [hsuknowledge](https://github.com/hsuknowledge) for pointing out the
   mismatch in naming convention
   (<https://github.com/jlmelville/uwot/issues/140>).
+- Parallel-loop helpers now propagate worker exceptions from threaded
+  code, although hopefully that never happens.
 
 ## uwot 0.2.4
 

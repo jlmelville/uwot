@@ -47,6 +47,7 @@ in their default (slower) values. I also use PCA to reduce the
 dimensionality to 100:
 
 ``` r
+
 set.seed(1337)
 mnist_umap_slow <- umap(mnist, pca = 100, verbose = TRUE)
 ```
@@ -54,6 +55,7 @@ mnist_umap_slow <- umap(mnist, pca = 100, verbose = TRUE)
 On the right are the embeddings from using `fast_sgd = TRUE`:
 
 ``` r
+
 set.seed(1337)
 mnist_umap_fast <- umap(mnist, pca = 100, fast_sgd = TRUE, verbose = TRUE)
 ```
@@ -70,26 +72,26 @@ by `fast_sgd`.
 
 ### mnist
 
-|                                            |                                            |
-|:------------------------------------------:|:------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![mnist slow](img/fast-sgd/mnist_slow.png) | ![mnist fast](img/fast-sgd/mnist_fast.png) |
 
 ### fashion
 
-|                                                |                                                |
-|:----------------------------------------------:|:----------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![fashion slow](img/fast-sgd/fashion_slow.png) | ![fashion fast](img/fast-sgd/fashion_fast.png) |
 
 ### kuzushiji
 
-|                                                    |                                                    |
-|:--------------------------------------------------:|:--------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![kuzushiji slow](img/fast-sgd/kuzushiji_slow.png) | ![kuzushiji fast](img/fast-sgd/kuzushiji_fast.png) |
 
 ### norb
 
-|                                          |                                          |
-|:----------------------------------------:|:----------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![norb slow](img/fast-sgd/norb_slow.png) | ![norb fast](img/fast-sgd/norb_fast.png) |
 
 The distribution of clusters here does a look a little bit different,
@@ -98,8 +100,8 @@ stochastic nature of the optimization. To bolster my point, here are two
 further runs of UMAP on the NORB dataset with `fast_sgd = FALSE` and
 different seeds:
 
-|                                      |                                          |
-|:------------------------------------:|:----------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![norb 42](img/fast-sgd/norb_42.png) | ![norb 5446](img/fast-sgd/norb_5446.png) |
 
 I think if you didn’t know one of these four images was generated with
@@ -109,8 +111,8 @@ The variation between images is more likely due to the default
 plots with `n_neighbors = 150`, and `n_epochs = 500` to account for the
 increased number of edges that need sampling:
 
-|                                                 |                                                 |
-|:-----------------------------------------------:|:-----------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![norb 150 slow](img/fast-sgd/norb150_slow.png) | ![norb 150 fast](img/fast-sgd/norb150_fast.png) |
 
 Apart from one of the blue loops being open in the `fast_sgd = TRUE`
@@ -119,14 +121,14 @@ arrangement of the two plots is pretty similar.
 
 ### tasic2018
 
-|                                                    |                                                    |
-|:--------------------------------------------------:|:--------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![tasic2018 slow](img/fast-sgd/tasic2018_slow.png) | ![tasic2018 fast](img/fast-sgd/tasic2018_fast.png) |
 
 ### macosko2015
 
-|                                                        |                                                        |
-|:------------------------------------------------------:|:------------------------------------------------------:|
+|  |  |
+|:--:|:--:|
 | ![macosko2015 slow](img/fast-sgd/macosko2015_slow.png) | ![macosko2015 fast](img/fast-sgd/macosko2015_fast.png) |
 
 ## Recommendations

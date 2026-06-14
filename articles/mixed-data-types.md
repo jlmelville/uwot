@@ -16,6 +16,7 @@ their integer id, but I strongly recommend names) to apply that metric
 to, e.g.:
 
 ``` r
+
 metric = list("euclidean" = c("A1", "A2"), "cosine" = c("B1", "B2", "B3"))
 ```
 
@@ -33,6 +34,7 @@ petal and sepal data separately in the `iris` dataset, but to use
 Euclidean distances for both, use:
 
 ``` r
+
 metric = list("euclidean" = c("Petal.Width", "Petal.Length"),
               "euclidean" = c("Sepal.Width", "Sepal.Length"))
 ```
@@ -44,6 +46,7 @@ Integer indexing is supported, so the equivalent of the above using
 integer indexing into the columns of `iris` is:
 
 ``` r
+
 metric = list("euclidean" = 3:4, "euclidean" = 1:2)
 ```
 
@@ -63,6 +66,7 @@ specify factor columns in the `X` data. Use the special `metric` name
 UMAP for `iris` along with the usual four numeric columns, use:
 
 ``` r
+
 metric = list("euclidean" = 1:4, "categorical" = "Species")
 ```
 
@@ -73,12 +77,14 @@ Factor columns are treated differently from numeric columns:
   included in UMAP, you should write:
 
 ``` r
+
 metric = list("categorical" = "cat1", "categorical" = "cat2", ...)
 ```
 
 As a convenience, you can also write:
 
 ``` r
+
 metric = list("categorical" = c("cat1", "cat2"), ...)
 ```
 
@@ -91,6 +97,7 @@ some typing.
   for numeric data. For `iris`, the following is an error:
 
 ``` r
+
 # wrong and bad
 metric = list("categorical" = "Species")
 ```
@@ -98,6 +105,7 @@ metric = list("categorical" = "Species")
 Specifying some numeric columns is required:
 
 ``` r
+
 # OK
 metric = list("categorical" = "Species", "euclidean" = 1:4)
 ```
@@ -118,6 +126,7 @@ columns as the only unnamed element, and then the over-riding keyword
 arguments. An example:
 
 ``` r
+
   umap(
     X,
     pca = 40,
@@ -152,6 +161,7 @@ treated as one block, so if you have multiple numeric columns that you
 want treated separately, you should specify each column separately:
 
 ``` r
+
 target_metric = list("euclidean" = 1, "euclidean" = 2, ...)
 ```
 
