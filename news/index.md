@@ -23,6 +23,7 @@
   (<https://github.com/jlmelville/uwot/issues/140>).
 - Parallel-loop helpers now propagate worker exceptions from threaded
   code, although hopefully that never happens.
+- `default_num_threads` now returns an integer.
 
 ## uwot 0.2.4
 
