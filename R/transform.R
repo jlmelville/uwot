@@ -226,6 +226,14 @@ umap_transform <- function(X = NULL, model = NULL,
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
+  if (n_threads < 0) {
+    stop("n_threads cannot be < 0")
+  }
+  if (n_threads %% 1 != 0) {
+    n_threads <- round(n_threads)
+    tsmessage("Non-integer 'n_threads' provided. Setting to ", n_threads)
+  }
+  n_threads <- as.integer(n_threads)
   if (is.character(n_sgd_threads) && n_sgd_threads == "auto") {
     n_sgd_threads <- n_threads
   }

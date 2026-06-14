@@ -80,6 +80,15 @@ nndescent_search <- function(X,
                              nn_args = list(),
                              n_threads = NULL,
                              verbose = FALSE) {
+  if (is.null(n_threads)) {
+    n_threads <- default_num_threads()
+  }
+  if (n_threads %% 1 != 0) {
+    n_threads <- round(n_threads)
+    tsmessage("Non-integer 'n_threads' provided. Setting to ", n_threads)
+  }
+  n_threads <- as.integer(n_threads)
+
   nn_query_args <- get_nndescent_query_args(nn_args)
   nn_query_args <- lmerge(
     nn_query_args,

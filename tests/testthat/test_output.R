@@ -569,6 +569,10 @@ res <- umap(iris10,
 expect_ok_matrix(res)
 
 # https://github.com/jlmelville/uwot/issues/39
+expect_type(default_num_threads(), "integer")
+expect_equal(length(default_num_threads()), 1L)
+expect_true(default_num_threads() >= 1L)
+
 res <- umap(iris10, n_neighbors = 4, n_threads = 0.5)
 expect_ok_matrix(res)
 res <- umap(iris10, n_neighbors = 4, n_threads = 1.5)

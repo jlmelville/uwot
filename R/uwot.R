@@ -3228,6 +3228,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
     n_threads <- round(n_threads)
     tsmessage("Non-integer 'n_threads' provided. Setting to ", n_threads)
   }
+  n_threads <- as.integer(n_threads)
   if (is.null(n_build_threads)) {
     n_build_threads <- n_threads
   }
@@ -3241,6 +3242,7 @@ uwot <- function(X, n_neighbors = 15, n_components = 2, metric = "euclidean",
       n_build_threads
     )
   }
+  n_build_threads <- as.integer(n_build_threads)
   if (n_sgd_threads == "auto") {
     n_sgd_threads <- n_threads
   }
@@ -4385,7 +4387,7 @@ abspath <- function(filename) {
 # Half of whatever the C++ implementation thinks are the number of concurrent
 # threads supported, but at least 1
 default_num_threads <- function() {
-  max(1, hardware_concurrency() / 2)
+  as.integer(max(1L, round(hardware_concurrency() / 2)))
 }
 
 # Get the number of vertices in X
