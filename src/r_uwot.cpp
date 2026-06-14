@@ -187,13 +187,8 @@ struct UmapFactory {
   void create_impl(Worker &worker, const Gradient &gradient) {
 
     RProgress progress(n_epochs, verbose);
-    if (n_threads > 0) {
-      RParallel parallel(n_threads, grain_size);
-      create_impl(worker, gradient, progress, parallel);
-    } else {
-      RSerial serial;
-      create_impl(worker, gradient, progress, serial);
-    }
+    RParallel parallel(n_threads, grain_size);
+    create_impl(worker, gradient, progress, parallel);
   }
 
   template <typename Worker, typename Gradient, typename Progress,

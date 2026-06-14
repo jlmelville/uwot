@@ -39,15 +39,4 @@ struct RParallel {
   }
 };
 
-struct RSerial {
-  template <typename Worker> void pfor(std::size_t n_items, Worker &worker) {
-    pfor(0, n_items, worker);
-  }
-
-  template <typename Worker>
-  void pfor(std::size_t begin, std::size_t end, Worker &worker) {
-    worker(begin, end, 0);
-  }
-};
-
 #endif // UWOT_RPARALLEL_H
