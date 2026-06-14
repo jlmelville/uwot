@@ -21,7 +21,7 @@
 
 #include <Rcpp.h>
 
-#include "RcppPerpendicular.h"
+#include "pforr.h"
 #include "uwot/perplexity.h"
 
 using namespace Rcpp;
@@ -47,7 +47,7 @@ List calc_row_probabilities_parallel(NumericVector nn_dist,
                             n_search_fails);
   };
 
-  RcppPerpendicular::parallel_for(0, n_vertices, worker, n_threads, grain_size);
+  pforr::parallel_for(0, n_vertices, worker, n_threads, grain_size);
 
   auto res = List::create(
       _("matrix") = NumericMatrix(n_neighbors, n_vertices, nn_weights.begin()),

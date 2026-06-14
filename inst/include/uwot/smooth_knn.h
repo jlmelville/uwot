@@ -33,7 +33,7 @@
 #include <numeric>
 #include <vector>
 
-#include "RcppPerpendicular.h"
+#include "pforr.h"
 
 namespace uwot {
 

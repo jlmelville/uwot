@@ -72,7 +72,7 @@ List smooth_knn_distances_parallel(
                      n_search_fails);
   };
 
-  RcppPerpendicular::parallel_for(n_vertices, worker, n_threads, grain_size);
+  pforr::parallel_for(n_vertices, worker, n_threads, grain_size);
 
   auto res = List::create(
       _("matrix") = NumericVector(nn_weights.begin(), nn_weights.end()),
@@ -100,7 +100,7 @@ List reset_local_metrics_parallel(IntegerVector indptr,
     uwot::reset_local_metric(begin, end, probabilitiesv, prob_ptrv, target, tol,
                              n_iter, n_search_fails);
   };
-  RcppPerpendicular::parallel_for(n_vertices, worker, n_threads);
+  pforr::parallel_for(n_vertices, worker, n_threads);
 
   auto res = List::create(
       _("values") = NumericVector(probabilitiesv.begin(), probabilitiesv.end()),

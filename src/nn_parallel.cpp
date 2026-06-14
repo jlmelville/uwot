@@ -2,7 +2,7 @@
 
 #include <Rcpp.h>
 
-#include "RcppPerpendicular.h"
+#include "pforr.h"
 #include "nn_parallel.h"
 
 using namespace Rcpp;
@@ -20,7 +20,7 @@ auto annoy_nns_impl(const std::string &index_name, NumericMatrix mat,
 
   NNWorker<UwotAnnoyDistance> worker(index_name, vmat, ncol, n_neighbors,
                                      search_k);
-  RcppPerpendicular::parallel_for(0, nrow, worker, n_threads, grain_size);
+  pforr::parallel_for(0, nrow, worker, n_threads, grain_size);
 
   return List::create(
       _("item") = IntegerMatrix(nrow, n_neighbors, worker.idx.begin()),
