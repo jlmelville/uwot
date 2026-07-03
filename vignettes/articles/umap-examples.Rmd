@@ -24,9 +24,14 @@ given in the
 [smallvis documentation](https://jlmelville.github.io/smallvis/datasets.htm). 
 `iris` you already have if you are using R. `s1k` is part of the
 [sneer](https://github.com/jlmelville/sneer) package. `frey`, `oli`, `mnist`,
-`fashion`, `kuzushiji`, `norb` and `cifar10` can be downloaded via
-[snedata](https://github.com/jlmelville/snedata). `coil20` and `coil100` can be
-fetched via [coil20](https://github.com/jlmelville/coil20).
+`fashion`, `kuzushiji`, `norb`, `cifar10`, `hierarchical`, `isofaces`,
+`isoswiss`, `mammoth`, `scurvehole`, `spheres` and (an unprocessed version of) 
+`ng20` can be downloaded or generated via the
+[snedata](https://github.com/jlmelville/snedata) package. `coil20` and
+`coil100` can be downloaded via the
+[coil20](https://github.com/jlmelville/coil20) package. Other data I processed
+using Python. Notebooks for these can be found at
+<https://github.com/jlmelville/drnb/tree/master/notebooks/data-pipeline>.
 
 ```R
 mnist <- snedata::download_mnist()
@@ -369,16 +374,20 @@ use of it.
 ## hierarchical
 
 Another dataset used in the
-[PaCMAP paper](https://jmlr.org/papers/v22/20-1061.html), but for which 
-I was unable to find the code to generate it in the PaCMAP repo. The paper 
-describes it thusly: 'consists of 5 “macro clusters” that each have 5 “meso
-clusters,” and each of the meso subclusters has 5 “micro clusters.” Thus, there
-are 5x5x5 = 125 micro clusters total. We colored each point based on its true
-macro clusters, shading each meso cluster.". Get all of that? There's more
-detail in Appendix B of the paper and I think I was able to turn that into some
-Python that probably generated the correct data. I think it's correct. For more
-details see <https://github.com/jlmelville/drnb/blob/master/notebooks/data-pipeline/synthetic-hierarchical.ipynb>.
-I have not yet summoned the enthusiasm to come up with a pure R version.
+[PaCMAP paper](https://jmlr.org/papers/v22/20-1061.html), but for which I was
+unable to find code for generating it in the PaCMAP repo. The
+[gitub repo](https://github.com/hyhuang00/scRNA-DR2020/) for the paper 
+["Towards a comprehensive evaluation of dimension reduction methods for transcriptomic data visualization"](https://doi.org/10.1038/s42003-022-03628-x) (by many of the
+same authors), contains a numpy-formatted version of the data under the name 
+`hierarchical_threelayer_dataset`, and we can probably assume it's the data also
+used in the PaCMAP paper. The paper describes the generation like so: 
+
+> consists of 5 “macro clusters” that each have 5 “meso clusters,” and each of
+the meso subclusters has 5 “micro clusters.” Therefore, there are 5x5x5 = 125
+micro clusters total. We colored each point based on its true macro clusters,
+shading each meso cluster.".
+
+Get all of that? There's more detail in Appendix B of the PacMAP paper.
 
 | UMAP                        | t-SNE                     |
 :----------------------------:|:--------------------------:
