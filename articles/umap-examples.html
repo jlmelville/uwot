@@ -84,9 +84,14 @@ is also given in the <a href="https://jlmelville.github.io/smallvis/datasets.htm
 documentation</a>. <code>iris</code> you already have if you are using
 R. <code>s1k</code> is part of the <a href="https://github.com/jlmelville/sneer" class="external-link">sneer</a> package.
 <code>frey</code>, <code>oli</code>, <code>mnist</code>,
-<code>fashion</code>, <code>kuzushiji</code>, <code>norb</code> and
-<code>cifar10</code> can be downloaded via <a href="https://github.com/jlmelville/snedata" class="external-link">snedata</a>.
-<code>coil20</code> and <code>coil100</code> can be fetched via <a href="https://github.com/jlmelville/coil20" class="external-link">coil20</a>.</p>
+<code>fashion</code>, <code>kuzushiji</code>, <code>norb</code>,
+<code>cifar10</code>, <code>hierarchical</code>, <code>isofaces</code>,
+<code>isoswiss</code>, <code>mammoth</code>, <code>scurvehole</code>,
+<code>spheres</code> and (an unprocessed version of) <code>ng20</code>
+can be downloaded or generated via the <a href="https://github.com/jlmelville/snedata" class="external-link">snedata</a> package.
+<code>coil20</code> and <code>coil100</code> can be downloaded via the
+<a href="https://github.com/jlmelville/coil20" class="external-link">coil20</a> package. Other
+data I processed using Python. Notebooks for these can be found at <a href="https://github.com/jlmelville/drnb/tree/master/notebooks/data-pipeline" class="external-link uri">https://github.com/jlmelville/drnb/tree/master/notebooks/data-pipeline</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mnist</span> <span class="op">&lt;-</span> <span class="fu">snedata</span><span class="fu">::</span><span class="fu">download_mnist</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -618,17 +623,23 @@ extensive use of it.</p>
 <h3 id="hierarchical">hierarchical<a class="anchor" aria-label="anchor" href="#hierarchical"></a>
 </h3>
 <p>Another dataset used in the <a href="https://jmlr.org/papers/v22/20-1061.html" class="external-link">PaCMAP paper</a>, but
-for which I was unable to find the code to generate it in the PaCMAP
-repo. The paper describes it thusly: ’consists of 5 “macro clusters”
-that each have 5 “meso clusters,” and each of the meso subclusters has 5
-“micro clusters.” Thus, there are 5x5x5 = 125 micro clusters total. We
-colored each point based on its true macro clusters, shading each meso
-cluster.”. Get all of that? There’s more detail in Appendix B of the
-paper and I think I was able to turn that into some Python that probably
-generated the correct data. I think it’s correct. For more details see
-<a href="https://github.com/jlmelville/drnb/blob/master/notebooks/data-pipeline/synthetic-hierarchical.ipynb" class="external-link uri">https://github.com/jlmelville/drnb/blob/master/notebooks/data-pipeline/synthetic-hierarchical.ipynb</a>.
-I have not yet summoned the enthusiasm to come up with a pure R
-version.</p>
+for which I was unable to find code for generating it in the PaCMAP
+repo. The <a href="https://github.com/hyhuang00/scRNA-DR2020/" class="external-link">gitub
+repo</a> for the paper <a href="https://doi.org/10.1038/s42003-022-03628-x" class="external-link">“Towards a
+comprehensive evaluation of dimension reduction methods for
+transcriptomic data visualization”</a> (by many of the same authors),
+contains a numpy-formatted version of the data under the name
+<code>hierarchical_threelayer_dataset</code>, and we can probably assume
+it’s the data also used in the PaCMAP paper. The paper describes the
+generation like so:</p>
+<blockquote>
+<p>consists of 5 “macro clusters” that each have 5 “meso clusters,” and
+each of the meso subclusters has 5 “micro clusters.” Therefore, there
+are 5x5x5 = 125 micro clusters total. We colored each point based on its
+true macro clusters, shading each meso cluster.”.</p>
+</blockquote>
+<p>Get all of that? There’s more detail in Appendix B of the PacMAP
+paper.</p>
 <table class="table">
 <colgroup>
 <col width="51%">
