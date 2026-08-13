@@ -11,6 +11,7 @@
 ^codecov\.yml$
 ^.*\/*DONTCHECKMEIN.*$
 ^\.github$
+^\.clang-format$
 ^revdep$
 ^CRAN-SUBMISSION$
 ^_pkgdown\.yml$

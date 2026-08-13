@@ -20,8 +20,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
 // USA.
 
-#ifndef PFORR
-#define PFORR
+#ifndef PFORR_PFORR_H
+#define PFORR_PFORR_H
 
 #include <algorithm>
 #include <cstddef>
@@ -34,7 +34,11 @@
 
 namespace pforr {
 
+// Maintainers: rnndescent's installed header is canonical; downstream copies
+// must remain byte-for-byte identical.
 using IndexRange = std::pair<std::size_t, std::size_t>;
+
+namespace detail {
 
 class ThreadJoiner {
 public:
@@ -98,10 +102,12 @@ inline auto effective_grain_size(const IndexRange &range, std::size_t n_threads,
   }
 
   const auto max_chunks = (std::min)(length, n_threads);
-  const auto even_chunk = static_cast<std::size_t>(1) +
-    ((length - 1) / max_chunks);
+  const auto even_chunk =
+      static_cast<std::size_t>(1) + ((length - 1) / max_chunks);
   return (std::max)(grain_size, even_chunk);
 }
+
+} // namespace detail
 
 inline auto split_input_range(const IndexRange &range, std::size_t n_threads,
                               std::size_t grain_size)
@@ -109,7 +115,7 @@ inline auto split_input_range(const IndexRange &range, std::size_t n_threads,
   if (range.first >= range.second) {
     return {};
   }
-  grain_size = effective_grain_size(range, n_threads, grain_size);
+  grain_size = detail::effective_grain_size(range, n_threads, grain_size);
 
   // allocate ranges
   std::vector<IndexRange> ranges;
@@ -118,7 +124,7 @@ inline auto split_input_range(const IndexRange &range, std::size_t n_threads,
   while (begin < range.second) {
     const auto remaining = range.second - begin;
     const auto end =
-      remaining <= grain_size ? range.second : begin + grain_size;
+        remaining <= grain_size ? range.second : begin + grain_size;
     ranges.emplace_back(begin, end);
     begin = end;
   }
@@ -140,7 +146,7 @@ inline void parallel_for(std::size_t begin, std::size_t end, Worker &worker,
   // split the work
   IndexRange input_range(begin, end);
   std::vector<IndexRange> ranges =
-    split_input_range(input_range, n_threads, grain_size);
+      split_input_range(input_range, n_threads, grain_size);
   if (ranges.size() <= 1) {
     worker(begin, end);
     return;
@@ -150,10 +156,10 @@ inline void parallel_for(std::size_t begin, std::size_t end, Worker &worker,
   std::mutex worker_exception_mutex;
   std::vector<std::thread> threads;
   threads.reserve(ranges.size());
-  ThreadJoiner thread_joiner(threads);
+  detail::ThreadJoiner thread_joiner(threads);
   for (auto &range : ranges) {
-    threads.emplace_back(&worker_thread<Worker>, std::ref(worker), range,
-                         std::ref(worker_exception),
+    threads.emplace_back(&detail::worker_thread<Worker>, std::ref(worker),
+                         range, std::ref(worker_exception),
                          std::ref(worker_exception_mutex));
   }
 
@@ -191,7 +197,7 @@ inline void parallel_for_indexed(std::size_t begin, std::size_t end,
   }
   IndexRange input_range(begin, end);
   std::vector<IndexRange> ranges =
-    split_input_range(input_range, n_threads, grain_size);
+      split_input_range(input_range, n_threads, grain_size);
   if (ranges.size() <= 1) {
     worker(begin, end, 0);
     return;
@@ -201,10 +207,10 @@ inline void parallel_for_indexed(std::size_t begin, std::size_t end,
   std::mutex worker_exception_mutex;
   std::vector<std::thread> threads;
   threads.reserve(ranges.size());
-  ThreadJoiner thread_joiner(threads);
+  detail::ThreadJoiner thread_joiner(threads);
   for (std::size_t chunk_id = 0; chunk_id < ranges.size(); ++chunk_id) {
-    threads.emplace_back(&worker_thread_indexed<Worker>, std::ref(worker),
-                         ranges[chunk_id], chunk_id,
+    threads.emplace_back(&detail::worker_thread_indexed<Worker>,
+                         std::ref(worker), ranges[chunk_id], chunk_id,
                          std::ref(worker_exception),
                          std::ref(worker_exception_mutex));
   }
@@ -231,4 +237,4 @@ inline void parallel_for_indexed(std::size_t end, Worker &worker,
 
 } // namespace pforr
 
-#endif // PFORR
+#endif // PFORR_PFORR_H
