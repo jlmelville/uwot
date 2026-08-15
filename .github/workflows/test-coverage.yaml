@@ -34,7 +34,9 @@ jobs:
       # Pinned to a full-length commit SHA for immutability.
       - uses: r-lib/actions/setup-r-dependencies@a51a8012b0aab7c32ef9d19bf54da93f3254335e
         with:
-          extra-packages: any::covr
+          extra-packages: |
+            any::covr
+            any::xml2
           needs: coverage
 
       - name: Calculate test coverage
