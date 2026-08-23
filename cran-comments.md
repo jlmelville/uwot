@@ -13,7 +13,6 @@ package, plus some other small bug fixes.
 * win-builder (devel)
 * local Windows 11 build, R 4.5.2
 * Windows Server 2022 (on github actions), R 4.4.3, R 4.5.2
-* Windows Server 2012 (on appveyor) R 4.5.2
 * local mac OS X Sequoia R 4.5.2
 * mac OS X Sequoia (on github actions) R 4.5.2
 

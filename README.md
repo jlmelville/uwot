@@ -1,7 +1,6 @@
 # uwot
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/jlmelville/uwot/workflows/R-CMD-check/badge.svg)](https://github.com/jlmelville/uwot/actions)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/jlmelville/uwot?branch=master&svg=true)](https://ci.appveyor.com/project/jlmelville/uwot)
 [![Coverage Status](https://img.shields.io/codecov/c/github/jlmelville/uwot/master.svg)](https://app.codecov.io/github/jlmelville/uwot?branch=master)
 [![CRAN Status Badge](https://www.r-pkg.org/badges/version/uwot)](https://cran.r-project.org/package=uwot)
 [![Dependencies](https://tinyverse.netlify.app/badge/uwot)](https://cran.r-project.org/package=uwot)
