@@ -12,19 +12,21 @@ in the additional Clang 23 checks:
 ## Test environments
 
 * local Ubuntu 26.04 LTS, R 4.5.2, GCC 15.2.0
-* local Ubuntu 26.04 LTS, R 4.5.2, Clang 21.1.8 with libstdc++
-
-External CRAN-like compiler, sanitizer, and platform checks are still pending.
-Their actual environments will be added after the corresponding runs complete.
+* local Ubuntu 26.04 LTS, R 4.5.2, Clang 21.1.8 with libstdc++ and libc++
+* Ubuntu 24.04 (on GitHub Actions), R 4.5.3, R 4.6.1, and R-devel
+  (4.7.0), GCC 13.3.0
+* local Windows 11 build, R 4.6.1
+* Windows Server 2025 with Visual Studio 2026 (on GitHub Actions), R 4.5.3
+  and R 4.6.1
+* local macOS Tahoe R 4.6.1
+* macOS Tahoe 26, arm64 (on GitHub Actions), R 4.6.1, Apple Clang 21.0.0
+* Ubuntu 22.04 (on R-hub), R-devel 4.7.0, Clang 15.0.7
+* Ubuntu 22.04 (on R-hub), R-devel 4.7.0, Clang 22.1.8 with libc++,
+  ASAN and UBSAN
+* Fedora 42 (on R-hub), R-devel 4.7.0, GCC 15.2.1, ASAN and Valgrind
+* Fedora 44 (on R-hub), R-devel 4.7.0, GCC 16.2.1
+* Ubuntu 24.04 (on R-hub), R 4.6.1, GCC 13.3.0, LTO
 
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
-
-This result is from the local GCC environment above with `--as-cran` and
-`--no-manual`. A separate source installation with Clang, `-Wall`, `-Wextra`,
-and `-pedantic` also completed successfully.
-
-## revdepcheck results
-
-Pending a fresh reverse-dependency check against the release candidate.
