@@ -1,39 +1,30 @@
-## Patch release
+## CRAN-requested update
 
-This is a patch release for compatibility with a new release of the `testthat`
-package, plus some other small bug fixes.
+This update addresses the problems reported on the CRAN check results page and
+in the additional Clang 23 checks:
+
+* A test fixture now uses `dim` rather than the deprecated special name `.Dim`
+  in a call to `structure()`.
+* Installed C++ headers now include the standard-library headers that declare
+  the facilities they use. This avoids relying on transitive libc++ includes
+  removed in LLVM 23.
 
 ## Test environments
 
-* local ubuntu 25.10 R 4.5.1
-* ubuntu 24.04 (on github actions), R 4.4.3, R 4.5.2, devel
-* ubuntu 22.04 (on rhub) devel clang-ASAN
-* ubuntu 22.04 (on rhub) devel gcc13
-* Fedora 38 (on rhub) devel valgrind
-* win-builder (devel)
-* local Windows 11 build, R 4.5.2
-* Windows Server 2022 (on github actions), R 4.4.3, R 4.5.2
-* local mac OS X Sequoia R 4.5.2
-* mac OS X Sequoia (on github actions) R 4.5.2
+* local Ubuntu 26.04 LTS, R 4.5.2, GCC 15.2.0
+* local Ubuntu 26.04 LTS, R 4.5.2, Clang 21.1.8 with libstdc++
+
+External CRAN-like compiler, sanitizer, and platform checks are still pending.
+Their actual environments will be added after the corresponding runs complete.
 
 ## R CMD check results
 
-There is 1 NOTE:
+0 errors | 0 warnings | 0 notes
 
-Version: 0.2.3
-Check: installed package size
-Result: NOTE 
-    installed size is 16.6Mb
-    sub-directories of 1Mb or more:
-      libs  15.6Mb
-Flavors: r-oldrel-macos-arm64, r-oldrel-macos-x86_64
-
-This is due to the underlying C++ implementation using templates.
+This result is from the local GCC environment above with `--as-cran` and
+`--no-manual`. A separate source installation with Clang, `-Wall`, `-Wextra`,
+and `-pedantic` also completed successfully.
 
 ## revdepcheck results
 
-We checked 76 reverse dependencies (39 from CRAN + 37 from Bioconductor), 
-comparing R CMD check results across CRAN and dev versions of this package.
-
-* We saw 0 new problems
-* We failed to check 0 packages
+Pending a fresh reverse-dependency check against the release candidate.

@@ -27,6 +27,7 @@
 #ifndef UWOT_UPDATE_H
 #define UWOT_UPDATE_H
 
+#include <algorithm>
 #include <memory>
 
 #include "gradient.h"

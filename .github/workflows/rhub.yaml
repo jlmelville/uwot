@@ -7,20 +7,28 @@
 # It is unlikely that you need to modify this file manually.
 
 name: R-hub
-run-name: "${{ github.event.inputs.id }}: ${{ github.event.inputs.name || format('Manually run by {0}', github.triggering_actor) }}"
+run-name: >-
+  ${{ github.event_name == 'schedule' && 'Scheduled compiler drift check' ||
+  format('{0}: {1}', github.event.inputs.id || format('Manual run by @{0}', github.triggering_actor),
+  github.event.inputs.name || github.event.inputs.config) }}
 
 on:
+  schedule:
+    - cron: '23 7 * * 1'
   workflow_dispatch:
     inputs:
       config:
-        description: 'A comma separated list of R-hub platforms to use.'
+        description: >-
+          Comma-separated list of R-hub platforms to use.
+          Full list: https://r-hub.github.io/containers/
         type: string
-        default: 'linux,windows,macos'
+        default: >-
+          ubuntu-clang,gcc16,clang-asan,clang-ubsan,gcc-asan,valgrind,lto,rchk
       name:
-        description: 'Run name. You can leave this empty now.'
+        description: 'Run name. You can leave this empty.'
         type: string
       id:
-        description: 'Unique ID. You can leave this empty now.'
+        description: 'Unique ID. You can leave this empty.'
         type: string
 
 permissions:
@@ -43,7 +51,9 @@ jobs:
     # Pinned to a full-length commit SHA for immutability.
     - uses: r-hub/actions/setup@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
       with:
-        config: ${{ github.event.inputs.config }}
+        config: >-
+          ${{ github.event_name == 'schedule' && 'ubuntu-clang,gcc16' ||
+          github.event.inputs.config }}
       id: rhub-setup
 
   linux-containers:

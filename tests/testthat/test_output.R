@@ -375,7 +375,7 @@ bin10 <- structure(c(
   0L, 0L, 1L, 0L, 1L, 1L, 1L, 0L, 0L, 0L, 0L, 0L, 0L,
   0L, 1L, 1L, 1L, 1L, 0L, 1L, 0L, 1L, 0L, 0L, 0L, 0L, 0L, 1L, 1L,
   0L, 1L, 0L, 0L, 1L, 1L, 0L, 0L, 1L, 1L, 0L
-), .Dim = c(10L, 4L))
+), dim = c(10L, 4L))
 res <- umap(bin10,
   n_neighbors = 4, metric = "hamming", verbose = FALSE,
   n_threads = 1
