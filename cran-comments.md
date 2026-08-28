@@ -30,3 +30,11 @@ in the additional Clang 23 checks:
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
+
+## revdepcheck results
+
+We checked 98 reverse dependencies (58 from CRAN + 40 from Bioconductor),
+comparing R CMD check results across CRAN and development versions of uwot.
+
+* We saw 0 new problems.
+* We failed to check 0 packages.
