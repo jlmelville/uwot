@@ -1,4 +1,4 @@
-# uwot (development version)
+# uwot 0.2.5
 
 ## Bug fixes and minor improvements
 
@@ -17,6 +17,7 @@ improves compatibility with the `BiocNeighbors` package. Thank you
 * Parallel-loop helpers now propagate worker exceptions from threaded code, although hopefully that
 never happens.
 * `default_num_threads` now returns an integer.
+* The C++ sources now explicitly target the C++17 standard.
 
 # uwot 0.2.4
 
