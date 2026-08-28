@@ -12,6 +12,7 @@ additional Clang 23 checks.
 * local Windows 11 build, R 4.6.1
 * Windows Server 2025 with Visual Studio 2026 (on GitHub Actions), R 4.5.3
   and R 4.6.1
+* Windows Server 2022 (on Win-Builder), R-devel (2026-08-27 r90452), GCC 14.3.0
 * local macOS Tahoe R 4.6.1
 * macOS Tahoe 26, arm64 (on GitHub Actions), R 4.6.1, Apple Clang 21.0.0
 * Ubuntu 22.04 (on R-hub), R-devel 4.7.0, Clang 15.0.7
