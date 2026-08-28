@@ -1,13 +1,7 @@
 ## CRAN-requested update
 
-This update addresses the problems reported on the CRAN check results page and
-in the additional Clang 23 checks:
-
-* A test fixture now uses `dim` rather than the deprecated special name `.Dim`
-  in a call to `structure()`.
-* Installed C++ headers now include the standard-library headers that declare
-  the facilities they use. This avoids relying on transitive libc++ includes
-  removed in LLVM 23.
+This release fixes issues reported for uwot 0.2.4 in the CRAN checks and the
+additional Clang 23 checks.
 
 ## Test environments
 
@@ -30,6 +24,40 @@ in the additional Clang 23 checks:
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
+
+## CRAN checks
+
+The CRAN checks for uwot 0.2.4 report one NOTE on the five r-devel flavors:
+
+```
+Version: 0.2.4
+Check: R code for possible problems
+Result: NOTE
+  Found calls to structure() using deprecated special names:
+    uwot/tests/testthat/test_output.R (.Dim: 1)
+  '.Dim' should be changed to 'dim'.
+```
+
+Flavors: r-devel-linux-x86_64-debian-clang,
+r-devel-linux-x86_64-debian-gcc, r-devel-linux-x86_64-fedora-clang,
+r-devel-linux-x86_64-fedora-gcc, r-devel-windows-x86_64.
+
+The test fixture now uses `dim` rather than `.Dim`.
+
+The additional R-devel check on Fedora 44 with Clang 23.1.0 and libc++ reports
+an installation ERROR:
+
+```
+Version: 0.2.4
+Check: whether package can be installed
+Result: ERROR
+  ../inst/include/uwot/update.h:210:10: error: no member named 'fill' in namespace 'std'
+  ../inst/include/RcppPerpendicular.h:97:52: error: no member named 'ref' in namespace 'std'
+```
+
+The installed C++ headers now directly include `<algorithm>` and `<functional>`,
+which declare `std::fill` and `std::ref`, respectively. This avoids relying on
+transitive libc++ includes removed in LLVM 23.
 
 ## revdepcheck results
 
