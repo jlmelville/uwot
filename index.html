@@ -57,8 +57,7 @@
 <div class="section level2">
 <h2 id="news">News<a class="anchor" aria-label="anchor" href="#news"></a>
 </h2>
-<p><em>November 10 2025</em> <code>uwot</code> version 0.2.4 has been released to CRAN. This was mainly to avoid a test potentially starting to fail due to an incorrect use of <code>testthat</code>. However, as part of some other small fixes, optional dependencies (e.g. RSpectra) will now be correctly detected and used if installed even if not loaded. This could have an effect on output (but the old behavior was a bug).</p>
-<p><em>February 24 2025</em> <code>uwot</code> version 0.2.3 has been released to CRAN. This release mainly fixes some bugs, including one that was causing an error with an upcoming version of R-devel. One new feature: set <code>rng_type = "deterministic"</code> to use a deterministic sampling of vertices during the optimization phase which will give faster and more reproducible output at the cost of accuracy. The idea for this came straight from <a href="https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy/" class="external-link">Leland McInnes via Reddit</a>.</p>
+<p><em>August 29 2026</em> <code>uwot</code> version 0.2.5 has been released to CRAN. This is to apply fixes for some minor issues surfaced by CRAN checks (transitive headers in the C++ code caught by clang, a deprecation in test code) but there are some other minor changes for nearest neighbor calculations. See the <a href="https://github.com/jlmelville/uwot/blob/master/NEWS.md" class="external-link">NEWS.md</a> for details.</p>
 </div>
 <div class="section level2">
 <h2 id="installing">Installing<a class="anchor" aria-label="anchor" href="#installing"></a>

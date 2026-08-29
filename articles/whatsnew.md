@@ -6,6 +6,11 @@ more, they will get moved here. You should look at the
 [Changelog](https://jlmelville.github.io/uwot/news/index.html) for
 fuller details.
 
+*August 29 2026* `uwot` version 0.2.5 has been released to CRAN. This is
+to apply fixes for some minor issues surfaced by CRAN checks (some
+transitive headers in the C++ code for clang, a deprecation in test
+code) but there are some other minor changes.
+
 *November 10 2025* `uwot` version 0.2.4 has been released to CRAN. This
 was mainly to avoid a test potentially starting to fail due to an
 incorrect use of `testthat`. However, as part of some other small fixes,
