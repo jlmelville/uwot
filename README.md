@@ -18,21 +18,11 @@ method. Translated from the
 
 ## News
 
-*November 10 2025* `uwot` version 0.2.4 has been released to CRAN. This was
-mainly to avoid a test potentially starting to fail due to an incorrect use of
-`testthat`. However, as part of some other small fixes, optional dependencies
-(e.g. RSpectra) will now be correctly detected and used if installed even if not
-loaded. This could have an effect on output (but the old behavior was a bug).
-
-*February 24 2025* `uwot` version 0.2.3 has been released to CRAN. This release
-mainly fixes some bugs, including one that was causing an error with an upcoming
-version of R-devel. One new feature: set `rng_type = "deterministic"` to use a
-deterministic sampling of vertices during the optimization phase which will give
-faster and more reproducible output at the cost of accuracy. The idea for this
-came straight from
-[Leland McInnes via Reddit](https://www.reddit.com/r/MachineLearning/comments/1gsjfq9/comment/lxip9wy/).
-
-
+*August 29 2026* `uwot` version 0.2.5 has been released to CRAN. This is to 
+apply fixes for some minor issues surfaced by CRAN checks (transitive headers
+in the C++ code caught by clang, a deprecation in test code) but there are
+some other minor changes for nearest neighbor calculations. See the 
+[NEWS.md](https://github.com/jlmelville/uwot/blob/master/NEWS.md) for details.
 
 ## Installing
 
