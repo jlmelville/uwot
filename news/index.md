@@ -4,6 +4,8 @@
 
 ## uwot 0.2.5
 
+CRAN release: 2026-08-29
+
 ### Bug fixes and minor improvements
 
 - New parameter: `n_build_threads`. Controls the number of threads used

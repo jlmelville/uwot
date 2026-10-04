@@ -38,7 +38,7 @@
 <h2 class="pkg-version" data-toc-text="development version" id="uwot-development-version">uwot (development version)<a class="anchor" aria-label="anchor" href="#uwot-development-version"></a></h2>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.2.5" id="uwot-025">uwot 0.2.5<a class="anchor" aria-label="anchor" href="#uwot-025"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.5" id="uwot-025">uwot 0.2.5<a class="anchor" aria-label="anchor" href="#uwot-025"></a></h2><p class="text-muted">CRAN release: 2026-08-29</p>
 <div class="section level3">
 <h3 id="bug-fixes-and-minor-improvements-0-2-5">Bug fixes and minor improvements<a class="anchor" aria-label="anchor" href="#bug-fixes-and-minor-improvements-0-2-5"></a></h3>
 <ul><li>New parameter: <code>n_build_threads</code>. Controls the number of threads used to build the nearest neighbor index when using <code>nn_method = "hnsw"</code> or <code>nn_method = "nndescent"</code>. With a given seed, setting <code>n_build_threads = 1</code> will give deterministic nearest neighbor results when using either of those methods (at the cost of some speed). If you are using the default Annoy-based method, this parameter does nothing: it has always used one thread to build the index. Thank you <a href="https://github.com/hsuknowledge" class="external-link">hsuknowledge</a> for pointing out the issue around determinism. (<a href="https://github.com/jlmelville/uwot/issues/139" class="external-link uri">https://github.com/jlmelville/uwot/issues/139</a>).</li>
