@@ -70,8 +70,10 @@ jobs:
       image: ${{ matrix.config.container }}
 
     steps:
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-hub/actions/checkout@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
+      # Use an explicit checkout so package code cannot reuse checkout credentials.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       # Pinned to a full-length commit SHA for immutability.
       - uses: r-hub/actions/platform-info@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
         with:
@@ -100,8 +102,10 @@ jobs:
         config: ${{ fromJson(needs.setup.outputs.platforms) }}
 
     steps:
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-hub/actions/checkout@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
+      # Use an explicit checkout so package code cannot reuse checkout credentials.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       # Pinned to a full-length commit SHA for immutability.
       - uses: r-hub/actions/setup-r@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
         with:
