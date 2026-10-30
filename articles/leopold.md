@@ -19,18 +19,16 @@ in which the “local radius” of each observation in the input and output
 space is calculated and the Pearson correlation between the two is
 optimized.
 
-The radius of observation $`i`$, $`R_i`$ is calculated as:
+The radius of observation i, R_i is calculated as:
 
-``` math
-R_i = \frac{1}{\sum_i P_{ij}} \sum_i d_{ij}^2 P_{ij}
-```
+R_i = \frac{1}{\sum_i P\_{ij}} \sum_i d\_{ij}^2 P\_{ij}
 
-where $`d_{ij}`$ is the distance between point $`i`$ and $`j`$ and
-$`P_{ij}`$ is the *symmetrized* edge weight between $`i`$ and $`j`$,
-i.e. the radius is the edge-weighted average of the squared distances
-between each $`i`$ and each of its neighbors. Because the matrix has
-been symmetrized, $`i`$ may have a different number of neighbors than
-the `n_neighbors` parameter that the user specifies.
+where d\_{ij} is the distance between point i and j and P\_{ij} is the
+*symmetrized* edge weight between i and j, i.e. the radius is the
+edge-weighted average of the squared distances between each i and each
+of its neighbors. Because the matrix has been symmetrized, i may have a
+different number of neighbors than the `n_neighbors` parameter that the
+user specifies.
 
 To get a feel for what densMAP does, below are some results from the
 Python UMAP (i.e. no `uwot` output here), with and without
@@ -394,50 +392,46 @@ Here’s my pitch for an approximation to densMAP, which I have named the
 Lightweight Estimate of Preservation of Local Density (Leopold).
 
 For the input radii, as part of the smooth k-nearest neighbor distances
-routine we already calculate $`\rho`$ which is the distance to the
-nearest neighbor of each item in the dataset (subject to the
-`local_connectivity` constraint). Additionally, we also calculate
-$`\sigma`$ which is a normalization factor used with the neighbors at
-distance greater than $`\rho`$. It must have units of distance, and the
-larger the distances to the neighbors, the larger $`\sigma`$ gets. So I
-propose the following definition for the local radius:
+routine we already calculate \rho which is the distance to the nearest
+neighbor of each item in the dataset (subject to the
+`local_connectivity` constraint). Additionally, we also calculate \sigma
+which is a normalization factor used with the neighbors at distance
+greater than \rho. It must have units of distance, and the larger the
+distances to the neighbors, the larger \sigma gets. So I propose the
+following definition for the local radius:
 
-``` math
 R_i = \rho + \sigma
-```
 
 The biggest difference between this definition of the local input radii
 is that I haven’t bothered to square the distances (it doesn’t make much
-difference for leopold) and that the values for $`\sigma`$ and $`\rho`$
-are calculated *before* the symmetrization of the UMAP input edge
-weights. So these values are missing the influence of observations
-outside the initial k-nearest neighborhood graph.
+difference for leopold) and that the values for \sigma and \rho are
+calculated *before* the symmetrization of the UMAP input edge weights.
+So these values are missing the influence of observations outside the
+initial k-nearest neighborhood graph.
 
 For the output radii, I know from looking at the [output weight function
 parameters](https://jlmelville.github.io/uwot/articles/umap-examples.html),
 that increasing the `a` parameter makes the clusters in a UMAP plot
 shrink, and vice versa. So let’s use that as measure of the output
 density, i.e. the inverse of the local radius. As every point has its
-own radius, the value for a given weight between points $`i`$ and $`j`$
-will be the geometric mean of the two radii:
+own radius, the value for a given weight between points i and j will be
+the geometric mean of the two radii:
 
-``` math
-w_{ij} = 1 / \left(1 + \frac{d_{ij}^2}{\sqrt{r_i r_j}} \right)
-```
+w\_{ij} = 1 / \left(1 + \frac{d\_{ij}^2}{\sqrt{r_i r_j}} \right)
 
-where $`r_i`$ is a scaled version of the input radius $`R_i`$ suitable
-for the lower dimensional space. This is a similar sort of scaling to
-that used by [Zelnik-Manor and
+where r_i is a scaled version of the input radius R_i suitable for the
+lower dimensional space. This is a similar sort of scaling to that used
+by [Zelnik-Manor and
 Perona](https://papers.nips.cc/paper/2004/hash/40173ea48d9567f1f393b20c855bb40b-Abstract.html)
 for “self-tuning” spectral clustering, and also recommended for local
 scaling to reduce hubness in high dimensional space by [Schnitzer and
 co-workers](https://www.jmlr.org/papers/v13/schnitzer12a.html).
 
 The scaling from input to output space is not sophisticated: I have
-observed that for typical values of $`b`$ used in UMAP, a usable range
-of $`a`$ values are between 0.01 (very diffuse clusters) and 100 (very
-tight clusters), so we will just map the inverse of the input local
-radii to that range.
+observed that for typical values of b used in UMAP, a usable range of a
+values are between 0.01 (very diffuse clusters) and 100 (very tight
+clusters), so we will just map the inverse of the input local radii to
+that range.
 
 The final adjustment to this is that it would be good to introduce a
 parameter that controls how much of the range of `a` is used in the
@@ -451,24 +445,24 @@ value of `a` as specified by the user (or via the `spread` and
 In my mind this scaling of the radii is straightforward, but looking up
 at that description maybe it’s not. The procedure is:
 
-1.  Define the minimum log density as $`a \times 10^{-2s}`$ where $`a`$
-    is the UMAP `a` parameter for the output and $`s`$ is the
-    `den_scale` parameter.
-2.  Define the maximum log density as $`a \times 10^{2s}`$.
-3.  Range scale $`\log \left(1 / R_i \right)`$ between the minimum and
-    maximum log density. Call that range scaled log density $`\Delta_i`$
-4.  $`a_i = \sqrt{ \exp \left( \Delta_i \right) }`$.
-5.  The leopold output weight function is
-    $`w_{ij} = 1 / \left( 1 + a_i a_j d_{ij}^2 \right)`$.
+1.  Define the minimum log density as a \times 10^{-2s} where a is the
+    UMAP `a` parameter for the output and s is the `den_scale`
+    parameter.
+2.  Define the maximum log density as a \times 10^{2s}.
+3.  Range scale \log \left(1 / R_i \right) between the minimum and
+    maximum log density. Call that range scaled log density \Delta_i
+4.  a_i = \sqrt{ \exp \left( \Delta_i \right) }.
+5.  The leopold output weight function is w\_{ij} = 1 / \left( 1 + a_i
+    a_j d\_{ij}^2 \right).
 
 ### The Advantage of leopold
 
 The main advantage is for me: to implement this I don’t have to write
-much new code: $`\rho`$ and $`\sigma`$ are already calculated and
-implementing the per-observation value for `a` in the output function
-requires creating a new version of the umap gradient routine that
-expects a vector of values rather than a scalar. This is a lot less work
-than implementing densMAP.
+much new code: \rho and \sigma are already calculated and implementing
+the per-observation value for `a` in the output function requires
+creating a new version of the umap gradient routine that expects a
+vector of values rather than a scalar. This is a lot less work than
+implementing densMAP.
 
 ### The Disadvantage of leopold
 
@@ -476,11 +470,10 @@ It’s all a bit approximate. But all I really want from this technique is
 that it makes the dense clusters get smaller and the diffuse clusters
 get bigger. The exact changes seem less important to me as long as they
 are vaguely sensible. I don’t claim to have a good sense of what I
-expect to see when a blob of data with an intrinsic dimensionality of
-$`d`$ and a radius of $`r`$ is embedded into 2D versus one with an
-intrinsic dimensionality of $`d + 5`$ but a radius of $`r / 2`$. Even if
-that was accurately embedded, would it even look sensible let alone
-helpful?
+expect to see when a blob of data with an intrinsic dimensionality of d
+and a radius of r is embedded into 2D versus one with an intrinsic
+dimensionality of d + 5 but a radius of r / 2. Even if that was
+accurately embedded, would it even look sensible let alone helpful?
 
 ## Results
 
@@ -508,7 +501,7 @@ top left: the output of running leopold,
   output radii and the Pearson correlation between them. When there were
   more than 1000 points, I used `smoothScatter` to plot the results.
 - Bottom right: a plot of the log of the densmap input local radii
-  against the leopold equivalent ($`\rho + \sigma`$). The number in the
+  against the leopold equivalent (\rho + \sigma). The number in the
   title is Pearson correlation. There’s no particular reason for the two
   measures of local radius to be the same, but they should show a
   similar trend.
@@ -752,9 +745,9 @@ If you want to use leopold in `uwot`:
   images on this page.
 - You can transform new data with models generated where `dens_scale` is
   set. When UMAP transforms new data, an adjusted local connectivity is
-  used which affects both $`\sigma`$ and $`\rho`$ so the estimated
-  values of $`R_i`$ are not as precise as I would like, but the effect
-  seems to be quite small.
+  used which affects both \sigma and \rho so the estimated values of R_i
+  are not as precise as I would like, but the effect seems to be quite
+  small.
 - Even if you don’t use the local radii to generate the UMAP layout,
   coloring the results by the log of `localr` is quite informative as to
   which parts of the embedding you would expect to shrink or expand.

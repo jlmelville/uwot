@@ -6,11 +6,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Fine-tuning UMAP Visualizations • uwot</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><script src="../extra.js"></script><meta property="og:title" content="Fine-tuning UMAP Visualizations">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<script src="../extra.js"></script><meta property="og:title" content="Fine-tuning UMAP Visualizations">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -76,42 +78,29 @@ function are more subtle.</p>
 <div class="section level2">
 <h2 id="theory">Theory<a class="anchor" aria-label="anchor" href="#theory"></a>
 </h2>
-<p>The output weight between two points
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-are given by:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mn>1</mn><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p>The output weight between two points <span class="math inline">i</span> and <span class="math inline">j</span> are
+given by:</p>
+<p><span class="math display">
 w_{ij} = 1 / \left(1 + ad_{ij}^{2b}\right)
-</annotation></semantics></math></p>
-<p>with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">d_{ij}</annotation></semantics></math>
-being the Euclidean distance in the embedding between the two points.
-Below I drop the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>j</mi></mrow><annotation encoding="application/x-tex">ij</annotation></semantics></math>
-subscript for clarity’s sake.
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>
-are two hyper-parameters. Usually they are determined by a non-linear
-least squares fit based on an exponential decay curve parameterized by
+</span></p>
+<p>with <span class="math inline">d_{ij}</span> being the Euclidean
+distance in the embedding between the two points. Below I drop the <span class="math inline">ij</span> subscript for clarity’s sake. <span class="math inline">a</span> and <span class="math inline">b</span> are
+two hyper-parameters. Usually they are determined by a non-linear least
+squares fit based on an exponential decay curve parameterized by
 <code>min_dist</code> and <code>spread</code>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">[</mo><mi>−</mi><mi mathvariant="normal">max</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mi>d</mi><mo>−</mo><mi>ρ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mi>σ</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">
 w = \exp\left[-\max \left(0, d - \rho \right) / \sigma \right]
-</annotation></semantics></math></p>
-<p>where <code>min_dist</code> is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
-and <code>spread</code> is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>.
-I have used those symbols to make it more obvious that this equation has
+</span></p>
+<p>where <code>min_dist</code> is <span class="math inline">\rho</span>
+and <code>spread</code> is <span class="math inline">\sigma</span>. I
+have used those symbols to make it more obvious that this equation has
 the same form as UMAP’s weighting function for its edge weights in the
 input space. As a reminder, the presence of the <code>max</code>
-operation and shifting the distances by
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
-is to enforce the local connectivity constraint: there is always an edge
-weight of 1 between a point and its nearest neighbor.
-<code>spread</code> determines the x-value range over which the y-value
-decays to zero, and is set to <code>spread</code> multiplied by 3.</p>
+operation and shifting the distances by <span class="math inline">\rho</span> is to enforce the local connectivity
+constraint: there is always an edge weight of 1 between a point and its
+nearest neighbor. <code>spread</code> determines the x-value range over
+which the y-value decays to zero, and is set to <code>spread</code>
+multiplied by 3.</p>
 <p>Here’s some R code that works through this and then plots the results
 using the Python UMAP defaults of <code>spread = 1</code>,
 <code>min_dist = 0.1</code>:</p>
@@ -160,25 +149,21 @@ using the Python UMAP defaults of <code>spread = 1</code>,
 <img src="img/abparams/umap_ab_curve.png" alt="UMAP a,b curve"><div class="figcaption">UMAP a,b curve</div>
 </div>
 <p>As the title indicates, this curve leads to the default parameters of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>1.577</mn></mrow><annotation encoding="application/x-tex">a = 1.577</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mn>0.895</mn></mrow><annotation encoding="application/x-tex">b = 0.895</annotation></semantics></math>.
-<code>uwot</code> uses a slightly different default
-<code>min_dist = 0.001</code>, which leads to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>1.93</mn><mo>,</mo><mi>b</mi><mo>=</mo><mn>0.79</mn></mrow><annotation encoding="application/x-tex">a = 1.93, b = 0.79</annotation></semantics></math>.
-I don’t know why I used a different default <code>min_dist</code> –
-probably I made a mistake. This is likely to change in a later version
-of <code>uwot</code>, but it doesn’t make much of a difference to the
-results, fortunately. Setting
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>b</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a = 1, b = 1</annotation></semantics></math>
-gives the Cauchy distribution used in t-SNE (and the <code>tumap</code>
-function in <code>uwot</code>), which corresponds roughly to
+<span class="math inline">a = 1.577</span>, <span class="math inline">b
+= 0.895</span>. <code>uwot</code> uses a slightly different default
+<code>min_dist = 0.001</code>, which leads to <span class="math inline">a = 1.93, b = 0.79</span>. I don’t know why I used a
+different default <code>min_dist</code> – probably I made a mistake.
+This is likely to change in a later version of <code>uwot</code>, but it
+doesn’t make much of a difference to the results, fortunately. Setting
+<span class="math inline">a = 1, b = 1</span> gives the Cauchy
+distribution used in t-SNE (and the <code>tumap</code> function in
+<code>uwot</code>), which corresponds roughly to
 <code>spread = 1.12</code> and <code>min_dist = 0.23</code>: putting
 those values back into the curve-fitting routine will give you back
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>0.99</mn></mrow><annotation encoding="application/x-tex">a = 0.99</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mn>1.01</mn></mrow><annotation encoding="application/x-tex">b = 1.01</annotation></semantics></math>.
-Close enough. Here is the <code>uwot</code> default results in orange
-and the Cauchy results in blue overlaid with the UMAP defaults (green,
-same as in the previous plot):</p>
+<span class="math inline">a = 0.99</span>, <span class="math inline">b =
+1.01</span>. Close enough. Here is the <code>uwot</code> default results
+in orange and the Cauchy results in blue overlaid with the UMAP defaults
+(green, same as in the previous plot):</p>
 <div class="float">
 <img src="img/abparams/umap_ab_curve_other.png" alt="Other UMAP a,b curve"><div class="figcaption">Other UMAP a,b curve</div>
 </div>
@@ -512,11 +497,7 @@ can still see borders between the clusters, unlike what happens with low
 <code>spread</code> I prefer <code>a</code> and <code>b</code> myself,
 as it reminds me more of the approach used in <a href="https://people.eecs.berkeley.edu/~pabbeel/papers/2015-ICML-absne.pdf" class="external-link">ABSNE
 (PDF)</a>, although I don’t claim there is any equivalence between the
-<code>a</code> and <code>b</code> parameters in UMAP and the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
-parameters in that work.</p>
+<code>a</code> and <code>b</code> parameters in UMAP and the <span class="math inline">\alpha</span> and <span class="math inline">\beta</span> parameters in that work.</p>
 </div>
 </div>
 <div class="section level2">

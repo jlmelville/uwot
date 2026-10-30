@@ -6,11 +6,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>UMAP for t-SNE • uwot</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><script src="../extra.js"></script><meta property="og:title" content="UMAP for t-SNE">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<script src="../extra.js"></script><meta property="og:title" content="UMAP for t-SNE">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -85,201 +87,126 @@ from SNE and t-SNE before we take a look at LargeVis and UMAP.</p>
 <div class="section level2">
 <h2 id="asymmetric-sne">(Asymmetric) SNE<a class="anchor" aria-label="anchor" href="#asymmetric-sne"></a>
 </h2>
-<p>Given
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
-observations of some high dimensional data, for any pair,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐱</mi><mi>𝐢</mi></msub><annotation encoding="application/x-tex">\mathbf{x_{i}}</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐱</mi><mi>𝐣</mi></msub><annotation encoding="application/x-tex">\mathbf{x_{j}}</annotation></semantics></math>,
-SNE defines the similarity (aka an affinity or weight) between them,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">v_{j|i}</annotation></semantics></math>,
-using a Gaussian kernel function:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><msub><mi>β</mi><mi>i</mi></msub><msubsup><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+<p>Given <span class="math inline">N</span> observations of some high
+dimensional data, for any pair, <span class="math inline">\mathbf{x_{i}}</span> and <span class="math inline">\mathbf{x_{j}}</span>, SNE defines the similarity
+(aka an affinity or weight) between them, <span class="math inline">v_{j|i}</span>, using a Gaussian kernel
+function:</p>
+<p><span class="math display">
 v_{j|i} = \exp(-\beta_{i} r_{ij}^2)
-</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">r_{ij}</annotation></semantics></math>
-is the distance between
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐱</mi><mi>𝐢</mi></msub><annotation encoding="application/x-tex">\mathbf{x_{i}}</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐱</mi><mi>𝐣</mi></msub><annotation encoding="application/x-tex">\mathbf{x_{j}}</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\beta_{i}</annotation></semantics></math>
-must be determined by some method (we’ll get back to that). The notation
-of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">v_{j|i}</annotation></semantics></math>
-rather than
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">v_{ij}</annotation></semantics></math>,
-is to indicate that this quantity is not symmetric,
-i.e. <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>≠</mo><msub><mi>v</mi><mrow><mi>i</mi><mo stretchy="false" form="prefix">|</mo><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">v_{j|i} \neq v_{i|j}</annotation></semantics></math>.
-I’ve borrowed this notation from the conditional versus joint
-probability definitions used in symmetric SNE (see below) but we’ll also
-need it for quantities other than probabilities. The
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">r_{ij}</annotation></semantics></math>
-notation indicates that the distances are symmetric and this convention
-will be used for other symmetric values.</p>
-<p>The weights are normalized to form
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
+</span></p>
+<p>where <span class="math inline">r_{ij}</span> is the distance between
+<span class="math inline">\mathbf{x_{i}}</span> and <span class="math inline">\mathbf{x_{j}}</span> and <span class="math inline">\beta_{i}</span> must be determined by some method
+(we’ll get back to that). The notation of <span class="math inline">v_{j|i}</span> rather than <span class="math inline">v_{ij}</span>, is to indicate that this quantity is
+not symmetric, i.e. <span class="math inline">v_{j|i} \neq
+v_{i|j}</span>. I’ve borrowed this notation from the conditional versus
+joint probability definitions used in symmetric SNE (see below) but
+we’ll also need it for quantities other than probabilities. The <span class="math inline">r_{ij}</span> notation indicates that the distances
+are symmetric and this convention will be used for other symmetric
+values.</p>
+<p>The weights are normalized to form <span class="math inline">N</span>
 probability distributions:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><mfrac><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mrow><munderover><mo>∑</mo><mi>k</mi><mi>N</mi></munderover><msub><mi>v</mi><mrow><mi>k</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-p_{j|i} = \frac{v_{j|i}}{\sum_{k}^{N} v_{k|i}} 
-</annotation></semantics></math></p>
-<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\beta_{i}</annotation></semantics></math>
-is chosen by finding that value that results in the probability
-distribution having a specific perplexity. The perplexity has to be
-chosen by the user, but is interpreted as being a continuous version of
-the number of nearest neighbors, and generally is chosen to take values
-between 5 and 50.</p>
-<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">p_{j|i}</annotation></semantics></math>
-is a conditional probability, and is interpreted as meaning “the
-probability that you would pick item
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-as being similar to item
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
-given that you’ve already picked
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>”.</p>
+<p><span class="math display">
+p_{j|i} = \frac{v_{j|i}}{\sum_{k}^{N} v_{k|i}}
+</span></p>
+<p><span class="math inline">\beta_{i}</span> is chosen by finding that
+value that results in the probability distribution having a specific
+perplexity. The perplexity has to be chosen by the user, but is
+interpreted as being a continuous version of the number of nearest
+neighbors, and generally is chosen to take values between 5 and 50.</p>
+<p><span class="math inline">p_{j|i}</span> is a conditional
+probability, and is interpreted as meaning “the probability that you
+would pick item <span class="math inline">j</span> as being similar to
+item <span class="math inline">i</span>, given that you’ve already
+picked <span class="math inline">i</span>”.</p>
 <p>In the output space of the embedded coordinates, the similarity
-between the points
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐲</mi><mi>𝐢</mi></msub><annotation encoding="application/x-tex">\mathbf{y_i}</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐲</mi><mi>𝐣</mi></msub><annotation encoding="application/x-tex">\mathbf{y_j}</annotation></semantics></math>
-is also defined as a Gaussian:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+between the points <span class="math inline">\mathbf{y_i}</span> and
+<span class="math inline">\mathbf{y_j}</span> is also defined as a
+Gaussian:</p>
+<p><span class="math display">
 w_{ij} = \exp(-d_{ij}^2)
-</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">d_{ij}</annotation></semantics></math>
-is the Euclidean distance between
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐲</mi><mi>𝐢</mi></msub><annotation encoding="application/x-tex">\mathbf{y_i}</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐲</mi><mi>𝐣</mi></msub><annotation encoding="application/x-tex">\mathbf{y_j}</annotation></semantics></math>.
-There is no
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
-in this weight definition so these weights are symmetric. The output
-probabilities,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">q_{j|i}</annotation></semantics></math>
-are calculated from
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">w_{ij}</annotation></semantics></math>
-in the same way that we go from
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">v_{j|i}</annotation></semantics></math>
-to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">p_{j|i}</annotation></semantics></math>,
-again creating
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
-probability distributions. Due to normalizing by rows, the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">q_{j|i}</annotation></semantics></math>
-are asymmetric despite the symmetric weights they are generated
-from.</p>
+</span></p>
+<p>where <span class="math inline">d_{ij}</span> is the Euclidean
+distance between <span class="math inline">\mathbf{y_i}</span> and <span class="math inline">\mathbf{y_j}</span>. There is no <span class="math inline">\beta</span> in this weight definition so these
+weights are symmetric. The output probabilities, <span class="math inline">q_{j|i}</span> are calculated from <span class="math inline">w_{ij}</span> in the same way that we go from <span class="math inline">v_{j|i}</span> to <span class="math inline">p_{j|i}</span>, again creating <span class="math inline">N</span> probability distributions. Due to
+normalizing by rows, the <span class="math inline">q_{j|i}</span> are
+asymmetric despite the symmetric weights they are generated from.</p>
 <p>The SNE cost function is the sum of the Kullback-Leibler divergences
-of the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
-distributions:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>S</mi><mi>N</mi><mi>E</mi></mrow></msub><mo>=</mo><munderover><mo>∑</mo><mi>i</mi><mi>N</mi></munderover><munderover><mo>∑</mo><mi>j</mi><mi>N</mi></munderover><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mfrac><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><msub><mi>q</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub></mfrac></mrow><annotation encoding="application/x-tex">
-C_{SNE} = \sum_{i}^{N} \sum_{j}^{N} p_{j|i} \log \frac{p_{j|i}}{q_{j|i}} 
-</annotation></semantics></math></p>
+of the <span class="math inline">N</span> distributions:</p>
+<p><span class="math display">
+C_{SNE} = \sum_{i}^{N} \sum_{j}^{N} p_{j|i} \log \frac{p_{j|i}}{q_{j|i}}
+</span></p>
 <p>In all of the above (and in what follows), weights and probabilities
-when
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>=</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">i =
-j</annotation></semantics></math> are not defined. I don’t want to
-clutter the notation further, so assume they are excluded from any
-sums.</p>
+when <span class="math inline">i =
+j</span> are not defined. I don’t want to clutter the notation further,
+so assume they are excluded from any sums.</p>
 </div>
 <div class="section level2">
 <h2 id="symmetric-sne">Symmetric SNE<a class="anchor" aria-label="anchor" href="#symmetric-sne"></a>
 </h2>
 <p>In Symmetric SNE, the input probability matrix is symmetrized by
-averaging
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">p_{j|i}</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mo stretchy="false" form="prefix">|</mo><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{i|j}</annotation></semantics></math>
-and then re-normalized over all pairs of points, to create a single
-(joint) probability distribution,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>p</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>+</mo><msub><mi>p</mi><mrow><mi>i</mi><mo stretchy="false" form="prefix">|</mo><mi>j</mi></mrow></msub></mrow><mrow><mn>2</mn><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+averaging <span class="math inline">p_{j|i}</span> and <span class="math inline">p_{i|j}</span> and then re-normalized over all pairs
+of points, to create a single (joint) probability distribution, <span class="math inline">p_{ij}</span>:</p>
+<p><span class="math display">
 p_{ij} = \frac{p_{j|i} + p_{i|j}}{2N}
-</annotation></semantics></math></p>
-<p>The output probabilities,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">q_{ij}</annotation></semantics></math>
-are now defined by normalizing the output weights over all pairs, again
+</span></p>
+<p>The output probabilities, <span class="math inline">q_{ij}</span> are
+now defined by normalizing the output weights over all pairs, again
 creating a single probability distribution:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mfrac><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><munderover><mo>∑</mo><mi>k</mi><mi>N</mi></munderover><munderover><mo>∑</mo><mi>l</mi><mi>N</mi></munderover><msub><mi>w</mi><mrow><mi>k</mi><mi>l</mi></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">
-q_{ij} = \frac{w_{ij}}{\sum_{k}^N \sum_{l}^N w_{kl}} 
-</annotation></semantics></math></p>
+<p><span class="math display">
+q_{ij} = \frac{w_{ij}}{\sum_{k}^N \sum_{l}^N w_{kl}}
+</span></p>
 <p>The cost function for SSNE is then:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>S</mi><mi>S</mi><mi>N</mi><mi>E</mi></mrow></msub><mo>=</mo><munderover><mo>∑</mo><mi>i</mi><mi>N</mi></munderover><munderover><mo>∑</mo><mi>j</mi><mi>N</mi></munderover><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mfrac><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mfrac></mrow><annotation encoding="application/x-tex">
-C_{SSNE} = \sum_{i}^{N} \sum_{j}^{N} p_{ij} \log \frac{p_{ij}}{q_{ij}} 
-</annotation></semantics></math></p>
+<p><span class="math display">
+C_{SSNE} = \sum_{i}^{N} \sum_{j}^{N} p_{ij} \log \frac{p_{ij}}{q_{ij}}
+</span></p>
 </div>
 <div class="section level2">
 <h2 id="t-sne">t-SNE<a class="anchor" aria-label="anchor" href="#t-sne"></a>
 </h2>
 <p>For the purposes of this discussion, t-SNE only differs from
 symmetric SNE by its weight function:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">
 w_{ij} = \frac{1}{1 + d_{ij}^2}
-</annotation></semantics></math></p>
+</span></p>
 </div>
 <div class="section level2">
 <h2 id="sne-optimization">SNE Optimization<a class="anchor" aria-label="anchor" href="#sne-optimization"></a>
 </h2>
 <p>Optimization in t-SNE proceeds by:</p>
 <ul>
-<li>Calibrate the input probabilities,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>
-according to the desired perplexity (this only needs to be done
-once).</li>
+<li>Calibrate the input probabilities, <span class="math inline">p_{ij}</span> according to the desired perplexity
+(this only needs to be done once).</li>
 <li>Iteratively:</li>
-<li>Calculate all pairwise distances,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">d_{ij}</annotation></semantics></math>
-from
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐲</mi><mi>𝐢</mi></msub><annotation encoding="application/x-tex">\mathbf{y_{i}}</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐲</mi><mi>𝐣</mi></msub><annotation encoding="application/x-tex">\mathbf{y_{j}}</annotation></semantics></math>
+<li>Calculate all pairwise distances, <span class="math inline">d_{ij}</span> from <span class="math inline">\mathbf{y_{i}}</span> and <span class="math inline">\mathbf{y_{j}}</span>
 </li>
-<li>Calculate the weights,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">w_{ij}</annotation></semantics></math>
+<li>Calculate the weights, <span class="math inline">w_{ij}</span>
 </li>
-<li>Calculate the output probabilities
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">q_{ij}</annotation></semantics></math>
+<li>Calculate the output probabilities <span class="math inline">q_{ij}</span>
 </li>
-<li>Use gradient descent to update the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐲</mi><mi>𝐢</mi></msub><annotation encoding="application/x-tex">\mathbf{y_{i}}</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐲</mi><mi>𝐣</mi></msub><annotation encoding="application/x-tex">\mathbf{y_{j}}</annotation></semantics></math>
+<li>Use gradient descent to update the <span class="math inline">\mathbf{y_{i}}</span> and <span class="math inline">\mathbf{y_{j}}</span>
 </li>
 </ul>
-<p>This is fundamentally
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>N</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(N^2)</annotation></semantics></math>
-because of the need to calculate pairwise distances: the t-SNE gradient
-requires the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">q_{ij}</annotation></semantics></math>
-to be calculated and the normalization step that converts
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">w_{ij}</annotation></semantics></math>
-to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">q_{ij}</annotation></semantics></math>
-requires all of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">w_{ij}</annotation></semantics></math>
-to be calculated so you also need all the distances.</p>
+<p>This is fundamentally <span class="math inline">O(N^2)</span> because
+of the need to calculate pairwise distances: the t-SNE gradient requires
+the <span class="math inline">q_{ij}</span> to be calculated and the
+normalization step that converts <span class="math inline">w_{ij}</span>
+to <span class="math inline">q_{ij}</span> requires all of <span class="math inline">w_{ij}</span> to be calculated so you also need all
+the distances.</p>
 <p>Approaches like <a href="https://arxiv.org/abs/1301.3342" class="external-link">Barnes-Hut
 t-SNE</a> and others (e.g. <a href="https://arxiv.org/abs/1712.09005" class="external-link">Flt-SNE</a>) attempt to improve
 on this by taking advantage of the t-SNE gradient:</p>
 <ul>
-<li>The attractive part of the gradient depends on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>,
-which is constant and only large for neighbors that are close in the
-input space. Therefore it’s only necessary to calculate the attractive
-gradient for nearest neighbors of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐱</mi><mi>𝐢</mi></msub><annotation encoding="application/x-tex">\mathbf{x_i}</annotation></semantics></math>.
-In Barnes-Hut t-SNE, the number of nearest neighbors used is three times
-whatever the perplexity is. For larger datasets, a perplexity of 50 is
-common, so usually you are looking for the 150-nearest neighbors of each
-point.</li>
-<li>The repulsive part of the gradient is dependent on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">q_{ij}</annotation></semantics></math>
-which changes with each iteration, so the improvements here focus on
-grouping together points which are distant in the output space and
-treating them as a single point for the purposes of the gradient
-calculation.</li>
+<li>The attractive part of the gradient depends on <span class="math inline">p_{ij}</span>, which is constant and only large for
+neighbors that are close in the input space. Therefore it’s only
+necessary to calculate the attractive gradient for nearest neighbors of
+<span class="math inline">\mathbf{x_i}</span>. In Barnes-Hut t-SNE, the
+number of nearest neighbors used is three times whatever the perplexity
+is. For larger datasets, a perplexity of 50 is common, so usually you
+are looking for the 150-nearest neighbors of each point.</li>
+<li>The repulsive part of the gradient is dependent on <span class="math inline">q_{ij}</span> which changes with each iteration, so
+the improvements here focus on grouping together points which are
+distant in the output space and treating them as a single point for the
+purposes of the gradient calculation.</li>
 </ul>
 <p>As you will be able to tell from perusing the publications linked to
 above, these approaches are increasing in sophistication and
@@ -299,120 +226,90 @@ talking about elements in a matrix, but I will start slipping into the
 language of “edges” and “vertices”.</p>
 <p>The key change is the cost function, which is now a maximum
 likelihood function:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub><mo>=</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi></mrow></munder><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>+</mo><mi>γ</mi><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mover><mi>E</mi><mo accent="true">‾</mo></mover></mrow></munder><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-L_{LV} = \sum_{ \left(i, j\right) \in E} p_{ij} \log w_{ij} 
-+\gamma \sum_{\left(i, j\right) \in \bar{E}} \log \left(1 - w_{ij} \right)
-</annotation></semantics></math></p>
-<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">w_{ij}</annotation></semantics></math>
-is the same as in t-SNE (the authors try some alternative
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">w_{ij}</annotation></semantics></math>
+<p><span class="math display">
+L_{LV} = \sum_{ \left(i, j\right) \in E} p_{ij} \log w_{ij}
++\gamma \sum_{\left(i, j\right) \in \bar{E}} \log \left(1 - w_{ij}
+\right)
+</span></p>
+<p><span class="math inline">p_{ij}</span> and <span class="math inline">w_{ij}</span> is the same as in t-SNE (the authors
+try some alternative <span class="math inline">w_{ij}</span>
 definitions, but they aren’t as effective).</p>
-<p>The new concepts here are
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>E</mi><annotation encoding="application/x-tex">E</annotation></semantics></math>.
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>
-is a user-defined positive scalar to weight repulsive versus attractive
-forces. Its default in the <a href="https://github.com/lferry007/LargeVis" class="external-link">reference
+<p>The new concepts here are <span class="math inline">\gamma</span> and
+<span class="math inline">E</span>. <span class="math inline">\gamma</span> is a user-defined positive scalar to
+weight repulsive versus attractive forces. Its default in the <a href="https://github.com/lferry007/LargeVis" class="external-link">reference
 implementation</a> is 7.</p>
-<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>E</mi><annotation encoding="application/x-tex">E</annotation></semantics></math>
-is the set of edges with a non-zero weight. This is the graph theory way
-to talk about nearest neighbors in the input space. Just as with
-Barnes-Hut t-SNE, we find a set of nearest neighbors for each point
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐱</mi><mi>𝐢</mi></msub><annotation encoding="application/x-tex">\mathbf{x_i}</annotation></semantics></math>
-and only define input weights and probabilities for pairs of points
-which are nearest neighbors. As with the official Barnes-Hut t-SNE
-implementation, the LargeVis reference implementation uses a default
-perplexity of 50, and the default number of nearest neighbors is 3 times
-the perplexity.</p>
+<p><span class="math inline">E</span> is the set of edges with a
+non-zero weight. This is the graph theory way to talk about nearest
+neighbors in the input space. Just as with Barnes-Hut t-SNE, we find a
+set of nearest neighbors for each point <span class="math inline">\mathbf{x_i}</span> and only define input weights
+and probabilities for pairs of points which are nearest neighbors. As
+with the official Barnes-Hut t-SNE implementation, the LargeVis
+reference implementation uses a default perplexity of 50, and the
+default number of nearest neighbors is 3 times the perplexity.</p>
 <p>This cost function therefore consists of two disjoint contributions:
 nearest neighbors in the input space contribute to the attractive part
 of the cost function (the first part). Everything else contributes to
 the second, repulsive part.</p>
 <p>The key advantage of this cost function over the KL divergence is
-that it doesn’t contain
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">q_{ij}</annotation></semantics></math>.
-With no output normalization, we don’t need to calculate all the output
-pairwise distances. So this cost function is amenable to stochastic
-gradient descent techniques.</p>
+that it doesn’t contain <span class="math inline">q_{ij}</span>. With no
+output normalization, we don’t need to calculate all the output pairwise
+distances. So this cost function is amenable to stochastic gradient
+descent techniques.</p>
 </div>
 <div class="section level2">
 <h2 id="the-largevis-sampling-strategy">The LargeVis sampling strategy<a class="anchor" aria-label="anchor" href="#the-largevis-sampling-strategy"></a>
 </h2>
 <p>To calculate a stochastic gradient, LargeVis does the following:</p>
 <ul>
-<li>Samples an edge in
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>E</mi><annotation encoding="application/x-tex">E</annotation></semantics></math>,
-i.e. chooses
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-such that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>≠</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">p_{ij} \neq 0</annotation></semantics></math>.
-This is called a “positive edge” in the LargeVis paper.
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-are used to calculate the attractive part of the gradient.</li>
-<li>Samples one of the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
-vertices, let’s call it
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>.
-As datasets grow larger, the probability that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-is in
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>E</mi><annotation encoding="application/x-tex">E</annotation></semantics></math>
-grows smaller, but that’s not actually checked for (only that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>≠</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">k \neq i</annotation></semantics></math>).
-This is used to calculate the repulsive part of the gradient. These are
-called the “negative samples” in the LargeVis paper.</li>
+<li>Samples an edge in <span class="math inline">E</span>, i.e. chooses
+<span class="math inline">i</span> and <span class="math inline">j</span> such that <span class="math inline">p_{ij}
+\neq 0</span>. This is called a “positive edge” in the LargeVis paper.
+<span class="math inline">i</span> and <span class="math inline">j</span> are used to calculate the attractive part
+of the gradient.</li>
+<li>Samples one of the <span class="math inline">N</span> vertices,
+let’s call it <span class="math inline">k</span>. As datasets grow
+larger, the probability that <span class="math inline">k</span> is in
+<span class="math inline">E</span> grows smaller, but that’s not
+actually checked for (only that <span class="math inline">k \neq
+i</span>). This is used to calculate the repulsive part of the gradient.
+These are called the “negative samples” in the LargeVis paper.</li>
 <li>Repeat the negative sample step a number of times. The default in
 LargeVis is to sample 5 negatives for each positive edge.</li>
 </ul>
-<p>The coordinates of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-and the various
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-are then updated according to the gradients. This concludes one
-iteration of the SGD.</p>
+<p>The coordinates of <span class="math inline">i</span>, <span class="math inline">j</span> and the various <span class="math inline">k</span> are then updated according to the
+gradients. This concludes one iteration of the SGD.</p>
 <p>The attractive and repulsive gradients for LargeVis are
 respectively:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mi>−</mi><mn>2</mn></mrow><mrow><mn>1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup></mrow></mfrac><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^+ =
 \frac{-2}{1 + d_{ij}^2}p_{ij} \left(\mathbf{y_i - y_j}\right)
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>−</mo></msup><mo>=</mo><mfrac><mrow><mn>2</mn><mi>γ</mi></mrow><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+</span></p>
+<p><span class="math display">
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^- =
-\frac{2\gamma}{\left(0.1 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)} \left(\mathbf{y_i - y_j}\right)
-</annotation></semantics></math></p>
+\frac{2\gamma}{\left(0.1 + d_{ij}^2\right)\left(1 + d_{ij}^2\right)}
+\left(\mathbf{y_i - y_j}\right)
+</span></p>
 <p>The value of 0.1 that appears in the repulsive gradient is there to
 prevent division by zero.</p>
 <p>Sampling of edges and vertices is not uniform. For the attractive
-gradient, the authors note that the factor of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>
-that appears means that the magnitude of the gradient can differ hugely
-between samples to the extent that choosing an appropriate learning rate
-can be difficult. Instead they sample the edges proportionally to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>
-and then for the gradient calculation, treat each edge as if the weights
-were all equal. The attractive gradient used as part of LargeVis SGD is
-therefore:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>L</mi><mrow><mi>L</mi><mi>V</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mi>−</mi><mn>2</mn></mrow><mrow><mn>1</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+gradient, the authors note that the factor of <span class="math inline">p_{ij}</span> that appears means that the magnitude
+of the gradient can differ hugely between samples to the extent that
+choosing an appropriate learning rate can be difficult. Instead they
+sample the edges proportionally to <span class="math inline">p_{ij}</span> and then for the gradient calculation,
+treat each edge as if the weights were all equal. The attractive
+gradient used as part of LargeVis SGD is therefore:</p>
+<p><span class="math display">
 \frac{\partial L_{LV}}{\partial \mathbf{y_i}}^+ =
 \frac{-2}{1 + d_{ij}^2} \left(\mathbf{y_i - y_j}\right)
-</annotation></semantics></math></p>
-<p>As
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>
-doesn’t appear in the repulsive part of the gradient, so it would seem
-that uniform sampling would work for the negative sampling. However,
-vertices are sampled using a “noisy” distribution proportional to their
-degree ^ 0.75, where the degree of the vertex is the sum of the weights
-of the edges incident to them. There doesn’t seem to be a theoretical
-reason to use the degree ^ 0.75. It’s based on results from the field of
-word embeddings: the LargeVis authors reference a <a href="http://papers.nips.cc/paper/5021-distributed-representations-of-words-andphrases" class="external-link">skip-gram</a>
+</span></p>
+<p>As <span class="math inline">p_{ij}</span> doesn’t appear in the
+repulsive part of the gradient, so it would seem that uniform sampling
+would work for the negative sampling. However, vertices are sampled
+using a “noisy” distribution proportional to their degree ^ 0.75, where
+the degree of the vertex is the sum of the weights of the edges incident
+to them. There doesn’t seem to be a theoretical reason to use the degree
+^ 0.75. It’s based on results from the field of word embeddings: the
+LargeVis authors reference a <a href="http://papers.nips.cc/paper/5021-distributed-representations-of-words-andphrases" class="external-link">skip-gram</a>
 paper, but the same power also shows up in <a href="https://nlp.stanford.edu/projects/glove/" class="external-link">GloVE</a>. In both cases
 it is justified purely empirically. The <code>uwot</code> version of
 LargeVis (<code>lvish</code>) samples the negative edges uniformly, and
@@ -423,153 +320,115 @@ it doesn’t seem to cause any problems.</p>
 </h2>
 <p>The UMAP cost function is the cross-entropy of two fuzzy sets, which
 can be represented as symmetric weight matrices:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub><mo>=</mo><munder><mo>∑</mo><mrow><mi>i</mi><mi>j</mi></mrow></munder><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi mathvariant="normal">log</mi><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mi mathvariant="normal">log</mi><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><mn>1</mn><mo>−</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><mrow><mn>1</mn><mo>−</mo><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
-C_{UMAP} = 
-\sum_{ij} \left[ v_{ij} \log \left( \frac{v_{ij}}{w_{ij}} \right) + 
+<p><span class="math display">
+C_{UMAP} =
+\sum_{ij} \left[ v_{ij} \log \left( \frac{v_{ij}}{w_{ij}} \right) +
 (1 - v_{ij}) \log \left( \frac{1 - v_{ij}}{1 - w_{ij}} \right) \right]
-</annotation></semantics></math></p>
-<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">v_{ij}</annotation></semantics></math>
-are symmetrized input affinities, and are not probabilities. The graph
-interpretation of them as weights of edges in a graph still applies,
-though. These are arrived at differently to t-SNE and LargeVis. The
-unsymmetrized UMAP input weights are given by:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">[</mo><mi>−</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>ρ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
-v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \sigma_{i} \right]
-</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">r_{ij}</annotation></semantics></math>
-are the input distances,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\rho_{i}</annotation></semantics></math>
-is the distance to the nearest neighbor (ignoring zero distances where
-neighbors are duplicates) and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_{i}</annotation></semantics></math>
-is analogous to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\beta_{i}</annotation></semantics></math>
-in the perplexity calibration used in SNE. In this case,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_{i}</annotation></semantics></math>
-is determined such that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mi>j</mi></msub><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><msub><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mn>2</mn></msub><mi>k</mi></mrow><annotation encoding="application/x-tex">\sum_{j} v_{j|i} = \log_{2} k</annotation></semantics></math>
-where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-is the number of nearest neighbors.</p>
+</span></p>
+<p><span class="math inline">v_{ij}</span> are symmetrized input
+affinities, and are not probabilities. The graph interpretation of them
+as weights of edges in a graph still applies, though. These are arrived
+at differently to t-SNE and LargeVis. The unsymmetrized UMAP input
+weights are given by:</p>
+<p><span class="math display">
+v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \sigma_{i}
+\right]
+</span></p>
+<p>where <span class="math inline">r_{ij}</span> are the input
+distances, <span class="math inline">\rho_{i}</span> is the distance to
+the nearest neighbor (ignoring zero distances where neighbors are
+duplicates) and <span class="math inline">\sigma_{i}</span> is analogous
+to <span class="math inline">\beta_{i}</span> in the perplexity
+calibration used in SNE. In this case, <span class="math inline">\sigma_{i}</span> is determined such that <span class="math inline">\sum_{j} v_{j|i} = \log_{2} k</span> where <span class="math inline">k</span> is the number of nearest neighbors.</p>
 <p><em>January 1 2020:</em> I assume there is a connection here with the
 local scaling advocated for <a href="http://papers.nips.cc/paper/2619-self-tuning-spectral-clustering" class="external-link">self-tuning
 spectral clustering</a>, given that spectral decomposition of the
 affinity graph is the default initialization method for UMAP.</p>
 <p>These weights are symmetrized by a slightly different method to
 SNE:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>+</mo><msub><mi>v</mi><mrow><mi>i</mi><mo stretchy="false" form="prefix">|</mo><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><msub><mi>v</mi><mrow><mi>i</mi><mo stretchy="false" form="prefix">|</mo><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">
 v_{ij} = \left(v_{j|i} + v_{i|j}\right) - v_{j|i}v_{i|j}
-</annotation></semantics></math></p>
+</span></p>
 <p>or as a matrix operation:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>V</mi><mrow><mi>s</mi><mi>y</mi><mi>m</mi><mi>m</mi></mrow></msub><mo>=</mo><mi>V</mi><mo>+</mo><msup><mi>V</mi><mi>T</mi></msup><mo>−</mo><mi>V</mi><mo>∘</mo><msup><mi>V</mi><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">
 V_{symm} = V + V^{T} - V \circ V^{T}
-</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
-indicates the transpose and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>∘</mi><annotation encoding="application/x-tex">\circ</annotation></semantics></math>
-is the Hadamard (i.e. entry-wise) product. This effectively carries out
-a fuzzy set union.</p>
+</span></p>
+<p>where <span class="math inline">T</span> indicates the transpose and
+<span class="math inline">\circ</span> is the Hadamard (i.e. entry-wise)
+product. This effectively carries out a fuzzy set union.</p>
 <p>The output weights are given by:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mn>1</mn><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">
 w_{ij} = 1 / \left(1 + ad_{ij}^{2b}\right)
-</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>
-are determined by a non-linear least squares fit based on the
-<code>min_dist</code> and <code>spread</code> parameters that control
-the tightness of the squashing function. By setting
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a = 1</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">b = 1</annotation></semantics></math>
-you get t-SNE weighting back. <del>The current UMAP defaults result in a
-= 1.929 and b = 0.7915</del>. <em>April 7 2019</em>: Actually, I got
-this wrong. The UMAP defaults use
-<code>min_dist = 0.1, spread = 1</code>, which results in
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>1.577</mn></mrow><annotation encoding="application/x-tex">a = 1.577</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mn>0.8951</mn></mrow><annotation encoding="application/x-tex">b = 0.8951</annotation></semantics></math>.
-If you use <code>min_dist = 0.001, spread = 1</code> then you get the
-result for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>1.929</mn></mrow><annotation encoding="application/x-tex">a = 1.929</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mn>0.7915</mn></mrow><annotation encoding="application/x-tex">b = 0.7915</annotation></semantics></math>.</p>
+</span></p>
+<p>where <span class="math inline">a</span> and <span class="math inline">b</span> are determined by a non-linear least
+squares fit based on the <code>min_dist</code> and <code>spread</code>
+parameters that control the tightness of the squashing function. By
+setting <span class="math inline">a = 1</span> and <span class="math inline">b = 1</span> you get t-SNE weighting back. <del>The
+current UMAP defaults result in a = 1.929 and b = 0.7915</del>.
+<em>April 7 2019</em>: Actually, I got this wrong. The UMAP defaults use
+<code>min_dist = 0.1, spread = 1</code>, which results in <span class="math inline">a = 1.577</span> and <span class="math inline">b =
+0.8951</span>. If you use <code>min_dist = 0.001, spread = 1</code> then
+you get the result for <span class="math inline">a = 1.929</span> and
+<span class="math inline">b = 0.7915</span>.</p>
 <p>The attractive and repulsive UMAP gradient expressions are,
 respectively:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mi>−</mi><mn>2</mn><mi>a</mi><mi>b</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>b</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msubsup></mrow><mrow><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup></mrow></mfrac><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
-\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}  v_{ij} \left(\mathbf{y_i - y_j}\right)
-</annotation></semantics></math></p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>−</mo></msup><mo>=</mo><mfrac><mrow><mn>2</mn><mi>b</mi></mrow><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.001</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
-\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + ad_{ij}^{2b}\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i - y_j}\right)
-</annotation></semantics></math></p>
+<p><span class="math display">
+\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ =
+\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}  v_{ij}
+\left(\mathbf{y_i - y_j}\right)
+</span></p>
+<p><span class="math display">
+\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- =
+\frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 +
+ad_{ij}^{2b}\right)}\left(1 - v_{ij}\right)\left(\mathbf{y_i -
+y_j}\right)
+</span></p>
 <p>(<em>April 13 2020</em>: In previous versions of this document I had
 completely messed up this expression by omitting a factor of 2 in the
-repulsive gradient equation <em>and</em> missed out some important
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>s
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>s.
+repulsive gradient equation <em>and</em> missed out some important <span class="math inline">a</span>s and <span class="math inline">b</span>s.
 This also affected the SGD version two equations below. Thank you to
 Dmitry Kobak for spotting this.)</p>
 <p>While more complex-looking than the LargeVis gradient, there are
-obvious similarities, which become more clearer if you set
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a=1</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">b=1</annotation></semantics></math>,
+obvious similarities, which become more clearer if you set <span class="math inline">a=1</span> and <span class="math inline">b=1</span>,
 to get back the t-SNE/LargeVis output weight function. The 0.001 term in
 the denominator of the repulsive gradient plays the same role as the 0.1
 in the LargeVis gradient (preventing division by zero).</p>
 <p>UMAP uses the same sampling strategy as LargeVis, where sampling of
 positive edges is proportional to the weight of the edge (in this case
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">v_{ij}</annotation></semantics></math>),
-and then the value of the gradient is calculated by assuming that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">v_{ij} = 1</annotation></semantics></math>
-for all edges. So for SGD purposes, the attractive gradient for UMAP
-is:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>+</mo></msup><mo>=</mo><mfrac><mrow><mi>−</mi><mn>2</mn><mi>a</mi><mi>b</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>b</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msubsup></mrow><mrow><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mi>−</mi><mn>2</mn><mi>a</mi><mi>b</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup></mrow><mrow><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ = 
-\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 + ad_{ij}^{2b}}\left(\mathbf{y_i - y_j}\right) =
-\frac{-2abd_{ij}^{2b}}{d_{ij}^2 \left(1 + ad_{ij}^{2b}\right)}\left(\mathbf{y_i - y_j}\right)
-</annotation></semantics></math></p>
+<span class="math inline">v_{ij}</span>), and then the value of the
+gradient is calculated by assuming that <span class="math inline">v_{ij}
+= 1</span> for all edges. So for SGD purposes, the attractive gradient
+for UMAP is:</p>
+<p><span class="math display">
+\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^+ =
+\frac{-2abd_{ij}^{2\left(b - 1\right)}}{1 +
+ad_{ij}^{2b}}\left(\mathbf{y_i - y_j}\right) =
+\frac{-2abd_{ij}^{2b}}{d_{ij}^2 \left(1 +
+ad_{ij}^{2b}\right)}\left(\mathbf{y_i - y_j}\right)
+</span></p>
 <p>The final expression might be more computationally convenient because
 it saves on an extra power calculation.</p>
-<p>The repulsive part of the gradient contains a
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">1 - v_{ij}</annotation></semantics></math>
-term, but because
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">v_{ij} = 0</annotation></semantics></math>
-for most pairs of edges, that term effectively disappears, leaving:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mfrac><mrow><mi>∂</mi><msub><mi>C</mi><mrow><mi>U</mi><mi>M</mi><mi>A</mi><mi>P</mi></mrow></msub></mrow><mrow><mi>∂</mi><msub><mi>𝐲</mi><mi>𝐢</mi></msub></mrow></mfrac><mo>−</mo></msup><mo>=</mo><mfrac><mrow><mn>2</mn><mi>b</mi></mrow><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.001</mn><mo>+</mo><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>a</mi><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mn>2</mn><mi>b</mi></mrow></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msub><mi>𝐲</mi><mi>𝐢</mi></msub><mo mathvariant="bold">−</mo><msub><mi>𝐲</mi><mi>𝐣</mi></msub></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
-\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- = 
+<p>The repulsive part of the gradient contains a <span class="math inline">1 - v_{ij}</span> term, but because <span class="math inline">v_{ij} = 0</span> for most pairs of edges, that term
+effectively disappears, leaving:</p>
+<p><span class="math display">
+\frac{\partial C_{UMAP}}{\partial \mathbf{y_i}}^- =
 \frac{2b}{\left(0.001 + d_{ij}^2\right)\left(1 + ad_{ij}^{2b}\right)}
   \left(\mathbf{y_i - y_j}\right)
-</annotation></semantics></math></p>
+</span></p>
 <p>Unlike LargeVis, negative sampling in UMAP uses a uniform
 distribution.</p>
-<p>It’s worth considering that, although LargeVis uses
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>
-and UMAP uses
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">v_{ij}</annotation></semantics></math>
-in their cost functions, the difference isn’t that important, because
-sampling proportionally to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>
-is exactly the same as sampling proportionally to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">v_{ij}</annotation></semantics></math>.
-In fact, if you look at the LargeVis reference implementation (or
-<code>lvish</code> in <code>uwot</code>), the input affinities are
-symmetrized, but not divided by
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>.
-Nonetheless, because the affinities are only used to construct the
-sampling probabilities, the presence of the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>
-parameter in the repulsive part of the gradient means that you are
-effectively using
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">p_{ij}</annotation></semantics></math>
-in the LargeVis cost function that is being optimized, not
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">v_{ij}</annotation></semantics></math>.</p>
+<p>It’s worth considering that, although LargeVis uses <span class="math inline">p_{ij}</span> and UMAP uses <span class="math inline">v_{ij}</span> in their cost functions, the
+difference isn’t that important, because sampling proportionally to
+<span class="math inline">p_{ij}</span> is exactly the same as sampling
+proportionally to <span class="math inline">v_{ij}</span>. In fact, if
+you look at the LargeVis reference implementation (or <code>lvish</code>
+in <code>uwot</code>), the input affinities are symmetrized, but not
+divided by <span class="math inline">N</span>. Nonetheless, because the
+affinities are only used to construct the sampling probabilities, the
+presence of the <span class="math inline">\gamma</span> parameter in the
+repulsive part of the gradient means that you are effectively using
+<span class="math inline">p_{ij}</span> in the LargeVis cost function
+that is being optimized, not <span class="math inline">v_{ij}</span>.</p>
 </div>
 <div class="section level2">
 <h2 id="minor-umap-variations">Minor UMAP Variations<a class="anchor" aria-label="anchor" href="#minor-umap-variations"></a>
@@ -577,16 +436,14 @@ in the LargeVis cost function that is being optimized, not
 <p>There are some extra parameters in UMAP that make some minor changes
 if modified from their default-values:</p>
 <ul>
-<li><p><code>local_connectivity</code> affects
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\rho_{i}</annotation></semantics></math>
-by using the distance to the <code>local_connectivity</code>th non-zero
-near neighbor (or by interpolating between distances if
-<code>local_connectivity</code> is non-integral).</p></li>
+<li><p><code>local_connectivity</code> affects <span class="math inline">\rho_{i}</span> by using the distance to the
+<code>local_connectivity</code>th non-zero near neighbor (or by
+interpolating between distances if <code>local_connectivity</code> is
+non-integral).</p></li>
 <li><p><code>set_op_mix_ratio</code> This changes the form of the
 symmetrization from fuzzy set union to fuzzy set intersection which is
-just
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><msub><mi>v</mi><mrow><mi>i</mi><mo stretchy="false" form="prefix">|</mo><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">v_{j|i}v_{i|j}</annotation></semantics></math>,
-and can also blend between the two.</p></li>
+just <span class="math inline">v_{j|i}v_{i|j}</span>, and can also blend
+between the two.</p></li>
 <li><p><code>gamma</code> This works exactly like the value in LargeVis,
 up-weighting the repulsive contribution of the gradient.</p></li>
 </ul>
@@ -594,25 +451,14 @@ up-weighting the repulsive contribution of the gradient.</p></li>
 reference UMAP implementation:</p>
 <ul>
 <li>
-<code>bandwidth</code> affects
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">v_{j|i}</annotation></semantics></math>
-by multiplying the value of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_{i}</annotation></semantics></math>:</li>
+<code>bandwidth</code> affects <span class="math inline">v_{j|i}</span> by multiplying the value of <span class="math inline">\sigma_{i}</span>:</li>
 </ul>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">[</mo><mi>−</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>r</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>ρ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mi>β</mi><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
-v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \beta \sigma_{i} \right]
-</annotation></semantics></math></p>
-<p>where <code>bandwidth</code> is represented as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>.
-The value of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_{i}</annotation></semantics></math>
-is determined using calculations of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">v_{j|i}</annotation></semantics></math>
-without
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>,
-before recalculating the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>j</mi><mo stretchy="false" form="prefix">|</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">v_{j|i}</annotation></semantics></math>
-using <code>bandwidth</code>.</p>
+<p><span class="math display">
+v_{j|i} = \exp \left[ -\left( r_{ij} - \rho_{i} \right) / \beta
+\sigma_{i} \right]
+</span></p>
+<p>where <code>bandwidth</code> is represented as <span class="math inline">\beta</span>. The value of <span class="math inline">\sigma_{i}</span> is determined using calculations
+of <span class="math inline">v_{j|i}</span> without <span class="math inline">\beta</span>, before recalculating the <span class="math inline">v_{j|i}</span> using <code>bandwidth</code>.</p>
 <p>I’m not sure how useful any of these are when changed from the
 defaults.</p>
 <p>My thanks to <a href="https://github.com/dkobak" class="external-link">Dmitry Kobak</a> for

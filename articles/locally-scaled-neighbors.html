@@ -6,11 +6,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Locally Scaled Neighbors • uwot</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><script src="../extra.js"></script><meta property="og:title" content="Locally Scaled Neighbors">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<script src="../extra.js"></script><meta property="og:title" content="Locally Scaled Neighbors">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -69,31 +71,18 @@
 Spectral Clustering</a>, Zelnik-Manor and Perona describe a method of
 local scaling to determining the affinity (similarity) between two data
 points. This is defined as:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>A</mi><mo accent="true">̂</mo></mover><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>−</mi><mfrac><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mrow><msub><mi>σ</mi><mi>i</mi></msub><msub><mi>σ</mi><mi>j</mi></msub></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">
 \hat{A}_{ij} = \exp\left(-\frac{d^2_{ij}}{\sigma_{i} \sigma_{j}}\right)
-</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">d_{ij}</annotation></semantics></math>
-is the distance between points
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>,
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>j</mi></msub><annotation encoding="application/x-tex">\sigma_j</annotation></semantics></math>
-are local scaling factors for points
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-respectively. Previous methods had suggested empirically selecting a
-fixed value of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
-for the entire dataset, whereas Zelnik-Manor and Perona suggest that
-there should be a per-point scaling factor, based on the local density
-around each point. To choose the local scaling factor, the authors
-suggest “studying the local statistics of the neighborhood” around each
-point. In their studies they use the distance to the 7th neighbor.</p>
+</span></p>
+<p>where <span class="math inline">d_{ij}</span> is the distance between
+points <span class="math inline">i</span> and <span class="math inline">j</span>, and <span class="math inline">\sigma_i</span> and <span class="math inline">\sigma_j</span> are local scaling factors for points
+<span class="math inline">i</span> and <span class="math inline">j</span> respectively. Previous methods had
+suggested empirically selecting a fixed value of <span class="math inline">\sigma</span> for the entire dataset, whereas
+Zelnik-Manor and Perona suggest that there should be a per-point scaling
+factor, based on the local density around each point. To choose the
+local scaling factor, the authors suggest “studying the local statistics
+of the neighborhood” around each point. In their studies they use the
+distance to the 7th neighbor.</p>
 <p>Although there is clearly a connection here between the local scaling
 factor and the perplexity parameter in t-SNE, this specific method was
 not used in dimensionality reduction until the introduction of <a href="https://arxiv.org/abs/1910.00204" class="external-link">TriMap</a> where it was used as
@@ -112,33 +101,25 @@ neighborhoods in different parts of the feature space could be of
 significantly different magnitudes”.</p>
 <p>Here’s how you do it:</p>
 <ol style="list-style-type: decimal">
-<li>Select a number of neighbors
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>.
-By default, this is determined based on the number of points in the
+<li>Select a number of neighbors <span class="math inline">k</span>. By
+default, this is determined based on the number of points in the
 dataset, but is on the order of the UMAP default of
 <code>n_neighbors = 15</code>.</li>
-<li>Select a number of “extended” neighbors,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>k</mi><mo>′</mo></msup><annotation encoding="application/x-tex">k'</annotation></semantics></math>.
-This is set to 50.</li>
-<li>Find the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>+</mo><msup><mi>k</mi><mo>′</mo></msup><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k + k' + 1</annotation></semantics></math>
-nearest neighbors for each point. The <code>+ 1</code> bit is to account
-for the fact that the self-neighbor is included in the nearest neighbor
-list (this is an implementation detail of the PaCMAP code and not
-explicitly mentioned in the paper but makes sense).</li>
+<li>Select a number of “extended” neighbors, <span class="math inline">k'</span>. This is set to 50.</li>
+<li>Find the <span class="math inline">k + k' + 1</span> nearest
+neighbors for each point. The <code>+ 1</code> bit is to account for the
+fact that the self-neighbor is included in the nearest neighbor list
+(this is an implementation detail of the PaCMAP code and not explicitly
+mentioned in the paper but makes sense).</li>
 <li>For each of the extended nearest neighbors, calculate the
-locally-scaled distances as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>d</mi><mrow><mi>i</mi><mi>j</mi></mrow><mn>2</mn></msubsup><mi>/</mi><msub><mi>σ</mi><mi>i</mi></msub><msub><mi>σ</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">d^2_{ij}/\sigma_{i} \sigma_{j}</annotation></semantics></math>
-with the same definition for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math>
-as in TriMap. Once again, because of the self-neighbor, we need to use
-one more neighbor than mentioned in the paper, so in terms of UMAP, we
-actually use the average distance of the fifth-to-seventh nearest
-neighbors to define
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math>.</li>
-<li>Return the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-nearest neighbors based on the locally-scaled distances.</li>
+locally-scaled distances as <span class="math inline">d^2_{ij}/\sigma_{i} \sigma_{j}</span> with the same
+definition for <span class="math inline">\sigma_i</span> as in TriMap.
+Once again, because of the self-neighbor, we need to use one more
+neighbor than mentioned in the paper, so in terms of UMAP, we actually
+use the average distance of the fifth-to-seventh nearest neighbors to
+define <span class="math inline">\sigma_i</span>.</li>
+<li>Return the <span class="math inline">k</span> nearest neighbors
+based on the locally-scaled distances.</li>
 </ol>
 <p>PaCMAP does not actually make use of the distances from the near
 neighbors, but the paper stresses that the scaled distances “are used

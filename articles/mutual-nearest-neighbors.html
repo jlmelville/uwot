@@ -6,11 +6,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>UMAP with Mutual Nearest Neighbors • uwot</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><script src="../extra.js"></script><meta property="og:title" content="UMAP with Mutual Nearest Neighbors">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<script src="../extra.js"></script><meta property="og:title" content="UMAP with Mutual Nearest Neighbors">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -95,60 +97,37 @@ graph and see if it has any effect on UMAP.</p>
 <p>Although in a kNN graph each item only has k neighbors, any workable
 dimensionality reduction working on the kNN graph as input will
 symmetrize that graph, otherwise optimization is difficult. The outcome
-of symmetrizing the kNN graph is that if
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-is a neighbor of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-in the kNN graph,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-is also guaranteed to be a neighbor of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-in the symmetrized graph and <em>vice versa</em>. If one item tends to
-show up in a lot of the kNN lists of multiple items, the symmetrization
-means that there can be up to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
-edges involving that very popular item. These are called hubs and not
-only do they make search on the graph more difficult (that item will be
-likely to show up in most queries) but because for a given
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-there are a limited number of edges to distribute over the dataset, some
-items are not getting their fair share. This is more likely to lead to
-outlier points that get embedded far away from the main body of the data
-as they have no particularly strong bonds to the rest of the data.</p>
+of symmetrizing the kNN graph is that if <span class="math inline">j</span> is a neighbor of <span class="math inline">i</span> in the kNN graph, <span class="math inline">i</span> is also guaranteed to be a neighbor of
+<span class="math inline">j</span> in the symmetrized graph and <em>vice
+versa</em>. If one item tends to show up in a lot of the kNN lists of
+multiple items, the symmetrization means that there can be up to <span class="math inline">N</span> edges involving that very popular item.
+These are called hubs and not only do they make search on the graph more
+difficult (that item will be likely to show up in most queries) but
+because for a given <span class="math inline">k</span> there are a
+limited number of edges to distribute over the dataset, some items are
+not getting their fair share. This is more likely to lead to outlier
+points that get embedded far away from the main body of the data as they
+have no particularly strong bonds to the rest of the data.</p>
 </div>
 <div class="section level2">
 <h2 id="mutual-k-nearest-neighbors">Mutual k-Nearest Neighbors<a class="anchor" aria-label="anchor" href="#mutual-k-nearest-neighbors"></a>
 </h2>
 <p>You can think of the mutual k-nearest neighbors graph (the MNN graph)
-as being a symmetrized kNN graph where edges only appear if item
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-was a neighbor of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math><em>and</em>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-was a neighbor of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>:
-in the symmetrized kNN graph described above the requirement is only
-that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-be a neighbor of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math><em>or</em>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-be a neighbor of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>.
-This means that an item can have no more than
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-mutual neighbors. Hub problem solved.</p>
+as being a symmetrized kNN graph where edges only appear if item <span class="math inline">i</span> was a neighbor of <span class="math inline">j</span> <em>and</em> <span class="math inline">j</span> was a neighbor of <span class="math inline">i</span>: in the symmetrized kNN graph described
+above the requirement is only that <span class="math inline">i</span> be
+a neighbor of <span class="math inline">j</span> <em>or</em> <span class="math inline">j</span> be a neighbor of <span class="math inline">i</span>. This means that an item can have no more
+than <span class="math inline">k</span> mutual neighbors. Hub problem
+solved.</p>
 </div>
 <div class="section level2">
 <h2 id="the-problem-with-mutual-k-nearest-neighbors">The Problem with Mutual k-Nearest Neighbors<a class="anchor" aria-label="anchor" href="#the-problem-with-mutual-k-nearest-neighbors"></a>
 </h2>
 <p>The downside of the MNN graph is that even in very well-behaved kNN
 graphs, the MNN will contain several items with no edges to any other
-item: while they have
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-nearest neighbors, none of those neighbors reciprocate. UMAP requires
-local connectivity, so it cannot handle a use case where we have such
-Billy no-mates items.</p>
+item: while they have <span class="math inline">k</span> nearest
+neighbors, none of those neighbors reciprocate. UMAP requires local
+connectivity, so it cannot handle a use case where we have such Billy
+no-mates items.</p>
 <p>As a result, the Dalmia and Sia paper has to go to some extra lengths
 to augment the MNN graph with some extra nodes which you can see at <a href="https://github.com/adalmia96/umap-mnn" class="external-link">their repo</a>. This
 involves minimum spanning trees and Dijkstra’s algorithm to add new
@@ -170,24 +149,17 @@ Graph<a class="anchor" aria-label="anchor" href="#adding-back-extra-neighbors-th
 <p>As I don’t currently fancy implementing any of the path neighbor
 approach, I propose the following strategy: just add back more than one
 neighbor to disconnected nodes. In fact, we would probably do well to
-ensure every item in the dataset has at least
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
-neighbors where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>&lt;</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">m \lt k</annotation></semantics></math>,
-not just items which are completely disconnected, as we can already see
-that items with only one neighbor don’t do a good job. Obviously adding
-back all the neighbors would recreate the original symmetrized kNN
-graph, so we want to keep
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
-small, but bigger than one.</p>
+ensure every item in the dataset has at least <span class="math inline">m</span> neighbors where <span class="math inline">m
+\lt k</span>, not just items which are completely disconnected, as we
+can already see that items with only one neighbor don’t do a good job.
+Obviously adding back all the neighbors would recreate the original
+symmetrized kNN graph, so we want to keep <span class="math inline">m</span> small, but bigger than one.</p>
 <p>To name this concept I am going with the “Balanced MNN graph” where
 “balanced” is meant to suggest that we are trying to ensure that no node
 is left too isolated in the MNN graph. To be specific with numbers I
-will refer to a
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>)-BMNN
-graph. I would welcome hearing if there is existing literature with a
-different (probably better) name.</p>
+will refer to a (<span class="math inline">k</span>, <span class="math inline">m</span>)-BMNN graph. I would welcome hearing if
+there is existing literature with a different (probably better)
+name.</p>
 </div>
 <div class="section level2">
 <h2 id="creating-the-bmnn">Creating the BMNN<a class="anchor" aria-label="anchor" href="#creating-the-bmnn"></a>
@@ -196,28 +168,19 @@ different (probably better) name.</p>
 <ol style="list-style-type: decimal">
 <li>Create the kNN graph.</li>
 <li>Form the equivalent MNN graph.</li>
-<li>Are there any nodes with fewer than
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
-neighbors? If not, we stop. Otherwise:</li>
-<li>Add back the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>th-nearest
-neighbor from the kNN graph to each of those nodes.</li>
+<li>Are there any nodes with fewer than <span class="math inline">m</span> neighbors? If not, we stop. Otherwise:</li>
+<li>Add back the <span class="math inline">m</span>th-nearest neighbor
+from the kNN graph to each of those nodes.</li>
 <li>Go to step 3.</li>
 </ol>
-<p>The loop in steps 3-5 must terminate in
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
-steps: at worst, for items with 0 neighbors, we add all the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>-th
-nearest neighbors. For items with
-1-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>-1)
-neighbors, we don’t know if the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>-th
+<p>The loop in steps 3-5 must terminate in <span class="math inline">m</span> steps: at worst, for items with 0
+neighbors, we add all the <span class="math inline">m</span>-th nearest
+neighbors. For items with 1-(<span class="math inline">m</span>-1)
+neighbors, we don’t know if the <span class="math inline">m</span>-th
 nearest neighbor is already a neighbor. If it isn’t we are one step
 closer to termination. If it is, then adding the edge will do nothing.
-So we can’t add more than
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math>
-edges to any node and none of these nodes will get too many edges
-added.</p>
+So we can’t add more than <span class="math inline">m</span> edges to
+any node and none of these nodes will get too many edges added.</p>
 <p>Creating the MNN from the sparse kNN representation is easy, assuming
 your distances are symmetrical:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -264,13 +227,12 @@ will actually get back one less edge than the value you ask for. This is
 because in the dense format every item’s nearest neighbor is itself with
 a distance of zero. This disappears when we convert to the sparse
 format. As a result your dense k-nearest neighbor graph only contains
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k-1</annotation></semantics></math>
-different neighbors for each item. The self-neighbor thing counting as
-one of the neighbors is always how UMAP has done it, so we won’t be
-changing the habit of a lifetime. You will just have to remember to
-reproduce the “adjacent neighbor” method you must specify
-<code>m = 2</code>. The function won’t let you go lower than
-<code>m = 2</code> anyway.</p>
+<span class="math inline">k-1</span> different neighbors for each item.
+The self-neighbor thing counting as one of the neighbors is always how
+UMAP has done it, so we won’t be changing the habit of a lifetime. You
+will just have to remember to reproduce the “adjacent neighbor” method
+you must specify <code>m = 2</code>. The function won’t let you go lower
+than <code>m = 2</code> anyway.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># create an m-balanced k-mutual nearest neighbors graph from the dense k-nearest</span></span>
 <span><span class="co"># neighbors graph `nn_graph`. m must be less than or equal to k. If `k` is not</span></span>

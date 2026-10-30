@@ -17,24 +17,23 @@ To embed new data into an embedding so you should:
 
 ## How It Works
 
-1.  Let’s say $`P`$ are the set of embedded points and there are $`N_P`$
-    of them. Likewise there are new points to embed called $`Q`$ (could
-    be as few as 1 point in Q).
-2.  For a given new item to embed, $`q`$, find the `n_neighbors` nearest
-    neighbors from the already embedded dataset (i.e. find $`p_1`$\`,
-    $`p_2`$, …, $`p_k`$).
-3.  Form the affinity matrix between the $`N_Q`$ points to embed and the
-    original $`N_P`$ points. The affinity matrix is no longer square or
+1.  Let’s say P are the set of embedded points and there are N_P of
+    them. Likewise there are new points to embed called Q (could be as
+    few as 1 point in Q).
+2.  For a given new item to embed, q, find the `n_neighbors` nearest
+    neighbors from the already embedded dataset (i.e. find p_1\`, p_2,
+    …, p_k).
+3.  Form the affinity matrix between the N_Q points to embed and the
+    original N_P points. The affinity matrix is no longer square or
     symmetric but that doesn’t matter.
 4.  Embed that as usual, where we want the Euclidean distance in the
     low-dimensional space to reproduce the affinities in the affinity
     matrix, via the usual UMAP cost function. Each pair of items is of
-    the form $`(p, q)`$, i.e. it’s always one point from the original
-    data and one from the new data. You don’t have pairs like $`(p, p)`$
-    or $`(q, q)`$.
+    the form (p, q), i.e. it’s always one point from the original data
+    and one from the new data. You don’t have pairs like (p, p) or (q,
+    q).
 5.  The only deviation from the standard way of doing things is that you
-    don’t let the coordinates of any of the $`p`$ points update only the
-    $`q`$.
+    don’t let the coordinates of any of the p points update only the q.
 
 There are some minor differences to the parameters involved in the
 transform:

@@ -262,9 +262,9 @@ black clusters for the right-hand plot.
 
 As an alternative to using the Gaussian perplexities, you could use the
 k-nearest neighbor graph directly, which involves setting the similarity
-of $`i`$ with $`j`$ to 1 if $`i`$ is in the k-nearest neighbors of
-$`j`$, and 0 otherwise. The usual t-SNE procedure of symmetrizing (but
-not the normalization step) is then carried out. There are some t-SNE
+of i with j to 1 if i is in the k-nearest neighbors of j, and 0
+otherwise. The usual t-SNE procedure of symmetrizing (but not the
+normalization step) is then carried out. There are some t-SNE
 implementations which use kNN-derived perplexities, e.g. [the
 majorization-minimization approach of Yang and
 co-workers](http://proceedings.mlr.press/v38/yang15a.md).

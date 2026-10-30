@@ -37,34 +37,32 @@ effect on UMAP.
 Although in a kNN graph each item only has k neighbors, any workable
 dimensionality reduction working on the kNN graph as input will
 symmetrize that graph, otherwise optimization is difficult. The outcome
-of symmetrizing the kNN graph is that if $`j`$ is a neighbor of $`i`$ in
-the kNN graph, $`i`$ is also guaranteed to be a neighbor of $`j`$ in the
-symmetrized graph and *vice versa*. If one item tends to show up in a
-lot of the kNN lists of multiple items, the symmetrization means that
-there can be up to $`N`$ edges involving that very popular item. These
-are called hubs and not only do they make search on the graph more
-difficult (that item will be likely to show up in most queries) but
-because for a given $`k`$ there are a limited number of edges to
-distribute over the dataset, some items are not getting their fair
-share. This is more likely to lead to outlier points that get embedded
-far away from the main body of the data as they have no particularly
-strong bonds to the rest of the data.
+of symmetrizing the kNN graph is that if j is a neighbor of i in the kNN
+graph, i is also guaranteed to be a neighbor of j in the symmetrized
+graph and *vice versa*. If one item tends to show up in a lot of the kNN
+lists of multiple items, the symmetrization means that there can be up
+to N edges involving that very popular item. These are called hubs and
+not only do they make search on the graph more difficult (that item will
+be likely to show up in most queries) but because for a given k there
+are a limited number of edges to distribute over the dataset, some items
+are not getting their fair share. This is more likely to lead to outlier
+points that get embedded far away from the main body of the data as they
+have no particularly strong bonds to the rest of the data.
 
 ## Mutual k-Nearest Neighbors
 
 You can think of the mutual k-nearest neighbors graph (the MNN graph) as
-being a symmetrized kNN graph where edges only appear if item $`i`$ was
-a neighbor of $`j`$*and* $`j`$ was a neighbor of $`i`$: in the
-symmetrized kNN graph described above the requirement is only that $`i`$
-be a neighbor of $`j`$*or* $`j`$ be a neighbor of $`i`$. This means that
-an item can have no more than $`k`$ mutual neighbors. Hub problem
-solved.
+being a symmetrized kNN graph where edges only appear if item i was a
+neighbor of j *and* j was a neighbor of i: in the symmetrized kNN graph
+described above the requirement is only that i be a neighbor of j *or* j
+be a neighbor of i. This means that an item can have no more than k
+mutual neighbors. Hub problem solved.
 
 ## The Problem with Mutual k-Nearest Neighbors
 
 The downside of the MNN graph is that even in very well-behaved kNN
 graphs, the MNN will contain several items with no edges to any other
-item: while they have $`k`$ nearest neighbors, none of those neighbors
+item: while they have k nearest neighbors, none of those neighbors
 reciprocate. UMAP requires local connectivity, so it cannot handle a use
 case where we have such Billy no-mates items.
 
@@ -91,18 +89,17 @@ This is not very surprising.
 As I don’t currently fancy implementing any of the path neighbor
 approach, I propose the following strategy: just add back more than one
 neighbor to disconnected nodes. In fact, we would probably do well to
-ensure every item in the dataset has at least $`m`$ neighbors where
-$`m \lt k`$, not just items which are completely disconnected, as we can
-already see that items with only one neighbor don’t do a good job.
-Obviously adding back all the neighbors would recreate the original
-symmetrized kNN graph, so we want to keep $`m`$ small, but bigger than
-one.
+ensure every item in the dataset has at least m neighbors where m \lt k,
+not just items which are completely disconnected, as we can already see
+that items with only one neighbor don’t do a good job. Obviously adding
+back all the neighbors would recreate the original symmetrized kNN
+graph, so we want to keep m small, but bigger than one.
 
 To name this concept I am going with the “Balanced MNN graph” where
 “balanced” is meant to suggest that we are trying to ensure that no node
 is left too isolated in the MNN graph. To be specific with numbers I
-will refer to a ($`k`$, $`m`$)-BMNN graph. I would welcome hearing if
-there is existing literature with a different (probably better) name.
+will refer to a (k, m)-BMNN graph. I would welcome hearing if there is
+existing literature with a different (probably better) name.
 
 ## Creating the BMNN
 
@@ -110,19 +107,18 @@ The basic formula for creating the BMNN graph is as follows:
 
 1.  Create the kNN graph.
 2.  Form the equivalent MNN graph.
-3.  Are there any nodes with fewer than $`m`$ neighbors? If not, we
-    stop. Otherwise:
-4.  Add back the $`m`$th-nearest neighbor from the kNN graph to each of
+3.  Are there any nodes with fewer than m neighbors? If not, we stop.
+    Otherwise:
+4.  Add back the mth-nearest neighbor from the kNN graph to each of
     those nodes.
 5.  Go to step 3.
 
-The loop in steps 3-5 must terminate in $`m`$ steps: at worst, for items
-with 0 neighbors, we add all the $`m`$-th nearest neighbors. For items
-with 1-($`m`$-1) neighbors, we don’t know if the $`m`$-th nearest
-neighbor is already a neighbor. If it isn’t we are one step closer to
-termination. If it is, then adding the edge will do nothing. So we can’t
-add more than $`m`$ edges to any node and none of these nodes will get
-too many edges added.
+The loop in steps 3-5 must terminate in m steps: at worst, for items
+with 0 neighbors, we add all the m-th nearest neighbors. For items with
+1-(m-1) neighbors, we don’t know if the m-th nearest neighbor is already
+a neighbor. If it isn’t we are one step closer to termination. If it is,
+then adding the edge will do nothing. So we can’t add more than m edges
+to any node and none of these nodes will get too many edges added.
 
 Creating the MNN from the sparse kNN representation is easy, assuming
 your distances are symmetrical:
@@ -171,12 +167,12 @@ One slightly weird thing about specifying `m` is that you will actually
 get back one less edge than the value you ask for. This is because in
 the dense format every item’s nearest neighbor is itself with a distance
 of zero. This disappears when we convert to the sparse format. As a
-result your dense k-nearest neighbor graph only contains $`k-1`$
-different neighbors for each item. The self-neighbor thing counting as
-one of the neighbors is always how UMAP has done it, so we won’t be
-changing the habit of a lifetime. You will just have to remember to
-reproduce the “adjacent neighbor” method you must specify `m = 2`. The
-function won’t let you go lower than `m = 2` anyway.
+result your dense k-nearest neighbor graph only contains k-1 different
+neighbors for each item. The self-neighbor thing counting as one of the
+neighbors is always how UMAP has done it, so we won’t be changing the
+habit of a lifetime. You will just have to remember to reproduce the
+“adjacent neighbor” method you must specify `m = 2`. The function won’t
+let you go lower than `m = 2` anyway.
 
 ``` r
 

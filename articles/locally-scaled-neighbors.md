@@ -8,19 +8,18 @@ Zelnik-Manor and Perona describe a method of local scaling to
 determining the affinity (similarity) between two data points. This is
 defined as:
 
-``` math
-\hat{A}_{ij} = \exp\left(-\frac{d^2_{ij}}{\sigma_{i} \sigma_{j}}\right)
-```
+\hat{A}\_{ij} = \exp\left(-\frac{d^2\_{ij}}{\sigma\_{i}
+\sigma\_{j}}\right)
 
-where $`d_{ij}`$ is the distance between points $`i`$ and $`j`$, and
-$`\sigma_i`$ and $`\sigma_j`$ are local scaling factors for points $`i`$
-and $`j`$ respectively. Previous methods had suggested empirically
-selecting a fixed value of $`\sigma`$ for the entire dataset, whereas
-Zelnik-Manor and Perona suggest that there should be a per-point scaling
-factor, based on the local density around each point. To choose the
-local scaling factor, the authors suggest “studying the local statistics
-of the neighborhood” around each point. In their studies they use the
-distance to the 7th neighbor.
+where d\_{ij} is the distance between points i and j, and \sigma_i and
+\sigma_j are local scaling factors for points i and j respectively.
+Previous methods had suggested empirically selecting a fixed value of
+\sigma for the entire dataset, whereas Zelnik-Manor and Perona suggest
+that there should be a per-point scaling factor, based on the local
+density around each point. To choose the local scaling factor, the
+authors suggest “studying the local statistics of the neighborhood”
+around each point. In their studies they use the distance to the 7th
+neighbor.
 
 Although there is clearly a connection here between the local scaling
 factor and the perplexity parameter in t-SNE, this specific method was
@@ -41,23 +40,23 @@ different magnitudes”.
 
 Here’s how you do it:
 
-1.  Select a number of neighbors $`k`$. By default, this is determined
-    based on the number of points in the dataset, but is on the order of
-    the UMAP default of `n_neighbors = 15`.
-2.  Select a number of “extended” neighbors, $`k'`$. This is set to 50.
-3.  Find the $`k + k' + 1`$ nearest neighbors for each point. The `+ 1`
-    bit is to account for the fact that the self-neighbor is included in
-    the nearest neighbor list (this is an implementation detail of the
+1.  Select a number of neighbors k. By default, this is determined based
+    on the number of points in the dataset, but is on the order of the
+    UMAP default of `n_neighbors = 15`.
+2.  Select a number of “extended” neighbors, k'. This is set to 50.
+3.  Find the k + k' + 1 nearest neighbors for each point. The `+ 1` bit
+    is to account for the fact that the self-neighbor is included in the
+    nearest neighbor list (this is an implementation detail of the
     PaCMAP code and not explicitly mentioned in the paper but makes
     sense).
 4.  For each of the extended nearest neighbors, calculate the
-    locally-scaled distances as $`d^2_{ij}/\sigma_{i} \sigma_{j}`$ with
-    the same definition for $`\sigma_i`$ as in TriMap. Once again,
-    because of the self-neighbor, we need to use one more neighbor than
+    locally-scaled distances as d^2\_{ij}/\sigma\_{i} \sigma\_{j} with
+    the same definition for \sigma_i as in TriMap. Once again, because
+    of the self-neighbor, we need to use one more neighbor than
     mentioned in the paper, so in terms of UMAP, we actually use the
     average distance of the fifth-to-seventh nearest neighbors to define
-    $`\sigma_i`$.
-5.  Return the $`k`$ nearest neighbors based on the locally-scaled
+    \sigma_i.
+5.  Return the k nearest neighbors based on the locally-scaled
     distances.
 
 PaCMAP does not actually make use of the distances from the near
