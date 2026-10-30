@@ -1,6 +1,7 @@
 url: https://jlmelville.github.io/uwot/
 template:
   bootstrap: 5
+  math-rendering: katex
 
 articles:
 - title: What's New

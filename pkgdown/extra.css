@@ -1,0 +1,4 @@
+/* Keep long display equations inside the article column on narrow screens. */
+.katex-display {
+  overflow: auto hidden;
+}
