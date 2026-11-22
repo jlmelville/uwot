@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: rhub
     env:
-      CLANG_SANITIZER: ${{ matrix.config.name == 'clang-asan' || matrix.config.name == 'clang-ubsan' }}
+      SANITIZER: ${{ contains(fromJSON('["clang-asan","clang-ubsan","gcc-asan"]'), matrix.config.name) }}
     name: ${{ matrix.config.label }}
     strategy:
       fail-fast: false
@@ -83,22 +83,22 @@ jobs:
           job-config: ${{ matrix.config.job-config }}
 
       - uses: r-hub/actions/setup-deps@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
-        if: env.CLANG_SANITIZER != 'true'
+        if: env.SANITIZER != 'true'
         with:
           token: ${{ secrets.RHUB_TOKEN }}
           job-config: ${{ matrix.config.job-config }}
 
-      # R-hub's generic cache key can also match a libstdc++ build of Rcpp.
-      - name: Locate the Clang sanitizer library
-        if: env.CLANG_SANITIZER == 'true'
+      # Generic keys can mix C++ runtimes on Ubuntu and LAPACK libraries on Fedora.
+      - name: Locate the sanitizer library
+        if: env.SANITIZER == 'true'
         shell: Rscript {0}
         run: |
           lib <- Sys.getenv("R_LIBS_USER")
           dir.create(lib, recursive = TRUE, showWarnings = FALSE)
           cat("R_LIBS_USER=", lib, "\n", sep = "", file = Sys.getenv("GITHUB_ENV"), append = TRUE)
 
-      - name: Install dependencies for this Clang sanitizer
-        if: env.CLANG_SANITIZER == 'true'
+      - name: Install dependencies for this sanitizer
+        if: env.SANITIZER == 'true'
         uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
         with:
           cache-version: rhub-${{ matrix.config.name }}
@@ -111,16 +111,6 @@ jobs:
           install-quarto: false
         env:
           R_KEEP_PKG_SOURCE: yes
-
-      - name: Check RSpectra linkage in the GCC sanitizer image
-        if: matrix.config.name == 'gcc-asan'
-        shell: Rscript {0}
-        run: |
-          # A restored RSpectra can require libRlapack.so instead of this image's FlexiBLAS.
-          if (!requireNamespace("RSpectra", quietly = TRUE)) {
-            install.packages("RSpectra", repos = "https://cloud.r-project.org", type = "source")
-          }
-          stopifnot(requireNamespace("RSpectra", quietly = TRUE))
 
       - uses: r-hub/actions/run-check@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
         with:
