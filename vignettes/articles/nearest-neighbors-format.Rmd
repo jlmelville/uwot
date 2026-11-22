@@ -123,7 +123,9 @@ look like:
 
 ```R
 lapply(umap(iris, ret_nn = TRUE, n_neighbors = 5)$nn$euclidean, head)
+```
 
+```text
 $`idx`
      [,1] [,2] [,3] [,4] [,5]
 [1,]    1   18    5   40   29
