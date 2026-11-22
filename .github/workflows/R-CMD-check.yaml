@@ -41,28 +41,48 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
 
     steps:
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-lib/actions/setup-pandoc@a51a8012b0aab7c32ef9d19bf54da93f3254335e
+      - uses: r-lib/actions/setup-pandoc@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
 
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-lib/actions/setup-r@a51a8012b0aab7c32ef9d19bf54da93f3254335e
+      - uses: r-lib/actions/setup-r@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-lib/actions/setup-r-dependencies@a51a8012b0aab7c32ef9d19bf54da93f3254335e
+      - uses: r-lib/actions/setup-r-dependencies@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
         with:
           extra-packages: any::rcmdcheck
           needs: check
 
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-lib/actions/check-r-package@a51a8012b0aab7c32ef9d19bf54da93f3254335e
+      - name: Exercise installed nearest neighbor backends
+        if: runner.os == 'Linux' && matrix.config.r == 'release'
+        run: |
+          R CMD INSTALL --clean .
+          Rscript --vanilla tools/check-backends.R full
+
+      - uses: r-lib/actions/check-r-package@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
         with:
           upload-snapshots: true
+
+  minimal-backends:
+    name: Linux (default backend without optional neighbors)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - uses: r-lib/actions/setup-r@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
+        with:
+          packages: local::.
+          dependencies: '"hard"'
+          cache: false
+      - name: Exercise the default Annoy fallback
+        run: Rscript --vanilla tools/check-backends.R minimal
