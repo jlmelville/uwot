@@ -64,9 +64,10 @@ inline auto sum_nbrs_weighted(std::size_t i,
 void init_by_mean(std::size_t begin, std::size_t end, std::size_t ndim,
                   std::size_t n_neighbors, const std::vector<int> &nn_index,
                   const std::vector<float> &nn_weights,
-                  std::size_t n_test_vertices,
+                  std::size_t /* n_test_vertices */,
                   const std::vector<float> &train_embedding,
-                  std::size_t n_train_vertices, std::vector<float> &embedding) {
+                  std::size_t /* n_train_vertices */,
+                  std::vector<float> &embedding) {
   bool weighted = nn_weights.size() > 0;
 
   std::vector<double> sumc(ndim);

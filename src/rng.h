@@ -134,7 +134,7 @@ struct deterministic_factory {
 
   void reseed() {}
 
-  uwot::deterministic_ng create(std::size_t seed) {
+  uwot::deterministic_ng create(std::size_t) {
     return uwot::deterministic_ng();
   }
 };

@@ -106,7 +106,7 @@ void general_sset_union(
     const std::vector<double> &data1, const std::vector<int> &indptr2,
     const std::vector<int> &indices2, const std::vector<double> &data2,
     const std::vector<int> &result_row, const std::vector<int> &result_col,
-    std::vector<double> &result_val, double mix_weight = 0.5) {
+    std::vector<double> &result_val, double /* mix_weight */ = 0.5) {
 
   double left_min =
       (std::max)(*std::min_element(data1.begin(), data1.end()) / 2.0, 1.0e-8);

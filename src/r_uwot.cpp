@@ -193,7 +193,7 @@ struct UmapFactory {
 
   template <typename Worker, typename Gradient, typename Progress,
             typename Parallel>
-  void create_impl(Worker &worker, const Gradient &gradient, Progress &progress,
+  void create_impl(Worker &worker, const Gradient &, Progress &progress,
                    Parallel &parallel) {
     uwot::optimize_layout(worker, progress, n_epochs, parallel);
   }

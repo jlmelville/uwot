@@ -149,8 +149,8 @@ template <bool DoMoveVertex> struct InPlaceUpdate {
     // e.g. if adding new points to an existing embedding
     update_vec<DoMoveVertex>(tail_embedding, -update_d, d, dk);
   }
-  inline void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
-                    std::size_t) {
+  inline void repel(std::size_t dj, std::size_t /* dk */, std::size_t d,
+                    float grad_d, std::size_t) {
     head_embedding[dj + d] += opt.alpha * grad_d;
     // Python implementation doesn't move the negative sample but as Damrich
     // and Hamprecht (2021) note, it ought to. However they also note it has
@@ -191,13 +191,13 @@ template <bool DoMoveVertex> struct BatchUpdate {
         opt(std::move(opt)), gradient(head_embedding.size()),
         epoch_callback(std::move(epoch_callback)) {}
 
-  inline void attract(std::size_t dj, std::size_t dk, std::size_t d,
+  inline void attract(std::size_t dj, std::size_t /* dk */, std::size_t d,
                       float grad_d, std::size_t) {
     update_head_grad_vec<DoMoveVertex>(gradient, dj + d, grad_d);
   }
 
-  inline void repel(std::size_t dj, std::size_t dk, std::size_t d, float grad_d,
-                    std::size_t) {
+  inline void repel(std::size_t dj, std::size_t /* dk */, std::size_t d,
+                    float grad_d, std::size_t) {
     gradient[dj + d] += grad_d;
   }
 

@@ -2,8 +2,8 @@
 
 #include <Rcpp.h>
 
-#include "pforr.h"
 #include "nn_parallel.h"
+#include "pforr.h"
 
 using namespace Rcpp;
 
