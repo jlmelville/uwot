@@ -1,0 +1,7 @@
+linters: linters_with_tags(
+    tags = "correctness",
+    namespace_linter = NULL,
+    object_usage_linter = NULL,
+    duplicate_argument_linter = duplicate_argument_linter(except = c("list", "mutate", "transmute"))
+  )
+encoding: "UTF-8"

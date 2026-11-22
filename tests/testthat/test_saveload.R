@@ -255,7 +255,7 @@ test_that("save-load hnsw", {
 
   expect_equal(
     transformed_before_reload$nn$euclidean$idx,
-    transformed_after_reload$nn$euclidean$idx,
+    transformed_after_reload$nn$euclidean$idx
   )
   expect_equal(
     transformed_before_reload$nn$euclidean$dist,
@@ -314,7 +314,7 @@ test_that("save-load nndescent", {
 
   expect_equal(
     transformed_before_reload$nn$euclidean$idx,
-    transformed_after_reload$nn$euclidean$idx,
+    transformed_after_reload$nn$euclidean$idx
   )
   expect_equal(
     transformed_before_reload$nn$euclidean$dist,
@@ -337,7 +337,7 @@ test_that("save-load nndescent", {
     umap_transform(iris10, modelload2, n_epochs = 2, ret_extra = c("nn"))
   expect_equal(
     transformed_after_reload$nn$euclidean$idx,
-    transformed_after_reload2$nn$euclidean$idx,
+    transformed_after_reload2$nn$euclidean$idx
   )
   expect_equal(
     transformed_after_reload$nn$euclidean$dist,

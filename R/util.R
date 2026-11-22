@@ -303,7 +303,7 @@ range_scale <- function(x, min = 0, max = 1) {
 }
 
 is_installed <- function(pkgname) {
-  requireNamespace(pkgname, quietly = TRUE, )
+  requireNamespace(pkgname, quietly = TRUE)
   isNamespaceLoaded(pkgname)
 }
 

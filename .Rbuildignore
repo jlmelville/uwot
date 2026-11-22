@@ -18,3 +18,5 @@
 ^vignettes/articles$
 ^pkgdown$
 ^tools$
+^air\.toml$
+^\.lintr$

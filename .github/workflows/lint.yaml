@@ -15,26 +15,47 @@ concurrency:
 
 jobs:
   lint:
-    name: Lint
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-lib/actions/setup-r@a51a8012b0aab7c32ef9d19bf54da93f3254335e
+      - name: Install Air
+        uses: posit-dev/setup-air@482cb5912394878ab5a63b75db0f9d19cc6df5ba # v1.0.3
+        with:
+          version: "0.13.0"
+
+      - name: Check R formatting
+        run: |
+          test "$(air --version)" = "air 0.13.0"
+          air format . --check
+
+      - uses: r-lib/actions/setup-r@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
         with:
           use-public-rspm: true
 
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-lib/actions/setup-r-dependencies@a51a8012b0aab7c32ef9d19bf54da93f3254335e
+      - name: Check R Markdown formatting
+        shell: bash
+        run: |
+          air --version
+          # Shared pkgdown formatter pinned to its reviewed skill revision.
+          curl --fail --location --silent --show-error \
+            https://raw.githubusercontent.com/jlmelville/codex-workflows/8ffc90f0809991b57583e3de9ed6c6ae4aa78951/skills/r-docs-pkgdown/scripts/format-rmd.py \
+            --output "${RUNNER_TEMP}/format-rmd.py"
+          printf '%s  %s\n' \
+            '00c73ad230c66fed808450ea536a9eb77565b6757757273ebead13eb56cb804f' \
+            "${RUNNER_TEMP}/format-rmd.py" | shasum -a 256 --check --quiet
+          mapfile -d '' -t rmd_files < <(git ls-files -z -- '*.[Rr][Mm][Dd]')
+          python3 "${RUNNER_TEMP}/format-rmd.py" --check "${rmd_files[@]}"
+
+      - uses: r-lib/actions/setup-r-dependencies@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
         with:
-          extra-packages: any::lintr, local::.
+          extra-packages: any::lintr@3.4.0, local::.
           needs: lint
 
       - name: Lint
-        run: Rscript -e 'lintr::lint_package()'
+        run: Rscript --vanilla tools/lint.R
