@@ -680,59 +680,63 @@
 #'
 #' @export
 umap2 <-
-  function(X,
-           n_neighbors = 15,
-           n_components = 2,
-           metric = "euclidean",
-           n_epochs = NULL,
-           learning_rate = 1,
-           scale = FALSE,
-           init = "spectral",
-           init_sdev = "range",
-           spread = 1,
-           min_dist = 0.1,
-           set_op_mix_ratio = 1.0,
-           local_connectivity = 1.0,
-           bandwidth = 1.0,
-           repulsion_strength = 1.0,
-           negative_sample_rate = 5.0,
-           a = NULL,
-           b = NULL,
-           nn_method = NULL,
-           n_trees = 50,
-           search_k = 2 * n_neighbors * n_trees,
-           approx_pow = FALSE,
-           y = NULL,
-           target_n_neighbors = n_neighbors,
-           target_metric = "euclidean",
-           target_weight = 0.5,
-           pca = NULL,
-           pca_center = TRUE,
-           pcg_rand = TRUE,
-           fast_sgd = FALSE,
-           ret_model = FALSE,
-           ret_nn = FALSE,
-           ret_extra = c(),
-           n_threads = NULL,
-           n_build_threads = NULL,
-           n_sgd_threads = 0,
-           grain_size = 1,
-           tmpdir = tempdir(),
-           verbose = getOption("verbose", TRUE),
-           batch = TRUE,
-           opt_args = NULL,
-           epoch_callback = NULL,
-           pca_method = NULL,
-           binary_edge_weights = FALSE,
-           dens_scale = NULL,
-           seed = NULL,
-           nn_args = list(),
-           rng_type = NULL) {
+  function(
+    X,
+    n_neighbors = 15,
+    n_components = 2,
+    metric = "euclidean",
+    n_epochs = NULL,
+    learning_rate = 1,
+    scale = FALSE,
+    init = "spectral",
+    init_sdev = "range",
+    spread = 1,
+    min_dist = 0.1,
+    set_op_mix_ratio = 1.0,
+    local_connectivity = 1.0,
+    bandwidth = 1.0,
+    repulsion_strength = 1.0,
+    negative_sample_rate = 5.0,
+    a = NULL,
+    b = NULL,
+    nn_method = NULL,
+    n_trees = 50,
+    search_k = 2 * n_neighbors * n_trees,
+    approx_pow = FALSE,
+    y = NULL,
+    target_n_neighbors = n_neighbors,
+    target_metric = "euclidean",
+    target_weight = 0.5,
+    pca = NULL,
+    pca_center = TRUE,
+    pcg_rand = TRUE,
+    fast_sgd = FALSE,
+    ret_model = FALSE,
+    ret_nn = FALSE,
+    ret_extra = c(),
+    n_threads = NULL,
+    n_build_threads = NULL,
+    n_sgd_threads = 0,
+    grain_size = 1,
+    tmpdir = tempdir(),
+    verbose = getOption("verbose", TRUE),
+    batch = TRUE,
+    opt_args = NULL,
+    epoch_callback = NULL,
+    pca_method = NULL,
+    binary_edge_weights = FALSE,
+    dens_scale = NULL,
+    seed = NULL,
+    nn_args = list(),
+    rng_type = NULL
+  ) {
     if (is.null(nn_method)) {
-      if (is_installed("RcppHNSW") &&
-        is.character(metric) &&
-        is_ok_hnsw_metric(metric) &&
-        is_ok_hnsw_metric(target_metric)) {
+      if (
+        is_installed("RcppHNSW") &&
+          is.character(metric) &&
+          is_ok_hnsw_metric(metric) &&
+          is_ok_hnsw_metric(target_metric)
+      ) {
         nn_method <- "hnsw"
         tsmessage("Using HNSW for nearest neighbor search")
       }
@@ -763,8 +767,11 @@ umap2 <-
             "'rnndescent' package, please install it"
           )
         }
-        if (!is.null(nn_method) &&
-          is.character(nn_method) && nn_method != "nndescent") {
+        if (
+          !is.null(nn_method) &&
+            is.character(nn_method) &&
+            nn_method != "nndescent"
+        ) {
           stop(
             "nearest neighbor search for sparse matrices only supports ",
             "the 'nndescent' method"
@@ -779,8 +786,13 @@ umap2 <-
       n_epochs <- 500
     }
 
-    if (is.numeric(a) &&
-      is.numeric(b) && a == 1 && b == 1 && is.null(dens_scale)) {
+    if (
+      is.numeric(a) &&
+        is.numeric(b) &&
+        a == 1 &&
+        b == 1 &&
+        is.null(dens_scale)
+    ) {
       method <- "tumap"
     } else {
       method <- "umap"

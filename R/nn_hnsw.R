@@ -1,13 +1,15 @@
-hnsw_nn <- function(X,
-                    k = 10,
-                    metric = "euclidean",
-                    M = 16,
-                    ef_construction = 200,
-                    ef = 10,
-                    n_threads = NULL,
-                    n_build_threads = NULL,
-                    ret_index = FALSE,
-                    verbose = FALSE) {
+hnsw_nn <- function(
+  X,
+  k = 10,
+  metric = "euclidean",
+  M = 16,
+  ef_construction = 200,
+  ef = 10,
+  n_threads = NULL,
+  n_build_threads = NULL,
+  ret_index = FALSE,
+  verbose = FALSE
+) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -15,7 +17,8 @@ hnsw_nn <- function(X,
     n_build_threads <- n_threads
   }
   ann <-
-    hnsw_build(X,
+    hnsw_build(
+      X,
       metric = metric,
       M = M,
       ef_construction = ef_construction,
@@ -38,7 +41,14 @@ hnsw_nn <- function(X,
   res
 }
 
-hnsw_build <- function(X, metric, M, ef_construction, n_build_threads, verbose) {
+hnsw_build <- function(
+  X,
+  metric,
+  M,
+  ef_construction,
+  n_build_threads,
+  verbose
+) {
   hnsw_distance <- metric
   if (metric == "correlation") {
     tsmessage("Annoy build: subtracting row means for correlation")
@@ -70,12 +80,7 @@ hnsw_build <- function(X, metric, M, ef_construction, n_build_threads, verbose) 
 
 # called by hnsw_nn when building a model, and by umap_transform directly
 hnsw_search <-
-  function(X,
-           k,
-           ann,
-           ef,
-           n_threads = NULL,
-           verbose = FALSE) {
+  function(X, k, ann, ef, n_threads = NULL, verbose = FALSE) {
     if (is.null(n_threads)) {
       n_threads <- default_num_threads()
     }

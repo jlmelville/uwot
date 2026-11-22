@@ -113,20 +113,20 @@ palette <- as.vector(Polychrome::createPalette(
 
 ```{r plot umap}
 ggplot(
-    data.frame(mnist_umap, Digit = mnist$Label),
-    aes(x = X1, y = X2, color = Digit)
+  data.frame(mnist_umap, Digit = mnist$Label),
+  aes(x = X1, y = X2, color = Digit)
 ) +
-    geom_point(alpha = 0.1, size = 0.5) +
-    scale_color_manual(values = palette) +
-    theme_minimal() +
-    labs(
-        title = "MNIST with uwot::umap",
-        x = "",
-        y = "",
-        color = "Digit"
-    ) +
-    theme(legend.position = "right") +
-    guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+  geom_point(alpha = 0.1, size = 0.5) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "MNIST with uwot::umap",
+    x = "",
+    y = "",
+    color = "Digit"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
 ```
 
 ![umap on MNIST](img/umap2/umap.png)

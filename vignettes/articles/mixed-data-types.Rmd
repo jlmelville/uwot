@@ -33,8 +33,10 @@ petal and sepal data separately in the `iris` dataset, but to use Euclidean
 distances for both, use:
 
 ```R
-metric <- list("euclidean" = c("Petal.Width", "Petal.Length"),
-              "euclidean" = c("Sepal.Width", "Sepal.Length"))
+metric <- list(
+  "euclidean" = c("Petal.Width", "Petal.Length"),
+  "euclidean" = c("Sepal.Width", "Sepal.Length")
+)
 ```
 
 ## Indexing
@@ -115,16 +117,16 @@ a list as the value for the metric, containing the vector of columns as the
 only unnamed element, and then the over-riding keyword arguments. An example:
 
 ```R
-  umap(
-    X,
-    pca = 40,
-    pca_center = TRUE,
-    metric = list(
-      euclidean = 1:200,
-      euclidean = list(201:300, pca = NULL),
-      manhattan = list(300:500, pca_center = FALSE)
-    )
+umap(
+  X,
+  pca = 40,
+  pca_center = TRUE,
+  metric = list(
+    euclidean = 1:200,
+    euclidean = list(201:300, pca = NULL),
+    manhattan = list(300:500, pca_center = FALSE)
   )
+)
 ```
 
 In this case, the first `euclidean` block with be reduced to 40 dimensions by

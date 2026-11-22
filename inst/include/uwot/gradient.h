@@ -41,8 +41,8 @@ namespace uwot {
 // rather than recalculating it in the gradient step
 inline auto d2diff(const std::vector<float> &x, std::size_t px,
                    const std::vector<float> &y, std::size_t py,
-                   std::size_t ndim, float dist_eps,
-                   std::vector<float> &diffxy) -> float {
+                   std::size_t ndim, float dist_eps, std::vector<float> &diffxy)
+    -> float {
   float d2 = 0.0;
   for (std::size_t d = 0; d < ndim; d++) {
     float diff = x[px + d] - y[py + d];
@@ -116,7 +116,7 @@ auto grad_rep(const Gradient &gradient,
 template <float (*powfun)(float, float)> class base_umap_gradient {
 public:
   base_umap_gradient(float a, float b, float gamma)
-      : a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b){};
+      : a(a), b(b), a_b_m2(-2.0 * a * b), gamma_b_2(2.0 * gamma * b) {};
   // Compared to the UMAP Python implementation, instead of doing d2^(b-1)
   // we can save a power calculation by using d2^b / d2
   auto grad_attr(float d2, std::size_t, std::size_t) const -> float {
@@ -151,7 +151,7 @@ using apumap_gradient = base_umap_gradient<fastPrecisePow>;
 // default.
 class tumap_gradient {
 public:
-  tumap_gradient(float gamma) : gamma_2(gamma * 2.0){};
+  tumap_gradient(float gamma) : gamma_2(gamma * 2.0) {};
   auto grad_attr(float d2, std::size_t, std::size_t) const -> float {
     return -2.0 / (d2 + 1.0);
   }
@@ -200,10 +200,10 @@ private:
 
 class umapai2_gradient {
 public:
-  umapai2_gradient(std::vector<float> ai, std::vector<float> aj,
-                   float b, std::size_t ndim)
-      : ai(std::move(ai)), aj(std::move(aj)), b(b), ndim(ndim),
-        b_m2(-2.0 * b), b_2(2.0 * b) {}
+  umapai2_gradient(std::vector<float> ai, std::vector<float> aj, float b,
+                   std::size_t ndim)
+      : ai(std::move(ai)), aj(std::move(aj)), b(b), ndim(ndim), b_m2(-2.0 * b),
+        b_2(2.0 * b) {}
 
   auto clamp_grad(float grad_d) const -> float {
     return std::clamp(grad_d, clamp_lo, clamp_hi);

@@ -17,15 +17,17 @@ fuzzy_set_union <- function(X, set_op_mix_ratio = 1) {
 # Calculate the (asymmetric) affinity matrix based on the nearest neighborhoods
 # default target for calibration is the sum of affinities = log2(n_nbrs)
 # nn distances should be stored column-wise
-smooth_knn <- function(nn_dist,
-                       nn_ptr = NULL,
-                       skip_first = TRUE,
-                       target = NULL,
-                       local_connectivity = 1.0,
-                       n_threads = NULL,
-                       grain_size = 1,
-                       ret_sigma = FALSE,
-                       verbose = FALSE) {
+smooth_knn <- function(
+  nn_dist,
+  nn_ptr = NULL,
+  skip_first = TRUE,
+  target = NULL,
+  local_connectivity = 1.0,
+  n_threads = NULL,
+  grain_size = 1,
+  ret_sigma = FALSE,
+  verbose = FALSE
+) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -35,7 +37,11 @@ smooth_knn <- function(nn_dist,
     appendLF = FALSE
   )
   if (length(target) == 1) {
-    tsmessage(" with target n_neighbors = ", formatC(2^target), time_stamp = FALSE)
+    tsmessage(
+      " with target n_neighbors = ",
+      formatC(2^target),
+      time_stamp = FALSE
+    )
   } else {
     tsmessage(time_stamp = FALSE)
   }
@@ -58,14 +64,16 @@ smooth_knn <- function(nn_dist,
   affinity_matrix_res
 }
 
-smooth_knn_matrix <- function(nn,
-                              target = NULL,
-                              local_connectivity = 1.0,
-                              bandwidth = 1.0,
-                              ret_sigma = FALSE,
-                              n_threads = NULL,
-                              grain_size = 1,
-                              verbose = FALSE) {
+smooth_knn_matrix <- function(
+  nn,
+  target = NULL,
+  local_connectivity = 1.0,
+  bandwidth = 1.0,
+  ret_sigma = FALSE,
+  n_threads = NULL,
+  grain_size = 1,
+  verbose = FALSE
+) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -111,8 +119,11 @@ smooth_knn_matrix <- function(nn,
   if (is_sparse_matrix(nn)) {
     # use j instead of i to transpose it
     v <- Matrix::sparseMatrix(
-      j = osparse$i, p = osparse$p, x = v,
-      dims = osparse$dims, index1 = FALSE
+      j = osparse$i,
+      p = osparse$p,
+      x = v,
+      dims = osparse$dims,
+      index1 = FALSE
     )
     Matrix::diag(v) <- 0.0
     v <- Matrix::drop0(v)
@@ -129,14 +140,17 @@ smooth_knn_matrix <- function(nn,
 # geodesic distance at each point, creating a fuzzy simplicial set for each such
 # point, and then combining all the local fuzzy simplicial sets into a global
 # one via a fuzzy union
-fuzzy_simplicial_set <- function(nn,
-                                 target = NULL,
-                                 set_op_mix_ratio = 1.0,
-                                 local_connectivity = 1.0, bandwidth = 1.0,
-                                 ret_sigma = FALSE,
-                                 n_threads = NULL,
-                                 grain_size = 1,
-                                 verbose = FALSE) {
+fuzzy_simplicial_set <- function(
+  nn,
+  target = NULL,
+  set_op_mix_ratio = 1.0,
+  local_connectivity = 1.0,
+  bandwidth = 1.0,
+  ret_sigma = FALSE,
+  n_threads = NULL,
+  grain_size = 1,
+  verbose = FALSE
+) {
   affinity_matrix_res <- smooth_knn_matrix(
     nn = nn,
     target = target,
@@ -147,7 +161,10 @@ fuzzy_simplicial_set <- function(nn,
     grain_size = grain_size,
     verbose = verbose
   )
-  res <- fuzzy_set_union(affinity_matrix_res$matrix, set_op_mix_ratio = set_op_mix_ratio)
+  res <- fuzzy_set_union(
+    affinity_matrix_res$matrix,
+    set_op_mix_ratio = set_op_mix_ratio
+  )
   if (ret_sigma) {
     res <- list(matrix = res)
     res$sigma <- affinity_matrix_res$sigma
@@ -160,11 +177,15 @@ symmetrize <- function(P) {
   0.5 * (P + Matrix::t(P))
 }
 
-perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
-                                    n_threads = NULL,
-                                    grain_size = 1,
-                                    kernel = "gauss",
-                                    verbose = FALSE) {
+perplexity_similarities <- function(
+  nn,
+  perplexity = NULL,
+  ret_sigma = FALSE,
+  n_threads = NULL,
+  grain_size = 1,
+  kernel = "gauss",
+  verbose = FALSE
+) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -175,7 +196,8 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
   sigma <- NULL
   if (kernel == "gauss") {
     tsmessage(
-      "Commencing calibration for perplexity = ", formatC(perplexity),
+      "Commencing calibration for perplexity = ",
+      formatC(perplexity),
       pluralize("thread", n_threads, " using")
     )
 
@@ -208,8 +230,11 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
       dint <- -2 * dhdb / (s * s)
     }
 
-    affinity_matrix <- nng_to_sparse(nnt$idx, as.vector(affinity_matrix_res$matrix),
-      self_nbr = TRUE, by_row = FALSE
+    affinity_matrix <- nng_to_sparse(
+      nnt$idx,
+      as.vector(affinity_matrix_res$matrix),
+      self_nbr = TRUE,
+      by_row = FALSE
     )
     if (!is.null(affinity_matrix_res$sigma)) {
       sigma <- affinity_matrix_res$sigma
@@ -236,10 +261,15 @@ perplexity_similarities <- function(nn, perplexity = NULL, ret_sigma = FALSE,
 # Convert the matrix of NN indices to a sparse asymmetric matrix where each
 # edge has a weight of val (scalar or vector)
 # return a sparse matrix with dimensions of nrow(nn_idx) x max_nbr_id
-nn_to_sparse <- function(nn_idxv, n_obs, val = 1, self_nbr = FALSE,
-                         max_nbr_id = NULL, by_row = TRUE) {
+nn_to_sparse <- function(
+  nn_idxv,
+  n_obs,
+  val = 1,
+  self_nbr = FALSE,
+  max_nbr_id = NULL,
+  by_row = TRUE
+) {
   n_nbrs <- length(nn_idxv) / n_obs
-
 
   if (is.null(max_nbr_id)) {
     max_nbr_id <- ifelse(self_nbr, n_obs, max(nn_idxv))
@@ -266,17 +296,26 @@ nn_to_sparse <- function(nn_idxv, n_obs, val = 1, self_nbr = FALSE,
   res
 }
 
-nng_to_sparse <- function(nn_idx, val = 1, self_nbr = FALSE,
-                          max_nbr_id = NULL, by_row = TRUE) {
+nng_to_sparse <- function(
+  nn_idx,
+  val = 1,
+  self_nbr = FALSE,
+  max_nbr_id = NULL,
+  by_row = TRUE
+) {
   if (by_row) {
     n_obs <- nrow(nn_idx)
   } else {
     n_obs <- ncol(nn_idx)
   }
 
-  nn_to_sparse(as.vector(nn_idx), n_obs,
-    val = val, self_nbr = self_nbr,
-    max_nbr_id = max_nbr_id, by_row = by_row
+  nn_to_sparse(
+    as.vector(nn_idx),
+    n_obs,
+    val = val,
+    self_nbr = self_nbr,
+    max_nbr_id = max_nbr_id,
+    by_row = by_row
   )
 }
 

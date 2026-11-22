@@ -5,8 +5,13 @@ stime <- function() {
 # message with a time stamp
 # appears only if called from an environment where a logical verbose = TRUE
 # OR force = TRUE
-tsmessage <- function(..., domain = NULL, appendLF = TRUE, force = FALSE,
-                      time_stamp = TRUE) {
+tsmessage <- function(
+  ...,
+  domain = NULL,
+  appendLF = TRUE,
+  force = FALSE,
+  time_stamp = TRUE
+) {
   verbose <- get0("verbose", envir = sys.parent())
 
   if (force || (!is.null(verbose) && verbose)) {
@@ -22,10 +27,11 @@ tsmessage <- function(..., domain = NULL, appendLF = TRUE, force = FALSE,
 # log vector information
 summarize <- function(X, msg = "") {
   summary_X <- summary(X, digits = max(3, getOption("digits") - 3))
-  tsmessage(msg, ": ", paste(names(summary_X), ":", summary_X, "|",
-    collapse = ""
-  ),
-  force = get0("verbose", envir = sys.parent())
+  tsmessage(
+    msg,
+    ": ",
+    paste(names(summary_X), ":", summary_X, "|", collapse = ""),
+    force = get0("verbose", envir = sys.parent())
   )
 }
 
@@ -128,8 +134,12 @@ checkna <- function(X) {
   }
 }
 
-check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL,
-                        bipartite = FALSE) {
+check_graph <- function(
+  graph,
+  expected_rows = NULL,
+  expected_cols = NULL,
+  bipartite = FALSE
+) {
   idx <- graph$idx
   dist <- graph$dist
   if (!methods::is(idx, "matrix")) {
@@ -170,8 +180,12 @@ check_graph <- function(graph, expected_rows = NULL, expected_cols = NULL,
   }
 }
 
-check_sparse_graph <- function(graph, expected_rows = NULL,
-                               expected_cols = NULL, bipartite = FALSE) {
+check_sparse_graph <- function(
+  graph,
+  expected_rows = NULL,
+  expected_cols = NULL,
+  bipartite = FALSE
+) {
   if (!is.null(expected_rows)) {
     if (nrow(graph) != expected_rows) {
       stop("Sparse distance matrix has unexpected number of rows")
@@ -189,8 +203,12 @@ check_sparse_graph <- function(graph, expected_rows = NULL,
   }
 }
 
-check_graph_list <- function(graph_list, expected_rows = NULL,
-                             expected_cols = NULL, bipartite = FALSE) {
+check_graph_list <- function(
+  graph_list,
+  expected_rows = NULL,
+  expected_cols = NULL,
+  bipartite = FALSE
+) {
   if (nn_is_single(graph_list)) {
     graph_list <- list(graph_list)
   }
@@ -203,7 +221,10 @@ check_graph_list <- function(graph_list, expected_rows = NULL,
     if (is.list(graph)) {
       check_graph(graph, expected_rows, expected_cols, bipartite = bipartite)
     } else if (is_sparse_matrix(graph)) {
-      check_sparse_graph(graph, expected_rows, expected_cols,
+      check_sparse_graph(
+        graph,
+        expected_rows,
+        expected_cols,
         bipartite = bipartite
       )
     } else {
@@ -282,9 +303,7 @@ range_scale <- function(x, min = 0, max = 1) {
 }
 
 is_installed <- function(pkgname) {
-  requireNamespace(pkgname,
-    quietly = TRUE,
-  )
+  requireNamespace(pkgname, quietly = TRUE, )
   isNamespaceLoaded(pkgname)
 }
 

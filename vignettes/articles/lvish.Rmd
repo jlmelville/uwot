@@ -12,8 +12,13 @@ also offers a LargeVis-like method, `lvish`:
 ```R
 # perplexity, init and n_epoch values shown are the defaults
 # use perplexity instead of n_neighbors to control local neighborhood size
-mnist_lv <- lvish(mnist, perplexity = 50, init = "lvrand", n_epochs = 5000,
-                  verbose = TRUE)
+mnist_lv <- lvish(
+  mnist,
+  perplexity = 50,
+  init = "lvrand",
+  n_epochs = 5000,
+  verbose = TRUE
+)
 # Make hilarious Lembas bread joke
 ```
 
@@ -77,8 +82,14 @@ still expect to see a big improvement. Something like the following works for
 MNIST:
 
 ```R
-mnist_lv <- lvish(mnist, kernel = "knn", perplexity = 15, n_epochs = 1500,
-                  init = "lvrand", verbose = TRUE)
+mnist_lv <- lvish(
+  mnist,
+  kernel = "knn",
+  perplexity = 15,
+  n_epochs = 1500,
+  init = "lvrand",
+  verbose = TRUE
+)
 ```
 
 ## Some More Results
@@ -119,7 +130,13 @@ I would also suggest that you fix the number of epochs to a smaller value
 initially and see if that provides an adequate visualization.
 
 ```R
-iris_lv15 <- lvish(iris, pca = 100, perplexity = 15, n_sgd_threads = "auto", n_epochs = 500)
+iris_lv15 <- lvish(
+  iris,
+  pca = 100,
+  perplexity = 15,
+  n_sgd_threads = "auto",
+  n_epochs = 500
+)
 ```
 
 #### iris

@@ -57,7 +57,8 @@ xv <- seq(
 yv <- exp(-(pmax(0, xv - min_dist)) / spread)
 
 # Fit the a,b curve to the exponential
-params <- stats::nls(yv ~ 1 / (1 + a * xv^(2.0 * b)),
+params <- stats::nls(
+  yv ~ 1 / (1 + a * xv^(2.0 * b)),
   start = list(a = 1, b = 1)
 )$m$getPars()
 a <- params["a"]
@@ -301,8 +302,13 @@ Here's an example workflow:
 
 ```R
 # PCA to 50 dimensions first
-mnist_pca <- irlba::prcomp_irlba(mnist, n = 50, retx = TRUE, center = center,
-                             scale. = FALSE)$x
+mnist_pca <- irlba::prcomp_irlba(
+  mnist,
+  n = 50,
+  retx = TRUE,
+  center = center,
+  scale. = FALSE
+)$x
 
 # t-UMAP is equivalent to a = 1, b = 1
 # remember to get the nearest neighbor data back too

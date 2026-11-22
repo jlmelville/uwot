@@ -61,8 +61,7 @@ NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
                        n_test_vertices, train_embeddingv, n_train_vertices,
                        embedding);
   };
-  pforr::parallel_for(n_test_vertices, worker, n_threads,
-                                  grain_size);
+  pforr::parallel_for(n_test_vertices, worker, n_threads, grain_size);
 
   return NumericMatrix(ndim, n_test_vertices, embedding.begin());
 }

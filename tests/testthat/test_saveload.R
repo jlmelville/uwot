@@ -4,9 +4,14 @@ context("load/save model")
 
 test_that("can save and load simple model", {
   set.seed(1337)
-  model <- umap(iris10,
-    n_neighbors = 4, n_epochs = 2, init = "spca",
-    metric = "euclidean", verbose = FALSE, n_threads = 0,
+  model <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    init = "spca",
+    metric = "euclidean",
+    verbose = FALSE,
+    n_threads = 0,
     ret_model = TRUE
   )
 
@@ -50,11 +55,16 @@ test_that("can save and load mixed distance model", {
     "euclidean" = c(1, 2),
     "cosine" = c("Petal.Length", "Petal.Width")
   )
-  model <- umap(jiris10,
-    n_neighbors = 4, n_epochs = 2, init = "spca",
+  model <- umap(
+    jiris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    init = "spca",
     metric = metric2,
-    verbose = FALSE, n_threads = 0,
-    ret_nn = TRUE, ret_model = TRUE
+    verbose = FALSE,
+    n_threads = 0,
+    ret_nn = TRUE,
+    ret_model = TRUE
   )
 
   mod_fname <- tempfile(tmpdir = tempdir())
@@ -91,9 +101,14 @@ test_that("can save and load mixed distance model", {
 
 test_that("unloading a model on save", {
   set.seed(1337)
-  model <- umap(iris10,
-    n_neighbors = 4, n_epochs = 2, init = "spca",
-    metric = "euclidean", verbose = FALSE, n_threads = 0,
+  model <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    init = "spca",
+    metric = "euclidean",
+    verbose = FALSE,
+    n_threads = 0,
     ret_model = TRUE
   )
 
@@ -128,7 +143,12 @@ test_that("save-load-save", {
   uwot::save_uwot(model2, file = new_file)
   expect_true(file.exists(new_file))
 
-  modelm <- uwot::umap(X, n_neighbors = 4, metric = list("euclidean" = 1:5, "euclidean" = 6:10), ret_model = TRUE)
+  modelm <- uwot::umap(
+    X,
+    n_neighbors = 4,
+    metric = list("euclidean" = 1:5, "euclidean" = 6:10),
+    ret_model = TRUE
+  )
   modelm_file <- tempfile(tmpdir = tempdir())
   modelm <- uwot::save_uwot(modelm, file = modelm_file)
   modelm2 <- uwot::load_uwot(file = modelm_file)
@@ -140,20 +160,23 @@ test_that("save-load-save", {
 # #117 correlation metric not correctly restored
 test_that("reload-correlation", {
   set.seed(1337)
-  model <- umap(iris10,
-                n_neighbors = 4, n_epochs = 2, init = "spca",
-                metric = "correlation", verbose = FALSE, n_threads = 0,
-                ret_model = TRUE, ret_extra = c("nn")
+  model <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    init = "spca",
+    metric = "correlation",
+    verbose = FALSE,
+    n_threads = 0,
+    ret_model = TRUE,
+    ret_extra = c("nn")
   )
   expect_equal(names(model$metric), "correlation")
   expect_equal(model$nn_index$metric, "correlation")
 
   set.seed(1337)
   transformed_before_reload <-
-    umap_transform(iris10,
-                   model,
-                   n_epochs = 2,
-                   ret_extra = c("nn"))
+    umap_transform(iris10, model, n_epochs = 2, ret_extra = c("nn"))
 
   expect_equal(
     transformed_before_reload$nn$correlation$dist,
@@ -172,10 +195,7 @@ test_that("reload-correlation", {
 
   set.seed(1337)
   transformed_after_reload <-
-    umap_transform(iris10,
-                   modelload,
-                   n_epochs = 2,
-                   ret_extra = c("nn"))
+    umap_transform(iris10, modelload, n_epochs = 2, ret_extra = c("nn"))
   expect_equal(
     transformed_after_reload$nn$correlation$dist,
     model$nn$correlation$dist,
@@ -194,20 +214,23 @@ test_that("reload-correlation", {
 test_that("save-load hnsw", {
   testthat::skip_if_not_installed("RcppHNSW")
   set.seed(1337)
-  model <- umap(iris10,
-    n_neighbors = 4, n_epochs = 2, init = "spca",
-    metric = "euclidean", verbose = FALSE, n_threads = 0,
-    ret_model = TRUE, ret_extra = c("nn"), nn_method = "hnsw"
+  model <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    init = "spca",
+    metric = "euclidean",
+    verbose = FALSE,
+    n_threads = 0,
+    ret_model = TRUE,
+    ret_extra = c("nn"),
+    nn_method = "hnsw"
   )
   expect_equal(model$nn_method, "hnsw")
 
   set.seed(1337)
   transformed_before_reload <-
-    umap_transform(iris10,
-      model,
-      n_epochs = 2,
-      ret_extra = c("nn")
-    )
+    umap_transform(iris10, model, n_epochs = 2, ret_extra = c("nn"))
 
   mod_fname <- tempfile(tmpdir = tempdir())
   model <- save_uwot(model, file = mod_fname, unload = TRUE)
@@ -218,11 +241,7 @@ test_that("save-load hnsw", {
 
   set.seed(1337)
   transformed_after_reload <-
-    umap_transform(iris10,
-      modelload,
-      n_epochs = 2,
-      ret_extra = c("nn")
-    )
+    umap_transform(iris10, modelload, n_epochs = 2, ret_extra = c("nn"))
 
   if (file.exists(mod_fname)) {
     unlink(mod_fname)
@@ -254,20 +273,23 @@ test_that("save-load hnsw", {
 test_that("save-load nndescent", {
   testthat::skip_if_not_installed("rnndescent")
   set.seed(1337)
-  model <- umap(iris10,
-                n_neighbors = 4, n_epochs = 2, init = "spca",
-                metric = "euclidean", verbose = FALSE, n_threads = 0,
-                ret_model = TRUE, ret_extra = c("nn"), nn_method = "nndescent"
+  model <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    init = "spca",
+    metric = "euclidean",
+    verbose = FALSE,
+    n_threads = 0,
+    ret_model = TRUE,
+    ret_extra = c("nn"),
+    nn_method = "nndescent"
   )
   expect_equal(model$nn_method, "nndescent")
 
   set.seed(1337)
   transformed_before_reload <-
-    umap_transform(iris10,
-                   model,
-                   n_epochs = 2,
-                   ret_extra = c("nn")
-    )
+    umap_transform(iris10, model, n_epochs = 2, ret_extra = c("nn"))
 
   mod_fname <- tempfile(tmpdir = tempdir())
   model <- save_uwot(model, file = mod_fname, unload = TRUE)
@@ -278,11 +300,7 @@ test_that("save-load nndescent", {
 
   set.seed(1337)
   transformed_after_reload <-
-    umap_transform(iris10,
-                   modelload,
-                   n_epochs = 2,
-                   ret_extra = c("nn")
-    )
+    umap_transform(iris10, modelload, n_epochs = 2, ret_extra = c("nn"))
 
   if (file.exists(mod_fname)) {
     unlink(mod_fname)
@@ -316,11 +334,7 @@ test_that("save-load nndescent", {
   expect_equal(modelload2$nn_method, "nndescent")
   set.seed(1337)
   transformed_after_reload2 <-
-    umap_transform(iris10,
-                   modelload2,
-                   n_epochs = 2,
-                   ret_extra = c("nn")
-    )
+    umap_transform(iris10, modelload2, n_epochs = 2, ret_extra = c("nn"))
   expect_equal(
     transformed_after_reload$nn$euclidean$idx,
     transformed_after_reload2$nn$euclidean$idx,
@@ -343,10 +357,15 @@ test_that("save-load nndescent", {
 # 131: can't use a relative path for saving
 test_that("save-load relative path", {
   set.seed(1337)
-  model <- umap(iris10,
-                n_neighbors = 4, n_epochs = 2, init = "spca",
-                metric = "euclidean", verbose = FALSE, n_threads = 0,
-                ret_model = TRUE
+  model <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    init = "spca",
+    metric = "euclidean",
+    verbose = FALSE,
+    n_threads = 0,
+    ret_model = TRUE
   )
   # remember to go back to the original working directory
   old_wd <- getwd()

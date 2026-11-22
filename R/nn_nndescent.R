@@ -1,11 +1,13 @@
-nndescent_nn <- function(X,
-                         k = 10,
-                         metric = "euclidean",
-                         nn_args = list(),
-                         n_threads = NULL,
-                         n_build_threads = NULL,
-                         ret_index = FALSE,
-                         verbose = FALSE) {
+nndescent_nn <- function(
+  X,
+  k = 10,
+  metric = "euclidean",
+  nn_args = list(),
+  n_threads = NULL,
+  n_build_threads = NULL,
+  ret_index = FALSE,
+  verbose = FALSE
+) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -46,12 +48,14 @@ nndescent_nn <- function(X,
   res
 }
 
-nndescent_build <- function(X,
-                            k,
-                            metric,
-                            nn_args = list(),
-                            n_build_threads = NULL,
-                            verbose = FALSE) {
+nndescent_build <- function(
+  X,
+  k,
+  metric,
+  nn_args = list(),
+  n_build_threads = NULL,
+  verbose = FALSE
+) {
   nn_build_args <- get_nndescent_build_args(nn_args)
   nn_build_args <- lmerge(
     nn_build_args,
@@ -74,12 +78,14 @@ nndescent_build <- function(X,
 }
 
 
-nndescent_search <- function(X,
-                             k,
-                             ann,
-                             nn_args = list(),
-                             n_threads = NULL,
-                             verbose = FALSE) {
+nndescent_search <- function(
+  X,
+  k,
+  ann,
+  nn_args = list(),
+  n_threads = NULL,
+  verbose = FALSE
+) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }

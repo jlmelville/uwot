@@ -2,12 +2,14 @@ bigstatsr_is_installed <- function() {
   is_installed("bigstatsr")
 }
 
-bigstatsr_scores <- function(X,
-                             ncol,
-                             center = TRUE,
-                             ret_extra = FALSE,
-                             ncores = 1,
-                             verbose = FALSE) {
+bigstatsr_scores <- function(
+  X,
+  ncol,
+  center = TRUE,
+  ret_extra = FALSE,
+  ncores = 1,
+  verbose = FALSE
+) {
   res <- bigstatsr::big_randomSVD(
     X = bigstatsr::as_FBM(X),
     fun.scaling = bigstatsr::big_scale(center = center, scale = FALSE),

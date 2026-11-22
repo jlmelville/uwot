@@ -229,7 +229,10 @@ And here are the results:
 
 ```{r plot training data}
 ggplot(
-  data.frame(fashion_train_umap$embedding, Description = fashion_train$Description),
+  data.frame(
+    fashion_train_umap$embedding,
+    Description = fashion_train$Description
+  ),
   aes(x = X1, y = X2, color = Description)
 ) +
   geom_point(alpha = 0.1, size = 1.0) +

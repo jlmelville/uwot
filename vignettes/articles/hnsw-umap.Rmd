@@ -233,8 +233,11 @@ can control the behavior of the HNSW index by passing a list of arguments as
 For example you could do something like:
 
 ```{r HNSW nn_args}
-iris_umap <- umap(iris, nn_method = "hnsw", 
-                  nn_args = list(M = 12, ef_construction = 64, ef = 20))
+iris_umap <- umap(
+  iris,
+  nn_method = "hnsw",
+  nn_args = list(M = 12, ef_construction = 64, ef = 20)
+)
 ```
 
 ## Using RcppHNSW Directly

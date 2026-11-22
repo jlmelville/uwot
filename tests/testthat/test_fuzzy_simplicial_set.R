@@ -8,8 +8,12 @@ context("fuzzy simplicial set")
 # umap.umap_.fuzzy_simplicial_set(iris10, 4, random_state=42, metric="euclidean")
 # as of 0.5 (and even earlier)
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 1, local_connectivity = 1,
-  bandwidth = 1, verbose = FALSE, n_threads = 0, nn = nn
+  set_op_mix_ratio = 1,
+  local_connectivity = 1,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 0,
+  nn = nn
 )
 expect_equal(res, V_union, tolerance = 1e-4)
 
@@ -36,125 +40,193 @@ expect_equal(res, V_union, tolerance = 1e-4)
 
 # mix union + intersection
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 0.5, local_connectivity = 1,
-  bandwidth = 1, verbose = FALSE, n_threads = 0, nn = nn
+  set_op_mix_ratio = 0.5,
+  local_connectivity = 1,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 0,
+  nn = nn
 )
 expect_equal(res, V_mix, tolerance = 1e-4)
 
 
 # intersection
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 0, local_connectivity = 1,
-  bandwidth = 1, verbose = FALSE, n_threads = 0, nn = nn
+  set_op_mix_ratio = 0,
+  local_connectivity = 1,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 0,
+  nn = nn
 )
 expect_equal(res, V_intersect, tolerance = 1e-4)
 
 # Union + local_connectivity
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 1, local_connectivity = 1.5,
-  bandwidth = 1, verbose = FALSE, n_threads = 0, nn = nn
+  set_op_mix_ratio = 1,
+  local_connectivity = 1.5,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 0,
+  nn = nn
 )
 expect_equal(res, V_union_local, tolerance = 1e-4)
 
 # use unique iris nbrs to make comparison with Python UMAP easier
 # Union + bandwidth
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 1, local_connectivity = 1,
-  bandwidth = 0.5, verbose = FALSE, n_threads = 0, nn = self_unn4
+  set_op_mix_ratio = 1,
+  local_connectivity = 1,
+  bandwidth = 0.5,
+  verbose = FALSE,
+  n_threads = 0,
+  nn = self_unn4
 )
 expect_equal(res, V_union_bandwidth, tolerance = 1e-4)
 
 # intersect + local + bandwidth
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 0, local_connectivity = 1.5,
-  bandwidth = 0.5, verbose = FALSE, n_threads = 0, nn = self_unn4
+  set_op_mix_ratio = 0,
+  local_connectivity = 1.5,
+  bandwidth = 0.5,
+  verbose = FALSE,
+  n_threads = 0,
+  nn = self_unn4
 )
 expect_equal(res, V_intersect_local_bandwidth, tolerance = 1e-4)
 
 # parallel code path
 # matrix
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 1, local_connectivity = 1,
-  bandwidth = 1, verbose = FALSE, n_threads = 1, nn = nn
+  set_op_mix_ratio = 1,
+  local_connectivity = 1,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = nn
 )
 expect_equal(res, V_union, tolerance = 1e-4)
 
 # mix union + intersection
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 0.5, local_connectivity = 1,
-  bandwidth = 1, verbose = FALSE, n_threads = 1, nn = nn
+  set_op_mix_ratio = 0.5,
+  local_connectivity = 1,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = nn
 )
 expect_equal(res, V_mix, tolerance = 1e-4)
 
 # intersection
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 0, local_connectivity = 1,
-  bandwidth = 1, verbose = FALSE, n_threads = 1, nn = nn
+  set_op_mix_ratio = 0,
+  local_connectivity = 1,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = nn
 )
 expect_equal(res, V_intersect, tolerance = 1e-4)
 
 # Union + local_connectivity
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 1, local_connectivity = 1.5,
-  bandwidth = 1, verbose = FALSE, n_threads = 1, nn = nn
+  set_op_mix_ratio = 1,
+  local_connectivity = 1.5,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = nn
 )
 expect_equal(res, V_union_local, tolerance = 1e-4)
 
 
 # Union + bandwidth
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 1, local_connectivity = 1,
-  bandwidth = 0.5, verbose = FALSE, n_threads = 1, nn = self_unn4
+  set_op_mix_ratio = 1,
+  local_connectivity = 1,
+  bandwidth = 0.5,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = self_unn4
 )
 expect_equal(res, V_union_bandwidth, tolerance = 1e-4)
 
 # intersect + local + bandwidth
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 0, local_connectivity = 1.5,
-  bandwidth = 0.5, verbose = FALSE, n_threads = 1, nn = self_unn4
+  set_op_mix_ratio = 0,
+  local_connectivity = 1.5,
+  bandwidth = 0.5,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = self_unn4
 )
 expect_equal(res, V_intersect_local_bandwidth, tolerance = 1e-4)
 
 # parallel code path
 # matrix
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 1, local_connectivity = 1,
-  bandwidth = 1, verbose = FALSE, n_threads = 1, nn = nn
+  set_op_mix_ratio = 1,
+  local_connectivity = 1,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = nn
 )
 expect_equal(res, V_union, tolerance = 1e-4)
 
 # mix union + intersection
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 0.5, local_connectivity = 1,
-  bandwidth = 1, verbose = FALSE, n_threads = 1, nn = nn
+  set_op_mix_ratio = 0.5,
+  local_connectivity = 1,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = nn
 )
 expect_equal(res, V_mix, tolerance = 1e-4)
 
 # intersection
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 0, local_connectivity = 1,
-  bandwidth = 1, verbose = FALSE, n_threads = 1, nn = nn
+  set_op_mix_ratio = 0,
+  local_connectivity = 1,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = nn
 )
 expect_equal(res, V_intersect, tolerance = 1e-4)
 
 # Union + local_connectivity
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 1, local_connectivity = 1.5,
-  bandwidth = 1, verbose = FALSE, n_threads = 1, nn = nn
+  set_op_mix_ratio = 1,
+  local_connectivity = 1.5,
+  bandwidth = 1,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = nn
 )
 expect_equal(res, V_union_local, tolerance = 1e-4)
 
 
 # Union + bandwidth
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 1, local_connectivity = 1,
-  bandwidth = 0.5, verbose = FALSE, n_threads = 1, nn = self_unn4
+  set_op_mix_ratio = 1,
+  local_connectivity = 1,
+  bandwidth = 0.5,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = self_unn4
 )
 expect_equal(res, V_union_bandwidth, tolerance = 1e-4)
 
 # intersect + local + bandwidth
 res <- fuzzy_simplicial_set(
-  set_op_mix_ratio = 0, local_connectivity = 1.5,
-  bandwidth = 0.5, verbose = FALSE, n_threads = 1, nn = self_unn4
+  set_op_mix_ratio = 0,
+  local_connectivity = 1.5,
+  bandwidth = 0.5,
+  verbose = FALSE,
+  n_threads = 1,
+  nn = self_unn4
 )
 expect_equal(res, V_intersect_local_bandwidth, tolerance = 1e-4)

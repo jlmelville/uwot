@@ -8,10 +8,13 @@
 # unknown_dist The distance an unknown label (-1) is assumed to be from any point.
 # far_dist The distance between unmatched labels.
 # Return The resulting intersected fuzzy simplicial set.
-categorical_simplicial_set_intersection <- function(simplicial_set, target,
-                                                    unknown_dist = 1.0,
-                                                    far_dist = 5.0,
-                                                    verbose = FALSE) {
+categorical_simplicial_set_intersection <- function(
+  simplicial_set,
+  target,
+  unknown_dist = 1.0,
+  far_dist = 5.0,
+  verbose = FALSE
+) {
   # Convert to dgTMatrix to get to the j indices
   simplicial_set <- methods::as(simplicial_set, "TsparseMatrix")
   simplicial_set@x <- fast_intersection_cpp(
@@ -32,11 +35,13 @@ categorical_simplicial_set_intersection <- function(simplicial_set, target,
 # We can enforce this by locally rescaling confidences, and then remerging the
 # different local simplicial sets together.
 reset_local_connectivity <-
-  function(simplicial_set,
-           reset_local_metric = FALSE,
-           num_local_metric_neighbors = 15,
-           n_threads = NULL,
-           verbose = FALSE) {
+  function(
+    simplicial_set,
+    reset_local_metric = FALSE,
+    num_local_metric_neighbors = 15,
+    n_threads = NULL,
+    verbose = FALSE
+  ) {
     # Python UMAP stores graph as CSR uwot uses CSC so need to be careful about
     # which axis to normalize
     simplicial_set <- col_max_normalize(simplicial_set)
@@ -45,10 +50,13 @@ reset_local_connectivity <-
         n_threads <- default_num_threads()
       }
       tsmessage(
-        "Resetting local metric", pluralize("thread", n_threads, " using")
+        "Resetting local metric",
+        pluralize("thread", n_threads, " using")
       )
       metric_res <-
-        reset_local_metrics_parallel(simplicial_set@p, simplicial_set@x,
+        reset_local_metrics_parallel(
+          simplicial_set@p,
+          simplicial_set@x,
           num_local_metric_neighbors = num_local_metric_neighbors,
           n_threads = n_threads
         )
@@ -65,8 +73,14 @@ reset_local_connectivity <-
 # Under the assumption of categorical distance for the intersecting
 # simplicial set perform a fast intersection.
 # This is not at all fast in R, use fast_intersection_cpp instead
-fast_intersection <- function(rows, cols, values, target, unknown_dist = 1.0,
-                              far_dist = 5.0) {
+fast_intersection <- function(
+  rows,
+  cols,
+  values,
+  target,
+  unknown_dist = 1.0,
+  far_dist = 5.0
+) {
   ex_unknown <- exp(-unknown_dist)
   ex_far <- exp(-far_dist)
 
@@ -104,16 +118,18 @@ general_simplicial_set_intersection <- function(left, right, weight) {
 
 # An R translation of the Python function. Not very fast,
 # so use the C++ version instead
-general_sset_intersection <- function(indptr1,
-                                      indices1,
-                                      data1,
-                                      indptr2,
-                                      indices2,
-                                      data2,
-                                      result_row,
-                                      result_col,
-                                      result_val,
-                                      mix_weight = 0.5) {
+general_sset_intersection <- function(
+  indptr1,
+  indices1,
+  data1,
+  indptr2,
+  indices2,
+  data2,
+  result_row,
+  result_col,
+  result_val,
+  mix_weight = 0.5
+) {
   left_min <- max(min(data1) / 2.0, 1.0e-8)
   right_min <- max(min(data2) / 2.0, 1.0e-8)
 
@@ -184,7 +200,8 @@ colMaxs <- function(X) {
       } else {
         0
       }
-    }, numeric(1)
+    },
+    numeric(1)
   )
 }
 

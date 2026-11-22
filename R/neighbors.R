@@ -1,14 +1,20 @@
-find_nn <- function(X, k, include_self = TRUE, method = "fnn",
-                    metric = "euclidean",
-                    n_trees = 50, search_k = 2 * k * n_trees,
-                    nn_args = nn_args,
-                    tmpdir = tempdir(),
-                    n_threads = NULL,
-                    n_build_threads = NULL,
-                    grain_size = 1,
-                    ret_index = FALSE,
-                    sparse_is_distance = TRUE,
-                    verbose = FALSE) {
+find_nn <- function(
+  X,
+  k,
+  include_self = TRUE,
+  method = "fnn",
+  metric = "euclidean",
+  n_trees = 50,
+  search_k = 2 * k * n_trees,
+  nn_args = nn_args,
+  tmpdir = tempdir(),
+  n_threads = NULL,
+  n_build_threads = NULL,
+  grain_size = 1,
+  ret_index = FALSE,
+  sparse_is_distance = TRUE,
+  verbose = FALSE
+) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -30,7 +36,8 @@ find_nn <- function(X, k, include_self = TRUE, method = "fnn",
       stop("Sparse matrix input only supported for nndescent method.")
     }
     # normal matrix
-    switch(method,
+    switch(
+      method,
       "fnn" = {
         res <- FNN_nn(X, k = k, include_self = include_self)
       },
@@ -107,8 +114,12 @@ normalize_nn_method <- function(nn_method) {
   }
 
   # the case where we have a single list with (idx, dist) or (index, distance)
-  if (!is.null(nn_method[["idx"]]) || !is.null(nn_method[["dist"]]) ||
-      !is.null(nn_method[["index"]]) || !is.null(nn_method[["distance"]])) {
+  if (
+    !is.null(nn_method[["idx"]]) ||
+      !is.null(nn_method[["dist"]]) ||
+      !is.null(nn_method[["index"]]) ||
+      !is.null(nn_method[["distance"]])
+  ) {
     nn_method <- normalize_nn_graph(nn_method)
     return(nn_method)
   }
@@ -152,28 +163,33 @@ nn_is_hnsw <- function(ann) {
 # larger k, the more accurate results, but the longer the search takes. Default
 # is k * n_trees.
 #' @importFrom methods new
-annoy_nn <- function(X, k = 10,
-                     metric = "euclidean",
-                     n_trees = 50, search_k = 2 * k * n_trees,
-                     tmpdir = tempdir(),
-                     n_threads = NULL,
-                     grain_size = 1,
-                     ret_index = FALSE,
-                     verbose = FALSE) {
+annoy_nn <- function(
+  X,
+  k = 10,
+  metric = "euclidean",
+  n_trees = 50,
+  search_k = 2 * k * n_trees,
+  tmpdir = tempdir(),
+  n_threads = NULL,
+  grain_size = 1,
+  ret_index = FALSE,
+  verbose = FALSE
+) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  ann <- annoy_build(X,
-    metric = metric, n_trees = n_trees,
-    verbose = verbose
-  )
+  ann <- annoy_build(X, metric = metric, n_trees = n_trees, verbose = verbose)
 
-  res <- annoy_search(X,
-    k = k, ann = ann, search_k = search_k,
+  res <- annoy_search(
+    X,
+    k = k,
+    ann = ann,
+    search_k = search_k,
     tmpdir = tmpdir,
     n_threads = n_threads,
     prep_data = TRUE,
-    grain_size = grain_size, verbose = verbose
+    grain_size = grain_size,
+    verbose = verbose
   )
 
   nn_acc <- sum(res$idx == 1:nrow(X)) / nrow(X)
@@ -197,8 +213,12 @@ annoy_create <- function(metric, ndim) {
   )
 }
 
-annoy_build <- function(X, metric = "euclidean", n_trees = 50,
-                        verbose = FALSE) {
+annoy_build <- function(
+  X,
+  metric = "euclidean",
+  n_trees = 50,
+  verbose = FALSE
+) {
   nr <- nrow(X)
   nc <- ncol(X)
 
@@ -210,14 +230,17 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
   }
 
   tsmessage(
-    "Building Annoy index with metric = ", metric,
-    ", n_trees = ", n_trees
+    "Building Annoy index with metric = ",
+    metric,
+    ", n_trees = ",
+    n_trees
   )
   ann <- annoy$ann
   nstars <- 50
   if (verbose && nr > nstars) {
     progress_for(
-      nr, nstars,
+      nr,
+      nstars,
       function(chunk_start, chunk_end) {
         for (i in chunk_start:chunk_end) {
           ann$addItem(i - 1, X[i, , drop = FALSE])
@@ -239,7 +262,8 @@ annoy_build <- function(X, metric = "euclidean", n_trees = 50,
 # create RcppAnnoy class from metric name with ndim dimensions
 # Correlation uses AnnoyAngular, input data needs to be centered first
 create_ann <- function(name, ndim) {
-  ann <- switch(name,
+  ann <- switch(
+    name,
     cosine = methods::new(RcppAnnoy::AnnoyAngular, ndim),
     manhattan = methods::new(RcppAnnoy::AnnoyManhattan, ndim),
     euclidean = methods::new(RcppAnnoy::AnnoyEuclidean, ndim),
@@ -260,20 +284,25 @@ get_rcppannoy <- function(nni) {
   } else {
     stop(
       "BUG: Found an unknown ann implementation of class: '",
-      class(nni), "'"
+      class(nni),
+      "'"
     )
   }
   rcppannoy
 }
 
 # Search a pre-built Annoy index for neighbors of X
-annoy_search <- function(X, k, ann,
-                         search_k = 100 * k,
-                         prep_data = FALSE,
-                         tmpdir = tempdir(),
-                         n_threads = NULL,
-                         grain_size = 1,
-                         verbose = FALSE) {
+annoy_search <- function(
+  X,
+  k,
+  ann,
+  search_k = 100 * k,
+  prep_data = FALSE,
+  tmpdir = tempdir(),
+  n_threads = NULL,
+  grain_size = 1,
+  verbose = FALSE
+) {
   # newer NN structures hide impl in a tagged list
   if (nn_is_annoy(ann)) {
     lann <- ann
@@ -289,7 +318,9 @@ annoy_search <- function(X, k, ann,
   }
   if (n_threads > 0) {
     annoy_res <- annoy_search_parallel(
-      X = X, k = k, ann = ann,
+      X = X,
+      k = k,
+      ann = ann,
       search_k = search_k,
       tmpdir = tmpdir,
       n_threads = n_threads,
@@ -299,7 +330,9 @@ annoy_search <- function(X, k, ann,
     res <- list(idx = annoy_res$item + 1, dist = annoy_res$distance)
   } else {
     res <- annoy_search_serial(
-      X = X, k = k, ann = ann,
+      X = X,
+      k = k,
+      ann = ann,
       search_k = search_k,
       verbose = verbose
     )
@@ -319,9 +352,13 @@ annoy_search <- function(X, k, ann,
   res
 }
 
-annoy_search_serial <- function(X, k, ann,
-                                search_k = 100 * k,
-                                verbose = FALSE) {
+annoy_search_serial <- function(
+  X,
+  k,
+  ann,
+  search_k = 100 * k,
+  verbose = FALSE
+) {
   tsmessage("Searching Annoy index, search_k = ", search_k)
   nr <- nrow(X)
   idx <- matrix(nrow = nr, ncol = k)
@@ -329,14 +366,17 @@ annoy_search_serial <- function(X, k, ann,
   nstars <- 50
   if (verbose && nr > nstars) {
     progress_for(
-      nr, nstars,
+      nr,
+      nstars,
       function(chunk_start, chunk_end) {
         for (i in chunk_start:chunk_end) {
           res <- ann$getNNsByVectorList(X[i, ], k, search_k, TRUE)
           if (length(res$item) != k) {
             stop(
-              "search_k/n_trees settings were unable to find ", k,
-              " neighbors for item ", i
+              "search_k/n_trees settings were unable to find ",
+              k,
+              " neighbors for item ",
+              i
             )
           }
           idx[i, ] <<- res$item
@@ -349,8 +389,10 @@ annoy_search_serial <- function(X, k, ann,
       res <- ann$getNNsByVectorList(X[i, ], k, search_k, TRUE)
       if (length(res$item) != k) {
         stop(
-          "search_k/n_trees settings were unable to find ", k,
-          " neighbors for item ", i
+          "search_k/n_trees settings were unable to find ",
+          k,
+          " neighbors for item ",
+          i
         )
       }
       idx[i, ] <- res$item
@@ -360,12 +402,16 @@ annoy_search_serial <- function(X, k, ann,
   list(idx = idx + 1, dist = dist)
 }
 
-annoy_search_parallel <- function(X, k, ann,
-                                  search_k = 100 * k,
-                                  tmpdir = tempdir(),
-                                  n_threads = NULL,
-                                  grain_size = 1,
-                                  verbose = FALSE) {
+annoy_search_parallel <- function(
+  X,
+  k,
+  ann,
+  search_k = 100 * k,
+  tmpdir = tempdir(),
+  n_threads = NULL,
+  grain_size = 1,
+  verbose = FALSE
+) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -374,12 +420,15 @@ annoy_search_parallel <- function(X, k, ann,
   ann$save(index_file)
   fsize <- file.size(index_file)
   tsmessage(
-    "Searching Annoy index using ", pluralize("thread", n_threads),
-    ", search_k = ", search_k
+    "Searching Annoy index using ",
+    pluralize("thread", n_threads),
+    ", search_k = ",
+    search_k
   )
 
   ann_class <- class(ann)
-  metric <- switch(ann_class,
+  metric <- switch(
+    ann_class,
     Rcpp_AnnoyAngular = "cosine",
     Rcpp_AnnoyManhattan = "manhattan",
     Rcpp_AnnoyEuclidean = "euclidean",
@@ -387,9 +436,11 @@ annoy_search_parallel <- function(X, k, ann,
     stop("BUG: unknown Annoy class '", ann_class, "'")
   )
 
-  res <- annoy_search_parallel_cpp(index_file,
+  res <- annoy_search_parallel_cpp(
+    index_file,
     X,
-    k, search_k,
+    k,
+    search_k,
     metric = metric,
     n_threads = n_threads,
     grain_size = grain_size
@@ -397,12 +448,14 @@ annoy_search_parallel <- function(X, k, ann,
   unlink(index_file)
   if (any(res$item == -1)) {
     msg <- paste0(
-      "search_k/n_trees settings were unable to find ", k,
+      "search_k/n_trees settings were unable to find ",
+      k,
       " neighbors for all items."
     )
     if (fsize > 2147483647) {
       msg <- paste0(
-        msg, " Index file may have been too large to process.",
+        msg,
+        " Index file may have been too large to process.",
         " Try repeating with n_threads = 0, reducing n_trees,",
         " or reducing to a smaller dimensionality, e.g. pca = 50"
       )
@@ -472,7 +525,10 @@ sparse_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
     dist_nonzero <- dists[is_nonzero]
     if (length(dist_nonzero) < k) {
       stop(
-        "Row ", i, " of distance matrix has only ", length(dist_nonzero),
+        "Row ",
+        i,
+        " of distance matrix has only ",
+        length(dist_nonzero),
         " defined distances"
       )
     }
@@ -520,7 +576,10 @@ sparse_tri_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
     dist_nonzero <- dists[is_nonzero]
     if (length(dist_nonzero) < k) {
       stop(
-        "Row ", i, " of distance matrix has only ", length(dist_nonzero),
+        "Row ",
+        i,
+        " of distance matrix has only ",
+        length(dist_nonzero),
         " defined distances"
       )
     }
@@ -548,16 +607,17 @@ sparse_tri_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
 }
 
 is_binary_metric <- function(metric) {
-  metric %in% c(
-    "dice",
-    "hamming",
-    "jaccard",
-    "kulsinski",
-    "matching",
-    "rogerstanimoto",
-    "russellrao",
-    "sokalmichener",
-    "sokalsneath",
-    "yule"
-  )
+  metric %in%
+    c(
+      "dice",
+      "hamming",
+      "jaccard",
+      "kulsinski",
+      "matching",
+      "rogerstanimoto",
+      "russellrao",
+      "sokalmichener",
+      "sokalsneath",
+      "yule"
+    )
 }

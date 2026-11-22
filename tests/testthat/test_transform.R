@@ -2,7 +2,10 @@ library(uwot)
 library(RSpectra)
 context("Transform")
 
-diagonal1s <- as(Matrix::drop0(diag(1, nrow(V_asymm), ncol(V_asymm))), "generalMatrix")
+diagonal1s <- as(
+  Matrix::drop0(diag(1, nrow(V_asymm), ncol(V_asymm))),
+  "generalMatrix"
+)
 graph <- V_asymm + diagonal1s
 dV <- as.matrix(graph)
 vdV <- as.vector(t(dV))
@@ -16,19 +19,36 @@ nnt <- nn_graph_t(nn)
 
 train_embedding <- t(matrix(1:20, nrow = 10))
 
-av <- t(matrix(c(
-  6.00, 16.00,
-  4.75, 14.75,
-  4.00, 14.00,
-  6.50, 16.50,
-  5.25, 15.25,
-  5.00, 15.00,
-  5.50, 15.50,
-  6.00, 16.00,
-  4.50, 14.50,
-  4.75, 14.75
-), nrow = 10, byrow = TRUE))
-embedding <- init_new_embedding(train_embedding, as.vector(nnt$idx), ncol(nnt$idx),
+av <- t(matrix(
+  c(
+    6.00,
+    16.00,
+    4.75,
+    14.75,
+    4.00,
+    14.00,
+    6.50,
+    16.50,
+    5.25,
+    15.25,
+    5.00,
+    15.00,
+    5.50,
+    15.50,
+    6.00,
+    16.00,
+    4.50,
+    14.50,
+    4.75,
+    14.75
+  ),
+  nrow = 10,
+  byrow = TRUE
+))
+embedding <- init_new_embedding(
+  train_embedding,
+  as.vector(nnt$idx),
+  ncol(nnt$idx),
   graph = NULL,
   weighted = FALSE,
   n_threads = 0,
@@ -36,19 +56,36 @@ embedding <- init_new_embedding(train_embedding, as.vector(nnt$idx), ncol(nnt$id
 )
 expect_equal(embedding, av, check.attributes = FALSE)
 
-wav <- t(matrix(c(
-  4.774600, 14.77460,
-  5.153800, 15.15380,
-  4.120000, 14.12000,
-  5.485100, 15.48510,
-  4.573100, 14.57310,
-  4.000000, 14.00000,
-  5.138362, 15.13836,
-  5.184333, 15.18433,
-  5.191600, 15.19160,
-  5.166667, 15.16667
-), nrow = 10, byrow = TRUE))
-embedding <- init_new_embedding(train_embedding, as.vector(nnt$idx), ncol(nnt$idx),
+wav <- t(matrix(
+  c(
+    4.774600,
+    14.77460,
+    5.153800,
+    15.15380,
+    4.120000,
+    14.12000,
+    5.485100,
+    15.48510,
+    4.573100,
+    14.57310,
+    4.000000,
+    14.00000,
+    5.138362,
+    15.13836,
+    5.184333,
+    15.18433,
+    5.191600,
+    15.19160,
+    5.166667,
+    15.16667
+  ),
+  nrow = 10,
+  byrow = TRUE
+))
+embedding <- init_new_embedding(
+  train_embedding,
+  as.vector(nnt$idx),
+  ncol(nnt$idx),
   graph = dgraph,
   weighted = TRUE,
   n_threads = 0,
@@ -58,7 +95,10 @@ expect_equal(embedding, wav, check.attributes = FALSE, tolerance = 1e-5)
 
 
 # Check threaded code
-embedding <- init_new_embedding(train_embedding, as.vector(nnt$idx), ncol(nnt$idx),
+embedding <- init_new_embedding(
+  train_embedding,
+  as.vector(nnt$idx),
+  ncol(nnt$idx),
   graph = NULL,
   weighted = FALSE,
   n_threads = 1,
@@ -66,7 +106,10 @@ embedding <- init_new_embedding(train_embedding, as.vector(nnt$idx), ncol(nnt$id
 )
 expect_equal(embedding, av, check.attributes = FALSE)
 
-embedding <- init_new_embedding(train_embedding, as.vector(nnt$idx), ncol(nnt$idx),
+embedding <- init_new_embedding(
+  train_embedding,
+  as.vector(nnt$idx),
+  ncol(nnt$idx),
   graph = dgraph,
   weighted = TRUE,
   n_threads = 1,
@@ -89,7 +132,8 @@ expect_equal(iris10_scale, iris10_strans, check.attributes = FALSE)
 
 iris10_zv_col <- iris10
 iris10_zv_col[, 3] <- 10
-iris10zvc_scale <- scale_input(iris10_zv_col,
+iris10zvc_scale <- scale_input(
+  iris10_zv_col,
   scale_type = "scale",
   ret_model = TRUE
 )
@@ -102,7 +146,11 @@ iris10_none <- scale_input(iris10, scale_type = FALSE, ret_model = TRUE)
 expect_null(attr_to_scale_info(iris10_none))
 
 
-iris10_colrange <- scale_input(iris10, scale_type = "colrange", ret_model = TRUE)
+iris10_colrange <- scale_input(
+  iris10,
+  scale_type = "colrange",
+  ret_model = TRUE
+)
 iris10_crtrans <- apply_scaling(iris10, attr_to_scale_info(iris10_colrange))
 expect_equal(iris10_colrange, iris10_crtrans, check.attributes = FALSE)
 
@@ -117,28 +165,36 @@ test_that("can use pre-calculated neighbors in transform", {
   X_train <- as.matrix(iris[c(1:10, 51:60), -5])
   X_test <- as.matrix(iris[101:110, -5])
   iris_train_nn <- annoy_nn(
-    X = X_train, k = 4,
-    metric = "euclidean", n_threads = 0,
+    X = X_train,
+    k = 4,
+    metric = "euclidean",
+    n_threads = 0,
     ret_index = TRUE
   )
   # (81) test row names are found if it's just the dist matrix of the NN graph
   row.names(iris_train_nn$dist) <- row.names(X_train)
   iris_umap_train <- umap(
-    X = NULL, nn_method = iris_train_nn, ret_model = TRUE,
+    X = NULL,
+    nn_method = iris_train_nn,
+    ret_model = TRUE,
     n_neighbors = 4
   )
   expect_equal(row.names(iris_umap_train$embedding), row.names(X_train))
 
   query_ref_nn <- annoy_search(
-    X = X_test, k = 4,
-    ann = iris_train_nn$index, n_threads = 0
+    X = X_test,
+    k = 4,
+    ann = iris_train_nn$index,
+    n_threads = 0
   )
   # (81) test row names are found if it's just the index matrix of the NN graph
   row.names(query_ref_nn$dist) <- row.names(X_test)
 
   iris_umap_test <- umap_transform(
-    X = NULL, model = iris_umap_train,
-    nn_method = query_ref_nn, ret_extra = c("nn")
+    X = NULL,
+    model = iris_umap_train,
+    nn_method = query_ref_nn,
+    ret_extra = c("nn")
   )
   expect_ok_matrix(iris_umap_test$embedding)
   expect_equal(row.names(iris_umap_test$embedding), row.names(X_test))
@@ -155,9 +211,11 @@ test_that("can use pre-calculated neighbors in transform", {
   row.names(query_ref_nn$dist) <- NULL
 
   iris_umap_test_rand0 <- umap_transform(
-    X = NULL, model = iris_umap_train,
+    X = NULL,
+    model = iris_umap_train,
     nn_method = query_ref_nn,
-    init = test_init, n_epochs = 0
+    init = test_init,
+    n_epochs = 0
   )
   expect_equal(iris_umap_test_rand0, test_init)
 })
@@ -200,7 +258,9 @@ test_that("equivalent results with nn graph or sparse distance matrix", {
   expect_equal(row.names(iris_odd_transform_nn_graph), row.names(iris_odd))
 
   iris_odd_nn_sp <-
-    t(uwot:::nng_to_sparse(iris_odd_nn$idx, as.vector(iris_odd_nn$dist),
+    t(uwot:::nng_to_sparse(
+      iris_odd_nn$idx,
+      as.vector(iris_odd_nn$dist),
       self_nbr = FALSE,
       max_nbr_id = nrow(iris_even)
     ))
@@ -209,7 +269,8 @@ test_that("equivalent results with nn graph or sparse distance matrix", {
 
   set.seed(42)
   iris_odd_transform_sp <- umap_transform(
-    X = NULL, iris_even_umap,
+    X = NULL,
+    iris_even_umap,
     nn_method = iris_odd_nn_sp,
     ret_extra = c("nn")
   )
@@ -250,7 +311,9 @@ test_that("return transform fgraph (#104)", {
       n_neighbors = 3
     )
   set.seed(42)
-  test_umap <- umap_transform(test, train_umap,
+  test_umap <- umap_transform(
+    test,
+    train_umap,
     ret_extra = c("fgraph", "localr", "sigma", "nn")
   )
   expect_is(test_umap, "list")
@@ -301,7 +364,9 @@ test_that("can transform with binary edge weights", {
   iris_s3 <- umap(iris_species_3, binary_edge_weights = TRUE, ret_model = TRUE)
   expect_true(iris_s3$binary_edge_weights)
 
-  iris_s12_transform <- umap_transform(iris_species_12, iris_s3,
+  iris_s12_transform <- umap_transform(
+    iris_species_12,
+    iris_s3,
     ret_extra = c("fgraph")
   )
   expect_true(all(iris_s12_transform$fgraph@x == 1))
@@ -326,20 +391,13 @@ test_that("transform can set or inherit model seed", {
   expect_equal(iris_transform1, iris_transform2)
 
   iris_transform3 <-
-    umap_transform(iris_species_3,
-      iris_model,
-      seed = 42,
-      n_sgd_threads = 1
-    )
+    umap_transform(iris_species_3, iris_model, seed = 42, n_sgd_threads = 1)
   expect_equal(iris_transform1, iris_transform3)
 
   # external seed setting should be same as internal
   set.seed(42)
   iris_model2 <-
-    umap(iris_species_12,
-      ret_model = TRUE,
-      n_sgd_threads = 1
-    )
+    umap(iris_species_12, ret_model = TRUE, n_sgd_threads = 1)
   set.seed(42)
   iris_transform4 <-
     umap_transform(iris_species_3, iris_model2, n_sgd_threads = 1)
@@ -347,29 +405,17 @@ test_that("transform can set or inherit model seed", {
 
   # setting seed explicitly overrides model seed, gives different results
   iris_transform5 <-
-    umap_transform(iris_species_3,
-      iris_model,
-      seed = 123,
-      n_sgd_threads = 1
-    )
+    umap_transform(iris_species_3, iris_model, seed = 123, n_sgd_threads = 1)
   diff15 <- iris_transform1 - iris_transform5
   expect_gt(sqrt(sum(diff15 * diff15) / length(diff15)), 0.01)
 
   # force model seed setting off
   iris_transform6 <-
-    umap_transform(iris_species_3,
-      iris_model,
-      seed = FALSE,
-      n_sgd_threads = 1
-    )
+    umap_transform(iris_species_3, iris_model, seed = FALSE, n_sgd_threads = 1)
   diff16 <- iris_transform1 - iris_transform6
   expect_gt(sqrt(sum(diff16 * diff16) / length(diff16)), 0.01)
   iris_transform7 <-
-    umap_transform(iris_species_3,
-      iris_model,
-      seed = FALSE,
-      n_sgd_threads = 1
-    )
+    umap_transform(iris_species_3, iris_model, seed = FALSE, n_sgd_threads = 1)
   diff17 <- iris_transform1 - iris_transform7
   expect_gt(sqrt(sum(diff17 * diff17) / length(diff17)), 0.01)
   # and transforms are different from each other
@@ -390,13 +436,15 @@ test_that("graph dim is consistent when n_epochs = 0", {
       batch = TRUE
     )
 
-  iris_transform_10 <- umap_transform(iris_species_3,
+  iris_transform_10 <- umap_transform(
+    iris_species_3,
     iris_model,
     n_epochs = 10,
     ret_extra = "fgraph"
   )
 
-  iris_transform_0 <- umap_transform(iris_species_3,
+  iris_transform_0 <- umap_transform(
+    iris_species_3,
     iris_model,
     n_epochs = 0,
     ret_extra = "fgraph"
@@ -408,7 +456,6 @@ test_that("graph dim is consistent when n_epochs = 0", {
   )
   expect_equal(dim(iris_transform_10$fgraph), c(50, 100))
 
-
   #118/129 and also without batch
   iris_model_no_batch <-
     umap(
@@ -418,16 +465,18 @@ test_that("graph dim is consistent when n_epochs = 0", {
       batch = FALSE
     )
 
-  iris_transform_10_no_batch <- umap_transform(iris_species_3,
-                                      iris_model_no_batch,
-                                      n_epochs = 10,
-                                      ret_extra = "fgraph"
+  iris_transform_10_no_batch <- umap_transform(
+    iris_species_3,
+    iris_model_no_batch,
+    n_epochs = 10,
+    ret_extra = "fgraph"
   )
 
-  iris_transform_0_no_batch <- umap_transform(iris_species_3,
-                                     iris_model_no_batch,
-                                     n_epochs = 0,
-                                     ret_extra = "fgraph"
+  iris_transform_0_no_batch <- umap_transform(
+    iris_species_3,
+    iris_model_no_batch,
+    n_epochs = 0,
+    ret_extra = "fgraph"
   )
 
   expect_equal(

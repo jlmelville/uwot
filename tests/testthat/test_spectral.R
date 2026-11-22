@@ -4,31 +4,57 @@ context("Spectral")
 
 test_that("1 dimensional output gives a matrix", {
   expect_ok_matrix(spectral_init(V_union, ndim = 1, verbose = FALSE), nc = 1)
-  expect_ok_matrix(normalized_laplacian_init(V_union,
-    ndim = 1,
-    verbose = FALSE
-  ), nc = 1)
-  expect_ok_matrix(laplacian_eigenmap(V_union, ndim = 1, verbose = FALSE),
+  expect_ok_matrix(
+    normalized_laplacian_init(V_union, ndim = 1, verbose = FALSE),
+    nc = 1
+  )
+  expect_ok_matrix(
+    laplacian_eigenmap(V_union, ndim = 1, verbose = FALSE),
     nc = 1
   )
   # 23: ndim was always 2
-  expect_ok_matrix(agspectral_init(V_union, n_neg_nbrs = 2, ndim = 1, verbose = FALSE),
+  expect_ok_matrix(
+    agspectral_init(V_union, n_neg_nbrs = 2, ndim = 1, verbose = FALSE),
     nc = 1
   )
 })
 
 test_that("connected components", {
   # Example from doc of scipy.sparse.csgraph.connected_components
-  graph <- as(Matrix::drop0(matrix(
-    c(
-      0, 1, 1, 0, 0,
-      0, 0, 1, 0, 0,
-      0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1,
-      0, 0, 0, 0, 0
-    ),
-    nrow = 5, byrow = TRUE
-  )), "generalMatrix")
+  graph <- as(
+    Matrix::drop0(matrix(
+      c(
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ),
+      nrow = 5,
+      byrow = TRUE
+    )),
+    "generalMatrix"
+  )
 
   cc_res <- connected_components(graph)
   expect_equal(cc_res$n_components, 2)

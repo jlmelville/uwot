@@ -292,7 +292,10 @@ words. Let's look at the distribution of the number of words, but stop at 95%
 of the data to avoid the outliers:
 
 ```{r histogram of number of words}
-hist(nwords[nwords <= quantile(nwords, 0.95)], main = "0-95% word count distribution")
+hist(
+  nwords[nwords <= quantile(nwords, 0.95)],
+  main = "0-95% word count distribution"
+)
 ```
 ![0-95% word count distribution](img/sparse-data-example/word-dist.png)
 
@@ -345,7 +348,10 @@ Those `NA`'s are the documents with zero words. This looks like another rather
 skewed distribution:
 
 ```{r histogram of average word lengths}
-hist(avg_word_lengths[avg_word_lengths <= quantile(avg_word_lengths, 0.95, na.rm = TRUE)],
+hist(
+  avg_word_lengths[
+    avg_word_lengths <= quantile(avg_word_lengths, 0.95, na.rm = TRUE)
+  ],
   main = "0-95% average word length distribution"
 )
 ```
@@ -760,13 +766,13 @@ the equivalent brute force results to see if it helped:
 
 ```{r more exact neighbors}
 tfidfl1_hell_bf_50 <-
-    brute_force_knn(
-        tfidf_sp,
-        k = 50,
-        metric = "hellinger",
-        n_threads = 6,
-        verbose = TRUE
-    )
+  brute_force_knn(
+    tfidf_sp,
+    k = 50,
+    metric = "hellinger",
+    n_threads = 6,
+    verbose = TRUE
+  )
 ```
 
 Let's see what's up with the hubness:
@@ -784,17 +790,17 @@ the larger `n_neighbors` value. But let's find out.
 
 ```{r umap with more approximate neighbors}
 ng20_umap_50 <-
-    umap2(
-        X = tfidf_sp,
-        nn_method = "nndescent",
-        metric = "hellinger",
-        n_neighbors = 50,
-        n_epochs = 1000,
-        batch = TRUE,
-        dens_scale = 0.5,
-        ret_nn = TRUE,
-        verbose = TRUE
-    )
+  umap2(
+    X = tfidf_sp,
+    nn_method = "nndescent",
+    metric = "hellinger",
+    n_neighbors = 50,
+    n_epochs = 1000,
+    batch = TRUE,
+    dens_scale = 0.5,
+    ret_nn = TRUE,
+    verbose = TRUE
+  )
 ```
 
 ```{r hubness with more approximate}
@@ -818,7 +824,10 @@ neighbor_overlap(ng20_umap_50$nn$hellinger, tfidfl1_hell_bf_50)
 
 ```{r ggplot with more}
 ggplot(
-  data.frame(prcomp(ng20_umap_50$embedding)$x, Newsgroup = text_unsplit$Newsgroup),
+  data.frame(
+    prcomp(ng20_umap_50$embedding)$x,
+    Newsgroup = text_unsplit$Newsgroup
+  ),
   aes(x = PC1, y = PC2, color = Newsgroup)
 ) +
   geom_point(alpha = 0.4, size = 0.5) +
@@ -843,30 +852,30 @@ with the exact case for `n_neighbors = 50`:
 
 ```{r UMAP on exact 50}
 ng20_umap_exact_50 <-
-    umap2(
-        X = NULL,
-        nn_method = tfidfl1_hell_bf_50,
-        n_epochs = 1000,
-        batch = TRUE,
-        dens_scale = 0.5,
-        verbose = TRUE
-    )
+  umap2(
+    X = NULL,
+    nn_method = tfidfl1_hell_bf_50,
+    n_epochs = 1000,
+    batch = TRUE,
+    dens_scale = 0.5,
+    verbose = TRUE
+  )
 
 ggplot(
-    data.frame(prcomp(ng20_umap_exact_50)$x, Newsgroup = text_unsplit$Newsgroup),
-    aes(x = PC1, y = PC2, color = Newsgroup)
+  data.frame(prcomp(ng20_umap_exact_50)$x, Newsgroup = text_unsplit$Newsgroup),
+  aes(x = PC1, y = PC2, color = Newsgroup)
 ) +
-    geom_point(alpha = 0.4, size = 0.5) +
-    scale_color_manual(values = palette) +
-    theme_minimal() +
-    labs(
-        title = "Sparse Hellinger Exact 50-Neighbors 20Newsgroups UMAP",
-        x = "",
-        y = "",
-        color = "Newsgroup"
-    ) +
-    theme(legend.position = "right") +
-    guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+  geom_point(alpha = 0.4, size = 0.5) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "Sparse Hellinger Exact 50-Neighbors 20Newsgroups UMAP",
+    x = "",
+    y = "",
+    color = "Newsgroup"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
 ```
 
 ![UMAP-exact-50](img/sparse-data-example/ng20-umap2-exact-50.png)
@@ -932,20 +941,20 @@ ng20_umap_150_50_15 <- umap2(
   init = ng20_umap_150_50
 )
 ggplot(
-    data.frame(prcomp(ng20_umap_150_50_15)$x, Newsgroup = text_unsplit$Newsgroup),
-    aes(x = PC1, y = PC2, color = Newsgroup)
+  data.frame(prcomp(ng20_umap_150_50_15)$x, Newsgroup = text_unsplit$Newsgroup),
+  aes(x = PC1, y = PC2, color = Newsgroup)
 ) +
-    geom_point(alpha = 0.4, size = 0.5) +
-    scale_color_manual(values = palette) +
-    theme_minimal() +
-    labs(
-        title = "Sparse Hellinger Exact 150-to-15 20Newsgroups UMAP",
-        x = "",
-        y = "",
-        color = "Newsgroup"
-    ) +
-    theme(legend.position = "right") +
-    guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+  geom_point(alpha = 0.4, size = 0.5) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "Sparse Hellinger Exact 150-to-15 20Newsgroups UMAP",
+    x = "",
+    y = "",
+    color = "Newsgroup"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
 ```
 
 ![UMAP-150-15](img/sparse-data-example/ng20-umap2-150-15.png)

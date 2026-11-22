@@ -206,23 +206,26 @@
 #' iris_train_umap <- umap(iris_train, ret_model = TRUE)
 #' iris_test_umap <- umap_transform(iris_test, iris_train_umap)
 #' @export
-umap_transform <- function(X = NULL, model = NULL,
-                           nn_method = NULL,
-                           init_weighted = TRUE,
-                           search_k = NULL,
-                           tmpdir = tempdir(),
-                           n_epochs = NULL,
-                           n_threads = NULL,
-                           n_sgd_threads = 0,
-                           grain_size = 1,
-                           verbose = FALSE,
-                           init = "weighted",
-                           batch = NULL,
-                           learning_rate = NULL,
-                           opt_args = NULL,
-                           epoch_callback = NULL,
-                           ret_extra = NULL,
-                           seed = NULL) {
+umap_transform <- function(
+  X = NULL,
+  model = NULL,
+  nn_method = NULL,
+  init_weighted = TRUE,
+  search_k = NULL,
+  tmpdir = tempdir(),
+  n_epochs = NULL,
+  n_threads = NULL,
+  n_sgd_threads = 0,
+  grain_size = 1,
+  verbose = FALSE,
+  init = "weighted",
+  batch = NULL,
+  learning_rate = NULL,
+  opt_args = NULL,
+  epoch_callback = NULL,
+  ret_extra = NULL,
+  seed = NULL
+) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -238,8 +241,12 @@ umap_transform <- function(X = NULL, model = NULL,
     n_sgd_threads <- n_threads
   }
   if (!is.numeric(n_sgd_threads)) {
-    stop("Unknown n_sgd_threads value: ", n_sgd_threads, " should be a positive
-         integer or 'auto'")
+    stop(
+      "Unknown n_sgd_threads value: ",
+      n_sgd_threads,
+      " should be a positive
+         integer or 'auto'"
+    )
   }
   nn_method <- normalize_nn_method(nn_method)
   if (is.null(nn_method)) {
@@ -262,15 +269,21 @@ umap_transform <- function(X = NULL, model = NULL,
     }
   }
 
-  if (is.character(model$nn_method) &&
-      model$nn_method == "hnsw" && !is_installed("RcppHNSW")) {
+  if (
+    is.character(model$nn_method) &&
+      model$nn_method == "hnsw" &&
+      !is_installed("RcppHNSW")
+  ) {
     stop(
       "This model requires the RcppHNSW package to be installed."
     )
   }
 
-  if (is.character(model$nn_method) &&
-      model$nn_method == "nndescent" && !is_installed("rnndescent")) {
+  if (
+    is.character(model$nn_method) &&
+      model$nn_method == "nndescent" &&
+      !is_installed("rnndescent")
+  ) {
     stop(
       "This model requires the rnndescent package to be installed."
     )
@@ -299,9 +312,8 @@ umap_transform <- function(X = NULL, model = NULL,
   # sets seed = TRUE
   if (is.logical(seed) && !seed) {
     # do nothing
-  }
-  # handle the seed = TRUE case in this clause too
-  else if (is.logical(seed) || is.null(seed)) {
+  } else if (is.logical(seed) || is.null(seed)) {
+    # handle the seed = TRUE case in this clause too
     if (!is.null(model$seed)) {
       tsmessage("Setting model random seed ", model$seed)
       set.seed(model$seed)
@@ -386,8 +398,7 @@ umap_transform <- function(X = NULL, model = NULL,
     pcg_rand <- model$pcg_rand
     if (is.null(pcg_rand)) {
       rng_type <- "pcg"
-    }
-    else {
+    } else {
       if (pcg_rand) {
         rng_type <- "pcg"
       } else {
@@ -405,8 +416,11 @@ umap_transform <- function(X = NULL, model = NULL,
   n_vertices <- NULL
   Xnames <- NULL
   if (!is.null(X)) {
-    if (!(methods::is(X, "data.frame") ||
-          methods::is(X, "matrix") || is_sparse_matrix(X))) {
+    if (
+      !(methods::is(X, "data.frame") ||
+        methods::is(X, "matrix") ||
+        is_sparse_matrix(X))
+    ) {
       stop("Unknown input data format")
     }
     if (!is.null(norig_col) && ncol(X) != norig_col) {
@@ -441,22 +455,28 @@ umap_transform <- function(X = NULL, model = NULL,
     if (length(nn_method) != num_precomputed_nns) {
       stop(
         "Wrong # pre-computed neighbor data blocks, expected: ",
-        num_precomputed_nns, " but got: ", length(nn_method)
+        num_precomputed_nns,
+        " but got: ",
+        length(nn_method)
       )
     }
     if (length(n_neighbors) != num_precomputed_nns) {
       stop(
         "Wrong # n_neighbor values (one per neighbor block), expected: ",
-        num_precomputed_nns, " but got: ", length(n_neighbors)
+        num_precomputed_nns,
+        " but got: ",
+        length(n_neighbors)
       )
     }
     for (i in 1:num_precomputed_nns) {
       graph <- nn_method[[i]]
 
       if (is.list(graph)) {
-        check_graph(graph,
+        check_graph(
+          graph,
           expected_rows = n_vertices,
-          expected_cols = n_neighbors[[i]], bipartite = TRUE
+          expected_cols = n_neighbors[[i]],
+          bipartite = TRUE
         )
         if (is.null(n_vertices)) {
           n_vertices <- nrow(graph$idx)
@@ -498,8 +518,14 @@ umap_transform <- function(X = NULL, model = NULL,
       if (!all(indim == xdim)) {
         stop(
           "Initial embedding matrix has wrong dimensions, expected (",
-          xdim[1], ", ", xdim[2], "), but was (",
-          indim[1], ", ", indim[2], ")"
+          xdim[1],
+          ", ",
+          xdim[2],
+          "), but was (",
+          indim[1],
+          ", ",
+          indim[2],
+          ")"
         )
       }
       if (any(is.na(init))) {
@@ -560,7 +586,8 @@ umap_transform <- function(X = NULL, model = NULL,
 
       if (!is.null(pca_models) && !is.null(pca_models[[as.character(i)]])) {
         Xsub <- apply_pca(
-          X = Xsub, pca_res = pca_models[[as.character(i)]],
+          X = Xsub,
+          pca_res = pca_models[[as.character(i)]],
           verbose = verbose
         )
       }
@@ -576,16 +603,14 @@ umap_transform <- function(X = NULL, model = NULL,
           grain_size = grain_size,
           verbose = verbose
         )
-      }
-      else if (startsWith(ann$type, "hnsw")) {
+      } else if (startsWith(ann$type, "hnsw")) {
         if (is.list(model$nn_args)) {
           nn_args <- model$nn_args
           nn_args_names <- names(nn_args)
 
           if ("ef" %in% nn_args_names) {
             ef <- nn_args$ef
-          }
-          else {
+          } else {
             ef <- 10
           }
         }
@@ -604,8 +629,7 @@ umap_transform <- function(X = NULL, model = NULL,
         if (names(model$metric)[[1]] == "euclidean") {
           nn$dist <- sqrt(nn$dist)
         }
-      }
-      else if (startsWith(ann$type, "nndescent")) {
+      } else if (startsWith(ann$type, "nndescent")) {
         nn <-
           nndescent_search(
             X,
@@ -615,8 +639,7 @@ umap_transform <- function(X = NULL, model = NULL,
             n_threads = n_threads,
             verbose = verbose
           )
-      }
-      else {
+      } else {
         stop("Unknown nn method: ", ann$type)
       }
       if (ret_nn) {
@@ -665,7 +688,9 @@ umap_transform <- function(X = NULL, model = NULL,
         n_nbrs <- nrow(nnt$idx)
         tsmessage(
           "Possible mismatch with original vs new neighbor data ",
-          "format, using ", n_nbrs, " nearest neighbors"
+          "format, using ",
+          n_nbrs,
+          " nearest neighbors"
         )
       }
       target <- log2(n_nbrs)
@@ -699,11 +724,17 @@ umap_transform <- function(X = NULL, model = NULL,
     graph_blockv <- sknn_res$matrix
     if (is_sparse_matrix(nn)) {
       graph_block <- Matrix::sparseMatrix(
-        j = osparse$i, p = osparse$p, x = graph_blockv,
-        dims = rev(osparse$dims), index1 = FALSE
+        j = osparse$i,
+        p = osparse$p,
+        x = graph_blockv,
+        dims = rev(osparse$dims),
+        index1 = FALSE
       )
     } else {
-      graph_block <- nn_to_sparse(nn_idxv, n_vertices, graph_blockv,
+      graph_block <- nn_to_sparse(
+        nn_idxv,
+        n_vertices,
+        graph_blockv,
         self_nbr = FALSE,
         max_nbr_id = n_train_vertices,
         by_row = FALSE
@@ -732,7 +763,9 @@ umap_transform <- function(X = NULL, model = NULL,
     if (is.null(graph)) {
       graph <- graph_block
     } else {
-      graph <- set_intersect(graph, graph_block,
+      graph <- set_intersect(
+        graph,
+        graph_block,
         weight = 0.5,
         reset_connectivity = FALSE
       )
@@ -793,8 +826,11 @@ umap_transform <- function(X = NULL, model = NULL,
     epochs_per_sample <- make_epochs_per_sample(graph@x, n_epochs)
 
     tsmessage(
-      "Commencing optimization for ", n_epochs, " epochs, with ",
-      length(positive_head), " positive edges",
+      "Commencing optimization for ",
+      n_epochs,
+      " epochs, with ",
+      length(positive_head),
+      " positive edges",
       pluralize("thread", n_sgd_threads, " using")
     )
 
@@ -810,7 +846,8 @@ umap_transform <- function(X = NULL, model = NULL,
       method <- "leopold2"
     }
 
-    method_args <- switch(method,
+    method_args <- switch(
+      method,
       umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
       tumap = list(gamma = gamma),
       leopold2 = list(ai = ai, aj = aj, b = b, ndim = ndim),
@@ -878,14 +915,16 @@ umap_transform <- function(X = NULL, model = NULL,
 }
 
 init_new_embedding <-
-  function(train_embedding,
-           nn_idx,
-           n_test_vertices,
-           graph,
-           weighted = TRUE,
-           n_threads = NULL,
-           grain_size = 1,
-           verbose = FALSE) {
+  function(
+    train_embedding,
+    nn_idx,
+    n_test_vertices,
+    graph,
+    weighted = TRUE,
+    n_threads = NULL,
+    grain_size = 1,
+    verbose = FALSE
+  ) {
     if (is.null(n_threads)) {
       n_threads <- default_num_threads()
     }
@@ -926,7 +965,8 @@ init_transform <- function(train_embedding, nn_index, weights = NULL) {
       nbr_embedding <- train_embedding[nn_index[i, ], ]
       nbr_weights <- weights[nn_index[i, ], i]
       embedding[i, ] <- apply(
-        nbr_embedding, 2,
+        nbr_embedding,
+        2,
         function(x) {
           stats::weighted.mean(x, nbr_weights)
         }
@@ -953,7 +993,8 @@ apply_scaling <- function(X, scale_info, verbose = FALSE) {
   } else {
     tsmessage("Applying training data column filtering/scaling")
     X <- X[, scale_info[["scaled:nzvcols"]]]
-    X <- scale(X,
+    X <- scale(
+      X,
       center = scale_info[["scaled:center"]],
       scale = scale_info[["scaled:scale"]]
     )

@@ -55,7 +55,7 @@ struct Sgd : public Optimizer {
   float initial_alpha;
   float alpha;
 
-  Sgd(float alpha) : initial_alpha(alpha), alpha(alpha){};
+  Sgd(float alpha) : initial_alpha(alpha), alpha(alpha) {};
 
   virtual ~Sgd() = default;
 

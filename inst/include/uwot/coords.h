@@ -41,7 +41,8 @@ struct Coords {
   std::optional<std::vector<float>> tail_embedding;
 
   explicit Coords(std::vector<float> head_embedding)
-      : head_embedding(std::move(head_embedding)), tail_embedding(std::nullopt) {}
+      : head_embedding(std::move(head_embedding)),
+        tail_embedding(std::nullopt) {}
 
   Coords(std::vector<float> head_embedding, std::vector<float> tail_embedding)
       : head_embedding(std::move(head_embedding)),

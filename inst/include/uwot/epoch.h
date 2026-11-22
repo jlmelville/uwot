@@ -127,8 +127,8 @@ struct NodeWorker {
       : gradient(gradient), update(update), positive_head(positive_head),
         positive_tail(positive_tail), positive_ptr(positive_ptr),
         sampler(std::move(sampler)), ndim(ndim),
-        n_tail_vertices(n_tail_vertices),
-        n_items(positive_ptr.size() - 1), rng_factory(n_items) {}
+        n_tail_vertices(n_tail_vertices), n_items(positive_ptr.size() - 1),
+        rng_factory(n_items) {}
 
   void epoch_begin(std::size_t epoch, std::size_t n_epochs) {
     rng_factory.reseed();
