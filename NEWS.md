@@ -1,5 +1,7 @@
 # uwot (development version)
 
+* Errors from parallel workers now reach the caller when R loads both libc++ and libstdc++.
+
 # uwot 0.2.5
 
 ## Bug fixes and minor improvements
