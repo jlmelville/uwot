@@ -159,7 +159,7 @@ neighbor data. The list under `nn` will now contain as many items as metrics,
 in the order they were specified. For instance, if the `metric` argument is:
 
 ```R
-metric = list("euclidean" = c("Petal.Width", "Petal.Length"),
+metric <- list("euclidean" = c("Petal.Width", "Petal.Length"),
               "cosine" = c("Sepal.Width", "Sepal.Length"))
 ```
 

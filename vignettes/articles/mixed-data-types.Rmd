@@ -17,7 +17,7 @@ value is a vector containing the names of the columns (or their integer id, but
 I strongly recommend names) to apply that metric to, e.g.:
 
 ```R
-metric = list("euclidean" = c("A1", "A2"), "cosine" = c("B1", "B2", "B3"))
+metric <- list("euclidean" = c("A1", "A2"), "cosine" = c("B1", "B2", "B3"))
 ```
 
 this will treat columns `A1` and `A2` as one block of data, and generate
@@ -33,7 +33,7 @@ petal and sepal data separately in the `iris` dataset, but to use Euclidean
 distances for both, use:
 
 ```R
-metric = list("euclidean" = c("Petal.Width", "Petal.Length"),
+metric <- list("euclidean" = c("Petal.Width", "Petal.Length"),
               "euclidean" = c("Sepal.Width", "Sepal.Length"))
 ```
 
@@ -44,7 +44,7 @@ indexing is supported, so the equivalent of the above using integer indexing
 into the columns of `iris` is:
 
 ```R
-metric = list("euclidean" = 3:4, "euclidean" = 1:2)
+metric <- list("euclidean" = 3:4, "euclidean" = 1:2)
 ```
 
 but internally, `uwot` strips out the non-numeric columns from the data, and if
@@ -62,7 +62,7 @@ For example, to use the `Species` factor in standard UMAP for `iris` along
 with the usual four numeric columns, use:
 
 ```R
-metric = list("euclidean" = 1:4, "categorical" = "Species")
+metric <- list("euclidean" = 1:4, "categorical" = "Species")
 ```
 
 Factor columns are treated differently from numeric columns:
@@ -72,13 +72,13 @@ factor columns, `cat1`, and `cat2`, and you would like them included in UMAP,
 you should write:
 
 ```R
-metric = list("categorical" = "cat1", "categorical" = "cat2", ...)
+metric <- list("categorical" = "cat1", "categorical" = "cat2", ...)
 ```
 
 As a convenience, you can also write:
 
 ```R
-metric = list("categorical" = c("cat1", "cat2"), ...)
+metric <- list("categorical" = c("cat1", "cat2"), ...)
 ```
 
 but that doesn't combine `cat1` and `cat2` into one block, just saves some
@@ -91,14 +91,14 @@ For `iris`, the following is an error:
 
 ```R
 # wrong and bad
-metric = list("categorical" = "Species")
+metric <- list("categorical" = "Species")
 ```
 
 Specifying some numeric columns is required:
 
 ```R
 # OK
-metric = list("categorical" = "Species", "euclidean" = 1:4)
+metric <- list("categorical" = "Species", "euclidean" = 1:4)
 ```
 
 * Factor columns not explicitly included in the `metric` are still removed as
@@ -149,7 +149,7 @@ you have multiple numeric columns that you want treated separately, you should
 specify each column separately:
 
 ```R
-target_metric = list("euclidean" = 1, "euclidean" = 2, ...)
+target_metric <- list("euclidean" = 1, "euclidean" = 2, ...)
 ```
 
 I suspect that the vast majority of `y` data is one column, so the default
