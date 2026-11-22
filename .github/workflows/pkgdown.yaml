@@ -25,21 +25,18 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-lib/actions/setup-pandoc@a51a8012b0aab7c32ef9d19bf54da93f3254335e
+      - uses: r-lib/actions/setup-pandoc@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
 
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-lib/actions/setup-r@a51a8012b0aab7c32ef9d19bf54da93f3254335e
+      - uses: r-lib/actions/setup-r@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
         with:
           use-public-rspm: true
 
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-lib/actions/setup-r-dependencies@a51a8012b0aab7c32ef9d19bf54da93f3254335e
+      - uses: r-lib/actions/setup-r-dependencies@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
@@ -49,8 +46,8 @@ jobs:
 
       - name: Upload site artifact
         if: github.event_name != 'pull_request'
-        # Pinned to a full-length commit SHA for immutability.
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: pkgdown-site
           path: docs
@@ -66,21 +63,21 @@ jobs:
     permissions:
       contents: write # zizmor: ignore[undocumented-permissions] required to publish docs
     steps:
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
       - name: Download site artifact
-        # Pinned to a full-length commit SHA for immutability.
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: pkgdown-site
           path: docs
 
       - name: Deploy to GitHub pages
-        # Pinned to a full-length commit SHA for immutability.
-        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f
+
+        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
         with:
           clean: false
           branch: gh-pages

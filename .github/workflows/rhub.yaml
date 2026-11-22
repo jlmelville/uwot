@@ -48,8 +48,8 @@ jobs:
 
     steps:
     # NO NEED TO CHECKOUT HERE
-    # Pinned to a full-length commit SHA for immutability.
-    - uses: r-hub/actions/setup@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
+
+    - uses: r-hub/actions/setup@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
       with:
         config: >-
           ${{ github.event_name == 'schedule' && 'ubuntu-clang,gcc16' ||
@@ -74,18 +74,18 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-hub/actions/platform-info@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
+
+      - uses: r-hub/actions/platform-info@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
         with:
           token: ${{ secrets.RHUB_TOKEN }}
           job-config: ${{ matrix.config.job-config }}
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-hub/actions/setup-deps@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
+
+      - uses: r-hub/actions/setup-deps@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
         with:
           token: ${{ secrets.RHUB_TOKEN }}
           job-config: ${{ matrix.config.job-config }}
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-hub/actions/run-check@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
+
+      - uses: r-hub/actions/run-check@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
         with:
           token: ${{ secrets.RHUB_TOKEN }}
           job-config: ${{ matrix.config.job-config }}
@@ -106,23 +106,23 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-hub/actions/setup-r@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
+
+      - uses: r-hub/actions/setup-r@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
         with:
           job-config: ${{ matrix.config.job-config }}
           token: ${{ secrets.RHUB_TOKEN }}
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-hub/actions/platform-info@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
+
+      - uses: r-hub/actions/platform-info@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
         with:
           token: ${{ secrets.RHUB_TOKEN }}
           job-config: ${{ matrix.config.job-config }}
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-hub/actions/setup-deps@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
+
+      - uses: r-hub/actions/setup-deps@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
         with:
           job-config: ${{ matrix.config.job-config }}
           token: ${{ secrets.RHUB_TOKEN }}
-      # Pinned to a full-length commit SHA for immutability.
-      - uses: r-hub/actions/run-check@4b161272a59fcd8192e5bd5e6ce183c025cb80fa
+
+      - uses: r-hub/actions/run-check@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
         with:
           job-config: ${{ matrix.config.job-config }}
           token: ${{ secrets.RHUB_TOKEN }}
