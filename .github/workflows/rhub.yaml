@@ -85,6 +85,16 @@ jobs:
           token: ${{ secrets.RHUB_TOKEN }}
           job-config: ${{ matrix.config.job-config }}
 
+      - name: Check RSpectra linkage in the GCC sanitizer image
+        if: matrix.config.name == 'gcc-asan'
+        shell: Rscript {0}
+        run: |
+          # A restored RSpectra can require libRlapack.so instead of this image's FlexiBLAS.
+          if (!requireNamespace("RSpectra", quietly = TRUE)) {
+            install.packages("RSpectra", repos = "https://cloud.r-project.org", type = "source")
+          }
+          stopifnot(requireNamespace("RSpectra", quietly = TRUE))
+
       - uses: r-hub/actions/run-check@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
         with:
           token: ${{ secrets.RHUB_TOKEN }}
