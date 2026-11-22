@@ -34,7 +34,7 @@ jobs:
           test "$(air --version)" = "air 0.13.0"
           air format . --check
 
-      - uses: r-lib/actions/setup-r@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
         with:
           use-public-rspm: true
 
@@ -52,7 +52,7 @@ jobs:
           mapfile -d '' -t rmd_files < <(git ls-files -z -- '*.[Rr][Mm][Dd]')
           python3 "${RUNNER_TEMP}/format-rmd.py" --check "${rmd_files[@]}"
 
-      - uses: r-lib/actions/setup-r-dependencies@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2.12.0
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
         with:
           extra-packages: any::lintr@3.4.0, local::.
           needs: lint
