@@ -80,7 +80,12 @@ Below is some code to generate a LSNN graph for use with `uwot`. Use
 
 ``` r
 
-lsnn15 <- locally_scaled_knn(data, n_neighbors = 15, n_extra = 50, n_threads = 6)
+lsnn15 <- locally_scaled_knn(
+  data,
+  n_neighbors = 15,
+  n_extra = 50,
+  n_threads = 6
+)
 ```
 
 If you set `nn_kind = "exact"` you can get out the exact nearest
@@ -105,15 +110,17 @@ umap_res <- umap2(data, nn_method = lsnn15)
 
 ``` r
 
-locally_scaled_knn <- function(X,
-                               n_neighbors = 15,
-                               n_extra = 50,
-                               scale_from = 5,
-                               scale_to = 7,
-                               n_threads = 1,
-                               nn_kind = "approx",
-                               ret_knn = FALSE,
-                               verbose = FALSE) {
+locally_scaled_knn <- function(
+  X,
+  n_neighbors = 15,
+  n_extra = 50,
+  scale_from = 5,
+  scale_to = 7,
+  n_threads = 1,
+  nn_kind = "approx",
+  ret_knn = FALSE,
+  verbose = FALSE
+) {
   n <- nrow(X)
   n_neighbors <- min(n_neighbors, n - 1)
 
@@ -134,16 +141,19 @@ locally_scaled_knn <- function(X,
   lsnn
 }
 
-enn_to_lsnn <- function(enn,
-                        n_neighbors,
-                        scale_from = 5,
-                        scale_to = 7,
-                        n_extra = 51) {
+enn_to_lsnn <- function(
+  enn,
+  n_neighbors,
+  scale_from = 5,
+  scale_to = 7,
+  n_extra = 51
+) {
   enn <- truncate_graph(enn, n_neighbors + n_extra)
   n <- nrow(enn$idx)
   n_neighbors <- min(n_neighbors, n - 1)
 
-  lsdist <- locally_scaled_distances(enn$idx,
+  lsdist <- locally_scaled_distances(
+    enn$idx,
     enn$dist,
     scale_from = scale_from,
     scale_to = scale_to
@@ -155,12 +165,14 @@ enn_to_lsnn <- function(enn,
   lsnn
 }
 
-extended_knn <- function(X,
-                         n_neighbors = 150,
-                         n_extra = 50,
-                         n_threads = 1,
-                         nn_kind = "approx",
-                         verbose = FALSE) {
+extended_knn <- function(
+  X,
+  n_neighbors = 150,
+  n_extra = 50,
+  n_threads = 1,
+  nn_kind = "approx",
+  verbose = FALSE
+) {
   n <- nrow(X)
   n_neighbors_extra <- min(n_neighbors + n_extra, n - 1)
   n_neighbors <- min(n_neighbors, n - 1)
@@ -185,10 +197,7 @@ extended_knn <- function(X,
 }
 
 # Zelnik-Manor, Pietro Perona. Self-tuning spectral clustering. In NIPS, 2004.
-locally_scaled_distances <- function(idx,
-                                     dist,
-                                     scale_from = 5,
-                                     scale_to = 7) {
+locally_scaled_distances <- function(idx, dist, scale_from = 5, scale_to = 7) {
   if (scale_to < scale_from) {
     stop("scale_to must be greater than or equal to scale_from")
   }
@@ -216,8 +225,12 @@ locally_scaled_distances <- function(idx,
 # returned graph is the self-neighbor, even if it ought to sort to a different
 # position. knn graphs usually assume that the first column is the
 # self-neighbor.
-sort_knn_graph <- function(knn_graph, sort_values = NULL, decreasing = FALSE,
-                           enforce_self_first = TRUE) {
+sort_knn_graph <- function(
+  knn_graph,
+  sort_values = NULL,
+  decreasing = FALSE,
+  enforce_self_first = TRUE
+) {
   dist_matrix <- knn_graph$dist
   idx_matrix <- knn_graph$idx
 

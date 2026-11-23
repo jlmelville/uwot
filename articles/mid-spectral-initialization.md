@@ -92,11 +92,7 @@ the more like the typical spectral initialization you will get.
 
 ``` r
 
-pacmap_mid_nbrs <- function(X,
-                            k = 10,
-                            n_rand = 6,
-                            nth_closest = 2,
-                            ...) {
+pacmap_mid_nbrs <- function(X, k = 10, n_rand = 6, nth_closest = 2, ...) {
   varargs <- list(...)
   varargs$data <- Matrix::t(X)
   varargs$k <- n_rand
@@ -119,15 +115,17 @@ pacmap_mid_nbrs <- function(X,
   res
 }
 
-weighted_affinity_graph <- function(X,
-                                    nn_graph,
-                                    midn_graph = NULL,
-                                    mid_nnbrs = 10,
-                                    mid_select = 6,
-                                    mid_nth_closest = 2,
-                                    graph_weight = 0.9,
-                                    n_threads = NULL,
-                                    verbose = FALSE) {
+weighted_affinity_graph <- function(
+  X,
+  nn_graph,
+  midn_graph = NULL,
+  mid_nnbrs = 10,
+  mid_select = 6,
+  mid_nth_closest = 2,
+  graph_weight = 0.9,
+  n_threads = NULL,
+  verbose = FALSE
+) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
@@ -179,22 +177,25 @@ weighted_affinity_graph <- function(X,
   } else if (graph_weight == 0) {
     affinity_graph <- mid_affinity_graph
   } else {
-    affinity_graph <- graph_weight * nbr_affinity_graph +
+    affinity_graph <- graph_weight *
+      nbr_affinity_graph +
       (1 - graph_weight) * mid_affinity_graph
   }
 
   affinity_graph
 }
 
-mid_spectral_init <- function(X,
-                              nn_graph,
-                              midn_graph = NULL,
-                              mid_nnbrs = 5,
-                              mid_select = 6,
-                              mid_nth_closest = 2,
-                              graph_weight = 0.9,
-                              n_threads = NULL,
-                              verbose = FALSE) {
+mid_spectral_init <- function(
+  X,
+  nn_graph,
+  midn_graph = NULL,
+  mid_nnbrs = 5,
+  mid_select = 6,
+  mid_nth_closest = 2,
+  graph_weight = 0.9,
+  n_threads = NULL,
+  verbose = FALSE
+) {
   if (is.null(n_threads)) {
     n_threads <- uwot:::default_num_threads()
   }

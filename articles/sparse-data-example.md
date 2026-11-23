@@ -65,7 +65,7 @@ downloaded to.
 dim(ng20)
 ```
 
-``` r
+``` text
 [1] 18846     6
 ```
 
@@ -76,7 +76,7 @@ The data is returned as a data frame with 6 columns:
 names(ng20)
 ```
 
-``` r
+``` text
 [1] "Id"        "FileId"    "Text"      "Subset"    "Label"     "Newsgroup"
 ```
 
@@ -95,7 +95,7 @@ column (we can safely ignore the row id):
 ng20[1, -3]
 ```
 
-``` r
+``` text
                    Id FileId Subset Label   Newsgroup
 alt.atheism.1 train_1  49960  train     0 alt.atheism
 ```
@@ -107,7 +107,7 @@ And here’s the first few characters of the text:
 substr(ng20[1, ]$Text, 1, 72)
 ```
 
-``` r
+``` text
 [1] "From: mathew <mathew@mantis.co.uk>\nSubject: Alt.Atheism FAQ: Atheist Res"
 ```
 
@@ -146,7 +146,7 @@ ng20spl <- ng20 |> separate_longer_delim(`Text`, delim = "\n")
 dim(ng20spl)
 ```
 
-``` r
+``` text
 [1] 834780      6
 ```
 
@@ -157,7 +157,7 @@ Now the first row looks like:
 ng20spl[1, ]
 ```
 
-``` r
+``` text
        Id FileId                               Text Subset Label   Newsgroup
 1 train_1  49960 From: mathew <mathew@mantis.co.uk>  train     0 alt.atheism
 ```
@@ -178,7 +178,7 @@ cleaned_text <- ng20spl |>
 dim(cleaned_text)
 ```
 
-``` r
+``` text
 [1] 599249      6
 ```
 
@@ -196,7 +196,7 @@ cleaned_text <- cleaned_text |>
 dim(cleaned_text)
 ```
 
-``` r
+``` text
 [1] 445080      6
 ```
 
@@ -233,7 +233,7 @@ text_unsplit <-
 dim(text_unsplit)
 ```
 
-``` r
+``` text
 [1] 18846     6
 ```
 
@@ -273,7 +273,7 @@ corpus <-
 length(corpus)
 ```
 
-``` r
+``` text
 [1] 18846
 ```
 
@@ -307,7 +307,7 @@ nwords <- sapply(corpus, count_words)
 summary(nwords)
 ```
 
-``` r
+``` text
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
    0.00   24.00   46.00   84.42   86.00 6592.00 
 ```
@@ -319,7 +319,10 @@ words, but stop at 95% of the data to avoid the outliers:
 
 ``` r
 
-hist(nwords[nwords <= quantile(nwords, 0.95)], main = "0-95% word count distribution")
+hist(
+  nwords[nwords <= quantile(nwords, 0.95)],
+  main = "0-95% word count distribution"
+)
 ```
 
 ![0-95% word count distribution](img/sparse-data-example/word-dist.png)
@@ -335,7 +338,7 @@ What is this massive document? Let’s (carefully) take a look:
 substr(ng20[which.max(nwords), ]$Text, 0, 80)
 ```
 
-``` r
+``` text
 [1] "From: jeh@cmkrnl.com\nSubject: Electrical wiring FAQ (was: A question about 120VA"
 ```
 
@@ -350,7 +353,7 @@ nchars <- sapply(corpus, function(doc) {
 summary(nchars)
 ```
 
-``` r
+``` text
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     0.0   158.0   310.0   594.6   593.0 67441.0 
 ```
@@ -378,7 +381,7 @@ avg_word_lengths <- nchars / nwords
 summary(avg_word_lengths)
 ```
 
-``` r
+``` text
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
   1.000   6.294   6.750   6.720   7.213  27.533      77 
 ```
@@ -388,7 +391,10 @@ rather skewed distribution:
 
 ``` r
 
-hist(avg_word_lengths[avg_word_lengths <= quantile(avg_word_lengths, 0.95, na.rm = TRUE)],
+hist(
+  avg_word_lengths[
+    avg_word_lengths <= quantile(avg_word_lengths, 0.95, na.rm = TRUE)
+  ],
   main = "0-95% average word length distribution"
 )
 ```
@@ -420,7 +426,7 @@ text_unsplit <- text_unsplit[!suspiciously_short_indices, ]
 length(corpus)
 ```
 
-``` r
+``` text
 [1] 17708
 ```
 
@@ -435,7 +441,7 @@ text_unsplit <- text_unsplit[!suspiciously_long_indices, ]
 length(corpus)
 ```
 
-``` r
+``` text
 [1] 17675
 ```
 
@@ -454,7 +460,7 @@ text_unsplit <- text_unsplit[!suspiciously_short_word_indices, ]
 length(corpus)
 ```
 
-``` r
+``` text
 [1] 17670
 ```
 
@@ -469,7 +475,7 @@ text_unsplit <- text_unsplit[!suspiciously_long_word_indices, ]
 length(corpus)
 ```
 
-``` r
+``` text
 [1] 17666
 ```
 
@@ -485,7 +491,7 @@ tfidf <- weightTfIdf(DocumentTermMatrix(corpus))
 dim(tfidf)
 ```
 
-``` r
+``` text
 [1] 17666 88894
 ```
 
@@ -843,13 +849,13 @@ helped:
 ``` r
 
 tfidfl1_hell_bf_50 <-
-    brute_force_knn(
-        tfidf_sp,
-        k = 50,
-        metric = "hellinger",
-        n_threads = 6,
-        verbose = TRUE
-    )
+  brute_force_knn(
+    tfidf_sp,
+    k = 50,
+    metric = "hellinger",
+    n_threads = 6,
+    verbose = TRUE
+  )
 ```
 
 Let’s see what’s up with the hubness:
@@ -869,17 +875,17 @@ out.
 ``` r
 
 ng20_umap_50 <-
-    umap2(
-        X = tfidf_sp,
-        nn_method = "nndescent",
-        metric = "hellinger",
-        n_neighbors = 50,
-        n_epochs = 1000,
-        batch = TRUE,
-        dens_scale = 0.5,
-        ret_nn = TRUE,
-        verbose = TRUE
-    )
+  umap2(
+    X = tfidf_sp,
+    nn_method = "nndescent",
+    metric = "hellinger",
+    n_neighbors = 50,
+    n_epochs = 1000,
+    batch = TRUE,
+    dens_scale = 0.5,
+    ret_nn = TRUE,
+    verbose = TRUE
+  )
 ```
 
 ``` r
@@ -904,7 +910,10 @@ neighbor_overlap(ng20_umap_50$nn$hellinger, tfidfl1_hell_bf_50)
 ``` r
 
 ggplot(
-  data.frame(prcomp(ng20_umap_50$embedding)$x, Newsgroup = text_unsplit$Newsgroup),
+  data.frame(
+    prcomp(ng20_umap_50$embedding)$x,
+    Newsgroup = text_unsplit$Newsgroup
+  ),
   aes(x = PC1, y = PC2, color = Newsgroup)
 ) +
   geom_point(alpha = 0.4, size = 0.5) +
@@ -932,30 +941,30 @@ least we have agreement with the exact case for `n_neighbors = 50`:
 ``` r
 
 ng20_umap_exact_50 <-
-    umap2(
-        X = NULL,
-        nn_method = tfidfl1_hell_bf_50,
-        n_epochs = 1000,
-        batch = TRUE,
-        dens_scale = 0.5,
-        verbose = TRUE
-    )
+  umap2(
+    X = NULL,
+    nn_method = tfidfl1_hell_bf_50,
+    n_epochs = 1000,
+    batch = TRUE,
+    dens_scale = 0.5,
+    verbose = TRUE
+  )
 
 ggplot(
-    data.frame(prcomp(ng20_umap_exact_50)$x, Newsgroup = text_unsplit$Newsgroup),
-    aes(x = PC1, y = PC2, color = Newsgroup)
+  data.frame(prcomp(ng20_umap_exact_50)$x, Newsgroup = text_unsplit$Newsgroup),
+  aes(x = PC1, y = PC2, color = Newsgroup)
 ) +
-    geom_point(alpha = 0.4, size = 0.5) +
-    scale_color_manual(values = palette) +
-    theme_minimal() +
-    labs(
-        title = "Sparse Hellinger Exact 50-Neighbors 20Newsgroups UMAP",
-        x = "",
-        y = "",
-        color = "Newsgroup"
-    ) +
-    theme(legend.position = "right") +
-    guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+  geom_point(alpha = 0.4, size = 0.5) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "Sparse Hellinger Exact 50-Neighbors 20Newsgroups UMAP",
+    x = "",
+    y = "",
+    color = "Newsgroup"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
 ```
 
 ![UMAP-exact-50](img/sparse-data-example/ng20-umap2-exact-50.png)
@@ -1027,20 +1036,20 @@ ng20_umap_150_50_15 <- umap2(
   init = ng20_umap_150_50
 )
 ggplot(
-    data.frame(prcomp(ng20_umap_150_50_15)$x, Newsgroup = text_unsplit$Newsgroup),
-    aes(x = PC1, y = PC2, color = Newsgroup)
+  data.frame(prcomp(ng20_umap_150_50_15)$x, Newsgroup = text_unsplit$Newsgroup),
+  aes(x = PC1, y = PC2, color = Newsgroup)
 ) +
-    geom_point(alpha = 0.4, size = 0.5) +
-    scale_color_manual(values = palette) +
-    theme_minimal() +
-    labs(
-        title = "Sparse Hellinger Exact 150-to-15 20Newsgroups UMAP",
-        x = "",
-        y = "",
-        color = "Newsgroup"
-    ) +
-    theme(legend.position = "right") +
-    guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
+  geom_point(alpha = 0.4, size = 0.5) +
+  scale_color_manual(values = palette) +
+  theme_minimal() +
+  labs(
+    title = "Sparse Hellinger Exact 150-to-15 20Newsgroups UMAP",
+    x = "",
+    y = "",
+    color = "Newsgroup"
+  ) +
+  theme(legend.position = "right") +
+  guides(color = guide_legend(override.aes = list(size = 5, alpha = 1)))
 ```
 
 ![UMAP-150-15](img/sparse-data-example/ng20-umap2-150-15.png) This

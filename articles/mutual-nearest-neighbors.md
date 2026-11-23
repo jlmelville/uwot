@@ -229,7 +229,7 @@ balance_mnn <- function(nn_graph, m, k = NULL) {
 
 # truncate a dense neighbor graph to the first k neighbors
 nng <- function(graph, k) {
-    list(idx = graph$idx[, 1:k], dist = graph$dist[, 1:k])
+  list(idx = graph$idx[, 1:k], dist = graph$dist[, 1:k])
 }
 
 # convert a dense knn graph to a sparse matrix format
@@ -252,8 +252,13 @@ nng_to_sp <- function(graph, nbrs = NULL) {
   i <- i[keep_indices]
   j <- j[keep_indices]
   x <- x[keep_indices]
-  res <- Matrix::sparseMatrix(i = i, j = j, x = x, dims = c(n_row, 
-      n_ref), repr = "C")
+  res <- Matrix::sparseMatrix(
+    i = i,
+    j = j,
+    x = x,
+    dims = c(n_row, n_ref),
+    repr = "C"
+  )
   Matrix::drop0(res)
 }
 
@@ -280,7 +285,7 @@ sp_to_adj <- function(sp) {
 
 # convert the vector of values x to a sparse matrix with where the row is given
 # by the equivalent value in the vector i, and the column is the index of the
-# value in the vector x. The resulting matrix is a square matrix with the same 
+# value in the vector x. The resulting matrix is a square matrix with the same
 # number of rows as the length of x.
 vec_to_sp <- function(i, x) {
   n_row <- length(i)

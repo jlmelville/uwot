@@ -88,7 +88,7 @@ fashion_train_umap <-
   )
 ```
 
-``` r
+``` text
 UMAP embedding parameters a = 1.896 b = 0.8006
 Converting dataframe to numerical matrix
 Read 60000 rows and found 784 numeric columns
@@ -170,7 +170,7 @@ fashion_test_umap <-
   )
 ```
 
-``` r
+``` text
 Read 10000 rows and found 784 numeric columns
 Processing block 1 of 1
 Reading metric data from forest
@@ -234,7 +234,10 @@ And here are the results:
 ``` r
 
 ggplot(
-  data.frame(fashion_train_umap$embedding, Description = fashion_train$Description),
+  data.frame(
+    fashion_train_umap$embedding,
+    Description = fashion_train$Description
+  ),
   aes(x = X1, y = X2, color = Description)
 ) +
   geom_point(alpha = 0.1, size = 1.0) +
@@ -329,7 +332,7 @@ What’s in the returned index? A bunch of stuff:
 names(fashion_index)
 ```
 
-``` r
+``` text
 [1] "graph"           "prep"            "data"            "original_metric" "use_alt_metric"  "search_forest"   "search_graph"
 ```
 
@@ -345,7 +348,7 @@ be all zeros.
 fashion_index$graph$idx[1:3, 1:3]
 ```
 
-``` r
+``` text
      [,1]  [,2]  [,3]
 [1,]    1 25720 27656
 [2,]    2 42565 37551
@@ -357,7 +360,7 @@ fashion_index$graph$idx[1:3, 1:3]
 fashion_index$graph$dist[1:3, 1:3]
 ```
 
-``` r
+``` text
      [,1]      [,2]      [,3]
 [1,]    0 1188.7826 1215.3440
 [2,]    0 1048.0482 1068.3951
@@ -393,7 +396,7 @@ fashion_test_query_neighbors <-
 fashion_test_query_neighbors$idx[1:3, 1:3]
 ```
 
-``` r
+``` text
       [,1]  [,2]  [,3]
 [1,] 18095 53940 18353
 [2,]  8573 31349  3885
@@ -405,7 +408,7 @@ fashion_test_query_neighbors$idx[1:3, 1:3]
 fashion_test_query_neighbors$dist[1:3, 1:3]
 ```
 
-``` r
+``` text
           [,1]      [,2]      [,3]
 [1,]  482.2966  681.9905  708.4991
 [2,] 1308.0019 1329.3134 1382.7317
@@ -442,7 +445,7 @@ fashion_train_umap <-
   )
 ```
 
-``` r
+``` text
 UMAP embedding parameters a = 1.896 b = 0.8006
 Commencing smooth kNN distance calibration using 6 threads with target n_neighbors = 15
 Initializing from normalized Laplacian + noise (using irlba)
@@ -474,7 +477,7 @@ fashion_test_umap <-
   )
 ```
 
-``` r
+``` text
 Read 10000 rows
 Processing block 1 of 1
 Commencing smooth kNN distance calibration using 6 threads with target n_neighbors = 15
@@ -506,7 +509,7 @@ fashion_knn <- rnnd_knn(fashion, k = 15, n_threads = 6)
 names(fashion_knn)
 ```
 
-``` r
+``` text
 [1] "idx"  "dist"
 ```
 

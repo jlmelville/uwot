@@ -95,7 +95,11 @@ nearest neighbor search. This is also optional (just don’t set
 
 set.seed(1337)
 library(rnndescent)
-fashion_umap_train <- umap2(fashion_train, ret_model = TRUE, nn_method = "nndescent")
+fashion_umap_train <- umap2(
+  fashion_train,
+  ret_model = TRUE,
+  nn_method = "nndescent"
+)
 ```
 
 #### Test Data

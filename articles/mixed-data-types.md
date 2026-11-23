@@ -17,7 +17,7 @@ to, e.g.:
 
 ``` r
 
-metric = list("euclidean" = c("A1", "A2"), "cosine" = c("B1", "B2", "B3"))
+metric <- list("euclidean" = c("A1", "A2"), "cosine" = c("B1", "B2", "B3"))
 ```
 
 this will treat columns `A1` and `A2` as one block of data, and generate
@@ -35,8 +35,10 @@ Euclidean distances for both, use:
 
 ``` r
 
-metric = list("euclidean" = c("Petal.Width", "Petal.Length"),
-              "euclidean" = c("Sepal.Width", "Sepal.Length"))
+metric <- list(
+  "euclidean" = c("Petal.Width", "Petal.Length"),
+  "euclidean" = c("Sepal.Width", "Sepal.Length")
+)
 ```
 
 ## Indexing
@@ -47,7 +49,7 @@ integer indexing into the columns of `iris` is:
 
 ``` r
 
-metric = list("euclidean" = 3:4, "euclidean" = 1:2)
+metric <- list("euclidean" = 3:4, "euclidean" = 1:2)
 ```
 
 but internally, `uwot` strips out the non-numeric columns from the data,
@@ -67,7 +69,7 @@ UMAP for `iris` along with the usual four numeric columns, use:
 
 ``` r
 
-metric = list("euclidean" = 1:4, "categorical" = "Species")
+metric <- list("euclidean" = 1:4, "categorical" = "Species")
 ```
 
 Factor columns are treated differently from numeric columns:
@@ -78,14 +80,14 @@ Factor columns are treated differently from numeric columns:
 
 ``` r
 
-metric = list("categorical" = "cat1", "categorical" = "cat2", ...)
+metric <- list("categorical" = "cat1", "categorical" = "cat2", ...)
 ```
 
 As a convenience, you can also write:
 
 ``` r
 
-metric = list("categorical" = c("cat1", "cat2"), ...)
+metric <- list("categorical" = c("cat1", "cat2"), ...)
 ```
 
 but that doesn’t combine `cat1` and `cat2` into one block, just saves
@@ -99,7 +101,7 @@ some typing.
 ``` r
 
 # wrong and bad
-metric = list("categorical" = "Species")
+metric <- list("categorical" = "Species")
 ```
 
 Specifying some numeric columns is required:
@@ -107,7 +109,7 @@ Specifying some numeric columns is required:
 ``` r
 
 # OK
-metric = list("categorical" = "Species", "euclidean" = 1:4)
+metric <- list("categorical" = "Species", "euclidean" = 1:4)
 ```
 
 - Factor columns not explicitly included in the `metric` are still
@@ -127,16 +129,16 @@ arguments. An example:
 
 ``` r
 
-  umap(
-    X,
-    pca = 40,
-    pca_center = TRUE,
-    metric = list(
-      euclidean = 1:200,
-      euclidean = list(201:300, pca = NULL),
-      manhattan = list(300:500, pca_center = FALSE)
-    )
+umap(
+  X,
+  pca = 40,
+  pca_center = TRUE,
+  metric = list(
+    euclidean = 1:200,
+    euclidean = list(201:300, pca = NULL),
+    manhattan = list(300:500, pca_center = FALSE)
   )
+)
 ```
 
 In this case, the first `euclidean` block with be reduced to 40
@@ -162,7 +164,7 @@ want treated separately, you should specify each column separately:
 
 ``` r
 
-target_metric = list("euclidean" = 1, "euclidean" = 2, ...)
+target_metric <- list("euclidean" = 1, "euclidean" = 2, ...)
 ```
 
 I suspect that the vast majority of `y` data is one column, so the

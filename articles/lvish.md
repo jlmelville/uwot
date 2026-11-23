@@ -11,8 +11,13 @@ bridge between t-SNE and UMAP. It’s sufficiently close to UMAP that
 
 # perplexity, init and n_epoch values shown are the defaults
 # use perplexity instead of n_neighbors to control local neighborhood size
-mnist_lv <- lvish(mnist, perplexity = 50, init = "lvrand", n_epochs = 5000,
-                  verbose = TRUE)
+mnist_lv <- lvish(
+  mnist,
+  perplexity = 50,
+  init = "lvrand",
+  n_epochs = 5000,
+  verbose = TRUE
+)
 # Make hilarious Lembas bread joke
 ```
 
@@ -83,8 +88,14 @@ Something like the following works for MNIST:
 
 ``` r
 
-mnist_lv <- lvish(mnist, kernel = "knn", perplexity = 15, n_epochs = 1500,
-                  init = "lvrand", verbose = TRUE)
+mnist_lv <- lvish(
+  mnist,
+  kernel = "knn",
+  perplexity = 15,
+  n_epochs = 1500,
+  init = "lvrand",
+  verbose = TRUE
+)
 ```
 
 ## Some More Results
@@ -131,7 +142,13 @@ value initially and see if that provides an adequate visualization.
 
 ``` r
 
-iris_lv15 <- lvish(iris, pca = 100, perplexity = 15, n_sgd_threads = "auto", n_epochs = 500)
+iris_lv15 <- lvish(
+  iris,
+  pca = 100,
+  perplexity = 15,
+  n_sgd_threads = "auto",
+  n_epochs = 500
+)
 ```
 
 #### iris

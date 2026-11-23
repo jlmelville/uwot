@@ -63,7 +63,11 @@ In this example, one of the clusters (the yellow one) is much denser
 
 ``` r
 
-gauss2d_scale <- snedata::two_different_clusters_data(n = 75, scale = 10, dim = 2)
+gauss2d_scale <- snedata::two_different_clusters_data(
+  n = 75,
+  scale = 10,
+  dim = 2
+)
 ```
 
 |  |  |  |

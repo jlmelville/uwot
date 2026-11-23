@@ -93,7 +93,7 @@ mnist_train_umap <-
   )
 ```
 
-``` r
+``` text
 UMAP embedding parameters a = 1.896 b = 0.8006
 Converting dataframe to numerical matrix
 Read 60000 rows and found 784 numeric columns
@@ -129,7 +129,7 @@ mnist_test_umap <-
   )
 ```
 
-``` r
+``` text
 Read 10000 rows and found 784 numeric columns
 Processing block 1 of 1
 Finished searching
@@ -247,8 +247,11 @@ For example you could do something like:
 
 ``` r
 
-iris_umap <- umap(iris, nn_method = "hnsw", 
-                  nn_args = list(M = 12, ef_construction = 64, ef = 20))
+iris_umap <- umap(
+  iris,
+  nn_method = "hnsw",
+  nn_args = list(M = 12, ef_construction = 64, ef = 20)
+)
 ```
 
 ### Using RcppHNSW Directly
@@ -337,7 +340,7 @@ output, which is a list of two matrices:
 names(mnist_train_knn)
 ```
 
-``` r
+``` text
 [1] "idx"  "dist"
 ```
 
@@ -351,7 +354,7 @@ dimensions of these matrices:
 lapply(mnist_train_knn, `dim`)
 ```
 
-``` r
+``` text
 $idx
 [1] 60000    15
 
@@ -368,7 +371,7 @@ few rows and columns of each matrix:
 mnist_train_knn$idx[1:3, 1:3]
 ```
 
-``` r
+``` text
      [,1]  [,2]  [,3]
 [1,]    1 32249  8729
 [2,]    2   640 51122
@@ -380,7 +383,7 @@ mnist_train_knn$idx[1:3, 1:3]
 mnist_train_knn$dist[1:3, 1:3]
 ```
 
-``` r
+``` text
      [,1]     [,2]     [,3]
 [1,]    0 1561.472 1591.601
 [2,]    0 1020.647 1100.529
@@ -419,7 +422,7 @@ there should be no surprises here:
 lapply(mnist_test_query_neighbors, `dim`)
 ```
 
-``` r
+``` text
 $idx
 [1] 10000    15
 
@@ -434,7 +437,7 @@ Here are the first few indices and distances for the test set:
 mnist_test_query_neighbors$idx[1:3, 1:3]
 ```
 
-``` r
+``` text
       [,1]  [,2]  [,3]
 [1,] 53844 38621 16187
 [2,] 28883 49161 24613
@@ -446,7 +449,7 @@ mnist_test_query_neighbors$idx[1:3, 1:3]
 mnist_test_query_neighbors$dist[1:3, 1:3]
 ```
 
-``` r
+``` text
           [,1]      [,2]      [,3]
 [1,]  676.5841  793.9868  862.6766
 [2,] 1162.9316 1211.8445 1285.9285
@@ -487,7 +490,7 @@ mnist_train_umap <-
   )
 ```
 
-``` r
+``` text
 UMAP embedding parameters a = 1.896 b = 0.8006
 Commencing smooth kNN distance calibration using 6 threads with target n_neighbors = 15
 Initializing from normalized Laplacian + noise (using irlba)
@@ -526,7 +529,7 @@ mnist_test_umap <-
   )
 ```
 
-``` r
+``` text
 Read 10000 rows
 Processing block 1 of 1
 Commencing smooth kNN distance calibration using 6 threads with target n_neighbors = 15

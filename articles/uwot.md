@@ -177,11 +177,7 @@ the default of `"range"`.
 
 set.seed(42)
 iris_umap_spca <-
-  umap(iris,
-    init = "spca",
-    init_sdev = "range",
-    min_dist = 0.3
-  )
+  umap(iris, init = "spca", init_sdev = "range", min_dist = 0.3)
 plot_umap(iris_umap_spca)
 ```
 

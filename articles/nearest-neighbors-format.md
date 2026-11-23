@@ -97,7 +97,7 @@ iris_odd_nn <- annoy_search(
   ann = iris_even_nn$index
 )
 
-# Delete the Annoy index, force the transform method to use the nn distances 
+# Delete the Annoy index, force the transform method to use the nn distances
 # directly
 iris_even_nn$index <- NULL
 
@@ -127,8 +127,11 @@ the data. As an example, here’s what the first few items of the `iris`
 5-NN data should look like:
 
 ``` r
-lapply(umap(iris, ret_nn = TRUE, n_neighbors = 5)$nn$euclidean, head)
 
+lapply(umap(iris, ret_nn = TRUE, n_neighbors = 5)$nn$euclidean, head)
+```
+
+``` text
 $`idx`
      [,1] [,2] [,3] [,4] [,5]
 [1,]    1   18    5   40   29
@@ -165,8 +168,10 @@ if the `metric` argument is:
 
 ``` r
 
-metric = list("euclidean" = c("Petal.Width", "Petal.Length"),
-              "cosine" = c("Sepal.Width", "Sepal.Length"))
+metric <- list(
+  "euclidean" = c("Petal.Width", "Petal.Length"),
+  "cosine" = c("Sepal.Width", "Sepal.Length")
+)
 ```
 
 The `nn` list will contain two list entries. The first will be called

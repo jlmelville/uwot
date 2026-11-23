@@ -66,8 +66,20 @@ left, and the supervised version on the right:
 
 ``` r
 
-vizier::embed_plot(fashion_umap, fashion, cex = 0.5, title = "Fashion UMAP", alpha_scale = 0.075)
-vizier::embed_plot(fashion_sumap, fashion, cex = 0.5, title = "Fashion Supervised UMAP", alpha_scale = 0.075)
+vizier::embed_plot(
+  fashion_umap,
+  fashion,
+  cex = 0.5,
+  title = "Fashion UMAP",
+  alpha_scale = 0.075
+)
+vizier::embed_plot(
+  fashion_sumap,
+  fashion,
+  cex = 0.5,
+  title = "Fashion Supervised UMAP",
+  alpha_scale = 0.075
+)
 ```
 
 |  |  |
@@ -112,7 +124,11 @@ and supervised UMAP:
 ``` r
 
 set.seed(1337)
-fashion_sumap_train <- umap(fashion_train, ret_model = TRUE, y = fashion_train$Description)
+fashion_sumap_train <- umap(
+  fashion_train,
+  ret_model = TRUE,
+  y = fashion_train$Description
+)
 ```
 
 These results shouldn’t be that different from the full-dataset
@@ -120,8 +136,20 @@ embeddings, but let’s take a look anyway:
 
 ``` r
 
-vizier::embed_plot(fashion_umap_train$embedding, fashion_train, cex = 0.5, title = "Fashion Train UMAP", alpha_scale = 0.075)
-vizier::embed_plot(fashion_sumap_train$embedding, fashion_train, cex = 0.5, title = "Fashion Train Supervised UMAP", alpha_scale = 0.075)
+vizier::embed_plot(
+  fashion_umap_train$embedding,
+  fashion_train,
+  cex = 0.5,
+  title = "Fashion Train UMAP",
+  alpha_scale = 0.075
+)
+vizier::embed_plot(
+  fashion_sumap_train$embedding,
+  fashion_train,
+  cex = 0.5,
+  title = "Fashion Train Supervised UMAP",
+  alpha_scale = 0.075
+)
 ```
 
 |  |  |
@@ -156,8 +184,20 @@ Here are the results:
 
 ``` r
 
-vizier::embed_plot(fashion_umap_test, fashion_test, cex = 0.5, title = "Fashion Test UMAP", alpha_scale = 0.075)
-vizier::embed_plot(fashion_sumap_test, fashion_test, cex = 0.5, title = "Fashion Test Supervised UMAP", alpha_scale = 0.075)
+vizier::embed_plot(
+  fashion_umap_test,
+  fashion_test,
+  cex = 0.5,
+  title = "Fashion Test UMAP",
+  alpha_scale = 0.075
+)
+vizier::embed_plot(
+  fashion_sumap_test,
+  fashion_test,
+  cex = 0.5,
+  title = "Fashion Test Supervised UMAP",
+  alpha_scale = 0.075
+)
 ```
 
 |  |  |
@@ -264,7 +304,15 @@ the [irlba](https://cran.r-project.org/package=irlba) package:
 ``` r
 
 dia_pca <- irlba::prcomp_irlba(dia, n = 2, scale. = TRUE)
-vizier::embed_plot(dia_pca$x, diamonds$price, title = "Diamonds PCA", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
+vizier::embed_plot(
+  dia_pca$x,
+  diamonds$price,
+  title = "Diamonds PCA",
+  color_scheme = "RColorBrewer::Spectral",
+  alpha_scale = 0.1,
+  cex = 0.5,
+  pc_axes = TRUE
+)
 ```
 
 ![Diamonds PCA](img/metric-learning/dia_pca.png)
@@ -285,7 +333,15 @@ all scaled to have equal variance (`scale = TRUE`):
 ``` r
 
 dia_umap <- umap(dia, scale = TRUE, verbose = TRUE)
-vizier::embed_plot(dia_umap, diamonds$price, title = "Diamonds UMAP", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
+vizier::embed_plot(
+  dia_umap,
+  diamonds$price,
+  title = "Diamonds UMAP",
+  color_scheme = "RColorBrewer::Spectral",
+  alpha_scale = 0.1,
+  cex = 0.5,
+  pc_axes = TRUE
+)
 ```
 
 ![Diamonds UMAP](img/metric-learning/dia_umap.png)
@@ -299,7 +355,15 @@ the layout that’s initialized from the PCA results, though:
 ``` r
 
 dia_umap_from_pca <- umap(dia, scale = TRUE, verbose = TRUE, init = dia_pca$x)
-vizier::embed_plot(dia_umap_from_pca, diamonds$price, title = "Diamonds UMAP (PCA init)", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
+vizier::embed_plot(
+  dia_umap_from_pca,
+  diamonds$price,
+  title = "Diamonds UMAP (PCA init)",
+  color_scheme = "RColorBrewer::Spectral",
+  alpha_scale = 0.1,
+  cex = 0.5,
+  pc_axes = TRUE
+)
 ```
 
 ![Diamonds UMAP from PCA](img/metric-learning/dia_umap_from_pca.png)
@@ -318,7 +382,15 @@ spectral initialization:
 ``` r
 
 dia_sumap <- umap(dia, scale = TRUE, verbose = TRUE, y = diamonds$price)
-vizier::embed_plot(dia_sumap, diamonds$price, title = "Diamonds Supervised UMAP", color_scheme = "RColorBrewer::Spectral", alpha_scale = 0.1, cex = 0.5, pc_axes = TRUE)
+vizier::embed_plot(
+  dia_sumap,
+  diamonds$price,
+  title = "Diamonds Supervised UMAP",
+  color_scheme = "RColorBrewer::Spectral",
+  alpha_scale = 0.1,
+  cex = 0.5,
+  pc_axes = TRUE
+)
 ```
 
 ![Diamonds Supervised UMAP](img/metric-learning/dia_sumap.png)
