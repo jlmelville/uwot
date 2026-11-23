@@ -1,5 +1,4 @@
 library(uwot)
-context("rnndescent integration")
 
 test_that("rnndescent accepts integer-valued doubles from uwot", {
   testthat::skip_if_not_installed("rnndescent")

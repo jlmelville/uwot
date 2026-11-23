@@ -263,20 +263,20 @@ create_data <- function() {
 
 # Just test that res is a matrix with valid numbers
 expect_ok_matrix <- function(res, nr = 10, nc = 2) {
-  expect_is(res, "matrix")
+  expect_true(is.matrix(res))
   expect_equal(nrow(res), nr)
   expect_equal(ncol(res), nc)
   expect_false(any(is.infinite(res)))
 }
 
 expect_is_nn <- function(res, nr = 10, k = 4) {
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_is_nn_matrix(res$dist, nr, k)
   expect_is_nn_matrix(res$idx, nr, k)
 }
 
 expect_is_nn_matrix <- function(res, nr = 10, k = 4) {
-  expect_is(res, "matrix")
+  expect_true(is.matrix(res))
   expect_equal(nrow(res), nr)
   expect_equal(ncol(res), k)
 }

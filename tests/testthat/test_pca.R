@@ -1,5 +1,4 @@
 library(uwot)
-context("PCA")
 
 iris10prcomp <- prcomp(iris10, retx = TRUE, center = TRUE, scale. = FALSE)
 

@@ -140,10 +140,10 @@ test_that("precomputed neighbor formats reproduce the training embedding", {
     n_threads = 0,
     ret_nn = TRUE
   )
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_ok_matrix(res$embedding)
-  expect_is(res$nn, "list")
-  expect_is(res$nn$euclidean, "list")
+  expect_type(res$nn, "list")
+  expect_type(res$nn$euclidean, "list")
   expect_ok_matrix(res$nn$euclidean$idx, nc = 4)
   expect_ok_matrix(res$nn$euclidean$dist, nc = 4)
 
@@ -325,7 +325,7 @@ test_that("UMAP models expose curve parameters and support zero-epoch transforms
     n_threads = 1,
     ret_model = TRUE
   )
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_ok_matrix(res$embedding)
   # #95: export min_dist and spread in returned model
   expect_equal(res$min_dist, 0.001)
@@ -378,10 +378,10 @@ test_that("sparse neighbor matrices reproduce the t-UMAP embedding", {
     ret_model = TRUE,
     ret_nn = TRUE
   )
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_ok_matrix(res$embedding)
 
-  expect_is(res$nn, "list")
+  expect_type(res$nn, "list")
   expect_is_nn(res$nn[[1]], k = 4)
   expect_equal(names(res$nn), "euclidean")
   res_test <- umap_transform(iris10, res, n_threads = 0, verbose = FALSE)
@@ -501,7 +501,7 @@ test_that("sparse neighbor matrices reproduce the t-UMAP embedding", {
     nn_method = sparse_nbr_matrix0,
     ret_nn = TRUE
   )
-  expect_is(res_spnn0, "list")
+  expect_type(res_spnn0, "list")
   expect_ok_matrix(res_spnn0$embedding)
   # should get same results as with internal nn calculation
   expect_equal(res_spnn0$embedding, res$embedding)
@@ -835,7 +835,7 @@ test_that("PCA models record rotations and optional centering", {
     ret_model = TRUE
   )
   expect_ok_matrix(res$embedding)
-  expect_is(res$pca_models, "list")
+  expect_type(res$pca_models, "list")
   expect_equal(length(res$pca_models), 1)
   expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
   expect_equal(
@@ -858,7 +858,7 @@ test_that("PCA models record rotations and optional centering", {
     ret_model = TRUE
   )
   expect_ok_matrix(res$embedding)
-  expect_is(res$pca_models, "list")
+  expect_type(res$pca_models, "list")
   expect_equal(length(res$pca_models), 1)
   expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
   expect_null(res$pca_models[["1"]]$center)
@@ -898,7 +898,7 @@ test_that("mixed metrics retain PCA models for the selected blocks", {
     ret_model = TRUE
   )
   expect_ok_matrix(res$embedding)
-  expect_is(res$pca_models, "list")
+  expect_type(res$pca_models, "list")
   expect_equal(length(res$pca_models), 2)
   expect_equal(names(res$pca_models), c("1", "3"))
   expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 2, nc = 2)
@@ -942,7 +942,7 @@ test_that("mixed metrics retain PCA models for the selected blocks", {
     ret_model = TRUE
   )
   expect_ok_matrix(res$embedding)
-  expect_is(res$pca_models, "list")
+  expect_type(res$pca_models, "list")
   expect_equal(length(res$pca_models), 1)
   expect_equal(names(res$pca_models), "1")
   expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 2, nc = 2)
@@ -979,7 +979,7 @@ test_that("PCA transforms binary data without centering", {
     ret_model = TRUE
   )
   expect_ok_matrix(res$embedding)
-  expect_is(res$pca_models, "list")
+  expect_type(res$pca_models, "list")
   expect_equal(length(res$pca_models), 1)
   expect_equal(names(res$pca_models), "1")
   expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
@@ -1066,7 +1066,7 @@ test_that("a model projects more rows than its training set", {
     verbose = FALSE,
     ret_model = TRUE
   )
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_ok_matrix(res$embedding, nr = 4)
 
   res_test <- umap_transform(
@@ -1126,9 +1126,9 @@ test_that("UMAP and LargeVis can return their graph with the embedding", {
     n_threads = 0,
     ret_extra = c("fgraph")
   )
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_ok_matrix(res$embedding)
-  expect_is(res$fgraph, "Matrix")
+  expect_s4_class(res$fgraph, "Matrix")
 
   res <- tumap(
     iris10,
@@ -1140,9 +1140,9 @@ test_that("UMAP and LargeVis can return their graph with the embedding", {
     n_threads = 0,
     ret_extra = c("fgraph")
   )
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_ok_matrix(res$embedding)
-  expect_is(res$fgraph, "Matrix")
+  expect_s4_class(res$fgraph, "Matrix")
 
   # param is ret_P and returned value is P in lvish
   res <- lvish(
@@ -1155,9 +1155,9 @@ test_that("UMAP and LargeVis can return their graph with the embedding", {
     n_threads = 0,
     ret_extra = c("P")
   )
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_ok_matrix(res$embedding)
-  expect_is(res$P, "Matrix")
+  expect_s4_class(res$P, "Matrix")
 })
 
 
@@ -1350,7 +1350,7 @@ test_that("returned local scales and radii match their references", {
     n_threads = 0,
     ret_extra = c("sigma")
   )
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_ok_matrix(res$embedding)
 
   expected_sigma <- c(
@@ -1407,7 +1407,7 @@ test_that("returned local scales and radii match their references", {
     dens_scale = 1,
     ret_extra = c("sigma", "localr")
   )
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_ok_matrix(res$embedding)
   sigma <- res$sigma
   expect_equal(signif(sigma, 4), expected_sigma)
@@ -1443,7 +1443,7 @@ test_that("density scaling returns the local curve parameters and supports trans
     dens_scale = 1,
     ret_model = TRUE
   )
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_ok_matrix(res$embedding)
   expected_ai <- c(
     8.072,

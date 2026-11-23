@@ -188,8 +188,8 @@ test_that("serial and threaded Annoy Euclidean searches return reusable indexes"
     tolerance = 1e-6
   )
   expect_true(!is.null(res$index))
-  expect_is(res$index, "list")
-  expect_is(res$index$ann, "Rcpp_AnnoyEuclidean")
+  expect_type(res$index, "list")
+  expect_s4_class(res$index$ann, "Rcpp_AnnoyEuclidean")
   expect_equal(res$index$metric, "euclidean")
 
   res <- annoy_nn(ui10, k = 4, n_threads = 1)
@@ -210,8 +210,8 @@ test_that("serial and threaded Annoy Euclidean searches return reusable indexes"
     tolerance = 1e-6
   )
   expect_true(!is.null(res$index))
-  expect_is(res$index, "list")
-  expect_is(res$index$ann, "Rcpp_AnnoyEuclidean")
+  expect_type(res$index, "list")
+  expect_s4_class(res$index$ann, "Rcpp_AnnoyEuclidean")
   expect_equal(res$index$metric, "euclidean")
 })
 
@@ -323,8 +323,8 @@ test_that("Annoy returns the reference cosine neighbors", {
   expect_equal(res$idx, cos_index, check.attributes = FALSE)
   expect_angular_distances(res$dist, cos_dist)
   expect_true(!is.null(res$index))
-  expect_is(res$index, "list")
-  expect_is(res$index$ann, "Rcpp_AnnoyAngular")
+  expect_type(res$index, "list")
+  expect_s4_class(res$index$ann, "Rcpp_AnnoyAngular")
   expect_equal(res$index$metric, "cosine")
 })
 
@@ -556,8 +556,8 @@ test_that("Annoy returns the reference correlation neighbors", {
   expect_equal(res$idx, cor_index, check.attributes = FALSE)
   expect_angular_distances(res$dist, cor_dist)
   expect_true(!is.null(res$index))
-  expect_is(res$index, "list")
-  expect_is(res$index$ann, "Rcpp_AnnoyAngular")
+  expect_type(res$index, "list")
+  expect_s4_class(res$index$ann, "Rcpp_AnnoyAngular")
   expect_equal(res$index$metric, "correlation")
 })
 

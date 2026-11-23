@@ -21,9 +21,9 @@ test_that("graph-only UMAP agrees with similarity_graph and precomputed neighbor
     n_epochs = 0,
     ret_extra = c("fgraph")
   )
-  expect_is(res, "list")
+  expect_type(res, "list")
   expect_null(res$embedding)
-  expect_is(res$fgraph, "sparseMatrix")
+  expect_s4_class(res$fgraph, "sparseMatrix")
 
   # also a bad idea but maybe ok to extract something from the return value
   # manually
@@ -37,7 +37,7 @@ test_that("graph-only UMAP agrees with similarity_graph and precomputed neighbor
     ),
     "will not be valid for transforming"
   )
-  expect_is(res_with_model, "list")
+  expect_type(res_with_model, "list")
   expect_null(res_with_model$embedding)
   # but you cannot use umap_transform with the model
   expect_error(
@@ -57,11 +57,11 @@ test_that("graph-only UMAP agrees with similarity_graph and precomputed neighbor
     n_neighbors = 4,
     ret_extra = c("sigma", "nn")
   )
-  expect_is(sim_graph_extra, "list")
+  expect_type(sim_graph_extra, "list")
   expect_equal(sim_graph, sim_graph_extra$similarity_graph)
   expect_equal(length(sim_graph_extra$sigma), 10)
   expect_equal(length(sim_graph_extra$rho), 10)
-  expect_is(sim_graph_extra$nn$euclidean, "list")
+  expect_type(sim_graph_extra$nn$euclidean, "list")
 
   # can use pre-computed nn instead of data
   sim_graph_nn <- similarity_graph(
@@ -80,8 +80,8 @@ test_that("LargeVis returns the similarity graph and bandwidths", {
     perplexity = 5,
     ret_extra = c("sigma")
   )
-  expect_is(sim_graph_largevis, "list")
-  expect_is(sim_graph_largevis$similarity_graph, "sparseMatrix")
+  expect_type(sim_graph_largevis, "list")
+  expect_s4_class(sim_graph_largevis$similarity_graph, "sparseMatrix")
   expect_equal(dim(sim_graph_largevis$similarity_graph), c(10, 10))
   expect_equal(length(sim_graph_largevis$sigma), 10)
 })
@@ -105,7 +105,7 @@ test_that("precomputed neighbors respect the set mix and local connectivity", {
 test_that("supervision and binary edge weights work with similarity_graph", {
   # supervised
   sim_graphy <- similarity_graph(iris10, n_neighbors = 4, y = ynum)
-  expect_is(sim_graphy, "sparseMatrix")
+  expect_s4_class(sim_graphy, "sparseMatrix")
 
   # binary edge weights
   sim_graphb <- similarity_graph(

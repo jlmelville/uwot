@@ -1,6 +1,5 @@
 library(uwot)
 library(RSpectra)
-context("normalized laplacian")
 
 # this exists as a separate file only because it's easier to comment out as
 # part of temporarily removing any function calls to rspectra when using rhub

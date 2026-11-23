@@ -1,6 +1,5 @@
 library(uwot)
 library(RSpectra)
-context("Spectral")
 
 test_that("1 dimensional output gives a matrix", {
   expect_ok_matrix(spectral_init(V_union, ndim = 1, verbose = FALSE), nc = 1)
