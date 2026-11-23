@@ -501,7 +501,7 @@ test_that("sparse neighbor matrices reproduce the t-UMAP embedding", {
     nn_method = sparse_nbr_matrix0,
     ret_nn = TRUE
   )
-  expect_is(res, "list")
+  expect_is(res_spnn0, "list")
   expect_ok_matrix(res_spnn0$embedding)
   # should get same results as with internal nn calculation
   expect_equal(res_spnn0$embedding, res$embedding)
@@ -797,744 +797,781 @@ test_that("UMAP embeds binary data with Hamming distance", {
   expect_ok_matrix(res)
 })
 
-# Multiple metrics
-set.seed(1337)
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  n_threads = 0,
-  metric = list(euclidean = c(1, 2), euclidean = c(3, 4)),
-  ret_model = TRUE
-)
-res_trans <- umap_transform(
-  iris10,
-  model = res,
-  verbose = FALSE,
-  n_threads = 0,
-  n_epochs = 2
-)
-expect_ok_matrix(res_trans)
-
-# PCA dimensionality reduction
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  n_threads = 0,
-  pca = 2,
-  ret_model = TRUE
-)
-expect_ok_matrix(res$embedding)
-expect_is(res$pca_models, "list")
-expect_equal(length(res$pca_models), 1)
-expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
-expect_equal(
-  res$pca_models[["1"]]$center,
-  c(4.86, 3.31, 1.45, 0.22),
-  check.attributes = FALSE
-)
-
-# no centering
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  n_threads = 0,
-  pca = 2,
-  pca_center = FALSE,
-  ret_model = TRUE
-)
-expect_ok_matrix(res$embedding)
-expect_is(res$pca_models, "list")
-expect_equal(length(res$pca_models), 1)
-expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
-expect_null(res$pca_models[["1"]]$center)
-
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  metric = list("euclidean" = 1:2, "euclidean" = 3:4),
-  init = "spca",
-  verbose = FALSE,
-  n_threads = 0,
-  pca = 2
-)
-expect_ok_matrix(res)
-
-# Mixed metrics, PCA and transform
-set.seed(1337)
-ib10 <- cbind(iris10, bin10, bin10)
-res <- umap(
-  ib10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  n_threads = 0,
-  metric = list(
-    euclidean = c(1, 2),
-    hamming = 5:12,
-    euclidean = c(3, 4)
-  ),
-  pca = 2,
-  ret_model = TRUE
-)
-expect_ok_matrix(res$embedding)
-expect_is(res$pca_models, "list")
-expect_equal(length(res$pca_models), 2)
-expect_equal(names(res$pca_models), c("1", "3"))
-expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 2, nc = 2)
-expect_equal(
-  res$pca_models[["1"]]$center,
-  c(4.86, 3.31),
-  check.attributes = FALSE
-)
-expect_ok_matrix(res$pca_models[["3"]]$rotation, nr = 2, nc = 2)
-expect_equal(
-  res$pca_models[["3"]]$center,
-  c(1.45, 0.22),
-  check.attributes = FALSE
-)
-
-res_trans <- umap_transform(
-  ib10,
-  model = res,
-  verbose = FALSE,
-  n_threads = 0,
-  n_epochs = 2
-)
-expect_ok_matrix(res_trans)
-
-# Override pca command in third block
-set.seed(1337)
-res <- umap(
-  ib10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  n_threads = 0,
-  metric = list(
-    euclidean = c(1, 2),
-    hamming = 5:8,
-    euclidean = list(c(3, 4), pca = NULL)
-  ),
-  pca = 2,
-  ret_model = TRUE
-)
-expect_ok_matrix(res$embedding)
-expect_is(res$pca_models, "list")
-expect_equal(length(res$pca_models), 1)
-expect_equal(names(res$pca_models), "1")
-expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 2, nc = 2)
-expect_equal(
-  res$pca_models[["1"]]$center,
-  c(4.86, 3.31),
-  check.attributes = FALSE
-)
-
-res_trans <- umap_transform(
-  ib10,
-  model = res,
-  verbose = FALSE,
-  n_threads = 0,
-  n_epochs = 2
-)
-expect_ok_matrix(res_trans)
-
-# Turn off PCA centering for binary data
-set.seed(1337)
-res <- umap(
-  bin10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  n_threads = 0,
-  metric = "manhattan",
-  pca = 2,
-  pca_center = FALSE,
-  ret_model = TRUE
-)
-expect_ok_matrix(res$embedding)
-expect_is(res$pca_models, "list")
-expect_equal(length(res$pca_models), 1)
-expect_equal(names(res$pca_models), "1")
-expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
-expect_null(res$pca_models[["1"]]$center)
-
-res_trans <- umap_transform(
-  bin10,
-  model = res,
-  verbose = FALSE,
-  n_threads = 0,
-  n_epochs = 2
-)
-expect_ok_matrix(res_trans)
-
-
-# shrunk spectral initialization
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "pca",
-  verbose = FALSE,
-  n_threads = 0,
-  init_sdev = 2
-)
-expect_ok_matrix(res)
-
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "laplacian",
-  verbose = FALSE,
-  n_threads = 0,
-  init_sdev = 0.1
-)
-expect_ok_matrix(res)
-
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spectral",
-  verbose = FALSE,
-  n_threads = 0,
-  init_sdev = 5
-)
-expect_ok_matrix(res)
-
-# test that init_sdev actually applies to the input matrix
-# store old sd
-res_sd <- apply(res, 2, sd)
-res2 <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 0,
-  learning_rate = 0.5,
-  init = res,
-  verbose = FALSE,
-  n_threads = 0,
-  init_sdev = 5
-)
-expect_ok_matrix(res2)
-expect_equal(apply(res2, 2, sd), rep(5, ncol(res2)))
-# make sure input is unchanged
-expect_equal(apply(res, 2, sd), res_sd)
-
-# umap transform when test datset size > train dataset size
-set.seed(1337)
-res <- umap(
-  iris10[1:4, ],
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  min_dist = 0.001,
-  init = "rand",
-  verbose = FALSE,
-  ret_model = TRUE
-)
-expect_is(res, "list")
-expect_ok_matrix(res$embedding, nr = 4)
-
-res_test <- umap_transform(iris10[5:10, ], res, verbose = FALSE, n_epochs = 10)
-expect_ok_matrix(res_test, nr = 6)
-# 31: ensure we store the ndim for single-metric models
-expect_equal(res$metric$euclidean$ndim, 4)
-
-# taus88 prng
-res <- umap(
-  iris10,
-  pcg_rand = FALSE,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spectral",
-  verbose = FALSE,
-  n_threads = 0,
-  init_sdev = 5
-)
-expect_ok_matrix(res)
-
-# https://github.com/jlmelville/uwot/issues/39
-expect_type(default_num_threads(), "integer")
-expect_equal(length(default_num_threads()), 1L)
-expect_true(default_num_threads() >= 1L)
-
-res <- umap(iris10, n_neighbors = 4, n_threads = 0.5)
-expect_ok_matrix(res)
-res <- umap(iris10, n_neighbors = 4, n_threads = 1.5)
-expect_ok_matrix(res)
-res <- umap(iris10, n_neighbors = 4, n_sgd_threads = 0.5)
-expect_ok_matrix(res)
-res <- umap(iris10, n_neighbors = 4, n_sgd_threads = 1.5)
-expect_ok_matrix(res)
-
-# https://github.com/jlmelville/uwot/issues/47
-# return fuzzy graph
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  min_dist = 0.001,
-  init = "spca",
-  verbose = FALSE,
-  n_threads = 0,
-  ret_extra = c("fgraph")
-)
-expect_is(res, "list")
-expect_ok_matrix(res$embedding)
-expect_is(res$fgraph, "Matrix")
-
-res <- tumap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  n_threads = 0,
-  ret_extra = c("fgraph")
-)
-expect_is(res, "list")
-expect_ok_matrix(res$embedding)
-expect_is(res$fgraph, "Matrix")
-
-# param is ret_P and returned value is P in lvish
-res <- lvish(
-  iris10,
-  perplexity = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  n_threads = 0,
-  ret_extra = c("P")
-)
-expect_is(res, "list")
-expect_ok_matrix(res$embedding)
-expect_is(res$P, "Matrix")
-
-
-# 22 Pearson correlation
-set.seed(42)
-res_cor <- tumap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  metric = "correlation",
-  init = "spectral",
-  verbose = FALSE,
-  n_threads = 0,
-  ret_model = TRUE
-)
-expect_ok_matrix(res_cor$embedding)
-
-# Ensure cosine results are different from correlation
-set.seed(42)
-res_cos <- tumap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  metric = "cosine",
-  init = "spectral",
-  verbose = FALSE,
-  n_threads = 0,
-  ret_model = TRUE
-)
-expect_gt(sum((res_cor$embedding - res_cos$embedding)^2), 1e-3)
-
-
-# Ensure correlation transform results differ from cosine
-set.seed(42)
-res_trans_cor <- umap_transform(
-  x2m(iris[11:20, ]),
-  res_cor,
-  n_threads = 0,
-  verbose = FALSE
-)
-expect_ok_matrix(res_trans_cor)
-
-# Switch metric and results should differ
-res_cor$nn_index$metric <- "cosine"
-set.seed(42)
-res_trans_cor2 <- umap_transform(
-  x2m(iris[11:20, ]),
-  res_cor,
-  n_threads = 0,
-  verbose = FALSE
-)
-expect_ok_matrix(res_trans_cor2)
-expect_gt(sum((res_trans_cor - res_trans_cor2)^2), 1e-3)
-
-
-# 81: Preserve row names
-set.seed(42)
-xnames <-
-  data.frame(matrix(rnorm(10 * 4), nrow = 10), row.names = letters[1:10])
-xumap <-
-  umap(
-    xnames,
-    n_neighbors = 4,
-    verbose = FALSE,
-    n_threads = 0,
-    ret_model = TRUE,
-    ret_nn = TRUE
-  )
-expect_equal(row.names(xumap$embedding), row.names(xnames))
-expect_equal(row.names(xumap$nn$euclidean$idx), row.names(xnames))
-expect_equal(row.names(xumap$nn$euclidean$dist), row.names(xnames))
-
-first_coords <- c()
-test_callback <- function(epochs, n_epochs, coords) {
-  first_coords <<- c(first_coords, coords[1, 1])
-}
-set.seed(42)
-ibatch <- tumap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  batch = TRUE,
-  n_threads = 0,
-  n_sgd_threads = 0,
-  ret_model = TRUE,
-  epoch_callback = test_callback
-)
-expect_equal(length(first_coords), 2)
-
-set.seed(42)
-ibatch2 <- tumap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  batch = TRUE,
-  n_threads = 0,
-  n_sgd_threads = 2,
-  ret_model = TRUE
-)
-expect_equal(ibatch$embedding, ibatch2$embedding)
-
-itest <- x2m(iris[11:20, ])
-first_coords <- c()
-fixed_first_coords <- c()
-test_transform_callback <- function(epochs, n_epochs, coords, fixed_coords) {
-  first_coords <<- c(first_coords, coords[1, 1])
-  fixed_first_coords <<- c(fixed_first_coords, fixed_coords[1, 1])
-}
-set.seed(42)
-ibatchtest <- umap_transform(
-  itest,
-  ibatch,
-  epoch_callback = test_transform_callback,
-  n_epochs = 5
-)
-expect_equal(length(first_coords), 5)
-expect_equal(length(fixed_first_coords), 5)
-# coords don't actually change on the first epoch
-expect_equal(length(unique(first_coords)), 4)
-# if coords are fixed they should be the same at each epoch
-expect_equal(length(unique(fixed_first_coords)), 1)
-
-set.seed(42)
-ibatchtest2 <- umap_transform(itest, ibatch, n_sgd_threads = 2, n_epochs = 5)
-expect_equal(ibatchtest, ibatchtest2)
-
-
-oargs_umap <- tumap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 0,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  batch = TRUE,
-  n_threads = 0,
-  n_sgd_threads = 0,
-  ret_model = TRUE,
-  opt_args = list(alpha = 0.4, beta1 = 0.1, beta2 = 0.2, eps = 1e-3)
-)
-expect_equal(length(oargs_umap$opt_args), 5)
-expect_equal(oargs_umap$opt_args$method, "adam")
-expect_equal(oargs_umap$opt_args$alpha, 0.4)
-expect_equal(oargs_umap$opt_args$beta1, 0.1)
-expect_equal(oargs_umap$opt_args$beta2, 0.2)
-expect_equal(oargs_umap$opt_args$eps, 1e-3)
-
-
-oargs_umap <- tumap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "spca",
-  verbose = FALSE,
-  batch = TRUE,
-  n_threads = 0,
-  n_sgd_threads = 0,
-  ret_model = TRUE,
-  opt_args = list(method = "sgd", alpha = 0.4)
-)
-expect_equal(length(oargs_umap$opt_args), 2)
-expect_equal(oargs_umap$opt_args$method, "sgd")
-expect_equal(oargs_umap$opt_args$alpha, 0.4)
-
-# Return sigma and rho
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  min_dist = 0.001,
-  init = "spca",
-  verbose = FALSE,
-  n_threads = 0,
-  ret_extra = c("sigma")
-)
-expect_is(res, "list")
-expect_ok_matrix(res$embedding)
-
-expected_sigma <- c(
-  0.1799,
-  0.2049,
-  0.04938,
-  0.0906,
-  0.2494,
-  0.003906,
-  0.1537,
-  0.1355,
-  0.2454,
-  0.2063
-)
-sigma <- res$sigma
-expect_equal(sigma, expected_sigma, tolerance = 1e-4)
-
-expected_rho <- c(
-  0.1414,
-  0.1732,
-  0.2449,
-  0.2449,
-  0.1414,
-  0.6164,
-  0.2646,
-  0.1732,
-  0.3,
-  0.1732
-)
-rho <- res$rho
-expect_equal(rho, expected_rho, 1e-4)
-
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  min_dist = 0.001,
-  init = "normlaplacian",
-  verbose = FALSE,
-  n_threads = 0,
-  dens_scale = 1
-)
-expect_ok_matrix(res)
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  min_dist = 0.001,
-  init = "normlaplacian",
-  verbose = FALSE,
-  n_threads = 0,
-  dens_scale = 1,
-  ret_extra = c("sigma", "localr")
-)
-expect_is(res, "list")
-expect_ok_matrix(res$embedding)
-sigma <- res$sigma
-expect_equal(sigma, expected_sigma, tolerance = 1e-4)
-rho <- res$rho
-expect_equal(rho, expected_rho, tolerance = 1e-4)
-
-expected_localr <- c(
-  0.3214,
-  0.3781,
-  0.2943,
-  0.3356,
-  0.3908,
-  0.6203,
-  0.4182,
-  0.3087,
-  0.5454,
-  0.3795
-)
-localr <- res$localr
-expect_equal(localr, expected_localr, tolerance = 1e-4)
-
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  min_dist = 0.001,
-  init = "normlaplacian",
-  verbose = FALSE,
-  n_threads = 0,
-  dens_scale = 1,
-  ret_model = TRUE
-)
-expect_is(res, "list")
-expect_ok_matrix(res$embedding)
-expected_ai <- c(
-  8.072,
-  2.957,
-  13.89,
-  6.181,
-  2.41,
-  0.1389,
-  1.585,
-  10.34,
-  0.3076,
-  2.888
-)
-ai <- res$ai
-expect_equal(ai, expected_ai, tolerance = 1e-4)
-expect_equal(res$dens_scale, 1.0)
-expect_equal(res$method, "leopold")
-
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  min_dist = 0.001,
-  init = "normlaplacian",
-  verbose = FALSE,
-  n_threads = 0,
-  dens_scale = 0.5,
-  ret_model = TRUE
-)
-expected_ai05 <- c(
-  3.348,
-  2.027,
-  4.392,
-  2.93,
-  1.83,
-  0.4392,
-  1.484,
-  3.79,
-  0.6536,
-  2.003
-)
-expect_equal(res$ai, expected_ai05, tolerance = 1e-3)
-expect_equal(res$dens_scale, 0.5)
-
-ret_trans <- umap_transform(iris10, res)
-expect_ok_matrix(res$embedding)
-
-# 97: should be able to create a model without pre-computed nns and allow
-# umap_transform to work with pre-computed nns
-train_nn <- annoy_nn(
-  X = iris10,
-  k = 4,
-  metric = "euclidean",
-  n_threads = 0,
-  ret_index = TRUE
-)
-set.seed(42)
-umap_train_x_null <- umap(
-  X = NULL,
-  nn_method = train_nn,
-  ret_model = TRUE,
-  n_neighbors = 4
-)
-set.seed(42)
-umap_train_x <- umap(X = iris10, ret_model = TRUE, n_neighbors = 4)
-
-# make the test set a different size to the training set
-iris9test <- x2m(iris[11:19, ])
-query_ref_nn <- annoy_search(
-  X = iris9test,
-  k = 4,
-  ann = train_nn$index,
-  n_threads = 0
-)
-row.names(query_ref_nn$dist) <- row.names(iris9test)
-
-# Success
-set.seed(42)
-umap_test_1 <- umap_transform(
-  X = NULL,
-  model = umap_train_x_null,
-  nn_method = query_ref_nn
-)
-
-# This was throwing an error because umap_train_x doesn't have pre-computed
-# neighbors (and there is no reason to insist that it should have just because
-# the test data uses them)
-set.seed(42)
-umap_test_2 <- umap_transform(
-  X = NULL,
-  model = umap_train_x,
-  nn_method = query_ref_nn
-)
-expect_equal(umap_test_1, umap_test_2)
-
-
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  init = "laplacian",
-  verbose = FALSE,
-  n_threads = 0,
-  init_sdev = 0.1
-)
-expect_ok_matrix(res)
-
-# 99 init_sdev = "range" range scales input data columns 0-10
-res <- umap(iris10, n_neighbors = 4, init_sdev = "range", n_epochs = 0)
-expect_equal(apply(res, 2, range), matrix(c(0, 10, 0, 10), ncol = 2))
-
-# init_sdev = "range" should rescale with user-supplied input too
-res <-
-  umap(
+test_that("mixed-metric models transform new data", {
+  # Multiple metrics
+  set.seed(1337)
+  res <- umap(
     iris10,
     n_neighbors = 4,
-    init = res,
-    init_sdev = "range",
-    n_epochs = 0
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    n_threads = 0,
+    metric = list(euclidean = c(1, 2), euclidean = c(3, 4)),
+    ret_model = TRUE
   )
-expect_equal(apply(res, 2, range), matrix(c(0, 10, 0, 10), ncol = 2))
+  res_trans <- umap_transform(
+    iris10,
+    model = res,
+    verbose = FALSE,
+    n_threads = 0,
+    n_epochs = 2
+  )
+  expect_ok_matrix(res_trans)
+})
+
+test_that("PCA models record rotations and optional centering", {
+  # PCA dimensionality reduction
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    n_threads = 0,
+    pca = 2,
+    ret_model = TRUE
+  )
+  expect_ok_matrix(res$embedding)
+  expect_is(res$pca_models, "list")
+  expect_equal(length(res$pca_models), 1)
+  expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
+  expect_equal(
+    res$pca_models[["1"]]$center,
+    c(4.86, 3.31, 1.45, 0.22),
+    check.attributes = FALSE
+  )
+
+  # no centering
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    n_threads = 0,
+    pca = 2,
+    pca_center = FALSE,
+    ret_model = TRUE
+  )
+  expect_ok_matrix(res$embedding)
+  expect_is(res$pca_models, "list")
+  expect_equal(length(res$pca_models), 1)
+  expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
+  expect_null(res$pca_models[["1"]]$center)
+
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    metric = list("euclidean" = 1:2, "euclidean" = 3:4),
+    init = "spca",
+    verbose = FALSE,
+    n_threads = 0,
+    pca = 2
+  )
+  expect_ok_matrix(res)
+})
+
+test_that("mixed metrics retain PCA models for the selected blocks", {
+  # Mixed metrics, PCA and transform
+  set.seed(1337)
+  ib10 <- cbind(iris10, bin10, bin10)
+  res <- umap(
+    ib10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    n_threads = 0,
+    metric = list(
+      euclidean = c(1, 2),
+      hamming = 5:12,
+      euclidean = c(3, 4)
+    ),
+    pca = 2,
+    ret_model = TRUE
+  )
+  expect_ok_matrix(res$embedding)
+  expect_is(res$pca_models, "list")
+  expect_equal(length(res$pca_models), 2)
+  expect_equal(names(res$pca_models), c("1", "3"))
+  expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 2, nc = 2)
+  expect_equal(
+    res$pca_models[["1"]]$center,
+    c(4.86, 3.31),
+    check.attributes = FALSE
+  )
+  expect_ok_matrix(res$pca_models[["3"]]$rotation, nr = 2, nc = 2)
+  expect_equal(
+    res$pca_models[["3"]]$center,
+    c(1.45, 0.22),
+    check.attributes = FALSE
+  )
+
+  res_trans <- umap_transform(
+    ib10,
+    model = res,
+    verbose = FALSE,
+    n_threads = 0,
+    n_epochs = 2
+  )
+  expect_ok_matrix(res_trans)
+
+  # Override pca command in third block
+  set.seed(1337)
+  res <- umap(
+    ib10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    n_threads = 0,
+    metric = list(
+      euclidean = c(1, 2),
+      hamming = 5:8,
+      euclidean = list(c(3, 4), pca = NULL)
+    ),
+    pca = 2,
+    ret_model = TRUE
+  )
+  expect_ok_matrix(res$embedding)
+  expect_is(res$pca_models, "list")
+  expect_equal(length(res$pca_models), 1)
+  expect_equal(names(res$pca_models), "1")
+  expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 2, nc = 2)
+  expect_equal(
+    res$pca_models[["1"]]$center,
+    c(4.86, 3.31),
+    check.attributes = FALSE
+  )
+
+  res_trans <- umap_transform(
+    ib10,
+    model = res,
+    verbose = FALSE,
+    n_threads = 0,
+    n_epochs = 2
+  )
+  expect_ok_matrix(res_trans)
+})
+
+test_that("PCA transforms binary data without centering", {
+  # Turn off PCA centering for binary data
+  set.seed(1337)
+  res <- umap(
+    bin10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    n_threads = 0,
+    metric = "manhattan",
+    pca = 2,
+    pca_center = FALSE,
+    ret_model = TRUE
+  )
+  expect_ok_matrix(res$embedding)
+  expect_is(res$pca_models, "list")
+  expect_equal(length(res$pca_models), 1)
+  expect_equal(names(res$pca_models), "1")
+  expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
+  expect_null(res$pca_models[["1"]]$center)
+
+  res_trans <- umap_transform(
+    bin10,
+    model = res,
+    verbose = FALSE,
+    n_threads = 0,
+    n_epochs = 2
+  )
+  expect_ok_matrix(res_trans)
+})
+
+
+test_that("initialization rescales coordinates without modifying its input", {
+  # shrunk spectral initialization
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "pca",
+    verbose = FALSE,
+    n_threads = 0,
+    init_sdev = 2
+  )
+  expect_ok_matrix(res)
+
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "laplacian",
+    verbose = FALSE,
+    n_threads = 0,
+    init_sdev = 0.1
+  )
+  expect_ok_matrix(res)
+
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spectral",
+    verbose = FALSE,
+    n_threads = 0,
+    init_sdev = 5
+  )
+  expect_ok_matrix(res)
+
+  # test that init_sdev actually applies to the input matrix
+  # store old sd
+  res_sd <- apply(res, 2, sd)
+  res2 <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 0,
+    learning_rate = 0.5,
+    init = res,
+    verbose = FALSE,
+    n_threads = 0,
+    init_sdev = 5
+  )
+  expect_ok_matrix(res2)
+  expect_equal(apply(res2, 2, sd), rep(5, ncol(res2)))
+  # make sure input is unchanged
+  expect_equal(apply(res, 2, sd), res_sd)
+})
+
+test_that("a model projects more rows than its training set", {
+  # umap transform when test datset size > train dataset size
+  set.seed(1337)
+  res <- umap(
+    iris10[1:4, ],
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    min_dist = 0.001,
+    init = "rand",
+    verbose = FALSE,
+    ret_model = TRUE
+  )
+  expect_is(res, "list")
+  expect_ok_matrix(res$embedding, nr = 4)
+
+  res_test <- umap_transform(
+    iris10[5:10, ],
+    res,
+    verbose = FALSE,
+    n_epochs = 10
+  )
+  expect_ok_matrix(res_test, nr = 6)
+  # 31: ensure we store the ndim for single-metric models
+  expect_equal(res$metric$euclidean$ndim, 4)
+})
+
+test_that("UMAP supports the Tausworthe random number generator", {
+  # taus88 prng
+  res <- umap(
+    iris10,
+    pcg_rand = FALSE,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spectral",
+    verbose = FALSE,
+    n_threads = 0,
+    init_sdev = 5
+  )
+  expect_ok_matrix(res)
+})
+
+test_that("thread defaults are scalar integers and fractional settings run", {
+  # https://github.com/jlmelville/uwot/issues/39
+  expect_type(default_num_threads(), "integer")
+  expect_equal(length(default_num_threads()), 1L)
+  expect_true(default_num_threads() >= 1L)
+
+  res <- umap(iris10, n_neighbors = 4, n_threads = 0.5)
+  expect_ok_matrix(res)
+  res <- umap(iris10, n_neighbors = 4, n_threads = 1.5)
+  expect_ok_matrix(res)
+  res <- umap(iris10, n_neighbors = 4, n_sgd_threads = 0.5)
+  expect_ok_matrix(res)
+  res <- umap(iris10, n_neighbors = 4, n_sgd_threads = 1.5)
+  expect_ok_matrix(res)
+})
+
+test_that("UMAP and LargeVis can return their graph with the embedding", {
+  # https://github.com/jlmelville/uwot/issues/47
+  # return fuzzy graph
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    min_dist = 0.001,
+    init = "spca",
+    verbose = FALSE,
+    n_threads = 0,
+    ret_extra = c("fgraph")
+  )
+  expect_is(res, "list")
+  expect_ok_matrix(res$embedding)
+  expect_is(res$fgraph, "Matrix")
+
+  res <- tumap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    n_threads = 0,
+    ret_extra = c("fgraph")
+  )
+  expect_is(res, "list")
+  expect_ok_matrix(res$embedding)
+  expect_is(res$fgraph, "Matrix")
+
+  # param is ret_P and returned value is P in lvish
+  res <- lvish(
+    iris10,
+    perplexity = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    n_threads = 0,
+    ret_extra = c("P")
+  )
+  expect_is(res, "list")
+  expect_ok_matrix(res$embedding)
+  expect_is(res$P, "Matrix")
+})
+
+
+test_that("cosine and correlation produce distinct fits and transforms", {
+  # 22 Pearson correlation
+  set.seed(42)
+  res_cor <- tumap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    metric = "correlation",
+    init = "spectral",
+    verbose = FALSE,
+    n_threads = 0,
+    ret_model = TRUE
+  )
+  expect_ok_matrix(res_cor$embedding)
+
+  # Ensure cosine results are different from correlation
+  set.seed(42)
+  res_cos <- tumap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    metric = "cosine",
+    init = "spectral",
+    verbose = FALSE,
+    n_threads = 0,
+    ret_model = TRUE
+  )
+  expect_gt(sum((res_cor$embedding - res_cos$embedding)^2), 1e-3)
+
+  # Ensure correlation transform results differ from cosine
+  set.seed(42)
+  res_trans_cor <- umap_transform(
+    x2m(iris[11:20, ]),
+    res_cor,
+    n_threads = 0,
+    verbose = FALSE
+  )
+  expect_ok_matrix(res_trans_cor)
+
+  # Switch metric and results should differ
+  res_cor$nn_index$metric <- "cosine"
+  set.seed(42)
+  res_trans_cor2 <- umap_transform(
+    x2m(iris[11:20, ]),
+    res_cor,
+    n_threads = 0,
+    verbose = FALSE
+  )
+  expect_ok_matrix(res_trans_cor2)
+  expect_gt(sum((res_trans_cor - res_trans_cor2)^2), 1e-3)
+})
+
+
+test_that("training row names propagate to the embedding and neighbors", {
+  # 81: Preserve row names
+  set.seed(42)
+  xnames <-
+    data.frame(matrix(rnorm(10 * 4), nrow = 10), row.names = letters[1:10])
+  xumap <-
+    umap(
+      xnames,
+      n_neighbors = 4,
+      verbose = FALSE,
+      n_threads = 0,
+      ret_model = TRUE,
+      ret_nn = TRUE
+    )
+  expect_equal(row.names(xumap$embedding), row.names(xnames))
+  expect_equal(row.names(xumap$nn$euclidean$idx), row.names(xnames))
+  expect_equal(row.names(xumap$nn$euclidean$dist), row.names(xnames))
+})
+
+test_that("batch callbacks report moving and fixed coordinates across thread counts", {
+  first_coords <- c()
+  test_callback <- function(epochs, n_epochs, coords) {
+    first_coords <<- c(first_coords, coords[1, 1])
+  }
+  set.seed(42)
+  ibatch <- tumap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    batch = TRUE,
+    n_threads = 0,
+    n_sgd_threads = 0,
+    ret_model = TRUE,
+    epoch_callback = test_callback
+  )
+  expect_equal(length(first_coords), 2)
+
+  set.seed(42)
+  ibatch2 <- tumap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    batch = TRUE,
+    n_threads = 0,
+    n_sgd_threads = 2,
+    ret_model = TRUE
+  )
+  expect_equal(ibatch$embedding, ibatch2$embedding)
+
+  itest <- x2m(iris[11:20, ])
+  first_coords <- c()
+  fixed_first_coords <- c()
+  test_transform_callback <- function(epochs, n_epochs, coords, fixed_coords) {
+    first_coords <<- c(first_coords, coords[1, 1])
+    fixed_first_coords <<- c(fixed_first_coords, fixed_coords[1, 1])
+  }
+  set.seed(42)
+  ibatchtest <- umap_transform(
+    itest,
+    ibatch,
+    epoch_callback = test_transform_callback,
+    n_epochs = 5
+  )
+  expect_equal(length(first_coords), 5)
+  expect_equal(length(fixed_first_coords), 5)
+  # coords don't actually change on the first epoch
+  expect_equal(length(unique(first_coords)), 4)
+  # if coords are fixed they should be the same at each epoch
+  expect_equal(length(unique(fixed_first_coords)), 1)
+
+  set.seed(42)
+  ibatchtest2 <- umap_transform(itest, ibatch, n_sgd_threads = 2, n_epochs = 5)
+  expect_equal(ibatchtest, ibatchtest2)
+})
+
+
+test_that("models retain Adam and SGD optimizer options", {
+  oargs_umap <- tumap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 0,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    batch = TRUE,
+    n_threads = 0,
+    n_sgd_threads = 0,
+    ret_model = TRUE,
+    opt_args = list(alpha = 0.4, beta1 = 0.1, beta2 = 0.2, eps = 1e-3)
+  )
+  expect_equal(length(oargs_umap$opt_args), 5)
+  expect_equal(oargs_umap$opt_args$method, "adam")
+  expect_equal(oargs_umap$opt_args$alpha, 0.4)
+  expect_equal(oargs_umap$opt_args$beta1, 0.1)
+  expect_equal(oargs_umap$opt_args$beta2, 0.2)
+  expect_equal(oargs_umap$opt_args$eps, 1e-3)
+
+  oargs_umap <- tumap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "spca",
+    verbose = FALSE,
+    batch = TRUE,
+    n_threads = 0,
+    n_sgd_threads = 0,
+    ret_model = TRUE,
+    opt_args = list(method = "sgd", alpha = 0.4)
+  )
+  expect_equal(length(oargs_umap$opt_args), 2)
+  expect_equal(oargs_umap$opt_args$method, "sgd")
+  expect_equal(oargs_umap$opt_args$alpha, 0.4)
+})
+
+test_that("returned local scales and radii match their references", {
+  # Return sigma and rho
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    min_dist = 0.001,
+    init = "spca",
+    verbose = FALSE,
+    n_threads = 0,
+    ret_extra = c("sigma")
+  )
+  expect_is(res, "list")
+  expect_ok_matrix(res$embedding)
+
+  expected_sigma <- c(
+    0.1799,
+    0.2049,
+    0.04938,
+    0.0906,
+    0.2494,
+    0.003906,
+    0.1537,
+    0.1355,
+    0.2454,
+    0.2063
+  )
+  sigma <- res$sigma
+  expect_equal(sigma, expected_sigma, tolerance = 1e-4)
+
+  expected_rho <- c(
+    0.1414,
+    0.1732,
+    0.2449,
+    0.2449,
+    0.1414,
+    0.6164,
+    0.2646,
+    0.1732,
+    0.3,
+    0.1732
+  )
+  rho <- res$rho
+  expect_equal(rho, expected_rho, 1e-4)
+
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    min_dist = 0.001,
+    init = "normlaplacian",
+    verbose = FALSE,
+    n_threads = 0,
+    dens_scale = 1
+  )
+  expect_ok_matrix(res)
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    min_dist = 0.001,
+    init = "normlaplacian",
+    verbose = FALSE,
+    n_threads = 0,
+    dens_scale = 1,
+    ret_extra = c("sigma", "localr")
+  )
+  expect_is(res, "list")
+  expect_ok_matrix(res$embedding)
+  sigma <- res$sigma
+  expect_equal(sigma, expected_sigma, tolerance = 1e-4)
+  rho <- res$rho
+  expect_equal(rho, expected_rho, tolerance = 1e-4)
+
+  expected_localr <- c(
+    0.3214,
+    0.3781,
+    0.2943,
+    0.3356,
+    0.3908,
+    0.6203,
+    0.4182,
+    0.3087,
+    0.5454,
+    0.3795
+  )
+  localr <- res$localr
+  expect_equal(localr, expected_localr, tolerance = 1e-4)
+})
+
+test_that("density scaling returns the local curve parameters and supports transform", {
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    min_dist = 0.001,
+    init = "normlaplacian",
+    verbose = FALSE,
+    n_threads = 0,
+    dens_scale = 1,
+    ret_model = TRUE
+  )
+  expect_is(res, "list")
+  expect_ok_matrix(res$embedding)
+  expected_ai <- c(
+    8.072,
+    2.957,
+    13.89,
+    6.181,
+    2.41,
+    0.1389,
+    1.585,
+    10.34,
+    0.3076,
+    2.888
+  )
+  ai <- res$ai
+  expect_equal(ai, expected_ai, tolerance = 1e-4)
+  expect_equal(res$dens_scale, 1.0)
+  expect_equal(res$method, "leopold")
+
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    min_dist = 0.001,
+    init = "normlaplacian",
+    verbose = FALSE,
+    n_threads = 0,
+    dens_scale = 0.5,
+    ret_model = TRUE
+  )
+  expected_ai05 <- c(
+    3.348,
+    2.027,
+    4.392,
+    2.93,
+    1.83,
+    0.4392,
+    1.484,
+    3.79,
+    0.6536,
+    2.003
+  )
+  expect_equal(res$ai, expected_ai05, tolerance = 1e-3)
+  expect_equal(res$dens_scale, 0.5)
+
+  ret_trans <- umap_transform(iris10, res)
+  expect_ok_matrix(ret_trans)
+})
+
+test_that("precomputed query neighbors work with either training representation", {
+  # 97: should be able to create a model without pre-computed nns and allow
+  # umap_transform to work with pre-computed nns
+  train_nn <- annoy_nn(
+    X = iris10,
+    k = 4,
+    metric = "euclidean",
+    n_threads = 0,
+    ret_index = TRUE
+  )
+  set.seed(42)
+  umap_train_x_null <- umap(
+    X = NULL,
+    nn_method = train_nn,
+    ret_model = TRUE,
+    n_neighbors = 4
+  )
+  set.seed(42)
+  umap_train_x <- umap(X = iris10, ret_model = TRUE, n_neighbors = 4)
+
+  # make the test set a different size to the training set
+  iris9test <- x2m(iris[11:19, ])
+  query_ref_nn <- annoy_search(
+    X = iris9test,
+    k = 4,
+    ann = train_nn$index,
+    n_threads = 0
+  )
+  row.names(query_ref_nn$dist) <- row.names(iris9test)
+
+  # Success
+  set.seed(42)
+  umap_test_1 <- umap_transform(
+    X = NULL,
+    model = umap_train_x_null,
+    nn_method = query_ref_nn
+  )
+
+  # This was throwing an error because umap_train_x doesn't have pre-computed
+  # neighbors (and there is no reason to insist that it should have just because
+  # the test data uses them)
+  set.seed(42)
+  umap_test_2 <- umap_transform(
+    X = NULL,
+    model = umap_train_x,
+    nn_method = query_ref_nn
+  )
+  expect_equal(umap_test_1, umap_test_2)
+})
+
+
+test_that("initialization accepts a standard deviation or a coordinate range", {
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    init = "laplacian",
+    verbose = FALSE,
+    n_threads = 0,
+    init_sdev = 0.1
+  )
+  expect_ok_matrix(res)
+
+  # 99 init_sdev = "range" range scales input data columns 0-10
+  res <- umap(iris10, n_neighbors = 4, init_sdev = "range", n_epochs = 0)
+  expect_equal(apply(res, 2, range), matrix(c(0, 10, 0, 10), ncol = 2))
+
+  # init_sdev = "range" should rescale with user-supplied input too
+  res <-
+    umap(
+      iris10,
+      n_neighbors = 4,
+      init = res,
+      init_sdev = "range",
+      n_epochs = 0
+    )
+  expect_equal(apply(res, 2, range), matrix(c(0, 10, 0, 10), ncol = 2))
+})
 
 # 101 intersect and union
 test_that("intersect and union", {
