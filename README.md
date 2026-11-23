@@ -32,72 +32,88 @@ some other minor changes for nearest neighbor calculations. See the
 install.packages("uwot")
 ```
 
-### From github
+### From GitHub
 
-`uwot` makes use of C++ code which must be compiled. You may have to carry out
-a few extra steps before being able to build this package:
+Building the development version from source requires a C++17 compiler.
 
-**Windows**: install
-[Rtools](https://cran.r-project.org/bin/windows/Rtools/) and ensure
-`C:\Rtools\bin` is on your path.
-
-**Mac OS X**: using a custom `~/.R/Makevars`
-[may cause linking errors](https://github.com/jlmelville/uwot/issues/1).
-This sort of thing is a potential problem on all platforms but seems to bite
-Mac owners more.
-[The R for Mac OS X FAQ](https://cran.r-project.org/bin/macosx/RMacOSX-FAQ.html#Installation-of-source-packages)
-may be helpful here to work out what you can get away with. To be on the safe
-side, I would advise building `uwot` without a custom `Makevars`.
+- On Windows, install the [Rtools version for your R release][rtools].
+- On macOS, install the Xcode Command Line Tools with `xcode-select --install`. The
+  [R for macOS tools page][mac-tools] lists compilers for dependencies built from source.
+- On Linux, install R's development headers, `make`, and a C++17 compiler through your distribution.
 
 ```R
-install.packages("devtools")
-devtools::install_github("jlmelville/uwot")
+install.packages("pak")
+pak::pak("jlmelville/uwot")
 ```
 
-## Example
+[rtools]: https://cran.r-project.org/bin/windows/Rtools/
+[mac-tools]: https://mac.r-project.org/tools/
+
+## Quick start
+
+Embed the four measurements in R's built-in `iris` data, then plot one point per flower. The
+plotting symbols identify the species.
 
 ```R
 library(uwot)
 
-# umap2 is a version of the umap() function with better defaults
-iris_umap <- umap2(iris)
+iris_umap <- umap2(iris[, 1:4], seed = 42)
+species <- iris$Species
+plot(
+  iris_umap,
+  pch = as.integer(species),
+  xlab = "UMAP 1",
+  ylab = "UMAP 2"
+)
+legend(
+  "topright",
+  legend = levels(species),
+  pch = seq_along(levels(species)),
+  bty = "n"
+)
+```
 
-# but you can still use the umap function (which most of the existing 
-# documentation does)
-iris_umap <- umap(iris)
+## MNIST example
 
-# Load mnist from somewhere, e.g.
-# devtools::install_github("jlmelville/snedata")
-# mnist <- snedata::download_mnist()
+To embed the 70,000 handwritten digits in MNIST, first install the `snedata` package from GitHub.
 
-mnist_umap <- umap(mnist, n_neighbors = 15, min_dist = 0.001, verbose = TRUE)
+```R
+install.packages("pak")
+pak::pak("jlmelville/snedata")
+```
+
+Download the data, fit UMAP to the pixel values, and color each point by its digit label.
+
+```R
+mnist <- snedata::download_mnist()
+mnist_umap <- uwot::umap(mnist, min_dist = 0.001, verbose = TRUE)
+digit_colors <- grDevices::adjustcolor(rainbow(nlevels(mnist$Label)), alpha.f = 0.1)
 plot(
   mnist_umap,
   cex = 0.1,
-  col = grDevices::rainbow(n = length(levels(mnist$Label)))[as.integer(mnist$Label)] |>
-    grDevices::adjustcolor(alpha.f = 0.1),
+  col = digit_colors[mnist$Label],
   main = "R uwot::umap",
   xlab = "",
   ylab = ""
 )
-
-# I recommend the following optional packages
-# for faster or more flexible nearest neighbor search:
-install.packages(c("RcppHNSW", "rnndescent"))
-library(RcppHNSW)
-library(rnndescent)
-
-# Installing RcppHNSW will allow the use of the usually faster HNSW method:
-mnist_umap_hnsw <- umap(mnist, n_neighbors = 15, min_dist = 0.001, 
-                        nn_method = "hnsw")
-# nndescent is also available
-mnist_umap_nnd <- umap(mnist, n_neighbors = 15, min_dist = 0.001, 
-                       nn_method = "nndescent")
-# umap2 will choose HNSW by default if available
-mnist_umap2 <- umap2(mnist)
 ```
 
-![MNIST UMAP](man/figures/mnist-r.png)
+![UMAP embedding of MNIST, colored by digit](man/figures/mnist-r.png)
+
+## Optional neighbor backends
+
+For approximate nearest-neighbor search, install the package for the method you want to use.
+
+```R
+install.packages(c("RcppHNSW", "rnndescent"))
+```
+
+Select HNSW or NN-Descent with `nn_method`. These examples use the built-in iris measurements.
+
+```R
+iris_hnsw <- uwot::umap(iris[, 1:4], nn_method = "hnsw")
+iris_nnd <- uwot::umap(iris[, 1:4], nn_method = "nndescent")
+```
 
 ## Documentation
 
