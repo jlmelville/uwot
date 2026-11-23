@@ -1,5 +1,6 @@
 # uwot (development version)
 
+* `optimize_graph_layout()` honors `binary_edge_weights` on weighted input graphs.
 * Errors from parallel workers now reach the caller when R loads both libc++ and libstdc++.
 
 # uwot 0.2.5

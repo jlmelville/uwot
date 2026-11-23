@@ -3105,6 +3105,7 @@ optimize_graph_layout <-
       opt_args = opt_args,
       epoch_callback = epoch_callback,
       pca_method = pca_method,
+      binary_edge_weights = binary_edge_weights,
       rng_type = rng_type
     )
   }
