@@ -74,14 +74,13 @@ List smooth_knn_distances_parallel(
 
   pforr::parallel_for(n_vertices, worker, n_threads, grain_size);
 
-  auto res = List::create(
-      _("matrix") = NumericVector(nn_weights.begin(), nn_weights.end()),
-      _("n_failures") = static_cast<std::size_t>(n_search_fails));
+  const NumericVector weights(nn_weights.begin(), nn_weights.end());
+  const auto failures = n_search_fails.load();
   if (ret_sigma) {
-    res["sigma"] = sigmas;
-    res["rho"] = rhos;
+    return List::create(_("matrix") = weights, _("n_failures") = failures,
+                        _("sigma") = sigmas, _("rho") = rhos);
   }
-  return res;
+  return List::create(_("matrix") = weights, _("n_failures") = failures);
 }
 
 // [[Rcpp::export]]

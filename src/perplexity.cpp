@@ -49,11 +49,11 @@ List calc_row_probabilities_parallel(NumericVector nn_dist,
 
   pforr::parallel_for(0, n_vertices, worker, n_threads, grain_size);
 
-  auto res = List::create(
-      _("matrix") = NumericMatrix(n_neighbors, n_vertices, nn_weights.begin()),
-      _("n_failures") = static_cast<std::size_t>(n_search_fails));
+  const NumericMatrix weights(n_neighbors, n_vertices, nn_weights.begin());
+  const auto failures = n_search_fails.load();
   if (ret_sigma) {
-    res["sigma"] = sigmas;
+    return List::create(_("matrix") = weights, _("n_failures") = failures,
+                        _("sigma") = sigmas);
   }
-  return res;
+  return List::create(_("matrix") = weights, _("n_failures") = failures);
 }
