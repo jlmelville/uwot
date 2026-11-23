@@ -18,3 +18,7 @@ expect_annoy_tmpdir <- function(fit) {
 test_that("umap writes its Annoy index in the requested directory", {
   expect_annoy_tmpdir(umap)
 })
+
+test_that("umap2 writes its Annoy index in the requested directory", {
+  expect_annoy_tmpdir(umap2)
+})
