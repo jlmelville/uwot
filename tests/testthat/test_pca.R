@@ -9,19 +9,19 @@ test_that("PCA initialization", {
   expect_equal(
     abs(iris10prcomp$x[, 1:2]),
     abs(iris10_pca_scores),
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     abs(iris10prcomp$x[, 1:2]),
     abs(iris10_irlba_scores),
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
 
   suppressWarnings(iris10_svdr_scores <- irlba_svdr_scores(iris10, ncol = 2))
   expect_equal(
     abs(iris10prcomp$x[, 1:2]),
     abs(iris10_svdr_scores),
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
 })
 
@@ -34,17 +34,16 @@ test_that("PCA returns model data", {
   expect_equal(
     abs(iris10prcomp$x[, 1:2]),
     abs(iris10_pca_scores$scores),
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     abs(iris10prcomp$rotation[, 1:2]),
     abs(iris10_pca_scores$rotation),
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     abs(iris10prcomp$center),
-    abs(iris10_pca_scores$center),
-    check.attributes = FALSE
+    abs(iris10_pca_scores$center)
   )
 
   suppressWarnings(
@@ -53,17 +52,16 @@ test_that("PCA returns model data", {
   expect_equal(
     abs(iris10prcomp$x[, 1:2]),
     abs(iris10_irlba_scores$scores),
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     abs(iris10prcomp$rotation[, 1:2]),
     abs(iris10_irlba_scores$rotation),
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     abs(iris10prcomp$center),
-    abs(iris10_irlba_scores$center),
-    check.attributes = FALSE
+    abs(iris10_irlba_scores$center)
   )
 })
 

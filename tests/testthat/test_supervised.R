@@ -140,8 +140,7 @@ test_that("local connectivity can be reset on a supervised graph", {
   expect_equal(
     as.matrix(reset_local_connectivity(sms)),
     expected,
-    tolerance = 1e-7,
-    check.attributes = FALSE
+    tolerance = 1e-7
   )
 
   # tested on a modified python version with the effect n_neighbors changed
@@ -170,8 +169,7 @@ test_that("local connectivity can be reset on a supervised graph", {
       )
     ),
     expected_reset_local_metric,
-    tolerance = 1e-7,
-    check.attributes = FALSE
+    tolerance = 1e-7
   )
 
   expect_equal(
@@ -184,8 +182,7 @@ test_that("local connectivity can be reset on a supervised graph", {
       )
     ),
     expected_reset_local_metric,
-    tolerance = 1e-7,
-    check.attributes = FALSE
+    tolerance = 1e-7
   )
 })
 
@@ -246,7 +243,6 @@ test_that("weighted intersections agree with the reference graphs", {
   expect_equal(
     as.matrix(int09),
     res09,
-    check.attributes = FALSE,
     tolerance = 1e-6
   )
 
@@ -269,7 +265,6 @@ test_that("weighted intersections agree with the reference graphs", {
   expect_equal(
     as.matrix(int01),
     res01,
-    check.attributes = FALSE,
     tolerance = 1e-6
   )
 })

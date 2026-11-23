@@ -54,7 +54,7 @@ test_that("new coordinates use weighted or unweighted neighbor averages", {
     n_threads = 0,
     verbose = FALSE
   )
-  expect_equal(embedding, av, check.attributes = FALSE)
+  expect_equal(embedding, av)
 
   wav <- t(matrix(
     c(
@@ -91,7 +91,7 @@ test_that("new coordinates use weighted or unweighted neighbor averages", {
     n_threads = 0,
     verbose = FALSE
   )
-  expect_equal(embedding, wav, check.attributes = FALSE, tolerance = 1e-5)
+  expect_equal(embedding, wav, tolerance = 1e-5)
 
   # Check threaded code
   embedding <- init_new_embedding(
@@ -103,7 +103,7 @@ test_that("new coordinates use weighted or unweighted neighbor averages", {
     n_threads = 1,
     verbose = FALSE
   )
-  expect_equal(embedding, av, check.attributes = FALSE)
+  expect_equal(embedding, av)
 
   embedding <- init_new_embedding(
     train_embedding,
@@ -114,22 +114,26 @@ test_that("new coordinates use weighted or unweighted neighbor averages", {
     n_threads = 1,
     verbose = FALSE
   )
-  expect_equal(embedding, wav, check.attributes = FALSE, tolerance = 1e-5)
+  expect_equal(embedding, wav, tolerance = 1e-5)
 })
 
 
 test_that("stored scaling parameters reproduce the training transformation", {
   iris10_range <- scale_input(iris10, scale_type = "range", ret_model = TRUE)
   iris10_rtrans <- apply_scaling(iris10, attr_to_scale_info(iris10_range))
-  expect_equal(iris10_range, iris10_rtrans, check.attributes = FALSE)
+  expect_equal(
+    iris10_range,
+    iris10_rtrans,
+    ignore_attr = c("scaled:range:max", "scaled:range:min")
+  )
 
   iris10_maxabs <- scale_input(iris10, scale_type = "maxabs", ret_model = TRUE)
   iris10_matrans <- apply_scaling(iris10, attr_to_scale_info(iris10_maxabs))
-  expect_equal(iris10_maxabs, iris10_matrans, check.attributes = FALSE)
+  expect_equal(iris10_maxabs, iris10_matrans, ignore_attr = "scaled:maxabs")
 
   iris10_scale <- scale_input(iris10, scale_type = "scale", ret_model = TRUE)
   iris10_strans <- apply_scaling(iris10, attr_to_scale_info(iris10_scale))
-  expect_equal(iris10_scale, iris10_strans, check.attributes = FALSE)
+  expect_equal(iris10_scale, iris10_strans, ignore_attr = "scaled:nzvcols")
 
   iris10_zv_col <- iris10
   iris10_zv_col[, 3] <- 10
@@ -141,7 +145,7 @@ test_that("stored scaling parameters reproduce the training transformation", {
   # scale the original iris10 here on purpose to check that full-variance column
   # is correctly removed
   iris10_zvstrans <- apply_scaling(iris10, attr_to_scale_info(iris10zvc_scale))
-  expect_equal(iris10zvc_scale, iris10_zvstrans, check.attributes = FALSE)
+  expect_equal(iris10zvc_scale, iris10_zvstrans, ignore_attr = "scaled:nzvcols")
 
   iris10_none <- scale_input(iris10, scale_type = FALSE, ret_model = TRUE)
   expect_null(attr_to_scale_info(iris10_none))
@@ -152,14 +156,18 @@ test_that("stored scaling parameters reproduce the training transformation", {
     ret_model = TRUE
   )
   iris10_crtrans <- apply_scaling(iris10, attr_to_scale_info(iris10_colrange))
-  expect_equal(iris10_colrange, iris10_crtrans, check.attributes = FALSE)
+  expect_equal(
+    iris10_colrange,
+    iris10_crtrans,
+    ignore_attr = c("scaled:colrange:max", "scaled:colrange:min")
+  )
 })
 
 test_that("stored PCA reproduces the training scores", {
   # test pca transform works
   iris10pca <- pca_init(iris10, ndim = 2, ret_extra = TRUE)
   iris10pcat <- apply_pca(iris10, iris10pca)
-  expect_equal(iris10pca$scores, iris10pcat, check.attributes = FALSE)
+  expect_equal(iris10pca$scores, iris10pcat, ignore_attr = "dimnames")
 })
 
 # #64 (and some #81)

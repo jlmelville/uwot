@@ -9,11 +9,10 @@ test_that("standardization centers and rescales each feature", {
   expect_equal(apply(iris10_none, 2, mean), iris10_mean)
 
   iris10_scale <- scale_input(iris10, scale_type = TRUE)
-  expect_equal(apply(iris10_scale, 2, sd), rep(1, 4), check.attributes = FALSE)
+  expect_equal(unname(apply(iris10_scale, 2, sd)), rep(1, 4))
   expect_equal(
-    apply(iris10_scale, 2, mean),
-    rep(0, 4),
-    check.attributes = FALSE
+    unname(apply(iris10_scale, 2, mean)),
+    rep(0, 4)
   )
 
   # "scale" and "z" and TRUE are synonyms
@@ -24,9 +23,8 @@ test_that("standardization centers and rescales each feature", {
 test_that("range and maximum-absolute scaling use the requested bounds", {
   iris10_maxabs <- scale_input(iris10, scale_type = "maxabs")
   expect_equal(
-    apply(iris10_maxabs, 2, mean),
-    rep(0, 4),
-    check.attributes = FALSE
+    unname(apply(iris10_maxabs, 2, mean)),
+    rep(0, 4)
   )
   expect_equal(max(abs(iris10_maxabs)), 1)
 
@@ -36,14 +34,12 @@ test_that("range and maximum-absolute scaling use the requested bounds", {
 
   iris10_colrange <- scale_input(iris10, scale_type = "colrange")
   expect_equal(
-    apply(iris10_colrange, 2, max),
-    rep(1, 4),
-    check.attributes = FALSE
+    unname(apply(iris10_colrange, 2, max)),
+    rep(1, 4)
   )
   expect_equal(
-    apply(iris10_colrange, 2, min),
-    rep(0, 4),
-    check.attributes = FALSE
+    unname(apply(iris10_colrange, 2, min)),
+    rep(0, 4)
   )
 })
 

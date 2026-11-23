@@ -44,7 +44,6 @@ test_that("the knn kernel returns symmetric affinities", {
   expect_equal(
     as.matrix(res),
     expected_sym_nn_graph,
-    check.attributes = FALSE,
     tolerance = 1e-7
   )
 })

@@ -129,8 +129,7 @@ test_that("symmetric affinities match the reference at perplexity four", {
   expect_equal(
     as.matrix(res),
     P_symm,
-    tolerance = 1e-5,
-    check.attributes = FALSE
+    tolerance = 1e-5
   )
 })
 
@@ -386,8 +385,7 @@ test_that("truncated neighbor lists give the reference affinities", {
   expect_equal(
     as.matrix(res),
     P_symm_6nn,
-    tolerance = 1e-5,
-    check.attributes = FALSE
+    tolerance = 1e-5
   )
 })
 
@@ -532,8 +530,7 @@ test_that("serial and threaded row probabilities match the reference", {
   expect_equal(
     as.matrix(res),
     P_row,
-    tolerance = 1e-5,
-    check.attributes = FALSE
+    tolerance = 1e-5
   )
   expect_equal(resp$sigma, expected_sigmas, tolerance = 1e-5)
 
@@ -552,8 +549,7 @@ test_that("serial and threaded row probabilities match the reference", {
   expect_equal(
     as.matrix(res),
     P_row,
-    tolerance = 1e-5,
-    check.attributes = FALSE
+    tolerance = 1e-5
   )
 })
 

@@ -171,20 +171,18 @@ test_that("exact neighbor searches agree for observations and distance matrices"
 test_that("serial and threaded Annoy Euclidean searches return reusable indexes", {
   # Test Annoy
   res <- annoy_nn(ui10, k = 4, n_threads = 0)
-  expect_equal(res$idx, self_unn4$idx, check.attributes = FALSE)
+  expect_equal(res$idx, self_unn4$idx)
   expect_equal(
     res$dist,
     self_unn4$dist,
-    check.attributes = FALSE,
     tolerance = 1e-6
   )
 
   res <- annoy_nn(ui10, k = 4, n_threads = 0, ret_index = TRUE)
-  expect_equal(res$idx, self_unn4$idx, check.attributes = FALSE)
+  expect_equal(res$idx, self_unn4$idx)
   expect_equal(
     res$dist,
     self_unn4$dist,
-    check.attributes = FALSE,
     tolerance = 1e-6
   )
   expect_true(!is.null(res$index))
@@ -193,20 +191,18 @@ test_that("serial and threaded Annoy Euclidean searches return reusable indexes"
   expect_equal(res$index$metric, "euclidean")
 
   res <- annoy_nn(ui10, k = 4, n_threads = 1)
-  expect_equal(res$idx, self_unn4$idx, check.attributes = FALSE)
+  expect_equal(res$idx, self_unn4$idx)
   expect_equal(
     res$dist,
     self_unn4$dist,
-    check.attributes = FALSE,
     tolerance = 1e-6
   )
 
   res <- annoy_nn(ui10, k = 4, n_threads = 1, ret_index = TRUE)
-  expect_equal(res$idx, self_unn4$idx, check.attributes = FALSE)
+  expect_equal(res$idx, self_unn4$idx)
   expect_equal(
     res$dist,
     self_unn4$dist,
-    check.attributes = FALSE,
     tolerance = 1e-6
   )
   expect_true(!is.null(res$index))
@@ -320,7 +316,7 @@ test_that("Annoy returns the reference cosine neighbors", {
     ret_index = TRUE,
     metric = "cosine"
   )
-  expect_equal(res$idx, cos_index, check.attributes = FALSE)
+  expect_equal(res$idx, cos_index)
   expect_angular_distances(res$dist, cos_dist)
   expect_true(!is.null(res$index))
   expect_type(res$index, "list")
@@ -553,7 +549,7 @@ test_that("Annoy returns the reference correlation neighbors", {
     ret_index = TRUE,
     metric = "correlation"
   )
-  expect_equal(res$idx, cor_index, check.attributes = FALSE)
+  expect_equal(res$idx, cor_index)
   expect_angular_distances(res$dist, cor_dist)
   expect_true(!is.null(res$index))
   expect_type(res$index, "list")
@@ -584,13 +580,11 @@ test_that("hnsw gives correct euclidean neighbor results", {
     )
   expect_equal(
     iris10_annoy$nn$euclidean$idx,
-    iris10_hnsw$nn$euclidean$idx,
-    check.attributes = FALSE
+    iris10_hnsw$nn$euclidean$idx
   )
   expect_equal(
     iris10_annoy$nn$euclidean$dist,
     iris10_hnsw$nn$euclidean$dist,
-    check.attributes = FALSE,
     tolerance = 1e-7
   )
 
@@ -599,25 +593,23 @@ test_that("hnsw gives correct euclidean neighbor results", {
   expect_equal(
     iris10_hnsw$nn$euclidean$idx,
     iris10_transform_hnsw$nn$euclidean$idx,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     iris10_hnsw$nn$euclidean$dist,
     iris10_transform_hnsw$nn$euclidean$dist,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
 
   iris10_transform_annoy <-
     umap_transform(iris10, iris10_annoy, n_epochs = 0, ret_extra = c("nn"))
   expect_equal(
     iris10_transform_annoy$nn$euclidean$idx,
-    iris10_transform_hnsw$nn$euclidean$idx,
-    check.attributes = FALSE
+    iris10_transform_hnsw$nn$euclidean$idx
   )
   expect_equal(
     iris10_transform_annoy$nn$euclidean$dist,
     iris10_transform_hnsw$nn$euclidean$dist,
-    check.attributes = FALSE,
     tolerance = 1e-6
   )
 })
@@ -646,8 +638,7 @@ test_that("hnsw gives correct cosine neighbor results", {
     )
   expect_equal(
     iris10_annoy$nn$cosine$idx,
-    iris10_hnsw$nn$cosine$idx,
-    check.attributes = FALSE
+    iris10_hnsw$nn$cosine$idx
   )
   expect_angular_distances(
     iris10_annoy$nn$cosine$dist,
@@ -659,20 +650,19 @@ test_that("hnsw gives correct cosine neighbor results", {
   expect_equal(
     iris10_hnsw$nn$cosine$idx,
     iris10_transform_hnsw$nn$cosine$idx,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     iris10_hnsw$nn$cosine$dist,
     iris10_transform_hnsw$nn$cosine$dist,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
 
   iris10_transform_annoy <-
     umap_transform(iris10, iris10_annoy, n_epochs = 0, ret_extra = c("nn"))
   expect_equal(
     iris10_transform_annoy$nn$cosine$idx,
-    iris10_transform_hnsw$nn$cosine$idx,
-    check.attributes = FALSE
+    iris10_transform_hnsw$nn$cosine$idx
   )
   expect_angular_distances(
     iris10_transform_annoy$nn$cosine$dist,
@@ -704,8 +694,7 @@ test_that("hnsw gives correct correlation neighbor results", {
     )
   expect_equal(
     iris10_annoy$nn$correlation$idx,
-    iris10_hnsw$nn$correlation$idx,
-    check.attributes = FALSE
+    iris10_hnsw$nn$correlation$idx
   )
   expect_angular_distances(
     iris10_annoy$nn$correlation$dist,
@@ -717,20 +706,19 @@ test_that("hnsw gives correct correlation neighbor results", {
   expect_equal(
     iris10_hnsw$nn$correlation$idx,
     iris10_transform_hnsw$nn$correlation$idx,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     iris10_hnsw$nn$correlation$dist,
     iris10_transform_hnsw$nn$correlation$dist,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
 
   iris10_transform_annoy <-
     umap_transform(iris10, iris10_annoy, n_epochs = 0, ret_extra = c("nn"))
   expect_equal(
     iris10_transform_annoy$nn$correlation$idx,
-    iris10_transform_hnsw$nn$correlation$idx,
-    check.attributes = FALSE
+    iris10_transform_hnsw$nn$correlation$idx
   )
   expect_angular_distances(
     iris10_transform_annoy$nn$correlation$dist,
@@ -763,8 +751,7 @@ test_that("hnsw gives correct correlation neighbor results and multiple threads"
     )
   expect_equal(
     iris10_annoy$nn$correlation$idx,
-    iris10_hnsw$nn$correlation$idx,
-    check.attributes = FALSE
+    iris10_hnsw$nn$correlation$idx
   )
   expect_angular_distances(
     iris10_annoy$nn$correlation$dist,
@@ -782,20 +769,19 @@ test_that("hnsw gives correct correlation neighbor results and multiple threads"
   expect_equal(
     iris10_hnsw$nn$correlation$idx,
     iris10_transform_hnsw$nn$correlation$idx,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     iris10_hnsw$nn$correlation$dist,
     iris10_transform_hnsw$nn$correlation$dist,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
 
   iris10_transform_annoy <-
     umap_transform(iris10, iris10_annoy, n_epochs = 0, ret_extra = c("nn"))
   expect_equal(
     iris10_transform_annoy$nn$correlation$idx,
-    iris10_transform_hnsw$nn$correlation$idx,
-    check.attributes = FALSE
+    iris10_transform_hnsw$nn$correlation$idx
   )
   expect_angular_distances(
     iris10_transform_annoy$nn$correlation$dist,
@@ -827,13 +813,11 @@ test_that("nndescent gives correct euclidean neighbor results", {
     )
   expect_equal(
     iris10_annoy$nn$euclidean$idx,
-    iris10_nnd_no_model$nn$euclidean$idx,
-    check.attributes = FALSE
+    iris10_nnd_no_model$nn$euclidean$idx
   )
   expect_equal(
     iris10_annoy$nn$euclidean$dist,
     iris10_nnd_no_model$nn$euclidean$dist,
-    check.attributes = FALSE,
     tolerance = 1e-7
   )
 
@@ -848,13 +832,11 @@ test_that("nndescent gives correct euclidean neighbor results", {
     )
   expect_equal(
     iris10_annoy$nn$euclidean$idx,
-    iris10_nnd$nn$euclidean$idx,
-    check.attributes = FALSE
+    iris10_nnd$nn$euclidean$idx
   )
   expect_equal(
     iris10_annoy$nn$euclidean$dist,
     iris10_nnd$nn$euclidean$dist,
-    check.attributes = FALSE,
     tolerance = 1e-7
   )
 
@@ -863,25 +845,23 @@ test_that("nndescent gives correct euclidean neighbor results", {
   expect_equal(
     iris10_nnd$nn$euclidean$idx,
     iris10_transform_nnd$nn$euclidean$idx,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     iris10_nnd$nn$euclidean$dist,
     iris10_transform_nnd$nn$euclidean$dist,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
 
   iris10_transform_annoy <-
     umap_transform(iris10, iris10_annoy, n_epochs = 0, ret_extra = c("nn"))
   expect_equal(
     iris10_transform_annoy$nn$euclidean$idx,
-    iris10_transform_nnd$nn$euclidean$idx,
-    check.attributes = FALSE
+    iris10_transform_nnd$nn$euclidean$idx
   )
   expect_equal(
     iris10_transform_annoy$nn$euclidean$dist,
     iris10_transform_nnd$nn$euclidean$dist,
-    check.attributes = FALSE,
     tolerance = 1e-6
   )
 })
@@ -910,8 +890,7 @@ test_that("nndescent gives correct cosine neighbor results", {
     )
   expect_equal(
     iris10_annoy$nn$cosine$idx,
-    iris10_nnd$nn$cosine$idx,
-    check.attributes = FALSE
+    iris10_nnd$nn$cosine$idx
   )
   expect_angular_distances(
     iris10_annoy$nn$cosine$dist,
@@ -923,20 +902,19 @@ test_that("nndescent gives correct cosine neighbor results", {
   expect_equal(
     iris10_nnd$nn$cosine$idx,
     iris10_transform_nnd$nn$cosine$idx,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     iris10_nnd$nn$cosine$dist,
     iris10_transform_nnd$nn$cosine$dist,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
 
   iris10_transform_annoy <-
     umap_transform(iris10, iris10_annoy, n_epochs = 0, ret_extra = c("nn"))
   expect_equal(
     iris10_transform_annoy$nn$cosine$idx,
-    iris10_transform_nnd$nn$cosine$idx,
-    check.attributes = FALSE
+    iris10_transform_nnd$nn$cosine$idx
   )
   expect_angular_distances(
     iris10_transform_annoy$nn$cosine$dist,
@@ -968,8 +946,7 @@ test_that("nndescent gives correct correlation neighbor results", {
     )
   expect_equal(
     iris10_annoy$nn$correlation$idx,
-    iris10_nnd$nn$correlation$idx,
-    check.attributes = FALSE
+    iris10_nnd$nn$correlation$idx
   )
   expect_angular_distances(
     iris10_annoy$nn$correlation$dist,
@@ -981,20 +958,19 @@ test_that("nndescent gives correct correlation neighbor results", {
   expect_equal(
     iris10_nnd$nn$correlation$idx,
     iris10_transform_nnd$nn$correlation$idx,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     iris10_nnd$nn$correlation$dist,
     iris10_transform_nnd$nn$correlation$dist,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
 
   iris10_transform_annoy <-
     umap_transform(iris10, iris10_annoy, n_epochs = 0, ret_extra = c("nn"))
   expect_equal(
     iris10_transform_annoy$nn$correlation$idx,
-    iris10_transform_nnd$nn$correlation$idx,
-    check.attributes = FALSE
+    iris10_transform_nnd$nn$correlation$idx
   )
   expect_angular_distances(
     iris10_transform_annoy$nn$correlation$dist,
@@ -1027,8 +1003,7 @@ test_that("nndescent gives correct correlation neighbor results and multiple thr
     )
   expect_equal(
     iris10_annoy$nn$correlation$idx,
-    iris10_nnd$nn$correlation$idx,
-    check.attributes = FALSE
+    iris10_nnd$nn$correlation$idx
   )
   expect_angular_distances(
     iris10_annoy$nn$correlation$dist,
@@ -1046,20 +1021,19 @@ test_that("nndescent gives correct correlation neighbor results and multiple thr
   expect_equal(
     iris10_nnd$nn$correlation$idx,
     iris10_transform_nnd$nn$correlation$idx,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
   expect_equal(
     iris10_nnd$nn$correlation$dist,
     iris10_transform_nnd$nn$correlation$dist,
-    check.attributes = FALSE
+    ignore_attr = "dimnames"
   )
 
   iris10_transform_annoy <-
     umap_transform(iris10, iris10_annoy, n_epochs = 0, ret_extra = c("nn"))
   expect_equal(
     iris10_transform_annoy$nn$correlation$idx,
-    iris10_transform_nnd$nn$correlation$idx,
-    check.attributes = FALSE
+    iris10_transform_nnd$nn$correlation$idx
   )
   expect_angular_distances(
     iris10_transform_annoy$nn$correlation$dist,

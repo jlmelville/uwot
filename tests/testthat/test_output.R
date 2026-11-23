@@ -839,9 +839,8 @@ test_that("PCA models record rotations and optional centering", {
   expect_equal(length(res$pca_models), 1)
   expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 4, nc = 2)
   expect_equal(
-    res$pca_models[["1"]]$center,
-    c(4.86, 3.31, 1.45, 0.22),
-    check.attributes = FALSE
+    unname(res$pca_models[["1"]]$center),
+    c(4.86, 3.31, 1.45, 0.22)
   )
 
   # no centering
@@ -903,15 +902,13 @@ test_that("mixed metrics retain PCA models for the selected blocks", {
   expect_equal(names(res$pca_models), c("1", "3"))
   expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 2, nc = 2)
   expect_equal(
-    res$pca_models[["1"]]$center,
-    c(4.86, 3.31),
-    check.attributes = FALSE
+    unname(res$pca_models[["1"]]$center),
+    c(4.86, 3.31)
   )
   expect_ok_matrix(res$pca_models[["3"]]$rotation, nr = 2, nc = 2)
   expect_equal(
-    res$pca_models[["3"]]$center,
-    c(1.45, 0.22),
-    check.attributes = FALSE
+    unname(res$pca_models[["3"]]$center),
+    c(1.45, 0.22)
   )
 
   res_trans <- umap_transform(
@@ -947,9 +944,8 @@ test_that("mixed metrics retain PCA models for the selected blocks", {
   expect_equal(names(res$pca_models), "1")
   expect_ok_matrix(res$pca_models[["1"]]$rotation, nr = 2, nc = 2)
   expect_equal(
-    res$pca_models[["1"]]$center,
-    c(4.86, 3.31),
-    check.attributes = FALSE
+    unname(res$pca_models[["1"]]$center),
+    c(4.86, 3.31)
   )
 
   res_trans <- umap_transform(
@@ -1917,8 +1913,7 @@ test_that("intersect and union", {
   expect_equal(
     as.matrix(simplicial_set_intersect(iris10_12, iris10_34)),
     expected_intersect,
-    tolerance = 1e-7,
-    check.attributes = FALSE
+    tolerance = 1e-7
   )
 
   expected_union <- matrix(
@@ -2031,8 +2026,7 @@ test_that("intersect and union", {
   expect_equal(
     as.matrix(simplicial_set_union(iris10_12, iris10_34)),
     expected_union,
-    tolerance = 1e-7,
-    check.attributes = FALSE
+    tolerance = 1e-7
   )
 
   expected_intersect_weighted <- matrix(
@@ -2145,8 +2139,7 @@ test_that("intersect and union", {
   expect_equal(
     as.matrix(simplicial_set_intersect(iris10_12, iris10_34, weight = 0.25)),
     expected_intersect_weighted,
-    tolerance = 1e-7,
-    check.attributes = FALSE
+    tolerance = 1e-7
   )
 })
 

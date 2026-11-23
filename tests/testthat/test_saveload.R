@@ -180,8 +180,8 @@ test_that("reload-correlation", {
   expect_equal(
     transformed_before_reload$nn$correlation$dist,
     model$nn$correlation$dist,
-    check.attributes = FALSE,
-    tolerance = 1e-7
+    tolerance = 1e-7,
+    ignore_attr = "dimnames"
   )
 
   mod_fname <- tempfile(tmpdir = tempdir())
@@ -198,8 +198,8 @@ test_that("reload-correlation", {
   expect_equal(
     transformed_after_reload$nn$correlation$dist,
     model$nn$correlation$dist,
-    check.attributes = FALSE,
-    tolerance = 1e-7
+    tolerance = 1e-7,
+    ignore_attr = "dimnames"
   )
 
   if (file.exists(mod_fname)) {
@@ -259,7 +259,6 @@ test_that("save-load hnsw", {
   expect_equal(
     transformed_before_reload$nn$euclidean$dist,
     transformed_after_reload$nn$euclidean$dist,
-    check.attributes = FALSE,
     tolerance = 1e-7
   )
 
@@ -318,7 +317,6 @@ test_that("save-load nndescent", {
   expect_equal(
     transformed_before_reload$nn$euclidean$dist,
     transformed_after_reload$nn$euclidean$dist,
-    check.attributes = FALSE,
     tolerance = 1e-7
   )
 
@@ -341,7 +339,6 @@ test_that("save-load nndescent", {
   expect_equal(
     transformed_after_reload$nn$euclidean$dist,
     transformed_after_reload2$nn$euclidean$dist,
-    check.attributes = FALSE,
     tolerance = 1e-7
   )
   expect_equal(
