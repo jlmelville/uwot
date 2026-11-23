@@ -4424,7 +4424,17 @@ load_uwot <- function(file, verbose = FALSE) {
   # create directory to store files in
   mod_dir <- tempfile(pattern = "dir")
   tsmessage("Creating temp directory ", mod_dir)
-  dir.create(mod_dir)
+  if (!dir.create(mod_dir)) {
+    stop("Cannot create temporary model directory: ", mod_dir)
+  }
+  opened_annoy <- list()
+  on.exit({
+    # Windows keeps index files locked until their mappings are released.
+    for (index in opened_annoy) {
+      index$unload()
+    }
+    unlink(mod_dir, recursive = TRUE)
+  })
 
   # #109: Windows 7 tar needs "--force-local" to avoid interpreting colon
   # as indicating a remote machine
@@ -4472,6 +4482,7 @@ load_uwot <- function(file, verbose = FALSE) {
     if (nn_method == "annoy") {
       annoy_metric <- metric
       ann <- create_ann(annoy_metric, ndim = ndim)
+      opened_annoy[[i]] <- ann
       ann$load(nn_fname)
 
       idx <-
@@ -4509,7 +4520,7 @@ load_uwot <- function(file, verbose = FALSE) {
     }
   }
   model$mod_dir <- mod_dir
-
+  on.exit(NULL)
   model
 }
 
