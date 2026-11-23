@@ -1,5 +1,4 @@
 library(uwot)
-context("optimization only")
 
 # this mainly exists to hedge against rhub timing out during tests and to still
 # exercise the main umap code even with RSpectra and other dependencies
@@ -129,37 +128,41 @@ nn <- list(
   )
 )
 
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 2,
-  learning_rate = 0.5,
-  min_dist = 0.001,
-  init = init_coords,
-  verbose = FALSE,
-  n_threads = 0,
-  nn_method = nn
-)
-expect_ok_matrix(res)
+test_that("precomputed neighbors and coordinates can be optimized", {
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 2,
+    learning_rate = 0.5,
+    min_dist = 0.001,
+    init = init_coords,
+    verbose = FALSE,
+    n_threads = 0,
+    nn_method = nn
+  )
+  expect_ok_matrix(res)
+})
 
-first_coords <- c()
-test_callback <- function(epochs, n_epochs, coords) {
-  first_coords <<- c(first_coords, coords[1, 1])
-}
-set.seed(42)
-res <- umap(
-  iris10,
-  n_neighbors = 4,
-  n_epochs = 10,
-  learning_rate = 0.5,
-  min_dist = 0.001,
-  init = init_coords,
-  verbose = FALSE,
-  nn_method = nn,
-  batch = TRUE,
-  epoch_callback = test_callback,
-  approx_pow = TRUE,
-  n_threads = 2
-)
-expect_ok_matrix(res)
-expect_equal(length(first_coords), 10)
+test_that("the epoch callback receives coordinates during optimization", {
+  first_coords <- c()
+  test_callback <- function(epochs, n_epochs, coords) {
+    first_coords <<- c(first_coords, coords[1, 1])
+  }
+  set.seed(42)
+  res <- umap(
+    iris10,
+    n_neighbors = 4,
+    n_epochs = 10,
+    learning_rate = 0.5,
+    min_dist = 0.001,
+    init = init_coords,
+    verbose = FALSE,
+    nn_method = nn,
+    batch = TRUE,
+    epoch_callback = test_callback,
+    approx_pow = TRUE,
+    n_threads = 2
+  )
+  expect_ok_matrix(res)
+  expect_equal(length(first_coords), 10)
+})

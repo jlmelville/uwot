@@ -1,14 +1,15 @@
 library(uwot)
-context("Curve Parameters")
 
-expect_equal(
-  as.vector(find_ab_params(spread = 1, min_dist = 0.001)),
-  c(1.929, 0.792),
-  tolerance = 1e-3
-)
+test_that("curve parameters match the reference fits", {
+  expect_equal(
+    as.vector(find_ab_params(spread = 1, min_dist = 0.001)),
+    c(1.929, 0.792),
+    tolerance = 1e-3
+  )
 
-expect_equal(
-  as.vector(find_ab_params(spread = 1, min_dist = 0.1)),
-  c(1.577, 0.895),
-  tolerance = 1e-3
-)
+  expect_equal(
+    as.vector(find_ab_params(spread = 1, min_dist = 0.1)),
+    c(1.577, 0.895),
+    tolerance = 1e-3
+  )
+})
