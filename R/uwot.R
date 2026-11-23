@@ -2744,7 +2744,7 @@ similarity_graph <- function(
     ret_sigma = "sigma" %in% ret_extra,
     ret_localr = "localr" %in% ret_extra,
     binary_edge_weights = binary_edge_weights,
-    tmpdir = tempdir(),
+    tmpdir = tmpdir,
     verbose = verbose,
     nn_args = nn_args
   )

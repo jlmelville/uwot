@@ -22,3 +22,7 @@ test_that("umap writes its Annoy index in the requested directory", {
 test_that("umap2 writes its Annoy index in the requested directory", {
   expect_annoy_tmpdir(umap2)
 })
+
+test_that("similarity_graph writes its Annoy index in the requested directory", {
+  expect_annoy_tmpdir(similarity_graph)
+})
