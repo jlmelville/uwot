@@ -601,7 +601,10 @@ umap_transform <- function(
           tmpdir = tmpdir,
           n_threads = n_threads,
           grain_size = grain_size,
-          verbose = verbose
+          verbose = verbose,
+          index_file = if (!is.null(model$mod_dir)) {
+            file.path(model$mod_dir, "uwot", paste0("nn", i))
+          }
         )
       } else if (startsWith(ann$type, "hnsw")) {
         if (is.list(model$nn_args)) {

@@ -4,6 +4,8 @@
 * `lvish()` passes `nn_args` to its nearest-neighbor backend.
 * `umap()`, `umap2()` and `similarity_graph()` honor the requested `tmpdir` for Annoy indexes.
 * Failed model loads release opened Annoy indexes and remove their extraction directories.
+* Interrupted Annoy fits remove their search index. Threaded transforms can reuse the index
+  of a saved model.
 * Errors from parallel workers now reach the caller when R loads both libc++ and libstdc++.
 
 # uwot 0.2.5

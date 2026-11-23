@@ -188,6 +188,7 @@ annoy_nn <- function(
     tmpdir = tmpdir,
     n_threads = n_threads,
     prep_data = TRUE,
+    owns_index = TRUE,
     grain_size = grain_size,
     verbose = verbose
   )
@@ -301,7 +302,9 @@ annoy_search <- function(
   tmpdir = tempdir(),
   n_threads = NULL,
   grain_size = 1,
-  verbose = FALSE
+  verbose = FALSE,
+  owns_index = FALSE,
+  index_file = NULL
 ) {
   # newer NN structures hide impl in a tagged list
   if (nn_is_annoy(ann)) {
@@ -325,7 +328,9 @@ annoy_search <- function(
       tmpdir = tmpdir,
       n_threads = n_threads,
       grain_size = grain_size,
-      verbose = verbose
+      verbose = verbose,
+      owns_index = owns_index,
+      index_file = index_file
     )
     res <- list(idx = annoy_res$item + 1, dist = annoy_res$distance)
   } else {
@@ -410,14 +415,26 @@ annoy_search_parallel <- function(
   tmpdir = tempdir(),
   n_threads = NULL,
   grain_size = 1,
-  verbose = FALSE
+  verbose = FALSE,
+  owns_index = FALSE,
+  index_file = NULL
 ) {
   if (is.null(n_threads)) {
     n_threads <- default_num_threads()
   }
-  index_file <- tempfile(tmpdir = tmpdir)
-  tsmessage("Writing NN index file to temp file ", index_file)
-  ann$save(index_file)
+  # An index loaded from a saved model already has a searchable backing file.
+  if (is.null(index_file) || !file.exists(index_file)) {
+    index_file <- tempfile(tmpdir = tmpdir)
+    finished <- FALSE
+    on.exit({
+      if (owns_index && !finished) {
+        ann$unload()
+      }
+      unlink(index_file)
+    })
+    tsmessage("Writing NN index file to temp file ", index_file)
+    ann$save(index_file)
+  }
   fsize <- file.size(index_file)
   tsmessage(
     "Searching Annoy index using ",
@@ -445,7 +462,6 @@ annoy_search_parallel <- function(
     n_threads = n_threads,
     grain_size = grain_size
   )
-  unlink(index_file)
   if (any(res$item == -1)) {
     msg <- paste0(
       "search_k/n_trees settings were unable to find ",
@@ -463,6 +479,7 @@ annoy_search_parallel <- function(
     stop(msg)
   }
 
+  finished <- TRUE
   res
 }
 
