@@ -2,6 +2,18 @@
 
 ## uwot (development version)
 
+- [`optimize_graph_layout()`](https://jlmelville.github.io/uwot/reference/optimize_graph_layout.md)
+  honors `binary_edge_weights` on weighted input graphs.
+- [`lvish()`](https://jlmelville.github.io/uwot/reference/lvish.md)
+  passes `nn_args` to its nearest-neighbor backend.
+- [`umap()`](https://jlmelville.github.io/uwot/reference/umap.md),
+  [`umap2()`](https://jlmelville.github.io/uwot/reference/umap2.md) and
+  [`similarity_graph()`](https://jlmelville.github.io/uwot/reference/similarity_graph.md)
+  honor the requested `tmpdir` for Annoy indexes.
+- Failed model loads release opened Annoy indexes and remove their
+  extraction directories.
+- Interrupted Annoy fits remove their search index. Threaded transforms
+  can reuse the index of a saved model.
 - Errors from parallel workers now reach the caller when R loads both
   libc++ and libstdc++.
 
