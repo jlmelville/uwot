@@ -177,11 +177,10 @@ test_that("reload-correlation", {
   transformed_before_reload <-
     umap_transform(iris10, model, n_epochs = 2, ret_extra = c("nn"))
 
-  expect_equal(
+  expect_angular_distances(
     transformed_before_reload$nn$correlation$dist,
     model$nn$correlation$dist,
-    tolerance = 1e-7,
-    ignore_attr = "dimnames"
+    tolerance = 1e-7
   )
 
   mod_fname <- tempfile(tmpdir = tempdir())
@@ -189,18 +188,18 @@ test_that("reload-correlation", {
 
   modelload <- load_uwot(file = mod_fname)
 
-  expect_equal(names(model$metric), "correlation")
-  expect_equal(model$nn_index$metric, "correlation")
+  expect_equal(names(modelload$metric), "correlation")
+  expect_equal(modelload$nn_index$metric, "correlation")
 
   set.seed(1337)
   transformed_after_reload <-
     umap_transform(iris10, modelload, n_epochs = 2, ret_extra = c("nn"))
-  expect_equal(
+  expect_angular_distances(
     transformed_after_reload$nn$correlation$dist,
     model$nn$correlation$dist,
-    tolerance = 1e-7,
-    ignore_attr = "dimnames"
+    tolerance = 1e-7
   )
+  expect_identical(transformed_after_reload$nn, transformed_before_reload$nn)
 
   if (file.exists(mod_fname)) {
     unlink(mod_fname)

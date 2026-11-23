@@ -1,12 +1,6 @@
 library(uwot)
 library(RSpectra)
 
-# Angular distances close to zero differ between single-precision backends.
-expect_angular_distances <- function(actual, expected) {
-  expect_identical(dim(actual), dim(expected))
-  expect_lte(max(abs(actual - expected)), 1e-6)
-}
-
 i10nn4dist <- matrix(
   c(
     0,

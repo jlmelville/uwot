@@ -275,6 +275,12 @@ expect_is_nn <- function(res, nr = 10, k = 4) {
   expect_is_nn_matrix(res$idx, nr, k)
 }
 
+# Angular distances close to zero vary across single-precision calculations.
+expect_angular_distances <- function(actual, expected, tolerance = 1e-6) {
+  expect_identical(dim(actual), dim(expected))
+  expect_lte(max(abs(actual - expected)), tolerance)
+}
+
 expect_is_nn_matrix <- function(res, nr = 10, k = 4) {
   expect_true(is.matrix(res))
   expect_equal(nrow(res), nr)
