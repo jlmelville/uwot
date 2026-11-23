@@ -70,61 +70,75 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"uwot"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="from-github">From github<a class="anchor" aria-label="anchor" href="#from-github"></a>
+<h3 id="from-github">From GitHub<a class="anchor" aria-label="anchor" href="#from-github"></a>
 </h3>
-<p><code>uwot</code> makes use of C++ code which must be compiled. You may have to carry out a few extra steps before being able to build this package:</p>
-<p><strong>Windows</strong>: install <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">Rtools</a> and ensure <code>C:\Rtools\bin</code> is on your path.</p>
-<p><strong>Mac OS X</strong>: using a custom <code>~/.R/Makevars</code> <a href="https://github.com/jlmelville/uwot/issues/1" class="external-link">may cause linking errors</a>. This sort of thing is a potential problem on all platforms but seems to bite Mac owners more. <a href="https://cran.r-project.org/bin/macosx/RMacOSX-FAQ.html#Installation-of-source-packages" class="external-link">The R for Mac OS X FAQ</a> may be helpful here to work out what you can get away with. To be on the safe side, I would advise building <code>uwot</code> without a custom <code>Makevars</code>.</p>
+<p>Building the development version from source requires a C++17 compiler.</p>
+<ul>
+<li>On Windows, install the <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">Rtools version for your R release</a>.</li>
+<li>On macOS, install the Xcode Command Line Tools with <code>xcode-select --install</code>. The <a href="https://mac.r-project.org/tools/" class="external-link">R for macOS tools page</a> lists compilers for dependencies built from source.</li>
+<li>On Linux, install R’s development headers, <code>make</code>, and a C++17 compiler through your distribution.</li>
+</ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"jlmelville/uwot"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"jlmelville/uwot"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
+<p>Embed the four measurements in R’s built-in <code>iris</code> data, then plot one point per flower. The plotting symbols identify the species.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/uwot" class="external-link">uwot</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># umap2 is a version of the umap() function with better defaults</span></span>
-<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/umap2.html">umap2</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># but you can still use the umap function (which most of the existing </span></span>
-<span><span class="co"># documentation does)</span></span>
-<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Load mnist from somewhere, e.g.</span></span>
-<span><span class="co"># devtools::install_github("jlmelville/snedata")</span></span>
-<span><span class="co"># mnist &lt;- snedata::download_mnist()</span></span>
-<span></span>
-<span><span class="va">mnist_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, min_dist <span class="op">=</span> <span class="fl">0.001</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">iris_umap</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/umap2.html">umap2</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">species</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">iris_umap</span>,</span>
+<span>  pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="st">"UMAP 1"</span>,</span>
+<span>  ylab <span class="op">=</span> <span class="st">"UMAP 2"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span></span>
+<span>  <span class="st">"topright"</span>,</span>
+<span>  legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>,</span>
+<span>  pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  bty <span class="op">=</span> <span class="st">"n"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="mnist-example">MNIST example<a class="anchor" aria-label="anchor" href="#mnist-example"></a>
+</h2>
+<p>To embed the 70,000 handwritten digits in MNIST, first install the <code>snedata</code> package from GitHub.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"jlmelville/snedata"</span><span class="op">)</span></span></code></pre></div>
+<p>Download the data, fit UMAP to the pixel values, and color each point by its digit label.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mnist</span> <span class="op">&lt;-</span> <span class="fu">snedata</span><span class="fu">::</span><span class="fu">download_mnist</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">mnist_umap</span> <span class="op">&lt;-</span> <span class="fu">uwot</span><span class="fu">::</span><span class="fu"><a href="reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, min_dist <span class="op">=</span> <span class="fl">0.001</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">digit_colors</span> <span class="op">&lt;-</span> <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/adjustcolor.html" class="external-link">adjustcolor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nlevels.html" class="external-link">nlevels</a></span><span class="op">(</span><span class="va">mnist</span><span class="op">$</span><span class="va">Label</span><span class="op">)</span><span class="op">)</span>, alpha.f <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">mnist_umap</span>,</span>
 <span>  cex <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span>  col <span class="op">=</span> <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">mnist</span><span class="op">$</span><span class="va">Label</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">mnist</span><span class="op">$</span><span class="va">Label</span><span class="op">)</span><span class="op">]</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/adjustcolor.html" class="external-link">adjustcolor</a></span><span class="op">(</span>alpha.f <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span>
+<span>  col <span class="op">=</span> <span class="va">digit_colors</span><span class="op">[</span><span class="va">mnist</span><span class="op">$</span><span class="va">Label</span><span class="op">]</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"R uwot::umap"</span>,</span>
 <span>  xlab <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  ylab <span class="op">=</span> <span class="st">""</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># I recommend the following optional packages</span></span>
-<span><span class="co"># for faster or more flexible nearest neighbor search:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RcppHNSW"</span>, <span class="st">"rnndescent"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jlmelville/rcpphnsw" class="external-link">RcppHNSW</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jlmelville.github.io/rnndescent/" class="external-link">rnndescent</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Installing RcppHNSW will allow the use of the usually faster HNSW method:</span></span>
-<span><span class="va">mnist_umap_hnsw</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, min_dist <span class="op">=</span> <span class="fl">0.001</span>, </span>
-<span>                        nn_method <span class="op">=</span> <span class="st">"hnsw"</span><span class="op">)</span></span>
-<span><span class="co"># nndescent is also available</span></span>
-<span><span class="va">mnist_umap_nnd</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/umap.html">umap</a></span><span class="op">(</span><span class="va">mnist</span>, n_neighbors <span class="op">=</span> <span class="fl">15</span>, min_dist <span class="op">=</span> <span class="fl">0.001</span>, </span>
-<span>                       nn_method <span class="op">=</span> <span class="st">"nndescent"</span><span class="op">)</span></span>
-<span><span class="co"># umap2 will choose HNSW by default if available</span></span>
-<span><span class="va">mnist_umap2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/umap2.html">umap2</a></span><span class="op">(</span><span class="va">mnist</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <div class="float">
-<img src="reference/figures/mnist-r.png" alt="MNIST UMAP"><div class="figcaption">MNIST UMAP</div>
+<img src="reference/figures/mnist-r.png" alt="UMAP embedding of MNIST, colored by digit"><div class="figcaption">UMAP embedding of MNIST, colored by digit</div>
 </div>
+</div>
+<div class="section level2">
+<h2 id="optional-neighbor-backends">Optional neighbor backends<a class="anchor" aria-label="anchor" href="#optional-neighbor-backends"></a>
+</h2>
+<p>For approximate nearest-neighbor search, install the package for the method you want to use.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RcppHNSW"</span>, <span class="st">"rnndescent"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Select HNSW or NN-Descent with <code>nn_method</code>. These examples use the built-in iris measurements.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">iris_hnsw</span> <span class="op">&lt;-</span> <span class="fu">uwot</span><span class="fu">::</span><span class="fu"><a href="reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, nn_method <span class="op">=</span> <span class="st">"hnsw"</span><span class="op">)</span></span>
+<span><span class="va">iris_nnd</span> <span class="op">&lt;-</span> <span class="fu">uwot</span><span class="fu">::</span><span class="fu"><a href="reference/umap.html">umap</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, nn_method <span class="op">=</span> <span class="st">"nndescent"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
