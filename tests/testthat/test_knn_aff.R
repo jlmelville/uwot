@@ -12,19 +12,14 @@ test_that("sparse graphs retain weights for each neighbor", {
   res <- nng_to_sparse(nn$idx, val = 2)
   expect_equal(res, expected_sparse)
 
-  v <- 1
+  weights <- matrix(1:40, nrow = 10, byrow = TRUE)
   expected_sparse_mv <- matrix(0, nrow = 10, ncol = 10)
   for (i in seq_len(nrow(nn$idx))) {
-    nnr <- sort(nn$idx[i, ])
-    for (j in seq_len(ncol(nn$idx))) {
-      expected_sparse_mv[i, nnr[j]] <- v
-      v <- v + 1
-    }
+    expected_sparse_mv[i, nn$idx[i, ]] <- weights[i, ]
   }
   expect_equal(
-    nng_to_sparse(nn$idx, matrix(1:40, nrow = 10, byrow = TRUE)),
-    Matrix::drop0(expected_sparse_mv),
-    check.attributes = FALSE
+    nng_to_sparse(nn$idx, weights),
+    Matrix::drop0(expected_sparse_mv)
   )
 })
 
