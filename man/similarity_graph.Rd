@@ -323,10 +323,8 @@ similarities. \code{"knn"} assigns equal similiarties. to every edge in the
 nearest neighbor graph, and zero otherwise, using \code{perplexity} nearest
 neighbors. The \code{n_neighbors} parameter is ignored in this case.}
 
-\item{tmpdir}{Temporary directory to store nearest neighbor indexes during
-nearest neighbor search. Default is \code{\link{tempdir}}. The index is
-only written to disk if \code{n_threads > 1} and
-\code{nn_method = "annoy"}; otherwise, this parameter is ignored.}
+\item{tmpdir}{Directory for temporary Annoy index files when
+\code{n_threads > 0}. Defaults to \code{\link{tempdir}}.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
 

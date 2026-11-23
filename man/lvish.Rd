@@ -369,10 +369,8 @@ any combination of the following strings:
     Gaussians to reproduce the target \code{"perplexity"}.
 }}
 
-\item{tmpdir}{Temporary directory to store nearest neighbor indexes during
-nearest neighbor search. Default is \code{\link{tempdir}}. The index is
-only written to disk if \code{n_threads > 1} and
-\code{nn_method = "annoy"}; otherwise, this parameter is ignored.}
+\item{tmpdir}{Directory for temporary Annoy index files when
+\code{n_threads > 0}. Defaults to \code{\link{tempdir}}.}
 
 \item{verbose}{If \code{TRUE}, log details to the console.}
 

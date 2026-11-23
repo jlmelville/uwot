@@ -179,6 +179,9 @@ annoy_nn <- function(
     n_threads <- default_num_threads()
   }
   ann <- annoy_build(X, metric = metric, n_trees = n_trees, verbose = verbose)
+  if (!ret_index) {
+    on.exit(release_annoy_backing(annoy_backing(ann$ann)))
+  }
 
   res <- annoy_search(
     X,
@@ -407,6 +410,33 @@ annoy_search_serial <- function(
   list(idx = idx + 1, dist = dist)
 }
 
+# A saved Annoy index remains mapped on Windows. Keep its backing file with
+# the live index, including when several R models share that index.
+annoy_backing <- function(ann) {
+  get0(".uwot_backing", envir = ann, inherits = FALSE)
+}
+
+remember_annoy_backing <- function(ann, path) {
+  backing <- annoy_backing(ann)
+  if (is.null(backing)) {
+    backing <- new.env(parent = emptyenv())
+    backing$unload <- ann$unload
+    reg.finalizer(backing, release_annoy_backing, onexit = TRUE)
+    assign(".uwot_backing", backing, envir = ann)
+  }
+  backing$path <- normalizePath(path, mustWork = TRUE)
+}
+
+release_annoy_backing <- function(backing, unload = TRUE) {
+  if (!is.null(backing$path)) {
+    if (unload) {
+      backing$unload()
+    }
+    unlink(backing$path)
+    backing$path <- NULL
+  }
+}
+
 annoy_search_parallel <- function(
   X,
   k,
@@ -424,16 +454,24 @@ annoy_search_parallel <- function(
   }
   # An index loaded from a saved model already has a searchable backing file.
   if (is.null(index_file) || !file.exists(index_file)) {
+    index_file <- annoy_backing(ann)$path
+  }
+  if (is.null(index_file)) {
     index_file <- tempfile(tmpdir = tmpdir)
+    saved <- FALSE
     finished <- FALSE
     on.exit({
       if (owns_index && !finished) {
         ann$unload()
       }
-      unlink(index_file)
+      removed <- unlink(index_file) == 0L
+      if (!removed && saved && .Platform$OS.type == "windows") {
+        remember_annoy_backing(ann, index_file)
+      }
     })
     tsmessage("Writing NN index file to temp file ", index_file)
     ann$save(index_file)
+    saved <- TRUE
   }
   fsize <- file.size(index_file)
   tsmessage(

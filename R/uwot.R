@@ -509,10 +509,10 @@
 #'   switching was outweighing the improvement due to concurrent processing.
 #'   This should be left at default (\code{1}) and work will be spread evenly
 #'   over all the threads specified.
-#' @param tmpdir Temporary directory to store nearest neighbor indexes during
-#'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
-#'   only written to disk if \code{n_threads > 1} and
-#'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
+#' @param tmpdir Directory for temporary Annoy index files when
+#'   \code{n_threads > 0}. Defaults to \code{\link{tempdir}}.
+#'   On Windows, a model can keep one temporary file per live Annoy index until
+#'   you save or unload the model, or R garbage-collects the index.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @param opt_args A list of optimizer parameters, used when
 #'   \code{batch = TRUE}. The default optimization method used is Adam (Kingma
@@ -1340,10 +1340,10 @@ umap <- function(
 #'   switching was outweighing the improvement due to concurrent processing.
 #'   This should be left at default (\code{1}) and work will be spread evenly
 #'   over all the threads specified.
-#' @param tmpdir Temporary directory to store nearest neighbor indexes during
-#'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
-#'   only written to disk if \code{n_threads > 1} and
-#'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
+#' @param tmpdir Directory for temporary Annoy index files when
+#'   \code{n_threads > 0}. Defaults to \code{\link{tempdir}}.
+#'   On Windows, a model can keep one temporary file per live Annoy index until
+#'   you save or unload the model, or R garbage-collects the index.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @param opt_args A list of optimizer parameters, used when
 #'   \code{batch = TRUE}. The default optimization method used is Adam (Kingma
@@ -1999,10 +1999,8 @@ tumap <- function(
 #'    \item \code{sigma} a vector of the bandwidths used to calibrate the input
 #'       Gaussians to reproduce the target \code{"perplexity"}.
 #'   }
-#' @param tmpdir Temporary directory to store nearest neighbor indexes during
-#'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
-#'   only written to disk if \code{n_threads > 1} and
-#'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
+#' @param tmpdir Directory for temporary Annoy index files when
+#'   \code{n_threads > 0}. Defaults to \code{\link{tempdir}}.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @param opt_args A list of optimizer parameters, used when
 #'   \code{batch = TRUE}. The default optimization method used is Adam (Kingma
@@ -2589,10 +2587,8 @@ lvish <- function(
 #'   thread management and context switching was outweighing the improvement due
 #'   to concurrent processing. This should be left at default (\code{1}) and
 #'   work will be spread evenly over all the threads specified.
-#' @param tmpdir Temporary directory to store nearest neighbor indexes during
-#'   nearest neighbor search. Default is \code{\link{tempdir}}. The index is
-#'   only written to disk if \code{n_threads > 1} and
-#'   \code{nn_method = "annoy"}; otherwise, this parameter is ignored.
+#' @param tmpdir Directory for temporary Annoy index files when
+#'   \code{n_threads > 0}. Defaults to \code{\link{tempdir}}.
 #' @param verbose If \code{TRUE}, log details to the console.
 #' @param binary_edge_weights If \code{TRUE} then edge weights of the returned
 #'   graph are binary (0/1) rather than reflecting the degree of similarity.
@@ -4321,6 +4317,9 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
           nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
           nn_meta_tmpfname <- file.path(uwot_dir, paste0("nn-meta", i))
           nn_index$ann$save(nn_tmpfname)
+          if (startsWith(nn_index$type, "annoy")) {
+            release_annoy_backing(annoy_backing(nn_index$ann), unload = FALSE)
+          }
 
           # save metadata wrapper around the index separately
           meta_data <- nn_index
@@ -4583,11 +4582,11 @@ unload_uwot <- function(model, cleanup = TRUE, verbose = FALSE) {
     for (i in 1:n_metrics) {
       if (n_metrics == 1) {
         rcppannoy <- get_rcppannoy(model$nn_index)
-        rcppannoy$unload()
       } else {
         rcppannoy <- get_rcppannoy(model$nn_index[[i]])
-        rcppannoy$unload()
       }
+      rcppannoy$unload()
+      release_annoy_backing(annoy_backing(rcppannoy), unload = FALSE)
     }
   }
 
