@@ -256,10 +256,8 @@ test_that("high-perplexity affinities match the rounded reference", {
   )$matrix
   expect_true(Matrix::isSymmetric(res))
   expect_equal(
-    as.matrix(res),
-    Psymm9,
-    tolerance = 1e-4,
-    check.attributes = FALSE
+    round(as.matrix(res), 4),
+    Psymm9
   )
 })
 

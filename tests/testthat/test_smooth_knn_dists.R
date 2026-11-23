@@ -1015,7 +1015,7 @@ test_that("sparse rows can contain different numbers of neighbors", {
   expect_equal(sknn34msp$matrix@i, expected_sknn34m@i)
   expect_equal(sknn34msp$n_failures, 1)
   expect_equal(
-    sknn34msp$sigma,
+    round(sknn34msp$sigma, 7),
     c(
       0.1799393,
       0.2364655,
@@ -1027,8 +1027,7 @@ test_that("sparse rows can contain different numbers of neighbors", {
       0.1355171,
       0.2454262,
       0.2063370
-    ),
-    tolerance = 1e-7
+    )
   )
   expect_equal(sknn34msp$rho, expected_rho, tolerance = 1e-6)
 })

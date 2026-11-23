@@ -1366,7 +1366,7 @@ test_that("returned local scales and radii match their references", {
     0.2063
   )
   sigma <- res$sigma
-  expect_equal(sigma, expected_sigma, tolerance = 1e-4)
+  expect_equal(signif(sigma, 4), expected_sigma)
 
   expected_rho <- c(
     0.1414,
@@ -1381,7 +1381,7 @@ test_that("returned local scales and radii match their references", {
     0.1732
   )
   rho <- res$rho
-  expect_equal(rho, expected_rho, 1e-4)
+  expect_equal(signif(rho, 4), expected_rho)
 
   res <- umap(
     iris10,
@@ -1410,9 +1410,9 @@ test_that("returned local scales and radii match their references", {
   expect_is(res, "list")
   expect_ok_matrix(res$embedding)
   sigma <- res$sigma
-  expect_equal(sigma, expected_sigma, tolerance = 1e-4)
+  expect_equal(signif(sigma, 4), expected_sigma)
   rho <- res$rho
-  expect_equal(rho, expected_rho, tolerance = 1e-4)
+  expect_equal(signif(rho, 4), expected_rho)
 
   expected_localr <- c(
     0.3214,
