@@ -568,11 +568,10 @@ tumap(
 
 - tmpdir:
 
-  Temporary directory to store nearest neighbor indexes during nearest
-  neighbor search. Default is
-  [`tempdir`](https://rdrr.io/r/base/tempfile.html). The index is only
-  written to disk if `n_threads > 1` and `nn_method = "annoy"`;
-  otherwise, this parameter is ignored.
+  Directory for temporary Annoy index files when `n_threads > 0`.
+  Defaults to [`tempdir`](https://rdrr.io/r/base/tempfile.html). On
+  Windows, a model can keep one temporary file per live Annoy index
+  until you save or unload the model, or R garbage-collects the index.
 
 - verbose:
 

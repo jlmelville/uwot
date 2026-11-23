@@ -43,7 +43,7 @@
 <li>
 <code><a href="../reference/umap.html">umap()</a></code>, <code><a href="../reference/umap2.html">umap2()</a></code> and <code><a href="../reference/similarity_graph.html">similarity_graph()</a></code> honor the requested <code>tmpdir</code> for Annoy indexes.</li>
 <li>Failed model loads release opened Annoy indexes and remove their extraction directories.</li>
-<li>Interrupted Annoy fits remove their search index. Threaded transforms can reuse the index of a saved model.</li>
+<li>Interrupted Annoy fits remove their search index. Threaded transforms can reuse the index of a saved model. On Windows, a live Annoy index can retain one mapped file until the model is saved, unloaded, or garbage-collected.</li>
 <li>Errors from parallel workers now reach the caller when R loads both libc++ and libstdc++.</li>
 </ul></div>
     <div class="section level2">

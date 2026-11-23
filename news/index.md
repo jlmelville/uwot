@@ -13,7 +13,9 @@
 - Failed model loads release opened Annoy indexes and remove their
   extraction directories.
 - Interrupted Annoy fits remove their search index. Threaded transforms
-  can reuse the index of a saved model.
+  can reuse the index of a saved model. On Windows, a live Annoy index
+  can retain one mapped file until the model is saved, unloaded, or
+  garbage-collected.
 - Errors from parallel workers now reach the caller when R loads both
   libc++ and libstdc++.
 

@@ -537,10 +537,10 @@ any combination of the following strings:</p><ul><li><p><code>"model"</code> Sam
 
 
 <dt id="arg-tmpdir">tmpdir<a class="anchor" aria-label="anchor" href="#arg-tmpdir"></a></dt>
-<dd><p>Temporary directory to store nearest neighbor indexes during
-nearest neighbor search. Default is <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></code>. The index is
-only written to disk if <code>n_threads &gt; 1</code> and
-<code>nn_method = "annoy"</code>; otherwise, this parameter is ignored.</p></dd>
+<dd><p>Directory for temporary Annoy index files when
+<code>n_threads &gt; 0</code>. Defaults to <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></code>.
+On Windows, a model can keep one temporary file per live Annoy index until
+you save or unload the model, or R garbage-collects the index.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
