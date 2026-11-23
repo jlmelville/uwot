@@ -1,5 +1,4 @@
 library(uwot)
-context("perplexity")
 
 # Full neighbor values based on comparison with smallvis results
 iris10_nn10 <- dist_nn(stats::dist(iris10), k = 10)
@@ -113,20 +112,27 @@ P_symm <- matrix(
 )
 
 
-res <- perplexity_similarities(
-  perplexity = 4,
-  verbose = FALSE,
-  nn = find_nn(
-    iris10,
-    k = 10,
-    method = "fnn",
-    metric = "euclidean",
-    n_threads = 0,
-    verbose = FALSE
+test_that("symmetric affinities match the reference at perplexity four", {
+  res <- perplexity_similarities(
+    perplexity = 4,
+    verbose = FALSE,
+    nn = find_nn(
+      iris10,
+      k = 10,
+      method = "fnn",
+      metric = "euclidean",
+      n_threads = 0,
+      verbose = FALSE
+    )
+  )$matrix
+  expect_true(Matrix::isSymmetric(res))
+  expect_equal(
+    as.matrix(res),
+    P_symm,
+    tolerance = 1e-5,
+    check.attributes = FALSE
   )
-)$matrix
-expect_true(Matrix::isSymmetric(res))
-expect_equal(as.matrix(res), P_symm, tolerance = 1e-5, check.attributes = FALSE)
+})
 
 Psymm9 <- matrix(
   c(
@@ -235,20 +241,27 @@ Psymm9 <- matrix(
   nrow = 10
 )
 
-res <- perplexity_similarities(
-  perplexity = 9,
-  verbose = FALSE,
-  nn = find_nn(
-    iris10,
-    k = 10,
-    method = "fnn",
-    metric = "euclidean",
-    n_threads = 0,
-    verbose = FALSE
+test_that("high-perplexity affinities match the rounded reference", {
+  res <- perplexity_similarities(
+    perplexity = 9,
+    verbose = FALSE,
+    nn = find_nn(
+      iris10,
+      k = 10,
+      method = "fnn",
+      metric = "euclidean",
+      n_threads = 0,
+      verbose = FALSE
+    )
+  )$matrix
+  expect_true(Matrix::isSymmetric(res))
+  expect_equal(
+    as.matrix(res),
+    Psymm9,
+    tolerance = 1e-4,
+    check.attributes = FALSE
   )
-)$matrix
-expect_true(Matrix::isSymmetric(res))
-expect_equal(as.matrix(res), Psymm9, tolerance = 1e-4, check.attributes = FALSE)
+})
 
 
 P_symm_6nn <- matrix(
@@ -358,25 +371,27 @@ P_symm_6nn <- matrix(
   nrow = 10,
   byrow = TRUE
 )
-res <- perplexity_similarities(
-  perplexity = 4,
-  verbose = FALSE,
-  nn = find_nn(
-    iris10,
-    k = 6,
-    method = "fnn",
-    metric = "euclidean",
-    n_threads = 0,
-    verbose = FALSE
+test_that("truncated neighbor lists give the reference affinities", {
+  res <- perplexity_similarities(
+    perplexity = 4,
+    verbose = FALSE,
+    nn = find_nn(
+      iris10,
+      k = 6,
+      method = "fnn",
+      metric = "euclidean",
+      n_threads = 0,
+      verbose = FALSE
+    )
+  )$matrix
+  expect_true(Matrix::isSymmetric(res))
+  expect_equal(
+    as.matrix(res),
+    P_symm_6nn,
+    tolerance = 1e-5,
+    check.attributes = FALSE
   )
-)$matrix
-expect_true(Matrix::isSymmetric(res))
-expect_equal(
-  as.matrix(res),
-  P_symm_6nn,
-  tolerance = 1e-5,
-  check.attributes = FALSE
-)
+})
 
 # x2aff(stats::dist(iris10), perplexity = 4)
 P_row <- matrix(
@@ -500,37 +515,49 @@ expected_sigmas <- c(
   0.2411619
 )
 
-iris10nn10d <- as.vector(t(iris10_nn10$dist))
-resp <- calc_row_probabilities_parallel(
-  iris10nn10d,
-  n_vertices = nrow(iris10_nn10$dist),
-  perplexity = 4,
-  n_threads = 0,
-  ret_sigma = TRUE
-)
-res <- resp$matrix
-res <- nng_to_sparse(
-  iris10_nn10$idx,
-  as.vector(t(res)),
-  self_nbr = TRUE,
-  max_nbr_id = nrow(iris10_nn10$idx)
-)
-expect_equal(as.matrix(res), P_row, tolerance = 1e-5, check.attributes = FALSE)
-expect_equal(resp$sigma, expected_sigmas, tolerance = 1e-5)
+test_that("serial and threaded row probabilities match the reference", {
+  iris10nn10d <- as.vector(t(iris10_nn10$dist))
+  resp <- calc_row_probabilities_parallel(
+    iris10nn10d,
+    n_vertices = nrow(iris10_nn10$dist),
+    perplexity = 4,
+    n_threads = 0,
+    ret_sigma = TRUE
+  )
+  res <- resp$matrix
+  res <- nng_to_sparse(
+    iris10_nn10$idx,
+    as.vector(t(res)),
+    self_nbr = TRUE,
+    max_nbr_id = nrow(iris10_nn10$idx)
+  )
+  expect_equal(
+    as.matrix(res),
+    P_row,
+    tolerance = 1e-5,
+    check.attributes = FALSE
+  )
+  expect_equal(resp$sigma, expected_sigmas, tolerance = 1e-5)
 
-res <- calc_row_probabilities_parallel(
-  iris10nn10d,
-  n_vertices = nrow(iris10_nn10$dist),
-  perplexity = 4,
-  n_threads = 1
-)$matrix
-res <- nng_to_sparse(
-  iris10_nn10$idx,
-  as.vector(t(res)),
-  self_nbr = TRUE,
-  max_nbr_id = nrow(iris10_nn10$idx)
-)
-expect_equal(as.matrix(res), P_row, tolerance = 1e-5, check.attributes = FALSE)
+  res <- calc_row_probabilities_parallel(
+    iris10nn10d,
+    n_vertices = nrow(iris10_nn10$dist),
+    perplexity = 4,
+    n_threads = 1
+  )$matrix
+  res <- nng_to_sparse(
+    iris10_nn10$idx,
+    as.vector(t(res)),
+    self_nbr = TRUE,
+    max_nbr_id = nrow(iris10_nn10$idx)
+  )
+  expect_equal(
+    as.matrix(res),
+    P_row,
+    tolerance = 1e-5,
+    check.attributes = FALSE
+  )
+})
 
 iris_dup <- duplicated(x2m(iris))
 uiris <- iris[!iris_dup, ]
@@ -844,38 +871,44 @@ Prow_niris_p150_k50_betas <-
     13.867188,
     22.583008
   )
-res <- perplexity_similarities(
-  perplexity = 50,
-  n_threads = 0,
-  verbose = FALSE,
-  ret_sigma = TRUE,
-  nn = find_nn(
-    normiris,
-    k = 149,
-    method = "fnn",
-    metric = "euclidean",
+test_that("normalized iris data gives the reference row sums and bandwidths", {
+  res <- perplexity_similarities(
+    perplexity = 50,
     n_threads = 0,
-    verbose = FALSE
+    verbose = FALSE,
+    ret_sigma = TRUE,
+    nn = find_nn(
+      normiris,
+      k = 149,
+      method = "fnn",
+      metric = "euclidean",
+      n_threads = 0,
+      verbose = FALSE
+    )
   )
-)
-expect_equal(
-  Matrix::rowSums(res$matrix),
-  Prow_iris_p150_k50_rowSums,
-  tolerance = 1e-6
-)
-expect_equal(1 / res$sigma^2, Prow_niris_p150_k50_betas, tolerance = 1e-6)
+  expect_equal(
+    Matrix::rowSums(res$matrix),
+    Prow_iris_p150_k50_rowSums,
+    tolerance = 1e-6
+  )
+  expect_equal(1 / res$sigma^2, Prow_niris_p150_k50_betas, tolerance = 1e-6)
 
-res <- perplexity_similarities(
-  perplexity = 50,
-  n_threads = 1,
-  verbose = FALSE,
-  nn = find_nn(
-    normiris,
-    k = 149,
-    method = "fnn",
-    metric = "euclidean",
+  res <- perplexity_similarities(
+    perplexity = 50,
     n_threads = 1,
-    verbose = FALSE
+    verbose = FALSE,
+    nn = find_nn(
+      normiris,
+      k = 149,
+      method = "fnn",
+      metric = "euclidean",
+      n_threads = 1,
+      verbose = FALSE
+    )
+  )$matrix
+  expect_equal(
+    Matrix::rowSums(res),
+    Prow_iris_p150_k50_rowSums,
+    tolerance = 1e-6
   )
-)$matrix
-expect_equal(Matrix::rowSums(res), Prow_iris_p150_k50_rowSums, tolerance = 1e-6)
+})
