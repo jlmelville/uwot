@@ -2215,7 +2215,7 @@ lvish <- function(
     tmpdir = tmpdir,
     binary_edge_weights = binary_edge_weights,
     verbose = verbose,
-    nn_args = list(),
+    nn_args = nn_args,
     rng_type = rng_type
   )
 }
