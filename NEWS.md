@@ -2,6 +2,7 @@
 
 * `optimize_graph_layout()` honors `binary_edge_weights` on weighted input graphs.
 * `lvish()` passes `nn_args` to its nearest-neighbor backend.
+* `umap()` honors the requested `tmpdir` for Annoy indexes.
 * Errors from parallel workers now reach the caller when R loads both libc++ and libstdc++.
 
 # uwot 0.2.5

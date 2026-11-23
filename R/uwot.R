@@ -788,7 +788,7 @@ umap <- function(
     opt_args = opt_args,
     epoch_callback = epoch_callback,
     binary_edge_weights = binary_edge_weights,
-    tmpdir = tempdir(),
+    tmpdir = tmpdir,
     verbose = verbose,
     dens_scale = dens_scale,
     seed = seed,
