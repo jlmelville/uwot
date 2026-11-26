@@ -496,3 +496,177 @@ test_that("graph dim is consistent when n_epochs = 0", {
   )
   expect_equal(dim(iris_transform_10_no_batch$fgraph), c(50, 100))
 })
+
+test_that("scaled PCA models project original-format training rows", {
+  m <- fit_small_model(scale = TRUE, pca = 2, pca_method = "svd")
+  q <- query_neighbors(m)
+  expect_equal(unname(q$idx[, 1]), seq_len(nrow(iris10)))
+  expect_equal(unname(q$dist[, 1]), rep(0, nrow(iris10)), tolerance = 1e-6)
+})
+
+test_that("each backend queries the fitted PCA space", {
+  for (backend in c("annoy", "hnsw", "nndescent")) {
+    if (backend == "hnsw" && !is_installed("RcppHNSW")) {
+      next
+    }
+    if (backend == "nndescent" && !is_installed("rnndescent")) {
+      next
+    }
+    m <- fit_small_model(nn_method = backend, pca = 2, pca_method = "svd")
+    q <- query_neighbors(m)
+    expect_equal(unname(q$idx[, 1]), seq_len(nrow(iris10)))
+    expect_equal(unname(q$dist[, 1]), rep(0, nrow(iris10)), tolerance = 1e-5)
+  }
+})
+
+test_that("a single feature block precedes PCA in fit and projection", {
+  cols <- 2:4
+  for (pca in list(NULL, 2L)) {
+    m <- fit_small_model(
+      metric = list(euclidean = cols),
+      pca = pca,
+      pca_method = "svd",
+      ret_nn = TRUE
+    )
+    ref <- fit_small_model(
+      iris10[, cols],
+      pca = pca,
+      pca_method = "svd",
+      ret_nn = TRUE
+    )
+    expect_equal(m$nn[[1]], ref$nn[[1]])
+    expected <- query_neighbors(ref, iris10[, cols])
+    expect_equal(query_neighbors(m), expected)
+    archive <- tempfile()
+    save_uwot(m, archive, unload = TRUE)
+    m <- load_uwot(archive)
+    expect_equal(query_neighbors(m), expected)
+    unload_uwot(m)
+    unlink(archive)
+  }
+})
+
+test_that("sparse projection averages each query's own neighbors", {
+  m <- fit_small_model(iris10[1:4, ], n_components = 1)
+  m$embedding <- matrix(c(0, 10, 20, 30))
+  s <- Matrix::sparseMatrix(i = 1:4, j = c(1, 2, 2, 2), x = c(1, 1, 2, 3))
+  project <- function(init) {
+    umap_transform(
+      model = m,
+      nn_method = s,
+      init = init,
+      n_epochs = 0,
+      n_threads = 0,
+      ret_extra = "fgraph",
+      verbose = FALSE
+    )
+  }
+  expect_equal(as.vector(project("average")$embedding), c(0, 20))
+  q <- project("weighted")
+  expected <- as.vector(q$fgraph %*% m$embedding) / Matrix::rowSums(q$fgraph)
+  expect_equal(as.vector(q$embedding), expected, tolerance = 1e-6)
+})
+
+test_that("batch transform learns at the explicitly requested rate", {
+  m <- fit_small_model(batch = TRUE)
+  initial <- matrix(0, 3, 2)
+  project <- function(...) {
+    umap_transform(
+      iris10[1:3, ],
+      m,
+      init = initial,
+      n_epochs = 4,
+      n_threads = 0,
+      learning_rate = 0,
+      verbose = FALSE,
+      ...
+    )
+  }
+  expect_equal(unname(project()), initial)
+  expect_gt(max(abs(project(opt_args = list(alpha = 0.1)))), 0)
+})
+
+test_that("saved models retain their RNG and calibration bandwidth", {
+  m <- fit_small_model(rng_type = "deterministic", bandwidth = 0.5)
+  archive <- tempfile()
+  on.exit(unlink(archive))
+  save_uwot(m, archive, unload = TRUE)
+  m <- load_uwot(archive)
+  on.exit(unload_uwot(m), add = TRUE, after = FALSE)
+  expect_identical(m$rng_type, "deterministic")
+  expect_equal(m$bandwidth, 0.5)
+  x <- iris10[1:3, ] + 0.15
+  project <- function(model, seed, ...) {
+    umap_transform(
+      x,
+      model,
+      seed = seed,
+      n_epochs = 4,
+      n_threads = 0,
+      verbose = FALSE,
+      ...
+    )
+  }
+  expect_equal(project(m, 41), project(m, 42))
+  for (bandwidth in c(0.5, 1)) {
+    if (bandwidth == 1) {
+      m$bandwidth <- NULL
+      m$rng_type <- NULL
+      expect_false(isTRUE(all.equal(project(m, 41), project(m, 42))))
+    }
+    q <- project(m, 42, ret_extra = c("sigma", "nn"))
+    d <- q$nn[[1]]$dist
+    expected <- smooth_knn(
+      as.vector(t(d)),
+      ncol(d),
+      TRUE,
+      log2(ncol(d)) * bandwidth,
+      local_connectivity = 0,
+      n_threads = 0,
+      grain_size = 1,
+      verbose = FALSE,
+      ret_sigma = TRUE
+    )
+    expect_equal(q$sigma, expected$sigma)
+  }
+})
+
+test_that("only a shared embedding excludes a matching negative index", {
+  update <- function(row, batch, shared) {
+    result <- optimize_layout_r(
+      matrix(c(1, 1), 1),
+      if (!shared) matrix(c(0, 2), 1),
+      row,
+      1L,
+      c(0L, as.integer(row == 0), 1L),
+      2L,
+      2L,
+      2L,
+      1,
+      "tumap",
+      list(gamma = 1),
+      0.1,
+      list(method = "sgd", alpha = 0.1),
+      NULL,
+      2,
+      "deterministic",
+      batch,
+      0L,
+      1L,
+      shared,
+      FALSE
+    )
+    result[1, row + 1L]
+  }
+  for (batch in c(FALSE, TRUE)) {
+    expect_equal(update(0L, batch, FALSE), update(1L, batch, FALSE))
+    expect_equal(update(0L, batch, TRUE), 1)
+  }
+})
+
+test_that("legacy single-block PCA models can select columns of stored scores", {
+  m <- fit_small_model(pca = 2, pca_method = "svd")
+  expected <- query_neighbors(m)
+  m$metric <- list(euclidean = 1:2)
+  expect_equal(query_neighbors(m), expected)
+})

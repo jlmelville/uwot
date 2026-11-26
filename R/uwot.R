@@ -3603,10 +3603,12 @@ uwot <- function(
 
   # For typical case of numeric matrix X and not using binary metric, save
   # PCA results here in case initialization uses PCA too
+  scale_info <- if (ret_model && !is.null(X)) attr_to_scale_info(X)
   pca_models <- NULL
   pca_shortcut <- FALSE
   if (
     !is.null(pca) &&
+      is.character(metric) &&
       length(metric) == 1 &&
       !is_binary_metric(metric) &&
       is.matrix(X) &&
@@ -4092,11 +4094,9 @@ uwot <- function(
       res <- append(
         res,
         list(
-          scale_info = if (!is.null(X)) {
-            attr_to_scale_info(X)
-          } else {
-            NULL
-          },
+          scale_info = scale_info,
+          bandwidth = bandwidth,
+          rng_type = rng_type,
           search_k = search_k,
           local_connectivity = local_connectivity,
           n_epochs = n_epochs,
@@ -4816,6 +4816,7 @@ data2set <- function(
         is.matrix(X) &&
         metric != "hamming" &&
         ncol(X) > pca_i &&
+        (nblocks > 1 || ncol(Xsub) > pca_i) &&
         nrow(X) > pca_i
     ) {
       tsmessage("Reducing column dimension to ", pca_i, " via PCA")

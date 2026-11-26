@@ -374,6 +374,9 @@ umap_transform <- function(
   if (is.null(opt_args)) {
     if (!is.null(model$opt_args)) {
       opt_args <- model$opt_args
+      if (!is.null(learning_rate)) {
+        opt_args$alpha <- NULL
+      }
     } else {
       opt_args <- list()
     }
@@ -564,10 +567,11 @@ umap_transform <- function(
     }
   }
 
-  if (!is.null(scale_info)) {
+  if (!is.null(X) && !is.null(scale_info)) {
     X <- apply_scaling(X, scale_info = scale_info, verbose = verbose)
   }
 
+  bandwidth <- if (is.null(model$bandwidth)) 1 else model$bandwidth
   adjusted_local_connectivity <- max(0, local_connectivity - 1.0)
 
   graph <- NULL
@@ -585,24 +589,26 @@ umap_transform <- function(
   for (i in 1:nblocks) {
     tsmessage("Processing block ", i, " of ", nblocks)
     if (!is.null(X)) {
-      if (nblocks == 1) {
-        Xsub <- X
-        ann <- nn_index
-      } else {
-        subset <- metric[[i]]
-        if (is.list(subset)) {
-          subset <- lsplit_unnamed(subset)$unnamed[[1]]
-        }
-        Xsub <- X[, subset, drop = FALSE]
-        ann <- nn_index[[i]]
+      ann <- if (nblocks == 1) nn_index else nn_index[[i]]
+      subset <- metric[[i]]
+      if (is.list(subset)) {
+        # A named ndim alone describes an all-feature index in saved models.
+        subset <- lsplit_unnamed(subset)$unnamed
+        if (length(subset)) subset <- subset[[1]]
       }
+      Xsub <- if (length(subset)) X[, subset, drop = FALSE] else X
 
-      if (!is.null(pca_models) && !is.null(pca_models[[as.character(i)]])) {
-        Xsub <- apply_pca(
-          X = Xsub,
-          pca_res = pca_models[[as.character(i)]],
-          verbose = verbose
-        )
+      pca_res <- pca_models[[as.character(i)]]
+      if (!is.null(pca_res)) {
+        if (nrow(pca_res$rotation) == ncol(Xsub)) {
+          Xsub <- apply_pca(Xsub, pca_res, verbose = verbose)
+        } else {
+          # Older single-block models selected columns from the PCA scores.
+          Xsub <- apply_pca(X, pca_res, verbose = verbose)[,
+            subset,
+            drop = FALSE
+          ]
+        }
       }
       if (is.null(ann$type) || startsWith(ann$type, "annoy")) {
         nn <- annoy_search(
@@ -632,7 +638,7 @@ umap_transform <- function(
         }
 
         nn <- hnsw_search(
-          X,
+          Xsub,
           k = n_neighbors,
           ann = ann,
           ef = ef,
@@ -642,13 +648,13 @@ umap_transform <- function(
 
         # We use the L2 HNSW index for Euclidean so we need to process the
         # distances
-        if (names(model$metric)[[1]] == "euclidean") {
+        if (ann$metric == "euclidean") {
           nn$dist <- sqrt(nn$dist)
         }
       } else if (startsWith(ann$type, "nndescent")) {
         nn <-
           nndescent_search(
-            X,
+            Xsub,
             k = n_neighbors,
             ann = ann,
             nn_args = model$nn_args,
@@ -687,7 +693,7 @@ umap_transform <- function(
       if (any(n_nbrs < 1)) {
         stop("All observations need at least one neighbor")
       }
-      target <- log2(n_nbrs)
+      target <- log2(n_nbrs) * bandwidth
       skip_first <- TRUE
     } else {
       nnt <- nn_graph_t(nn)
@@ -709,7 +715,7 @@ umap_transform <- function(
           " nearest neighbors"
         )
       }
-      target <- log2(n_nbrs)
+      target <- log2(n_nbrs) * bandwidth
       nn_ptr <- n_nbrs
       nn_distv <- as.vector(nnt$dist)
       nn_idxv <- as.vector(nnt$idx)
@@ -762,6 +768,7 @@ umap_transform <- function(
         init_new_embedding(
           train_embedding = train_embedding,
           nn_idx = nn_idxv,
+          nn_ptr = nn_ptr,
           n_test_vertices = n_vertices,
           graph = graph_blockv,
           weighted = init_weighted,
@@ -939,7 +946,8 @@ init_new_embedding <-
     weighted = TRUE,
     n_threads = NULL,
     grain_size = 1,
-    verbose = FALSE
+    verbose = FALSE,
+    nn_ptr = length(nn_idx) / n_test_vertices
   ) {
     if (is.null(n_threads)) {
       n_threads <- default_num_threads()
@@ -958,6 +966,7 @@ init_new_embedding <-
     init_transform_parallel(
       train_embedding = train_embedding,
       nn_index = nn_idx,
+      nn_ptr = nn_ptr,
       n_test_vertices = n_test_vertices,
       nn_weights = nn_weights,
       n_threads = n_threads,

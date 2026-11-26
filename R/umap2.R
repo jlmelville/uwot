@@ -732,7 +732,8 @@ umap2 <-
   ) {
     if (is.null(nn_method)) {
       if (
-        is_installed("RcppHNSW") &&
+        !is_sparse_matrix(X) &&
+          is_installed("RcppHNSW") &&
           is.character(metric) &&
           is_ok_hnsw_metric(metric) &&
           is_ok_hnsw_metric(target_metric)

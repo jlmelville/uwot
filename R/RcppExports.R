@@ -41,7 +41,7 @@ hardware_concurrency <- function() {
     .Call(`_uwot_hardware_concurrency`)
 }
 
-init_transform_parallel <- function(train_embedding, nn_index, n_test_vertices, nn_weights, n_threads = 0L, grain_size = 1L) {
-    .Call(`_uwot_init_transform_parallel`, train_embedding, nn_index, n_test_vertices, nn_weights, n_threads, grain_size)
+init_transform_parallel <- function(train_embedding, nn_index, nn_ptr, n_test_vertices, nn_weights, n_threads = 0L, grain_size = 1L) {
+    .Call(`_uwot_init_transform_parallel`, train_embedding, nn_index, nn_ptr, n_test_vertices, nn_weights, n_threads, grain_size)
 }
 

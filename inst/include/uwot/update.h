@@ -70,7 +70,7 @@ process_edge(Update &update, Gradient &gradient, Sampler &sampler, Prng &prng,
   std::size_t n_neg_samples = sampler.get_num_neg_samples(edge);
   for (std::size_t p = 0; p < n_neg_samples; p++) {
     const std::size_t dkn = prng(n_tail_vertices, edge, epoch) * ndim;
-    if (dj == dkn) {
+    if (dj == dkn && &update.head_embedding == &update.tail_embedding) {
       continue;
     }
     // push them apart

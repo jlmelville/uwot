@@ -17,6 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <algorithm>
 #include <vector>
 
 #include <Rcpp.h>
@@ -33,21 +34,36 @@ using namespace Rcpp;
 // weights: n_nbrs x n_test weight matrix
 // Returns the dim x n_test matrix of initialized coordinates.
 // [[Rcpp::export]]
-NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
-                                      IntegerVector nn_index,
-                                      std::size_t n_test_vertices,
-                                      Nullable<NumericVector> nn_weights,
-                                      std::size_t n_threads = 0,
-                                      std::size_t grain_size = 1) {
+NumericMatrix
+init_transform_parallel(NumericMatrix train_embedding, IntegerVector nn_index,
+                        IntegerVector nn_ptr, std::size_t n_test_vertices,
+                        Nullable<NumericVector> nn_weights,
+                        std::size_t n_threads = 0, std::size_t grain_size = 1) {
 
-  std::size_t n_train_vertices = train_embedding.ncol();
+  if (nn_weights.isNotNull() &&
+      NumericVector(nn_weights).size() != nn_index.size()) {
+    stop("Expected one weight per neighbor");
+  }
   std::size_t ndim = train_embedding.nrow();
-  std::size_t n_neighbors = nn_index.size() / n_test_vertices;
+  auto ptr = as<std::vector<std::size_t>>(nn_ptr);
+  if (ptr.size() == 1) {
+    if (ptr[0] == 0 || nn_index.size() / ptr[0] != n_test_vertices ||
+        nn_index.size() % ptr[0] != 0) {
+      stop("Invalid fixed neighbor count");
+    }
+  } else if (ptr.size() != n_test_vertices + 1 || ptr.front() != 0 ||
+             ptr.back() != static_cast<std::size_t>(nn_index.size()) ||
+             !std::is_sorted(ptr.begin(), ptr.end()) ||
+             std::adjacent_find(ptr.begin(), ptr.end()) != ptr.end()) {
+    stop("Invalid neighbor column pointers");
+  }
 
   auto train_embeddingv = as<std::vector<float>>(train_embedding);
   auto nn_indexv = as<std::vector<int>>(nn_index);
   // Convert to zero-indexing
   for (int &i : nn_indexv) {
+    if (i < 1 || i > train_embedding.ncol())
+      stop("Invalid training neighbor index");
     --i;
   }
   std::vector<float> embedding(n_test_vertices * ndim);
@@ -57,9 +73,8 @@ NumericMatrix init_transform_parallel(NumericMatrix train_embedding,
     nn_weightsv = as<std::vector<float>>(nn_weights);
   }
   auto worker = [&](std::size_t begin, std::size_t end) {
-    uwot::init_by_mean(begin, end, ndim, n_neighbors, nn_indexv, nn_weightsv,
-                       n_test_vertices, train_embeddingv, n_train_vertices,
-                       embedding);
+    uwot::init_by_mean(begin, end, ndim, ptr, nn_indexv, nn_weightsv,
+                       train_embeddingv, embedding);
   };
   pforr::parallel_for(n_test_vertices, worker, n_threads, grain_size);
 

@@ -44,7 +44,7 @@ nndescent_nn <- function(
       dist = ann$ann$graph$dist,
       index = ann
     )
-  res$index$ann$ann$graph <- NULL
+  res$index$ann$graph <- NULL
   res
 }
 
