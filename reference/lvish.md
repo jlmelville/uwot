@@ -288,6 +288,7 @@ lvish(
 
   The number of negative edge/1-simplex samples to use per positive
   edge/1-simplex sample in optimizing the low dimensional embedding.
+  Must be finite and positive.
 
 - nn_method:
 

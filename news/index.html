@@ -36,15 +36,20 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="uwot-development-version">uwot (development version)<a class="anchor" aria-label="anchor" href="#uwot-development-version"></a></h2>
-<ul><li>
-<code><a href="../reference/optimize_graph_layout.html">optimize_graph_layout()</a></code> honors <code>binary_edge_weights</code> on weighted input graphs.</li>
-<li>
-<code><a href="../reference/lvish.html">lvish()</a></code> passes <code>nn_args</code> to its nearest-neighbor backend.</li>
-<li>
-<code><a href="../reference/umap.html">umap()</a></code>, <code><a href="../reference/umap2.html">umap2()</a></code> and <code><a href="../reference/similarity_graph.html">similarity_graph()</a></code> honor the requested <code>tmpdir</code> for Annoy indexes.</li>
-<li>Failed model loads release opened Annoy indexes and remove their extraction directories.</li>
-<li>Interrupted Annoy fits remove their search index. Threaded transforms can reuse the index of a saved model. On Windows, a live Annoy index can retain one mapped file until the model is saved, unloaded, or garbage-collected.</li>
-<li>Errors from parallel workers now reach the caller when R loads both libc++ and libstdc++.</li>
+<ul><li><p>Epoch callbacks can run nested optimizations. Large optimizer workloads check for interrupts within epochs, and native optimization uses less memory for edge lists.</p></li>
+<li><p>Invalid negative sampling rates, neighbor dimensions and target lengths raise errors before optimization or graph indexing.</p></li>
+<li><p>A failed model save preserves the live Annoy index, including when an external tar command fails.</p></li>
+<li><p>Projection now uses the fitted scaling, PCA, metric subsets, random generator and bandwidth. An explicit batch transform learning rate overrides the inherited optimizer rate. Models from earlier versions that lost scaling statistics during PCA require refitting with the original data.</p></li>
+<li><p>Sparse projection uses each query’s own neighbors for initialization. During optimization, a query can receive a negative sample from a training observation with the same row number.</p></li>
+<li><p>Numeric supervision calculates its own neighbors when input neighbors are supplied. Supplying target neighbors preserves the fitted input backend and neighbor count.</p></li>
+<li><p>Training neighbor graphs keep self first at distance zero, including for duplicate observations and cosine roundoff. Sparse distance extraction visits stored entries and ignores explicit zeros.</p></li>
+<li><p>Sparse feature input to <code><a href="../reference/umap2.html">umap2()</a></code> automatically selects NN-Descent. Saved NN-Descent models omit redundant training neighbor matrices.</p></li>
+<li><p><code><a href="../reference/optimize_graph_layout.html">optimize_graph_layout()</a></code> honors <code>binary_edge_weights</code> on weighted input graphs.</p></li>
+<li><p><code><a href="../reference/lvish.html">lvish()</a></code> passes <code>nn_args</code> to its nearest-neighbor backend.</p></li>
+<li><p><code><a href="../reference/umap.html">umap()</a></code>, <code><a href="../reference/umap2.html">umap2()</a></code> and <code><a href="../reference/similarity_graph.html">similarity_graph()</a></code> honor the requested <code>tmpdir</code> for Annoy indexes.</p></li>
+<li><p>Failed model loads release opened Annoy indexes and remove their extraction directories.</p></li>
+<li><p>Interrupted Annoy fits remove their search index. Threaded transforms can reuse the index of a saved model. On Windows, a live Annoy index can retain one mapped file until the model is saved, unloaded, or garbage-collected.</p></li>
+<li><p>Errors from parallel workers now reach the caller when R loads both libc++ and libstdc++.</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.5" id="uwot-025">uwot 0.2.5<a class="anchor" aria-label="anchor" href="#uwot-025"></a></h2><p class="text-muted">CRAN release: 2026-08-29</p>

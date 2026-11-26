@@ -2,20 +2,58 @@
 
 ## uwot (development version)
 
+- Epoch callbacks can run nested optimizations. Large optimizer
+  workloads check for interrupts within epochs, and native optimization
+  uses less memory for edge lists.
+
+- Invalid negative sampling rates, neighbor dimensions and target
+  lengths raise errors before optimization or graph indexing.
+
+- A failed model save preserves the live Annoy index, including when an
+  external tar command fails.
+
+- Projection now uses the fitted scaling, PCA, metric subsets, random
+  generator and bandwidth. An explicit batch transform learning rate
+  overrides the inherited optimizer rate. Models from earlier versions
+  that lost scaling statistics during PCA require refitting with the
+  original data.
+
+- Sparse projection uses each query’s own neighbors for initialization.
+  During optimization, a query can receive a negative sample from a
+  training observation with the same row number.
+
+- Numeric supervision calculates its own neighbors when input neighbors
+  are supplied. Supplying target neighbors preserves the fitted input
+  backend and neighbor count.
+
+- Training neighbor graphs keep self first at distance zero, including
+  for duplicate observations and cosine roundoff. Sparse distance
+  extraction visits stored entries and ignores explicit zeros.
+
+- Sparse feature input to
+  [`umap2()`](https://jlmelville.github.io/uwot/reference/umap2.md)
+  automatically selects NN-Descent. Saved NN-Descent models omit
+  redundant training neighbor matrices.
+
 - [`optimize_graph_layout()`](https://jlmelville.github.io/uwot/reference/optimize_graph_layout.md)
   honors `binary_edge_weights` on weighted input graphs.
+
 - [`lvish()`](https://jlmelville.github.io/uwot/reference/lvish.md)
   passes `nn_args` to its nearest-neighbor backend.
+
 - [`umap()`](https://jlmelville.github.io/uwot/reference/umap.md),
   [`umap2()`](https://jlmelville.github.io/uwot/reference/umap2.md) and
   [`similarity_graph()`](https://jlmelville.github.io/uwot/reference/similarity_graph.md)
   honor the requested `tmpdir` for Annoy indexes.
+
 - Failed model loads release opened Annoy indexes and remove their
   extraction directories.
+
 - Interrupted Annoy fits remove their search index. Threaded transforms
   can reuse the index of a saved model. On Windows, a live Annoy index
   can retain one mapped file until the model is saved, unloaded, or
   garbage-collected.
+
 - Errors from parallel workers now reach the caller when R loads both
   libc++ and libstdc++.
 
