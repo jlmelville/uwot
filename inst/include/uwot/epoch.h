@@ -91,17 +91,21 @@ struct EdgeWorker {
     update.epoch_end(epoch, n_epochs, parallel);
   }
 
-  void operator()(std::size_t begin, std::size_t end, std::size_t thread_id) {
-    // Each window gets its own PRNG state, to prevent locking inside the loop.
-    auto prng = rng_factory.create(end);
+  // A window can be resumed between interrupt checks without reseeding its RNG.
+  auto make_window(std::size_t end, std::size_t thread_id) {
+    return [this, prng = rng_factory.create(end), thread_id,
+            disp = std::vector<float>(ndim)](std::size_t first,
+                                             std::size_t last) mutable {
+      for (auto edge = first; edge < last; ++edge) {
+        process_edge(update, gradient, sampler, prng, positive_head,
+                     positive_tail, ndim, n_tail_vertices, edge, thread_id,
+                     disp);
+      }
+    };
+  }
 
-    // displacement between two points, cost of reallocating inside the loop
-    // is noticeable, also cheaper to calculate it once in the d2 calc
-    std::vector<float> disp(ndim);
-    for (auto edge = begin; edge < end; edge++) {
-      process_edge(update, gradient, sampler, prng, positive_head,
-                   positive_tail, ndim, n_tail_vertices, edge, thread_id, disp);
-    }
+  void operator()(std::size_t begin, std::size_t end, std::size_t thread_id) {
+    make_window(end, thread_id)(begin, end);
   }
 };
 
@@ -139,6 +143,12 @@ struct NodeWorker {
   template <typename Parallel>
   void epoch_end(std::size_t epoch, std::size_t n_epochs, Parallel &parallel) {
     update.epoch_end(epoch, n_epochs, parallel);
+  }
+
+  auto make_window(std::size_t, std::size_t thread_id) {
+    return [this, thread_id](std::size_t begin, std::size_t end) {
+      (*this)(begin, end, thread_id);
+    };
   }
 
   void operator()(std::size_t begin, std::size_t end, std::size_t thread_id) {

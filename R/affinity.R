@@ -334,7 +334,7 @@ order_sparse <- function(spm) {
 
   n_vertices <- length(p) - 1
 
-  for (v in 1:n_vertices) {
+  for (v in seq_len(n_vertices)) {
     p_begin <- p[v]
     p_end <- p[v + 1]
     if (p_end - p_begin == 0) {
@@ -346,5 +346,5 @@ order_sparse <- function(spm) {
     i_sort[pb1:p_end] <- i[x_order + p_begin]
   }
 
-  list(i = i_sort, p = p, x = x_sort, order = x_order, dims = spm@Dim)
+  list(i = i_sort, p = p, x = x_sort, dims = spm@Dim)
 }

@@ -134,6 +134,12 @@ checkna <- function(X) {
   }
 }
 
+check_negative_sample_rate <- function(rate) {
+  if (!is.numeric(rate) || length(rate) != 1 || !is.finite(rate) || rate <= 0) {
+    stop("negative_sample_rate must be a finite positive number")
+  }
+}
+
 check_graph <- function(
   graph,
   expected_rows = NULL,
@@ -151,6 +157,10 @@ check_graph <- function(
   if (!all(dim(idx) == dim(dist))) {
     stop("'idx' and 'dist' matrices must have identical dimensions")
   }
+  min_neighbors <- if (bipartite) 1L else 2L
+  if (!nrow(idx) || ncol(idx) < min_neighbors) {
+    stop("neighbor graph has too few observations or neighbors")
+  }
   # graph may be our only source of input data, in which case no other source
   # to validate from
   if (!is.null(expected_rows)) {
@@ -164,10 +174,17 @@ check_graph <- function(
     }
   }
   # graph should not contain missing data
-  if (any(is.na(idx)) || any(is.na(dist))) {
+  if (anyNA(idx) || anyNA(dist)) {
     stop("neighbor graph contains missing data")
   }
 
+  if (
+    !is.numeric(idx) ||
+      min(idx) < 1 ||
+      (!is.integer(idx) && (any(!is.finite(idx)) || any(idx != trunc(idx))))
+  ) {
+    stop("neighbor indices must be positive integers")
+  }
   # if looking at neighbors within one graph there can't be more neighbors
   # than observations
   if (!bipartite) {

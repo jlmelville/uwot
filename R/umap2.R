@@ -204,7 +204,7 @@
 #'   greater weight being given to negative samples.
 #' @param negative_sample_rate The number of negative edge/1-simplex samples to
 #'   use per positive edge/1-simplex sample in optimizing the low dimensional
-#'   embedding.
+#'   embedding. Must be finite and positive.
 #' @param a More specific parameters controlling the embedding. If \code{NULL}
 #'   these values are set automatically as determined by \code{min_dist} and
 #'   \code{spread}.

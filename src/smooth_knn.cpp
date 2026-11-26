@@ -44,6 +44,9 @@ List smooth_knn_distances_parallel(
     // Size optimization for the typical kNN graph case:
     // all points have the same number of neighbors so just store that number
     // as the single entry in the nn_ptr vector
+    if (nn_ptr[0] < 1) {
+      stop("n_neighbors must be positive");
+    }
     n_neighbors = nn_ptr[0];
     if (nn_dist.size() % n_neighbors != 0) {
       stop("Invalid n_neighbors for nn_dist size");

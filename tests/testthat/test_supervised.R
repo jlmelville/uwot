@@ -291,3 +291,25 @@ test_that("sparse column maxima include empty columns", {
 
   expect_equal(colMaxs(sp34), c(0, 0.7403984, 0.9472488, 0.6574427))
 })
+
+test_that("numeric targets calculate their own neighbors with precomputed input", {
+  y <- 2^seq_len(nrow(iris10))
+  graph <- function(target) {
+    similarity_graph(
+      NULL,
+      nn_method = nn,
+      y = target,
+      target_n_neighbors = 3,
+      n_threads = 0,
+      verbose = FALSE
+    )
+  }
+  ynn <- dist_nn(dist(y), 3)
+  expect_equal(graph(y), graph(ynn))
+  expect_gt(max(abs(graph(y) - graph(y[c(2:10, 1)]))), 0)
+  m <- fit_small_model(y = ynn)
+  expect_identical(m$nn_method, "annoy")
+  expect_equal(m$n_neighbors, 4)
+  expect_equal(ncol(query_neighbors(m)$idx), 4L)
+  expect_silent(unload_uwot(m, cleanup = FALSE))
+})

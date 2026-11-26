@@ -646,9 +646,14 @@ test_that("hnsw gives correct cosine neighbor results", {
     iris10_transform_hnsw$nn$cosine$idx,
     ignore_attr = "dimnames"
   )
+  expect_true(all(iris10_hnsw$nn$cosine$dist[, 1] == 0))
+  expect_angular_distances(
+    iris10_hnsw$nn$cosine$dist[, 1, drop = FALSE],
+    iris10_transform_hnsw$nn$cosine$dist[, 1, drop = FALSE]
+  )
   expect_equal(
-    iris10_hnsw$nn$cosine$dist,
-    iris10_transform_hnsw$nn$cosine$dist,
+    iris10_hnsw$nn$cosine$dist[, -1],
+    iris10_transform_hnsw$nn$cosine$dist[, -1],
     ignore_attr = "dimnames"
   )
 
@@ -702,9 +707,14 @@ test_that("hnsw gives correct correlation neighbor results", {
     iris10_transform_hnsw$nn$correlation$idx,
     ignore_attr = "dimnames"
   )
+  expect_true(all(iris10_hnsw$nn$correlation$dist[, 1] == 0))
+  expect_angular_distances(
+    iris10_hnsw$nn$correlation$dist[, 1, drop = FALSE],
+    iris10_transform_hnsw$nn$correlation$dist[, 1, drop = FALSE]
+  )
   expect_equal(
-    iris10_hnsw$nn$correlation$dist,
-    iris10_transform_hnsw$nn$correlation$dist,
+    iris10_hnsw$nn$correlation$dist[, -1],
+    iris10_transform_hnsw$nn$correlation$dist[, -1],
     ignore_attr = "dimnames"
   )
 
@@ -765,9 +775,14 @@ test_that("hnsw gives correct correlation neighbor results and multiple threads"
     iris10_transform_hnsw$nn$correlation$idx,
     ignore_attr = "dimnames"
   )
+  expect_true(all(iris10_hnsw$nn$correlation$dist[, 1] == 0))
+  expect_angular_distances(
+    iris10_hnsw$nn$correlation$dist[, 1, drop = FALSE],
+    iris10_transform_hnsw$nn$correlation$dist[, 1, drop = FALSE]
+  )
   expect_equal(
-    iris10_hnsw$nn$correlation$dist,
-    iris10_transform_hnsw$nn$correlation$dist,
+    iris10_hnsw$nn$correlation$dist[, -1],
+    iris10_transform_hnsw$nn$correlation$dist[, -1],
     ignore_attr = "dimnames"
   )
 
@@ -1059,4 +1074,64 @@ test_that("nndescent gives correct correlation neighbor results and multiple thr
       epsilon = 0
     )
   )
+})
+
+test_that("training duplicates preserve self identity and LargeVis probability mass", {
+  x <- cbind(c(0, 0, 1, 3), 0)
+  methods <- c("fnn", "annoy", if (is_installed("RcppHNSW")) "hnsw")
+  for (backend in c("matrix", methods)) {
+    res <- similarity_graph(
+      if (backend == "matrix") dist(x) else x,
+      nn_method = backend,
+      method = "largevis",
+      n_neighbors = 4,
+      perplexity = 2,
+      n_threads = 0,
+      ret_extra = "nn",
+      verbose = FALSE
+    )
+    idx <- res$nn[[1]]$idx
+    expect_equal(as.integer(idx[, 1]), 1:4)
+    expect_true(all(apply(idx, 1, anyDuplicated) == 0))
+    expect_equal(sum(res$similarity_graph), 4)
+  }
+})
+
+test_that("self-distance roundoff leaves nonself neighbors and calibration intact", {
+  baseline <- nn
+  rounded <- nn
+  rounded$dist[1, 1] <- 2^-24
+  rounded$dist[2, 2] <- baseline$dist[2, 2] <- 2^-23
+  corrected <- self_first(rounded)
+  expect_equal(corrected, baseline)
+  graph <- function(g) {
+    similarity_graph(
+      NULL,
+      nn_method = g,
+      n_threads = 0,
+      ret_extra = "sigma",
+      verbose = FALSE
+    )
+  }
+  expect_equal(graph(corrected), graph(baseline))
+})
+
+test_that("triangular distance storage ignores explicit zeros in either triangle", {
+  s <- Matrix::sparseMatrix(
+    i = c(2, 3, 4, 3, 4, 4),
+    j = c(1, 1, 1, 2, 2, 3),
+    x = c(0, 1, 3, 2, 4, 5),
+    dims = c(4, 4),
+    triangular = TRUE
+  )
+  ref <- sparse_tri_nn(Matrix::drop0(s), 2)
+  expect_equal(ref$idx[, 2], c(3, 3, 1, 1))
+  expect_equal(sparse_tri_nn(s, 2), ref)
+  expect_equal(sparse_tri_nn(Matrix::t(s), 2), ref)
+})
+
+test_that("a stored diagonal never counts as a nonself distance", {
+  d <- dmiris10z
+  Matrix::diag(d) <- 1e-8
+  expect_equal(sparse_nn(d, 4), sparse_nn(dmiris10z, 4))
 })

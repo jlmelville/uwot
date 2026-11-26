@@ -193,7 +193,7 @@
 #'   greater weight being given to negative samples.
 #' @param negative_sample_rate The number of negative edge/1-simplex samples to
 #'   use per positive edge/1-simplex sample in optimizing the low dimensional
-#'   embedding.
+#'   embedding. Must be finite and positive.
 #' @param a More specific parameters controlling the embedding. If \code{NULL}
 #'   these values are set automatically as determined by \code{min_dist} and
 #'   \code{spread}.
@@ -987,7 +987,7 @@ umap <- function(
 #'   greater weight being given to negative samples.
 #' @param negative_sample_rate The number of negative edge/1-simplex samples to
 #'   use per positive edge/1-simplex sample in optimizing the low dimensional
-#'   embedding.
+#'   embedding. Must be finite and positive.
 #' @param nn_method Method for finding nearest neighbors. Options are:
 #'   \itemize{
 #'     \item \code{"fnn"}. Use exact nearest neighbors via the
@@ -1775,7 +1775,7 @@ tumap <- function(
 #'   greater weight being given to negative samples.
 #' @param negative_sample_rate The number of negative edge/1-simplex samples to
 #'   use per positive edge/1-simplex sample in optimizing the low dimensional
-#'   embedding.
+#'   embedding. Must be finite and positive.
 #' @param nn_method Method for finding nearest neighbors. Options are:
 #'   \itemize{
 #'     \item \code{"fnn"}. Use exact nearest neighbors via the
@@ -2856,7 +2856,7 @@ similarity_graph <- function(
 #'   greater weight being given to negative samples.
 #' @param negative_sample_rate The number of negative edge/1-simplex samples to
 #'   use per positive edge/1-simplex sample in optimizing the low dimensional
-#'   embedding.
+#'   embedding. Must be finite and positive.
 #' @param a More specific parameters controlling the embedding. If \code{NULL}
 #'   these values are set automatically as determined by \code{min_dist} and
 #'   \code{spread}.
@@ -3312,6 +3312,8 @@ uwot <- function(
     }
   }
 
+  check_negative_sample_rate(negative_sample_rate)
+
   if (n_neighbors < 2) {
     stop("n_neighbors must be >= 2")
   }
@@ -3691,6 +3693,10 @@ uwot <- function(
   }
 
   if (!is.null(y)) {
+    if ((is.atomic(y) || is.data.frame(y)) && NROW(y) != n_vertices) {
+      stop("target data must have one row per training observation")
+    }
+    target_nn_method <- if (is.character(nn_method)) nn_method else NULL
     tsmessage("Processing y data")
 
     if (!is.list(target_metric)) {
@@ -3723,7 +3729,8 @@ uwot <- function(
         y <- NULL
       }
     } else if (is.list(y)) {
-      nn_method <- y
+      target_nn_method <- normalize_nn_method(y)
+      check_graph_list(target_nn_method, n_vertices)
     } else if (is.numeric(y)) {
       y <- as.matrix(y)
     } else if (is.factor(y)) {
@@ -3737,7 +3744,7 @@ uwot <- function(
         ycat,
         target_n_neighbors,
         target_metrics,
-        nn_method,
+        target_nn_method,
         n_trees,
         search_k,
         method,

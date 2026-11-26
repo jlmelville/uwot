@@ -27,6 +27,9 @@
 #ifndef UWOT_SAMPLER_H
 #define UWOT_SAMPLER_H
 
+#include <cmath>
+#include <limits>
+#include <stdexcept>
 #include <vector>
 
 namespace uwot {
@@ -42,6 +45,10 @@ public:
         epoch_of_next_sample(epochs_per_sample),
         epochs_per_negative_sample(epochs_per_sample.size()),
         epoch_of_next_negative_sample(epochs_per_sample.size()) {
+    if (!(negative_sample_rate > 0) || !std::isfinite(negative_sample_rate)) {
+      throw std::invalid_argument(
+          "negative_sample_rate must be finite and positive");
+    }
     std::size_t esz = epochs_per_sample.size();
     float nsr = 1.0 / negative_sample_rate;
     for (std::size_t i = 0; i < esz; i++) {
@@ -53,15 +60,25 @@ public:
     return epoch_of_next_sample[edge] <= epoch;
   }
   auto get_num_neg_samples(std::size_t edge) const -> std::size_t {
-    return static_cast<std::size_t>(
-        (epoch - epoch_of_next_negative_sample[edge]) /
-        epochs_per_negative_sample[edge]);
+    if (epoch <= epoch_of_next_negative_sample[edge]) {
+      return 0;
+    }
+    const auto count = (epoch - epoch_of_next_negative_sample[edge]) /
+                       epochs_per_negative_sample[edge];
+    if (count >=
+        static_cast<float>((std::numeric_limits<std::size_t>::max)())) {
+      throw std::overflow_error(
+          "negative_sample_rate produces too many samples");
+    }
+    return static_cast<std::size_t>(count);
   }
 
   void next_sample(std::size_t edge, std::size_t num_neg_samples) {
     epoch_of_next_sample[edge] += epochs_per_sample[edge];
-    epoch_of_next_negative_sample[edge] +=
-        num_neg_samples * epochs_per_negative_sample[edge];
+    if (num_neg_samples > 0) {
+      epoch_of_next_negative_sample[edge] +=
+          num_neg_samples * epochs_per_negative_sample[edge];
+    }
   }
 
 private:

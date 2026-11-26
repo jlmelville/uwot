@@ -89,6 +89,9 @@ find_nn <- function(
       },
       stop("Unknown method: ", method)
     )
+    if (include_self && method != "fnn") {
+      res <- self_first(res)
+    }
   }
   res
 }
@@ -521,144 +524,97 @@ annoy_search_parallel <- function(
   res
 }
 
+# Training searches can return a duplicate observation before the query itself,
+# or omit self at the cutoff. Keep the backend's ordering among other ties.
+self_first <- function(nn) {
+  ids <- seq_len(nrow(nn$idx))
+  k <- ncol(nn$idx)
+  misplaced <- which(nn$idx[, 1] != ids)
+  if (!length(misplaced) && all(nn$dist[, 1] == 0)) {
+    return(nn)
+  }
+  for (i in misplaced) {
+    other <- which(nn$idx[i, ] != i)[seq_len(k - 1L)]
+    nn$idx[i, ] <- c(i, nn$idx[i, other])
+    nn$dist[i, ] <- c(0, nn$dist[i, other])
+  }
+  nn$dist[, 1] <- 0
+  nn
+}
+
 FNN_nn <- function(X, k = 10, include_self = TRUE) {
-  if (include_self) {
-    k <- k - 1
+  # An explicit query returns k distinct candidates even for tied duplicates.
+  # get.knn's implicit removal of self can discard a different observation.
+  k_search <- if (include_self) k else k + 1L
+  fnn <- FNN::get.knnx(X, X, k = k_search)
+  nn <- self_first(list(idx = fnn$nn.index, dist = fnn$nn.dist))
+  if (!include_self) {
+    nn <- lapply(nn, function(x) x[, -1, drop = FALSE])
   }
-
-  fnn <- FNN::get.knn(X, k)
-  idx <- fnn$nn.index
-  dist <- fnn$nn.dist
-
-  if (include_self) {
-    idx <- cbind(seq_len(nrow(X)), idx)
-    dist <- cbind(rep(0, nrow(X)), dist)
-  }
-
-  list(idx = idx, dist = dist)
+  nn
 }
 
 dist_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
   tsmessage("Finding nearest neighbors from distance matrix")
   X <- as.matrix(X)
-
+  # Sort self before every other observation, including exact duplicates.
+  diag(X) <- -Inf
+  k_search <- if (include_self) k else k + 1L
+  idx <- t(apply(X, 2, order))[, seq_len(k_search), drop = FALSE]
+  diag(X) <- 0
   if (!include_self) {
-    k <- k + 1
+    idx <- idx[, -1, drop = FALSE]
   }
-
-  nn_idx <- t(apply(X, 2, order))[, 1:k]
-  nn_dist <- matrix(0, nrow = nrow(X), ncol = k)
-  for (i in seq_len(nrow(nn_idx))) {
-    nn_dist[i, ] <- X[i, nn_idx[i, ]]
+  dist <- matrix(0, nrow(X), ncol(idx))
+  for (i in seq_len(nrow(X))) {
+    dist[i, ] <- X[i, idx[i, ]]
   }
-
-  if (!include_self) {
-    nn_idx <- nn_idx[, 2:ncol(nn_idx)]
-    nn_dist <- nn_dist[, 2:ncol(nn_dist)]
-  }
-
-  attr(nn_idx, "dimnames") <- NULL
-  attr(nn_dist, "dimnames") <- NULL
-
-  list(idx = nn_idx, dist = nn_dist)
+  dimnames(idx) <- NULL
+  list(idx = idx, dist = dist)
 }
 
 sparse_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
   tsmessage("Finding nearest neighbors from sparse matrix")
-
-  if (include_self) {
-    k <- k - 1
+  X <- methods::as(
+    methods::as(Matrix::drop0(X), "generalMatrix"),
+    "CsparseMatrix"
+  )
+  if (!methods::is(X, "dMatrix")) {
+    X <- methods::as(X, "dMatrix")
   }
-
   n <- nrow(X)
-  nn_idx <- matrix(0, nrow = n, ncol = k)
-  nn_dist <- matrix(0, nrow = n, ncol = k)
-
-  for (i in 1:n) {
-    dists <- X[, i]
-    is_nonzero <- dists != 0
-    dist_nonzero <- dists[is_nonzero]
-    if (length(dist_nonzero) < k) {
+  k_other <- if (include_self) k - 1L else k
+  idx <- matrix(0L, n, k_other)
+  dist <- matrix(0, n, k_other)
+  for (i in seq_len(n)) {
+    start <- X@p[i]
+    entries <- start + seq_len(X@p[i + 1L] - start)
+    # Distances on the diagonal cannot supply one of the k nonself neighbors.
+    entries <- entries[X@i[entries] != i - 1L]
+    degree <- length(entries)
+    if (degree < k_other) {
       stop(
         "Row ",
         i,
         " of distance matrix has only ",
-        length(dist_nonzero),
+        degree,
         " defined distances"
       )
     }
-
-    k_order <- order(dist_nonzero)[1:k]
-
-    idx_nonzero <- which(is_nonzero, arr.ind = TRUE)
-
-    nn_idx[i, ] <- idx_nonzero[k_order]
-    nn_dist[i, ] <- dist_nonzero[k_order]
+    selected <- entries[order(X@x[entries])[seq_len(k_other)]]
+    idx[i, ] <- X@i[selected] + 1L
+    dist[i, ] <- X@x[selected]
   }
-
   if (include_self) {
-    nn_idx <- cbind(1:n, nn_idx)
-    nn_dist <- cbind(rep(0, n), nn_dist)
+    idx <- cbind(seq_len(n), idx)
+    dist <- cbind(rep(0, n), dist)
   }
-
-  list(idx = nn_idx, dist = nn_dist)
+  list(idx = idx, dist = dist)
 }
 
-# Extract knn data from sparse lower/upper triangular matrix
 sparse_tri_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
-  tsmessage("Finding nearest neighbors from sparse triangular matrix")
-  if (include_self) {
-    k <- k - 1
-  }
-
-  n <- nrow(X)
-  nn_idx <- matrix(0, nrow = n, ncol = k)
-  nn_dist <- matrix(0, nrow = n, ncol = k)
-
-  # this will get the i,j,x values no matter the internal representation
-  Xsumm <- summary(X)
-
-  for (i in 1:n) {
-    # get indices where $i/j == i
-    idxji <- Xsumm$j == i
-    idxii <- Xsumm$i == i
-
-    idxi <- idxji | idxii
-
-    # find non-zero distances
-    dists <- Xsumm$x[idxi]
-    is_nonzero <- dists != 0
-    dist_nonzero <- dists[is_nonzero]
-    if (length(dist_nonzero) < k) {
-      stop(
-        "Row ",
-        i,
-        " of distance matrix has only ",
-        length(dist_nonzero),
-        " defined distances"
-      )
-    }
-
-    # find indices of k-smallest distances
-    k_order <- order(dist_nonzero)[1:k]
-    nn_dist[i, ] <- dist_nonzero[k_order]
-
-    # get indices into original vector
-    isk <- which(idxi)[k_order]
-    Xis <- Xsumm$i[isk]
-    Xjs <- Xsumm$j[isk]
-    # We don't know if the non-i index is in the i or j column
-    # so do this slightly horrible logical * integer arithmetic
-    # which will add the correct index to 0
-    nn_idx[i, ] <- ((Xis != i) * Xis) + ((Xjs != i) * Xjs)
-  }
-
-  if (include_self) {
-    nn_idx <- cbind(1:n, nn_idx)
-    nn_dist <- cbind(rep(0, n), nn_dist)
-  }
-
-  list(idx = nn_idx, dist = nn_dist)
+  uplo <- if (Matrix::isTriangular(X, upper = TRUE)) "U" else "L"
+  sparse_nn(Matrix::forceSymmetric(X, uplo), k, include_self, verbose)
 }
 
 is_binary_metric <- function(metric) {

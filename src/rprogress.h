@@ -20,30 +20,19 @@
 #ifndef UWOT_RPROGRESS_H
 #define UWOT_RPROGRESS_H
 
-// [[Rcpp::depends(RcppProgress)]]
-#include <progress.hpp>
+#include <interruptable_progress_monitor.hpp>
+#include <simple_progress_bar.hpp>
 
 struct RProgress {
-
-  Progress progress;
-  bool verbose;
+  SimpleProgressBar bar;
+  InterruptableProgressMonitor monitor;
 
   RProgress(std::size_t n_epochs, bool verbose)
-      : progress(n_epochs, verbose), verbose(verbose) {}
+      : monitor(n_epochs, verbose, bar) {}
 
-  auto is_aborted() -> bool {
-    bool aborted = Progress::check_abort();
-    if (aborted) {
-      progress.cleanup();
-    }
-    return aborted;
-  }
+  auto is_aborted() -> bool { return monitor.check_abort(); }
 
-  void report() {
-    if (verbose) {
-      progress.increment();
-    }
-  }
+  void report() { monitor.increment(); }
 };
 
 #endif // UWOT_RPROGRESS_H

@@ -33,6 +33,10 @@ List calc_row_probabilities_parallel(NumericVector nn_dist,
                                      double tol = 1e-5, bool ret_sigma = false,
                                      std::size_t n_threads = 0,
                                      std::size_t grain_size = 1) {
+  if (n_vertices == 0 || nn_dist.size() % n_vertices != 0 ||
+      nn_dist.size() / n_vertices < 2) {
+    stop("Expected at least two neighbor distances per training observation");
+  }
   std::size_t n_neighbors = nn_dist.size() / n_vertices;
   auto nn_distv = as<std::vector<double>>(nn_dist);
 

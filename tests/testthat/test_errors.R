@@ -260,3 +260,73 @@ test_that("large initialization standard deviations produce a warning", {
     "embedding standard deviation"
   )
 })
+
+test_that("training and projection validate sampler and graph dimensions", {
+  for (rate in c(0, -1, Inf, NaN, NA_real_)) {
+    expect_error(
+      fit_small_model(negative_sample_rate = rate),
+      "negative_sample_rate"
+    )
+  }
+  m <- fit_small_model()
+  m$negative_sample_rate <- 0
+  expect_error(query_neighbors(m), "negative_sample_rate")
+  graph <- list(idx = matrix(integer(), 3, 0), dist = matrix(numeric(), 3, 0))
+  expect_error(
+    similarity_graph(NULL, nn_method = graph, verbose = FALSE),
+    "too few"
+  )
+  expect_error(fit_small_model(y = factor(1:2)), "one row per")
+  m <- fit_small_model()
+  s <- Matrix::sparseMatrix(i = 1:2, j = 1:2, x = c(1, 1), dims = c(3, 2))
+  expect_error(
+    umap_transform(model = m, nn_method = s, verbose = FALSE),
+    "unexpected number of rows"
+  )
+})
+
+test_that("an epoch callback can run another optimizer in the same R process", {
+  script <- tempfile(fileext = ".R")
+  on.exit(unlink(script))
+  nested_fit <- function() {
+    x <- as.matrix(iris[1:10, 1:4])
+    fit <- function(...) {
+      uwot::umap(
+        x,
+        init = "random",
+        n_neighbors = 4,
+        n_threads = 0,
+        n_epochs = 3,
+        verbose = FALSE,
+        ...
+      )
+    }
+    calls <- 0L
+    callback <- function(epoch, n_epochs, coords) {
+      calls <<- calls + 1L
+      if (epoch == 1L) stopifnot(all(is.finite(fit())))
+    }
+    stopifnot(all(is.finite(fit(epoch_callback = callback))), calls == 3L)
+  }
+  # Use the same installed build that the parent process is testing.
+  lib <- dirname(find.package("uwot"))
+  skip_if(
+    !file.exists(file.path(lib, "uwot", "Meta", "package.rds")),
+    "requires an installed package"
+  )
+  writeLines(
+    c(
+      ".libPaths(c(commandArgs(TRUE)[1], .libPaths()))",
+      deparse(body(nested_fit))
+    ),
+    script
+  )
+  log <- system2(
+    file.path(R.home("bin"), "Rscript"),
+    c("--vanilla", shQuote(script), shQuote(lib)),
+    stdout = TRUE,
+    stderr = TRUE,
+    timeout = 60
+  )
+  expect_null(attr(log, "status"), info = paste(log, collapse = "\n"))
+})

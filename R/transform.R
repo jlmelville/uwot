@@ -391,6 +391,7 @@ umap_transform <- function(
     stop("learning rate should be a positive number, not ", alpha)
   }
   negative_sample_rate <- model$negative_sample_rate
+  check_negative_sample_rate(negative_sample_rate)
   approx_pow <- model$approx_pow
   norig_col <- model$norig_col
 
@@ -479,6 +480,9 @@ umap_transform <- function(
           expected_cols = n_neighbors[[i]],
           bipartite = TRUE
         )
+        if (max(graph$idx) > n_train_vertices) {
+          stop("neighbor index exceeds the number of training observations")
+        }
         if (is.null(n_vertices)) {
           n_vertices <- nrow(graph$idx)
         }
@@ -487,7 +491,15 @@ umap_transform <- function(
         }
       } else if (is_sparse_matrix(graph)) {
         # nn graph should have dims n_train_obs x n_test_obs
-        graph <- Matrix::drop0(graph)
+        check_sparse_graph(
+          graph,
+          n_train_vertices,
+          n_vertices,
+          bipartite = TRUE
+        )
+        if (ncol(graph) == 0) {
+          stop("sparse query graph has no observations")
+        }
         if (is.null(n_vertices)) {
           n_vertices <- ncol(graph)
         }

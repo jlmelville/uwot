@@ -61,20 +61,20 @@ BEGIN_RCPP
 END_RCPP
 }
 // optimize_layout_r
-NumericMatrix optimize_layout_r(NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding, const std::vector<unsigned int> positive_head, const std::vector<unsigned int> positive_tail, const std::vector<unsigned int> positive_ptr, unsigned int n_epochs, unsigned int n_head_vertices, unsigned int n_tail_vertices, const std::vector<float> epochs_per_sample, const std::string& method, List method_args, float initial_alpha, List opt_args, Nullable<Function> epoch_callback, float negative_sample_rate, const std::string& rng_type, bool batch, std::size_t n_threads, std::size_t grain_size, bool move_other, bool verbose);
+NumericMatrix optimize_layout_r(NumericMatrix head_embedding, Nullable<NumericMatrix> tail_embedding, const std::vector<unsigned int>& positive_head, const std::vector<unsigned int>& positive_tail, const std::vector<unsigned int>& positive_ptr, unsigned int n_epochs, unsigned int n_head_vertices, unsigned int n_tail_vertices, const std::vector<float>& epochs_per_sample, const std::string& method, List method_args, float initial_alpha, List opt_args, Nullable<Function> epoch_callback, float negative_sample_rate, const std::string& rng_type, bool batch, std::size_t n_threads, std::size_t grain_size, bool move_other, bool verbose);
 RcppExport SEXP _uwot_optimize_layout_r(SEXP head_embeddingSEXP, SEXP tail_embeddingSEXP, SEXP positive_headSEXP, SEXP positive_tailSEXP, SEXP positive_ptrSEXP, SEXP n_epochsSEXP, SEXP n_head_verticesSEXP, SEXP n_tail_verticesSEXP, SEXP epochs_per_sampleSEXP, SEXP methodSEXP, SEXP method_argsSEXP, SEXP initial_alphaSEXP, SEXP opt_argsSEXP, SEXP epoch_callbackSEXP, SEXP negative_sample_rateSEXP, SEXP rng_typeSEXP, SEXP batchSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP, SEXP move_otherSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type head_embedding(head_embeddingSEXP);
     Rcpp::traits::input_parameter< Nullable<NumericMatrix> >::type tail_embedding(tail_embeddingSEXP);
-    Rcpp::traits::input_parameter< const std::vector<unsigned int> >::type positive_head(positive_headSEXP);
-    Rcpp::traits::input_parameter< const std::vector<unsigned int> >::type positive_tail(positive_tailSEXP);
-    Rcpp::traits::input_parameter< const std::vector<unsigned int> >::type positive_ptr(positive_ptrSEXP);
+    Rcpp::traits::input_parameter< const std::vector<unsigned int>& >::type positive_head(positive_headSEXP);
+    Rcpp::traits::input_parameter< const std::vector<unsigned int>& >::type positive_tail(positive_tailSEXP);
+    Rcpp::traits::input_parameter< const std::vector<unsigned int>& >::type positive_ptr(positive_ptrSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type n_epochs(n_epochsSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type n_head_vertices(n_head_verticesSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type n_tail_vertices(n_tail_verticesSEXP);
-    Rcpp::traits::input_parameter< const std::vector<float> >::type epochs_per_sample(epochs_per_sampleSEXP);
+    Rcpp::traits::input_parameter< const std::vector<float>& >::type epochs_per_sample(epochs_per_sampleSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type method(methodSEXP);
     Rcpp::traits::input_parameter< List >::type method_args(method_argsSEXP);
     Rcpp::traits::input_parameter< float >::type initial_alpha(initial_alphaSEXP);

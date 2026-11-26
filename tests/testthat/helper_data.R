@@ -288,3 +288,33 @@ expect_is_nn_matrix <- function(res, nr = 10, k = 4) {
 }
 
 create_data()
+
+fit_small_model <- function(
+  X = iris10,
+  nn_method = "annoy",
+  n_epochs = 0,
+  ...
+) {
+  umap(
+    X,
+    nn_method = nn_method,
+    n_neighbors = 4,
+    ret_model = TRUE,
+    init = "random",
+    n_epochs = n_epochs,
+    n_threads = 0,
+    verbose = FALSE,
+    ...
+  )
+}
+
+query_neighbors <- function(model, X = iris10) {
+  umap_transform(
+    X,
+    model,
+    n_epochs = 0,
+    n_threads = 0,
+    ret_extra = "nn",
+    verbose = FALSE
+  )$nn[[1]]
+}
