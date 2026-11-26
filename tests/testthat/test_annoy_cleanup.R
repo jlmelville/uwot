@@ -133,3 +133,42 @@ test_that("saving a live Annoy model releases its old temporary backing", {
   expect_identical(list.files(dir), "model.tar")
   expect_true(all(is.finite(umap_transform(iris10, saved, n_threads = 0))))
 })
+
+test_that("archive failures preserve the caller's live Annoy index", {
+  model <- make_annoy_model()
+  on.exit(unload_uwot(model, cleanup = FALSE))
+  expected <- query_neighbors(model)
+  wd <- getwd()
+  original_dirs <- list.dirs(tempdir(), recursive = FALSE)
+  missing <- file.path(tempfile(), "model.tar")
+  expect_error(suppressWarnings(save_uwot(model, missing, unload = TRUE)))
+  expect_false(file.exists(missing))
+  expect_equal(getwd(), wd)
+  expect_equal(query_neighbors(model), expected)
+
+  # An external archiver can return a failure status without raising an R error.
+  old_tar <- Sys.getenv("tar", unset = NA_character_)
+  on.exit(
+    if (is.na(old_tar)) Sys.unsetenv("tar") else Sys.setenv(tar = old_tar),
+    add = TRUE
+  )
+  stub <- tempfile(fileext = ".R")
+  on.exit(unlink(stub), add = TRUE)
+  writeLines("quit(status = 1L)", stub)
+  Sys.setenv(
+    tar = paste(
+      shQuote(file.path(R.home("bin"), "Rscript")),
+      "--vanilla",
+      shQuote(stub)
+    )
+  )
+  archive <- tempfile()
+  expect_error(
+    suppressWarnings(save_uwot(model, archive, unload = TRUE)),
+    "archive"
+  )
+  expect_false(file.exists(archive))
+  expect_equal(query_neighbors(model), expected)
+  unload_uwot(model, cleanup = FALSE)
+  expect_equal(list.dirs(tempdir(), recursive = FALSE), original_dirs)
+})

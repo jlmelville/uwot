@@ -419,7 +419,7 @@ annoy_backing <- function(ann) {
   get0(".uwot_backing", envir = ann, inherits = FALSE)
 }
 
-remember_annoy_backing <- function(ann, path) {
+remember_annoy_backing <- function(ann, path, cleanup_dir = NULL) {
   backing <- annoy_backing(ann)
   if (is.null(backing)) {
     backing <- new.env(parent = emptyenv())
@@ -428,6 +428,7 @@ remember_annoy_backing <- function(ann, path) {
     assign(".uwot_backing", backing, envir = ann)
   }
   backing$path <- normalizePath(path, mustWork = TRUE)
+  backing$cleanup_dir <- cleanup_dir
 }
 
 release_annoy_backing <- function(backing, unload = TRUE) {
@@ -436,6 +437,10 @@ release_annoy_backing <- function(backing, unload = TRUE) {
       backing$unload()
     }
     unlink(backing$path)
+    if (!is.null(backing$cleanup_dir)) {
+      unlink(backing$cleanup_dir, recursive = TRUE)
+      backing$cleanup_dir <- NULL
+    }
     backing$path <- NULL
   }
 }

@@ -4289,88 +4289,74 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
     stop("model file ", model_file, " already exists")
   }
 
-  tmp_model_file <- NULL
-  tryCatch(
-    {
-      # create directory to store files in
-      mod_dir <- tempfile(pattern = "dir")
-      tsmessage("Creating temp model dir ", mod_dir)
-      dir.create(mod_dir)
-
-      # create the tempdir/uwot subdirectory
-      uwot_dir <- file.path(mod_dir, "uwot")
-      tsmessage("Creating dir ", mod_dir)
-      dir.create(uwot_dir)
-
-      # save model file to tempdir/uwot/model
-      model_tmpfname <- file.path(uwot_dir, "model")
-      saveRDS(model, file = model_tmpfname)
-
-      # save each nn index inside tempdir/uwot/model
-      metrics <- names(model$metric)
-      n_metrics <- length(metrics)
-
-      for (i in 1:n_metrics) {
-        if (n_metrics == 1) {
-          nn_index <- model$nn_index
-        } else {
-          nn_index <- model$nn_index[[i]]
+  mod_dir <- tempfile(pattern = "dir")
+  uwot_dir <- file.path(mod_dir, "uwot")
+  if (!dir.create(uwot_dir, recursive = TRUE)) {
+    stop("Cannot create temporary model directory: ", mod_dir)
+  }
+  archive <- tempfile(pattern = ".uwot-", tmpdir = dirname(model_file))
+  saved_annoy <- list()
+  saved <- FALSE
+  on.exit({
+    setwd(wd)
+    unlink(archive)
+    if (!saved) {
+      unlink(mod_dir, recursive = TRUE)
+      # On Windows a live Annoy index can still map a staging file.
+      for (path in names(saved_annoy)) {
+        if (file.exists(path)) {
+          remember_annoy_backing(saved_annoy[[path]], path, mod_dir)
         }
-
-        if (
-          startsWith(nn_index$type, "annoy") ||
-            startsWith(nn_index$type, "hnsw")
-        ) {
-          nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
-          nn_meta_tmpfname <- file.path(uwot_dir, paste0("nn-meta", i))
-          nn_index$ann$save(nn_tmpfname)
-          if (startsWith(nn_index$type, "annoy")) {
-            release_annoy_backing(annoy_backing(nn_index$ann), unload = FALSE)
-          }
-
-          # save metadata wrapper around the index separately
-          meta_data <- nn_index
-          meta_data$ann <- NULL
-          saveRDS(meta_data, file = nn_meta_tmpfname)
-        } else if (startsWith(nn_index$type, "nndescent")) {
-          nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
-          saveRDS(nn_index, file = nn_tmpfname)
-        } else {
-          stop("unsupported nn index type: ", model$nn_index$type)
-        }
-      }
-
-      # archive the files under the temp dir into the single target file
-      # change directory so the archive only contains one directory
-      tmp_model_file <- abspath(file)
-      tsmessage("Changing to ", mod_dir)
-      setwd(mod_dir)
-      tsmessage("Creating ", tmp_model_file)
-
-      # #109: Windows 7 tar needs "--force-local" to avoid interpreting colon
-      # as indicating a remote machine
-      extra_flags <- ""
-      if (is_win7()) {
-        extra_flags <- "--force-local"
-      }
-      utils::tar(
-        tarfile = tmp_model_file,
-        extra_flags = extra_flags,
-        files = "uwot/"
-      )
-    },
-    finally = {
-      setwd(wd)
-      if (!is.null(tmp_model_file) && model_file != tmp_model_file) {
-        tsmessage("Copying ", tmp_model_file, " to ", model_file)
-        file.copy(from = tmp_model_file, to = model_file)
-      }
-      model$mod_dir <- mod_dir
-      if (unload) {
-        unload_uwot(model, cleanup = TRUE, verbose = verbose)
       }
     }
-  )
+  })
+
+  # save model file to tempdir/uwot/model
+  model_tmpfname <- file.path(uwot_dir, "model")
+  saveRDS(model, file = model_tmpfname)
+
+  # save each nn index inside tempdir/uwot/model
+  indices <- model_nn_indices(model)
+  for (i in seq_along(indices)) {
+    nn_index <- indices[[i]]
+    if (
+      startsWith(nn_index$type, "annoy") ||
+        startsWith(nn_index$type, "hnsw")
+    ) {
+      nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
+      nn_meta_tmpfname <- file.path(uwot_dir, paste0("nn-meta", i))
+      nn_index$ann$save(nn_tmpfname)
+      if (startsWith(nn_index$type, "annoy")) {
+        release_annoy_backing(annoy_backing(nn_index$ann), unload = FALSE)
+        saved_annoy[[nn_tmpfname]] <- nn_index$ann
+      }
+
+      # save metadata wrapper around the index separately
+      meta_data <- nn_index
+      meta_data$ann <- NULL
+      saveRDS(meta_data, file = nn_meta_tmpfname)
+    } else if (startsWith(nn_index$type, "nndescent")) {
+      nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
+      saveRDS(nn_index, file = nn_tmpfname)
+    } else {
+      stop("unsupported nn index type: ", model$nn_index$type)
+    }
+  }
+
+  setwd(mod_dir)
+  flags <- if (is_win7()) "--force-local" else ""
+  status <- utils::tar(tarfile = archive, files = "uwot/", extra_flags = flags)
+  setwd(wd)
+  if (
+    status != 0 || file.exists(model_file) || !file.rename(archive, model_file)
+  ) {
+    stop("Could not save model archive: ", model_file)
+  }
+  saved <- TRUE
+  model$mod_dir <- mod_dir
+  if (unload) {
+    unload_uwot(model, cleanup = TRUE, verbose = verbose)
+  }
   model
 }
 
@@ -4474,16 +4460,13 @@ load_uwot <- function(file, verbose = FALSE) {
       stop("Can't find nearest neighbor index ", nn_fname, " in ", file)
     }
     metric <- metrics[[i]]
-    # 31: need to specify the index dimensionality when creating the index
-    if (is.list(model$metric[[i]])) {
-      # in case where there is only one metric, the value is a one-item list
-      # named 'ndim' giving the number of dimensions directly: all columns
-      # are used in this metric
-      ndim <- model$metric[[i]]$ndim
-    } else {
-      # otherwise, metric specifies the name or index used for each metric,
-      # so the dimension is the number of them
-      ndim <- length(model$metric[[i]])
+    meta_path <- file.path(mod_dir, paste0("uwot/nn-meta", i))
+    meta <- if (file.exists(meta_path)) readRDS(meta_path)
+    ndim <- meta$ndim
+    if (is.null(ndim)) {
+      # Legacy archives describe the index via the fitted metric.
+      block <- model$metric[[i]]
+      ndim <- if (is.list(block)) block$ndim else length(block)
     }
     if (nn_method == "annoy") {
       annoy_metric <- metric
@@ -4505,8 +4488,7 @@ load_uwot <- function(file, verbose = FALSE) {
       }
     } else if (nn_method == "hnsw") {
       ann <- hnsw_load(metric, ndim = ndim, filename = nn_fname)
-      nn_meta_tmpfname <- file.path(mod_dir, paste0("uwot/nn-meta", i))
-      idx <- readRDS(nn_meta_tmpfname)
+      idx <- meta
       idx$ann <- ann
 
       if (n_metrics == 1) {
@@ -4582,18 +4564,12 @@ load_uwot <- function(file, verbose = FALSE) {
 #' @seealso \code{\link{save_uwot}}, \code{\link{load_uwot}}
 #' @export
 unload_uwot <- function(model, cleanup = TRUE, verbose = FALSE) {
-  if (is.null(model$nn_method) || model$nn_method == "annoy") {
-    tsmessage("Unloading NN index: model will be invalid")
-    metrics <- names(model$metric)
-    n_metrics <- length(metrics)
-    for (i in 1:n_metrics) {
-      if (n_metrics == 1) {
-        rcppannoy <- get_rcppannoy(model$nn_index)
-      } else {
-        rcppannoy <- get_rcppannoy(model$nn_index[[i]])
-      }
-      rcppannoy$unload()
-      release_annoy_backing(annoy_backing(rcppannoy), unload = FALSE)
+  for (index in model_nn_indices(model)) {
+    if (!is.list(index) || nn_is_annoy(index)) {
+      tsmessage("Unloading NN index: model will be invalid")
+      ann <- get_rcppannoy(index)
+      ann$unload()
+      release_annoy_backing(annoy_backing(ann), unload = FALSE)
     }
   }
 
@@ -4616,34 +4592,24 @@ unload_uwot <- function(model, cleanup = TRUE, verbose = FALSE) {
   }
 }
 
+model_nn_indices <- function(model) {
+  index <- model$nn_index
+  if (is.null(index)) {
+    return(list())
+  }
+  if (is.list(index) && is.null(index$type)) index else list(index)
+}
+
 all_nn_indices_are_loaded <- function(model) {
-  if (is.null(model$nn_index)) {
+  indices <- model_nn_indices(model)
+  if (!length(indices)) {
     stop("Invalid model: has no 'nn_index'")
   }
-  if (is.list(model$nn_index)) {
-    if (is.null(model$nn_index$type)) {
-      for (i in 1:length(model$nn_index)) {
-        rcppannoy <- get_rcppannoy(model$nn_index[[i]])
-        if (rcppannoy$getNTrees() == 0) {
-          return(FALSE)
-        }
-      }
-    } else if (model$nn_index$type == "annoyv1") {
-      rcppannoy <- get_rcppannoy(model$nn_index)
-      if (rcppannoy$getNTrees() == 0) {
-        return(FALSE)
-      }
-    } else if (model$nn_index$type == "hnswv1") {
-      return(TRUE)
-    } else if (model$nn_index$type == "nndescentv1") {
-      return(TRUE)
-    } else {
-      stop("Invalid model: has unknown 'nn_index' type ", model$nn_index$type)
-    }
-  } else {
-    rcppannoy <- get_rcppannoy(model$nn_index)
-    if (rcppannoy$getNTrees() == 0) {
-      return(FALSE)
+  for (index in indices) {
+    if (!is.list(index) || nn_is_annoy(index)) {
+      if (get_rcppannoy(index)$getNTrees() == 0) return(FALSE)
+    } else if (!(index$type %in% c("hnswv1", "nndescentv1"))) {
+      stop("Invalid model: has unknown 'nn_index' type ", index$type)
     }
   }
   TRUE
