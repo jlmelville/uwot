@@ -281,6 +281,17 @@ expect_angular_distances <- function(actual, expected, tolerance = 1e-6) {
   expect_lte(max(abs(actual - expected)), tolerance)
 }
 
+# Query the training data again, allowing roundoff at the known self matches.
+expect_angular_self_query <- function(fit, query) {
+  expect_equal(fit$idx, query$idx, ignore_attr = "dimnames")
+  expect_true(all(fit$dist[, 1] == 0))
+  expect_angular_distances(
+    fit$dist[, 1, drop = FALSE],
+    query$dist[, 1, drop = FALSE]
+  )
+  expect_equal(fit$dist[, -1], query$dist[, -1], ignore_attr = "dimnames")
+}
+
 expect_is_nn_matrix <- function(res, nr = 10, k = 4) {
   expect_true(is.matrix(res))
   expect_equal(nrow(res), nr)

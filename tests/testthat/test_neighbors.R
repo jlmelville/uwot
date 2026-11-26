@@ -641,20 +641,9 @@ test_that("hnsw gives correct cosine neighbor results", {
 
   iris10_transform_hnsw <-
     umap_transform(iris10, iris10_hnsw, n_epochs = 0, ret_extra = c("nn"))
-  expect_equal(
-    iris10_hnsw$nn$cosine$idx,
-    iris10_transform_hnsw$nn$cosine$idx,
-    ignore_attr = "dimnames"
-  )
-  expect_true(all(iris10_hnsw$nn$cosine$dist[, 1] == 0))
-  expect_angular_distances(
-    iris10_hnsw$nn$cosine$dist[, 1, drop = FALSE],
-    iris10_transform_hnsw$nn$cosine$dist[, 1, drop = FALSE]
-  )
-  expect_equal(
-    iris10_hnsw$nn$cosine$dist[, -1],
-    iris10_transform_hnsw$nn$cosine$dist[, -1],
-    ignore_attr = "dimnames"
+  expect_angular_self_query(
+    iris10_hnsw$nn$cosine,
+    iris10_transform_hnsw$nn$cosine
   )
 
   iris10_transform_annoy <-
@@ -702,20 +691,9 @@ test_that("hnsw gives correct correlation neighbor results", {
 
   iris10_transform_hnsw <-
     umap_transform(iris10, iris10_hnsw, n_epochs = 0, ret_extra = c("nn"))
-  expect_equal(
-    iris10_hnsw$nn$correlation$idx,
-    iris10_transform_hnsw$nn$correlation$idx,
-    ignore_attr = "dimnames"
-  )
-  expect_true(all(iris10_hnsw$nn$correlation$dist[, 1] == 0))
-  expect_angular_distances(
-    iris10_hnsw$nn$correlation$dist[, 1, drop = FALSE],
-    iris10_transform_hnsw$nn$correlation$dist[, 1, drop = FALSE]
-  )
-  expect_equal(
-    iris10_hnsw$nn$correlation$dist[, -1],
-    iris10_transform_hnsw$nn$correlation$dist[, -1],
-    ignore_attr = "dimnames"
+  expect_angular_self_query(
+    iris10_hnsw$nn$correlation,
+    iris10_transform_hnsw$nn$correlation
   )
 
   iris10_transform_annoy <-
@@ -770,20 +748,9 @@ test_that("hnsw gives correct correlation neighbor results and multiple threads"
       ret_extra = c("nn"),
       n_threads = 2
     )
-  expect_equal(
-    iris10_hnsw$nn$correlation$idx,
-    iris10_transform_hnsw$nn$correlation$idx,
-    ignore_attr = "dimnames"
-  )
-  expect_true(all(iris10_hnsw$nn$correlation$dist[, 1] == 0))
-  expect_angular_distances(
-    iris10_hnsw$nn$correlation$dist[, 1, drop = FALSE],
-    iris10_transform_hnsw$nn$correlation$dist[, 1, drop = FALSE]
-  )
-  expect_equal(
-    iris10_hnsw$nn$correlation$dist[, -1],
-    iris10_transform_hnsw$nn$correlation$dist[, -1],
-    ignore_attr = "dimnames"
+  expect_angular_self_query(
+    iris10_hnsw$nn$correlation,
+    iris10_transform_hnsw$nn$correlation
   )
 
   iris10_transform_annoy <-
@@ -908,15 +875,9 @@ test_that("nndescent gives correct cosine neighbor results", {
 
   iris10_transform_nnd <-
     umap_transform(iris10, iris10_nnd, n_epochs = 0, ret_extra = c("nn"))
-  expect_equal(
-    iris10_nnd$nn$cosine$idx,
-    iris10_transform_nnd$nn$cosine$idx,
-    ignore_attr = "dimnames"
-  )
-  expect_equal(
-    iris10_nnd$nn$cosine$dist,
-    iris10_transform_nnd$nn$cosine$dist,
-    ignore_attr = "dimnames"
+  expect_angular_self_query(
+    iris10_nnd$nn$cosine,
+    iris10_transform_nnd$nn$cosine
   )
 
   iris10_transform_annoy <-
@@ -964,15 +925,9 @@ test_that("nndescent gives correct correlation neighbor results", {
 
   iris10_transform_nnd <-
     umap_transform(iris10, iris10_nnd, n_epochs = 0, ret_extra = c("nn"))
-  expect_equal(
-    iris10_nnd$nn$correlation$idx,
-    iris10_transform_nnd$nn$correlation$idx,
-    ignore_attr = "dimnames"
-  )
-  expect_equal(
-    iris10_nnd$nn$correlation$dist,
-    iris10_transform_nnd$nn$correlation$dist,
-    ignore_attr = "dimnames"
+  expect_angular_self_query(
+    iris10_nnd$nn$correlation,
+    iris10_transform_nnd$nn$correlation
   )
 
   iris10_transform_annoy <-
@@ -1027,15 +982,9 @@ test_that("nndescent gives correct correlation neighbor results and multiple thr
       ret_extra = c("nn"),
       n_threads = 2
     )
-  expect_equal(
-    iris10_nnd$nn$correlation$idx,
-    iris10_transform_nnd$nn$correlation$idx,
-    ignore_attr = "dimnames"
-  )
-  expect_equal(
-    iris10_nnd$nn$correlation$dist,
-    iris10_transform_nnd$nn$correlation$dist,
-    ignore_attr = "dimnames"
+  expect_angular_self_query(
+    iris10_nnd$nn$correlation,
+    iris10_transform_nnd$nn$correlation
   )
 
   iris10_transform_annoy <-
