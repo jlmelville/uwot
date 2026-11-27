@@ -7,6 +7,14 @@
   an error. Refit models trained with affected integer selectors to use
   the intended features.
 
+- Column range scaling gives constant training features zero weight
+  during fitting and projection. Global range and maximum-absolute
+  scaling report a zero scale factor before neighbor search.
+
+- PCA skips metric blocks narrower than the requested rank and preserves
+  full-rank block rotations. Mixed supervised targets retain the column
+  name when there is a single numeric target.
+
 - HNSW accepts supported metrics in named feature and target blocks.
 
 - Equal local radii give a uniform density adjustment in fitting and
@@ -20,9 +28,9 @@
 - Fit and transform obtain optimizer edge columns from sparse column
   pointers, reducing memory use.
 
-- Model saves check that native backends created a nonempty index file
-  before publishing the archive. Repeated saves clean up superseded
-  staging files. NN-Descent archives store each index once.
+- Model saves detect partial Annoy and HNSW index writes before
+  publishing the archive or unloading the model. Repeated saves clean up
+  superseded staging files. NN-Descent archives store each index once.
 
 - Epoch callbacks can run nested optimizations. Large optimizer
   workloads check for interrupts within epochs, and native optimization

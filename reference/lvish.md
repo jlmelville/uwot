@@ -205,12 +205,14 @@ lvish(
     they include a removed column.
 
   - `"maxabs"` Center each column to mean 0, then divide each element by
-    the maximum absolute value over the entire matrix.
+    the maximum absolute value over the entire matrix. Raises an error
+    if every column is constant.
 
   - `"range"` Range scale the entire matrix, so the smallest element is
-    0 and the largest is 1.
+    0 and the largest is 1. A zero range raises an error.
 
-  - `"colrange"` Scale each column in the range (0,1).
+  - `"colrange"` Scale each column to the range \[0, 1\]. Columns that
+    are constant during training contribute zero, including in new data.
 
   For lvish, the default is `"maxabs"`, for consistency with LargeVis.
 
@@ -395,15 +397,15 @@ lvish(
 - pca:
 
   If set to a positive integer value, reduce data to this number of
-  columns using PCA. Doesn't applied if the distance `metric` is
-  `"hamming"`, or the dimensions of the data is larger than the number
-  specified (i.e. number of rows and columns must be larger than the
-  value of this parameter). If you have \> 100 columns in a data frame
-  or matrix, reducing the number of columns in this way may
-  substantially increase the performance of the nearest neighbor search
-  at the cost of a potential decrease in accuracy. In many t-SNE
-  applications, a value of 50 is recommended, although there's no
-  guarantee that this is appropriate for all settings.
+  columns using PCA. The input must have more rows and columns than the
+  requested number of components. PCA skips Hamming blocks and blocks
+  narrower than that number. With multiple blocks, a block of exactly
+  that width retains its full-rank PCA rotation. If you have \> 100
+  columns in a data frame or matrix, reducing the number of columns may
+  speed up the nearest neighbor search at the cost of a potential
+  decrease in accuracy. In many t-SNE applications, a value of 50 is
+  recommended, although there's no guarantee that this is appropriate
+  for all settings.
 
 - pca_center:
 
