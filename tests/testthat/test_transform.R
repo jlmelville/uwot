@@ -672,6 +672,31 @@ test_that("only a shared embedding excludes a matching negative index", {
   }
 })
 
+test_that("models without an epoch count use the size of the query", {
+  model <- fit_small_model()
+  model$n_epochs <- NULL
+  neighbors <- query_neighbors(model, iris10[1:3, ])
+
+  project <- function(n, expected_epochs) {
+    rows <- rep_len(seq_len(3), n)
+    graph <- lapply(neighbors, function(x) x[rows, , drop = FALSE])
+    last_epoch <- 0L
+    embedding <- umap_transform(
+      model = model,
+      nn_method = graph,
+      n_threads = 0,
+      epoch_callback = function(epoch, n_epochs, coords, fixed_coords) {
+        last_epoch <<- epoch
+      }
+    )
+    expect_ok_matrix(embedding, nr = n)
+    expect_equal(last_epoch, expected_epochs)
+  }
+
+  project(3, 100)
+  project(10001, 30)
+})
+
 test_that("legacy single-block PCA models can select columns of stored scores", {
   m <- fit_small_model(pca = 2, pca_method = "svd")
   expected <- query_neighbors(m)

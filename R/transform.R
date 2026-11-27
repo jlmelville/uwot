@@ -59,7 +59,9 @@
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. A value between \code{30 - 100} is a reasonable trade
 #'   off between speed and thoroughness. By default, this value is set to one
-#'   third the number of epochs used to build the \code{model}.
+#'   third the number of epochs used to build the \code{model}. If the model
+#'   has no epoch count, the default is 100 for up to 10,000 query observations
+#'   and 30 for larger queries.
 #' @param n_threads Number of threads to use, (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
 #'   system.
@@ -290,19 +292,6 @@ umap_transform <- function(
     stop(
       "This model requires the rnndescent package to be installed."
     )
-  }
-
-  if (is.null(n_epochs)) {
-    n_epochs <- model$n_epochs
-    if (is.null(n_epochs)) {
-      if (ncol(graph) <= 10000) {
-        n_epochs <- 100
-      } else {
-        n_epochs <- 30
-      }
-    } else {
-      n_epochs <- max(2, round(n_epochs / 3))
-    }
   }
 
   # Handle setting the random number seed internally:
@@ -559,6 +548,14 @@ umap_transform <- function(
   }
   if (is.null(n_vertices)) {
     stop("Failed to read input correctly: invalid input format")
+  }
+
+  if (is.null(n_epochs)) {
+    n_epochs <- if (is.null(model$n_epochs)) {
+      if (n_vertices <= 10000) 100 else 30
+    } else {
+      max(2, round(model$n_epochs / 3))
+    }
   }
 
   if (verbose) {

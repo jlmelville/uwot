@@ -1,6 +1,7 @@
 # uwot (development version)
 
 * PCA initialization retains its matrix shape for one-dimensional embeddings.
+* `umap_transform()` uses the query size to choose an epoch count when the fitted model omits it.
 
 * `umap_transform(init_weighted = FALSE)` once again uses unweighted neighbor averages. An explicit
   `init` takes precedence.
