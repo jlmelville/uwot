@@ -4313,7 +4313,10 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
 
   # save model file to tempdir/uwot/model
   model_tmpfname <- file.path(uwot_dir, "model")
-  saveRDS(model, file = model_tmpfname)
+  metadata <- model
+  metadata$nn_index <- NULL
+  metadata$mod_dir <- NULL
+  saveRDS(metadata, file = model_tmpfname)
 
   # save each nn index inside tempdir/uwot/model
   indices <- model_nn_indices(model)
@@ -4326,6 +4329,10 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
       nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
       nn_meta_tmpfname <- file.path(uwot_dir, paste0("nn-meta", i))
       nn_index$ann$save(nn_tmpfname)
+      # Both native save methods can return normally after a write failure.
+      if (!utils::file_test("-f", nn_tmpfname) || file.size(nn_tmpfname) == 0) {
+        stop("Could not save nearest neighbor index: ", nn_tmpfname)
+      }
       if (startsWith(nn_index$type, "annoy")) {
         release_annoy_backing(annoy_backing(nn_index$ann), unload = FALSE)
         saved_annoy[[nn_tmpfname]] <- nn_index$ann
@@ -4353,6 +4360,24 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
     stop("Could not save model archive: ", model_file)
   }
   saved <- TRUE
+  if (!is.null(model$mod_dir) && dir.exists(model$mod_dir)) {
+    # Only remove the model's own staging files. The caller may have saved
+    # the archive or placed other files in the old working directory.
+    old_uwot <- file.path(model$mod_dir, "uwot")
+    members <- list.files(uwot_dir)
+    if (
+      dir.exists(old_uwot) &&
+        normalizePath(old_uwot) == normalizePath(dirname(model_file))
+    ) {
+      members <- setdiff(members, basename(model_file))
+    }
+    unlink(file.path(old_uwot, members))
+    for (dir in c(old_uwot, model$mod_dir)) {
+      if (!length(list.files(dir, all.files = TRUE, no.. = TRUE))) {
+        unlink(dir, recursive = TRUE)
+      }
+    }
+  }
   model$mod_dir <- mod_dir
   if (unload) {
     unload_uwot(model, cleanup = TRUE, verbose = verbose)

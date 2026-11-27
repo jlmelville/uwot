@@ -392,3 +392,88 @@ test_that("save-load relative path", {
   resload_trans <- umap_transform(iris10, modelload)
   expect_ok_matrix(resload_trans)
 })
+
+for (backend in c("annoy", "hnsw", "nndescent")) {
+  test_that(paste("repeated saves replace staging files for", backend), {
+    if (backend == "hnsw") {
+      skip_if_not_installed("RcppHNSW")
+    }
+    if (backend == "nndescent") {
+      skip_if_not_installed("rnndescent")
+    }
+    archives <- c(tempfile(), tempfile())
+    on.exit(unlink(archives))
+    blocks <- list(euclidean = 1:2, euclidean = 3:4)
+    m <- fit_small_model(nn_method = backend, metric = blocks)
+    query <- function(m) {
+      umap_transform(
+        iris10,
+        m,
+        ret_extra = "nn",
+        n_epochs = 0,
+        n_threads = 0
+      )$nn
+    }
+    expected <- query(m)
+    m <- save_uwot(m, archives[1])
+    previous <- m$mod_dir
+    m <- save_uwot(m, archives[2])
+    expect_false(dir.exists(previous))
+    expect_true(all(file.exists(archives)))
+    metadata <- readRDS(file.path(m$mod_dir, "uwot", "model"))
+    expect_null(metadata$nn_index)
+    expect_equal(query(m), expected)
+    unload_uwot(m)
+    expect_false(dir.exists(m$mod_dir))
+    for (archive in archives) {
+      restored <- load_uwot(archive)
+      expect_equal(query(restored), expected)
+      unload_uwot(restored)
+    }
+  })
+}
+
+test_that("a native index write failure preserves the archive and live model", {
+  archive <- tempfile()
+  on.exit(unlink(archive))
+  for (backend in c("annoy", "hnsw")) {
+    if (backend == "hnsw" && !requireNamespace("RcppHNSW", quietly = TRUE)) {
+      next
+    }
+    m <- fit_small_model(nn_method = backend)
+    expected <- query_neighbors(m)
+    # Direct the real backend to a missing parent inside the staging folder.
+    failed <- m
+    native <- m$nn_index$ann
+    failed$nn_index$ann <- list(
+      save = function(file) {
+        native$save(file.path(dirname(file), "absent", "nn1"))
+      }
+    )
+    if (backend == "annoy") {
+      failed$nn_index$ann$getNTrees <- native$getNTrees
+    }
+    expect_error(
+      save_uwot(failed, archive, unload = TRUE),
+      "Could not save nearest neighbor index|[Uu]nable to open|[Cc]annot open"
+    )
+    expect_false(file.exists(archive))
+    expect_equal(query_neighbors(m), expected)
+    unload_uwot(m, cleanup = FALSE)
+  }
+})
+
+test_that("saving inside the old working directory preserves the new archive", {
+  first <- tempfile()
+  on.exit(unlink(first))
+  m <- save_uwot(fit_small_model(), first)
+  old_dir <- m$mod_dir
+  on.exit(unlink(old_dir, recursive = TRUE), add = TRUE)
+  second <- file.path(old_dir, "backup.tar")
+  saved <- save_uwot(m, second, unload = TRUE)
+  expect_false(dir.exists(saved$mod_dir))
+  expect_identical(list.files(old_dir), "backup.tar")
+  restored <- load_uwot(second)
+  expect_equal(query_neighbors(restored)$idx[1, 1], 1L)
+  unload_uwot(restored)
+})
