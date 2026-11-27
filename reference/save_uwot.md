@@ -47,6 +47,12 @@ after this function returns, and can be cleaned up with
 If you don't care about cleaning up this directory, or `unload = TRUE`,
 then you can ignore the return value.
 
+## Details
+
+If any model file (such as a neighbor index) is 8 GiB or larger, saving
+and loading the archive requires GNU tar or bsdtar. uwot looks for these
+tools on the system, including the tar supplied with Windows.
+
 ## See also
 
 [`load_uwot`](https://jlmelville.github.io/uwot/reference/load_uwot.md),

@@ -32,6 +32,10 @@
   publishing the archive or unloading the model. Repeated saves clean up
   superseded staging files. NN-Descent archives store each index once.
 
+- Model files of 8 GiB or more, including large neighbor indexes, can
+  now be saved and loaded using GNU tar or bsdtar
+  ([\#77](https://github.com/jlmelville/uwot/issues/77)).
+
 - Epoch callbacks can run nested optimizations. Large optimizer
   workloads check for interrupts within epochs, and native optimization
   uses less memory for edge lists.
