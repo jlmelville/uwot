@@ -4351,14 +4351,15 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
     ) {
       nn_tmpfname <- file.path(uwot_dir, paste0("nn", i))
       nn_meta_tmpfname <- file.path(uwot_dir, paste0("nn-meta", i))
-      nn_index$ann$save(nn_tmpfname)
-      # Both native save methods can return normally after a write failure.
-      if (!utils::file_test("-f", nn_tmpfname) || file.size(nn_tmpfname) == 0) {
-        stop("Could not save nearest neighbor index: ", nn_tmpfname)
-      }
       if (startsWith(nn_index$type, "annoy")) {
+        annoy_save(nn_index$ann, nn_tmpfname)
         release_annoy_backing(annoy_backing(nn_index$ann), unload = FALSE)
         saved_annoy[[nn_tmpfname]] <- nn_index$ann
+      } else {
+        nn_index$ann$save(nn_tmpfname)
+        if (!hnsw_index_complete(nn_tmpfname)) {
+          stop("Could not save nearest neighbor index: ", nn_tmpfname)
+        }
       }
 
       # save metadata wrapper around the index separately

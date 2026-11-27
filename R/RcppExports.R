@@ -5,6 +5,10 @@ connected_components_undirected <- function(N, indices1, indptr1, indices2, indp
     .Call(`_uwot_connected_components_undirected`, N, indices1, indptr1, indices2, indptr2)
 }
 
+hnsw_index_complete <- function(path) {
+    .Call(`_uwot_hnsw_index_complete`, path)
+}
+
 annoy_search_parallel_cpp <- function(index_name, mat, n_neighbors, search_k, metric, n_threads = 0L, grain_size = 1L) {
     .Call(`_uwot_annoy_search_parallel_cpp`, index_name, mat, n_neighbors, search_k, metric, n_threads, grain_size)
 }

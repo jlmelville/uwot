@@ -25,6 +25,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// hnsw_index_complete
+bool hnsw_index_complete(const std::string& path);
+RcppExport SEXP _uwot_hnsw_index_complete(SEXP pathSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const std::string& >::type path(pathSEXP);
+    rcpp_result_gen = Rcpp::wrap(hnsw_index_complete(path));
+    return rcpp_result_gen;
+END_RCPP
+}
 // annoy_search_parallel_cpp
 List annoy_search_parallel_cpp(const std::string& index_name, NumericMatrix mat, std::size_t n_neighbors, std::size_t search_k, const std::string& metric, std::size_t n_threads, std::size_t grain_size);
 RcppExport SEXP _uwot_annoy_search_parallel_cpp(SEXP index_nameSEXP, SEXP matSEXP, SEXP n_neighborsSEXP, SEXP search_kSEXP, SEXP metricSEXP, SEXP n_threadsSEXP, SEXP grain_sizeSEXP) {
@@ -213,6 +223,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_uwot_connected_components_undirected", (DL_FUNC) &_uwot_connected_components_undirected, 5},
+    {"_uwot_hnsw_index_complete", (DL_FUNC) &_uwot_hnsw_index_complete, 1},
     {"_uwot_annoy_search_parallel_cpp", (DL_FUNC) &_uwot_annoy_search_parallel_cpp, 7},
     {"_uwot_calc_row_probabilities_parallel", (DL_FUNC) &_uwot_calc_row_probabilities_parallel, 8},
     {"_uwot_optimize_layout_r", (DL_FUNC) &_uwot_optimize_layout_r, 21},

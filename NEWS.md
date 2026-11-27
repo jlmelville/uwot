@@ -9,9 +9,9 @@
 * Sparse graph union, intersection and layout expand triangular storage. Empty graphs use the
   existing minimum missing-edge weight when combined with other graphs.
 * Fit and transform obtain optimizer edge columns from sparse column pointers, reducing memory use.
-* Model saves check that native backends created a nonempty index file before publishing the
-  archive. Repeated saves clean up superseded staging files. NN-Descent archives store each index
-  once.
+* Model saves detect partial Annoy and HNSW index writes before publishing the archive or
+  unloading the model. Repeated saves clean up superseded staging files. NN-Descent archives store
+  each index once.
 
 * Epoch callbacks can run nested optimizations. Large optimizer workloads check for interrupts
   within epochs, and native optimization uses less memory for edge lists.

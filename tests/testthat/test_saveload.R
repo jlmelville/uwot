@@ -477,3 +477,59 @@ test_that("saving inside the old working directory preserves the new archive", {
   expect_equal(query_neighbors(restored)$idx[1, 1], 1L)
   unload_uwot(restored)
 })
+
+test_that("an Annoy write diagnostic rejects a nonempty staged file", {
+  m <- fit_small_model()
+  expected <- query_neighbors(m)
+  archive <- tempfile()
+  on.exit(unload_uwot(m, cleanup = FALSE))
+  failed <- m
+  proxy <- new.env(parent = emptyenv())
+  proxy$getNTrees <- m$nn_index$ann$getNTrees
+  proxy$save <- function(path) {
+    writeBin(as.raw(1:12), path)
+    # Use the real RcppAnnoy diagnostic while a partial staged file exists.
+    m$nn_index$ann$save(file.path(dirname(path), "absent", "nn1"))
+  }
+  failed$nn_index$ann <- proxy
+  outer <- utils::capture.output(
+    {
+      expect_error(save_uwot(failed, archive, unload = TRUE), "Unable to open")
+      message("outer sink restored")
+    },
+    type = "message"
+  )
+  expect_true("outer sink restored" %in% outer)
+  expect_false(file.exists(archive))
+  expect_equal(query_neighbors(m), expected)
+})
+
+test_that("HNSW saves reject a partial header, base table or final record", {
+  skip_if_not_installed("RcppHNSW")
+  m <- fit_small_model(nn_method = "hnsw")
+  expected <- query_neighbors(m)
+  archive <- tempfile()
+  m <- save_uwot(m, archive)
+  on.exit({
+    unload_uwot(m)
+    unlink(archive)
+  })
+  path <- file.path(m$mod_dir, "uwot", "nn1")
+  index <- readBin(path, "raw", n = file.size(path))
+  expect_true(hnsw_index_complete(path))
+
+  failed <- m
+  failed$nn_index$ann <- list(save = function(path) {
+    writeBin(index[seq_len(n)], path)
+  })
+  for (n in c(1L, length(index) %/% 2L, length(index) - 1L)) {
+    dest <- tempfile()
+    expect_error(
+      save_uwot(failed, dest, unload = TRUE),
+      "Could not save nearest neighbor index"
+    )
+    expect_false(file.exists(dest))
+    expect_true(file.exists(path))
+  }
+  expect_equal(query_neighbors(m), expected)
+})

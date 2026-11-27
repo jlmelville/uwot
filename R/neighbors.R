@@ -445,6 +445,34 @@ release_annoy_backing <- function(backing, unload = TRUE) {
   }
 }
 
+# RcppAnnoy returns NULL even when fopen, fwrite or fclose fails. Its native
+# diagnostic uses REprintf. Preserve the caller's message connection, including
+# when this save runs inside another capture.output().
+annoy_save <- function(ann, path) {
+  previous <- getConnection(sink.number(type = "message"))
+  on.exit(sink(previous, type = "message"))
+  diagnostics <- utils::capture.output(
+    status <- ann$save(path),
+    type = "message"
+  )
+  errors <- startsWith(diagnostics, "Unable to ")
+  if (
+    identical(status, FALSE) ||
+      any(errors) ||
+      !utils::file_test("-f", path) ||
+      file.size(path) == 0
+  ) {
+    stop(
+      "Could not save nearest neighbor index: ",
+      path,
+      if (any(errors)) {
+        paste0(" (", paste(diagnostics[errors], collapse = "; "), ")")
+      }
+    )
+  }
+  if (length(diagnostics)) writeLines(diagnostics, previous)
+}
+
 annoy_search_parallel <- function(
   X,
   k,
@@ -478,7 +506,7 @@ annoy_search_parallel <- function(
       }
     })
     tsmessage("Writing NN index file to temp file ", index_file)
-    ann$save(index_file)
+    annoy_save(ann, index_file)
     saved <- TRUE
   }
   fsize <- file.size(index_file)
