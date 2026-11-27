@@ -101,7 +101,9 @@ umap_transform(
   Number of epochs to use during the optimization of the embedded
   coordinates. A value between `30 - 100` is a reasonable trade off
   between speed and thoroughness. By default, this value is set to one
-  third the number of epochs used to build the `model`.
+  third the number of epochs used to build the `model`. If the model has
+  no epoch count, the default is 100 for up to 10,000 query observations
+  and 30 for larger queries.
 
 - n_threads:
 

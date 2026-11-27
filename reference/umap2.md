@@ -677,7 +677,7 @@ umap2(
     [`prcomp_irlba`](https://rdrr.io/pkg/irlba/man/prcomp_irlba.html)
     from the [irlba](https://cran.r-project.org/package=irlba) package.
 
-  - `"rsvd"`. Uses 5 iterations of
+  - `"svdr"`. Uses 5 iterations of
     [`svdr`](https://rdrr.io/pkg/irlba/man/svdr.html) from the
     [irlba](https://cran.r-project.org/package=irlba) package. This is
     likely to give much faster but potentially less accurate results

@@ -603,7 +603,7 @@ epoch. Its signature should be: <code>(epoch, n_epochs, coords)</code>, where:</
 <dd><p>Method to carry out any PCA dimensionality reduction when
 the <code>pca</code> parameter is specified. Allowed values are:</p><ul><li><p><code>"irlba"</code>. Uses <code><a href="https://rdrr.io/pkg/irlba/man/prcomp_irlba.html" class="external-link">prcomp_irlba</a></code> from the
   <a href="https://cran.r-project.org/package=irlba" class="external-link">irlba</a> package.</p></li>
-<li><p><code>"rsvd"</code>. Uses 5 iterations of <code><a href="https://rdrr.io/pkg/irlba/man/svdr.html" class="external-link">svdr</a></code> from
+<li><p><code>"svdr"</code>. Uses 5 iterations of <code><a href="https://rdrr.io/pkg/irlba/man/svdr.html" class="external-link">svdr</a></code> from
   the <a href="https://cran.r-project.org/package=irlba" class="external-link">irlba</a> package.
   This is likely to give much faster but potentially less accurate results
   than using <code>"irlba"</code>. For the purposes of nearest neighbor

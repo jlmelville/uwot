@@ -36,7 +36,11 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="uwot-development-version">uwot (development version)<a class="anchor" aria-label="anchor" href="#uwot-development-version"></a></h2>
-<ul><li><p><code>umap_transform(init_weighted = FALSE)</code> once again uses unweighted neighbor averages. An explicit <code>init</code> takes precedence.</p></li>
+<ul><li><p>PCA initialization retains its matrix shape for one-dimensional embeddings.</p></li>
+<li><p><code><a href="../reference/umap_transform.html">umap_transform()</a></code> uses the query size to choose an epoch count when the fitted model omits it.</p></li>
+<li><p>The <code>agspectral</code> initializer now samples random neighbors from all vertices except the vertex being initialized.</p></li>
+<li><p>The installed C++ header <code>uwot/supervised.h</code> no longer provides the unused <code>general_sset_intersection</code> and <code>general_sset_union</code> functions.</p></li>
+<li><p><code>umap_transform(init_weighted = FALSE)</code> once again uses unweighted neighbor averages. An explicit <code>init</code> takes precedence.</p></li>
 <li><p>Standardization preserves metric block column positions and supports single-row projection. Selecting a constant feature explicitly raises an error. Refit models trained with affected integer selectors to use the intended features.</p></li>
 <li><p>Column range scaling gives constant training features zero weight during fitting and projection. Global range and maximum-absolute scaling report a zero scale factor before neighbor search.</p></li>
 <li><p>PCA skips metric blocks narrower than the requested rank and preserves full-rank block rotations. Mixed supervised targets retain the column name when there is a single numeric target.</p></li>
