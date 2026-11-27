@@ -385,7 +385,7 @@
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
-#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     \item{\code{"svdr"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
 #'     than using \code{"irlba"}. For the purposes of nearest neighbor
@@ -1221,7 +1221,7 @@ umap <- function(
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
-#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     \item{\code{"svdr"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
 #'     than using \code{"irlba"}. For the purposes of nearest neighbor
@@ -1932,7 +1932,7 @@ tumap <- function(
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
-#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     \item{\code{"svdr"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
 #'     than using \code{"irlba"}. For the purposes of nearest neighbor
@@ -2553,7 +2553,7 @@ lvish <- function(
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
-#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     \item{\code{"svdr"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
 #'     than using \code{"irlba"}. For the purposes of nearest neighbor
@@ -2894,7 +2894,7 @@ similarity_graph <- function(
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
-#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     \item{\code{"svdr"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
 #'     than using \code{"irlba"}. For the purposes of nearest neighbor

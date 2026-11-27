@@ -492,7 +492,7 @@ irlba_scores <- function(
     center = center,
     scale. = FALSE
   )
-  report_varex(res, verbose)
+  report_varex(ncol, sum(res$sdev[seq_len(ncol)]^2) / res$totalvar, verbose)
   if (ret_extra) {
     list(scores = res$x, rotation = res$rotation, center = res$center)
   } else {
@@ -500,10 +500,8 @@ irlba_scores <- function(
   }
 }
 
-report_varex <- function(res, verbose = FALSE) {
+report_varex <- function(ncol, varex, verbose) {
   if (verbose) {
-    ncol <- ncol(res$rotation)
-    varex <- sum(res$sdev[1:ncol]^2) / res$totalvar
     tsmessage(
       "PCA: ",
       ncol,
@@ -514,126 +512,36 @@ report_varex <- function(res, verbose = FALSE) {
   }
 }
 
-# This function taken from irlba and modified to use irlba::svdr rather
-# than irlba::irlba
-prcomp_rsvd <- function(
-  x,
-  n = 3,
-  retx = TRUE,
+irlba_svdr_scores <- function(
+  X,
+  ncol,
   center = TRUE,
-  scale. = FALSE,
-  ...
+  ret_extra = FALSE,
+  verbose = FALSE
 ) {
-  a <- names(as.list(match.call()))
-  ans <- list(scale = scale.)
-  if ("tol" %in% a) {
-    warning(
-      "The `tol` truncation argument from `prcomp` is not supported by\n`prcomp_rsvd`. If specified, `tol` is passed to the `irlba` function to\ncontrol that algorithm's convergence tolerance. See `?prcomp_irlba` for help."
-    )
+  if (is.data.frame(X)) {
+    X <- as.matrix(X)
   }
-  if (is.data.frame(x)) {
-    x <- as.matrix(x)
-  }
-  args <- list(x = x, k = n)
   if (is.logical(center)) {
-    if (center) {
-      args$center <- colMeans(x)
-    }
+    center <- if (center) colMeans(X) else NULL
+  }
+  # Five iterations matches the default for scikit-learn TruncatedSVD.
+  s <- irlba::svdr(X, k = ncol, center = center, it = 5)
+  if (verbose) {
+    offsets <- if (is.null(center)) numeric(ncol(X)) else center
+    column_ss <- function(j) sum((X[, j] - offsets[j])^2)
+    total_ss <- sum(vapply(seq_len(ncol(X)), column_ss, numeric(1)))
+    report_varex(ncol, sum(s$d^2) / total_ss, verbose)
+  }
+  scores <- sweep(s$u, 2, s$d, `*`)
+  colnames(scores) <- paste0("PC", seq_len(ncol))
+  if (ret_extra) {
+    colnames(s$v) <- colnames(scores)
+    list(scores = scores, rotation = s$v, center = center)
   } else {
-    args$center <- center
+    scores
   }
-  if (is.logical(scale.)) {
-    if (is.numeric(args$center)) {
-      f <- function(i) {
-        sqrt(
-          sum((x[, i] - args$center[i])^2) /
-            (nrow(x) -
-              1L)
-        )
-      }
-      scale. <- vapply(seq(ncol(x)), f, pi, USE.NAMES = FALSE)
-      if (ans$scale) {
-        ans$totalvar <- ncol(x)
-      } else {
-        ans$totalvar <- sum(scale.^2)
-      }
-    } else {
-      if (ans$scale) {
-        scale. <- apply(x, 2L, function(v) {
-          sqrt(
-            sum(v^2) /
-              max(
-                1,
-                length(v) - 1L
-              )
-          )
-        })
-        f <- function(i) {
-          sqrt(
-            sum((x[, i] / scale.[i])^2) /
-              (nrow(x) -
-                1L)
-          )
-        }
-        ans$totalvar <- sum(vapply(seq(ncol(x)), f, pi, USE.NAMES = FALSE)^2)
-      } else {
-        f <- function(i) sum(x[, i]^2) / (nrow(x) - 1L)
-        ans$totalvar <- sum(vapply(seq(ncol(x)), f, pi, USE.NAMES = FALSE))
-      }
-    }
-    if (ans$scale) {
-      args$scale <- scale.
-    }
-  } else {
-    args$scale <- scale.
-    f <- function(i) {
-      sqrt(
-        sum((x[, i] / scale.[i])^2) /
-          (nrow(x) -
-            1L)
-      )
-    }
-    ans$totalvar <- sum(vapply(seq(ncol(x)), f, pi, USE.NAMES = FALSE))
-  }
-  if (!missing(...)) {
-    args <- c(args, list(...))
-  }
-
-  s <- do.call(irlba::svdr, args = args)
-  ans$sdev <- s$d / sqrt(max(1, nrow(x) - 1))
-  ans$rotation <- s$v
-  colnames(ans$rotation) <- paste("PC", seq(1, ncol(ans$rotation)), sep = "")
-  ans$center <- args$center
-  if (retx) {
-    ans <- c(ans, list(x = sweep(s$u, 2, s$d, FUN = `*`)))
-    colnames(ans$x) <- paste("PC", seq(1, ncol(ans$rotation)), sep = "")
-  }
-  class(ans) <- c("irlba_prcomp", "prcomp")
-  ans
 }
-
-irlba_svdr_scores <-
-  function(X, ncol, center = TRUE, ret_extra = FALSE, verbose = FALSE) {
-    # 5 iterations is the default for scikit-learn TruncatedSVD
-    res <- prcomp_rsvd(
-      X,
-      n = ncol,
-      retx = TRUE,
-      center = center,
-      scale. = FALSE,
-      it = 5
-    )
-    report_varex(res, verbose)
-    if (ret_extra) {
-      list(
-        scores = res$x,
-        rotation = res$rotation,
-        center = res$center
-      )
-    } else {
-      res$x
-    }
-  }
 
 init_is_spectral <- function(init) {
   res <- pmatch(
