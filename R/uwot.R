@@ -4252,6 +4252,9 @@ uwot <- function(
 #'
 #' Functions to write a UMAP model to a file, and to restore.
 #'
+#' @details If any model file (such as a neighbor index) is 8 GiB or larger,
+#'   saving and loading the archive requires GNU tar or bsdtar. uwot looks for
+#'   these tools on the system, including the tar supplied with Windows.
 #' @param model a UMAP model create by \code{\link{umap}}.
 #' @param file name of the file where the model is to be saved or read from.
 #' @param unload if \code{TRUE}, unload all nearest neighbor indexes for the
@@ -4383,8 +4386,7 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
   }
 
   setwd(mod_dir)
-  flags <- if (is_win7()) "--force-local" else ""
-  status <- utils::tar(tarfile = archive, files = "uwot/", extra_flags = flags)
+  status <- write_model_archive(archive)
   setwd(wd)
   if (
     status != 0 || file.exists(model_file) || !file.rename(archive, model_file)
@@ -4421,6 +4423,7 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
 #'
 #' Functions to write a UMAP model to a file, and to restore.
 #'
+#' @inherit save_uwot details
 #' @param file name of the file where the model is to be saved or read from.
 #' @param verbose if \code{TRUE}, log information to the console.
 #' @return The model saved at \code{file}, for use with
@@ -4485,18 +4488,7 @@ load_uwot <- function(file, verbose = FALSE) {
     unlink(mod_dir, recursive = TRUE)
   })
 
-  # #109: Windows 7 tar needs "--force-local" to avoid interpreting colon
-  # as indicating a remote machine
-  extras <- NULL
-  if (is_win7()) {
-    extras <- "--force-local"
-  }
-  utils::untar(
-    abspath(file),
-    exdir = mod_dir,
-    extras = extras,
-    verbose = verbose
-  )
+  extract_model_archive(abspath(file), mod_dir, verbose)
 
   model_fname <- file.path(mod_dir, "uwot/model")
   if (!file.exists(model_fname)) {

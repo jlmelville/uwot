@@ -34,6 +34,11 @@ return value.}
 \description{
 Functions to write a UMAP model to a file, and to restore.
 }
+\details{
+If any model file (such as a neighbor index) is 8 GiB or larger,
+  saving and loading the archive requires GNU tar or bsdtar. uwot looks for
+  these tools on the system, including the tar supplied with Windows.
+}
 \examples{
 iris_train <- iris[c(1:10, 51:60), ]
 iris_test <- iris[100:110, ]

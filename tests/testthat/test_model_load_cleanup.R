@@ -30,3 +30,12 @@ test_that("a failed load releases Annoy indexes opened earlier in the archive", 
   expect_error(load_uwot("incomplete.tar"), "Can't find nearest neighbor index")
   expect_equal(list.dirs(tempdir(), recursive = FALSE), before)
 })
+
+test_that("an extraction failure is reported before reading model files", {
+  before <- list.dirs(tempdir(), recursive = FALSE)
+  expect_error(
+    suppressWarnings(load_uwot(tempfile())),
+    "Could not extract model archive"
+  )
+  expect_equal(list.dirs(tempdir(), recursive = FALSE), before)
+})

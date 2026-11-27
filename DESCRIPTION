@@ -41,7 +41,7 @@ Suggests:
     RcppHNSW,
     rmarkdown,
     rnndescent,
-    testthat (>= 3.0.0)
+    testthat (>= 3.2.1)
 LinkingTo: 
     dqrng,
     Rcpp,

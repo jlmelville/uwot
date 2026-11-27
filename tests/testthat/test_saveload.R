@@ -47,6 +47,51 @@ test_that("can save and load simple model", {
 })
 
 
+test_that("the large-member archive path round-trips an Annoy model", {
+  pax <- find_pax_tar()
+  if (Sys.getenv("GITHUB_ACTIONS") != "true") {
+    skip_if(is.null(pax), "GNU tar or bsdtar is required")
+  }
+  expect_false(is.null(pax))
+  lookups <- 0L
+  local_mocked_bindings(
+    ustar_size_limit = 1,
+    find_pax_tar = function() {
+      lookups <<- lookups + 1L
+      pax
+    }
+  )
+  archive <- tempfile("model archive ")
+  on.exit(unlink(archive))
+  model <- save_uwot(fit_small_model(), archive)
+  on.exit(unload_uwot(model), add = TRUE)
+  expect_equal(lookups, 1L)
+  reloaded <- load_uwot(archive)
+  on.exit(unload_uwot(reloaded), add = TRUE)
+  expect_equal(lookups, 2L)
+  set.seed(77)
+  expected <- umap_transform(iris10, model, n_epochs = 4, n_threads = 1)
+  set.seed(77)
+  expect_equal(
+    umap_transform(iris10, reloaded, n_epochs = 4, n_threads = 1),
+    expected
+  )
+})
+
+test_that("a large archive with small members still loads without a PAX tool", {
+  archive <- tempfile()
+  on.exit(unlink(archive))
+  saved <- save_uwot(fit_small_model(), archive, unload = TRUE)
+  local_mocked_bindings(ustar_size_limit = 1, find_pax_tar = function() NULL)
+  model <- load_uwot(archive)
+  on.exit(unload_uwot(model), add = TRUE)
+  expect_equal(model$embedding, saved$embedding)
+
+  dest <- tempfile()
+  expect_error(save_uwot(model, dest), "uwot/.*8 GiB.*GNU tar or bsdtar")
+  expect_false(file.exists(dest))
+})
+
 test_that("can save and load mixed distance model", {
   set.seed(1337)
   jiris10 <- jitter(iris10)

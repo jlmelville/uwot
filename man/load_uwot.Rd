@@ -21,6 +21,11 @@ The model saved at \code{file}, for use with
 \description{
 Functions to write a UMAP model to a file, and to restore.
 }
+\details{
+If any model file (such as a neighbor index) is 8 GiB or larger,
+  saving and loading the archive requires GNU tar or bsdtar. uwot looks for
+  these tools on the system, including the tar supplied with Windows.
+}
 \examples{
 library(RSpectra)
 
