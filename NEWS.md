@@ -4,6 +4,8 @@
 * `umap_transform()` uses the query size to choose an epoch count when the fitted model omits it.
 * The `agspectral` initializer now samples random neighbors from all vertices except the vertex
   being initialized.
+* The installed C++ header `uwot/supervised.h` no longer provides the unused
+  `general_sset_intersection` and `general_sset_union` functions.
 
 * `umap_transform(init_weighted = FALSE)` once again uses unweighted neighbor averages. An explicit
   `init` takes precedence.

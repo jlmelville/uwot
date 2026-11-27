@@ -187,11 +187,6 @@ auto r_to_coords(NumericMatrix head_embedding,
   }
 }
 
-auto r_to_coords(NumericMatrix head_embedding) -> uwot::Coords {
-  auto head_vec = as<std::vector<float>>(head_embedding);
-  return uwot::Coords(std::move(head_vec));
-}
-
 void validate_args(List method_args,
                    const std::vector<std::string> &arg_names) {
   for (auto &arg_name : arg_names) {

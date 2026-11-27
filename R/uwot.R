@@ -4070,8 +4070,6 @@ uwot <- function(
       method,
       umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
       tumap = list(gamma = gamma),
-      # a = 1 b = 10 for final phase of PaCMAP optimization
-      pacmap = list(a = a, b = b),
       largevis = list(gamma = gamma),
       leopold = list(ai = ai, b = b, ndim = n_components),
       stop("Unknown dimensionality reduction method '", method, "'")
