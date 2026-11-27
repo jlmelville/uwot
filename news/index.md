@@ -2,6 +2,9 @@
 
 ## uwot (development version)
 
+- `umap_transform(init_weighted = FALSE)` once again uses unweighted
+  neighbor averages. An explicit `init` takes precedence.
+
 - Standardization preserves metric block column positions and supports
   single-row projection. Selecting a constant feature explicitly raises
   an error. Refit models trained with affected integer selectors to use

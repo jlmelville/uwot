@@ -157,18 +157,18 @@ on some internal <code>uwot</code> functions which I do not promise have
 a stable API (i.e. this may example may be broken when you read this),
 but it gives you the general idea:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">iris_even</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="va">iris_odd</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">iris_even</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">iris_odd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">iris_even_nn</span> <span class="op">&lt;-</span> <span class="fu">uwot</span><span class="fu">:::</span><span class="fu">annoy_nn</span><span class="op">(</span></span>
-<span>  X <span class="op">=</span> <span class="fu">uwot</span><span class="fu">:::</span><span class="fu">x2m</span><span class="op">(</span><span class="va">iris_even</span><span class="op">)</span>,</span>
+<span>  X <span class="op">=</span> <span class="va">iris_even</span>,</span>
 <span>  k <span class="op">=</span> <span class="fl">15</span>,</span>
 <span>  metric <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
 <span>  ret_index <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">iris_odd_nn</span> <span class="op">&lt;-</span> <span class="fu">annoy_search</span><span class="op">(</span></span>
-<span>  X <span class="op">=</span> <span class="fu">uwot</span><span class="fu">:::</span><span class="fu">x2m</span><span class="op">(</span><span class="va">iris_odd</span><span class="op">)</span>,</span>
+<span><span class="va">iris_odd_nn</span> <span class="op">&lt;-</span> <span class="fu">uwot</span><span class="fu">:::</span><span class="fu">annoy_search</span><span class="op">(</span></span>
+<span>  X <span class="op">=</span> <span class="va">iris_odd</span>,</span>
 <span>  k <span class="op">=</span> <span class="fl">15</span>,</span>
 <span>  ann <span class="op">=</span> <span class="va">iris_even_nn</span><span class="op">$</span><span class="va">index</span></span>
 <span><span class="op">)</span></span>

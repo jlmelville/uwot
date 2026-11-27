@@ -144,7 +144,7 @@ umap_transform(
   - A matrix of user-specified input coordinates, which must have
     dimensions the same as `(nrow(X), ncol(model$embedding))`.
 
-  This parameter should be used in preference to `init_weighted`.
+  An explicitly supplied initialization overrides `init_weighted`.
 
 - batch:
 

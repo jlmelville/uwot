@@ -81,18 +81,18 @@ idea:
 
 ``` r
 
-iris_even <- iris[seq(2, nrow(iris), 2), ]
-iris_odd <- iris[seq(1, nrow(iris), 2), ]
+iris_even <- as.matrix(iris[seq(2, nrow(iris), 2), 1:4])
+iris_odd <- as.matrix(iris[seq(1, nrow(iris), 2), 1:4])
 
 iris_even_nn <- uwot:::annoy_nn(
-  X = uwot:::x2m(iris_even),
+  X = iris_even,
   k = 15,
   metric = "euclidean",
   ret_index = TRUE
 )
 
-iris_odd_nn <- annoy_search(
-  X = uwot:::x2m(iris_odd),
+iris_odd_nn <- uwot:::annoy_search(
+  X = iris_odd,
   k = 15,
   ann = iris_even_nn$index
 )
