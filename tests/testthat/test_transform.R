@@ -802,3 +802,20 @@ test_that("precomputed queries reject invalid training references and empty quer
   expect_error(project(sparse), "at least one neighbor")
   expect_error(project(sparse[, integer(), drop = FALSE]), "no observations")
 })
+
+test_that("older model settings reproduce the corresponding explicit projection", {
+  model <- fit_small_model()
+  old <- model
+  old[c("rng_type", "batch", "opt_args", "binary_edge_weights")] <- NULL
+  model$batch <- FALSE
+  model$opt_args <- list()
+  model$binary_edge_weights <- FALSE
+  project <- function(m) {
+    umap_transform(iris10[1:3, ], m, seed = 12, n_epochs = 4, n_threads = 0)
+  }
+  for (pcg in list(NULL, FALSE)) {
+    old$pcg_rand <- pcg
+    model$rng_type <- if (identical(pcg, FALSE)) "tausworthe" else "pcg"
+    expect_equal(project(old), project(model))
+  }
+})
