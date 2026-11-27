@@ -580,13 +580,7 @@ dist_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
 
 sparse_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
   tsmessage("Finding nearest neighbors from sparse matrix")
-  X <- methods::as(
-    methods::as(Matrix::drop0(X), "generalMatrix"),
-    "CsparseMatrix"
-  )
-  if (!methods::is(X, "dMatrix")) {
-    X <- methods::as(X, "dMatrix")
-  }
+  X <- as_neighbor_graph(X)
   n <- nrow(X)
   k_other <- if (include_self) k - 1L else k
   idx <- matrix(0L, n, k_other)

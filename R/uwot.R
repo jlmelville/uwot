@@ -3060,6 +3060,7 @@ optimize_graph_layout <-
     if (!Matrix::isSymmetric(graph)) {
       stop("graph should be symmetric")
     }
+    graph <- as_neighbor_graph(graph)
     if (!all(diff(graph@p) > 0)) {
       stop("All items must have at least one neighbor similarity defined")
     }
@@ -3144,6 +3145,8 @@ simplicial_set_union <-
       stop("x and y must have identical dimensions")
     }
 
+    x <- as_neighbor_graph(x)
+    y <- as_neighbor_graph(y)
     z <- methods::as(x + y, "TsparseMatrix")
 
     z@x <- general_sset_union_cpp(
@@ -3999,7 +4002,7 @@ uwot <- function(
     if (batch) {
       V <- Matrix::t(V)
       # head is ordered in non-decreasing order of node index
-      positive_head <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
+      positive_head <- edge_columns(V)
       # tail is unordered
       positive_tail <- V@i
     } else {
@@ -4007,7 +4010,7 @@ uwot <- function(
       # head is unordered
       positive_head <- V@i
       # tail is ordered in non-decreasing order of node index
-      positive_tail <- Matrix::which(V != 0, arr.ind = TRUE)[, 2] - 1
+      positive_tail <- edge_columns(V)
     }
     # start/end pointers into the ordered vector
     positive_ptr <- V@p

@@ -98,6 +98,8 @@ fast_intersection <- function(
 }
 
 general_simplicial_set_intersection <- function(left, right, weight) {
+  left <- as_neighbor_graph(left)
+  right <- as_neighbor_graph(right)
   result <- methods::as(left + right, "TsparseMatrix")
 
   result@x <- general_sset_intersection_cpp(

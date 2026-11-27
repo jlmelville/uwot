@@ -127,3 +127,70 @@ test_that("optimize graph layout", {
   iris30_umap <- umap(iris30, n_neighbors = 10)
   expect_equal(iris30_opt, iris30_umap)
 })
+
+test_that("graph operations expand triangular storage before reading edges", {
+  g <- methods::as(
+    Matrix::Matrix(exp(-abs(outer(1:16, 1:16, "-"))), sparse = TRUE),
+    "generalMatrix"
+  )
+  diag(g) <- 0
+  g <- Matrix::drop0(g)
+  layout <- function(x) {
+    set.seed(3)
+    optimize_graph_layout(x, init = "random", n_epochs = 3, n_sgd_threads = 0)
+  }
+  expected_layout <- layout(g)
+  for (uplo in c("U", "L")) {
+    s <- Matrix::forceSymmetric(g, uplo = uplo)
+    expect_equal(layout(s), expected_layout)
+    for (combine in list(simplicial_set_union, simplicial_set_intersect)) {
+      expected <- combine(g, g, n_threads = 0)
+      expect_equal(combine(s, s, n_threads = 0), expected)
+      expect_equal(combine(g, s, n_threads = 0), expected)
+    }
+  }
+})
+
+test_that("empty graph operands use the finite missing-edge weight", {
+  empty <- Matrix::sparseMatrix(
+    i = integer(),
+    j = integer(),
+    x = numeric(),
+    dims = c(3L, 3L)
+  )
+  graph <- Matrix::sparseMatrix(
+    i = c(1, 2, 2, 3),
+    j = c(2, 1, 3, 2),
+    x = c(1, 1, 0.5, 0.5)
+  )
+  for (combine in list(simplicial_set_intersect, simplicial_set_union)) {
+    left <- combine(empty, graph, n_threads = 0)
+    expect_equal(left, combine(graph, empty, n_threads = 0))
+    expect_true(all(is.finite(left@x)))
+    expect_equal(left > 0, graph > 0)
+    expect_length(combine(empty, empty, n_threads = 0)@x, 0)
+  }
+  nn <- Matrix::sparseMatrix(i = c(2, 3, 1), j = 1:3, x = 1)
+  x <- similarity_graph(
+    NULL,
+    nn_method = nn,
+    n_neighbors = 2,
+    set_op_mix_ratio = 0,
+    y = c(1, 2, 4),
+    n_threads = 0
+  )
+  expect_true(length(x@x) > 0 && all(is.finite(x@x)))
+})
+
+test_that("optimizer column indices follow CSC order across empty columns", {
+  x <- Matrix::sparseMatrix(
+    i = c(1, 3, 1),
+    j = c(2, 2, 4),
+    x = 1,
+    dims = c(4, 5)
+  )
+  for (graph in list(x, Matrix::t(x))) {
+    expected <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1L
+    expect_identical(edge_columns(graph), unname(expected))
+  }
+})

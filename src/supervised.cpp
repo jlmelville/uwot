@@ -38,6 +38,13 @@ NumericVector fast_intersection_cpp(IntegerVector rows, IntegerVector cols,
   return wrap(result);
 }
 
+namespace {
+double missing_edge_weight(const NumericVector &data) {
+  constexpr double floor = 1.0e-8;
+  return data.size() == 0 ? floor : (std::max)(min(data) / 2.0, floor);
+}
+} // namespace
+
 // [[Rcpp::export]]
 NumericVector general_sset_intersection_cpp(
     IntegerVector indptr1, IntegerVector indices1, NumericVector data1,
@@ -45,8 +52,8 @@ NumericVector general_sset_intersection_cpp(
     IntegerVector result_row, IntegerVector result_col,
     NumericVector result_val, double mix_weight = 0.5) {
 
-  double left_min = (std::max)(min(data1) / 2.0, 1.0e-8);
-  double right_min = (std::max)(min(data2) / 2.0, 1.0e-8);
+  double left_min = missing_edge_weight(data1);
+  double right_min = missing_edge_weight(data2);
 
   for (auto idx = 0; idx < result_row.length(); idx++) {
     auto i = result_col[idx];
@@ -87,8 +94,8 @@ general_sset_union_cpp(IntegerVector indptr1, IntegerVector indices1,
                        IntegerVector result_row, IntegerVector result_col,
                        NumericVector result_val) {
 
-  double left_min = (std::max)(min(data1) / 2.0, 1.0e-8);
-  double right_min = (std::max)(min(data2) / 2.0, 1.0e-8);
+  double left_min = missing_edge_weight(data1);
+  double right_min = missing_edge_weight(data2);
 
   for (auto idx = 0; idx < result_row.length(); idx++) {
     auto i = result_col[idx];

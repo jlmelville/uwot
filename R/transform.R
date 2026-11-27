@@ -826,7 +826,7 @@ umap_transform <- function(
     if (batch) {
       # ordered indices of the new data nodes. Coordinates are updated
       # during optimization
-      positive_head <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
+      positive_head <- edge_columns(graph)
       # unordered indices of the model nodes (some may not have any incoming
       # edges), these coordinates will NOT update during the optimization
       positive_tail <- graph@i
@@ -836,7 +836,7 @@ umap_transform <- function(
       positive_head <- graph@i
       # ordered indices of the model nodes (some may not have any incoming edges)
       # these coordinates will NOT update during the optimization
-      positive_tail <- Matrix::which(graph != 0, arr.ind = TRUE)[, 2] - 1
+      positive_tail <- edge_columns(graph)
     }
 
     n_head_vertices <- ncol(embedding)

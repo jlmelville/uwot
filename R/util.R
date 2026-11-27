@@ -306,6 +306,20 @@ is_sparse_matrix <- function(m) {
   methods::is(m, "sparseMatrix")
 }
 
+# Expand implied entries and put weights in the order used by native code.
+as_neighbor_graph <- function(X) {
+  X <- methods::as(
+    methods::as(Matrix::drop0(X), "generalMatrix"),
+    "CsparseMatrix"
+  )
+  if (methods::is(X, "dMatrix")) X else methods::as(X, "dMatrix")
+}
+
+# One zero-based column index for each stored edge, in CSC order.
+edge_columns <- function(graph) {
+  rep.int(seq_len(ncol(graph)) - 1L, diff(graph@p))
+}
+
 # Add the (named) values in l2 to l1.
 # Use to override default values in l1 with user-supplied values in l2
 lmerge <- function(l1, l2) {
