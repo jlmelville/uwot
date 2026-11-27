@@ -3590,8 +3590,8 @@ uwot <- function(
     }
   }
 
-  # Store number of precomputed nn if X is non-NULL (NULL X case handled above)
-  if (nn_is_precomputed(nn_method) && num_precomputed_nns == 0) {
+  # Graphs supplied alongside X must agree with its observation count.
+  if (!is.null(X) && (is.list(nn_method) || is_sparse_matrix(nn_method))) {
     num_precomputed_nns <- check_graph_list(
       nn_method,
       n_vertices,
@@ -5014,83 +5014,43 @@ x2nn <- function(
   n_build_threads,
   grain_size,
   ret_model,
-  n_vertices = x2nv(X),
   nn_args = list(),
   sparse_is_distance = TRUE,
   verbose = FALSE
 ) {
   if (is.list(nn_method)) {
-    validate_nn(nn_method, n_vertices)
-    nn <- nn_method
-  } else {
-    nn_method <-
-      match.arg(
-        tolower(nn_method),
-        c("annoy", "fnn", "matrix", "hnsw", "nndescent")
-      )
-    if (nn_method == "fnn" && metric != "euclidean") {
-      stop(
-        "nn_method = 'FNN' is only compatible with distance metric ",
-        "'euclidean'"
-      )
-    }
-    if (nn_method == "fnn" && ret_model) {
-      stop("nn_method = 'FNN' is incompatible with ret_model = TRUE")
-    }
-    nn <- find_nn(
-      X,
-      n_neighbors,
-      method = nn_method,
-      metric = metric,
-      n_trees = n_trees,
-      search_k = search_k,
-      nn_args = nn_args,
-      tmpdir = tmpdir,
-      n_threads = n_threads,
-      n_build_threads = n_build_threads,
-      grain_size = grain_size,
-      ret_index = ret_model,
-      sparse_is_distance = sparse_is_distance,
-      verbose = verbose
+    return(nn_method)
+  }
+  nn_method <-
+    match.arg(
+      tolower(nn_method),
+      c("annoy", "fnn", "matrix", "hnsw", "nndescent")
     )
-  }
-  nn
-}
-
-validate_nn <- function(nn_method, n_vertices) {
-  if (!is.matrix(nn_method$idx)) {
-    stop("Couldn't find precalculated 'idx' matrix")
-  }
-  if (nrow(nn_method$idx) != n_vertices) {
+  if (nn_method == "fnn" && metric != "euclidean") {
     stop(
-      "Precalculated 'idx' matrix must have ",
-      n_vertices,
-      " rows, but found ",
-      nrow(nn_method$idx)
+      "nn_method = 'FNN' is only compatible with distance metric ",
+      "'euclidean'"
     )
   }
-
-  if (!is.matrix(nn_method$dist)) {
-    stop("Couldn't find precalculated 'dist' matrix")
+  if (nn_method == "fnn" && ret_model) {
+    stop("nn_method = 'FNN' is incompatible with ret_model = TRUE")
   }
-  if (nrow(nn_method$idx) != n_vertices) {
-    stop(
-      "Precalculated 'dist' matrix must have ",
-      n_vertices,
-      " rows, but
-         found ",
-      nrow(nn_method$dist)
-    )
-  }
-  if (ncol(nn_method$dist) != ncol(nn_method$idx)) {
-    stop(
-      "Precalculated 'dist' matrix must have ",
-      ncol(nn_method$idx),
-      " cols, but
-         found ",
-      ncol(nn_method$dist)
-    )
-  }
+  find_nn(
+    X,
+    n_neighbors,
+    method = nn_method,
+    metric = metric,
+    n_trees = n_trees,
+    search_k = search_k,
+    nn_args = nn_args,
+    tmpdir = tmpdir,
+    n_threads = n_threads,
+    n_build_threads = n_build_threads,
+    grain_size = grain_size,
+    ret_index = ret_model,
+    sparse_is_distance = sparse_is_distance,
+    verbose = verbose
+  )
 }
 
 nn2set <- function(
@@ -5195,7 +5155,6 @@ x2set <- function(
       grain_size = grain_size,
       ret_model = ret_model,
       nn_args = nn_args,
-      n_vertices = n_vertices,
       sparse_is_distance = sparse_is_distance,
       verbose = verbose
     )
