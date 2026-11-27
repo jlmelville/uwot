@@ -45,6 +45,7 @@
 <li><p>Fit and transform obtain optimizer edge columns from sparse column pointers, reducing memory use.</p></li>
 <li><p>Model saves detect partial Annoy and HNSW index writes before publishing the archive or unloading the model. Repeated saves clean up superseded staging files. NN-Descent archives store each index once.</p></li>
 <li><p>Model files of 8 GiB or more, including large neighbor indexes, can now be saved and loaded using GNU tar or bsdtar (<a href="https://github.com/jlmelville/uwot/issues/77" class="external-link">#77</a>).</p></li>
+<li><p>Windows R with UTF-8 support can save and load models in archives with Unicode filenames and directories. Save errors distinguish archive creation failures from final rename failures.</p></li>
 <li><p>Epoch callbacks can run nested optimizations. Large optimizer workloads check for interrupts within epochs, and native optimization uses less memory for edge lists.</p></li>
 <li><p>Invalid negative sampling rates, neighbor dimensions and target lengths raise errors before optimization or graph indexing.</p></li>
 <li><p>A failed model save preserves the live Annoy index, including when an external tar command fails.</p></li>

@@ -36,6 +36,10 @@
   now be saved and loaded using GNU tar or bsdtar
   ([\#77](https://github.com/jlmelville/uwot/issues/77)).
 
+- Windows R with UTF-8 support can save and load models in archives with
+  Unicode filenames and directories. Save errors distinguish archive
+  creation failures from final rename failures.
+
 - Epoch callbacks can run nested optimizations. Large optimizer
   workloads check for interrupts within epochs, and native optimization
   uses less memory for edge lists.
