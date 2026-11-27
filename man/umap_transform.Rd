@@ -104,7 +104,9 @@ be used. Used in conjunction with \code{n_threads} and
     \item \code{"weighted"} (The default). Use a weighted average of the
     coordinates of the nearest neighbors from the original embedding in
     \code{model}, where the weights used are the edge weights from the UMAP
-    smoothed knn distances. Equivalent to \code{init_weighted = TRUE}.
+    smoothed knn distances. If all weights for a query are zero, use the
+    unweighted mean of its neighbors. Equivalent to
+    \code{init_weighted = TRUE}.
     \item \code{"average"}. Use the mean average of the coordinates of
     the nearest neighbors from the original embedding in \code{model}.
     Equivalent to \code{init_weighted = FALSE}.

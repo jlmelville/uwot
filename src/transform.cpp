@@ -68,9 +68,9 @@ init_transform_parallel(NumericMatrix train_embedding, IntegerVector nn_index,
   }
   std::vector<float> embedding(n_test_vertices * ndim);
 
-  std::vector<float> nn_weightsv(0);
+  std::vector<double> nn_weightsv;
   if (nn_weights.isNotNull()) {
-    nn_weightsv = as<std::vector<float>>(nn_weights);
+    nn_weightsv = as<std::vector<double>>(nn_weights);
   }
   auto worker = [&](std::size_t begin, std::size_t end) {
     uwot::init_by_mean(begin, end, ndim, ptr, nn_indexv, nn_weightsv,

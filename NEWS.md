@@ -1,5 +1,18 @@
 # uwot (development version)
 
+* Standardization preserves metric block column positions and supports single-row projection.
+  Selecting a constant feature explicitly raises an error. Refit models trained with affected
+  integer selectors to use the intended features.
+* HNSW accepts supported metrics in named feature and target blocks.
+* Equal local radii give a uniform density adjustment in fitting and projection. Weighted
+  projection retains tiny positive weights and averages a query's neighbors if all weights are zero.
+* Sparse graph union, intersection and layout expand triangular storage. Empty graphs use the
+  existing minimum missing-edge weight when combined with other graphs.
+* Fit and transform obtain optimizer edge columns from sparse column pointers, reducing memory use.
+* Model saves check that native backends created a nonempty index file before publishing the
+  archive. Repeated saves clean up superseded staging files. NN-Descent archives store each index
+  once.
+
 * Epoch callbacks can run nested optimizations. Large optimizer workloads check for interrupts
   within epochs, and native optimization uses less memory for edge lists.
 * Invalid negative sampling rates, neighbor dimensions and target lengths raise errors before

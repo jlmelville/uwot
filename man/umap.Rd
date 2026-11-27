@@ -161,7 +161,9 @@ coordinates.}
 \itemize{
   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
   \item{\code{"Z"} or \code{"scale"} or \code{TRUE}} Scale each column to
-  zero mean and variance 1.
+  zero mean and variance 1. Constant columns are removed. Explicit metric
+  blocks select from the numeric columns before scaling and raise an error
+  if they include a removed column.
   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
   element by the maximum absolute value over the entire matrix.
   \item{\code{"range"}} Range scale the entire matrix, so the smallest

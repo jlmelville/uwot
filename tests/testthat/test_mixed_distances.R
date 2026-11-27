@@ -165,3 +165,43 @@ test_that("an integer column can supply a categorical metric", {
   )
   expect_ok_matrix(resic)
 })
+
+test_that("HNSW validates the names of feature and target metric blocks", {
+  skip_if_not_installed("RcppHNSW")
+  blocks <- list(euclidean = 1:2, cosine = 3:4)
+  model <- fit_small_model(nn_method = "hnsw", metric = blocks, ret_nn = TRUE)
+  for (i in seq_along(blocks)) {
+    ref <- fit_small_model(
+      iris10[, blocks[[i]]],
+      nn_method = "hnsw",
+      metric = names(blocks)[i],
+      ret_nn = TRUE
+    )
+    expect_equal(model$nn[[i]], ref$nn[[1]])
+  }
+  single <- fit_small_model(
+    nn_method = "hnsw",
+    metric = blocks[1],
+    ret_nn = TRUE
+  )
+  expect_equal(single$nn[[1]], model$nn[[1]])
+  supervised <- fit_small_model(
+    nn_method = "hnsw",
+    y = iris10,
+    target_metric = blocks,
+    ret_extra = "fgraph"
+  )
+  expect_true(all(is.finite(supervised$fgraph@x)))
+  expect_error(
+    fit_small_model(nn_method = "hnsw", metric = list(manhattan = 1L)),
+    "bad metric"
+  )
+  expect_error(
+    fit_small_model(
+      nn_method = "hnsw",
+      y = iris10,
+      target_metric = list(manhattan = 1L)
+    ),
+    "bad target_metric"
+  )
+})

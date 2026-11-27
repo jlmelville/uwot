@@ -114,5 +114,11 @@ hnsw_load <- function(name, ndim, filename) {
 
 is_ok_hnsw_metric <- function(metric) {
   hnsw_metrics <- c("euclidean", "cosine", "correlation")
-  metric %in% hnsw_metrics
+  if (is.list(metric)) {
+    if (is.null(names(metric))) {
+      return(FALSE)
+    }
+    metric <- names(find_categoricals(metric)$metrics)
+  }
+  all(tolower(metric) %in% hnsw_metrics)
 }

@@ -70,3 +70,43 @@ test_that("scaling applied outside umap should not appear in the model", {
     c("scaled:center", "scaled:scale", "scaled:nzvcols")
   )
 })
+
+test_that("metric blocks select the original features across scaling", {
+  x <- cbind(constant = 1, trend = 0:3, zig = c(0, 10, 1, 11))
+  neighbors <- function(cols) {
+    umap(
+      x,
+      metric = list(euclidean = cols),
+      scale = TRUE,
+      nn_method = "fnn",
+      n_neighbors = 2,
+      n_components = 1,
+      init = "random",
+      n_epochs = 0,
+      n_threads = 0,
+      ret_nn = TRUE
+    )$nn[[1]]
+  }
+  expect_equal(neighbors(2L), neighbors("trend"))
+  expect_equal(neighbors(list(3L, pca = NULL)), neighbors("zig"))
+  expect_equal(neighbors(2L)$idx[1, 2], 2L)
+  expect_error(neighbors(1:2), "zero-variance column")
+  expect_error(scale_input(x[, 1, drop = FALSE], TRUE), "zero variance")
+
+  m <- fit_small_model(x, scale = TRUE, metric = list(euclidean = 2L))
+  ref <- fit_small_model(x, scale = TRUE, metric = list(euclidean = "trend"))
+  expect_equal(query_neighbors(m, x), query_neighbors(ref, x))
+})
+
+test_that("scaling preserves the dimensions of individual features and queries", {
+  for (pc in list(NULL, 2L)) {
+    m <- fit_small_model(scale = TRUE, pca = pc, pca_method = "svd")
+    one <- query_neighbors(m, iris10[1, , drop = FALSE])
+    two <- query_neighbors(m, iris10[1:2, , drop = FALSE])
+    expect_equal(one$idx, two$idx[1, , drop = FALSE])
+    expect_equal(one$dist, two$dist[1, , drop = FALSE])
+  }
+  x <- cbind(constant = 1, varying = seq_len(10))
+  m <- fit_small_model(x, scale = TRUE, n_components = 1)
+  expect_equal(query_neighbors(m, x[5, , drop = FALSE])$idx[1, 1], 5L)
+})

@@ -78,7 +78,9 @@
 #'     \item \code{"weighted"} (The default). Use a weighted average of the
 #'     coordinates of the nearest neighbors from the original embedding in
 #'     \code{model}, where the weights used are the edge weights from the UMAP
-#'     smoothed knn distances. Equivalent to \code{init_weighted = TRUE}.
+#'     smoothed knn distances. If all weights for a query are zero, use the
+#'     unweighted mean of its neighbors. Equivalent to
+#'     \code{init_weighted = TRUE}.
 #'     \item \code{"average"}. Use the mean average of the coordinates of
 #'     the nearest neighbors from the original embedding in \code{model}.
 #'     Equivalent to \code{init_weighted = FALSE}.
@@ -436,7 +438,7 @@ umap_transform <- function(
       if (length(indexes) == 0) {
         stop("No numeric columns found")
       }
-      X <- as.matrix(X[, indexes])
+      X <- as.matrix(X[, indexes, drop = FALSE])
     }
     n_vertices <- nrow(X)
     if (n_vertices < 1) {
@@ -860,7 +862,11 @@ umap_transform <- function(
     method <- tolower(method)
     if (method == "leopold") {
       # Use the linear model 2 log ai = -m log(localr) + c
-      ai <- exp(0.5 * ((-log(localr) * rad_coeff[2]) + rad_coeff[1]))
+      ai <- if (rad_coeff[2] == 0) {
+        rep(exp(0.5 * rad_coeff[1]), length(localr))
+      } else {
+        exp(0.5 * ((-log(localr) * rad_coeff[2]) + rad_coeff[1]))
+      }
       # Prevent too-small/large aj
       min_ai <- min(sqrt(a * 10^(-2 * dens_scale)), 0.1)
       ai[ai < min_ai] <- min_ai
@@ -1017,7 +1023,7 @@ apply_scaling <- function(X, scale_info, verbose = FALSE) {
     X <- sweep(X, 2, scale_info[["scaled:colrange:max"]], `/`)
   } else {
     tsmessage("Applying training data column filtering/scaling")
-    X <- X[, scale_info[["scaled:nzvcols"]]]
+    X <- X[, scale_info[["scaled:nzvcols"]], drop = FALSE]
     X <- scale(
       X,
       center = scale_info[["scaled:center"]],

@@ -102,7 +102,9 @@
 #' \itemize{
 #'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
 #'   \item{\code{"Z"} or \code{"scale"} or \code{TRUE}} Scale each column to
-#'   zero mean and variance 1.
+#'   zero mean and variance 1. Constant columns are removed. Explicit metric
+#'   blocks select from the numeric columns before scaling and raise an error
+#'   if they include a removed column.
 #'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
 #'   element by the maximum absolute value over the entire matrix.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
@@ -907,7 +909,9 @@ umap <- function(
 #' \itemize{
 #'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
 #'   \item{\code{"Z"} or \code{"scale"} or \code{TRUE}} Scale each column to
-#'   zero mean and variance 1.
+#'   zero mean and variance 1. Constant columns are removed. Explicit metric
+#'   blocks select from the numeric columns before scaling and raise an error
+#'   if they include a removed column.
 #'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
 #'   element by the maximum absolute value over the entire matrix.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
@@ -1710,7 +1714,9 @@ tumap <- function(
 #' \itemize{
 #'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
 #'   \item{\code{"Z"} or \code{"scale"} or \code{TRUE}} Scale each column to
-#'   zero mean and variance 1.
+#'   zero mean and variance 1. Constant columns are removed. Explicit metric
+#'   blocks select from the numeric columns before scaling and raise an error
+#'   if they include a removed column.
 #'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
 #'   element by the maximum absolute value over the entire matrix.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
@@ -2319,7 +2325,9 @@ lvish <- function(
 #' \itemize{
 #'   \item{\code{"none"} or \code{FALSE} or \code{NULL}} No scaling.
 #'   \item{\code{"Z"} or \code{"scale"} or \code{TRUE}} Scale each column to
-#'   zero mean and variance 1.
+#'   zero mean and variance 1. Constant columns are removed. Explicit metric
+#'   blocks select from the numeric columns before scaling and raise an error
+#'   if they include a removed column.
 #'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
 #'   element by the maximum absolute value over the entire matrix.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
@@ -3522,7 +3530,7 @@ uwot <- function(
         }
         tsmessage("Converting dataframe to numerical matrix")
         if (length(indexes) != ncol(X)) {
-          X <- X[, indexes]
+          X <- X[, indexes, drop = FALSE]
         }
         X <- as.matrix(X)
       }
@@ -3558,12 +3566,20 @@ uwot <- function(
     }
     Xnames <- row.names(X)
     X <- remove_scaling_attrs(X)
+    n_numeric_cols <- ncol(X)
+    numeric_names <- colnames(X)
     X <- scale_input(
       X,
       scale_type = scale,
       ret_model = ret_model,
       verbose = verbose
     )
+    if (is.list(metric) && ncol(X) < n_numeric_cols) {
+      kept <- attr(X, "scaled:nzvcols")
+      positions <- match(seq_len(n_numeric_cols), kept, nomatch = 0L)
+      names(positions) <- numeric_names
+      metric <- lapply(metric, remap_scaled_block, positions = positions)
+    }
   }
 
   # Store number of precomputed nn if X is non-NULL (NULL X case handled above)
@@ -3714,8 +3730,8 @@ uwot <- function(
     ycat <- NULL
     ycat_ids <- NULL
     if (methods::is(y, "data.frame")) {
-      ycat_res <- find_categoricals(target_metric)
-      target_metric <- ycat_res$metrics
+      ycat_res <- find_categoricals(target_metrics)
+      target_metrics <- ycat_res$metrics
       ycat_ids <- ycat_res$categoricals
       if (!is.null(ycat_ids)) {
         ycat <- y[, ycat_ids, drop = FALSE]
@@ -4032,8 +4048,12 @@ uwot <- function(
       if (ret_model) {
         # store the linear transform from localr to ai for transforming new data
         lai2 <- 2 * log(range(ai))
-        llr <- -log(rev(range(localr)))
-        rad_coeff <- stats::lm(lai2 ~ llr)$coefficients
+        if (lai2[1] == lai2[2]) {
+          rad_coeff <- c(log(a), 0)
+        } else {
+          llr <- -log(rev(range(localr)))
+          rad_coeff <- stats::lm(lai2 ~ llr)$coefficients
+        }
       }
     }
 
@@ -5239,6 +5259,9 @@ categorical_intersection <- function(x, V, weight, verbose = FALSE) {
 # n_epoch the total number of epochs
 # There is an inverse relationship between the weights and the return vector.
 make_epochs_per_sample <- function(weights, n_epochs) {
+  if (!length(weights)) {
+    return(numeric())
+  }
   result <- rep(-1, length(weights))
   n_samples <- n_epochs * (weights / max(weights))
   result[n_samples > 0] <- n_epochs / n_samples[n_samples > 0]
@@ -5353,19 +5376,41 @@ scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
       }
       non_zero_var_cols <- apply(X, 2, varf) >= .Machine$double.xmin
 
-      if (length(non_zero_var_cols) == 0) {
+      if (!any(non_zero_var_cols)) {
         stop("Matrix has zero variance")
       }
-      X <- X[, non_zero_var_cols]
+      X <- X[, non_zero_var_cols, drop = FALSE]
       tsmessage("Kept ", ncol(X), " non-zero-variance columns")
       X <- base::scale(X, scale = TRUE)
 
-      if (ret_model) {
-        attr(X, "scaled:nzvcols") <- which(non_zero_var_cols)
-      }
+      attr(X, "scaled:nzvcols") <- which(non_zero_var_cols)
     }
   )
   X
+}
+
+# Preserve block options and resolve positions against the pre-scaling columns.
+remap_scaled_block <- function(block, positions) {
+  if (is.list(block)) {
+    unnamed <- if (is.null(names(block))) {
+      seq_along(block)
+    } else {
+      names(block) == ""
+    }
+    block[unnamed] <- lapply(block[unnamed], remap_scaled_block, positions)
+    return(block)
+  }
+  if (is.null(block)) {
+    return(NULL)
+  }
+  mapped <- unname(positions[block])
+  if (anyNA(mapped)) {
+    stop("Unknown column in metric block")
+  }
+  if (any(mapped == 0L)) {
+    stop("Metric block selects a zero-variance column")
+  }
+  if (is.character(block)) block else mapped
 }
 
 attr_to_scale_info <- function(X) {
@@ -5407,6 +5452,9 @@ get_opt_args <- function(opt_args, alpha) {
 # * dens_scale)) ... log(a * 1e(2 * dens_scale))] We take the sqrt of the a_i in
 # this function to avoid repeatedly calling it inside the optimization loop.
 scale_radii <- function(localr, dens_scale, a) {
+  if (dens_scale == 0 || min(localr) == max(localr)) {
+    return(rep(sqrt(a), length(localr)))
+  }
   log_denso <- -log(localr)
   min_densl <- a * (10^(-2 * dens_scale))
   log_min_densl <- log(min_densl)

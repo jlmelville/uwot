@@ -670,3 +670,71 @@ test_that("legacy single-block PCA models can select columns of stored scores", 
   m$metric <- list(euclidean = 1:2)
   expect_equal(query_neighbors(m), expected)
 })
+
+test_that("uniform density scaling stays finite in fitting and projection", {
+  x <- rbind(c(0, 0), c(1, 0), c(0, 1), c(1, 1))
+  fit <- function(ds, ret_model) {
+    umap(
+      x,
+      nn_method = "annoy",
+      n_neighbors = 2,
+      init = "random",
+      seed = 1,
+      n_epochs = 5,
+      n_threads = 0,
+      dens_scale = ds,
+      ret_model = ret_model
+    )
+  }
+  for (ds in c(0, 1)) {
+    expect_true(all(is.finite(fit(ds, FALSE))))
+    m <- fit(ds, TRUE)
+    expect_true(all(is.finite(m$embedding)))
+    expect_equal(m$ai, rep(sqrt(m$a), nrow(x)))
+    expect_equal(unname(m$rad_coeff), c(log(unname(m$a)), 0))
+    expect_true(all(is.finite(umap_transform(
+      x,
+      m,
+      n_epochs = 3,
+      n_threads = 0
+    ))))
+  }
+  expect_equal(scale_radii(1:3, 0, 4), rep(2, 3))
+})
+
+test_that("weighted projection handles tiny and all-zero query weights", {
+  m <- fit_small_model(iris10[1:4, ], n_components = 1)
+  m$embedding <- matrix(c(0, 10, 20, 30))
+  for (distance in c(110, 1000)) {
+    s <- Matrix::sparseMatrix(i = 2L, j = 1L, x = distance, dims = c(4L, 1L))
+    q <- umap_transform(
+      NULL,
+      m,
+      nn_method = s,
+      n_epochs = 0,
+      n_threads = 0,
+      ret_extra = "fgraph"
+    )
+    expect_equal(as.numeric(q$embedding), 10)
+    expect_identical(as.numeric(q$fgraph[1, 2]) > 0, distance == 110)
+  }
+  for (batch in c(FALSE, TRUE)) {
+    final <- umap_transform(
+      NULL,
+      m,
+      nn_method = s,
+      n_epochs = 5,
+      batch = batch,
+      n_threads = 0
+    )
+    expect_equal(as.numeric(final), 10)
+  }
+  q <- init_transform_parallel(
+    t(m$embedding),
+    c(2L, 3L, 1L, 4L),
+    c(0L, 2L, 4L),
+    2,
+    c(1e-320, 2e-320, 0, 0)
+  )
+  expect_equal(as.numeric(q), c(50 / 3, 15), tolerance = 1e-6)
+})

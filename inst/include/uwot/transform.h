@@ -33,19 +33,30 @@
 
 namespace uwot {
 
-inline double sum_neighbors(std::size_t first, std::size_t last,
-                            const std::vector<float> &training,
-                            const std::vector<int> &indices, std::size_t ndim,
-                            const float *weights, std::vector<double> &sum) {
+template <typename Weight>
+inline double accumulate_neighbors(std::size_t first, std::size_t last,
+                                   const std::vector<float> &training,
+                                   const std::vector<int> &indices,
+                                   std::size_t ndim, const Weight *weights,
+                                   std::vector<double> &sum,
+                                   double scale = 1.0) {
   double total = 0;
   for (auto j = first; j < last; ++j) {
-    const float weight = weights ? weights[j] : 1.0f;
+    const double weight = weights ? weights[j] / scale : 1.0;
     total += weight;
     for (std::size_t k = 0; k < ndim; ++k) {
       sum[k] += training[ndim * indices[j] + k] * weight;
     }
   }
   return total;
+}
+
+inline double sum_neighbors(std::size_t first, std::size_t last,
+                            const std::vector<float> &training,
+                            const std::vector<int> &indices, std::size_t ndim,
+                            const float *weights, std::vector<double> &sum) {
+  return accumulate_neighbors(first, last, training, indices, ndim, weights,
+                              sum);
 }
 
 inline void sum_nbrs(std::size_t i, const std::vector<float> &training,
@@ -63,10 +74,11 @@ inline void sum_nbrs_weighted(std::size_t i, const std::vector<float> &training,
                          weights.data(), sum);
 }
 
+template <typename Weight = float>
 inline void init_by_mean(std::size_t begin, std::size_t end, std::size_t ndim,
                          const std::vector<std::size_t> &ptr,
                          const std::vector<int> &nn_index,
-                         const std::vector<float> &nn_weights,
+                         const std::vector<Weight> &nn_weights,
                          const std::vector<float> &train_embedding,
                          std::vector<float> &embedding) {
   std::vector<double> sum(ndim);
@@ -74,9 +86,15 @@ inline void init_by_mean(std::size_t begin, std::size_t end, std::size_t ndim,
     const auto first = ptr.size() == 1 ? i * ptr[0] : ptr[i];
     const auto last = ptr.size() == 1 ? first + ptr[0] : ptr[i + 1];
     std::fill(sum.begin(), sum.end(), 0.0);
-    const double total =
-        sum_neighbors(first, last, train_embedding, nn_index, ndim,
-                      nn_weights.empty() ? nullptr : nn_weights.data(), sum);
+    // Scale within each query so even subnormal weights retain their ratios.
+    // If every weight underflowed, use the ordinary neighbor mean.
+    const double scale = nn_weights.empty()
+                             ? 0.0
+                             : *std::max_element(nn_weights.begin() + first,
+                                                 nn_weights.begin() + last);
+    const double total = accumulate_neighbors(
+        first, last, train_embedding, nn_index, ndim,
+        scale > 0 ? nn_weights.data() : nullptr, sum, scale);
     for (std::size_t k = 0; k < ndim; ++k) {
       embedding[ndim * i + k] = sum[k] / total;
     }
