@@ -4313,17 +4313,28 @@ uwot <- function(
 #' @seealso \code{\link{load_uwot}}, \code{\link{unload_uwot}}
 #' @export
 save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
+  with_archive_locale(file, save_uwot_model(model, file, unload, verbose))
+}
+
+save_uwot_model <- function(model, file, unload, verbose) {
   if (!all_nn_indices_are_loaded(model)) {
     stop("cannot save: NN index is unloaded")
   }
 
   wd <- getwd()
+  if (!dir.exists(dirname(file))) {
+    stop(
+      "Cannot save model archive: destination directory does not exist: ",
+      dirname(file),
+      call. = FALSE
+    )
+  }
   model_file <- abspath(file)
   if (file.exists(model_file)) {
     stop("model file ", model_file, " already exists")
   }
 
-  mod_dir <- tempfile(pattern = "dir")
+  mod_dir <- enc2utf8(tempfile(pattern = "dir"))
   uwot_dir <- file.path(mod_dir, "uwot")
   if (!dir.create(uwot_dir, recursive = TRUE)) {
     stop("Cannot create temporary model directory: ", mod_dir)
@@ -4386,12 +4397,49 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
   }
 
   setwd(mod_dir)
-  status <- write_model_archive(archive)
+  status <- tryCatch(
+    write_model_archive(archive),
+    error = function(e) {
+      stop(
+        "Could not create model archive ",
+        model_file,
+        ": ",
+        conditionMessage(e),
+        call. = FALSE
+      )
+    }
+  )
   setwd(wd)
-  if (
-    status != 0 || file.exists(model_file) || !file.rename(archive, model_file)
-  ) {
-    stop("Could not save model archive: ", model_file)
+  if (status != 0L) {
+    stop(
+      "Could not create model archive ",
+      model_file,
+      ": tar exited with status ",
+      status,
+      ". See tar output for details.",
+      call. = FALSE
+    )
+  }
+  if (file.exists(model_file)) {
+    stop("model file ", model_file, " already exists")
+  }
+  renamed <- tryCatch(file.rename(archive, model_file), warning = function(w) {
+    stop(
+      "Could not rename temporary archive to ",
+      model_file,
+      ": ",
+      conditionMessage(w),
+      call. = FALSE
+    )
+  })
+  if (!renamed) {
+    stop(
+      "Could not rename temporary archive ",
+      archive,
+      " to ",
+      model_file,
+      call. = FALSE
+    )
   }
   saved <- TRUE
   if (!is.null(model$mod_dir) && dir.exists(model$mod_dir)) {
@@ -4473,8 +4521,12 @@ save_uwot <- function(model, file, unload = FALSE, verbose = FALSE) {
 #' @seealso \code{\link{save_uwot}}, \code{\link{unload_uwot}}
 #' @export
 load_uwot <- function(file, verbose = FALSE) {
+  with_archive_locale(file, load_uwot_model(file, verbose))
+}
+
+load_uwot_model <- function(file, verbose) {
   # create directory to store files in
-  mod_dir <- tempfile(pattern = "dir")
+  mod_dir <- enc2utf8(tempfile(pattern = "dir"))
   tsmessage("Creating temp directory ", mod_dir)
   if (!dir.create(mod_dir)) {
     stop("Cannot create temporary model directory: ", mod_dir)

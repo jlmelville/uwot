@@ -141,7 +141,10 @@ test_that("archive failures preserve the caller's live Annoy index", {
   wd <- getwd()
   original_dirs <- list.dirs(tempdir(), recursive = FALSE)
   missing <- file.path(tempfile(), "model.tar")
-  expect_error(suppressWarnings(save_uwot(model, missing, unload = TRUE)))
+  expect_error(
+    save_uwot(model, missing, unload = TRUE),
+    "destination directory does not exist"
+  )
   expect_false(file.exists(missing))
   expect_equal(getwd(), wd)
   expect_equal(query_neighbors(model), expected)
@@ -165,7 +168,13 @@ test_that("archive failures preserve the caller's live Annoy index", {
   archive <- tempfile()
   expect_error(
     suppressWarnings(save_uwot(model, archive, unload = TRUE)),
-    "archive"
+    "Could not create model archive .*tar exited with status 1"
+  )
+  # A command can also report success without leaving an archive to rename.
+  writeLines("quit(status = 0L)", stub)
+  expect_error(
+    save_uwot(model, archive, unload = TRUE),
+    "Could not rename temporary archive"
   )
   expect_false(file.exists(archive))
   expect_equal(query_neighbors(model), expected)

@@ -92,6 +92,46 @@ test_that("a large archive with small members still loads without a PAX tool", {
   expect_false(file.exists(dest))
 })
 
+test_that("Windows tar round-trips models with Unicode archive paths", {
+  skip_if(.Platform$OS.type != "windows")
+  skip_if(getRversion() < "4.2.0", "requires UTF-8 locale support on Windows")
+  tar <- file.path(Sys.getenv("SystemRoot"), "System32", "tar.exe")
+  skip_if_not(file.exists(tar), "Windows tar is unavailable")
+  old_tar <- Sys.getenv("TAR", unset = NA_character_)
+  on.exit(
+    if (is.na(old_tar)) Sys.unsetenv("TAR") else Sys.setenv(TAR = old_tar)
+  )
+  # Windows environment names are case-insensitive: this selects the built-in
+  # bsdtar for both creation and extraction, even if Rtools is on PATH.
+  Sys.setenv(TAR = tar)
+  root <- enc2utf8(paste0(tempfile(), " caf\u00e9 \u6771\u4eac"))
+  dir.create(root)
+  on.exit(unlink(root, recursive = TRUE), add = TRUE)
+  archive <- file.path(root, "model \u6771\u4eac.tar")
+  round_trip <- function() {
+    wd <- getwd()
+    model <- fit_small_model()
+    expected <- query_neighbors(model)
+    save_uwot(model, archive, unload = TRUE)
+    restored <- load_uwot(archive)
+    on.exit(unload_uwot(restored))
+    expect_equal(query_neighbors(restored), expected)
+    expect_equal(getwd(), wd)
+    unlink(archive)
+  }
+  round_trip()
+  local_mocked_bindings(ustar_size_limit = 1)
+  round_trip()
+  old_locale <- Sys.getlocale("LC_CTYPE")
+  on.exit(Sys.setlocale("LC_CTYPE", old_locale), add = TRUE)
+  Sys.setlocale("LC_CTYPE", "C")
+  previous_wd <- setwd(root)
+  on.exit(setwd(previous_wd), add = TRUE, after = FALSE)
+  archive <- "relative.tar"
+  round_trip()
+  expect_identical(Sys.getlocale("LC_CTYPE"), "C")
+})
+
 test_that("can save and load mixed distance model", {
   set.seed(1337)
   jiris10 <- jitter(iris10)
