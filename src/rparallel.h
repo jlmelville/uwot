@@ -24,6 +24,8 @@
 #include "uwot/epoch.h"
 #include <Rcpp.h>
 
+#include <functional>
+
 struct RParallel {
   std::size_t n_threads;
   std::size_t grain_size;
@@ -51,17 +53,21 @@ struct RParallel {
   }
 
 private:
+  using Window = std::function<void(std::size_t, std::size_t)>;
+
   template <typename Worker> void visit_windows(std::size_t n, Worker &worker) {
     constexpr std::size_t edges_per_poll = 65536;
     const auto n_edges = worker.positive_head.size();
     if (n_edges <= edges_per_poll || n == 0) {
-      pforr::parallel_for_indexed(n, worker, n_threads, grain_size);
+      // Share the thread-launch code across optimizer types.
+      const std::function<void(std::size_t, std::size_t, std::size_t)> task =
+          std::ref(worker);
+      pforr::parallel_for_indexed(n, task, n_threads, grain_size);
       return;
     }
     // Preserve each worker's original partition and random stream. Only the
     // main thread polls R, after all workers have finished the current slice.
     const auto ranges = pforr::split_input_range({0, n}, n_threads, grain_size);
-    using Window = decltype(worker.make_window(0, 0));
     std::vector<Window> windows;
     windows.reserve(ranges.size());
     for (std::size_t i = 0; i < ranges.size(); ++i) {
@@ -69,6 +75,11 @@ private:
     }
     const auto degree = (std::max)(std::size_t{1}, n_edges / n);
     const auto stride = (std::max)(std::size_t{1}, edges_per_poll / degree);
+    run_windows(ranges, windows, stride);
+  }
+
+  void run_windows(const std::vector<pforr::IndexRange> &ranges,
+                   const std::vector<Window> &windows, std::size_t stride) {
     for (std::size_t offset = 0; offset < ranges.front().second;
          offset += stride) {
       auto visit = [&](std::size_t begin, std::size_t end, std::size_t) {

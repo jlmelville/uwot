@@ -18,6 +18,7 @@
 //  along with UWOT.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 #include "uwot/coords.h"
@@ -41,18 +42,6 @@ auto lget(List list, const std::string &name, T default_value) -> T {
     return list[key];
   }
 }
-
-// Template class specialization to handle different rng/batch combinations
-template <bool DoBatch = true> struct BatchRngFactory {
-  using PcgFactoryType = batch_pcg_factory;
-  using TauFactoryType = batch_tau_factory;
-  using DeterministicFactoryType = deterministic_factory;
-};
-template <> struct BatchRngFactory<false> {
-  using PcgFactoryType = pcg_factory;
-  using TauFactoryType = tau_factory;
-  using DeterministicFactoryType = deterministic_factory;
-};
 
 struct UmapFactory {
   bool move_other;
@@ -99,34 +88,31 @@ struct UmapFactory {
 
   template <typename Gradient> void create(const Gradient &gradient) {
     if (move_other) {
-      create_impl<true>(gradient, rng_type, batch);
+      select_batch<true>(gradient);
     } else {
-      create_impl<false>(gradient, rng_type, batch);
+      select_batch<false>(gradient);
     }
   }
 
   template <bool DoMove, typename Gradient>
-  void create_impl(const Gradient &gradient, const std::string &rng_type,
-                   bool batch) {
+  void select_batch(const Gradient &gradient) {
     if (batch) {
-      create_impl<BatchRngFactory<true>, DoMove>(gradient, rng_type, batch);
+      select_rng<DoMove, true>(gradient);
     } else {
-      create_impl<BatchRngFactory<false>, DoMove>(gradient, rng_type, batch);
+      select_rng<DoMove, false>(gradient);
     }
   }
 
-  template <typename BatchRngFactory, bool DoMove, typename Gradient>
-  void create_impl(const Gradient &gradient, const std::string &rng_type,
-                   bool batch) {
+  template <bool DoMove, bool Batch, typename Gradient>
+  void select_rng(const Gradient &gradient) {
     if (rng_type == "pcg") {
-      create_impl<typename BatchRngFactory::PcgFactoryType, DoMove>(gradient,
-                                                                    batch);
+      using Factory = std::conditional_t<Batch, batch_pcg_factory, pcg_factory>;
+      create_worker<DoMove, Batch, Factory>(gradient);
     } else if (rng_type == "tausworthe") {
-      create_impl<typename BatchRngFactory::TauFactoryType, DoMove>(gradient,
-                                                                    batch);
+      using Factory = std::conditional_t<Batch, batch_tau_factory, tau_factory>;
+      create_worker<DoMove, Batch, Factory>(gradient);
     } else if (rng_type == "deterministic") {
-      create_impl<typename BatchRngFactory::DeterministicFactoryType, DoMove>(
-          gradient, batch);
+      create_worker<DoMove, Batch, deterministic_factory>(gradient);
     } else {
       stop("Invalid rng type: ", rng_type);
     }
@@ -157,12 +143,12 @@ struct UmapFactory {
     }
   }
 
-  template <typename RandFactory, bool DoMove, typename Gradient>
-  void create_impl(const Gradient &gradient, bool batch) {
+  template <bool DoMove, bool Batch, typename RandFactory, typename Gradient>
+  void create_worker(const Gradient &gradient) {
     uwot::Sampler sampler(epochs_per_sample, negative_sample_rate);
     const std::size_t ndim = head_embedding.size() / n_head_vertices;
 
-    if (batch) {
+    if constexpr (Batch) {
       std::string opt_name = opt_args["method"];
       auto opt = create_optimizer(opt_args);
       uwot::BatchUpdate<DoMove> update(head_embedding, tail_embedding,
@@ -171,7 +157,7 @@ struct UmapFactory {
       uwot::NodeWorker<Gradient, decltype(update), RandFactory> worker(
           gradient, update, positive_head, positive_tail, positive_ptr,
           std::move(sampler), ndim, n_tail_vertices);
-      create_impl(worker, gradient);
+      optimize(worker);
     } else {
       uwot::InPlaceUpdate<DoMove> update(head_embedding, tail_embedding,
                                          initial_alpha,
@@ -179,22 +165,13 @@ struct UmapFactory {
       uwot::EdgeWorker<Gradient, decltype(update), RandFactory> worker(
           gradient, update, positive_head, positive_tail, std::move(sampler),
           ndim, n_tail_vertices, n_threads);
-      create_impl(worker, gradient);
+      optimize(worker);
     }
   }
 
-  template <typename Worker, typename Gradient>
-  void create_impl(Worker &worker, const Gradient &gradient) {
-
+  template <typename Worker> void optimize(Worker &worker) {
     RProgress progress(n_epochs, verbose);
     RParallel parallel(n_threads, grain_size);
-    create_impl(worker, gradient, progress, parallel);
-  }
-
-  template <typename Worker, typename Gradient, typename Progress,
-            typename Parallel>
-  void create_impl(Worker &worker, const Gradient &, Progress &progress,
-                   Parallel &parallel) {
     uwot::optimize_layout(worker, progress, n_epochs, parallel);
   }
 };
