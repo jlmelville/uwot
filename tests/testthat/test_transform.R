@@ -550,19 +550,27 @@ test_that("sparse projection averages each query's own neighbors", {
   m <- fit_small_model(iris10[1:4, ], n_components = 1)
   m$embedding <- matrix(c(0, 10, 20, 30))
   s <- Matrix::sparseMatrix(i = 1:4, j = c(1, 2, 2, 2), x = c(1, 1, 2, 3))
-  project <- function(init) {
+  project <- function(...) {
     umap_transform(
       model = m,
       nn_method = s,
-      init = init,
+      ...,
       n_epochs = 0,
       n_threads = 0,
       ret_extra = "fgraph",
       verbose = FALSE
     )
   }
-  expect_equal(as.vector(project("average")$embedding), c(0, 20))
-  q <- project("weighted")
+  average <- project(init = "average")$embedding
+  expect_equal(as.vector(average), c(0, 20))
+  expect_equal(project(init_weighted = FALSE)$embedding, average)
+
+  q <- project(init = "weighted")
+  expect_equal(project()$embedding, q$embedding)
+  expect_equal(
+    project(init = "weighted", init_weighted = FALSE)$embedding,
+    q$embedding
+  )
   expected <- as.vector(q$fgraph %*% m$embedding) / Matrix::rowSums(q$fgraph)
   expect_equal(as.vector(q$embedding), expected, tolerance = 1e-6)
 })

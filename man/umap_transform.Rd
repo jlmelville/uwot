@@ -113,7 +113,7 @@ be used. Used in conjunction with \code{n_threads} and
     \item A matrix of user-specified input coordinates, which must have
     dimensions the same as \code{(nrow(X), ncol(model$embedding))}.
   }
-This parameter should be used in preference to \code{init_weighted}.}
+An explicitly supplied initialization overrides \code{init_weighted}.}
 
 \item{batch}{If \code{TRUE}, then embedding coordinates are updated at the
 end of each epoch rather than during the epoch. In batch mode, results are

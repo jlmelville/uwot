@@ -87,7 +87,7 @@
 #'     \item A matrix of user-specified input coordinates, which must have
 #'     dimensions the same as \code{(nrow(X), ncol(model$embedding))}.
 #'   }
-#' This parameter should be used in preference to \code{init_weighted}.
+#' An explicitly supplied initialization overrides \code{init_weighted}.
 #' @param batch If \code{TRUE}, then embedding coordinates are updated at the
 #'   end of each epoch rather than during the epoch. In batch mode, results are
 #'   reproducible with a fixed random seed even with \code{n_sgd_threads > 1},
@@ -518,7 +518,7 @@ umap_transform <- function(
     nblocks <- num_precomputed_nns
   }
 
-  if (!is.null(init)) {
+  if (!missing(init) && !is.null(init)) {
     if (is.logical(init)) {
       init_weighted <- init
     } else if (is.character(init)) {
