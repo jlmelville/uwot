@@ -75,3 +75,32 @@ test_that("logical pca ok", {
     abs(irlba_scores(random_int, ncol = 2))
   )
 })
+
+test_that("bigstatsr models project training rows in their fitted PCA space", {
+  skip_if_not_installed("bigstatsr")
+  set.seed(32)
+  x <- matrix(rnorm(48 * 20), nrow = 48)
+  model <- umap(
+    x,
+    nn_method = "annoy",
+    n_neighbors = 4,
+    pca = 2,
+    pca_method = "bigstatsr",
+    init = "random",
+    n_epochs = 0,
+    n_threads = 0,
+    ret_model = TRUE,
+    verbose = TRUE
+  )
+  on.exit(unload_uwot(model, cleanup = FALSE))
+  expect_identical(dim(model$pca_models[[1]]$rotation), c(ncol(x), 2L))
+  q <- umap_transform(
+    x[1:3, ],
+    model,
+    n_epochs = 0,
+    n_threads = 0,
+    ret_extra = "nn"
+  )
+  expect_equal(unname(q$nn[[1]]$idx[, 1]), 1:3)
+  expect_ok_matrix(q$embedding, nr = 3)
+})

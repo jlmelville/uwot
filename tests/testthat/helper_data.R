@@ -266,7 +266,7 @@ expect_ok_matrix <- function(res, nr = 10, nc = 2) {
   expect_true(is.matrix(res))
   expect_equal(nrow(res), nr)
   expect_equal(ncol(res), nc)
-  expect_false(any(is.infinite(res)))
+  expect_true(all(is.finite(res)))
 }
 
 expect_is_nn <- function(res, nr = 10, k = 4) {

@@ -23,7 +23,6 @@ test_that("invalid data, dimensions and neighbor counts are rejected", {
   expect_error(umap(diris10, ret_model = TRUE, n_threads = 0), "models")
   expect_error(umap(dmiris10z, ret_model = TRUE, n_threads = 0), "models")
   expect_error(umap(dmiris10z[, 1:9], n_threads = 0), "distance")
-  expect_error(umap(dmiris10z[, 1:9], n_threads = 0), "distance")
   expect_error(umap(iris[, "Species", drop = FALSE], n_threads = 0), "numeric")
 })
 test_that("invalid neighbor graphs and unsupported FNN options are rejected", {

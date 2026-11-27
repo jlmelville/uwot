@@ -1,104 +1,47 @@
-test_that("supervision supports numeric, categorical and mixed targets", {
-  # categorical y
-  res <- umap(
-    iris10,
-    n_neighbors = 4,
-    n_epochs = 2,
-    learning_rate = 0.5,
-    min_dist = 0.001,
-    init = "rand",
-    verbose = FALSE,
-    n_threads = 1,
-    y = ycat
-  )
-  expect_ok_matrix(res)
+test_that("categorical supervision removes edges between different labels", {
+  z <- c(0, 1, 3, 6, 10, 15)
+  x <- cbind(z, -z)
+  labels <- factor(c("a", "a", "a", "b", "b", "b"))
+  graph <- function(y = NULL) {
+    similarity_graph(
+      x,
+      y = y,
+      n_neighbors = 6,
+      target_weight = 1,
+      n_threads = 0
+    )
+  }
+  between <- outer(labels, labels, "!=")
+  expect_true(any(graph()[between] > 0))
 
-  # numeric y
-  res <- umap(
-    iris10,
-    n_neighbors = 4,
-    n_epochs = 2,
-    learning_rate = 0.5,
-    min_dist = 0.001,
-    init = "rand",
-    verbose = FALSE,
-    n_threads = 1,
-    y = ynum
-  )
-  expect_ok_matrix(res)
+  supervised <- graph(labels)
+  expect_true(all(supervised[between] == 0))
+  expect_true(any(supervised[!between] > 0))
+})
 
-  # mixed categorical and numeric
-  res <- umap(
-    iris10,
-    n_neighbors = 4,
-    n_epochs = 2,
-    learning_rate = 0.5,
-    min_dist = 0.001,
-    init = "rand",
-    verbose = FALSE,
-    n_threads = 1,
-    y = data.frame(ycat, ynum)
+test_that("both numeric and categorical targets influence a mixed target graph", {
+  targets <- data.frame(
+    score = ynum,
+    other = ynum2,
+    group = ycat,
+    class = ycat2
   )
-  expect_ok_matrix(res)
-
-  # multiple categorical y
-  res <- umap(
-    iris10,
-    n_neighbors = 4,
-    n_epochs = 2,
-    learning_rate = 0.5,
-    min_dist = 0.001,
-    init = "rand",
-    verbose = FALSE,
-    n_threads = 1,
-    y = data.frame(ycat, ycat2)
-  )
-  expect_ok_matrix(res)
-
-  # multiple numeric y
-  res <- umap(
-    iris10,
-    n_neighbors = 4,
-    n_epochs = 2,
-    learning_rate = 0.5,
-    min_dist = 0.001,
-    init = "rand",
-    verbose = FALSE,
-    n_threads = 1,
-    y = data.frame(ynum, ynum2)
-  )
-  expect_ok_matrix(res)
-
-  # multiple numeric and categorical
-  res <- umap(
-    iris10,
-    n_neighbors = 4,
-    n_epochs = 2,
-    learning_rate = 0.5,
-    min_dist = 0.001,
-    init = "rand",
-    verbose = FALSE,
-    n_threads = 1,
-    y = data.frame(ynum, ynum2, ycat, ycat2)
-  )
-  expect_ok_matrix(res)
-
-  # multiple numeric with different metrics and categorical
-  set.seed(1337)
-  res <- umap(
-    iris10,
-    n_neighbors = 4,
-    n_epochs = 2,
-    learning_rate = 0.5,
-    min_dist = 0.001,
-    init = "rand",
-    verbose = FALSE,
-    n_threads = 1,
-    target_metric = list("euclidean" = 1, "cosine" = 2),
-    target_weight = 0.5,
-    y = data.frame(ynum, ynum2, ycat, ycat2)
-  )
-  expect_ok_matrix(res)
+  graph <- function(y) {
+    similarity_graph(
+      iris10,
+      y = y,
+      target_metric = list(euclidean = "score", manhattan = "other"),
+      nn_method = "annoy",
+      n_neighbors = 4,
+      n_threads = 0
+    )
+  }
+  expected <- graph(targets)
+  for (column in names(targets)) {
+    changed <- targets
+    changed[[column]] <- changed[[column]][c(2:10, 1)]
+    expect_false(isTRUE(all.equal(graph(changed), expected)), label = column)
+  }
 })
 
 test_that("local connectivity can be reset on a supervised graph", {

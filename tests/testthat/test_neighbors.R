@@ -148,10 +148,6 @@ test_that("exact neighbor searches agree for observations and distance matrices"
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
-  res <- find_nn(dmiris10z, k = 4, include_self = TRUE)
-  expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
-  expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
-
   res <- find_nn(dmiris10zu, k = 4, include_self = TRUE)
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
@@ -1083,4 +1079,29 @@ test_that("a stored diagonal never counts as a nonself distance", {
   d <- dmiris10z
   Matrix::diag(d) <- 1e-8
   expect_equal(sparse_nn(d, 4), sparse_nn(dmiris10z, 4))
+})
+
+test_that("verbose serial Annoy indexes and queries every row across progress chunks", {
+  rows <- seq_len(53L)
+  x <- cbind(rows, rev(rows))
+  model <- umap(
+    x,
+    nn_method = "annoy",
+    n_neighbors = 4,
+    init = "random",
+    n_epochs = 0,
+    n_threads = 0,
+    ret_model = TRUE,
+    verbose = TRUE
+  )
+  on.exit(unload_uwot(model, cleanup = FALSE))
+  q <- umap_transform(
+    x[rev(rows), , drop = FALSE],
+    model,
+    n_epochs = 0,
+    n_threads = 0,
+    ret_extra = "nn",
+    verbose = TRUE
+  )
+  expect_equal(unname(q$nn[[1]]$idx[, 1]), rev(rows))
 })

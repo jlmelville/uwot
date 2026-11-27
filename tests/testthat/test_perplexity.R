@@ -534,23 +534,14 @@ test_that("serial and threaded row probabilities match the reference", {
   )
   expect_equal(resp$sigma, expected_sigmas, tolerance = 1e-5)
 
-  res <- calc_row_probabilities_parallel(
+  threaded <- calc_row_probabilities_parallel(
     iris10nn10d,
     n_vertices = nrow(iris10_nn10$dist),
     perplexity = 4,
-    n_threads = 1
-  )$matrix
-  res <- nng_to_sparse(
-    iris10_nn10$idx,
-    as.vector(t(res)),
-    self_nbr = TRUE,
-    max_nbr_id = nrow(iris10_nn10$idx)
+    n_threads = 2,
+    ret_sigma = TRUE
   )
-  expect_equal(
-    as.matrix(res),
-    P_row,
-    tolerance = 1e-5
-  )
+  expect_equal(threaded, resp)
 })
 
 iris_dup <- duplicated(x2m(iris))

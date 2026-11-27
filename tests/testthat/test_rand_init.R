@@ -1,12 +1,12 @@
 library(uwot)
 
-test_that("random initialization returns coordinates within the requested bounds", {
-  n_vertices <- 10
-  res_rand <- rand_init(n_vertices, ndim = 2, verbose = FALSE)
-
-  expect_ok_matrix(rand_init(n_vertices, ndim = 2, verbose = FALSE))
-  expect_ok_matrix(rand_init_lv(n_vertices, ndim = 2, verbose = FALSE))
-
-  expect_ok_matrix(rand_init(n_vertices, ndim = 1, verbose = FALSE), nc = 1)
-  expect_ok_matrix(rand_init_lv(n_vertices, ndim = 1, verbose = FALSE), nc = 1)
+test_that("uniform random initialization respects its bounds in one and two dimensions", {
+  set.seed(42)
+  for (ndim in 1:2) {
+    uniform <- rand_init(10, ndim)
+    expect_ok_matrix(uniform, nc = ndim)
+    expect_true(all(abs(uniform) <= 10))
+    expect_gt(diff(range(uniform)), 0)
+    expect_ok_matrix(rand_init_lv(10, ndim), nc = ndim)
+  }
 })

@@ -360,8 +360,7 @@ test_that("UMAP models expose curve parameters and support zero-epoch transforms
     n_threads = 1,
     verbose = FALSE
   )
-  expect_ok_matrix(res_test)
-  expect_equal(dim(res_test0), c(10, 2))
+  expect_ok_matrix(res_test0)
 })
 
 test_that("sparse neighbor matrices reproduce the t-UMAP embedding", {

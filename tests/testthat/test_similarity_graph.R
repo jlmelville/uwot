@@ -194,3 +194,27 @@ test_that("optimizer column indices follow CSC order across empty columns", {
     expect_identical(edge_columns(graph), unname(expected))
   }
 })
+
+test_that("graph layout rejects invalid shapes and isolated vertices", {
+  g <- Matrix::sparseMatrix(i = c(1, 2), j = c(2, 1), x = 1)
+  expect_error(optimize_graph_layout(as.matrix(g)), "sparse")
+  expect_error(optimize_graph_layout(g[, 1, drop = FALSE]), "square")
+  expect_error(optimize_graph_layout(Matrix::triu(g)), "symmetric")
+  isolated <- Matrix::sparseMatrix(
+    i = c(1, 2),
+    j = c(2, 1),
+    x = 1,
+    dims = c(3, 3)
+  )
+  expect_error(optimize_graph_layout(isolated), "at least one neighbor")
+})
+
+test_that("graph combinations require conformable sparse operands and a valid weight", {
+  g <- Matrix::sparseMatrix(i = c(1, 2), j = c(2, 1), x = 1)
+  for (combine in list(simplicial_set_union, simplicial_set_intersect)) {
+    expect_error(combine(as.matrix(g), g), "x must be a sparse")
+    expect_error(combine(g, as.matrix(g)), "y must be a sparse")
+    expect_error(combine(g, g[, 1, drop = FALSE]), "identical dimensions")
+  }
+  expect_error(simplicial_set_intersect(g, g, weight = 2), "weight")
+})
