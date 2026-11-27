@@ -91,6 +91,20 @@ test_that("logical pca ok", {
   )
 })
 
+test_that("distance PCA preserves labels and planar distances", {
+  x <- iris10[, 1:2]
+  rownames(x) <- paste0("point", seq_len(nrow(x)))
+  coords <- umap(
+    dist(x),
+    n_neighbors = 4,
+    init = "pca",
+    n_epochs = 0,
+    n_threads = 0
+  )
+  expect_identical(rownames(coords), rownames(x))
+  expect_equal(as.vector(dist(coords)), as.vector(dist(x)))
+})
+
 for (method in c("svdr", "bigstatsr")) {
   for (center in c(TRUE, FALSE)) {
     test_that(

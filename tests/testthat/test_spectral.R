@@ -82,3 +82,16 @@ test_that("connected components", {
   sgraph <- graph + Matrix::t(graph)
   expect_ok_matrix(spectral_init(sgraph), nr = 5, nc = 2)
 })
+
+test_that("a two-vertex spectral layout falls back to random coordinates", {
+  coords <- umap(
+    iris10[1:2, ],
+    n_neighbors = 2,
+    n_components = 1,
+    init = "spectral",
+    n_epochs = 0,
+    n_threads = 0
+  )
+  expect_ok_matrix(coords, nr = 2, nc = 1)
+  expect_true(all(abs(coords) <= 10))
+})
