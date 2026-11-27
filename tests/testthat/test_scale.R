@@ -110,3 +110,45 @@ test_that("scaling preserves the dimensions of individual features and queries",
   m <- fit_small_model(x, scale = TRUE, n_components = 1)
   expect_equal(query_neighbors(m, x[5, , drop = FALSE])$idx[1, 1], 5L)
 })
+
+test_that("column range scaling ignores training constants in every query", {
+  x <- cbind(constant = 7, iris10)
+  m <- fit_small_model(x, scale = "colrange", ret_nn = TRUE)
+  ref <- fit_small_model(iris10, scale = "colrange", ret_nn = TRUE)
+  expect_equal(m$nn, ref$nn)
+  query <- x[1:2, , drop = FALSE]
+  query[, "constant"] <- c(-100, 100)
+  expected <- query_neighbors(ref, iris10[1:2, , drop = FALSE])
+  expect_equal(query_neighbors(m, query), expected)
+  file <- tempfile()
+  on.exit(unlink(file))
+  save_uwot(m, file, unload = TRUE)
+  restored <- load_uwot(file)
+  on.exit(unload_uwot(restored), add = TRUE)
+  expect_equal(query_neighbors(restored, query), expected)
+
+  constants <- scale_input(
+    x[, "constant", drop = FALSE],
+    "colrange",
+    ret_model = TRUE
+  )
+  expect_true(all(constants == 0))
+  expect_equal(
+    as.numeric(apply_scaling(matrix(99), attr_to_scale_info(constants))),
+    0
+  )
+})
+
+test_that("global scaling reports zero training scale factors", {
+  flat <- matrix(3, 10, 2)
+  columns <- cbind(rep(1, 10), rep(2, 10))
+  expect_error(
+    fit_small_model(flat, scale = "range"),
+    "training scale factor is zero"
+  )
+  expect_error(
+    fit_small_model(columns, scale = "maxabs"),
+    "training scale factor is zero"
+  )
+  expect_equal(range(scale_input(columns, "range")), c(0, 1))
+})

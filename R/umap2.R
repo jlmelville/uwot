@@ -122,10 +122,12 @@
 #'   blocks select from the numeric columns before scaling and raise an error
 #'   if they include a removed column.
 #'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
-#'   element by the maximum absolute value over the entire matrix.
+#'   element by the maximum absolute value over the entire matrix. Raises an
+#'   error if every column is constant.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
-#'   element is 0 and the largest is 1.
-#'   \item{\code{"colrange"}} Scale each column in the range (0,1).
+#'   element is 0 and the largest is 1. A zero range raises an error.
+#'   \item{\code{"colrange"}} Scale each column to the range [0, 1]. Columns
+#'   that are constant during training contribute zero, including in new data.
 #' }
 #' For UMAP, the default is \code{"none"}.
 #' @param learning_rate Initial learning rate used in optimization of the
@@ -375,12 +377,12 @@
 #'   entirely on target. The default of 0.5 balances the weighting equally
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param pca If set to a positive integer value, reduce data to this number of
-#'   columns using PCA. Doesn't applied if the distance \code{metric} is
-#'   \code{"hamming"}, or the dimensions of the data is larger than the
-#'   number specified (i.e. number of rows and columns must be larger than the
-#'   value of this parameter). If you have > 100 columns in a data frame or
-#'   matrix, reducing the number of columns in this way may substantially
-#'   increase the performance of the nearest neighbor search at the cost of a
+#'   columns using PCA. The input must have more rows and columns than the
+#'   requested number of components. PCA skips Hamming blocks and blocks
+#'   narrower than that number. With multiple blocks, a block of exactly
+#'   that width retains its full-rank PCA rotation.
+#'   If you have > 100 columns in a data frame or matrix, reducing the number
+#'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
 #'   is recommended, although there's no guarantee that this is appropriate for
 #'   all settings.

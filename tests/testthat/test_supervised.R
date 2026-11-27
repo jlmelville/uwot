@@ -313,3 +313,23 @@ test_that("numeric targets calculate their own neighbors with precomputed input"
   expect_equal(ncol(query_neighbors(m)$idx), 4L)
   expect_silent(unload_uwot(m, cleanup = FALSE))
 })
+
+test_that("mixed supervision retains the name of a single numeric target", {
+  y <- data.frame(group = factor(rep(1:2, 5)), score = seq_len(10))
+  for (method in c("annoy", "hnsw")) {
+    if (method == "hnsw" && !is_installed("RcppHNSW")) {
+      next
+    }
+    graph <- function(cols) {
+      similarity_graph(
+        iris10,
+        y = y,
+        nn_method = method,
+        n_neighbors = 4,
+        target_metric = list(euclidean = cols, categorical = "group"),
+        n_threads = 0
+      )
+    }
+    expect_equal(graph("score"), graph(1L))
+  }
+})

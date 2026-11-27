@@ -205,3 +205,28 @@ test_that("HNSW validates the names of feature and target metric blocks", {
     "bad target_metric"
   )
 })
+
+test_that("PCA skips narrow blocks and preserves full-rank block rotations", {
+  blocks <- list(euclidean = 1L, euclidean = 1:2, euclidean = 2:4)
+  explicit <- list(
+    euclidean = list(1L, pca = NULL),
+    euclidean = list(1:2, pca = 2L),
+    euclidean = list(2:4, pca = 2L)
+  )
+  fit <- function(metric, pca = NULL) {
+    fit_small_model(
+      metric = metric,
+      pca = pca,
+      pca_method = "svd",
+      ret_nn = TRUE
+    )
+  }
+  m <- fit(blocks, pca = 2L)
+  ref <- fit(explicit)
+  expect_identical(names(m$pca_models), c("2", "3"))
+  expect_equal(m$nn, ref$nn)
+  project <- function(m) {
+    umap_transform(iris10, m, n_epochs = 0, n_threads = 0, ret_extra = "nn")$nn
+  }
+  expect_equal(project(m), project(ref))
+})

@@ -106,10 +106,12 @@
 #'   blocks select from the numeric columns before scaling and raise an error
 #'   if they include a removed column.
 #'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
-#'   element by the maximum absolute value over the entire matrix.
+#'   element by the maximum absolute value over the entire matrix. Raises an
+#'   error if every column is constant.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
-#'   element is 0 and the largest is 1.
-#'   \item{\code{"colrange"}} Scale each column in the range (0,1).
+#'   element is 0 and the largest is 1. A zero range raises an error.
+#'   \item{\code{"colrange"}} Scale each column to the range [0, 1]. Columns
+#'   that are constant during training contribute zero, including in new data.
 #' }
 #' For UMAP, the default is \code{"none"}.
 #' @param learning_rate Initial learning rate used in optimization of the
@@ -366,12 +368,12 @@
 #'   entirely on target. The default of 0.5 balances the weighting equally
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param pca If set to a positive integer value, reduce data to this number of
-#'   columns using PCA. Doesn't applied if the distance \code{metric} is
-#'   \code{"hamming"}, or the dimensions of the data is larger than the
-#'   number specified (i.e. number of rows and columns must be larger than the
-#'   value of this parameter). If you have > 100 columns in a data frame or
-#'   matrix, reducing the number of columns in this way may substantially
-#'   increase the performance of the nearest neighbor search at the cost of a
+#'   columns using PCA. The input must have more rows and columns than the
+#'   requested number of components. PCA skips Hamming blocks and blocks
+#'   narrower than that number. With multiple blocks, a block of exactly
+#'   that width retains its full-rank PCA rotation.
+#'   If you have > 100 columns in a data frame or matrix, reducing the number
+#'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
 #'   is recommended, although there's no guarantee that this is appropriate for
 #'   all settings.
@@ -913,10 +915,12 @@ umap <- function(
 #'   blocks select from the numeric columns before scaling and raise an error
 #'   if they include a removed column.
 #'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
-#'   element by the maximum absolute value over the entire matrix.
+#'   element by the maximum absolute value over the entire matrix. Raises an
+#'   error if every column is constant.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
-#'   element is 0 and the largest is 1.
-#'   \item{\code{"colrange"}} Scale each column in the range (0,1).
+#'   element is 0 and the largest is 1. A zero range raises an error.
+#'   \item{\code{"colrange"}} Scale each column to the range [0, 1]. Columns
+#'   that are constant during training contribute zero, including in new data.
 #' }
 #' For t-UMAP, the default is \code{"none"}.
 #' @param init Type of initialization for the coordinates. Options are:
@@ -1200,12 +1204,12 @@ umap <- function(
 #'   entirely on target. The default of 0.5 balances the weighting equally
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param pca If set to a positive integer value, reduce data to this number of
-#'   columns using PCA. Doesn't applied if the distance \code{metric} is
-#'   \code{"hamming"}, or the dimensions of the data is larger than the
-#'   number specified (i.e. number of rows and columns must be larger than the
-#'   value of this parameter). If you have > 100 columns in a data frame or
-#'   matrix, reducing the number of columns in this way may substantially
-#'   increase the performance of the nearest neighbor search at the cost of a
+#'   columns using PCA. The input must have more rows and columns than the
+#'   requested number of components. PCA skips Hamming blocks and blocks
+#'   narrower than that number. With multiple blocks, a block of exactly
+#'   that width retains its full-rank PCA rotation.
+#'   If you have > 100 columns in a data frame or matrix, reducing the number
+#'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
 #'   is recommended, although there's no guarantee that this is appropriate for
 #'   all settings.
@@ -1718,10 +1722,12 @@ tumap <- function(
 #'   blocks select from the numeric columns before scaling and raise an error
 #'   if they include a removed column.
 #'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
-#'   element by the maximum absolute value over the entire matrix.
+#'   element by the maximum absolute value over the entire matrix. Raises an
+#'   error if every column is constant.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
-#'   element is 0 and the largest is 1.
-#'   \item{\code{"colrange"}} Scale each column in the range (0,1).
+#'   element is 0 and the largest is 1. A zero range raises an error.
+#'   \item{\code{"colrange"}} Scale each column to the range [0, 1]. Columns
+#'   that are constant during training contribute zero, including in new data.
 #' }
 #' For lvish, the default is \code{"maxabs"}, for consistency with LargeVis.
 #' @param init Type of initialization for the coordinates. Options are:
@@ -1909,12 +1915,12 @@ tumap <- function(
 #'   otherwise, using \code{perplexity} nearest neighbors. The \code{n_neighbors}
 #'   parameter is ignored in this case.
 #' @param pca If set to a positive integer value, reduce data to this number of
-#'   columns using PCA. Doesn't applied if the distance \code{metric} is
-#'   \code{"hamming"}, or the dimensions of the data is larger than the
-#'   number specified (i.e. number of rows and columns must be larger than the
-#'   value of this parameter). If you have > 100 columns in a data frame or
-#'   matrix, reducing the number of columns in this way may substantially
-#'   increase the performance of the nearest neighbor search at the cost of a
+#'   columns using PCA. The input must have more rows and columns than the
+#'   requested number of components. PCA skips Hamming blocks and blocks
+#'   narrower than that number. With multiple blocks, a block of exactly
+#'   that width retains its full-rank PCA rotation.
+#'   If you have > 100 columns in a data frame or matrix, reducing the number
+#'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
 #'   is recommended, although there's no guarantee that this is appropriate for
 #'   all settings.
@@ -2329,10 +2335,12 @@ lvish <- function(
 #'   blocks select from the numeric columns before scaling and raise an error
 #'   if they include a removed column.
 #'   \item{\code{"maxabs"}} Center each column to mean 0, then divide each
-#'   element by the maximum absolute value over the entire matrix.
+#'   element by the maximum absolute value over the entire matrix. Raises an
+#'   error if every column is constant.
 #'   \item{\code{"range"}} Range scale the entire matrix, so the smallest
-#'   element is 0 and the largest is 1.
-#'   \item{\code{"colrange"}} Scale each column in the range (0,1).
+#'   element is 0 and the largest is 1. A zero range raises an error.
+#'   \item{\code{"colrange"}} Scale each column to the range [0, 1]. Columns
+#'   that are constant during training contribute zero, including in new data.
 #' }
 #' For \code{method} \code{"umap"}, the default is \code{"none"}. For
 #' \code{"largevis"}, the default is \code{"maxabs"}.
@@ -2528,12 +2536,12 @@ lvish <- function(
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}. This
 #'   parameter is ignored if \code{method = "largevis"}.
 #' @param pca If set to a positive integer value, reduce data to this number of
-#'   columns using PCA. Doesn't applied if the distance \code{metric} is
-#'   \code{"hamming"}, or the dimensions of the data is larger than the
-#'   number specified (i.e. number of rows and columns must be larger than the
-#'   value of this parameter). If you have > 100 columns in a data frame or
-#'   matrix, reducing the number of columns in this way may substantially
-#'   increase the performance of the nearest neighbor search at the cost of a
+#'   columns using PCA. The input must have more rows and columns than the
+#'   requested number of components. PCA skips Hamming blocks and blocks
+#'   narrower than that number. With multiple blocks, a block of exactly
+#'   that width retains its full-rank PCA rotation.
+#'   If you have > 100 columns in a data frame or matrix, reducing the number
+#'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
 #'   is recommended, although there's no guarantee that this is appropriate for
 #'   all settings.
@@ -3745,7 +3753,7 @@ uwot <- function(
       yindexes <- which(vapply(y, is.numeric, logical(1)))
 
       if (length(yindexes) > 0) {
-        y <- as.matrix(y[, yindexes])
+        y <- as.matrix(y[, yindexes, drop = FALSE])
       } else {
         y <- NULL
       }
@@ -4865,8 +4873,8 @@ data2set <- function(
         is.matrix(X) &&
         metric != "hamming" &&
         ncol(X) > pca_i &&
-        (nblocks > 1 || ncol(Xsub) > pca_i) &&
-        nrow(X) > pca_i
+        (ncol(Xsub) > pca_i || (nblocks > 1 && ncol(Xsub) == pca_i)) &&
+        nrow(Xsub) > pca_i
     ) {
       tsmessage("Reducing column dimension to ", pca_i, " via PCA")
       pca_res <- pca_init(
@@ -5317,6 +5325,24 @@ lvish_epochs <- function(n_vertices, V) {
   round(n_samples * max(V) / sum(V))
 }
 
+scale_by_extent <- function(X, extent) {
+  if (extent == 0) {
+    stop("Cannot scale data: the training scale factor is zero")
+  }
+  X / extent
+}
+
+scale_by_colrange <- function(X, minima, ranges) {
+  X <- sweep(X, 2, minima)
+  constant <- ranges == 0
+  if (any(constant)) {
+    # A feature constant during training contributes zero for every query.
+    X[, constant] <- 0
+    ranges[constant] <- 1
+  }
+  sweep(X, 2, ranges, `/`)
+}
+
 # Scale X according to various strategies
 scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
   if (is.null(scale_type)) {
@@ -5339,7 +5365,7 @@ scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
       X <- X - min_X
 
       max_X <- max(X)
-      X <- X / max_X
+      X <- scale_by_extent(X, max_X)
 
       if (ret_model) {
         attr(X, "scaled:range:min") <- min_X
@@ -5349,10 +5375,8 @@ scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
     colrange = {
       tsmessage("Column range scaling X")
       min_X <- apply(X, 2, min)
-      X <- sweep(X, 2, min_X)
-
-      max_X <- apply(X, 2, max)
-      X <- sweep(X, 2, max_X, `/`)
+      max_X <- apply(X, 2, max) - min_X
+      X <- scale_by_colrange(X, min_X, max_X)
 
       if (ret_model) {
         attr(X, "scaled:colrange:min") <- min_X
@@ -5363,7 +5387,7 @@ scale_input <- function(X, scale_type, ret_model = FALSE, verbose = FALSE) {
       tsmessage("Normalizing by max-abs")
       X <- base::scale(X, scale = FALSE)
       max_abs <- max(abs(X))
-      X <- X / max_abs
+      X <- scale_by_extent(X, max_abs)
 
       if (ret_model) {
         attr(X, "scaled:maxabs") <- max_abs

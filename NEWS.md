@@ -3,6 +3,10 @@
 * Standardization preserves metric block column positions and supports single-row projection.
   Selecting a constant feature explicitly raises an error. Refit models trained with affected
   integer selectors to use the intended features.
+* Column range scaling gives constant training features zero weight during fitting and projection.
+  Global range and maximum-absolute scaling report a zero scale factor before neighbor search.
+* PCA skips metric blocks narrower than the requested rank and preserves full-rank block rotations.
+  Mixed supervised targets retain the column name when there is a single numeric target.
 * HNSW accepts supported metrics in named feature and target blocks.
 * Equal local radii give a uniform density adjustment in fitting and projection. Weighted
   projection retains tiny positive weights and averages a query's neighbors if all weights are zero.
