@@ -771,3 +771,34 @@ test_that("weighted projection handles tiny and all-zero query weights", {
   )
   expect_equal(as.numeric(q), c(50 / 3, 15), tolerance = 1e-6)
 })
+
+test_that("precomputed queries reject invalid training references and empty queries", {
+  model <- fit_small_model()
+  project <- function(graph, ...) {
+    umap_transform(
+      model = model,
+      nn_method = graph,
+      n_epochs = 0,
+      n_threads = 0,
+      ...
+    )
+  }
+  graph <- query_neighbors(model, iris10[1:3, ])
+  expect_error(project(graph, init = matrix(0, 2, 2)), "wrong dimensions")
+  expect_error(project(lapply(graph, function(x) x[, -1])), "number of columns")
+  graph$idx[1, 1] <- nrow(iris10) + 1L
+  expect_error(project(graph), "exceeds the number of training observations")
+  graph$idx[1, 1] <- 0L
+  expect_error(project(graph), "positive integers")
+  graph$idx[1, 1] <- NA_integer_
+  expect_error(project(graph), "missing data")
+
+  sparse <- Matrix::sparseMatrix(
+    i = 1:2,
+    j = c(1, 1),
+    x = c(1, 2),
+    dims = c(nrow(iris10), 2L)
+  )
+  expect_error(project(sparse), "at least one neighbor")
+  expect_error(project(sparse[, integer(), drop = FALSE]), "no observations")
+})

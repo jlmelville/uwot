@@ -1105,3 +1105,17 @@ test_that("verbose serial Annoy indexes and queries every row across progress ch
   ))
   expect_equal(unname(q$nn[[1]]$idx[, 1]), rev(rows))
 })
+
+test_that("sparse training distances must supply enough nonself neighbors", {
+  distances <- Matrix::sparseMatrix(i = 1:2, j = 2:1, x = 1, dims = c(6, 6))
+  expect_error(
+    umap(
+      distances,
+      n_neighbors = 3,
+      init = "random",
+      n_epochs = 0,
+      n_threads = 0
+    ),
+    "only 1 defined distances"
+  )
+})
