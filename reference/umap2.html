@@ -201,7 +201,9 @@ coordinates.</p></dd>
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
 <dd><p>Scaling to apply to <code>X</code> if it is a data frame or matrix:</p><ul><li><p><code>"none"</code> or <code>FALSE</code> or <code>NULL</code> No scaling.</p></li>
 <li><p><code>"Z"</code> or <code>"scale"</code> or <code>TRUE</code> Scale each column to
-  zero mean and variance 1.</p></li>
+  zero mean and variance 1. Constant columns are removed. Explicit metric
+  blocks select from the numeric columns before scaling and raise an error
+  if they include a removed column.</p></li>
 <li><p><code>"maxabs"</code> Center each column to mean 0, then divide each
   element by the maximum absolute value over the entire matrix.</p></li>
 <li><p><code>"range"</code> Range scale the entire matrix, so the smallest

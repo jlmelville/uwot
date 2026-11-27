@@ -169,7 +169,9 @@ be used. Used in conjunction with <code>n_threads</code> and
 <dd><p>how to initialize the transformed coordinates. One of:</p><ul><li><p><code>"weighted"</code> (The default). Use a weighted average of the
     coordinates of the nearest neighbors from the original embedding in
     <code>model</code>, where the weights used are the edge weights from the UMAP
-    smoothed knn distances. Equivalent to <code>init_weighted = TRUE</code>.</p></li>
+    smoothed knn distances. If all weights for a query are zero, use the
+    unweighted mean of its neighbors. Equivalent to
+    <code>init_weighted = TRUE</code>.</p></li>
 <li><p><code>"average"</code>. Use the mean average of the coordinates of
     the nearest neighbors from the original embedding in <code>model</code>.
     Equivalent to <code>init_weighted = FALSE</code>.</p></li>

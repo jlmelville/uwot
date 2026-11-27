@@ -172,7 +172,9 @@ similarity_graph(
   - `"none"` or `FALSE` or `NULL` No scaling.
 
   - `"Z"` or `"scale"` or `TRUE` Scale each column to zero mean and
-    variance 1.
+    variance 1. Constant columns are removed. Explicit metric blocks
+    select from the numeric columns before scaling and raise an error if
+    they include a removed column.
 
   - `"maxabs"` Center each column to mean 0, then divide each element by
     the maximum absolute value over the entire matrix.
