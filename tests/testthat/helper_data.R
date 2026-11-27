@@ -281,7 +281,8 @@ expect_angular_distances <- function(actual, expected, tolerance = 1e-6) {
   expect_lte(max(abs(actual - expected)), tolerance)
 }
 
-# Query the training data again, allowing roundoff at the known self matches.
+# Training self-distances are exactly zero. Both angular search paths can
+# round their dot products differently, including for nearby nonself points.
 expect_angular_self_query <- function(fit, query) {
   expect_equal(fit$idx, query$idx, ignore_attr = "dimnames")
   expect_true(all(fit$dist[, 1] == 0))
@@ -289,7 +290,11 @@ expect_angular_self_query <- function(fit, query) {
     fit$dist[, 1, drop = FALSE],
     query$dist[, 1, drop = FALSE]
   )
-  expect_equal(fit$dist[, -1], query$dist[, -1], ignore_attr = "dimnames")
+  expect_angular_distances(
+    fit$dist[, -1, drop = FALSE],
+    query$dist[, -1, drop = FALSE],
+    tolerance = 2^-22
+  )
 }
 
 expect_is_nn_matrix <- function(res, nr = 10, k = 4) {
