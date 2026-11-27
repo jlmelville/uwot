@@ -80,7 +80,7 @@ test_that("bigstatsr models project training rows in their fitted PCA space", {
   skip_if_not_installed("bigstatsr")
   set.seed(32)
   x <- matrix(rnorm(48 * 20), nrow = 48)
-  model <- umap(
+  model <- suppressMessages(umap(
     x,
     nn_method = "annoy",
     n_neighbors = 4,
@@ -91,7 +91,7 @@ test_that("bigstatsr models project training rows in their fitted PCA space", {
     n_threads = 0,
     ret_model = TRUE,
     verbose = TRUE
-  )
+  ))
   on.exit(unload_uwot(model, cleanup = FALSE))
   expect_identical(dim(model$pca_models[[1]]$rotation), c(ncol(x), 2L))
   q <- umap_transform(

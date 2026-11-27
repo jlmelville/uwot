@@ -1,4 +1,4 @@
-expect_annoy_tmpdir <- function(fit) {
+expect_annoy_tmpdir <- function(fit, ...) {
   dir <- tempfile()
   dir.create(dir)
   on.exit(unlink(dir, recursive = TRUE))
@@ -10,7 +10,8 @@ expect_annoy_tmpdir <- function(fit) {
       n_neighbors = 4,
       n_threads = 2,
       tmpdir = dir,
-      verbose = TRUE
+      verbose = TRUE,
+      ...
     ),
     message = function(m) {
       files <- list.files(dir, full.names = TRUE)
@@ -24,11 +25,11 @@ expect_annoy_tmpdir <- function(fit) {
 }
 
 test_that("umap writes its Annoy index in the requested directory", {
-  expect_annoy_tmpdir(umap)
+  expect_annoy_tmpdir(umap, n_epochs = 0)
 })
 
 test_that("umap2 writes its Annoy index in the requested directory", {
-  expect_annoy_tmpdir(umap2)
+  expect_annoy_tmpdir(umap2, n_epochs = 0)
 })
 
 test_that("similarity_graph writes its Annoy index in the requested directory", {

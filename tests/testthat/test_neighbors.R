@@ -1084,7 +1084,7 @@ test_that("a stored diagonal never counts as a nonself distance", {
 test_that("verbose serial Annoy indexes and queries every row across progress chunks", {
   rows <- seq_len(53L)
   x <- cbind(rows, rev(rows))
-  model <- umap(
+  model <- suppressMessages(umap(
     x,
     nn_method = "annoy",
     n_neighbors = 4,
@@ -1093,15 +1093,15 @@ test_that("verbose serial Annoy indexes and queries every row across progress ch
     n_threads = 0,
     ret_model = TRUE,
     verbose = TRUE
-  )
+  ))
   on.exit(unload_uwot(model, cleanup = FALSE))
-  q <- umap_transform(
+  q <- suppressMessages(umap_transform(
     x[rev(rows), , drop = FALSE],
     model,
     n_epochs = 0,
     n_threads = 0,
     ret_extra = "nn",
     verbose = TRUE
-  )
+  ))
   expect_equal(unname(q$nn[[1]]$idx[, 1]), rev(rows))
 })

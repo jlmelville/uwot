@@ -32,10 +32,24 @@ test_that("a failed load releases Annoy indexes opened earlier in the archive", 
 })
 
 test_that("an extraction failure is reported before reading model files", {
+  archive <- tempfile(fileext = ".tar")
+  on.exit(unlink(archive), add = TRUE)
+  utils::tar(archive, files = character(), tar = "internal")
+
+  # Use a quiet external command to exercise tar's nonzero exit status.
+  old_tar <- Sys.getenv("TAR", unset = NA_character_)
+  on.exit(
+    if (is.na(old_tar)) Sys.unsetenv("TAR") else Sys.setenv(TAR = old_tar),
+    add = TRUE
+  )
+  Sys.setenv(TAR = paste(
+    shQuote(file.path(R.home("bin"), "Rscript")), "--vanilla -e",
+    shQuote("quit(status=1L)"), "--args"
+  ))
   before <- list.dirs(tempdir(), recursive = FALSE)
   expect_error(
-    suppressWarnings(load_uwot(tempfile())),
-    "Could not extract model archive"
+    suppressWarnings(load_uwot(archive)),
+    "Could not extract model archive .*tar exited with status 1"
   )
   expect_equal(list.dirs(tempdir(), recursive = FALSE), before)
 })
