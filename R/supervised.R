@@ -70,33 +70,6 @@ reset_local_connectivity <-
     fuzzy_set_union(simplicial_set)
   }
 
-# Under the assumption of categorical distance for the intersecting
-# simplicial set perform a fast intersection.
-# This is not at all fast in R, use fast_intersection_cpp instead
-fast_intersection <- function(
-  rows,
-  cols,
-  values,
-  target,
-  unknown_dist = 1.0,
-  far_dist = 5.0
-) {
-  ex_unknown <- exp(-unknown_dist)
-  ex_far <- exp(-far_dist)
-
-  for (nz in seq_len(length(values))) {
-    i <- rows[nz]
-    j <- cols[nz]
-    if (is.na(target[i]) || is.na(target[j])) {
-      values[nz] <- values[nz] * ex_unknown
-    } else if (target[i] != target[j]) {
-      values[nz] <- values[nz] * ex_far
-    }
-  }
-
-  values
-}
-
 general_simplicial_set_intersection <- function(left, right, weight) {
   left <- as_neighbor_graph(left)
   right <- as_neighbor_graph(right)
@@ -118,55 +91,6 @@ general_simplicial_set_intersection <- function(left, right, weight) {
   result
 }
 
-# An R translation of the Python function. Not very fast,
-# so use the C++ version instead
-general_sset_intersection <- function(
-  indptr1,
-  indices1,
-  data1,
-  indptr2,
-  indices2,
-  data2,
-  result_row,
-  result_col,
-  result_val,
-  mix_weight = 0.5
-) {
-  left_min <- max(min(data1) / 2.0, 1.0e-8)
-  right_min <- max(min(data2) / 2.0, 1.0e-8)
-
-  for (idx in seq_len(length(result_row))) {
-    i <- result_col[idx] + 1
-    j <- result_row[idx]
-
-    left_val <- left_min
-    for (k in (indptr1[i]):(indptr1[i + 1] - 1)) {
-      if (indices1[k + 1] == j) {
-        left_val <- data1[k + 1]
-      }
-    }
-
-    right_val <- right_min
-    for (k in (indptr2[i]):(indptr2[i + 1] - 1)) {
-      if (indices2[k + 1] == j) {
-        right_val <- data2[k + 1]
-      }
-    }
-
-    if (left_val > left_min || right_val > right_min) {
-      if (mix_weight < 0.5) {
-        result_val[idx] <- left_val *
-          right_val^(mix_weight / (1.0 - mix_weight))
-      } else {
-        result_val[idx] <- right_val *
-          left_val^(((1.0 - mix_weight) / mix_weight))
-      }
-    }
-  }
-  result_val
-}
-
-
 # Sparse Matrix functions -------------------------------------------------
 
 # normalize each column of a dgCMatrix by its maximum
@@ -174,20 +98,6 @@ general_sset_intersection <- function(
 col_max_normalize <- function(X) {
   X@x <- X@x / rep.int(colMaxs(X), diff(X@p))
   X
-}
-
-# normalize each row of a dgCMatrix by its maximum
-row_max_normalize <- function(X) {
-  Matrix::t(col_max_normalize(Matrix::t(X)))
-}
-
-col_sum_normalize <- function(X) {
-  X@x <- X@x / rep.int(Matrix::colSums(X), diff(X@p))
-  X
-}
-
-row_sum_normalize <- function(X) {
-  Matrix::t(col_sum_normalize(Matrix::t(X)))
 }
 
 # column maximums of a dgCMatrix
@@ -205,9 +115,4 @@ colMaxs <- function(X) {
     },
     numeric(1)
   )
-}
-
-# row maximums of a dgCMatrix
-rowMaxs <- function(X) {
-  colMaxs(Matrix::t(X))
 }

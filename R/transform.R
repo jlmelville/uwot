@@ -980,34 +980,6 @@ init_new_embedding <-
     )
   }
 
-# Pure R implementation of (weighted) average. Superceded by C++ implementations
-init_transform <- function(train_embedding, nn_index, weights = NULL) {
-  nr <- nrow(nn_index)
-  nc <- ncol(train_embedding)
-
-  embedding <- matrix(nrow = nr, ncol = nc)
-  if (is.null(weights)) {
-    for (i in 1:nr) {
-      nbr_embedding <- train_embedding[nn_index[i, ], ]
-      embedding[i, ] <- apply(nbr_embedding, 2, mean)
-    }
-  } else {
-    for (i in 1:nr) {
-      nbr_embedding <- train_embedding[nn_index[i, ], ]
-      nbr_weights <- weights[nn_index[i, ], i]
-      embedding[i, ] <- apply(
-        nbr_embedding,
-        2,
-        function(x) {
-          stats::weighted.mean(x, nbr_weights)
-        }
-      )
-    }
-  }
-
-  embedding
-}
-
 apply_scaling <- function(X, scale_info, verbose = FALSE) {
   if (!is.null(scale_info[["scaled:range:min"]])) {
     tsmessage("Applying training data range scaling")

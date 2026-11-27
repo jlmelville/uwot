@@ -24,17 +24,6 @@ tsmessage <- function(
   }
 }
 
-# log vector information
-summarize <- function(X, msg = "") {
-  summary_X <- summary(X, digits = max(3, getOption("digits") - 3))
-  tsmessage(
-    msg,
-    ": ",
-    paste(names(summary_X), ":", summary_X, "|", collapse = ""),
-    force = get0("verbose", envir = sys.parent())
-  )
-}
-
 # pluralize("thread", 1) => "1 thread"
 # pluralize("thread", 2) => "2 threads"
 pluralize <- function(str, n, prefix = NULL, inc_num = TRUE) {
@@ -49,16 +38,6 @@ pluralize <- function(str, n, prefix = NULL, inc_num = TRUE) {
     ret <- paste0(prefix, " ", ret)
   }
   ret
-}
-
-# convert data frame to matrix using numeric columns
-x2m <- function(X) {
-  if (!methods::is(X, "matrix")) {
-    m <- as.matrix(X[, which(vapply(X, is.numeric, logical(1)))])
-  } else {
-    m <- X
-  }
-  m
 }
 
 # given a metric argument, returns a list containing:

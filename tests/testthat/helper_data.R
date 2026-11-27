@@ -1,22 +1,4 @@
-# Small -ve distances are possible
-dist2 <- function(X) {
-  D2 <- rowSums(X * X)
-  D2 + sweep(X %*% t(X) * -2, 2, t(D2), `+`)
-}
-
-# Squared Euclidean distances, ensuring no small -ve distances can occur
-safe_dist2 <- function(X) {
-  D2 <- dist2(X)
-  D2[D2 < 0] <- 0
-  D2
-}
-
-# convert dataframe to distance matrix
-x2d <- function(X) {
-  sqrt(safe_dist2(x2m(X)))
-}
-
-# Covert a vector into a 2D matrix for generating Y output
+# Convert a vector into a 2D matrix for generating Y output
 c2y <- function(...) {
   matrix(unlist(list(...)), ncol = 2)
 }
@@ -37,7 +19,7 @@ unn4 <- NULL
 self_unn4 <- NULL
 
 create_data <- function() {
-  iris10 <<- x2m(iris[1:10, ])
+  iris10 <<- as.matrix(iris[1:10, 1:4])
   iris10_Y <<- pca_init(iris10, ndim = 2)
   diris10 <<- stats::dist(iris10)
 

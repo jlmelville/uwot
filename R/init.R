@@ -171,60 +171,6 @@ rspectra_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   sort_eigenvectors(res, ndim)
 }
 
-# maybe this should become an option one day
-# reminder to me for the next time I experiment: Shift-invert just doesn't work
-# in all cases: causes MNIST (k = 15) to hang forever even with a guess for
-# initvec of D^1/2, no matter which shift value (or maxitr or tol value) is
-# used. But we can form the shifted Laplacian like we do for tsvd approaches
-# and look for the LM eigenvalues (plus initialize with D^1/2 as a guess)
-# However the tolerance needs to be lower for similar quality of output
-# and most initializations are < 1 second anyway, so we don't gain much from
-# speeding them up. For slower initializations (e.g. `tomoradar`, `mammoth`)
-# there is a small speed up, but not down to a few seconds
-rspectra_normalized_laplacian_init_shift_inv <- function(
-  A,
-  ndim = 2,
-  verbose = FALSE
-) {
-  if (nrow(A) < 3) {
-    tsmessage("Graph too small, using random initialization instead")
-    return(rand_init(nrow(A), ndim))
-  }
-  tsmessage("Initializing from normalized Laplacian")
-
-  L <- form_modified_laplacian(A)
-  initvec <- sqrt(Matrix::colSums(A))
-  res <- rspectra_eigs_shift_sym(
-    L,
-    ndim,
-    verbose = verbose,
-    initvec = initvec,
-    tol = 1e-6
-  )
-  norm_initvec <- initvec / sqrt(sum(initvec * initvec))
-  if (
-    is.null(res) ||
-      !is.list(res) ||
-      !"vectors" %in% names(res) ||
-      is.null(res$vectors) ||
-      tryCatch(
-        is.na(ncol(res$vectors)),
-        error = function(e) {
-          TRUE
-        }
-      ) ||
-      ncol(res$vectors) < ndim
-  ) {
-    message(
-      "Spectral initialization failed to converge, ",
-      "using random initialization instead"
-    )
-    n <- nrow(A)
-    return(rand_init(n, ndim))
-  }
-  sort_eigenvectors(res, ndim, decreasing = FALSE)
-}
-
 # Use a normalized Laplacian and use truncated SVD
 irlba_tsvd_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
   if (nrow(A) < 3) {
@@ -267,35 +213,6 @@ irlba_spectral_tsvd <- function(L, n, iters = 1000) {
     values = 2.0 - res$d,
     converged = res$iter != iters
   )
-}
-
-irlba_eigs_asym <- function(L, ndim) {
-  irlba_args <- list(
-    x = L,
-    n = ndim + 1,
-    symmetric = FALSE,
-    smallest = TRUE,
-    tol = 1e-3,
-    maxit = 1000
-  )
-  suppressWarnings(
-    res <- tryCatch(
-      do.call(irlba::partial_eigen, irlba_args),
-      error = function(e) {
-        irlba_args$fastpath <- FALSE
-        tryCatch(
-          do.call(irlba::partial_eigen, irlba_args),
-          error = function(e) {
-            NULL
-          }
-        )
-      }
-    )
-  )
-  if (!is.null(res)) {
-    res$values <- sqrt(res$values)
-  }
-  res
 }
 
 irlba_eigs_sym <- function(L, ndim, smallest = TRUE) {

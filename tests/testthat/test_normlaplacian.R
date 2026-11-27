@@ -40,7 +40,7 @@ abs_expected_norm_lap <-
       0.6611
     )
   )
-sparse_m <- Matrix::drop0(x2d(iris[1:10, ]))
+sparse_m <- Matrix::drop0(as.matrix(diris10))
 
 test_that("normalized laplacian", {
   res <- normalized_laplacian_init(sparse_m)

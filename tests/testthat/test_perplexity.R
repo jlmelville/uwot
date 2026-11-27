@@ -544,10 +544,9 @@ test_that("serial and threaded row probabilities match the reference", {
   expect_equal(threaded, resp)
 })
 
-iris_dup <- duplicated(x2m(iris))
-uiris <- iris[!iris_dup, ]
+iris_features <- unique(as.matrix(iris[, 1:4]))
 # LargeVis-style iris normalization
-normiris <- scale(x2m(uiris), center = TRUE, scale = FALSE)
+normiris <- scale(iris_features, center = TRUE, scale = FALSE)
 normiris <- normiris / max(abs(normiris))
 # niris10_nn149 <- dist_nn(stats::dist(normiris), k = 149)
 # expect_equal(1 / res$sigma ^ 2, Prow_niris_p150_k50_betas, tolerance = 1e-5)

@@ -1190,7 +1190,7 @@ test_that("cosine and correlation produce distinct fits and transforms", {
   # Ensure correlation transform results differ from cosine
   set.seed(42)
   res_trans_cor <- umap_transform(
-    x2m(iris[11:20, ]),
+    as.matrix(iris[11:20, 1:4]),
     res_cor,
     n_threads = 0,
     verbose = FALSE
@@ -1201,7 +1201,7 @@ test_that("cosine and correlation produce distinct fits and transforms", {
   res_cor$nn_index$metric <- "cosine"
   set.seed(42)
   res_trans_cor2 <- umap_transform(
-    x2m(iris[11:20, ]),
+    as.matrix(iris[11:20, 1:4]),
     res_cor,
     n_threads = 0,
     verbose = FALSE
@@ -1266,7 +1266,7 @@ test_that("batch callbacks report moving and fixed coordinates across thread cou
   )
   expect_equal(ibatch$embedding, ibatch2$embedding)
 
-  itest <- x2m(iris[11:20, ])
+  itest <- as.matrix(iris[11:20, 1:4])
   first_coords <- c()
   fixed_first_coords <- c()
   test_transform_callback <- function(epochs, n_epochs, coords, fixed_coords) {
@@ -1509,7 +1509,7 @@ test_that("precomputed query neighbors work with either training representation"
   umap_train_x <- umap(X = iris10, ret_model = TRUE, n_neighbors = 4)
 
   # make the test set a different size to the training set
-  iris9test <- x2m(iris[11:19, ])
+  iris9test <- as.matrix(iris[11:19, 1:4])
   query_ref_nn <- annoy_search(
     X = iris9test,
     k = 4,
