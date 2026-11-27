@@ -29,6 +29,21 @@ test_that("1 component initialization works", {
   expect_ok_matrix(pca_init(iris10, ndim = 1), nc = 1)
 })
 
+test_that("the PCA shortcut preserves one embedding column through optimization", {
+  for (epochs in c(0, 3)) {
+    embedding <- umap(
+      iris10,
+      n_neighbors = 4,
+      pca = 2,
+      n_components = 1,
+      init = "pca",
+      n_epochs = epochs,
+      n_threads = 0
+    )
+    expect_ok_matrix(embedding, nc = 1)
+  }
+})
+
 test_that("PCA returns model data", {
   iris10_pca_scores <- pca_init(iris10, ndim = 2, ret_extra = TRUE)
   expect_equal(

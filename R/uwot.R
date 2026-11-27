@@ -3903,7 +3903,7 @@ uwot <- function(
         init %in% c("spca", "pca", "pacpca") &&
         pca >= n_components
     ) {
-      embedding <- X[, 1:n_components]
+      embedding <- X[, seq_len(n_components), drop = FALSE]
       switch(
         init,
         spca = tsmessage("Initializing from scaled PCA"),

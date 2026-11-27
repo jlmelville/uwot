@@ -1,5 +1,7 @@
 # uwot (development version)
 
+* PCA initialization retains its matrix shape for one-dimensional embeddings.
+
 * `umap_transform(init_weighted = FALSE)` once again uses unweighted neighbor averages. An explicit
   `init` takes precedence.
 * Standardization preserves metric block column positions and supports single-row projection.
