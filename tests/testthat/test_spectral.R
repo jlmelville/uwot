@@ -18,6 +18,14 @@ test_that("1 dimensional output gives a matrix", {
   )
 })
 
+test_that("agspectral samples distinct vertices other than the current one", {
+  vertices <- seq_len(6)
+  neighbors <- rand_nbr_idx(length(vertices), length(vertices) - 1)
+  for (i in vertices) {
+    expect_equal(sort(neighbors[i, ]), vertices[-i])
+  }
+})
+
 test_that("connected components", {
   # Example from doc of scipy.sparse.csgraph.connected_components
   graph <- as(

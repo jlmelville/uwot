@@ -665,9 +665,7 @@ rand_nbr_idx <- function(n_vertices, n_nbrs) {
   nv1 <- n_vertices - 1
   for (i in 1:n_vertices) {
     ids <- sample.int(nv1, n_nbrs)
-    id_sel <- ids >= 1
-    ids[id_sel] <- ids[id_sel] + 1
-    idx[i, ] <- ids
+    idx[i, ] <- ids + (ids >= i)
   }
   idx
 }

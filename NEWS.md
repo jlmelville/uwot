@@ -2,6 +2,8 @@
 
 * PCA initialization retains its matrix shape for one-dimensional embeddings.
 * `umap_transform()` uses the query size to choose an epoch count when the fitted model omits it.
+* The `agspectral` initializer now samples random neighbors from all vertices except the vertex
+  being initialized.
 
 * `umap_transform(init_weighted = FALSE)` once again uses unweighted neighbor averages. An explicit
   `init` takes precedence.
