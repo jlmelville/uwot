@@ -53,7 +53,7 @@ rspectra_laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
           TRUE
         }
       ) ||
-      ncol(res$vectors) < ndim
+      ncol(res$vectors) < ndim + 1
   ) {
     message(
       "Laplacian Eigenmap failed to converge, ",
@@ -68,7 +68,8 @@ rspectra_laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
 }
 
 irlba_laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
-  if (nrow(A) < 3) {
+  # irlba needs ndim + 1 vectors and requires rank strictly below nrow(A).
+  if (ndim + 1 >= nrow(A)) {
     tsmessage("Graph too small, using random initialization instead")
     return(rand_init(nrow(A), ndim))
   }
@@ -76,7 +77,7 @@ irlba_laplacian_eigenmap <- function(A, ndim = 2, verbose = FALSE) {
 
   lapA <- form_modified_laplacian(A, ret_d = TRUE)
   res <- irlba_spectral_tsvd(lapA$L, ndim + 1)
-  if (is.null(res) || ncol(res$vectors) < ndim || !res$converged) {
+  if (is.null(res) || ncol(res$vectors) < ndim + 1 || !res$converged) {
     message(
       "Laplacian Eigenmap failed to converge, ",
       "using random initialization instead"
@@ -173,7 +174,8 @@ rspectra_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
 
 # Use a normalized Laplacian and use truncated SVD
 irlba_tsvd_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
-  if (nrow(A) < 3) {
+  # irlba needs ndim + 1 vectors and requires rank strictly below nrow(A).
+  if (ndim + 1 >= nrow(A)) {
     tsmessage("Graph too small, using random initialization instead")
     return(rand_init(nrow(A), ndim))
   }
@@ -181,7 +183,7 @@ irlba_tsvd_normalized_laplacian_init <- function(A, ndim = 2, verbose = FALSE) {
 
   L <- form_modified_laplacian(A)
   res <- irlba_spectral_tsvd(L, ndim + 1)
-  if (is.null(res) || ncol(res$vectors) < ndim || !res$converged) {
+  if (is.null(res) || ncol(res$vectors) < ndim + 1 || !res$converged) {
     message(
       "Spectral initialization failed to converge, ",
       "using random initialization instead"

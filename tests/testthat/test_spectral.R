@@ -96,6 +96,20 @@ test_that("a two-vertex spectral layout falls back to random coordinates", {
   expect_true(all(abs(coords) <= 10))
 })
 
+test_that("irlba initialization handles a graph too small for the requested rank", {
+  for (init in c("irlba_laplacian", "irlba_spectral")) {
+    coords <- umap(
+      iris10[1:3, ],
+      n_neighbors = 3,
+      n_components = 2,
+      init = init,
+      n_epochs = 0,
+      n_threads = 0
+    )
+    expect_ok_matrix(coords, nr = 3, nc = 2)
+  }
+})
+
 test_that("agspectral fits when the default random neighbor count exceeds capacity", {
   embedding <- umap(
     iris10[1:5, ],
