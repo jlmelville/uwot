@@ -3469,6 +3469,7 @@ uwot <- function(
   # number of original columns in data frame (or matrix)
   # will be used only if using df or matrix and ret_model = TRUE
   norig_col <- NULL
+  numeric_columns <- NULL
   # row names for the input data, which we will apply to the embedding if
   # needed
   Xnames <- NULL
@@ -3532,13 +3533,13 @@ uwot <- function(
       }
 
       if (methods::is(X, "data.frame")) {
-        indexes <- which(vapply(X, is.numeric, logical(1)))
-        if (length(indexes) == 0) {
+        numeric_columns <- which(vapply(X, is.numeric, logical(1)))
+        if (length(numeric_columns) == 0) {
           stop("No numeric columns found")
         }
         tsmessage("Converting dataframe to numerical matrix")
-        if (length(indexes) != ncol(X)) {
-          X <- X[, indexes, drop = FALSE]
+        if (length(numeric_columns) != ncol(X)) {
+          X <- X[, numeric_columns, drop = FALSE]
         }
         X <- as.matrix(X)
       }
@@ -4138,6 +4139,7 @@ uwot <- function(
           approx_pow = approx_pow,
           metric = metrics,
           norig_col = norig_col,
+          numeric_columns = numeric_columns,
           pcg_rand = pcg_rand,
           batch = batch,
           opt_args = full_opt_args,

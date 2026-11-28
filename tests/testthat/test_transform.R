@@ -819,3 +819,24 @@ test_that("older model settings reproduce the corresponding explicit projection"
     expect_equal(project(old), project(model))
   }
 })
+
+test_that("projection uses the numeric features selected before fitted scaling", {
+  x <- data.frame(code = rep(1:2, 5), ui10, constant = 1)
+  numeric_ids <- seq_len(ncol(ui10))
+  for (columns in list(numeric_ids, colnames(ui10))) {
+    for (scaling in list(FALSE, "Z")) {
+      model <- fit_small_model(
+        x,
+        metric = list(euclidean = columns, categorical = "code"),
+        scale = scaling
+      )
+      factor_x <- transform(x, code = factor(code))
+      expected <- query_neighbors(model, factor_x)
+      expect_equal(unname(expected$idx[, 1]), seq_len(nrow(x)))
+      expect_equal(query_neighbors(model, x), expected)
+      expect_equal(query_neighbors(model, as.matrix(x)), expected)
+    }
+  }
+  model$numeric_columns <- NULL
+  expect_equal(query_neighbors(model, factor_x), expected)
+})

@@ -1,5 +1,8 @@
 # uwot (development version)
 
+* Projection uses the numeric columns selected during fitting, including when numeric codes were
+  declared categorical. Refit affected models to retain this selection.
+
 * PCA initialization retains its matrix shape for one-dimensional embeddings.
 * `umap_transform()` uses the query size to choose an epoch count when the fitted model omits it.
 * The `agspectral` initializer now samples random neighbors from all vertices except the vertex

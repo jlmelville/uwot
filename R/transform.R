@@ -422,12 +422,21 @@ umap_transform <- function(
     if (!is.null(norig_col) && ncol(X) != norig_col) {
       stop("Incorrect dimensions: X must have ", norig_col, " columns")
     }
+    columns <- model$numeric_columns
     if (methods::is(X, "data.frame")) {
-      indexes <- which(vapply(X, is.numeric, logical(1)))
-      if (length(indexes) == 0) {
+      is_numeric <- vapply(X, is.numeric, logical(1))
+      if (is.null(columns)) {
+        columns <- which(is_numeric)
+      }
+      if (!length(columns)) {
         stop("No numeric columns found")
       }
-      X <- as.matrix(X[, indexes, drop = FALSE])
+      if (!all(is_numeric[columns])) {
+        stop("Expected numeric data in the fitted numeric columns")
+      }
+      X <- as.matrix(X[, columns, drop = FALSE])
+    } else if (!is.null(columns) && length(columns) < ncol(X)) {
+      X <- X[, columns, drop = FALSE]
     }
     n_vertices <- nrow(X)
     if (n_vertices < 1) {
