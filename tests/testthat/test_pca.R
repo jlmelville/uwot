@@ -151,6 +151,32 @@ for (method in c("svdr", "bigstatsr")) {
   }
 }
 
+test_that("PCA centering can be overridden for just one metric block", {
+  set.seed(17)
+  x <- matrix(rnorm(24 * 6, mean = 5), ncol = 6)
+  model <- fit_small_model(
+    x,
+    metric = list(euclidean = list(1:3, pca_center = FALSE), manhattan = 4:6),
+    pca = 2,
+    pca_method = "svd"
+  )
+  expect_equal(dim(model$pca_models[["1"]]$rotation), c(3, 2))
+  expect_null(model$pca_models[["1"]]$center)
+  expect_equal(model$pca_models[["2"]]$center, colMeans(x[, 4:6]))
+
+  rows <- c(7L, 3L, 12L)
+  query <- umap_transform(
+    x[rows, , drop = FALSE],
+    model,
+    n_epochs = 0,
+    n_threads = 0,
+    ret_extra = "nn"
+  )
+  for (metric in c("euclidean", "manhattan")) {
+    expect_equal(query$nn[[metric]]$idx[, 1], rows)
+  }
+})
+
 test_that("PCA skips Jaccard and still reduces a neighboring Euclidean block", {
   skip_if_not_installed("rnndescent")
   set.seed(11)
