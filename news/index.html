@@ -36,7 +36,12 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="uwot-development-version">uwot (development version)<a class="anchor" aria-label="anchor" href="#uwot-development-version"></a></h2>
-<ul><li><p>PCA initialization retains its matrix shape for one-dimensional embeddings.</p></li>
+<ul><li><p>Projection uses the numeric columns selected during fitting, including when numeric codes were declared categorical. Refit affected models to retain this selection.</p></li>
+<li><p>PCA skips binary metric blocks, including Jaccard. Other metric blocks can still use PCA.</p></li>
+<li><p>Density adjustment honors <code>repulsion_strength</code> during fitting and projection and is ignored when fitting multiple metric blocks. Projection can return <code>localr</code> on its own.</p></li>
+<li><p>Annoy projection inherits the effective <code>nn_args$search_k</code> setting from fitting.</p></li>
+<li><p><code><a href="../reference/similarity_graph.html">similarity_graph()</a></code> resolves scaling independently of the neighbor count, and <code>agspectral</code> limits the number of random neighbors to the available vertices.</p></li>
+<li><p>PCA initialization retains its matrix shape for one-dimensional embeddings.</p></li>
 <li><p><code><a href="../reference/umap_transform.html">umap_transform()</a></code> uses the query size to choose an epoch count when the fitted model omits it.</p></li>
 <li><p>The <code>agspectral</code> initializer now samples random neighbors from all vertices except the vertex being initialized.</p></li>
 <li><p>The installed C++ header <code>uwot/supervised.h</code> no longer provides the unused <code>general_sset_intersection</code> and <code>general_sset_union</code> functions.</p></li>

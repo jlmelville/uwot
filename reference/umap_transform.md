@@ -241,6 +241,11 @@ umap_transform(
     fuzzy input graph (e.g. for clustering), setting `n_epochs = 0` will
     avoid any further sparsifying.
 
+  - `"sigma"` the local bandwidths and offsets, returned as `sigma` and
+    `rho`, from the first neighbor block.
+
+  - `"localr"` the local radii (`sigma + rho`) from that block.
+
   - `"nn"` the nearest neighbor graph for `X` with respect to the
     observations in the `model`. The graph will be returned as a list of
     two items: `idx` a matrix of indices, with as many rows as there are

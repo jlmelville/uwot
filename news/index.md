@@ -2,6 +2,24 @@
 
 ## uwot (development version)
 
+- Projection uses the numeric columns selected during fitting, including
+  when numeric codes were declared categorical. Refit affected models to
+  retain this selection.
+
+- PCA skips binary metric blocks, including Jaccard. Other metric blocks
+  can still use PCA.
+
+- Density adjustment honors `repulsion_strength` during fitting and
+  projection and is ignored when fitting multiple metric blocks.
+  Projection can return `localr` on its own.
+
+- Annoy projection inherits the effective `nn_args$search_k` setting
+  from fitting.
+
+- [`similarity_graph()`](https://jlmelville.github.io/uwot/reference/similarity_graph.md)
+  resolves scaling independently of the neighbor count, and `agspectral`
+  limits the number of random neighbors to the available vertices.
+
 - PCA initialization retains its matrix shape for one-dimensional
   embeddings.
 

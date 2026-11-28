@@ -260,6 +260,10 @@ any combination of the following strings:</p><ul><li><p><code>"fgraph"</code> th
     non-zero elements in the matrix is dependent on <code>n_epochs</code>. If you
     are only interested in the fuzzy input graph (e.g. for clustering),
     setting <code>n_epochs = 0</code> will avoid any further sparsifying.</p></li>
+<li><p><code>"sigma"</code> the local bandwidths and offsets, returned as
+   <code>sigma</code> and <code>rho</code>, from the first neighbor block.</p></li>
+<li><p><code>"localr"</code> the local radii (<code>sigma + rho</code>) from that
+   block.</p></li>
 <li><p><code>"nn"</code> the nearest neighbor graph for <code>X</code> with respect to
    the observations in the <code>model</code>. The graph will be returned as a
    list of two items: <code>idx</code> a matrix of indices, with as many rows
