@@ -6,7 +6,8 @@
 * Density adjustment honors `repulsion_strength` during fitting and projection and is ignored
   when fitting multiple metric blocks. Projection can return `localr` on its own.
 * Annoy projection inherits the effective `nn_args$search_k` setting from fitting.
-* `similarity_graph()` resolves scaling independently of the neighbor count.
+* `similarity_graph()` resolves scaling independently of the neighbor count, and `agspectral`
+  limits the number of random neighbors to the available vertices.
 
 * PCA initialization retains its matrix shape for one-dimensional embeddings.
 * `umap_transform()` uses the query size to choose an epoch count when the fitted model omits it.

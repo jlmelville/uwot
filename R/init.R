@@ -569,8 +569,9 @@ rand_nbr_graph <- function(n_vertices, n_nbrs, val) {
 }
 
 rand_nbr_idx <- function(n_vertices, n_nbrs) {
-  idx <- matrix(nrow = n_vertices, ncol = n_nbrs)
   nv1 <- n_vertices - 1
+  n_nbrs <- min(n_nbrs, nv1)
+  idx <- matrix(nrow = n_vertices, ncol = n_nbrs)
   for (i in 1:n_vertices) {
     ids <- sample.int(nv1, n_nbrs)
     idx[i, ] <- ids + (ids >= i)
