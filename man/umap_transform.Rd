@@ -80,7 +80,9 @@ you save or unload the model, or R garbage-collects the index.}
 \item{n_epochs}{Number of epochs to use during the optimization of the
 embedded coordinates. A value between \code{30 - 100} is a reasonable trade
 off between speed and thoroughness. By default, this value is set to one
-third the number of epochs used to build the \code{model}.}
+third the number of epochs used to build the \code{model}. If the model
+has no epoch count, the default is 100 for up to 10,000 query observations
+and 30 for larger queries.}
 
 \item{n_threads}{Number of threads to use, (except during stochastic gradient
 descent). Default is half the number of concurrent threads supported by the
@@ -191,6 +193,10 @@ any combination of the following strings:
     non-zero elements in the matrix is dependent on \code{n_epochs}. If you
     are only interested in the fuzzy input graph (e.g. for clustering),
     setting \code{n_epochs = 0} will avoid any further sparsifying.
+ \item \code{"sigma"} the local bandwidths and offsets, returned as
+   \code{sigma} and \code{rho}, from the first neighbor block.
+ \item \code{"localr"} the local radii (\code{sigma + rho}) from that
+   block.
  \item \code{"nn"} the nearest neighbor graph for \code{X} with respect to
    the observations in the \code{model}. The graph will be returned as a
    list of two items: \code{idx} a matrix of indices, with as many rows

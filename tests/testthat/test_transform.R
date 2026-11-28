@@ -672,6 +672,31 @@ test_that("only a shared embedding excludes a matching negative index", {
   }
 })
 
+test_that("models without an epoch count use the size of the query", {
+  model <- fit_small_model()
+  model$n_epochs <- NULL
+  neighbors <- query_neighbors(model, iris10[1:3, ])
+
+  project <- function(n, expected_epochs) {
+    rows <- rep_len(seq_len(3), n)
+    graph <- lapply(neighbors, function(x) x[rows, , drop = FALSE])
+    last_epoch <- 0L
+    embedding <- umap_transform(
+      model = model,
+      nn_method = graph,
+      n_threads = 0,
+      epoch_callback = function(epoch, n_epochs, coords, fixed_coords) {
+        last_epoch <<- epoch
+      }
+    )
+    expect_ok_matrix(embedding, nr = n)
+    expect_equal(last_epoch, expected_epochs)
+  }
+
+  project(3, 100)
+  project(10001, 30)
+})
+
 test_that("legacy single-block PCA models can select columns of stored scores", {
   m <- fit_small_model(pca = 2, pca_method = "svd")
   expected <- query_neighbors(m)
@@ -745,4 +770,153 @@ test_that("weighted projection handles tiny and all-zero query weights", {
     c(1e-320, 2e-320, 0, 0)
   )
   expect_equal(as.numeric(q), c(50 / 3, 15), tolerance = 1e-6)
+})
+
+test_that("precomputed queries reject invalid training references and empty queries", {
+  model <- fit_small_model()
+  project <- function(graph, ...) {
+    umap_transform(
+      model = model,
+      nn_method = graph,
+      n_epochs = 0,
+      n_threads = 0,
+      ...
+    )
+  }
+  graph <- query_neighbors(model, iris10[1:3, ])
+  expect_error(project(graph, init = matrix(0, 2, 2)), "wrong dimensions")
+  expect_error(project(lapply(graph, function(x) x[, -1])), "number of columns")
+  graph$idx[1, 1] <- nrow(iris10) + 1L
+  expect_error(project(graph), "exceeds the number of training observations")
+  graph$idx[1, 1] <- 0L
+  expect_error(project(graph), "positive integers")
+  graph$idx[1, 1] <- NA_integer_
+  expect_error(project(graph), "missing data")
+
+  sparse <- Matrix::sparseMatrix(
+    i = 1:2,
+    j = c(1, 1),
+    x = c(1, 2),
+    dims = c(nrow(iris10), 2L)
+  )
+  expect_error(project(sparse), "at least one neighbor")
+  expect_error(project(sparse[, integer(), drop = FALSE]), "no observations")
+})
+
+test_that("older model settings reproduce the corresponding explicit projection", {
+  model <- fit_small_model()
+  old <- model
+  old[c("rng_type", "batch", "opt_args", "binary_edge_weights")] <- NULL
+  model$batch <- FALSE
+  model$opt_args <- list()
+  model$binary_edge_weights <- FALSE
+  project <- function(m) {
+    umap_transform(iris10[1:3, ], m, seed = 12, n_epochs = 4, n_threads = 0)
+  }
+  for (pcg in list(NULL, FALSE)) {
+    old$pcg_rand <- pcg
+    model$rng_type <- if (identical(pcg, FALSE)) "tausworthe" else "pcg"
+    expect_equal(project(old), project(model))
+  }
+})
+
+test_that("projection uses the numeric features selected before fitted scaling", {
+  x <- data.frame(code = rep(1:2, 5), ui10, constant = 1)
+  numeric_ids <- seq_len(ncol(ui10))
+  for (columns in list(numeric_ids, colnames(ui10))) {
+    for (scaling in list(FALSE, "Z")) {
+      model <- fit_small_model(
+        x,
+        metric = list(euclidean = columns, categorical = "code"),
+        scale = scaling
+      )
+      factor_x <- transform(x, code = factor(code))
+      expected <- query_neighbors(model, factor_x)
+      expect_equal(unname(expected$idx[, 1]), seq_len(nrow(x)))
+      expect_equal(query_neighbors(model, x), expected)
+      expect_equal(query_neighbors(model, as.matrix(x)), expected)
+    }
+  }
+  model$numeric_columns <- NULL
+  expect_equal(query_neighbors(model, factor_x), expected)
+})
+
+test_that("Annoy projection inherits the fitted search_k unless overridden", {
+  model <- fit_small_model(n_trees = 2, nn_args = list(search_k = 200))
+  expect_equal(model$search_k, 200)
+  search <- annoy_search
+  seen <- numeric()
+  local_mocked_bindings(annoy_search = function(..., search_k) {
+    seen <<- c(seen, search_k)
+    search(..., search_k = search_k)
+  })
+  query_neighbors(model)
+  model$search_k <- 16 # Value stored by older fits before the nn_args override.
+  query_neighbors(model)
+  umap_transform(iris10, model, search_k = 50, n_epochs = 0, n_threads = 0)
+  expect_equal(seen, c(200, 200, 50))
+})
+
+test_that("constant density preserves the specified fit and query repulsion", {
+  fit <- function(ds) {
+    fit_small_model(
+      a = 1,
+      b = 1,
+      repulsion_strength = 0.25,
+      dens_scale = ds,
+      n_epochs = 8,
+      seed = 42
+    )
+  }
+  ordinary <- fit(NULL)
+  density <- fit(0)
+  expect_equal(density$embedding, ordinary$embedding)
+  project <- function(m) {
+    umap_transform(ui10, m, n_epochs = 8, n_threads = 0)
+  }
+  expect_equal(project(density), project(ordinary))
+})
+
+test_that("multiple metric blocks ignore density and diagnostics are independent", {
+  blocks <- list(euclidean = 1:2, euclidean = 3:4)
+  fit <- function(ds) {
+    fit_small_model(metric = blocks, dens_scale = ds, n_epochs = 5, seed = 42)
+  }
+  ordinary <- fit(NULL)
+  model <- fit(1)
+  expect_equal(model$method, ordinary$method)
+  expect_equal(model$embedding, ordinary$embedding)
+  project <- function(m, extra = NULL) {
+    umap_transform(ui10, m, n_epochs = 5, n_threads = 0, ret_extra = extra)
+  }
+  expect_equal(project(model), project(ordinary))
+  radii <- project(model, "localr")
+  bandwidth <- project(model, "sigma")
+  expect_equal(radii$localr, bandwidth$sigma + bandwidth$rho)
+  expect_length(radii$localr, nrow(ui10))
+  expect_equal(radii$embedding, project(model))
+
+  # Older fits used the first block's radii to fit the density curve.
+  model$method <- "leopold"
+  model$dens_scale <- 1
+  model$ai <- rep(1, nrow(iris10))
+  model$rad_coeff <- c(0, 1)
+  expect_equal(project(model), project(model, "sigma")$embedding)
+})
+
+test_that("precomputed blocks preserve umap2's ordinary optimizer", {
+  model <- umap2(
+    X = NULL,
+    nn_method = list(nn, nn),
+    init = "random",
+    a = 1,
+    b = 1,
+    dens_scale = 1,
+    ret_model = TRUE,
+    n_neighbors = 4,
+    n_epochs = 4,
+    n_threads = 0,
+    seed = 42
+  )
+  expect_equal(model$method, "tumap")
 })

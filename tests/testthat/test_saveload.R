@@ -18,6 +18,10 @@ test_that("can save and load simple model", {
   model <- save_uwot(model, file = mod_fname)
   expect_true(file.exists(mod_fname))
 
+  archive_hash <- tools::md5sum(mod_fname)
+  expect_error(save_uwot(model, mod_fname, unload = TRUE), "already exists")
+  expect_identical(tools::md5sum(mod_fname), archive_hash)
+
   # Can use model after saving
   set.seed(1337)
   res_trans <- umap_transform(iris10, model)
@@ -29,6 +33,8 @@ test_that("can save and load simple model", {
   expect_false(file.exists(model$mod_dir))
   # Can't use transform now model is unloaded
   expect_error(umap_transform(iris10, model), "is unloaded")
+
+  expect_error(save_uwot(model, tempfile()), "is unloaded")
 
   modelload <- load_uwot(file = mod_fname)
   set.seed(1337)

@@ -380,9 +380,9 @@ between data and target. Only applies if \code{y} is non-\code{NULL}.}
 
 \item{pca}{If set to a positive integer value, reduce data to this number of
 columns using PCA. The input must have more rows and columns than the
-requested number of components. PCA skips Hamming blocks and blocks
-narrower than that number. With multiple blocks, a block of exactly
-that width retains its full-rank PCA rotation.
+requested number of components. PCA skips binary metrics (such as Hamming
+and Jaccard) and blocks narrower than that number. With multiple blocks, a
+block of exactly that width retains its full-rank PCA rotation.
 If you have > 100 columns in a data frame or matrix, reducing the number
 of columns may speed up the nearest neighbor search at the cost of a
 potential decrease in accuracy. In many t-SNE applications, a value of 50
@@ -551,7 +551,7 @@ the \code{pca} parameter is specified. Allowed values are:
 \itemize{
   \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
   \href{https://cran.r-project.org/package=irlba}{irlba} package.
-  \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+  \item{\code{"svdr"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
   the \href{https://cran.r-project.org/package=irlba}{irlba} package.
   This is likely to give much faster but potentially less accurate results
   than using \code{"irlba"}. For the purposes of nearest neighbor

@@ -171,8 +171,10 @@ private:
 // UMAP where a varies for each observation
 class umapai_gradient {
 public:
-  umapai_gradient(std::vector<float> ai, float b, std::size_t ndim)
-      : ai(std::move(ai)), b(b), ndim(ndim), b_m2(-2.0 * b), b_2(2.0 * b) {}
+  umapai_gradient(std::vector<float> ai, float b, std::size_t ndim,
+                  float gamma = 1)
+      : ai(std::move(ai)), b(b), ndim(ndim), b_m2(-2.0 * b),
+        gamma_b_2(2.0 * gamma * b) {}
 
   auto clamp_grad(float grad_d) const -> float {
     return std::clamp(grad_d, clamp_lo, clamp_hi);
@@ -187,7 +189,7 @@ public:
 
   auto grad_rep(float d2, std::size_t i, std::size_t j) const -> float {
     auto a = ai[i / ndim] * ai[j / ndim];
-    return b_2 / ((0.001 + d2) * (a * std::pow(d2, b) + 1.0));
+    return gamma_b_2 / ((0.001 + d2) * (a * std::pow(d2, b) + 1.0));
   }
 
 private:
@@ -195,15 +197,15 @@ private:
   float b;
   std::size_t ndim;
   float b_m2;
-  float b_2;
+  float gamma_b_2;
 };
 
 class umapai2_gradient {
 public:
   umapai2_gradient(std::vector<float> ai, std::vector<float> aj, float b,
-                   std::size_t ndim)
+                   std::size_t ndim, float gamma = 1)
       : ai(std::move(ai)), aj(std::move(aj)), b(b), ndim(ndim), b_m2(-2.0 * b),
-        b_2(2.0 * b) {}
+        gamma_b_2(2.0 * gamma * b) {}
 
   auto clamp_grad(float grad_d) const -> float {
     return std::clamp(grad_d, clamp_lo, clamp_hi);
@@ -218,7 +220,7 @@ public:
 
   auto grad_rep(float d2, std::size_t i, std::size_t j) const -> float {
     auto a = ai[i / ndim] * aj[j / ndim];
-    return b_2 / ((0.001 + d2) * (a * std::pow(d2, b) + 1.0));
+    return gamma_b_2 / ((0.001 + d2) * (a * std::pow(d2, b) + 1.0));
   }
 
 private:
@@ -227,7 +229,7 @@ private:
   float b;
   std::size_t ndim;
   float b_m2;
-  float b_2;
+  float gamma_b_2;
 };
 
 class largevis_gradient {

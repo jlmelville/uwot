@@ -59,7 +59,9 @@
 #' @param n_epochs Number of epochs to use during the optimization of the
 #'   embedded coordinates. A value between \code{30 - 100} is a reasonable trade
 #'   off between speed and thoroughness. By default, this value is set to one
-#'   third the number of epochs used to build the \code{model}.
+#'   third the number of epochs used to build the \code{model}. If the model
+#'   has no epoch count, the default is 100 for up to 10,000 query observations
+#'   and 30 for larger queries.
 #' @param n_threads Number of threads to use, (except during stochastic gradient
 #'   descent). Default is half the number of concurrent threads supported by the
 #'   system.
@@ -160,6 +162,10 @@
 #'       non-zero elements in the matrix is dependent on \code{n_epochs}. If you
 #'       are only interested in the fuzzy input graph (e.g. for clustering),
 #'       setting \code{n_epochs = 0} will avoid any further sparsifying.
+#'    \item \code{"sigma"} the local bandwidths and offsets, returned as
+#'      \code{sigma} and \code{rho}, from the first neighbor block.
+#'    \item \code{"localr"} the local radii (\code{sigma + rho}) from that
+#'      block.
 #'    \item \code{"nn"} the nearest neighbor graph for \code{X} with respect to
 #'      the observations in the \code{model}. The graph will be returned as a
 #'      list of two items: \code{idx} a matrix of indices, with as many rows
@@ -292,19 +298,6 @@ umap_transform <- function(
     )
   }
 
-  if (is.null(n_epochs)) {
-    n_epochs <- model$n_epochs
-    if (is.null(n_epochs)) {
-      if (ncol(graph) <= 10000) {
-        n_epochs <- 100
-      } else {
-        n_epochs <- 30
-      }
-    } else {
-      n_epochs <- max(2, round(n_epochs / 3))
-    }
-  }
-
   # Handle setting the random number seed internally:
   # 1. If the user specifies seed = FALSE, definitely don't set the seed, even
   # if the model has a seed.
@@ -328,7 +321,8 @@ umap_transform <- function(
   }
 
   if (is.null(search_k)) {
-    search_k <- model$search_k
+    # Older models stored the top-level value before the Annoy override.
+    search_k <- annoy_search_k(model$nn_args, model$search_k)
   }
 
   nn_index <- model$nn_index
@@ -433,12 +427,21 @@ umap_transform <- function(
     if (!is.null(norig_col) && ncol(X) != norig_col) {
       stop("Incorrect dimensions: X must have ", norig_col, " columns")
     }
+    columns <- model$numeric_columns
     if (methods::is(X, "data.frame")) {
-      indexes <- which(vapply(X, is.numeric, logical(1)))
-      if (length(indexes) == 0) {
+      is_numeric <- vapply(X, is.numeric, logical(1))
+      if (is.null(columns)) {
+        columns <- which(is_numeric)
+      }
+      if (!length(columns)) {
         stop("No numeric columns found")
       }
-      X <- as.matrix(X[, indexes, drop = FALSE])
+      if (!all(is_numeric[columns])) {
+        stop("Expected numeric data in the fitted numeric columns")
+      }
+      X <- as.matrix(X[, columns, drop = FALSE])
+    } else if (!is.null(columns) && length(columns) < ncol(X)) {
+      X <- X[, columns, drop = FALSE]
     }
     n_vertices <- nrow(X)
     if (n_vertices < 1) {
@@ -561,6 +564,14 @@ umap_transform <- function(
     stop("Failed to read input correctly: invalid input format")
   }
 
+  if (is.null(n_epochs)) {
+    n_epochs <- if (is.null(model$n_epochs)) {
+      if (n_vertices <= 10000) 100 else 30
+    } else {
+      max(2, round(model$n_epochs / 3))
+    }
+  }
+
   if (verbose) {
     x_is_matrix <- methods::is(X, "matrix")
     tsmessage("Read ", n_vertices, " rows", appendLF = !x_is_matrix)
@@ -587,7 +598,8 @@ umap_transform <- function(
     ret_nn <- TRUE
     export_nns <- list()
   }
-  need_sigma <- (method == "leopold" && nblocks == 1) || "sigma" %in% ret_extra
+  # Older multi-block density models used the radii from the first block.
+  need_sigma <- method == "leopold" || any(c("sigma", "localr") %in% ret_extra)
   for (i in 1:nblocks) {
     tsmessage("Processing block ", i, " of ", nblocks)
     if (!is.null(X)) {
@@ -733,7 +745,7 @@ umap_transform <- function(
       n_threads = n_threads,
       grain_size = grain_size,
       verbose = verbose,
-      ret_sigma = TRUE
+      ret_sigma = need_sigma
     )
     if (is.null(localr) && need_sigma) {
       # because of the adjusted local connectivity rho is too small compared
@@ -879,7 +891,7 @@ umap_transform <- function(
       method,
       umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
       tumap = list(gamma = gamma),
-      leopold2 = list(ai = ai, aj = aj, b = b, ndim = ndim),
+      leopold2 = list(ai = ai, aj = aj, b = b, ndim = ndim, gamma = gamma),
       list()
     )
 

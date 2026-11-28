@@ -18,6 +18,14 @@ test_that("1 dimensional output gives a matrix", {
   )
 })
 
+test_that("agspectral samples distinct vertices other than the current one", {
+  vertices <- seq_len(6)
+  neighbors <- rand_nbr_idx(length(vertices), length(vertices) - 1)
+  for (i in vertices) {
+    expect_equal(sort(neighbors[i, ]), vertices[-i])
+  }
+})
+
 test_that("connected components", {
   # Example from doc of scipy.sparse.csgraph.connected_components
   graph <- as(
@@ -73,4 +81,29 @@ test_that("connected components", {
   # test recursive initialization of components
   sgraph <- graph + Matrix::t(graph)
   expect_ok_matrix(spectral_init(sgraph), nr = 5, nc = 2)
+})
+
+test_that("a two-vertex spectral layout falls back to random coordinates", {
+  coords <- umap(
+    iris10[1:2, ],
+    n_neighbors = 2,
+    n_components = 1,
+    init = "spectral",
+    n_epochs = 0,
+    n_threads = 0
+  )
+  expect_ok_matrix(coords, nr = 2, nc = 1)
+  expect_true(all(abs(coords) <= 10))
+})
+
+test_that("agspectral fits when the default random neighbor count exceeds capacity", {
+  embedding <- umap(
+    iris10[1:5, ],
+    n_neighbors = 3,
+    init = "agspectral",
+    n_epochs = 0,
+    n_threads = 0,
+    seed = 42
+  )
+  expect_ok_matrix(embedding, nr = 5, nc = 2)
 })

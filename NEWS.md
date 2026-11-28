@@ -1,5 +1,21 @@
 # uwot (development version)
 
+* Projection uses the numeric columns selected during fitting, including when numeric codes were
+  declared categorical. Refit affected models to retain this selection.
+* PCA skips binary metric blocks, including Jaccard. Other metric blocks can still use PCA.
+* Density adjustment honors `repulsion_strength` during fitting and projection and is ignored
+  when fitting multiple metric blocks. Projection can return `localr` on its own.
+* Annoy projection inherits the effective `nn_args$search_k` setting from fitting.
+* `similarity_graph()` resolves scaling independently of the neighbor count, and `agspectral`
+  limits the number of random neighbors to the available vertices.
+
+* PCA initialization retains its matrix shape for one-dimensional embeddings.
+* `umap_transform()` uses the query size to choose an epoch count when the fitted model omits it.
+* The `agspectral` initializer now samples random neighbors from all vertices except the vertex
+  being initialized.
+* The installed C++ header `uwot/supervised.h` no longer provides the unused
+  `general_sset_intersection` and `general_sset_union` functions.
+
 * `umap_transform(init_weighted = FALSE)` once again uses unweighted neighbor averages. An explicit
   `init` takes precedence.
 * Standardization preserves metric block column positions and supports single-row projection.

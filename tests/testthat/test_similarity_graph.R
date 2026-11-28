@@ -218,3 +218,31 @@ test_that("graph combinations require conformable sparse operands and a valid we
   }
   expect_error(simplicial_set_intersect(g, g, weight = 2), "weight")
 })
+
+test_that("scaling and neighbor defaults are independent for UMAP and LargeVis", {
+  x <- as.matrix(iris[1:32, 1:4])
+  x[, 1] <- 100 * x[, 1]
+  graph <- function(method, ...) {
+    similarity_graph(
+      x,
+      method = method,
+      perplexity = 5,
+      nn_method = "fnn",
+      n_threads = 0,
+      ret_extra = "nn",
+      ...
+    )
+  }
+
+  expect_equal(
+    graph("umap", scale = "Z"),
+    graph("umap", n_neighbors = 15, scale = "Z")
+  )
+  expect_equal(
+    graph("largevis", n_neighbors = 15),
+    graph("largevis", scale = "maxabs")
+  )
+  raw <- graph("largevis", n_neighbors = 15, scale = NULL)
+  expect_equal(graph("largevis", scale = NULL), raw)
+  expect_false(isTRUE(all.equal(raw$nn, graph("largevis")$nn)))
+})

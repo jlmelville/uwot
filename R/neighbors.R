@@ -48,16 +48,12 @@ find_nn <- function(
           n_trees <- nn_args$n_trees
         }
 
-        if ("search_k" %in% nn_args_names) {
-          search_k <- nn_args$search_k
-        }
-
         res <- annoy_nn(
           X,
           k = k,
           metric = metric,
           n_trees = n_trees,
-          search_k = search_k,
+          search_k = annoy_search_k(nn_args, search_k),
           tmpdir = tmpdir,
           n_threads = n_threads,
           ret_index = ret_index,
@@ -94,6 +90,10 @@ find_nn <- function(
     }
   }
   res
+}
+
+annoy_search_k <- function(nn_args, search_k) {
+  if (is.null(nn_args[["search_k"]])) search_k else nn_args[["search_k"]]
 }
 
 # allow (idx, dist) or (index, distance): convert the latter to the former

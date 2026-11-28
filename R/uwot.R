@@ -369,9 +369,9 @@
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param pca If set to a positive integer value, reduce data to this number of
 #'   columns using PCA. The input must have more rows and columns than the
-#'   requested number of components. PCA skips Hamming blocks and blocks
-#'   narrower than that number. With multiple blocks, a block of exactly
-#'   that width retains its full-rank PCA rotation.
+#'   requested number of components. PCA skips binary metrics (such as Hamming
+#'   and Jaccard) and blocks narrower than that number. With multiple blocks, a
+#'   block of exactly that width retains its full-rank PCA rotation.
 #'   If you have > 100 columns in a data frame or matrix, reducing the number
 #'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
@@ -385,7 +385,7 @@
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
-#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     \item{\code{"svdr"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
 #'     than using \code{"irlba"}. For the purposes of nearest neighbor
@@ -794,7 +794,7 @@ umap <- function(
     binary_edge_weights = binary_edge_weights,
     tmpdir = tmpdir,
     verbose = verbose,
-    dens_scale = dens_scale,
+    dens_scale = single_block_dens_scale(dens_scale, metric, nn_method),
     seed = seed,
     nn_args = nn_args,
     rng_type = rng_type
@@ -1205,9 +1205,9 @@ umap <- function(
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param pca If set to a positive integer value, reduce data to this number of
 #'   columns using PCA. The input must have more rows and columns than the
-#'   requested number of components. PCA skips Hamming blocks and blocks
-#'   narrower than that number. With multiple blocks, a block of exactly
-#'   that width retains its full-rank PCA rotation.
+#'   requested number of components. PCA skips binary metrics (such as Hamming
+#'   and Jaccard) and blocks narrower than that number. With multiple blocks, a
+#'   block of exactly that width retains its full-rank PCA rotation.
 #'   If you have > 100 columns in a data frame or matrix, reducing the number
 #'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
@@ -1221,7 +1221,7 @@ umap <- function(
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
-#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     \item{\code{"svdr"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
 #'     than using \code{"irlba"}. For the purposes of nearest neighbor
@@ -1916,9 +1916,9 @@ tumap <- function(
 #'   parameter is ignored in this case.
 #' @param pca If set to a positive integer value, reduce data to this number of
 #'   columns using PCA. The input must have more rows and columns than the
-#'   requested number of components. PCA skips Hamming blocks and blocks
-#'   narrower than that number. With multiple blocks, a block of exactly
-#'   that width retains its full-rank PCA rotation.
+#'   requested number of components. PCA skips binary metrics (such as Hamming
+#'   and Jaccard) and blocks narrower than that number. With multiple blocks, a
+#'   block of exactly that width retains its full-rank PCA rotation.
 #'   If you have > 100 columns in a data frame or matrix, reducing the number
 #'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
@@ -1932,7 +1932,7 @@ tumap <- function(
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
-#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     \item{\code{"svdr"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
 #'     than using \code{"irlba"}. For the purposes of nearest neighbor
@@ -2537,9 +2537,9 @@ lvish <- function(
 #'   parameter is ignored if \code{method = "largevis"}.
 #' @param pca If set to a positive integer value, reduce data to this number of
 #'   columns using PCA. The input must have more rows and columns than the
-#'   requested number of components. PCA skips Hamming blocks and blocks
-#'   narrower than that number. With multiple blocks, a block of exactly
-#'   that width retains its full-rank PCA rotation.
+#'   requested number of components. PCA skips binary metrics (such as Hamming
+#'   and Jaccard) and blocks narrower than that number. With multiple blocks, a
+#'   block of exactly that width retains its full-rank PCA rotation.
 #'   If you have > 100 columns in a data frame or matrix, reducing the number
 #'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
@@ -2553,7 +2553,7 @@ lvish <- function(
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
-#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     \item{\code{"svdr"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
 #'     than using \code{"irlba"}. For the purposes of nearest neighbor
@@ -2716,13 +2716,10 @@ similarity_graph <- function(
   nn_args = list()
 ) {
   if (is.null(n_neighbors)) {
-    if (method == "largevis") {
-      n_neighbors <- perplexity * 3
-      scale <- "maxabs"
-    } else {
-      n_neighbors <- 15
-      scale <- FALSE
-    }
+    n_neighbors <- if (tolower(method) == "largevis") perplexity * 3 else 15
+  }
+  if (missing(scale) && tolower(method) == "largevis") {
+    scale <- "maxabs"
   }
 
   uwot_res <- uwot(
@@ -2894,7 +2891,7 @@ similarity_graph <- function(
 #'   \itemize{
 #'     \item{\code{"irlba"}}. Uses \code{\link[irlba]{prcomp_irlba}} from the
 #'     \href{https://cran.r-project.org/package=irlba}{irlba} package.
-#'     \item{\code{"rsvd"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
+#'     \item{\code{"svdr"}}. Uses 5 iterations of \code{\link[irlba]{svdr}} from
 #'     the \href{https://cran.r-project.org/package=irlba}{irlba} package.
 #'     This is likely to give much faster but potentially less accurate results
 #'     than using \code{"irlba"}. For the purposes of nearest neighbor
@@ -3469,6 +3466,7 @@ uwot <- function(
   # number of original columns in data frame (or matrix)
   # will be used only if using df or matrix and ret_model = TRUE
   norig_col <- NULL
+  numeric_columns <- NULL
   # row names for the input data, which we will apply to the embedding if
   # needed
   Xnames <- NULL
@@ -3532,13 +3530,13 @@ uwot <- function(
       }
 
       if (methods::is(X, "data.frame")) {
-        indexes <- which(vapply(X, is.numeric, logical(1)))
-        if (length(indexes) == 0) {
+        numeric_columns <- which(vapply(X, is.numeric, logical(1)))
+        if (length(numeric_columns) == 0) {
           stop("No numeric columns found")
         }
         tsmessage("Converting dataframe to numerical matrix")
-        if (length(indexes) != ncol(X)) {
-          X <- X[, indexes, drop = FALSE]
+        if (length(numeric_columns) != ncol(X)) {
+          X <- X[, numeric_columns, drop = FALSE]
         }
         X <- as.matrix(X)
       }
@@ -3590,8 +3588,8 @@ uwot <- function(
     }
   }
 
-  # Store number of precomputed nn if X is non-NULL (NULL X case handled above)
-  if (nn_is_precomputed(nn_method) && num_precomputed_nns == 0) {
+  # Graphs supplied alongside X must agree with its observation count.
+  if (!is.null(X) && (is.list(nn_method) || is_sparse_matrix(nn_method))) {
     num_precomputed_nns <- check_graph_list(
       nn_method,
       n_vertices,
@@ -3637,7 +3635,7 @@ uwot <- function(
     !is.null(pca) &&
       is.character(metric) &&
       length(metric) == 1 &&
-      !is_binary_metric(metric) &&
+      !is_binary_metric(tolower(metric)) &&
       is.matrix(X) &&
       ncol(X) > pca
   ) {
@@ -3903,7 +3901,7 @@ uwot <- function(
         init %in% c("spca", "pca", "pacpca") &&
         pca >= n_components
     ) {
-      embedding <- X[, 1:n_components]
+      embedding <- X[, seq_len(n_components), drop = FALSE]
       switch(
         init,
         spca = tsmessage("Initializing from scaled PCA"),
@@ -4070,10 +4068,8 @@ uwot <- function(
       method,
       umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
       tumap = list(gamma = gamma),
-      # a = 1 b = 10 for final phase of PaCMAP optimization
-      pacmap = list(a = a, b = b),
       largevis = list(gamma = gamma),
-      leopold = list(ai = ai, b = b, ndim = n_components),
+      leopold = list(ai = ai, b = b, ndim = n_components, gamma = gamma),
       stop("Unknown dimensionality reduction method '", method, "'")
     )
     tsmessage("Using rng type: ", rng_type)
@@ -4128,7 +4124,7 @@ uwot <- function(
           scale_info = scale_info,
           bandwidth = bandwidth,
           rng_type = rng_type,
-          search_k = search_k,
+          search_k = annoy_search_k(nn_args, search_k),
           local_connectivity = local_connectivity,
           n_epochs = n_epochs,
           alpha = alpha,
@@ -4140,6 +4136,7 @@ uwot <- function(
           approx_pow = approx_pow,
           metric = metrics,
           norig_col = norig_col,
+          numeric_columns = numeric_columns,
           pcg_rand = pcg_rand,
           batch = batch,
           opt_args = full_opt_args,
@@ -4915,7 +4912,7 @@ data2set <- function(
     if (
       !is.null(pca_i) &&
         is.matrix(X) &&
-        metric != "hamming" &&
+        !is_binary_metric(metric) &&
         ncol(X) > pca_i &&
         (ncol(Xsub) > pca_i || (nblocks > 1 && ncol(Xsub) == pca_i)) &&
         nrow(Xsub) > pca_i
@@ -5014,83 +5011,43 @@ x2nn <- function(
   n_build_threads,
   grain_size,
   ret_model,
-  n_vertices = x2nv(X),
   nn_args = list(),
   sparse_is_distance = TRUE,
   verbose = FALSE
 ) {
   if (is.list(nn_method)) {
-    validate_nn(nn_method, n_vertices)
-    nn <- nn_method
-  } else {
-    nn_method <-
-      match.arg(
-        tolower(nn_method),
-        c("annoy", "fnn", "matrix", "hnsw", "nndescent")
-      )
-    if (nn_method == "fnn" && metric != "euclidean") {
-      stop(
-        "nn_method = 'FNN' is only compatible with distance metric ",
-        "'euclidean'"
-      )
-    }
-    if (nn_method == "fnn" && ret_model) {
-      stop("nn_method = 'FNN' is incompatible with ret_model = TRUE")
-    }
-    nn <- find_nn(
-      X,
-      n_neighbors,
-      method = nn_method,
-      metric = metric,
-      n_trees = n_trees,
-      search_k = search_k,
-      nn_args = nn_args,
-      tmpdir = tmpdir,
-      n_threads = n_threads,
-      n_build_threads = n_build_threads,
-      grain_size = grain_size,
-      ret_index = ret_model,
-      sparse_is_distance = sparse_is_distance,
-      verbose = verbose
+    return(nn_method)
+  }
+  nn_method <-
+    match.arg(
+      tolower(nn_method),
+      c("annoy", "fnn", "matrix", "hnsw", "nndescent")
     )
-  }
-  nn
-}
-
-validate_nn <- function(nn_method, n_vertices) {
-  if (!is.matrix(nn_method$idx)) {
-    stop("Couldn't find precalculated 'idx' matrix")
-  }
-  if (nrow(nn_method$idx) != n_vertices) {
+  if (nn_method == "fnn" && metric != "euclidean") {
     stop(
-      "Precalculated 'idx' matrix must have ",
-      n_vertices,
-      " rows, but found ",
-      nrow(nn_method$idx)
+      "nn_method = 'FNN' is only compatible with distance metric ",
+      "'euclidean'"
     )
   }
-
-  if (!is.matrix(nn_method$dist)) {
-    stop("Couldn't find precalculated 'dist' matrix")
+  if (nn_method == "fnn" && ret_model) {
+    stop("nn_method = 'FNN' is incompatible with ret_model = TRUE")
   }
-  if (nrow(nn_method$idx) != n_vertices) {
-    stop(
-      "Precalculated 'dist' matrix must have ",
-      n_vertices,
-      " rows, but
-         found ",
-      nrow(nn_method$dist)
-    )
-  }
-  if (ncol(nn_method$dist) != ncol(nn_method$idx)) {
-    stop(
-      "Precalculated 'dist' matrix must have ",
-      ncol(nn_method$idx),
-      " cols, but
-         found ",
-      ncol(nn_method$dist)
-    )
-  }
+  find_nn(
+    X,
+    n_neighbors,
+    method = nn_method,
+    metric = metric,
+    n_trees = n_trees,
+    search_k = search_k,
+    nn_args = nn_args,
+    tmpdir = tmpdir,
+    n_threads = n_threads,
+    n_build_threads = n_build_threads,
+    grain_size = grain_size,
+    ret_index = ret_model,
+    sparse_is_distance = sparse_is_distance,
+    verbose = verbose
+  )
 }
 
 nn2set <- function(
@@ -5195,7 +5152,6 @@ x2set <- function(
       grain_size = grain_size,
       ret_model = ret_model,
       nn_args = nn_args,
-      n_vertices = n_vertices,
       sparse_is_distance = sparse_is_distance,
       verbose = verbose
     )
@@ -5385,6 +5341,20 @@ scale_by_colrange <- function(X, minima, ranges) {
     ranges[constant] <- 1
   }
   sweep(X, 2, ranges, `/`)
+}
+
+# Precomputed neighbor graphs supply their own blocks instead of using metric.
+single_block_dens_scale <- function(dens_scale, metric, nn_method) {
+  if (is.null(dens_scale)) {
+    return(NULL)
+  }
+  if (nn_is_precomputed(nn_method)) {
+    nn_method <- normalize_nn_method(nn_method)
+    multiple_blocks <- !nn_is_single(nn_method) && length(nn_method) > 1
+  } else {
+    multiple_blocks <- length(metric) > 1
+  }
+  if (!multiple_blocks) dens_scale
 }
 
 # Scale X according to various strategies

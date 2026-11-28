@@ -42,10 +42,14 @@ test_that("an extraction failure is reported before reading model files", {
     if (is.na(old_tar)) Sys.unsetenv("TAR") else Sys.setenv(TAR = old_tar),
     add = TRUE
   )
-  Sys.setenv(TAR = paste(
-    shQuote(file.path(R.home("bin"), "Rscript")), "--vanilla -e",
-    shQuote("quit(status=1L)"), "--args"
-  ))
+  Sys.setenv(
+    TAR = paste(
+      shQuote(file.path(R.home("bin"), "Rscript")),
+      "--vanilla -e",
+      shQuote("quit(status=1L)"),
+      "--args"
+    )
+  )
   before <- list.dirs(tempdir(), recursive = FALSE)
   expect_error(
     suppressWarnings(load_uwot(archive)),
