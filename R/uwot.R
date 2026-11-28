@@ -2716,13 +2716,10 @@ similarity_graph <- function(
   nn_args = list()
 ) {
   if (is.null(n_neighbors)) {
-    if (method == "largevis") {
-      n_neighbors <- perplexity * 3
-      scale <- "maxabs"
-    } else {
-      n_neighbors <- 15
-      scale <- FALSE
-    }
+    n_neighbors <- if (tolower(method) == "largevis") perplexity * 3 else 15
+  }
+  if (missing(scale) && tolower(method) == "largevis") {
+    scale <- "maxabs"
   }
 
   uwot_res <- uwot(
