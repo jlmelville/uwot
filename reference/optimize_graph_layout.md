@@ -203,7 +203,7 @@ optimize_graph_layout(
 - fast_sgd:
 
   If `TRUE`, then the following combination of parameters is set:
-  `pcg_rand = TRUE`, `n_sgd_threads = "auto"` and `approx_pow = TRUE`.
+  `pcg_rand = FALSE`, `n_sgd_threads = "auto"` and `approx_pow = TRUE`.
   The default is `FALSE`. Setting this to `TRUE` will speed up the
   stochastic optimization phase, but give a potentially less accurate
   embedding, and which will not be exactly reproducible even with a

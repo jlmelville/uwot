@@ -491,7 +491,7 @@ umap2(
 - fast_sgd:
 
   If `TRUE`, then the following combination of parameters is set:
-  `pcg_rand = TRUE`, `n_sgd_threads = "auto"` and `approx_pow = TRUE`.
+  `pcg_rand = FALSE`, `n_sgd_threads = "auto"` and `approx_pow = TRUE`.
   The default is `FALSE`. Setting this to `TRUE` will speed up the
   stochastic optimization phase, but give a potentially less accurate
   embedding, and which will not be exactly reproducible even with a
@@ -507,19 +507,17 @@ umap2(
   [`umap_transform`](https://jlmelville.github.io/uwot/reference/umap_transform.md).
   The embedded coordinates are returned as the list item `embedding`. If
   `FALSE`, just return the coordinates. This parameter can be used in
-  conjunction with `ret_nn` and `ret_extra`. Note that some settings are
-  incompatible with the production of a UMAP model: external neighbor
-  data (passed via a list to `nn_method`), and factor columns that were
-  included via the `metric` parameter. In the latter case, the model
-  produced is based only on the numeric data. A transformation using new
-  data is possible, but the factor columns in the new data are ignored.
-  Note that setting `ret_model = TRUE` forces the use of the approximate
-  nearest neighbors method. Because small datasets would otherwise use
-  exact nearest neighbor calculations, setting `ret_model = TRUE` means
-  that different results may be returned for small datasets in terms of
-  both the returned nearest neighbors (if requested) and the final
-  embedded coordinates, compared to `ret_model = FALSE`, even if the
-  random number seed is fixed. To avoid this, explicitly set
+  conjunction with `ret_nn` and `ret_extra`. When fitting with
+  precomputed neighbors, supply query-to-training neighbors to
+  `umap_transform` via `nn_method`. If `metric` includes factor columns,
+  projection uses only the numeric columns. Note that setting
+  `ret_model = TRUE` forces the use of the approximate nearest neighbors
+  method. Because small datasets would otherwise use exact nearest
+  neighbor calculations, setting `ret_model = TRUE` means that different
+  results may be returned for small datasets in terms of both the
+  returned nearest neighbors (if requested) and the final embedded
+  coordinates, compared to `ret_model = FALSE`, even if the random
+  number seed is fixed. To avoid this, explicitly set
   `nn_method = "annoy"` in the `ret_model = FALSE` case.
 
 - ret_nn:

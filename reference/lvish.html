@@ -400,7 +400,7 @@ both are set, <code>rng_type</code> takes precedence.</p></dd>
 
 <dt id="arg-fast-sgd">fast_sgd<a class="anchor" aria-label="anchor" href="#arg-fast-sgd"></a></dt>
 <dd><p>If <code>TRUE</code>, then the following combination of parameters
-is set: <code>pcg_rand = TRUE</code> and <code>n_sgd_threads = "auto"</code>. The
+is set: <code>pcg_rand = FALSE</code> and <code>n_sgd_threads = "auto"</code>. The
 default is <code>FALSE</code>. Setting this to <code>TRUE</code> will speed up the
 stochastic optimization phase, but give a potentially less accurate
 embedding, and which will not be exactly reproducible even with a fixed

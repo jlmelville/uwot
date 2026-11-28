@@ -466,7 +466,7 @@ both are set, <code>rng_type</code> takes precedence.</p></dd>
 
 <dt id="arg-fast-sgd">fast_sgd<a class="anchor" aria-label="anchor" href="#arg-fast-sgd"></a></dt>
 <dd><p>If <code>TRUE</code>, then the following combination of parameters
-is set: <code>pcg_rand = TRUE</code>, <code>n_sgd_threads = "auto"</code> and
+is set: <code>pcg_rand = FALSE</code>, <code>n_sgd_threads = "auto"</code> and
 <code>approx_pow = TRUE</code>. The default is <code>FALSE</code>. Setting this to
 <code>TRUE</code> will speed up the stochastic optimization phase, but give a
 potentially less accurate embedding, and which will not be exactly
@@ -482,12 +482,10 @@ and <code>approx_pow</code> are ignored.</p></dd>
 add new data to an existing embedding via <code><a href="umap_transform.html">umap_transform</a></code>. The
 embedded coordinates are returned as the list item <code>embedding</code>. If
 <code>FALSE</code>, just return the coordinates. This parameter can be used in
-conjunction with <code>ret_nn</code> and <code>ret_extra</code>. Note that some
-settings are incompatible with the production of a UMAP model: external
-neighbor data (passed via a list to <code>nn_method</code>), and factor columns
-that were included via the <code>metric</code> parameter. In the latter case, the
-model produced is based only on the numeric data. A transformation using
-new data is possible, but the factor columns in the new data are ignored.
+conjunction with <code>ret_nn</code> and <code>ret_extra</code>. When fitting with
+precomputed neighbors, supply query-to-training neighbors to
+<code>umap_transform</code> via <code>nn_method</code>. If <code>metric</code> includes
+factor columns, projection uses only the numeric columns.
 Note that setting <code>ret_model = TRUE</code> forces the use of the approximate
 nearest neighbors method. Because small datasets would otherwise use exact
 nearest neighbor calculations, setting <code>ret_model = TRUE</code> means that

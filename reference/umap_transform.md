@@ -298,13 +298,10 @@ A matrix of coordinates for `X` transformed into the space of the
 
 ## Details
 
-Note that some settings are incompatible with the production of a UMAP
-model via [`umap`](https://jlmelville.github.io/uwot/reference/umap.md):
-external neighbor data (passed via a list to the argument of the
-`nn_method` parameter), and factor columns that were included in the
-UMAP calculation via the `metric` parameter. In the latter case, the
-model produced is based only on the numeric data. A transformation is
-possible, but factor columns in the new data are ignored.
+If the model was fitted with precomputed neighbors, supply neighbors
+from each query to the training observations via `nn_method`. If the
+fitted metric included factor columns, projection uses only the numeric
+columns.
 
 ## Examples
 

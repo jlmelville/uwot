@@ -423,7 +423,7 @@ lvish(
 - fast_sgd:
 
   If `TRUE`, then the following combination of parameters is set:
-  `pcg_rand = TRUE` and `n_sgd_threads = "auto"`. The default is
+  `pcg_rand = FALSE` and `n_sgd_threads = "auto"`. The default is
   `FALSE`. Setting this to `TRUE` will speed up the stochastic
   optimization phase, but give a potentially less accurate embedding,
   and which will not be exactly reproducible even with a fixed seed. For
