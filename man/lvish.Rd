@@ -334,7 +334,7 @@ statistically good) Tausworthe "taus88" generator. The default is
 both are set, \code{rng_type} takes precedence.}
 
 \item{fast_sgd}{If \code{TRUE}, then the following combination of parameters
-is set: \code{pcg_rand = TRUE} and \code{n_sgd_threads = "auto"}. The
+is set: \code{pcg_rand = FALSE} and \code{n_sgd_threads = "auto"}. The
 default is \code{FALSE}. Setting this to \code{TRUE} will speed up the
 stochastic optimization phase, but give a potentially less accurate
 embedding, and which will not be exactly reproducible even with a fixed

@@ -1293,6 +1293,16 @@ test_that("batch callbacks report moving and fixed coordinates across thread cou
 })
 
 
+test_that("fast SGD records its preset and honors an explicit RNG", {
+  model <- fit_small_model(fast_sgd = TRUE)
+  expect_false(model$pcg_rand)
+  expect_true(model$approx_pow)
+  expect_identical(model$rng_type, "tausworthe")
+
+  model <- fit_small_model(fast_sgd = TRUE, rng_type = "deterministic")
+  expect_identical(model$rng_type, "deterministic")
+})
+
 test_that("models retain Adam and SGD optimizer options", {
   oargs_umap <- tumap(
     iris10,

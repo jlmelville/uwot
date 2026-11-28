@@ -421,7 +421,7 @@
 #'   For backwards compatibility, by default this is unset and the choice of
 #'   \code{pcg_rand} is used (making "pcg" the effective default).
 #' @param fast_sgd If \code{TRUE}, then the following combination of parameters
-#'   is set: \code{pcg_rand = TRUE}, \code{n_sgd_threads = "auto"} and
+#'   is set: \code{pcg_rand = FALSE}, \code{n_sgd_threads = "auto"} and
 #'   \code{approx_pow = TRUE}. The default is \code{FALSE}. Setting this to
 #'   \code{TRUE} will speed up the stochastic optimization phase, but give a
 #'   potentially less accurate embedding, and which will not be exactly
@@ -1255,7 +1255,7 @@ umap <- function(
 #'   For backwards compatibility, by default this is unset and the choice of
 #'   \code{pcg_rand} is used (making "pcg" the effective default).
 #' @param fast_sgd If \code{TRUE}, then the following combination of parameters
-#'   is set: \code{pcg_rand = TRUE} and \code{n_sgd_threads = "auto"}. The
+#'   is set: \code{pcg_rand = FALSE} and \code{n_sgd_threads = "auto"}. The
 #'   default is \code{FALSE}. Setting this to \code{TRUE} will speed up the
 #'   stochastic optimization phase, but give a potentially less accurate
 #'   embedding, and which will not be exactly reproducible even with a fixed
@@ -1964,7 +1964,7 @@ tumap <- function(
 #'   For backwards compatibility, by default this is unset and the choice of
 #'   \code{pcg_rand} is used (making "pcg" the effective default).
 #' @param fast_sgd If \code{TRUE}, then the following combination of parameters
-#'   is set: \code{pcg_rand = TRUE} and \code{n_sgd_threads = "auto"}. The
+#'   is set: \code{pcg_rand = FALSE} and \code{n_sgd_threads = "auto"}. The
 #'   default is \code{FALSE}. Setting this to \code{TRUE} will speed up the
 #'   stochastic optimization phase, but give a potentially less accurate
 #'   embedding, and which will not be exactly reproducible even with a fixed
@@ -2923,7 +2923,7 @@ similarity_graph <- function(
 #'   For backwards compatibility, by default this is unset and the choice of
 #'   \code{pcg_rand} is used (making "pcg" the effective default).
 #' @param fast_sgd If \code{TRUE}, then the following combination of parameters
-#'   is set: \code{pcg_rand = TRUE}, \code{n_sgd_threads = "auto"} and
+#'   is set: \code{pcg_rand = FALSE}, \code{n_sgd_threads = "auto"} and
 #'   \code{approx_pow = TRUE}. The default is \code{FALSE}. Setting this to
 #'   \code{TRUE} will speed up the stochastic optimization phase, but give a
 #'   potentially less accurate embedding, and which will not be exactly
