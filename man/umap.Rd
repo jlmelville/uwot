@@ -414,12 +414,10 @@ and \code{approx_pow} are ignored.}
 add new data to an existing embedding via \code{\link{umap_transform}}. The
 embedded coordinates are returned as the list item \code{embedding}. If
 \code{FALSE}, just return the coordinates. This parameter can be used in
-conjunction with \code{ret_nn} and \code{ret_extra}. Note that some
-settings are incompatible with the production of a UMAP model: external
-neighbor data (passed via a list to \code{nn_method}), and factor columns
-that were included via the \code{metric} parameter. In the latter case, the
-model produced is based only on the numeric data. A transformation using
-new data is possible, but the factor columns in the new data are ignored.
+conjunction with \code{ret_nn} and \code{ret_extra}. When fitting with
+precomputed neighbors, supply query-to-training neighbors to
+\code{umap_transform} via \code{nn_method}. If \code{metric} includes
+factor columns, projection uses only the numeric columns.
 Note that setting \code{ret_model = TRUE} forces the use of the approximate
 nearest neighbors method. Because small datasets would otherwise use exact
 nearest neighbor calculations, setting \code{ret_model = TRUE} means that

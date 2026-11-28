@@ -546,6 +546,26 @@ test_that("a single feature block precedes PCA in fit and projection", {
   }
 })
 
+test_that("models fitted from a sparse graph project dense query neighbors", {
+  model <- fit_small_model(NULL, nn_method = dmiris10z, seed = 42)
+  idx <- rbind(first = c(1L, 4L), second = c(3L, 7L))
+  query <- list(idx = idx, dist = rbind(c(1, 2), c(2, 3)))
+  coords <- umap_transform(
+    NULL,
+    model,
+    nn_method = query,
+    init = "average",
+    n_epochs = 0,
+    n_threads = 0
+  )
+  expected <- rbind(
+    first = colMeans(model$embedding[idx[1, ], , drop = FALSE]),
+    second = colMeans(model$embedding[idx[2, ], , drop = FALSE])
+  )
+  expect_identical(rownames(coords), rownames(idx))
+  expect_equal(unname(coords), unname(expected), tolerance = 1e-6)
+})
+
 test_that("sparse projection averages each query's own neighbors", {
   m <- fit_small_model(iris10[1:4, ], n_components = 1)
   m$embedding <- matrix(c(0, 10, 20, 30))
