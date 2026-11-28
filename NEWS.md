@@ -2,6 +2,7 @@
 
 * Projection uses the numeric columns selected during fitting, including when numeric codes were
   declared categorical. Refit affected models to retain this selection.
+* PCA skips binary metric blocks, including Jaccard. Other metric blocks can still use PCA.
 
 * PCA initialization retains its matrix shape for one-dimensional embeddings.
 * `umap_transform()` uses the query size to choose an epoch count when the fitted model omits it.

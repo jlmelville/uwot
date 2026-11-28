@@ -151,3 +151,33 @@ for (method in c("svdr", "bigstatsr")) {
     )
   }
 }
+
+test_that("PCA skips Jaccard and still reduces a neighboring Euclidean block", {
+  skip_if_not_installed("rnndescent")
+  set.seed(11)
+  x <- matrix(rbinom(40 * 16, 1, 0.3), nrow = 40)
+  fit <- function(metric) {
+    fit_small_model(
+      x,
+      nn_method = "nndescent",
+      metric = metric,
+      pca = 2,
+      ret_nn = TRUE,
+      seed = 42
+    )
+  }
+  check_jaccard <- function(nn, binary) {
+    idx <- nn$idx[, 2]
+    other <- binary[idx, , drop = FALSE]
+    expected <- rowSums(binary != other) / pmax(1, rowSums(binary | other))
+    expect_gt(sum(expected), 0)
+    expect_equal(nn$dist[, 2], expected, tolerance = 1e-6)
+  }
+  single <- fit("jaccard")
+  expect_length(single$pca_models, 0)
+  check_jaccard(single$nn$jaccard, x)
+  mixed <- fit(list(euclidean = 1:8, jaccard = 9:16))
+  expect_equal(names(mixed$pca_models), "1")
+  expect_equal(dim(mixed$pca_models[[1]]$rotation), c(8, 2))
+  check_jaccard(mixed$nn$jaccard, x[, 9:16])
+})

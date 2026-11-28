@@ -369,9 +369,9 @@
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param pca If set to a positive integer value, reduce data to this number of
 #'   columns using PCA. The input must have more rows and columns than the
-#'   requested number of components. PCA skips Hamming blocks and blocks
-#'   narrower than that number. With multiple blocks, a block of exactly
-#'   that width retains its full-rank PCA rotation.
+#'   requested number of components. PCA skips binary metrics (such as Hamming
+#'   and Jaccard) and blocks narrower than that number. With multiple blocks, a
+#'   block of exactly that width retains its full-rank PCA rotation.
 #'   If you have > 100 columns in a data frame or matrix, reducing the number
 #'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
@@ -1205,9 +1205,9 @@ umap <- function(
 #'   between data and target. Only applies if \code{y} is non-\code{NULL}.
 #' @param pca If set to a positive integer value, reduce data to this number of
 #'   columns using PCA. The input must have more rows and columns than the
-#'   requested number of components. PCA skips Hamming blocks and blocks
-#'   narrower than that number. With multiple blocks, a block of exactly
-#'   that width retains its full-rank PCA rotation.
+#'   requested number of components. PCA skips binary metrics (such as Hamming
+#'   and Jaccard) and blocks narrower than that number. With multiple blocks, a
+#'   block of exactly that width retains its full-rank PCA rotation.
 #'   If you have > 100 columns in a data frame or matrix, reducing the number
 #'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
@@ -1916,9 +1916,9 @@ tumap <- function(
 #'   parameter is ignored in this case.
 #' @param pca If set to a positive integer value, reduce data to this number of
 #'   columns using PCA. The input must have more rows and columns than the
-#'   requested number of components. PCA skips Hamming blocks and blocks
-#'   narrower than that number. With multiple blocks, a block of exactly
-#'   that width retains its full-rank PCA rotation.
+#'   requested number of components. PCA skips binary metrics (such as Hamming
+#'   and Jaccard) and blocks narrower than that number. With multiple blocks, a
+#'   block of exactly that width retains its full-rank PCA rotation.
 #'   If you have > 100 columns in a data frame or matrix, reducing the number
 #'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
@@ -2537,9 +2537,9 @@ lvish <- function(
 #'   parameter is ignored if \code{method = "largevis"}.
 #' @param pca If set to a positive integer value, reduce data to this number of
 #'   columns using PCA. The input must have more rows and columns than the
-#'   requested number of components. PCA skips Hamming blocks and blocks
-#'   narrower than that number. With multiple blocks, a block of exactly
-#'   that width retains its full-rank PCA rotation.
+#'   requested number of components. PCA skips binary metrics (such as Hamming
+#'   and Jaccard) and blocks narrower than that number. With multiple blocks, a
+#'   block of exactly that width retains its full-rank PCA rotation.
 #'   If you have > 100 columns in a data frame or matrix, reducing the number
 #'   of columns may speed up the nearest neighbor search at the cost of a
 #'   potential decrease in accuracy. In many t-SNE applications, a value of 50
@@ -3638,7 +3638,7 @@ uwot <- function(
     !is.null(pca) &&
       is.character(metric) &&
       length(metric) == 1 &&
-      !is_binary_metric(metric) &&
+      !is_binary_metric(tolower(metric)) &&
       is.matrix(X) &&
       ncol(X) > pca
   ) {
@@ -4915,7 +4915,7 @@ data2set <- function(
     if (
       !is.null(pca_i) &&
         is.matrix(X) &&
-        metric != "hamming" &&
+        !is_binary_metric(metric) &&
         ncol(X) > pca_i &&
         (ncol(Xsub) > pca_i || (nblocks > 1 && ncol(Xsub) == pca_i)) &&
         nrow(Xsub) > pca_i
