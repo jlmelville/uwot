@@ -4072,7 +4072,7 @@ uwot <- function(
       umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
       tumap = list(gamma = gamma),
       largevis = list(gamma = gamma),
-      leopold = list(ai = ai, b = b, ndim = n_components),
+      leopold = list(ai = ai, b = b, ndim = n_components, gamma = gamma),
       stop("Unknown dimensionality reduction method '", method, "'")
     )
     tsmessage("Using rng type: ", rng_type)

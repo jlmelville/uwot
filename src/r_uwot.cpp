@@ -223,25 +223,28 @@ void create_tumap(UmapFactory &umap_factory, List method_args) {
 }
 
 void create_umapai(UmapFactory &umap_factory, List method_args) {
-  std::vector<std::string> arg_names = {"ai", "b", "ndim"};
+  std::vector<std::string> arg_names = {"ai", "b", "ndim", "gamma"};
   validate_args(method_args, arg_names);
 
   std::vector<float> ai = method_args["ai"];
   float b = method_args["b"];
   std::size_t ndim = method_args["ndim"];
-  const uwot::umapai_gradient gradient(std::move(ai), b, ndim);
+  float gamma = method_args["gamma"];
+  const uwot::umapai_gradient gradient(std::move(ai), b, ndim, gamma);
   umap_factory.create(gradient);
 }
 
 void create_umapai2(UmapFactory &umap_factory, List method_args) {
-  std::vector<std::string> arg_names = {"ai", "aj", "b", "ndim"};
+  std::vector<std::string> arg_names = {"ai", "aj", "b", "ndim", "gamma"};
   validate_args(method_args, arg_names);
 
   std::vector<float> ai = method_args["ai"];
   std::vector<float> aj = method_args["aj"];
   float b = method_args["b"];
   std::size_t ndim = method_args["ndim"];
-  const uwot::umapai2_gradient gradient(std::move(ai), std::move(aj), b, ndim);
+  float gamma = method_args["gamma"];
+  const uwot::umapai2_gradient gradient(std::move(ai), std::move(aj), b, ndim,
+                                        gamma);
   umap_factory.create(gradient);
 }
 

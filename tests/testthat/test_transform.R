@@ -840,3 +840,23 @@ test_that("projection uses the numeric features selected before fitted scaling",
   model$numeric_columns <- NULL
   expect_equal(query_neighbors(model, factor_x), expected)
 })
+
+test_that("constant density preserves the specified fit and query repulsion", {
+  fit <- function(ds) {
+    fit_small_model(
+      a = 1,
+      b = 1,
+      repulsion_strength = 0.25,
+      dens_scale = ds,
+      n_epochs = 8,
+      seed = 42
+    )
+  }
+  ordinary <- fit(NULL)
+  density <- fit(0)
+  expect_equal(density$embedding, ordinary$embedding)
+  project <- function(m) {
+    umap_transform(ui10, m, n_epochs = 8, n_threads = 0)
+  }
+  expect_equal(project(density), project(ordinary))
+})

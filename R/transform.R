@@ -885,7 +885,7 @@ umap_transform <- function(
       method,
       umap = list(a = a, b = b, gamma = gamma, approx_pow = approx_pow),
       tumap = list(gamma = gamma),
-      leopold2 = list(ai = ai, aj = aj, b = b, ndim = ndim),
+      leopold2 = list(ai = ai, aj = aj, b = b, ndim = ndim, gamma = gamma),
       list()
     )
 
