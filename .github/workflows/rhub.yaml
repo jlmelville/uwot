@@ -134,7 +134,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: r-hub/actions/setup-r@4b161272a59fcd8192e5bd5e6ce183c025cb80fa # v1.7.4
+      - uses: r-hub/actions/setup-r@02be5ffbeae2b0d553da66acded089da11a1fb8f # v1.8.1
         with:
           job-config: ${{ matrix.config.job-config }}
           token: ${{ secrets.RHUB_TOKEN }}
