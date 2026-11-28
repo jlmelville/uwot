@@ -20,9 +20,9 @@ rspectra_eigs_asym <- function(L, ndim) {
   res
 }
 
-rspectra_eigs_sym <- function(L, ndim, verbose = FALSE, ...) {
+rspectra_eigs_sym <- function(L, ndim, verbose = FALSE) {
   k <- ndim + 1
-  opt <- lmerge(list(tol = 1e-4), list(...))
+  opt <- list(tol = 1e-4)
 
   suppressWarnings(
     res <-
@@ -47,9 +47,6 @@ rspectra_eigs_sym <- function(L, ndim, verbose = FALSE, ...) {
       ncol(res$vectors) < ndim
   ) {
     tsmessage("RSpectra calculation failed, retrying with shifted")
-    if ("initvec" %in% names(opt)) {
-      opt$initvec <- 1 / opt$initvec
-    }
     suppressWarnings(
       res <- tryCatch(
         RSpectra::eigs_sym(
