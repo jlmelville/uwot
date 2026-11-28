@@ -162,6 +162,10 @@
 #'       non-zero elements in the matrix is dependent on \code{n_epochs}. If you
 #'       are only interested in the fuzzy input graph (e.g. for clustering),
 #'       setting \code{n_epochs = 0} will avoid any further sparsifying.
+#'    \item \code{"sigma"} the local bandwidths and offsets, returned as
+#'      \code{sigma} and \code{rho}, from the first neighbor block.
+#'    \item \code{"localr"} the local radii (\code{sigma + rho}) from that
+#'      block.
 #'    \item \code{"nn"} the nearest neighbor graph for \code{X} with respect to
 #'      the observations in the \code{model}. The graph will be returned as a
 #'      list of two items: \code{idx} a matrix of indices, with as many rows
@@ -593,7 +597,8 @@ umap_transform <- function(
     ret_nn <- TRUE
     export_nns <- list()
   }
-  need_sigma <- (method == "leopold" && nblocks == 1) || "sigma" %in% ret_extra
+  # Older multi-block density models used the radii from the first block.
+  need_sigma <- method == "leopold" || any(c("sigma", "localr") %in% ret_extra)
   for (i in 1:nblocks) {
     tsmessage("Processing block ", i, " of ", nblocks)
     if (!is.null(X)) {
@@ -739,7 +744,7 @@ umap_transform <- function(
       n_threads = n_threads,
       grain_size = grain_size,
       verbose = verbose,
-      ret_sigma = TRUE
+      ret_sigma = need_sigma
     )
     if (is.null(localr) && need_sigma) {
       # because of the adjusted local connectivity rho is too small compared

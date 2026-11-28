@@ -860,3 +860,47 @@ test_that("constant density preserves the specified fit and query repulsion", {
   }
   expect_equal(project(density), project(ordinary))
 })
+
+test_that("multiple metric blocks ignore density and diagnostics are independent", {
+  blocks <- list(euclidean = 1:2, euclidean = 3:4)
+  fit <- function(ds) {
+    fit_small_model(metric = blocks, dens_scale = ds, n_epochs = 5, seed = 42)
+  }
+  ordinary <- fit(NULL)
+  model <- fit(1)
+  expect_equal(model$method, ordinary$method)
+  expect_equal(model$embedding, ordinary$embedding)
+  project <- function(m, extra = NULL) {
+    umap_transform(ui10, m, n_epochs = 5, n_threads = 0, ret_extra = extra)
+  }
+  expect_equal(project(model), project(ordinary))
+  radii <- project(model, "localr")
+  bandwidth <- project(model, "sigma")
+  expect_equal(radii$localr, bandwidth$sigma + bandwidth$rho)
+  expect_length(radii$localr, nrow(ui10))
+  expect_equal(radii$embedding, project(model))
+
+  # Older fits used the first block's radii to fit the density curve.
+  model$method <- "leopold"
+  model$dens_scale <- 1
+  model$ai <- rep(1, nrow(iris10))
+  model$rad_coeff <- c(0, 1)
+  expect_equal(project(model), project(model, "sigma")$embedding)
+})
+
+test_that("precomputed blocks preserve umap2's ordinary optimizer", {
+  model <- umap2(
+    X = NULL,
+    nn_method = list(nn, nn),
+    init = "random",
+    a = 1,
+    b = 1,
+    dens_scale = 1,
+    ret_model = TRUE,
+    n_neighbors = 4,
+    n_epochs = 4,
+    n_threads = 0,
+    seed = 42
+  )
+  expect_equal(model$method, "tumap")
+})

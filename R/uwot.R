@@ -794,7 +794,7 @@ umap <- function(
     binary_edge_weights = binary_edge_weights,
     tmpdir = tmpdir,
     verbose = verbose,
-    dens_scale = dens_scale,
+    dens_scale = single_block_dens_scale(dens_scale, metric, nn_method),
     seed = seed,
     nn_args = nn_args,
     rng_type = rng_type
@@ -5344,6 +5344,20 @@ scale_by_colrange <- function(X, minima, ranges) {
     ranges[constant] <- 1
   }
   sweep(X, 2, ranges, `/`)
+}
+
+# Precomputed neighbor graphs supply their own blocks instead of using metric.
+single_block_dens_scale <- function(dens_scale, metric, nn_method) {
+  if (is.null(dens_scale)) {
+    return(NULL)
+  }
+  if (nn_is_precomputed(nn_method)) {
+    nn_method <- normalize_nn_method(nn_method)
+    multiple_blocks <- !nn_is_single(nn_method) && length(nn_method) > 1
+  } else {
+    multiple_blocks <- length(metric) > 1
+  }
+  if (!multiple_blocks) dens_scale
 }
 
 # Scale X according to various strategies

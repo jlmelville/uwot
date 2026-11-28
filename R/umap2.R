@@ -791,6 +791,7 @@ umap2 <-
       n_epochs <- 500
     }
 
+    dens_scale <- single_block_dens_scale(dens_scale, metric, nn_method)
     if (
       is.numeric(a) &&
         is.numeric(b) &&

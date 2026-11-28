@@ -193,6 +193,10 @@ any combination of the following strings:
     non-zero elements in the matrix is dependent on \code{n_epochs}. If you
     are only interested in the fuzzy input graph (e.g. for clustering),
     setting \code{n_epochs = 0} will avoid any further sparsifying.
+ \item \code{"sigma"} the local bandwidths and offsets, returned as
+   \code{sigma} and \code{rho}, from the first neighbor block.
+ \item \code{"localr"} the local radii (\code{sigma + rho}) from that
+   block.
  \item \code{"nn"} the nearest neighbor graph for \code{X} with respect to
    the observations in the \code{model}. The graph will be returned as a
    list of two items: \code{idx} a matrix of indices, with as many rows
