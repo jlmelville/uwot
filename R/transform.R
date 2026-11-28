@@ -335,8 +335,8 @@ umap_transform <- function(
       paste0(class(train_embedding), collapse = " ")
     )
   }
-  if (any(is.na(train_embedding))) {
-    stop("Model embedding coordinates contains NA values")
+  if (any(!is.finite(train_embedding))) {
+    stop("Model embedding coordinates must be finite")
   }
   n_train_vertices <- nrow(train_embedding)
   ndim <- ncol(train_embedding)
@@ -546,8 +546,8 @@ umap_transform <- function(
           ")"
         )
       }
-      if (any(is.na(init))) {
-        stop("Initial embedding matrix coordinates contains NA values")
+      if (any(!is.finite(init))) {
+        stop("Initial embedding matrix coordinates must be finite")
       }
       if (is.null(Xnames) && !is.null(row.names(init))) {
         Xnames <- row.names(init)

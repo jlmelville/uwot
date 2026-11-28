@@ -230,26 +230,20 @@ test_that("embedding and transform initialization are validated", {
     "Initial data contains NA"
   ))
 
-  # user-supplied intialization should not contain NA
-  transform_init <- model$embedding[1:5, ]
-  transform_init[1, 1] <- NA
-  expect_error(
-    trans <- umap_transform(
-      iris[51:55, ],
-      model = model,
-      init = transform_init
-    ),
-    "contains NA"
-  )
-
-  # model embedding coords should also not contain NA
-  old11 <- model$embedding[1, 1]
-  model$embedding[1, 1] <- NA
-  expect_error(
-    trans <- umap_transform(iris[51:55, ], model = model),
-    "contains NA"
-  )
-  model$embedding[1, 1] <- old11
+  for (value in c(NA_real_, Inf, -Inf)) {
+    transform_init <- model$embedding[1:5, , drop = FALSE]
+    transform_init[1, 1] <- value
+    expect_error(
+      umap_transform(iris[51:55, ], model, init = transform_init, n_epochs = 0),
+      "Initial embedding.*finite"
+    )
+    invalid_model <- model
+    invalid_model$embedding[1, 1] <- value
+    expect_error(
+      umap_transform(iris[51:55, ], invalid_model, n_epochs = 0),
+      "Model embedding.*finite"
+    )
+  }
 })
 
 test_that("large initialization standard deviations produce a warning", {

@@ -4,7 +4,7 @@
   neighbors. Graph layout also accepts graphs smaller than the default neighbor count.
 * HNSW projection uses the default search budget when the fitted model has no neighbor arguments.
 * Spectral initialization falls back to random coordinates when a graph is too small for the
-  requested truncated SVD rank.
+  requested truncated SVD rank. Projection rejects non-finite model and initialization coordinates.
 * Projection uses the numeric columns selected during fitting, including when numeric codes were
   declared categorical. Refit affected models to retain this selection.
 * PCA skips binary metric blocks, including Jaccard. Other metric blocks can still use PCA.
