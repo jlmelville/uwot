@@ -195,6 +195,12 @@ test_that("optimizer column indices follow CSC order across empty columns", {
   }
 })
 
+test_that("graph layout accepts a connected two-vertex graph", {
+  graph <- Matrix::sparseMatrix(i = 1:2, j = 2:1, x = 1)
+  coords <- optimize_graph_layout(graph, n_epochs = 3, n_sgd_threads = 0)
+  expect_ok_matrix(coords, nr = 2, nc = 2)
+})
+
 test_that("graph layout rejects invalid shapes and isolated vertices", {
   g <- Matrix::sparseMatrix(i = c(1, 2), j = c(2, 1), x = 1)
   expect_error(optimize_graph_layout(as.matrix(g)), "sparse")

@@ -3600,18 +3600,13 @@ uwot <- function(
     n_neighbors <- perplexity
   }
 
-  if (max(n_neighbors) > n_vertices) {
-    # pre-calculated nearest neighbors ignores the user-supplied n_neighbors
-    # which is handled later
-    if (!is.list(nn_method)) {
-      if (method == "largevis") {
-        # for LargeVis, n_neighbors normally determined from perplexity not an
-        # error to be too large
-        tsmessage("Setting n_neighbors to ", n_vertices)
-        n_neighbors <- n_vertices
-      } else {
-        stop("n_neighbors must be smaller than the dataset size")
-      }
+  if (num_precomputed_nns == 0 && max(n_neighbors) > n_vertices) {
+    if (method == "largevis") {
+      # LargeVis normally derives the neighbor count from perplexity.
+      tsmessage("Setting n_neighbors to ", n_vertices)
+      n_neighbors <- n_vertices
+    } else {
+      stop("n_neighbors must be smaller than the dataset size")
     }
   }
 
