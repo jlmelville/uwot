@@ -3805,7 +3805,7 @@ uwot <- function(
 
   if (!(ret_model || ret_nn)) {
     nns <- NULL
-    gc()
+    gc(full = FALSE)
   }
 
   if (methods::is(init, "matrix")) {
@@ -4091,7 +4091,7 @@ uwot <- function(
     )
     embedding <- t(embedding)
 
-    gc()
+    gc(full = FALSE)
     # Center the points before returning
     embedding <- scale(embedding, center = TRUE, scale = FALSE)
 
@@ -5150,7 +5150,7 @@ x2set <- function(
       stop("Infinite distances found in nearest neighbors")
     }
   }
-  gc()
+  gc(full = FALSE)
 
   nn2set_res <- nn2set(
     method,
@@ -5170,7 +5170,7 @@ x2set <- function(
   if (any(is.na(V))) {
     stop("Non-finite entries in the input matrix")
   }
-  gc()
+  gc(full = FALSE)
 
   res <- list(
     nn = nn,
