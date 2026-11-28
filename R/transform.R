@@ -637,22 +637,11 @@ umap_transform <- function(
           }
         )
       } else if (startsWith(ann$type, "hnsw")) {
-        if (is.list(model$nn_args)) {
-          nn_args <- model$nn_args
-          nn_args_names <- names(nn_args)
-
-          if ("ef" %in% nn_args_names) {
-            ef <- nn_args$ef
-          } else {
-            ef <- 10
-          }
-        }
-
         nn <- hnsw_search(
           Xsub,
           k = n_neighbors,
           ann = ann,
-          ef = ef,
+          ef = model$nn_args[["ef"]],
           n_threads = n_threads,
           verbose = verbose
         )

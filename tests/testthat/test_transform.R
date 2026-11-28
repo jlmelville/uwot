@@ -504,6 +504,17 @@ test_that("scaled PCA models project original-format training rows", {
   expect_equal(unname(q$dist[, 1]), rep(0, nrow(iris10)), tolerance = 1e-6)
 })
 
+test_that("HNSW projection defaults its search budget when nn_args is absent", {
+  skip_if_not_installed("RcppHNSW")
+  model <- fit_small_model(nn_method = "hnsw", nn_args = NULL)
+  rows <- c(7L, 3L, 5L)
+  query <- iris10[rows, , drop = FALSE]
+  neighbors <- query_neighbors(model, query)
+  expect_equal(unname(neighbors$idx[, 1]), rows)
+  model$nn_args <- list(ef = 10)
+  expect_equal(query_neighbors(model, query), neighbors)
+})
+
 test_that("each backend queries the fitted PCA space", {
   for (backend in c("annoy", "hnsw", "nndescent")) {
     if (backend == "hnsw" && !is_installed("RcppHNSW")) {

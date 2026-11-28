@@ -4,7 +4,7 @@ hnsw_nn <- function(
   metric = "euclidean",
   M = 16,
   ef_construction = 200,
-  ef = 10,
+  ef = NULL,
   n_threads = NULL,
   n_build_threads = NULL,
   ret_index = FALSE,
@@ -81,6 +81,9 @@ hnsw_build <- function(
 # called by hnsw_nn when building a model, and by umap_transform directly
 hnsw_search <-
   function(X, k, ann, ef, n_threads = NULL, verbose = FALSE) {
+    if (is.null(ef)) {
+      ef <- 10
+    }
     if (is.null(n_threads)) {
       n_threads <- default_num_threads()
     }
