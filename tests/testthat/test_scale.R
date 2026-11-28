@@ -87,9 +87,10 @@ test_that("metric blocks select the original features across scaling", {
       ret_nn = TRUE
     )$nn[[1]]
   }
-  expect_equal(neighbors(2L), neighbors("trend"))
+  trend <- neighbors(2L)
+  expect_equal(trend, neighbors("trend"))
   expect_equal(neighbors(list(3L, pca = NULL)), neighbors("zig"))
-  expect_equal(neighbors(2L)$idx[1, 2], 2L)
+  expect_equal(trend$idx[1, 2], 2L)
   expect_error(neighbors(1:2), "zero-variance column")
   expect_error(scale_input(x[, 1, drop = FALSE], TRUE), "zero variance")
 

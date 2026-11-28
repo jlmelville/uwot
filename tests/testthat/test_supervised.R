@@ -248,8 +248,9 @@ test_that("numeric targets calculate their own neighbors with precomputed input"
     )
   }
   ynn <- dist_nn(dist(y), 3)
-  expect_equal(graph(y), graph(ynn))
-  expect_gt(max(abs(graph(y) - graph(y[c(2:10, 1)]))), 0)
+  numeric_graph <- graph(y)
+  expect_equal(numeric_graph, graph(ynn))
+  expect_gt(max(abs(numeric_graph - graph(y[c(2:10, 1)]))), 0)
   m <- fit_small_model(y = ynn)
   expect_identical(m$nn_method, "annoy")
   expect_equal(m$n_neighbors, 4)

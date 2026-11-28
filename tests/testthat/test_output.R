@@ -1097,14 +1097,17 @@ test_that("thread defaults are scalar integers and fractional settings run", {
   expect_equal(length(default_num_threads()), 1L)
   expect_true(default_num_threads() >= 1L)
 
-  res <- umap(iris10, n_neighbors = 4, n_threads = 0.5)
-  expect_ok_matrix(res)
-  res <- umap(iris10, n_neighbors = 4, n_threads = 1.5)
-  expect_ok_matrix(res)
-  res <- umap(iris10, n_neighbors = 4, n_sgd_threads = 0.5)
-  expect_ok_matrix(res)
-  res <- umap(iris10, n_neighbors = 4, n_sgd_threads = 1.5)
-  expect_ok_matrix(res)
+  fit <- function(n_threads, n_sgd_threads) {
+    umap(
+      iris10,
+      n_neighbors = 4,
+      n_epochs = 3,
+      n_threads = n_threads,
+      n_sgd_threads = n_sgd_threads
+    )
+  }
+  expect_ok_matrix(fit(0.5, 1.5))
+  expect_ok_matrix(fit(1.5, 0.5))
 })
 
 test_that("UMAP and LargeVis can return their graph with the embedding", {
