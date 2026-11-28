@@ -14,8 +14,9 @@
   non-finite model and initialization coordinates.
 
 - Projection uses the numeric columns selected during fitting, including
-  when numeric codes were declared categorical. Refit affected models to
-  retain this selection.
+  when numeric codes were declared categorical. When the model records
+  these names, query data frames with unique column names can supply the
+  features in any order. Refit older models to retain this selection.
 
 - PCA skips binary metric blocks, including Jaccard. Other metric blocks
   can still use PCA.
