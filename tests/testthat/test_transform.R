@@ -841,6 +841,22 @@ test_that("projection uses the numeric features selected before fitted scaling",
   expect_equal(query_neighbors(model, factor_x), expected)
 })
 
+test_that("Annoy projection inherits the fitted search_k unless overridden", {
+  model <- fit_small_model(n_trees = 2, nn_args = list(search_k = 200))
+  expect_equal(model$search_k, 200)
+  search <- annoy_search
+  seen <- numeric()
+  local_mocked_bindings(annoy_search = function(..., search_k) {
+    seen <<- c(seen, search_k)
+    search(..., search_k = search_k)
+  })
+  query_neighbors(model)
+  model$search_k <- 16 # Value stored by older fits before the nn_args override.
+  query_neighbors(model)
+  umap_transform(iris10, model, search_k = 50, n_epochs = 0, n_threads = 0)
+  expect_equal(seen, c(200, 200, 50))
+})
+
 test_that("constant density preserves the specified fit and query repulsion", {
   fit <- function(ds) {
     fit_small_model(

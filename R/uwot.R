@@ -4127,7 +4127,7 @@ uwot <- function(
           scale_info = scale_info,
           bandwidth = bandwidth,
           rng_type = rng_type,
-          search_k = search_k,
+          search_k = annoy_search_k(nn_args, search_k),
           local_connectivity = local_connectivity,
           n_epochs = n_epochs,
           alpha = alpha,

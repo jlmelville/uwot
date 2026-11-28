@@ -321,7 +321,8 @@ umap_transform <- function(
   }
 
   if (is.null(search_k)) {
-    search_k <- model$search_k
+    # Older models stored the top-level value before the Annoy override.
+    search_k <- annoy_search_k(model$nn_args, model$search_k)
   }
 
   nn_index <- model$nn_index
