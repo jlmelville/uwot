@@ -80,15 +80,14 @@ test_that("PCA returns model data", {
   )
 })
 
-test_that("logical pca ok", {
+test_that("irlba PCA accepts logical and integer matrices without warnings", {
   set.seed(1337)
-  random_logical <- matrix(rnorm(1000), nrow = 100) > 0.5
-  random_int <- random_logical * 1
-
-  expect_equal(
-    abs(irlba_scores(random_logical, ncol = 2)),
-    abs(irlba_scores(random_int, ncol = 2))
-  )
+  x <- matrix(rnorm(1000), nrow = 100) > 0.5
+  expected <- irlba_scores(x * 1, ncol = 2)
+  for (input in list(x, x * 1L)) {
+    expect_no_warning(scores <- irlba_scores(input, ncol = 2))
+    expect_equal(abs(scores), abs(expected))
+  }
 })
 
 test_that("distance PCA preserves labels and planar distances", {

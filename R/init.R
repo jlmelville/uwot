@@ -482,10 +482,9 @@ irlba_scores <- function(
   ret_extra = FALSE,
   verbose = FALSE
 ) {
-  if (is.logical(X)) {
-    tsmessage("Converting logical input to numeric for PCA initialization")
-    # convert logical matrix to numeric
-    X <- X * 1
+  if (is.logical(X) || is.integer(X)) {
+    tsmessage("Converting PCA input to double precision")
+    storage.mode(X) <- "double"
   }
   res <- irlba::prcomp_irlba(
     X,
