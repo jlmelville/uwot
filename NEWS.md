@@ -6,7 +6,8 @@
 * Spectral initialization falls back to random coordinates when a graph is too small for the
   requested truncated SVD rank. Projection rejects non-finite model and initialization coordinates.
 * Projection uses the numeric columns selected during fitting, including when numeric codes were
-  declared categorical. Refit affected models to retain this selection.
+  declared categorical. When the model records these names, query data frames with unique column
+  names can supply the features in any order. Refit older models to retain this selection.
 * PCA skips binary metric blocks, including Jaccard. Other metric blocks can still use PCA.
 * Density adjustment honors `repulsion_strength` during fitting and projection and is ignored
   when fitting multiple metric blocks. Projection can return `localr` on its own.

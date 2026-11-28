@@ -872,6 +872,29 @@ test_that("projection uses the numeric features selected before fitted scaling",
   expect_equal(query_neighbors(model, factor_x), expected)
 })
 
+test_that("data frame projection matches the fitted numeric features by name", {
+  x <- data.frame(ui10, group = factor(rep(1:2, 5)))
+  model <- fit_small_model(
+    x,
+    metric = list(euclidean = 1:4, categorical = "group")
+  )
+  neighbor_ids <- function(query) query_neighbors(model, query)$idx
+  expected <- neighbor_ids(x)
+  expect_identical(neighbor_ids(x[c(4:1, 5)]), expected)
+  expect_identical(neighbor_ids(x[c(5, 1:4)]), expected)
+
+  renamed <- x
+  names(renamed)[1] <- "unknown"
+  expect_error(
+    neighbor_ids(renamed),
+    "Missing fitted numeric column.*Sepal.Length"
+  )
+
+  ambiguous <- x[c(5, 1:4)]
+  names(ambiguous)[1] <- "Sepal.Length"
+  expect_error(neighbor_ids(ambiguous), "unique column names")
+})
+
 test_that("Annoy projection inherits the fitted search_k unless overridden", {
   model <- fit_small_model(n_trees = 2, nn_args = list(search_k = 200))
   expect_equal(model$search_k, 200)

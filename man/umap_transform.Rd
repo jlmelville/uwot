@@ -26,9 +26,12 @@ umap_transform(
 )
 }
 \arguments{
-\item{X}{The new data to be transformed, either a matrix of data frame. Must
-have the same columns in the same order as the input data used to generate
-the \code{model}.}
+\item{X}{The new data to be transformed, either a matrix or a data frame with
+the same number of columns as the training data. When both inputs are data
+frames and the model records the fitted numeric column names, uniquely
+named columns can be supplied in any order. Each fitted numeric column
+must be present and numeric. For matrices or models without saved column
+names, supply the columns in their original order.}
 
 \item{model}{Data associated with an existing embedding.}
 

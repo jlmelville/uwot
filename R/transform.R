@@ -8,9 +8,12 @@
 #' each query to the training observations via \code{nn_method}. If the fitted
 #' metric included factor columns, projection uses only the numeric columns.
 #'
-#' @param X The new data to be transformed, either a matrix of data frame. Must
-#'   have the same columns in the same order as the input data used to generate
-#'   the \code{model}.
+#' @param X The new data to be transformed, either a matrix or a data frame with
+#'   the same number of columns as the training data. When both inputs are data
+#'   frames and the model records the fitted numeric column names, uniquely
+#'   named columns can be supplied in any order. Each fitted numeric column
+#'   must be present and numeric. For matrices or models without saved column
+#'   names, supply the columns in their original order.
 #' @param model Data associated with an existing embedding.
 #' @param nn_method Optional pre-calculated nearest neighbor data. There are
 #'   two supported formats. The first is a list consisting of two elements:
@@ -427,8 +430,27 @@ umap_transform <- function(
     columns <- model$numeric_columns
     if (methods::is(X, "data.frame")) {
       is_numeric <- vapply(X, is.numeric, logical(1))
+      fitted_names <- names(columns)
       if (is.null(columns)) {
         columns <- which(is_numeric)
+      } else if (
+        !is.null(fitted_names) && !identical(names(X)[columns], fitted_names)
+      ) {
+        columns <- match(fitted_names, names(X))
+        if (anyNA(columns)) {
+          stop(
+            "Missing fitted numeric column: ",
+            paste(fitted_names[is.na(columns)], collapse = ", ")
+          )
+        }
+        if (
+          anyDuplicated(fitted_names) ||
+            anyDuplicated(names(X)) ||
+            anyNA(fitted_names) ||
+            any(!nzchar(fitted_names))
+        ) {
+          stop("Reordering data frame columns requires unique column names")
+        }
       }
       if (!length(columns)) {
         stop("No numeric columns found")
