@@ -1,7 +1,6 @@
 find_nn <- function(
   X,
   k,
-  include_self = TRUE,
   method = "fnn",
   metric = "euclidean",
   n_trees = 50,
@@ -23,13 +22,13 @@ find_nn <- function(
   }
 
   if (inherits(X, "dist")) {
-    res <- dist_nn(X, k, include_self = include_self, verbose = verbose)
+    res <- dist_nn(X, k, verbose = verbose)
   } else if (sparse_is_distance && is_sparse_matrix(X)) {
     # sparse distance matrix
     if (Matrix::isTriangular(X)) {
-      res <- sparse_tri_nn(X, k, include_self = include_self, verbose = verbose)
+      res <- sparse_tri_nn(X, k, verbose = verbose)
     } else {
-      res <- sparse_nn(X, k, include_self = include_self, verbose = verbose)
+      res <- sparse_nn(X, k, verbose = verbose)
     }
   } else {
     if (is_sparse_matrix(X) && method != "nndescent") {
@@ -39,7 +38,7 @@ find_nn <- function(
     switch(
       method,
       "fnn" = {
-        res <- FNN_nn(X, k = k, include_self = include_self)
+        res <- FNN_nn(X, k = k)
       },
       "annoy" = {
         nn_args_names <- names(nn_args)
@@ -85,7 +84,7 @@ find_nn <- function(
       },
       stop("Unknown method: ", method)
     )
-    if (include_self && method != "fnn") {
+    if (method != "fnn") {
       res <- self_first(res)
     }
   }
@@ -575,29 +574,20 @@ self_first <- function(nn) {
   nn
 }
 
-FNN_nn <- function(X, k = 10, include_self = TRUE) {
+FNN_nn <- function(X, k = 10) {
   # An explicit query returns k distinct candidates even for tied duplicates.
   # get.knn's implicit removal of self can discard a different observation.
-  k_search <- if (include_self) k else k + 1L
-  fnn <- FNN::get.knnx(X, X, k = k_search)
-  nn <- self_first(list(idx = fnn$nn.index, dist = fnn$nn.dist))
-  if (!include_self) {
-    nn <- lapply(nn, function(x) x[, -1, drop = FALSE])
-  }
-  nn
+  fnn <- FNN::get.knnx(X, X, k = k)
+  self_first(list(idx = fnn$nn.index, dist = fnn$nn.dist))
 }
 
-dist_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
+dist_nn <- function(X, k, verbose = FALSE) {
   tsmessage("Finding nearest neighbors from distance matrix")
   X <- as.matrix(X)
   # Sort self before every other observation, including exact duplicates.
   diag(X) <- -Inf
-  k_search <- if (include_self) k else k + 1L
-  idx <- t(apply(X, 2, order))[, seq_len(k_search), drop = FALSE]
+  idx <- t(apply(X, 2, order))[, seq_len(k), drop = FALSE]
   diag(X) <- 0
-  if (!include_self) {
-    idx <- idx[, -1, drop = FALSE]
-  }
   dist <- matrix(0, nrow(X), ncol(idx))
   for (i in seq_len(nrow(X))) {
     dist[i, ] <- X[i, idx[i, ]]
@@ -606,17 +596,17 @@ dist_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
   list(idx = idx, dist = dist)
 }
 
-sparse_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
+sparse_nn <- function(X, k, verbose = FALSE) {
   tsmessage("Finding nearest neighbors from sparse matrix")
   X <- as_neighbor_graph(X)
   n <- nrow(X)
-  k_other <- if (include_self) k - 1L else k
+  k_other <- k - 1L
   idx <- matrix(0L, n, k_other)
   dist <- matrix(0, n, k_other)
   for (i in seq_len(n)) {
     start <- X@p[i]
     entries <- start + seq_len(X@p[i + 1L] - start)
-    # Distances on the diagonal cannot supply one of the k nonself neighbors.
+    # The self-neighbor is added separately.
     entries <- entries[X@i[entries] != i - 1L]
     degree <- length(entries)
     if (degree < k_other) {
@@ -632,16 +622,12 @@ sparse_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
     idx[i, ] <- X@i[selected] + 1L
     dist[i, ] <- X@x[selected]
   }
-  if (include_self) {
-    idx <- cbind(seq_len(n), idx)
-    dist <- cbind(rep(0, n), dist)
-  }
-  list(idx = idx, dist = dist)
+  list(idx = cbind(seq_len(n), idx), dist = cbind(rep(0, n), dist))
 }
 
-sparse_tri_nn <- function(X, k, include_self = TRUE, verbose = FALSE) {
+sparse_tri_nn <- function(X, k, verbose = FALSE) {
   uplo <- if (Matrix::isTriangular(X, upper = TRUE)) "U" else "L"
-  sparse_nn(Matrix::forceSymmetric(X, uplo), k, include_self, verbose)
+  sparse_nn(Matrix::forceSymmetric(X, uplo), k, verbose = verbose)
 }
 
 is_binary_metric <- function(metric) {

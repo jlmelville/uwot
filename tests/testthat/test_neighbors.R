@@ -97,15 +97,15 @@ i10nn4idx <- matrix(
 
 test_that("exact neighbor searches agree for observations and distance matrices", {
   ## Test specialized functions
-  res <- FNN_nn(iris10, k = 4, include_self = TRUE)
+  res <- FNN_nn(iris10, k = 4)
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
-  res <- dist_nn(diris10, k = 4, include_self = TRUE)
+  res <- dist_nn(diris10, k = 4)
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
-  res <- sparse_nn(dmiris10z, k = 4, include_self = TRUE)
+  res <- sparse_nn(dmiris10z, k = 4)
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
@@ -126,33 +126,33 @@ test_that("exact neighbor searches agree for observations and distance matrices"
   }
 
   dmiris10zu <- sparse_to_tri(dmiris10z, lower = FALSE)
-  res <- sparse_tri_nn(dmiris10zu, k = 4, include_self = TRUE)
+  res <- sparse_tri_nn(dmiris10zu, k = 4)
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
   dmiris10zl <- sparse_to_tri(dmiris10z, lower = TRUE)
-  res <- sparse_tri_nn(dmiris10zl, k = 4, include_self = TRUE)
+  res <- sparse_tri_nn(dmiris10zl, k = 4)
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
   # Test overall function
-  res <- find_nn(iris10, k = 4, include_self = TRUE)
+  res <- find_nn(iris10, k = 4)
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
-  res <- find_nn(diris10, k = 4, include_self = TRUE)
+  res <- find_nn(diris10, k = 4)
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
-  res <- find_nn(dmiris10z, k = 4, include_self = TRUE)
+  res <- find_nn(dmiris10z, k = 4)
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
-  res <- find_nn(dmiris10zu, k = 4, include_self = TRUE)
+  res <- find_nn(dmiris10zu, k = 4)
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 
-  res <- find_nn(dmiris10zl, k = 4, include_self = TRUE)
+  res <- find_nn(dmiris10zl, k = 4)
   expect_equal(res$dist, i10nn4dist, tolerance = 1e-6)
   expect_equal(res$idx[-6, ], i10nn4idx[-6, ])
 })
