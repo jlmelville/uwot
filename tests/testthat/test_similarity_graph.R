@@ -102,6 +102,17 @@ test_that("precomputed neighbors respect the set mix and local connectivity", {
   expect_equal(sim_graph_bbknnR, fss)
 })
 
+test_that("a factor and a one-column target frame give the same supervision", {
+  labels <- factor(rep(c("a", "b"), length.out = nrow(iris10)))
+  graph <- function(y = NULL) {
+    similarity_graph(iris10, n_neighbors = 4, nn_method = "fnn", y = y)
+  }
+  supervised <- graph(labels)
+  expect_equal(graph(data.frame(label = labels)), supervised)
+  cross_label <- outer(labels, labels, "!=")
+  expect_lt(sum(supervised[cross_label]), sum(graph()[cross_label]))
+})
+
 test_that("supervision and binary edge weights work with similarity_graph", {
   # supervised
   sim_graphy <- similarity_graph(iris10, n_neighbors = 4, y = ynum)
